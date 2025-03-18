@@ -1,0 +1,14 @@
+{
+    "Approach": "#MobileFirst",
+    "MobileFirst": "min-width",
+    "DesktopFirst": "max-width",
+    "xxxs": "media@([#Approach]:320px)$",
+    "xxs": "media@([#Approach]:384px)$",
+    "xs": "media@([#Approach]:448px)$",
+    "sm": "media@([#Approach]:512px)$",
+    "md": "media@([#Approach]:640px)$",
+    "lg": "media@([#Approach]:768px)$",
+    "xl": "media@([#Approach]:896px)$",
+    "xxl": "media@([#Approach]:1024px)$",
+    "xxxl": "media@([#Approach]:1152px)$"
+}

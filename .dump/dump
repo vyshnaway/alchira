@@ -1,0 +1,17 @@
+
+    if (args.some(c => ['build'].includes(c))) {
+        if (args.some(c => ['m', '-m', '--m', 'minified', '-minified', '--minified', 'min', '-min', '--min'].includes(c))) build(true);
+        else build();
+    }
+    else if (args.some(c => ['db', 'd-b', '-d-b', '--d-b', 'download-bundle', '-download-bundle', '--download-bundle', 'download', '-download', '--download'].includes(c))) {
+        downloadBundle(args(args.indexOf(c) + 1));
+    }
+    else if (args.some(c => ['dt', 'd-t', '-d-t', '--d-t', 'download-theme', '-download-bundele', '--download-bundle'].includes(c))) {
+        downloadBundle(args(args.indexOf(c) + 1));
+    }
+    else if (args.some(c => ['dcr', 'd-cr', '-d-cr', '--d-cr', 'download-class-refernce', '-download-class-refernce', '--download-class-refernce'].includes(c))) {
+        downloadClassReference(args(args.indexOf(c) + 1));
+    }
+    else if (args.some(c => ['dcl', 'd-cl', '-d-cl', '--d-cl', 'download-component-list', '-download-component-list', '--download-component-list'].includes(c))) {
+        downloadClassReference(args(args.indexOf(c) + 1));
+    }

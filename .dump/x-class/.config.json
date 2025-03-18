@@ -1,0 +1,85 @@
+{
+    "directoryMap": [],
+    "cssConfig": {
+        "decimationLevel": 1,
+        "referNative": true
+    },
+    "prefix": {
+        "globalStyle": "gs",
+        "localStyle": "s",
+        "lazyStyle": "x"
+    },
+    "languageSupport": {
+        "html": "html",
+        "jsx": "react",
+        "svelte": "svelte",
+        "vue": "vue",
+        "ts": "angular"
+    },
+    "supportRgx": {
+        "default": {
+            "element": "^\\S+",
+            "attributes": "^\\S+\\s+(.*)",
+            "htmlAttributes": "([@#$]|class)",
+            "cxcAttributes": "([@#$])",
+            "classList": "class",
+            "classSplit": "\\s+",
+            "cxcClass": "(\\s[lg]\\$[^\\s=]*)"
+        },
+        "html": {
+            "element": "^\\S+",
+            "attributes": "^\\S+\\s+(.*)",
+            "htmlAttributes": "([@#$]|class)",
+            "cxcAttributes": "([@#$])",
+            "classList": "class",
+            "classSplit": "\\s+",
+            "cxcClass": "[lg]\\$[^\\s=]*"
+        },
+        "react": {
+            "element": "^\\S+",
+            "attributes": "^\\S+\\s+(.*)",
+            "htmlAttributes": "([@#$]|class)",
+            "cxcAttributes": "([@#$])",
+            "classList": "([@#$])",
+            "classSplit": "\\s+",
+            "cxcClass": "([lg]\\$[^\\s=]*)"
+        },
+        "vue": {
+            "element": "^\\S+",
+            "attributes": "^\\S+\\s+(.*)",
+            "htmlAttributes": "([@#$]|class)",
+            "cxcAttributes": "([@#$])",
+            "classList": "([@#$])",
+            "classSplit": "\\s+",
+            "cxcClass": "([lg]\\$[^\\s=]*)"
+        },
+        "svelte": {
+            "element": "^\\S+",
+            "attributes": "^\\S+\\s+(.*)",
+            "htmlAttributes": "([@#$]|class)",
+            "cxcAttributes": "([@#$])",
+            "classList": "([@#$])",
+            "classSplit": "\\s+",
+            "cxcClass": "([lg]\\$[^\\s=]*)"
+        },
+        "angular": {
+            "element": "^\\S+",
+            "attributes": "^\\S+\\s+(.*)",
+            "htmlAttributes": "([@#$]|class)",
+            "cxcAttributes": "([@#$])",
+            "classList": "([@#$])",
+            "classSplit": "\\s+",
+            "cxcClass": "([lg]\\$[^\\s=]*)"
+        },
+        "astro": {
+            "element": "^\\S+",
+            "attributes": "^\\S+\\s+(.*)",
+            "htmlAttributes": "([@#$]|class)",
+            "cxcAttributes": "([@#$])",
+            "classList": "([@#$])",
+            "classSplit": "\\s+",
+            "cxcClass": "([lg]\\$[^\\s=]*)"
+        }
+    },
+    "cxcRoot": ".cxc" 
+}

@@ -1,0 +1,7 @@
+[
+    {
+        "source": "src",
+        "destination": "xrc",
+        "stylesheet": "styles.css"
+    }
+]

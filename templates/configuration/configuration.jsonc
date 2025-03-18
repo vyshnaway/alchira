@@ -1,0 +1,14 @@
+{
+    "source": "./src",
+    "target": "./src-x",
+    "extensions": [
+        "js",
+        "jsx",
+        "ts",
+        "tsx",
+        "astro",
+        "md"
+    ],
+    "global.css": "assets/styles/global.css",
+    "remote-bulid-key": "xxxxx-xxxxx-xxxxx-xxxxx-xxxxx"
+}

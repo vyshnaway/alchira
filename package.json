@@ -1,0 +1,42 @@
+{
+  "name": "xcss",
+  "description": "A lazy way to write luxurious CSS.",
+  "version": "0.1.0",
+  "main": "./dist/cli.js",
+  "type": "module",
+  "bin": {
+    "xklaz": "./bin/xklaz.js",
+    "xk": "./bin/xklaz.js"
+  },
+  "scripts": {
+    "start": "xklaz start",
+    "dev": "xklaz dev",
+    "preview": "xklaz preview",
+    "build": "xklaz build",
+    "docs": "xklaz docs"
+  },
+  "dependencies": {
+    "firebase": "^11.4.0",
+    "typescript": "^5.7.3",
+    "undici-types": "^6.20.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vyshnavprasad/xklaz-toolkit"
+  },
+  "bugs": {
+    "url": "https://github.com/vyshnavprasad/xklaz/issues"
+  },
+  "keywords": [
+    "css",
+    "xklaz",
+    "xclass",
+    "tailwind",
+    "post-css",
+    "front-end",
+    "full-stack"
+  ],
+  "author": "Yshell.dev",
+  "license": "proprietary",
+  "homepage": "xklaz.pages.dev"
+}
