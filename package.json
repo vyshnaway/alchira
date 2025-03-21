@@ -5,38 +5,32 @@
   "main": "./dist/cli.js",
   "type": "module",
   "bin": {
-    "xklaz": "./bin/xklaz.js",
-    "xk": "./bin/xklaz.js"
+    "xcss": "./bin/xcss.js"
   },
   "scripts": {
-    "start": "xklaz start",
-    "dev": "xklaz dev",
-    "preview": "xklaz preview",
-    "build": "xklaz build",
-    "docs": "xklaz docs"
+    "start": "xcss start",
+    "dev": "xcss dev",
+    "preview": "xcss preview",
+    "build": "xcss build",
+    "docs": "xcss docs"
   },
-  "dependencies": {
-    "firebase": "^11.4.0",
-    "typescript": "^5.7.3",
-    "undici-types": "^6.20.0"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/vyshnavprasad/xklaz-toolkit"
+  "devDependencies": {
+    "prettier": "^3.4.2",
+    "prettier-plugin-astro": "^0.14.1"
   },
   "bugs": {
-    "url": "https://github.com/vyshnavprasad/xklaz/issues"
+    "url": "https://github.com/yshell-dev/xcss-online/issues"
   },
+  "author": "Yshell.dev",
+  "license": "proprietary",
+  "homepage": "xcss.xpktr.com",
   "keywords": [
     "css",
-    "xklaz",
+    "xcss",
     "xclass",
     "tailwind",
     "post-css",
     "front-end",
     "full-stack"
-  ],
-  "author": "Yshell.dev",
-  "license": "proprietary",
-  "homepage": "xklaz.pages.dev"
+  ]
 }
