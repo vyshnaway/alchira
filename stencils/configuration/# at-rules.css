@@ -1,6 +1,4 @@
 @charset "UTF-8";
-/* Heirarchy of Layers */
-@layer layout, container, children, utility;
 
 /* Add namespaces as needed, start by uncommenting the following. */
 /* @namespace url(http://www.w3.org/1999/xhtml); */

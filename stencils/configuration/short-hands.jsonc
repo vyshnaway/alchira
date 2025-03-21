@@ -19,9 +19,5 @@
     "Cl1": "container@([#Approach]:384px)",
     "Cl2": "container@([#Approach]:449px)",
     "Cl3": "container@([#Approach]:512px)",
-    "Cl4": "container@([#Approach]:576px)",
-    "layout": "@layer layout",
-    "container": "@layer container",
-    "children": "@layer children",
-    "utility": "@layer utility"
+    "Cl4": "container@([#Approach]:576px)"
 }
