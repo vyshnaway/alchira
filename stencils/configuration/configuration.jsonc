@@ -1,6 +1,7 @@
 {
     "source": "./src",
     "target": "./src-x",
+    "stylesheet": "assets/styles/global.css",
     "extensions": [
         "js",
         "jsx",
@@ -9,7 +10,6 @@
         "astro",
         "md"
     ],
-    "global.css": "assets/styles/global.css",
     "project-id": "xxxxxxxxxxxxxxxxxxxxxxxx",
-    "public-key": "xxxxxxxxxxxxxxxxxxxxxxxx"
+    "access-key": "xxxxxxxxxxxxxxxxxxxxxxxx"
 }

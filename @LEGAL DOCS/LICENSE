@@ -1,8 +1,8 @@
 XPKTR Labs License for XCSS
-
 Version 1.0, 2025
+Effective Date: March 21, 2025
 
-Published by XPKTR Labs for XCSS (Xtensive Cascading Style Sheet)
+Published by XPKTR Labs for XCSS (Xtensible Cascading Style Sheet)
 Copyright (c) 2025 XPKTR Labs. All rights reserved.
 
 TERMS AND CONDITIONS
@@ -24,8 +24,8 @@ TERMS AND CONDITIONS
       You may:
       - Download and use the Preview Package for free during the preview period.
       - Integrate it into your development tools and build processes.
-      - Use publicly available commands (e.g., xcss preview).
-      The preview period ends on April 3, 2025 (or a date we specify).
+      - Use publicly available commands (e.g., "xcss preview").
+      The preview period begins on the Effective Date and ends on April 3, 2025 (or a date we specify).
       Attempts to circumvent the preview period restrictions are a violation of this License.
 
    b) Proprietary Features
@@ -36,10 +36,10 @@ TERMS AND CONDITIONS
 
 3. Usage Authorization and Credits
 
-   Authentication: To get optimized output using xcss build, you must provide a valid Project ID and Access Key.
-   Credits: Each use of a build command consumes a specific number of Credits, as outlined in the pricing documentation at xcss.xpktr.com.
-   Credit Management: You are responsible for maintaining a sufficient credit balance. If your balance reaches zero, access to the build command will be replaced by the preview command, which is not recommended for production purposes.
-   Compliance: Any attempt to bypass the credit system or use Proprietary Features without proper authorization is a violation of this License.
+   - Authentication: To get optimized output using "xcss build", you must provide a valid Project ID and Access Key.
+   - Credits: Each use of a build command consumes Credits (e.g., $2 per Credit or bundled rates, see xcss.xpktr.com for pricing documentation).
+   - Credit Management: You are responsible for maintaining a sufficient credit balance. If your balance reaches zero, access to the build command will be replaced by the preview command, which is not recommended for production purposes.
+   - Compliance: Any attempt to bypass the credit system or use Proprietary Features without proper authorization is a violation of this License.
 
 4. Ownership and Copyright
 
@@ -80,11 +80,11 @@ TERMS AND CONDITIONS
    - Unauthorized use of Proprietary Features.
    - Attempts to bypass the credit system.
    - Violation of confidentiality or restrictions.
-   Upon termination, you must cease all use of XCSS and destroy any copies in your possession.
+   Upon termination, you must cease all use of XCSS and destroy any copies in your possession. Unused Credits are non-refundable upon termination but may be reinstated if compliance is restored, at our discretion.
 
 10. No Warranty
 
-   XCSS is provided "AS IS", without warranty of any kind, express or implied.
+   XCSS is provided "AS IS", without warranty of any kind, express or implied. Real-time features are experimental during the preview period and may evolve post-preview.
 
 11. Limitation of Liability
 
@@ -101,12 +101,12 @@ TERMS AND CONDITIONS
 
 14. Updates and Support
 
-   Preview period updates are at our discretion.
+   Preview period updates are at our discretion. Updates may include compatibility with standard CSS linters (e.g., Stylelint) post-preview.
    Support is via community channels (e.g., GitHub issues).
 
 15. Future Licensing
 
-   Post-preview, Proprietary Features will require registration of a project in the XPKTR Labs console, where Project IDs, Access Keys, and tokens are managed from here.
+   Post-preview, Proprietary Features will require registration of a project in the XPKTR Labs console, where Project IDs, Access Keys, and Credits are managed.
    Details at xcss.xpktr.com.
 
 Contact Information:

@@ -1,5 +1,5 @@
 # **XCSS: When CSS Commits for You**
-**Xtensive Cascading Style Sheet**
+**Xtensible Cascading Style Sheet**
 
 ---
 

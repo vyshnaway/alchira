@@ -1,0 +1,66 @@
+XPKTR Labs Terms and Conditions for XCSS
+Effective Date: March 21, 2025
+
+These Terms and Conditions ("T&C") govern your interaction with the XCSS (Xtensible Cascading Style Sheet) platform and services provided by XPKTR Labs ("We," "Us," "Our"). By accessing or using XCSS, including its website (xcss.xpktr.com), console, or related services, you ("You," "User") agree to these T&C and the accompanying XPKTR Labs License for XCSS (Version 1.0, 2025) ("License"). XCSS—Write it, get it, no deps—built for lazy devs by a lazy dev.
+
+1. Scope and Relationship to License
+   - These T&C cover your use of the XCSS platform (e.g., website, console, credit purchases), while the License governs the XCSS software tool usage (e.g., "xcss preview," "xcss build").
+   - In case of conflict, the License prevails for software-specific terms.
+
+2. Account and Access
+   - Eligibility: You must be 18+ or have legal authority to use XCSS services.
+   - Registration: Proprietary Features (e.g., "xcss build") require a Project ID and Access Key, obtained via the XPKTR Labs console at xcss.xpktr.com after the preview period (ends April 3, 2025).
+   - Responsibility: You are responsible for securing your Project ID and Access Key—do not share them.
+
+3. Credits and Payment
+   - Purchase: Credits are required for Proprietary Features and purchased through xcss.xpktr.com (e.g., $2 per Credit or bundled rates, such as 10 Credits for $15—see pricing page for details).
+   - Usage: Each "xcss build" command consumes Credits as outlined in the License and pricing documentation.
+   - No Refunds: Credits are non-refundable, except where required by applicable law (e.g., consumer protection rights).
+   - Expiration: Credits expire 12 months from purchase unless otherwise stated.
+   - Adjustments: We may adjust Credit pricing or bundles with 30 days’ notice via xcss.xpktr.com—existing Credits remain valid at their purchase rate.
+   - Payment Terms: Payments are processed securely—no chargebacks allowed unless fraud is proven.
+
+4. User Conduct
+   - Permitted Use: Use XCSS for development as intended—integrate, build, showcase.
+   - Prohibited Actions: Do not misuse XCSS (e.g., bypass credit system, spam commands, overload servers) or violate License restrictions (e.g., reverse-engineering, redistributing Proprietary Features).
+   - Respect: Honor confidentiality and intellectual property terms in the License.
+
+5. Tools Powered by XCSS
+   - Development: Building tools or applications powered by XCSS for public or commercial use requires a written contract with Us—contact licensing@xpktr.com.
+   - Terms: Contracts will specify usage rights and profit-sharing (e.g., a percentage of profits derived from such tools shared with XPKTR Labs).
+
+6. Service and Support
+   - Availability: We aim for 95% uptime of xcss.xpktr.com and the Labs console—downtime may occur for maintenance (announced via website).
+   - Preview Support: During the preview period (March 21-April 3, 2025), support is via community channels (e.g., github.com/yshell-dev/xcss-online issues).
+   - Post-Preview Support: Email xcss@xpktr.com for paid users—response within 2 business days.
+   - Linter Compatibility: Post-preview, We may enhance XCSS to work with standard CSS linters (e.g., Stylelint)—updates at Our discretion.
+
+7. Privacy and Data
+   - Data Collection: We collect usage metrics for Proprietary Features (e.g., command frequency, feature patterns) to improve XCSS—see License Section 13 and Privacy Policy at xcss.xpktr.com/privacy.
+   - No PII: We do not collect personally identifiable information unless You provide it (e.g., email for support).
+   - Opt-Out: You may opt out of metrics via console settings—does not affect XCSS functionality.
+   - Compliance: Data handling aligns with applicable laws (e.g., GDPR for EU users).
+
+8. Termination
+   - By You: Deactivate your account via xcss.xpktr.com—unused Credits remain non-refundable.
+   - By Us: We may suspend or terminate access for violations (e.g., misuse, non-payment, License breaches) with notice where feasible—email sent to Your registered address.
+   - Effect: Termination ends platform access—License terms (Section 9) apply to software use.
+
+9. Dispute Resolution
+   - Process: Email disputes to licensing@xpktr.com—We’ll respond within 30 days to resolve informally.
+   - Legal: Unresolved disputes are governed by the laws of the State of Kerala, India, and settled in Kerala courts—no class actions permitted.
+   - Costs: Each party bears its own legal fees unless otherwise ordered.
+
+10. Changes to T&C
+   - Updates: We may modify these T&C—changes posted on xcss.xpktr.com with 30 days’ notice via website banner or email (for registered users).
+   - Acceptance: Continued use after changes constitutes agreement—check regularly.
+
+11. Contact Information
+   Support: xcss@xpktr.com
+   Licensing: licensing@xpktr.com
+   Address: XPKTR Labs, Kerala, India
+   Website: xcss.xpktr.com
+
+XPKTR Labs
+
+XCSS—Write it, get it, no deps. Built for lazy devs by a lazy dev.
