@@ -78,10 +78,20 @@ const rl = readline.createInterface({
 rl.question("Enter commit message: ", (commitMessage) => {
     if (commitMessage.trim()) {
         try {
-            execSync(`cd ${packageFolder}`)
+            // Commit and push changes in the packageFolder (submodule)
+            execSync(`cd ${packageFolder} && git init`, { stdio: "inherit" });
+            execSync("git add .", { cwd: packageFolder, stdio: "inherit" });
+            execSync(`git commit -m "${commitMessage}"`, { cwd: packageFolder, stdio: "inherit" });
+            execSync("git push", { cwd: packageFolder, stdio: "inherit" });
+
+            // Switch back to the working directory (main repo)
+            process.chdir(path.resolve("."));
+
+            // Commit and push changes in the working directory (main repo)
             execSync("git add .", { stdio: "inherit" });
             execSync(`git commit -m "${commitMessage}"`, { stdio: "inherit" });
             execSync("git push", { stdio: "inherit" });
+
             console.log("Changes have been published to GitHub.");
         } catch (error) {
             console.error("Failed to publish changes:", error.message);
