@@ -1,0 +1,37 @@
+/* Animation Name Utility Classes */
+
+/* Opacity Animations */
+.fade-in { animation-name: fade-in; }
+.fade-out { animation-name: fade-out; }
+
+/* Translate Animations */
+.slide-in-left { animation-name: slide-in-left; }
+.slide-in-right { animation-name: slide-in-right; }
+.slide-in-top { animation-name: slide-in-top; }
+.slide-in-bottom { animation-name: slide-in-bottom; }
+.slide-out-left { animation-name: slide-out-left; }
+.slide-out-right { animation-name: slide-out-right; }
+.slide-out-top { animation-name: slide-out-top; }
+.slide-out-bottom { animation-name: slide-out-bottom; }
+
+/* Scale Animations */
+.scale-in { animation-name: scale-in; }
+.scale-out { animation-name: scale-out; }
+.scale-up { animation-name: scale-up; }
+.scale-down { animation-name: scale-down; }
+
+/* Rotate Animations */
+.rotate-clockwise { animation-name: rotate-clockwise; }
+.rotate-counterclockwise { animation-name: rotate-counterclockwise; }
+
+/* Width Animations */
+.expand-width { animation-name: expand-width; }
+.collapse-width { animation-name: collapse-width; }
+
+/* Height Animations */
+.expand-height { animation-name: expand-height; }
+.collapse-height { animation-name: collapse-height; }
+
+/* Blur Animations */
+.blur-in { animation-name: blur-in; }
+.blur-out { animation-name: blur-out; }

@@ -1,0 +1,68 @@
+import fs, { writeFileSync } from "fs";
+import path from "path";
+
+const cdn = "https://xcdn.xpktr.com/"
+const packageFolder = ".xcss/"
+
+fs.readdirSync(packageFolder).forEach(file => {
+    if (!file.startsWith(".git")) {
+        const filePath = path.join(packageFolder, file);
+        if (fs.lstatSync(filePath).isDirectory()) {
+            fs.rmSync(filePath, { recursive: true, force: true });
+        } else {
+            fs.unlinkSync(filePath);
+        }
+    }
+});
+
+const packageJson = JSON.parse(fs.readFileSync("./package.json", "utf-8"));
+packageJson.devDependencies = undefined;
+packageJson.bin["xcss-dev"] = undefined
+Object.keys(packageJson.scripts).forEach(command =>
+    packageJson.scripts[command] = ["start", "dev", "preview", "build", "help"].includes(command) ? packageJson.scripts[command] : undefined
+)
+
+const destinationPath = packageFolder + "package.json";
+const destinationDir = path.dirname(destinationPath);
+
+fs.mkdirSync(destinationDir, { recursive: true });
+fs.writeFileSync(destinationPath, JSON.stringify(packageJson, null, 2));
+
+fs.copyFileSync(".npmignore", path.join(packageFolder, ".npmignore"));
+
+fs.mkdirSync(path.join(packageFolder, "bin"), { recursive: true });
+fs.copyFileSync("bin/xcss", path.join(packageFolder, "bin/xcss"));
+
+fs.mkdirSync(path.join(packageFolder, "template"), { recursive: true });
+
+fs.readdirSync("template").forEach(file => {
+    const sourcePath = path.join("template", file);
+    const destinationPath = path.join(packageFolder, "template", file);
+
+    if (fs.lstatSync(sourcePath).isDirectory()) {
+        fs.cpSync(sourcePath, destinationPath, { recursive: true });
+    } else {
+        fs.copyFileSync(sourcePath, destinationPath);
+    }
+});
+
+async function publishDoc(fileName, source, folder = '') {
+    const response = await fetch(source);
+    const data = await response.text();
+    const ext = path.extname(fileName);
+    const name = path.basename(fileName, ext).toUpperCase();
+    const folderPath = path.join(packageFolder, folder);
+
+    // Ensure the folder exists
+    fs.mkdirSync(folderPath, { recursive: true });
+
+    fs.writeFileSync(path.join(folderPath, name + ext), data);
+}
+
+fetch(cdn + "xcss/agreements-md/index.json")
+    .then(response => response.json())
+    .then(data => {
+        data.files.forEach(file => publishDoc(file.name, cdn + file.path, "AGREEMENTS"));
+    });
+
+publishDoc("readme.md", cdn + "xcss/readme.md");

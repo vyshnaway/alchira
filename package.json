@@ -5,14 +5,17 @@
   "main": "./dist/cli.js",
   "type": "module",
   "bin": {
-    "xcss": "./bin/xcss.js"
+    "xcss": "./bin/xcss",
+    "xcss-dev": "./bin/xcss.js"
   },
   "scripts": {
     "start": "xcss start",
     "dev": "xcss dev",
     "preview": "xcss preview",
     "build": "xcss build",
-    "docs": "xcss docs"
+    "help": "xcss docs",
+    "publish": "node publish.js",
+    "install": "npm install -g ."
   },
   "devDependencies": {
     "prettier": "^3.4.2",
@@ -26,11 +29,6 @@
   "homepage": "xcss.xpktr.com",
   "keywords": [
     "css",
-    "xcss",
-    "xclass",
-    "tailwind",
-    "post-css",
-    "front-end",
-    "full-stack"
+    "xcss"
   ]
 }
