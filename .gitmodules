@@ -1,0 +1,3 @@
+[submodule ".xcss"]
+	path = .xcss
+	url = https://github.com/xpktr-labs/xcss-package.git
