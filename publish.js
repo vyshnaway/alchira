@@ -78,6 +78,7 @@ const rl = readline.createInterface({
 rl.question("Enter commit message: ", (commitMessage) => {
     if (commitMessage.trim()) {
         try {
+            execSync(`cd ${packageFolder}`)
             execSync("git add .", { stdio: "inherit" });
             execSync(`git commit -m "${commitMessage}"`, { stdio: "inherit" });
             execSync("git push", { stdio: "inherit" });
