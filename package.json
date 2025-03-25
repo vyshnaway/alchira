@@ -2,10 +2,14 @@
   "name": "xcss",
   "description": "A lazy way to write luxurious CSS.",
   "version": "0.1.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yshell-dev/xcss-online"
+  },
   "main": "./dist/cli.js",
   "type": "module",
   "bin": {
-    "xcss": "./bin/xcss",
+    "xcss": "./bin/xcss.wasm",
     "xcss-dev": "./bin/xcss.js"
   },
   "scripts": {
@@ -14,12 +18,10 @@
     "preview": "xcss preview",
     "build": "xcss build",
     "help": "xcss docs",
-    "publish": "node publish.js",
-    "install": "npm install -g ."
-  },
-  "devDependencies": {
-    "prettier": "^3.4.2",
-    "prettier-plugin-astro": "^0.14.1"
+    "test": "jest",
+    "lint": "eslint . --ext .ts",
+    "format": "prettier --write .",
+    "prepare": "husky install"
   },
   "bugs": {
     "url": "https://github.com/yshell-dev/xcss-online/issues"
@@ -31,5 +33,16 @@
     "css",
     "xcss",
     "styles"
-  ]
+  ],
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "dependencies": {
+    "assemblyscript": "^0.21.0"
+  },
+  "devDependencies": {
+    "prettier": "^3.4.2",
+    "prettier-plugin-astro": "^0.14.1",
+    "as-loader": "^0.1.2"
+  }
 }
