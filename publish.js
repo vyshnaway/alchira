@@ -1,5 +1,7 @@
-import fs, { writeFileSync } from "fs";
+import fs from "fs";
 import path from "path";
+import { execSync } from "child_process";
+import readline from "readline";
 
 const cdn = "https://xcdn.xpktr.com/"
 const packageFolder = ".xcss/"
@@ -66,3 +68,25 @@ fetch(cdn + "xcss/agreements-md/index.json")
     });
 
 publishDoc("readme.md", cdn + "xcss/readme.md");
+
+
+const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout
+});
+
+rl.question("Enter commit message: ", (commitMessage) => {
+    if (commitMessage.trim()) {
+        try {
+            execSync("git add .", { stdio: "inherit" });
+            execSync(`git commit -m "${commitMessage}"`, { stdio: "inherit" });
+            execSync("git push", { stdio: "inherit" });
+            console.log("Changes have been published to GitHub.");
+        } catch (error) {
+            console.error("Failed to publish changes:", error.message);
+        }
+    } else {
+        console.log("No commit message provided. Aborting publish.");
+    }
+    rl.close();
+});
