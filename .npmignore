@@ -1,7 +1,3 @@
-node_modules/
-xclass/
-.dump/
-.git/
-node_modules/
-xklass/
-bin/xcss.js
+.git
+.npmignore
+node_module
