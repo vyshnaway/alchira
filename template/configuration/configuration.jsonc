@@ -3,13 +3,7 @@
     "target": "./src-x",
     "stylesheet": "assets/styles/global.css",
     "extensions": [
-        "js",
-        "jsx",
-        "ts",
-        "tsx",
-        "astro",
-        "md"
+        "html"
     ],
-    "project-id": "xxxxxxxxxxxxxxxxxxxxxxxx",
-    "access-key": "xxxxxxxxxxxxxxxxxxxxxxxx"
+    "project-key": ""
 }

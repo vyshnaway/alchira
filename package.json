@@ -17,17 +17,19 @@
     "dev": "xcss dev",
     "preview": "xcss preview",
     "build": "xcss build",
-    "help": "xcss docs",
+    "help": "xcss help",
     "test": "jest",
     "lint": "eslint . --ext .ts",
     "format": "prettier --write .",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "release": "asc src.as/index.ts --target release",
+    "publish": "node publish.js"
   },
   "bugs": {
     "url": "https://github.com/yshell-dev/xcss-online/issues"
   },
   "author": "Yshell.dev",
-  "license": "proprietary",
+  "license": "SEE LICENSE IN AGREEMENTS/LICENSE.md",
   "homepage": "xcss.xpktr.com",
   "keywords": [
     "css",
@@ -42,7 +44,6 @@
   },
   "devDependencies": {
     "prettier": "^3.4.2",
-    "prettier-plugin-astro": "^0.14.1",
     "as-loader": "^0.1.2"
   }
 }

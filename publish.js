@@ -33,7 +33,7 @@ fs.writeFileSync(destinationPath, JSON.stringify(packageJson, null, 2));
 fs.copyFileSync(".npmignore", path.join(packageFolder, ".npmignore"));
 
 fs.mkdirSync(path.join(packageFolder, "bin"), { recursive: true });
-fs.copyFileSync("bin/xcss", path.join(packageFolder, "bin/xcss"));
+fs.copyFileSync("bin/xcss.wasm", path.join(packageFolder, "bin/xcss.wasm"));
 
 fs.mkdirSync(path.join(packageFolder, "template"), { recursive: true });
 
