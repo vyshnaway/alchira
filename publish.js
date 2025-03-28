@@ -61,7 +61,7 @@ async function publishDoc(fileName, source, folder = '') {
     fs.writeFileSync(path.join(folderPath, name + ext), data);
 }
 
-fetch(cdn + "xcss/agreements-md/index.json")
+fetch(cdn + "xcss/agreements-txt/index.json")
     .then(response => response.json())
     .then(data => {
         data.files.forEach(file => publishDoc(file.name, cdn + file.path, "AGREEMENTS"));

@@ -10,7 +10,7 @@
   "type": "module",
   "bin": {
     "xcss": "./bin/xcss.wasm",
-    "xcss-dev": "./bin/xcss.js"
+    "xcss-dev": "./bin/xcss-dev.js"
   },
   "scripts": {
     "start": "xcss start",
@@ -18,12 +18,12 @@
     "preview": "xcss preview",
     "build": "xcss build",
     "help": "xcss help",
-    "test": "jest",
-    "lint": "eslint . --ext .ts",
-    "format": "prettier --write .",
-    "prepare": "husky install",
-    "release": "asc src.as/index.ts --target release",
-    "publish": "node publish.js"
+    "dev:test": "jest",
+    "dev:lint": "eslint . --ext .ts",
+    "dev:formats": "prettier --write .",
+    "dev:publish": "node publish.js",
+    "dev:as-debug": "asc src.as/index.ts --target debug",
+    "dev:as-build": "asc src.as/index.ts --target release"
   },
   "bugs": {
     "url": "https://github.com/yshell-dev/xcss-online/issues"
@@ -39,11 +39,11 @@
   "engines": {
     "node": ">=16.0.0"
   },
-  "dependencies": {
-    "assemblyscript": "^0.21.0"
-  },
   "devDependencies": {
-    "prettier": "^3.4.2",
-    "as-loader": "^0.1.2"
+    "@assemblyscript/loader": "^0.18.0",
+    "as-loader": "^0.1.2",
+    "assemblyscript": "^0.18.0",
+    "jest": "^29.7.0",
+    "prettier": "^3.4.2"
   }
 }
