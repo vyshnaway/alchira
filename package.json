@@ -6,11 +6,10 @@
     "type": "git",
     "url": "https://github.com/yshell-dev/xcss-online"
   },
-  "main": "./dist/cli.js",
   "type": "module",
   "bin": {
     "xcss": "./bin/xcss.wasm",
-    "xcss-dev": "./bin/xcss-dev.js"
+    "xdev": "./bin/xdev.js"
   },
   "scripts": {
     "start": "xcss start",

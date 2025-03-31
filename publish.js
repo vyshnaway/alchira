@@ -38,8 +38,8 @@ fs.copyFileSync("bin/xcss.wasm", path.join(packageFolder, "bin/xcss.wasm"));
 fs.mkdirSync(path.join(packageFolder, "template"), { recursive: true });
 
 fs.readdirSync("template").forEach(file => {
-    const sourcePath = path.join("template", file);
-    const destinationPath = path.join(packageFolder, "template", file);
+    const sourcePath = path.join("templates", file);
+    const destinationPath = path.join(packageFolder, "templates", file);
 
     if (fs.lstatSync(sourcePath).isDirectory()) {
         fs.cpSync(sourcePath, destinationPath, { recursive: true });
