@@ -139,7 +139,19 @@ const dirInspect = {
     }
 };
 
+const normalizePath = (dir) => {
+    if (!dir) return '.';
+    const normalizedDir = path.normalize(dir);
+    const noTrailingSlash = normalizedDir.replace(/\/$/g, '');
+
+    if (path.isAbsolute(normalizedDir))
+        return '.' + path.sep + noTrailingSlash.substring(1);
+    else
+        return noTrailingSlash;
+}
+
 export default {
+    normalizePath,
     fetchRoot,
     dirInspect,
     pathChecker,

@@ -1,40 +1,29 @@
-const appName = 'xklaz';
-const version = '0.1.0';
 
-let config = {
-    cmd: 'xk',
-    name: appName,
-    version: version,
-    root: '/',
-    path: '.',
-    setup: '&xetup',
-    cache: '.cache',
-    midway: 'midway',
-    carbon: '.target-clones',
-    template: 'template',
-    browser: '@dox.html',
-    dirMap: 'directory-map.jsonc',
-    swapMap: 'swap-map.json',
-    originCss: 'origin.css',
-    midwayTemplate: {
-        view: 'view.json',
-        refer: 'refer.json',
-        styles: 'styles.json',
-        atStyles: 'at-styles.json',
-        globalStyles: 'global-styles.json'
-    },
-    activeCommands: {
-        start: 'start and verify setup',
-        dev: 'live build for dev environment',
-        preview: 'fast build, preserves class names.',
-        build: 'build minified.',
-        docs: 'localhost docs.'
-    },
-    midwayData: {},
-    dirMaps: []
+const pathto = {
+    source: "",
+    target: "",
+    path: "",
+    setup: "",
+    cache: "",
+    swapMap: "",
+    classList: "",
+    shortHands: "",
+    configuration: "",
+    vendorPrefixes: "",
+    BUILD: (path) => {
+        pathto.path = path;
+        pathto.setup = `${pathto.path}/xtyle`;
+        pathto.cache = `${pathto.setup}/.cache`;
+        pathto.swapMap = `${pathto.cache}/swap-map.json`;
+        pathto.classList = `${pathto.cache}/class-list.json`;
+        pathto.shortHands = `${pathto.setup}/directory-map.jsonc`;
+        pathto.configuration = `${pathto.setup}/directory-map.jsonc`;
+        pathto.vendorPrefixes = `${pathto.setup}/vendor-prefixes.jsonc`;
+        return pathto
+    }
 };
 
-export default config;
+export default pathto
 
 export let classCounter = 0;
 export let scriptText = '';
@@ -48,7 +37,7 @@ export let styleBlocks = {};
 //     scope: {
 //         index: {
 //             xtyle: 0;
-//         } 
+//         }
 //         composedName: {
 //             xtyle: '',
 //         },

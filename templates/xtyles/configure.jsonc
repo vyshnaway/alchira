@@ -1,6 +1,6 @@
 {
-    "source": "./src",
-    "target": "./src-x",
+    "source": "src",
+    "target": "xrc",
     "stylesheet": "assets/styles/global.css",
     "extensions": [
         "html"

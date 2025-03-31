@@ -1,0 +1,118 @@
+/* Single Property CSS Animations Library */
+
+/* Opacity Animations */
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fade-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+/* Translate Animations */
+@keyframes slide-in-left {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+
+@keyframes slide-in-right {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+@keyframes slide-in-top {
+  from { transform: translateY(-100%); }
+  to { transform: translateY(0); }
+}
+
+@keyframes slide-in-bottom {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+@keyframes slide-out-left {
+  from { transform: translateX(0); }
+  to { transform: translateX(-100%); }
+}
+
+@keyframes slide-out-right {
+  from { transform: translateX(0); }
+  to { transform: translateX(100%); }
+}
+
+@keyframes slide-out-top {
+  from { transform: translateY(0); }
+  to { transform: translateY(-100%); }
+}
+
+@keyframes slide-out-bottom {
+  from { transform: translateY(0); }
+  to { transform: translateY(100%); }
+}
+
+/* Scale Animations */
+@keyframes scale-in {
+  from { transform: scale(0); }
+  to { transform: scale(1); }
+}
+
+@keyframes scale-out {
+  from { transform: scale(1); }
+  to { transform: scale(0); }
+}
+
+@keyframes scale-up {
+  from { transform: scale(1); }
+  to { transform: scale(1.1); }
+}
+
+@keyframes scale-down {
+  from { transform: scale(1); }
+  to { transform: scale(0.9); }
+}
+
+/* Rotate Animations */
+@keyframes rotate-clockwise {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes rotate-counterclockwise {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(-360deg); }
+}
+
+/* Width Animations */
+@keyframes expand-width {
+  from { width: 0; }
+  to { width: 100%; } /* or any target width */
+}
+
+@keyframes collapse-width {
+  from { width: 100%; } /* or any starting width */
+  to { width: 0; }
+}
+
+/* Height Animations */
+@keyframes expand-height {
+  from { height: 0; }
+  to { height: 100%; } /* or any target height */
+}
+
+@keyframes collapse-height {
+  from { height: 100%; } /* or any starting height */
+  to { height: 0; }
+}
+
+/* Blur Animations */
+@keyframes blur-in {
+    from {filter: blur(10px);}
+    to {filter: blur(0px);}
+}
+
+@keyframes blur-out {
+    from {filter: blur(0px);}
+    to {filter: blur(10px);}
+}
