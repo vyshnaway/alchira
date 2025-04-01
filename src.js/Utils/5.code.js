@@ -137,7 +137,10 @@ function minifyCssLite(content = scriptText) {
 
 
 export default {
-    clean: {
+    jsonc: {
+        parse: (string) => JSON.parse(stripComments(string))
+    },
+    uncomment: {
         Script: stripComments,
         Css: stripCssComments
     },

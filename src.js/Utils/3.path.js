@@ -2,7 +2,7 @@ import path from 'path';
 import fs from 'fs/promises'; // Added missing import
 
 // Simplified fetchRoot using modern Node.js features
-const fetchRoot = () => Promise.resolve(path.dirname(import.meta.url.pathname));
+const fetchRoot = () => Promise.resolve(path.dirname(import.meta.url.filePath));
 
 // Shared error handling for path checks
 async function checkPath(pathStr, checkFn) {

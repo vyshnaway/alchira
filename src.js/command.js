@@ -1,5 +1,6 @@
 import $ from './Xhell/package.js';
-import { fileURLToPath } from 'url';
+import U from './Utils/package.js';
+import FILEMAN from './fileman.js';
 import path from 'path';
 import fs from 'fs';
 
@@ -16,7 +17,8 @@ const APP = {
 };
 
 const NAV = {
-    root: "/",
+    root: FILEMAN.path.ofRoot(),
+    path: ".",
     template: {
         setup: "templates/xtyles",
         refer: "templates/refer"
@@ -36,11 +38,11 @@ const NAV = {
         styles: "",
         key: ""
     },
-    BUILD: function () {
-        NAV.root = path.resolve(fileURLToPath(import.meta.url), "../..");
+    INIT: function () {
         NAV.template.setup = path.join(NAV.root, NAV.template.setup);
         NAV.template.refer = path.join(NAV.root, NAV.template.refer);
 
+        NAV.project.setup = path.join(NAV.path, NAV.project.setup);
         NAV.project.refer = path.join(NAV.project.setup, NAV.project.refer);
         NAV.project.cache = path.join(NAV.project.setup, NAV.project.cache);
 
@@ -52,7 +54,12 @@ const NAV = {
         NAV.project.constants = path.join(NAV.project.setup, NAV.project.constants);
         NAV.project.tagstyles = path.join(NAV.project.setup, NAV.project.tagstyles);
 
-        const configure = JSON.parse(fs.readFileSync(NAV.project.config))
+        return NAV
+    },
+    BUILD: function () {
+        NAV.INIT();
+
+        const configure = U.code.jsonc.parse(fs.readFileSync(NAV.project.config))
 
         NAV.project.source = configure["source"];
         NAV.project.target = configure["target"];
@@ -63,147 +70,31 @@ const NAV = {
     }
 };
 
-const FILEMAN = {
-    getAllFiles: (dir, fileList = []) => {
-        if (!fs.existsSync(dir)) return fileList;
-        const files = fs.readdirSync(dir);
-        files.forEach(file => {
-            const filePath = path.join(dir, file);
-            if (fs.statSync(filePath).isDirectory()) {
-                fileList = getAllFiles(filePath, fileList);
-            } else {
-                fileList.push(filePath);
-            }
-        });
-        return fileList;
-    },
-    cloneFolder: (source, destination, ignoreFiles = []) => {
-        try {
-            if (!fs.existsSync(source)) {
-                throw new Error('Source folder does not exist.\n' + source);
-            }
-
-            const copyRecursiveSync = (src, dest) => {
-                const exists = fs.existsSync(src);
-                const stats = exists && fs.statSync(src);
-                const isDirectory = exists && stats.isDirectory();
-
-                if (isDirectory) {
-                    fs.mkdirSync(dest, { recursive: true });
-                    fs.readdirSync(src).forEach(childItemName => {
-                        const childSrcPath = path.join(src, childItemName);
-                        const childDestPath = path.join(dest, childItemName);
-                        if (!ignoreFiles.includes(childSrcPath)) {
-                            copyRecursiveSync(childSrcPath, childDestPath);
-                        }
-                    });
-                } else {
-                    if (!ignoreFiles.includes(src)) {
-                        fs.copyFileSync(src, dest);
-                    }
-                }
-            };
-
-            copyRecursiveSync(source, destination);
-        } catch (err) {
-            console.error(err);
-        }
-    },
-    safeCloneFolder: (source, destination, ignoreFiles = []) => {
-        const destinationFiles = fs.existsSync(destination)
-            ? FILEMAN.getAllFiles(destination).map(file => path.join(source, file.replace(destination, '')))
-            : [];
-        const updatedIgnoreFiles = [...ignoreFiles, ...destinationFiles];
-        FILEMAN.cloneFolder(source, destination, updatedIgnoreFiles);
-    },
-    getFilesAndSync: (target, extensions = [], source) => {
-        if (source === undefined) {
-            return FILEMAN.getAllFiles(target).reduce((result, file) => {
-                if (extensions.includes(path.extname(file)) || (extensions.length === 0))
-                    result[file] = fs.readFileSync(file, 'utf-8')
-                return result
-            }, {})
-        }
-
-        if (!fs.existsSync(target)) fs.mkdirSync(target, { recursive: true });
-        if (!fs.existsSync(source)) fs.mkdirSync(source, { recursive: true });
-
-        const targetFiles = FILEMAN.getAllFiles(target);
-        const sourceFiles = FILEMAN.getAllFiles(source);
-
-        const relativeTargetFiles = targetFiles.map(file => path.relative(target, file));
-        const relativeSourceFiles = sourceFiles.map(file => path.relative(source, file));
-
-        // Delete excess files in source
-        relativeSourceFiles.forEach(file => {
-            if (!relativeTargetFiles.includes(file)) {
-                const sourceFilePath = path.join(target, file);
-                fs.unlinkSync(sourceFilePath);
-            }
-        });
-
-        const result = {};
-
-        relativeTargetFiles.forEach(file => {
-            const targetFilePath = path.join(target, file);
-            const sourceFilePath = path.join(source, file);
-
-            if (!fs.existsSync(sourceFilePath)) {
-                const targetDirPath = path.dirname(targetFilePath);
-                if (!fs.existsSync(targetDirPath)) fs.mkdirSync(targetDirPath, { recursive: true });
-            }
-
-            if (extensions.includes(path.extname(file))) {
-                result[path.join(source, file)] = fs.readFileSync(targetFilePath, 'utf-8');
-            } else {
-                fs.copyFileSync(targetFilePath, sourceFilePath);
-            }
-        });
-
-        // Delete excess folders in target
-        const sourceFolders = sourceFiles
-            .map(file => path.dirname(path.relative(target, file)))
-            .filter((value, index, self) => self.indexOf(value) === index);
-
-        sourceFolders.forEach(folder => {
-            const sourceFolderPath = path.join(source, folder);
-            if (!fs.existsSync(sourceFolderPath)) return;
-            const relativeFolder = path.relative(target, sourceFolderPath);
-            const targetFolderPath = path.join(source, relativeFolder);
-
-            if (!fs.existsSync(targetFolderPath)) {
-                fs.rmSync(sourceFolderPath, { recursive: true, force: true });
-            }
-        });
-
-        return result;
-    },
-    bulkWriteFiles: (fileContentArray) => {
-        fileContentArray.forEach(fileContent => fs.writeFileSync(fileContent[0], fileContent[1]))
-    }
-}
 
 const create = async () => {
-    const modifyPackageJson = (xcssPackageJasonPath, destPackageJsonPath) => {
-        const destJson = JSON.parse(fs.readFileSync(destPackageJsonPath));
-        const xcssJson = JSON.parse(fs.readFileSync(xcssPackageJasonPath)).scripts
+    const modifyPackageJson = (xcssPackageJsonPath, destPackageJsonPath) => {
+        const destJson = U.code.jsonc.parse(fs.readFileSync(destPackageJsonPath, 'utf8'));
+        const xcssScripts = U.code.jsonc.parse(fs.readFileSync(xcssPackageJsonPath, 'utf8')).scripts;
         for (const key of ["dev", "preview", "build"])
-            if (xcssJson.hasOwnProperty(key))
-                destJson.scripts[`${APP.command}:${key}`] = xcssJson[key];
+            if (xcssScripts.hasOwnProperty(key))
+                destJson.scripts[`${APP.command}:${key}`] = xcssScripts[key];
         destJson.scripts[`${APP.command}:install`] = "npm install -g xcss-xpktr";
-        fs.writeFile(target, JSON.stringify(destJson, null, 2))
+        fs.writeFileSync(destPackageJsonPath, JSON.stringify(destJson, null, 2))
     }
 
     const xcssPackageJasonPath = path.join(NAV.root, 'package.json');
     const destPackageJsonPath = path.join(NAV.path, 'package.json');
 
-    if (await pathExists.file(destPackageJsonPath)) {
+    if (await FILEMAN.path.isFile(destPackageJsonPath)) {
         $.TASK('Adding additional scripts to project');
         modifyPackageJson(xcssPackageJasonPath, destPackageJsonPath)
     }
-    $.TASK(`Cloning template to: ./${config.setup}`)
-    FILEMAN.cloneFolder(NAV.template.setup, NAV.project.directory);
-    FILEMAN.cloneFolder(NAV.template.refer, config.setup);
+
+    NAV.INIT();
+    console.log(NAV)
+    $.TASK(`Cloning template to: ${NAV.path}`)
+    FILEMAN.cloneFolder(NAV.template.setup, NAV.project.setup);
+    FILEMAN.cloneFolder(NAV.template.refer, NAV.project.refer);
 
     return { heading: 'Initialized setup.' }
 }
@@ -211,10 +102,14 @@ const create = async () => {
 // console.log(NAV.BUILD(), NAV)
 const ignite = () => {
     const extensions = NAV.BUILD();
-    FILEMAN.cloneFolder(NAV.template.setup, NAV.project.directory);
+    FILEMAN.cloneFolder(NAV.template.setup, NAV.project.setup);
+    if (!FILEMAN.path.isFolder(NAV.project.target)) {
+        $.WRITE.std.Section('Creating missing targets')
+        FILEMAN.safeCloneFolder(NAV.project.source, NAV.project.target)
+    }
     return {
         setups: {
-            shorthand: fs.readFileSync(NAV.project.shorthand),
+            shorthand: JSON.parse(U.code.uncomment.Script(fs.readFileSync(NAV.project.shorthand))),
             vendorprefix: fs.readFileSync(NAV.project.vendorprefix),
         },
         stylesheets: {
@@ -229,8 +124,6 @@ const ignite = () => {
 }
 
 const execute = async (args) => {
-    const cmd = args[2];
-    const key = args[3];
 
     const mapDataVerify = (dirMap) => {
         let response = {
@@ -418,15 +311,17 @@ const execute = async (args) => {
     }
 
     let exitMessage;
+    const cmd = args[2], key = args[3];
 
     if (cmd === 'start') {
         await $.PLAY.Title(APP.name + ' : Initialize', 500)
-        const validity = await begin();
-        if (validity.start) {
-            $.TASK('Importing setup to directory')
-            await create()
-            exitMessage = $.compose.success.Footer('Initialized setup.');
-        } else exitMessage = $.compose.failed.Footer(validity.message, validity.errors)
+        await create()
+        // const validity = await begin();
+        // if (validity.start) {
+        //     $.TASK('Importing setup to directory')
+        //     await create()
+        //     exitMessage = $.compose.success.Footer('Initialized setup.');
+        // } else exitMessage = $.compose.failed.Footer(validity.message, validity.errors)
     }
     else if (['dev', 'preview', 'build'].includes(cmd)) {
         let report, validity;
