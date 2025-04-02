@@ -12,7 +12,7 @@
     "xdev": "./binary/xdev.js"
   },
   "scripts": {
-    "start": "xcss start",
+    "init": "xcss init",
     "dev": "xcss dev",
     "preview": "xcss preview",
     "build": "xcss build",

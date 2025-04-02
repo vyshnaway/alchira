@@ -1,4 +1,4 @@
-import fs from 'fs';
+import fs, { read, write } from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -37,7 +37,7 @@ const FILEMAN = {
         files.forEach(file => {
             const filePath = path.join(dir, file);
             if (fs.statSync(filePath).isDirectory()) {
-                fileList = getAllFiles(filePath, fileList);
+                fileList = FILEMAN.getAllFiles(filePath, fileList);
             } else {
                 fileList.push(filePath);
             }
@@ -159,6 +159,42 @@ const FILEMAN = {
     bulkWriteFiles: (fileContentArray) => {
         fileContentArray.forEach(fileContent => FILEMAN.writeToFile(fileContent[0], fileContent[1]))
     },
+    readJsonData: async (filePath) => {
+        try {
+            if (!fs.existsSync(filePath)) {
+                throw new Error(`File does not exist: ${filePath}`);
+            }
+            const data = JSON.parse(await fs.promises.readFile(filePath, 'utf8'));
+            return { status: true, data };
+        } catch (err) {
+            // console.error(`Error reading JSON data from ${filePath}:`, err);
+            return { status: false, data: null };
+        }
+    },
+    writeJsonFile: async (filePath, object) => {
+        try {
+            const dir = path.dirname(filePath);
+            if (!fs.existsSync(dir)) {
+                await fs.promises.mkdir(dir, { recursive: true });
+            }
+            await fs.promises.writeFile(filePath, JSON.stringify(object, null, 2), 'utf8');
+        } catch (err) {
+            console.error(`Error writing JSON data to ${filePath}:`, err);
+        }
+    },
+    fetchJsonData: async (source) => {
+        try {
+            const response = await fetch(source);
+            if (!response.ok) {
+                return { status: false, data: null };
+            }
+            const data = await response.json();
+            return { status: true, data };
+        } catch (error) {
+            // console.error(`Error fetching JSON data from ${source}:`, error);
+            return { status: false, data: null };
+        }
+    }
 }
 
 export default FILEMAN;

@@ -1,35 +1,42 @@
 import $ from './Xhell/package.js';
-import U from './Utils/package.js';
 import FILEMAN from './fileman.js';
 import path from 'path';
 import fs from 'fs';
+import SHORTHAND from "./Inquire/0.short-hand.js"
 
 const APP = {
     name: "XCSS",
+    package: "xpktr-css",
     command: "xcss",
     version: '0.1.0',
     commandList: {
-        start: 'Start and verify setup',
+        init: 'Initiate or Update & Verify setup.',
         dev: 'Live build for dev environment',
         preview: 'Fast build, preserves class names.',
         build: 'Build minified.'
+    },
+    live: {
+        vendorprefixes: "https://xcdn.xpktr.com/xcss/library/vendor-prefixes.json",
+        agreements: "https://xcdn.xpktr.com/xcss/agreements-txt/index.json",
+        build: "https://workers.xpktr.com/api/xcss-build-request"
     }
 };
 
 const NAV = {
-    root: FILEMAN.path.ofRoot(),
     path: ".",
+    root: "/",
+    agreements: "AGREEMENTS",
     template: {
         setup: "templates/xtyles",
-        refer: "templates/refer"
+        refer: "templates/refers"
     },
     project: {
         setup: "xtyles",
         refer: "references",
         cache: ".cache",
-        config: "configure.jsonc",
-        shorthand: "short-hand.jsonc",
-        vendorprefix: "vendor-prefix.jsonc",
+        config: "configure.json",
+        shorthand: "short-hands.json",
+        vendorprefix: "vendor-prefix.json",
         atrules: "# at-rules.css",
         constants: "# constants.css",
         tagstyles: "# tag-styles.css",
@@ -38,7 +45,9 @@ const NAV = {
         styles: "",
         key: ""
     },
-    INIT: function () {
+    INIT: () => {
+        NAV.root = FILEMAN.path.ofRoot();
+        NAV.agreements = path.join(NAV.root, NAV.agreements);
         NAV.template.setup = path.join(NAV.root, NAV.template.setup);
         NAV.template.refer = path.join(NAV.root, NAV.template.refer);
 
@@ -56,30 +65,28 @@ const NAV = {
 
         return NAV
     },
-    BUILD: function () {
+    BUILD: async () => {
         NAV.INIT();
-
-        const configure = U.code.jsonc.parse(fs.readFileSync(NAV.project.config))
+        SHORTHAND.BUILD((await FILEMAN.readJsonData(NAV.project.shorthand)).data);
+        const configure = (await FILEMAN.readJsonData(NAV.project.config)).data
 
         NAV.project.source = configure["source"];
         NAV.project.target = configure["target"];
         NAV.project.styles = configure["stylesheet"];
         NAV.project.key = configure["project-key"];
-
-        return configure["extensions"]
+        NAV.project.extensions = configure["extensions"];
     }
 };
 
-
 const create = async () => {
     const modifyPackageJson = (xcssPackageJsonPath, destPackageJsonPath) => {
-        const destJson = U.code.jsonc.parse(fs.readFileSync(destPackageJsonPath, 'utf8'));
-        const xcssScripts = U.code.jsonc.parse(fs.readFileSync(xcssPackageJsonPath, 'utf8')).scripts;
+        const destJson = FILEMAN.readJsonData(destPackageJsonPath);
+        const xcssScripts = FILEMAN.readJsonData(xcssPackageJsonPath).scripts;
         for (const key of ["dev", "preview", "build"])
             if (xcssScripts.hasOwnProperty(key))
                 destJson.scripts[`${APP.command}:${key}`] = xcssScripts[key];
-        destJson.scripts[`${APP.command}:install`] = "npm install -g xcss-xpktr";
-        fs.writeFileSync(destPackageJsonPath, JSON.stringify(destJson, null, 2))
+        destJson.scripts[`${APP.command}:install`] = `npm install -g ${APP.package}`;
+        FILEMAN.writeJsonFile(destPackageJsonPath, destJson)
     }
 
     const xcssPackageJasonPath = path.join(NAV.root, 'package.json');
@@ -99,8 +106,32 @@ const create = async () => {
     return { heading: 'Initialized setup.' }
 }
 
-// console.log(NAV.BUILD(), NAV)
-const ignite = () => {
+const ignite = async () => {
+    await NAV.BUILD();
+    FILEMAN.safeCloneFolder(NAV.template.setup, NAV.project.setup);
+    if (FILEMAN.path.isFolder(NAV.project.target))
+        FILEMAN.safeCloneFolder(NAV.project.source, NAV.project.target)
+
+    const latestVendorPrefixes = await FILEMAN.fetchJsonData(APP.live.vendorprefixes);
+    const currentVendorPrefixes = await FILEMAN.readJsonData(NAV.project.vendorprefix);
+    if (latestVendorPrefixes.status && (typeof (latestVendorPrefixes.data) === "object")) {
+        if (typeof (currentVendorPrefixes) === "object") {
+            $.STEP("Updating vendor-prefixes.json")
+            const updatedVendorPrefixes = {
+                ...latestVendorPrefixes.data,
+                ...currentVendorPrefixes,
+            };
+            FILEMAN.writeJsonFile(NAV.project.vendorprefix, updatedVendorPrefixes)
+        } else {
+            FILEMAN.writeJsonFile(NAV.project.vendorprefix, latestVendorPrefixes)
+        }
+    } else {
+        $.STEP("Unable to fetch latest vendor-prefixes. Verify connection and try again")
+    }
+}
+ignite()
+
+const start = () => {
     const extensions = NAV.BUILD();
     FILEMAN.cloneFolder(NAV.template.setup, NAV.project.setup);
     if (!FILEMAN.path.isFolder(NAV.project.target)) {
@@ -108,10 +139,8 @@ const ignite = () => {
         FILEMAN.safeCloneFolder(NAV.project.source, NAV.project.target)
     }
     return {
-        setups: {
-            shorthand: JSON.parse(U.code.uncomment.Script(fs.readFileSync(NAV.project.shorthand))),
-            vendorprefix: fs.readFileSync(NAV.project.vendorprefix),
-        },
+        shorthands: JSON.parse(fs.readFileSync(NAV.project.shorthand)),
+        vendorprefixes: fs.readFileSync(NAV.project.vendorprefix),
         stylesheets: {
             origin: fs.readFileSync(path.join(NAV.project.source, NAV.project.styles)),
             atrules: fs.readFileSync(NAV.project.atrules),

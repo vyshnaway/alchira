@@ -6,7 +6,6 @@ import {
 } from './4.utils.js';
 import path from 'path';
 import $ from './Docs/package.js';
-import renderShorthand from "./scribe/0.shorthands.js"
 
 
 
@@ -94,25 +93,3 @@ export const buildConfig = async () => {
         }
     }));
 }
-
-export const buildShorthands = async () => {
-    $.TASK('Attempting shorthand build.')
-
-    const shorthandErrors = [];
-    const userShorthands = await JSONCparse(path.join(config.setup, 'shorthands.jsonc'));
-    const allShorthands = { ...userShorthands, ...config.shorthands };
-
-    Object.keys(userShorthands).map(key => {
-        const hash = '#' + key
-        const response = renderShorthand(hash, allShorthands);
-        if (response.status) config.shorthands[key] = response.result;
-        else shorthandErrors.push(response.result)
-    });
-
-    if (Object.keys(config.shorthands).length)
-        $.WRITE.success.Section("Valid Shorthands", $.list.success.Props(config.shorthands), $.list.std.Bullets)
-    else $.WRITE.failed.Section("Unable to fetch Shorthands.")
-
-    if (shorthandErrors.length)
-        $.WRITE.failed.Footer("Invalid Shorthands", shorthandErrors, $.list.std.Bullets)
-} 
