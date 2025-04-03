@@ -142,11 +142,6 @@ const publish = (trim = true, debug = true) => {
 }
 
 
-
-
-
-
-
 const dev = (dirMap, cloneIgnore, parseIgnore, contentCallback) => {
     publish(false, true);
 

@@ -1,7 +1,7 @@
 import objectSwitch from './4.switch.js'
 import extract from './1.extract.js'
 import getBlock from './StyleBlock/0.block.js'
-import U from '../Utils/package.js'
+import U from '../../.dump/Utils/package.js'
 
 export function reader(string) {
     let keyStart = 0,

@@ -2,39 +2,10 @@ import $ from '../Xhell/package.js';
 
 const hashPattern = /\{#[a-z0-9]+\}/i;
 const preHashPattern = /(?<!\{)#\w+/g;
+let stash = {};
 
-function renderAtRule(string) {
-    let result = [],
-        length = string.length,
-        deviance = 0;
-
-    for (let i = 0; i < length; i++) {
-        let ch = string[i];
-        if ("({".includes(ch)) deviance++;
-        if (")}".includes(ch)) deviance--;
-        if (deviance) {
-            result.push(ch);
-        } else {
-            switch (ch) {
-                case '}': result.push(''); break;
-                case ',': result.push(', '); break;
-                case '|': result.push(' or '); break;
-                case '&': result.push(' and '); break;
-                case '!': result.push('not '); break;
-                case '*': result.push('all '); break;
-                case '^': result.push('only '); break;
-                case '@': result.unshift('@');result.push(' ');break;
-                default: result.push(ch);
-            }
-        }
-    }
-
-    return result.join('');
-}
-
-let shorthand = {
-    stash: {},
-    RENDER: (string) => {
+let SHORTHAND = {
+    IMPORT: (string) => {
         const response = {
             status: true,
             result: "",
@@ -63,7 +34,7 @@ let shorthand = {
         while (hashMatch = hashPattern.exec(string)) {
             const hash = hashMatch[0];
             const key = hash.slice(2, -1);
-            const replacement = shorthand.stash[key];
+            const replacement = stash[key];
             recursionPreview["FROM " + hash] = `GETS ${replacement}`
             if (replacement === undefined)
                 return errors.undefinedHash(recursionPreview, hash);
@@ -76,18 +47,18 @@ let shorthand = {
             recursionSequence.push(hash);
         }
 
-        response.result = renderAtRule(string)
+        response.result = string
         return response;
     },
-    BUILD: async (shorthands) => {
+    UPLOAD: async (shorthands) => {
         $.TASK('Attempting shorthand build.')
         const shorthandErrors = [];
-        
-        shorthand.stash = shorthands;
+
+        stash = shorthands;
         Object.keys(shorthands).map(key => {
             const hash = '#' + key
-            const response = shorthand.RENDER(hash);
-            if (typeof(shorthands[key]) === "string") {
+            const response = SHORTHAND.IMPORT(hash);
+            if (typeof (shorthands[key]) === "string") {
                 if (response.status) {
                     shorthands[key] = response.result;
                 } else {
@@ -96,15 +67,68 @@ let shorthand = {
                 }
             }
         });
-        shorthand.stash = shorthands;
+        stash = shorthands;
 
-        if (Object.keys(shorthand.stash).length)
+        if (Object.keys(stash).length)
             $.WRITE.success.Section("Valid Shorthands", $.list.success.Props(shorthands), $.list.std.Bullets)
         else $.WRITE.failed.Section("Unable to fetch Shorthands.")
 
         if (shorthandErrors.length)
             $.WRITE.failed.Footer("Invalid Shorthands", shorthandErrors, $.list.std.Bullets)
-    }
+    },
+    RENDER: (string) => {
+        string = SHORTHAND.IMPORT(string).result
+        let rule = [],
+            selector = [],
+            $Marker = 0,
+            length = string.length,
+            deviance = 0;
+
+        for (let i = 0; i < length; i++) {
+            let ch = string[i];
+
+            if ("({".includes(ch)) {
+                deviance++;
+            }
+            else if (")}".includes(ch)) {
+                deviance--;
+            }
+
+            if (deviance) {
+                rule.push(ch);
+            }
+            else if (ch === '$') {
+                $Marker = i + 1;
+                break;
+            }
+            else {
+                switch (ch) {
+                    case '}': rule.push(''); break;
+                    case ',': rule.push(', '); break;
+                    case '|': rule.push(' or '); break;
+                    case '&': rule.push(' and '); break;
+                    case '!': rule.push('not '); break;
+                    case '*': rule.push('all '); break;
+                    case '^': rule.push('only '); break;
+                    case '@': rule.unshift('@'); rule.push(' '); break;
+                    default: rule.push(ch);
+                }
+            }
+        }
+
+        if ($Marker > 0) {
+            for (let i = $Marker; i < length; i++) {
+                const ch = string[i];
+                if (ch === '{') {
+                    if (i + 1 < string.length && string[i + 1] !== ':') selector.push(' ');
+                } else if (ch !== '}') {
+                    selector.push(ch);
+                }
+            }
+        }
+
+        return { rule: rule.join(''), selector: selector.join('') };
+    },
 }
 
-export default shorthand;
+export default SHORTHAND;

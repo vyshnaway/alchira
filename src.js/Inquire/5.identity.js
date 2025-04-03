@@ -21,7 +21,7 @@ export default {
 // console.log(fn.className('.dic fj'))
 // console.log(fn.className('dic fj'))
 // console.log(fn.className(' .dicfj'))
- 
+
 // console.log(fn.nestSelector('&ghgh'))
 // console.log(fn.nestSelector('& k:lo'))
 // console.log(fn.nestSelector('&'))

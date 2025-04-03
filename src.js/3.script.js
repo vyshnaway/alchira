@@ -6,39 +6,6 @@ String.prototype.splice = function (start, deleteCount, ...items) {
     return this.slice(0, start) + items.join('') + this.slice(start + deleteCount);
 };
 
-const renderStyler = (string, globalStylePrefix, localStylePrefix) => {
-    string = string.replace(/\s+/g, ' ')
-    try {
-        if (pseudoElements.includes(string.match(/^[a-zA-Z]+/)[0]))
-            string = string.replace(/^[a-zA-Z]+/, match => "::" + match);
-        else if (string.match(/^[a-zA-Z]+/)[0])
-            string = string.replace(/^[a-zA-Z]+/, match => ":" + match);
-    } catch { }
-
-    return string
-}
-
-const tagEngine = (tag, shortHands, prefix) => {
-    let styleRules = { default: { style: tag.cxcClass.value } };
-    tag.cxcAttributes.forEach(attr => {
-
-        let [query, selector] = renderShorthand(attr.name, shortHands).split(/\$(.*)/);
-        if (query !== '') {
-            query = query.replace(/#+/g, '#').replaceAll(" ", "");
-            query = '@' + query.replace("!", "not ").replace("&", " and ").replace("|", " or ").replace("@", ' ')
-        }
-        else
-            query = 'default';
-
-        if (selector) selector = renderStyler(selector, prefix.global, prefix.local);
-        else selector = 'style';
-
-        if (!styleRules[query]) styleRules[query] = {};
-        styleRules[query][selector] = attr.value;
-    })
-    return { [tag.cxcClass.name]: styleRules }
-}
-
 const tagObjectModifier = (tagObj, index, rgx, prefixConfig) => {
     const element = tagObj.element;
 

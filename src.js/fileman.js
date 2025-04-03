@@ -2,7 +2,6 @@ import fs, { read, write } from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-
 async function checkPath(pathStr, checkFn) {
     try {
         const stats = await fs.promises.stat(pathStr);
@@ -84,12 +83,14 @@ const FILEMAN = {
         FILEMAN.cloneFolder(source, destination, updatedIgnoreFiles);
     },
     getFilesAndSync: (target, extensions = [], source) => {
+        const result = { fileContent: {}, syncMap: {} };
+
         if (source === undefined) {
-            return FILEMAN.getAllFiles(target).reduce((result, file) => {
+            FILEMAN.getAllFiles(target).forEach((file) => {
                 if (extensions.includes(path.extname(file)) || (extensions.length === 0))
-                    result[file] = fs.readFileSync(file, 'utf-8')
-                return result
-            }, {})
+                    result.fileContent[file] = fs.readFileSync(file, 'utf-8')
+            })
+            return result;
         }
 
         if (!fs.existsSync(target)) fs.mkdirSync(target, { recursive: true });
@@ -109,19 +110,19 @@ const FILEMAN = {
             }
         });
 
-        const result = {};
 
         relativeTargetFiles.forEach(file => {
             const targetFilePath = path.join(target, file);
             const sourceFilePath = path.join(source, file);
+            result.syncMap[targetFilePath] = sourceFilePath;
+            result.syncMap[sourceFilePath] = targetFilePath;
 
             if (!fs.existsSync(sourceFilePath)) {
                 const targetDirPath = path.dirname(targetFilePath);
                 if (!fs.existsSync(targetDirPath)) fs.mkdirSync(targetDirPath, { recursive: true });
             }
-
             if (extensions.includes(path.extname(file))) {
-                result[path.join(source, file)] = fs.readFileSync(targetFilePath, 'utf-8');
+                result.fileContent[path.join(source, file)] = fs.readFileSync(targetFilePath, 'utf-8');
             } else {
                 fs.copyFileSync(targetFilePath, sourceFilePath);
             }

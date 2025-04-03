@@ -1,4 +1,4 @@
-import codePreprocess from '../Utils/5.code.js'
+import codePreprocess from './5.code.js'
 import selectFile from './0.set-file.js'
 import extractSelector from '../Inquire/2.extract.js'
 import readCssBlock from './StyleBlock/0.block.js'

@@ -1,5 +1,5 @@
 import { currentCrumb, currentFile, scriptText } from '../0.env.js'
-import U from '../Utils/package.js'
+import U from '../../.dump/Utils/package.js'
 
 // const match = /[a-z0-9]/i;
 

@@ -1,14 +1,14 @@
 import { classTable, currentFile } from "../0.env.js";
 
-function setback(array) {
-    const lastSeen = new Map();
-    for (let i = 0; i < array.length; i++) {
-        lastSeen.set(array[i], i);
-    }
-    return array.filter((item, index) => lastSeen.get(item) === index);
-}
-
 export default function extractClassList(array, incCompStyles = true) {
+    function setback(array) {
+        const lastSeen = new Map();
+        for (let i = 0; i < array.length; i++) {
+            lastSeen.set(array[i], i);
+        }
+        return array.filter((item, index) => lastSeen.get(item) === index);
+    }
+    
     const currentScope = classTable[currentFile]?.styleGroup ?? {};
     const fallbackScope = classTable[defaultScope]?.styleGroup ?? {};
 

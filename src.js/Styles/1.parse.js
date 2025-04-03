@@ -2,6 +2,37 @@ import extract from './1.extract.js';
 import U from '../../Utils/package.js'
 import I from '../../Inquire/package.js'
 
+export default function xtylemerge(classList, blocks = true) {
+    function deepMerge(target, source, includeInnerObjects = true) {
+        if (!source || typeof source !== 'object') return target;
+
+        for (const key in source) {
+            const sourceValue = source[key];
+            if (sourceValue === undefined) continue;
+
+            const targetValue = target[key];
+
+            if (includeInnerObjects &&
+                targetValue &&
+                sourceValue &&
+                typeof targetValue === 'object' &&
+                typeof sourceValue === 'object' &&
+                !Array.isArray(targetValue)) {
+                target[key] = deepMerge(targetValue, sourceValue);
+            } else {
+                target[key] = sourceValue;
+            }
+        }
+
+        return target;
+    }
+    const result = {};
+    for (const className of classList) {
+        deepMerge(result, styleBlocks[className], blocks);
+    }
+    return result;
+}
+
 const OPEN_CHARS = ['{', '[', '('];
 const CLOSE_CHARS = ['}', ']', ')'];
 const QUOTE_CHARS = ['`', "'", '"'];
@@ -76,27 +107,27 @@ export default function parseCssToObject(string, refs = true, props = true, nest
     return properties;
 }
 
-// const string = `
-// prop1: val1;
-// prop3: val3;
-// 222% {
-//     prop4 : hinokin;
-//     props4 : hinokins4;
-// }
-// @applay hg;
-// &:media gh {
-//     prop4 : 'hinokin';
-//     prop43 : 'hinokin';
-//     @applay hg;
-// };
-// @:hover {
-//     prop4 : 'hinokin';
-//     prop43 : 'hinokin';
-//     @applay hg;
-// a b csd;
-// };
-// a b csd;
-// gha b csd;
-// `
+const string = `
+prop1: val1;
+prop3: val3;
+222% {
+    prop4 : hinokin;
+    props4 : hinokins4;
+}
+@applay hg;
+&:media gh {
+    prop4 : 'hinokin';
+    prop43 : 'hinokin';
+    @applay hg;
+};
+@:hover {
+    prop4 : 'hinokin';
+    prop43 : 'hinokin';
+    @applay hg;
+a b csd;
+};
+a b csd;
+gha b csd;
+`
 
-// console.log(JSON.stringify(fn(string), ' ', 4))
+console.log(JSON.stringify(fn(string), ' ', 4))

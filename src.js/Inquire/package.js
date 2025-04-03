@@ -1,5 +1,5 @@
 import shorthand from './0.short-hand.js'
-import classProxy from './1.style-proxy.js'
+import classProxy from './1.load-proxy.js'
 import className from './2.style-name.js'
 import directive from './3.directive.js'
 import selector from './4.selector.js'

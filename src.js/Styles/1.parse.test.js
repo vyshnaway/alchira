@@ -1,30 +1,30 @@
 import { styleBlocks } from "../../0.env.js";
 
-function deepMerge(target, source, includeInnerObjects = true) {
-    if (!source || typeof source !== 'object') return target;
-
-    for (const key in source) {
-        const sourceValue = source[key];
-        if (sourceValue === undefined) continue;
-
-        const targetValue = target[key];
-
-        if (includeInnerObjects &&
-            targetValue &&
-            sourceValue &&
-            typeof targetValue === 'object' &&
-            typeof sourceValue === 'object' &&
-            !Array.isArray(targetValue)) {
-            target[key] = deepMerge(targetValue, sourceValue);
-        } else {
-            target[key] = sourceValue;
-        }
-    }
-
-    return target;
-}
 
 export default function composeXtyle(classList, blocks = true) {
+    function deepMerge(target, source, includeInnerObjects = true) {
+        if (!source || typeof source !== 'object') return target;
+
+        for (const key in source) {
+            const sourceValue = source[key];
+            if (sourceValue === undefined) continue;
+
+            const targetValue = target[key];
+
+            if (includeInnerObjects &&
+                targetValue &&
+                sourceValue &&
+                typeof targetValue === 'object' &&
+                typeof sourceValue === 'object' &&
+                !Array.isArray(targetValue)) {
+                target[key] = deepMerge(targetValue, sourceValue);
+            } else {
+                target[key] = sourceValue;
+            }
+        }
+
+        return target;
+    }
     const result = {};
     for (const className of classList) {
         deepMerge(result, styleBlocks[className], blocks);

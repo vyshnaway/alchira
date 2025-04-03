@@ -2,7 +2,7 @@ import $ from './Xhell/package.js';
 import FILEMAN from './fileman.js';
 import path from 'path';
 import fs from 'fs';
-import SHORTHAND from "./Inquire/0.short-hand.js"
+import SHORTHAND from "./Workers/0.short-hand.js"
 
 const APP = {
     name: "XCSS",
@@ -34,16 +34,18 @@ const NAV = {
         setup: "xtyles",
         refer: "references",
         cache: ".cache",
+        syncmap: "syncmap.json",
         config: "configure.json",
         shorthand: "short-hands.json",
         vendorprefix: "vendor-prefix.json",
-        atrules: "# at-rules.css",
-        constants: "# constants.css",
-        tagstyles: "# tag-styles.css",
+        atrules: "#at-rules.css",
+        constants: "#constants.css",
+        tagstyles: "#tag-styles.css",
         source: "",
         target: "",
         styles: "",
-        key: ""
+        key: "",
+        extensions: [],
     },
     INIT: () => {
         NAV.root = FILEMAN.path.ofRoot();
@@ -54,6 +56,7 @@ const NAV = {
         NAV.project.setup = path.join(NAV.path, NAV.project.setup);
         NAV.project.refer = path.join(NAV.project.setup, NAV.project.refer);
         NAV.project.cache = path.join(NAV.project.setup, NAV.project.cache);
+        NAV.project.syncmap = path.join(NAV.project.cache, NAV.project.syncmap);
 
         NAV.project.config = path.join(NAV.project.setup, NAV.project.config);
         NAV.project.shorthand = path.join(NAV.project.setup, NAV.project.shorthand);
@@ -67,14 +70,14 @@ const NAV = {
     },
     BUILD: async () => {
         NAV.INIT();
-        SHORTHAND.BUILD((await FILEMAN.readJsonData(NAV.project.shorthand)).data);
+        SHORTHAND.UPLOAD((await FILEMAN.readJsonData(NAV.project.shorthand)).data);
         const configure = (await FILEMAN.readJsonData(NAV.project.config)).data
 
         NAV.project.source = configure["source"];
         NAV.project.target = configure["target"];
         NAV.project.styles = configure["stylesheet"];
         NAV.project.key = configure["project-key"];
-        NAV.project.extensions = configure["extensions"];
+        NAV.project.extensions = configure["extensions"].map(ext => '.' + ext);
     }
 };
 
@@ -129,15 +132,17 @@ const ignite = async () => {
         $.STEP("Unable to fetch latest vendor-prefixes. Verify connection and try again")
     }
 }
-ignite()
 
-const start = () => {
-    const extensions = NAV.BUILD();
-    FILEMAN.cloneFolder(NAV.template.setup, NAV.project.setup);
+const start = async () => {
+    await NAV.BUILD();
     if (!FILEMAN.path.isFolder(NAV.project.target)) {
         $.WRITE.std.Section('Creating missing targets')
         FILEMAN.safeCloneFolder(NAV.project.source, NAV.project.target)
     }
+    FILEMAN.safeCloneFolder(NAV.template.setup, NAV.project.setup);
+    const FILES = FILEMAN.getFilesAndSync(NAV.project.target, NAV.project.extensions, NAV.project.source)
+    console.log(FILES)
+    FILEMAN.writeJsonFile(NAV.project.syncmap, FILES.syncMap)
     return {
         shorthands: JSON.parse(fs.readFileSync(NAV.project.shorthand)),
         vendorprefixes: fs.readFileSync(NAV.project.vendorprefix),
@@ -147,10 +152,11 @@ const start = () => {
             constants: fs.readFileSync(NAV.project.constants),
             tagstyles: fs.readFileSync(NAV.project.tagstyles)
         },
-        refers: FILEMAN.getFilesAndSync(NAV.project.refer, [".css"]),
-        files: FILEMAN.getFilesAndSync(NAV.project.target, extensions, NAV.project.source)
+        refers: FILEMAN.getFilesAndSync(NAV.project.refer, [".css"]).fileContent,
+        files: FILES.fileContent
     }
 }
+start()
 
 const execute = async (args) => {
 

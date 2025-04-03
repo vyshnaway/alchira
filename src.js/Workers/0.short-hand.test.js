@@ -1,0 +1,33 @@
+import SHORTHAND from "./0.short-hand.js";
+
+SHORTHAND.UPLOAD({
+    "Approach": "#MobileFirst",
+    "MobileFirst": "min-width",
+    "DesktopFirst": "max-width",
+    "Ms4": "media@({#Approach}:0320px)",
+    "Ms3": "media@({#Approach}:0384px)",
+    "Ms2": "media@({#Approach}:0448px)",
+    "Ms1": "media@({#Approach}:0512px)",
+    "Mmd": "media@({#Approach}:0640px)",
+    "Ml1": "media@({#Approach}:0768px)",
+    "Ml2": "media@({#Approach}:0896px)",
+    "Ml3": "media@({#Approach}:1024px)",
+    "Ml4": "media@({#Approach}:1152px)",
+    "Cs4": "container@({#Approach}:160px)",
+    "Cs3": "container@({#Approach}:192px)",
+    "Cs2": "container@({#Approach}:224px)",
+    "Cs1": "container@({#Approach}:256px)",
+    "Cmd": "container@({#Approach}:320px)",
+    "Cl1": "container@({#Approach}:384px)",
+    "Cl2": "container@({#Approach}:449px)",
+    "Cl3": "container@({#Approach}:512px)",
+    "Cl4": "container@({#Approach}:576px)",
+    "a": "#b",
+    "b": "#c"
+})
+
+console.log(SHORTHAND.RENDER("#Cs4${dffg 9}"))
+console.log(SHORTHAND.RENDER('$:hover'))
+console.log(SHORTHAND.RENDER('${::placeholder h:hover}'))
+console.log(SHORTHAND.RENDER('{:active placeholder h:hover}'))
+console.log(SHORTHAND.RENDER(':{a}'))

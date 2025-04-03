@@ -1,4 +1,29 @@
-function mergeObjects(objectArray, aggressive = false, arrayMerge = false) {
+function objectSwitch(srcObject) {
+    if (!srcObject || typeof srcObject !== 'object') {
+        return {};
+    }
+
+    const output = {};
+
+    for (const outerKey in srcObject) {
+        if (srcObject.hasOwnProperty(outerKey) && outerKey[0] !== '+') {
+            const innerObject = srcObject[outerKey];
+
+            if (typeof innerObject === 'object' && innerObject !== null) {
+                for (const innerKey in innerObject) {
+                    if (innerObject.hasOwnProperty(innerKey)) {
+                        output[innerKey] = output[innerKey] || {};
+                        output[innerKey][outerKey] = innerObject[innerKey];
+                    }
+                }
+            }
+        }
+    }
+
+    return output;
+}
+
+function mergeObjects(objectArray = [], aggressive = false, arrayMerge = false) {
     // Input validation: return empty object if input is invalid or empty
     if (!objectArray || !Array.isArray(objectArray) || objectArray.length === 0) {
         return {};
@@ -24,10 +49,8 @@ function mergeObjects(objectArray, aggressive = false, arrayMerge = false) {
                     target[key].push(...source[key]);
                 }
                 // Handle primitives and arrays when arrayMerge is false
-                else {
-                    if (aggressive || !(key in target)) {
-                        target[key] = source[key];
-                    }
+                else if (aggressive || !(key in target)) {
+                    target[key] = source[key];
                 }
             }
         }
@@ -35,9 +58,7 @@ function mergeObjects(objectArray, aggressive = false, arrayMerge = false) {
     }
 
     // Merge all objects into a single result object
-    const result = {};
-    objectArray.forEach(obj => deepMerge(result, obj));
-    return result;
+    return objectArray.reduce((result, obj) => deepMerge(structuredClone(result), obj), {});
 }
 
 function booleanOnObject(objectA, objectB, onlyA = true, intersect = true, onlyB = true, notA = true, notB = true) {
@@ -157,6 +178,7 @@ function booleanOnObject(objectA, objectB, onlyA = true, intersect = true, onlyB
 
 export default {
     merge: mergeObjects,
+    switch: objectSwitch,
     extract: booleanOnObject
 }
 
