@@ -1,4 +1,4 @@
-import { scriptText } from '../0.env.js'
+import { scriptText } from '../appenv.js'
 
 function isInString(input, index) {
     let inSingleQuote = false;
@@ -138,7 +138,8 @@ function minifyCssLite(content = scriptText) {
 
 export default {
     jsonc: {
-        parse: (string) => JSON.parse(stripComments(string))
+        parse: (string) => JSON.parse(stripComments(string)),
+        build: (object) => JSON.stringify(object, null, 4)
     },
     uncomment: {
         Script: stripComments,

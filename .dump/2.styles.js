@@ -1,4 +1,4 @@
-import W from './Workers/package.js'
+import W from '../src.js/Workers/package.js'
 
 export const xtylesheetBuilder = () => {
 

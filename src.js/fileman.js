@@ -1,117 +1,140 @@
-import fs, { read, write } from 'fs';
+import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-
-async function checkPath(pathStr, checkFn) {
-    try {
-        const stats = await fs.promises.stat(pathStr);
-        return checkFn(stats);
-    } catch (error) {
-        if (error.code === 'ENOENT') return false;
-        console.error('Path check error:', error);
-        return false;
-    }
-}
-
 
 const FILEMAN = {
     path: {
         ofRoot: () => {
             return path.resolve(fileURLToPath(import.meta.url), "../..")
         },
-        isFolder: async (folderPath) => {
-            return checkPath(folderPath, stats => stats.isDirectory());
+        availability: async (pathString) => {
+            const result = { exist: false, type: null};
+            try {
+                const stats = await fs.promises.stat(pathString);
+                result.exist = true;
+                result.type = stats.isDirectory() ? "folder" : "file";
+            } catch (error) {
+                if (error.code !== 'ENOENT') {
+                    console.error('Path check error:', error);
+                }
+            }
+            return result;
         },
-        isFile: async (filePath) => {
-            return checkPath(filePath, stats => stats.isFile());
+        ifFolder: async (pathString) => {
+            return (await FILEMAN.path.availability(pathString)).type === "folder";
+        },
+        ifFile: async (pathString) => {
+            return (await FILEMAN.path.availability(pathString)).type === "file";
         },
         isAncestor: (ancestor, descendant) => {
             const relative = path.relative(ancestor, descendant);
             return !!relative && !relative.startsWith('..') && !path.isAbsolute(relative);
+        },
+        delete: async (pathToDelete) => {
+            try {
+                if (fs.existsSync(pathToDelete)) {
+                    const stats = await fs.promises.stat(pathToDelete);
+                    if (stats.isDirectory()) {
+                        await fs.promises.rm(pathToDelete, { recursive: true, force: true });
+                    } else {
+                        await fs.promises.unlink(pathToDelete);
+                    }
+                    return { success: true, message: 'Path deleted successfully.' };
+                } else {
+                    return { success: false, message: 'Path does not exist.' };
+                }
+            } catch (error) {
+                console.error('Error deleting path:', error);
+                return { success: false, message: 'Error deleting path.' };
+            }
         }
     },
-    getAllFiles: (dir, fileList = []) => {
+    getAllFiles: async (dir, fileList = []) => {
         if (!fs.existsSync(dir)) return fileList;
-        const files = fs.readdirSync(dir);
-        files.forEach(file => {
+        const files = await fs.promises.readdir(dir);
+        for (const file of files) {
             const filePath = path.join(dir, file);
-            if (fs.statSync(filePath).isDirectory()) {
-                fileList = FILEMAN.getAllFiles(filePath, fileList);
+            const stats = await fs.promises.stat(filePath);
+            if (stats.isDirectory()) {
+                fileList = await FILEMAN.getAllFiles(filePath, fileList);
             } else {
                 fileList.push(filePath);
             }
-        });
+        }
         return fileList;
     },
-    cloneFolder: (source, destination, ignoreFiles = []) => {
+    cloneFolder: async (source, destination, ignoreFiles = []) => {
         try {
             if (!fs.existsSync(source)) {
                 throw new Error('Source folder does not exist.\n' + source);
             }
 
-            const copyRecursiveSync = (src, dest) => {
+            const copyRecursiveAsync = async (src, dest) => {
                 const exists = fs.existsSync(src);
-                const stats = exists && fs.statSync(src);
+                const stats = exists && (await fs.promises.stat(src));
                 const isDirectory = exists && stats.isDirectory();
 
                 if (isDirectory) {
-                    fs.mkdirSync(dest, { recursive: true });
-                    fs.readdirSync(src).forEach(childItemName => {
+                    await fs.promises.mkdir(dest, { recursive: true });
+                    const children = await fs.promises.readdir(src);
+                    for (const childItemName of children) {
                         const childSrcPath = path.join(src, childItemName);
                         const childDestPath = path.join(dest, childItemName);
                         if (!ignoreFiles.includes(childSrcPath)) {
-                            copyRecursiveSync(childSrcPath, childDestPath);
+                            await copyRecursiveAsync(childSrcPath, childDestPath);
                         }
-                    });
+                    }
                 } else {
                     if (!ignoreFiles.includes(src)) {
-                        fs.copyFileSync(src, dest);
+                        await fs.promises.copyFile(src, dest);
                     }
                 }
             };
 
-            copyRecursiveSync(source, destination);
+            await copyRecursiveAsync(source, destination);
         } catch (err) {
             console.error(err);
         }
     },
-    safeCloneFolder: (source, destination, ignoreFiles = []) => {
+    safeCloneFolder: async (source, destination, ignoreFiles = []) => {
         const destinationFiles = fs.existsSync(destination)
-            ? FILEMAN.getAllFiles(destination).map(file => path.join(source, file.replace(destination, '')))
+            ? (await FILEMAN.getAllFiles(destination)).map(file => path.join(source, file.replace(destination, '')))
             : [];
         const updatedIgnoreFiles = [...ignoreFiles, ...destinationFiles];
-        FILEMAN.cloneFolder(source, destination, updatedIgnoreFiles);
+        await FILEMAN.cloneFolder(source, destination, updatedIgnoreFiles);
     },
-    getFilesAndSync: (target, extensions = [], source) => {
+    getFilesAndSync: async (target, extensions = [], source) => {
         const result = { fileContent: {}, syncMap: {} };
+        extensions.map(ext => '.' + ext)
 
         if (source === undefined) {
-            FILEMAN.getAllFiles(target).forEach((file) => {
-                if (extensions.includes(path.extname(file)) || (extensions.length === 0))
-                    result.fileContent[file] = fs.readFileSync(file, 'utf-8')
-            })
+            const files = await FILEMAN.getAllFiles(target);
+            for (const file of files) {
+                if (extensions.includes(path.extname(file)) || extensions.length === 0) {
+                    result.fileContent[file] = await fs.promises.readFile(file, 'utf-8');
+                }
+            }
             return result;
         }
 
-        if (!fs.existsSync(target)) fs.mkdirSync(target, { recursive: true });
-        if (!fs.existsSync(source)) fs.mkdirSync(source, { recursive: true });
+        if (!fs.existsSync(target)) await fs.promises.mkdir(target, { recursive: true });
+        if (!fs.existsSync(source)) await fs.promises.mkdir(source, { recursive: true });
 
-        const targetFiles = FILEMAN.getAllFiles(target);
-        const sourceFiles = FILEMAN.getAllFiles(source);
+        const targetFiles = await FILEMAN.getAllFiles(target);
+        const sourceFiles = await FILEMAN.getAllFiles(source);
 
         const relativeTargetFiles = targetFiles.map(file => path.relative(target, file));
         const relativeSourceFiles = sourceFiles.map(file => path.relative(source, file));
 
         // Delete excess files in source
-        relativeSourceFiles.forEach(file => {
+        for (const file of relativeSourceFiles) {
             if (!relativeTargetFiles.includes(file)) {
                 const sourceFilePath = path.join(target, file);
-                fs.unlinkSync(sourceFilePath);
+                await fs.promises.unlink(sourceFilePath);
             }
-        });
+        }
 
-
-        relativeTargetFiles.forEach(file => {
+        for (const file of relativeTargetFiles) {
             const targetFilePath = path.join(target, file);
             const sourceFilePath = path.join(source, file);
             result.syncMap[targetFilePath] = sourceFilePath;
@@ -119,81 +142,85 @@ const FILEMAN = {
 
             if (!fs.existsSync(sourceFilePath)) {
                 const targetDirPath = path.dirname(targetFilePath);
-                if (!fs.existsSync(targetDirPath)) fs.mkdirSync(targetDirPath, { recursive: true });
+                if (!fs.existsSync(targetDirPath)) await fs.promises.mkdir(targetDirPath, { recursive: true });
             }
             if (extensions.includes(path.extname(file))) {
-                result.fileContent[path.join(source, file)] = fs.readFileSync(targetFilePath, 'utf-8');
+                result.fileContent[path.join(source, file)] = await fs.promises.readFile(targetFilePath, 'utf-8');
             } else {
-                fs.copyFileSync(targetFilePath, sourceFilePath);
+                await fs.promises.copyFile(targetFilePath, sourceFilePath);
             }
-        });
+        }
 
         // Delete excess folders in target
         const sourceFolders = sourceFiles
             .map(file => path.dirname(path.relative(target, file)))
             .filter((value, index, self) => self.indexOf(value) === index);
 
-        sourceFolders.forEach(folder => {
+        for (const folder of sourceFolders) {
             const sourceFolderPath = path.join(source, folder);
-            if (!fs.existsSync(sourceFolderPath)) return;
+            if (!fs.existsSync(sourceFolderPath)) continue;
             const relativeFolder = path.relative(target, sourceFolderPath);
             const targetFolderPath = path.join(source, relativeFolder);
 
             if (!fs.existsSync(targetFolderPath)) {
-                fs.rmSync(sourceFolderPath, { recursive: true, force: true });
+                await fs.promises.rm(sourceFolderPath, { recursive: true, force: true });
             }
-        });
+        }
 
         return result;
     },
-    writeToFile: (filePath, content) => {
-        try {
-            const dir = path.dirname(filePath);
-            if (!fs.existsSync(dir)) {
-                fs.mkdirSync(dir, { recursive: true });
-            }
-            fs.writeFileSync(filePath, content, 'utf8');
-        } catch (err) {
-            console.error(`Error writing to file ${filePath}:`, err);
-        }
-    },
-    bulkWriteFiles: (fileContentArray) => {
-        fileContentArray.forEach(fileContent => FILEMAN.writeToFile(fileContent[0], fileContent[1]))
-    },
-    readJsonData: async (filePath) => {
-        try {
-            if (!fs.existsSync(filePath)) {
-                throw new Error(`File does not exist: ${filePath}`);
-            }
-            const data = JSON.parse(await fs.promises.readFile(filePath, 'utf8'));
-            return { status: true, data };
-        } catch (err) {
-            // console.error(`Error reading JSON data from ${filePath}:`, err);
-            return { status: false, data: null };
-        }
-    },
-    writeJsonFile: async (filePath, object) => {
+    writeToFile: async (filePath, content) => {
         try {
             const dir = path.dirname(filePath);
             if (!fs.existsSync(dir)) {
                 await fs.promises.mkdir(dir, { recursive: true });
             }
-            await fs.promises.writeFile(filePath, JSON.stringify(object, null, 2), 'utf8');
+            await fs.promises.writeFile(filePath, content, 'utf8');
         } catch (err) {
-            console.error(`Error writing JSON data to ${filePath}:`, err);
+            console.error(`Error writing to file ${filePath}:`, err);
         }
     },
-    fetchJsonData: async (source) => {
-        try {
-            const response = await fetch(source);
-            if (!response.ok) {
+    bulkWriteFiles: async (fileContentArray) => {
+        for (const fileContent of fileContentArray) {
+            await FILEMAN.writeToFile(fileContent[0], fileContent[1]);
+        }
+    },
+    JSON: {
+        readData: async (pathString) => {
+            try {
+                if (!fs.existsSync(pathString)) {
+                    throw new Error(`File does not exist: ${pathString}`);
+                }
+                const data = JSON.parse(await fs.promises.readFile(pathString, 'utf8'));
+                return { status: true, data };
+            } catch (err) {
+                // console.error(`Error reading JSON data from ${filePath}:`, err);
                 return { status: false, data: null };
             }
-            const data = await response.json();
-            return { status: true, data };
-        } catch (error) {
-            // console.error(`Error fetching JSON data from ${source}:`, error);
-            return { status: false, data: null };
+        },
+        writeFile: async (pathString, object) => {
+            try {
+                const dir = path.dirname(pathString);
+                if (!fs.existsSync(dir)) {
+                    await fs.promises.mkdir(dir, { recursive: true });
+                }
+                await fs.promises.writeFile(pathString, JSON.stringify(object, null, 2), 'utf8');
+            } catch (err) {
+                console.error(`Error writing JSON data to ${pathString}:`, err);
+            }
+        },
+        fetchData: async (source) => {
+            try {
+                const response = await fetch(source);
+                if (!response.ok) {
+                    return { status: false, data: null };
+                }
+                const data = await response.json();
+                return { status: true, data };
+            } catch (error) {
+                // console.error(`Error fetching JSON data from ${source}:`, error);
+                return { status: false, data: null };
+            }
         }
     }
 }

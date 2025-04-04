@@ -1,4 +1,4 @@
-import STYLES from "./0.styles.js"
+import STYLES from "./styles.js"
 import parse from "./Workers/style-block/0.parse.js"
 
 const styleLibibDetect = /^.*(?=\$)/

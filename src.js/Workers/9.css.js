@@ -1,9 +1,10 @@
-import objectSwitch from './4.switch.js'
-import extract from './1.extract.js'
-import getBlock from './StyleBlock/0.block.js'
-import U from '../../.dump/Utils/package.js'
+import objectSwitch from '../../.dump/4.switch.js'
+import code from '../Style/code.js'
+// import extract from './1.extract.js'
+// import getBlock from './StyleBlock/0.block.js'
+// import U from '../../.dump/Utils/package.js'
 
-export function reader(string) {
+export function parse(string) {
     let keyStart = 0,
         valStart = 0,
         deviance = 0,
@@ -39,7 +40,7 @@ export function reader(string) {
                     case ';':
                         if (key !== '' && ch === '}') {
                             if (key[0] === '@') {
-                                styleObject[key] = reader(string.slice(valStart, index))['']
+                                styleObject[key] = parse(string.slice(valStart, index))['']
                             } else {
                                 key = extract.className(key)
                                 if (key !== '') {
@@ -60,7 +61,7 @@ export function reader(string) {
     return styleObject;
 }
 
-function writer(object, minify = false) {
+function compose(object, minify = false) {
     const tb = (count = 0) => minify ? '' : '    '.repeat(count)
     const br = (count = 1) => minify ? '' : '\n'.repeat(count);
     const sp = (count = 1) => minify ? '' : ' '.repeat(count);
@@ -69,7 +70,7 @@ function writer(object, minify = false) {
         let output = '';
         for (const key in propObj) {
             const value = propObj[key]
-            output += `${tb(2)}${key}${(value === '') ? `` : `: ${value}`};${br()}`;
+            output += `${tb(2)}${key}${(value === '') ? `` : `:${sp()}${value}`};${br()}`;
         }
         return output
     }
@@ -78,10 +79,11 @@ function writer(object, minify = false) {
         for (const key in classObj) {
             if (key === '') continue;
             const value = classObj[key]
-            if (typeof (value) === 'string')
+            if (typeof (value) === 'string') {
                 output += `${tb(1)}${key}${(value === '') ? `` : `:${sp()}${value}`};${br()}`
-            else
+            } else {
                 output += `${tb(1)}${key}${sp()}{${br()}${genNestsBlock(classObj[key], key)}${tb(1)}}${br()}`;
+            }
         }
         return output;
     }
@@ -108,304 +110,17 @@ function writer(object, minify = false) {
     return styleSheet
 }
 
+function render(styleSheets = [], command = "dev") {
+    const renderOpt = {
+        dev: code.uncomment.Css,
+        preview: code.minify.Lite,
+        build: code.minify.Strict,
+    };
+    return styleSheets.map(sheet => renderOpt[command](sheet))
+}
+
 export default {
-    reader,
-    writer
+    parse,
+    compose,
+    render
 }
-
-
-const style1 = `.my-button{background-color:#007bff;color:white;media(max-width:738px){font-size: 14px;&:hover{background-color:#0056b3;}}&:hover{background-color:#0056b3;}}.my-button:active{background-color:#003f8e;}@fontface dfk;@media(max-width: 768px){.my-button{font-size:14px;padding:8px 16px;&:hover{background-color:#0056b3;}}@supports(display: grid){.my-button-container{display:grid;grid-template-columns:1fr 1fr;gap:10px;}}}@supports(display:grid){.my-button-container{display:grid;grid-template-columns:1fr 1fr;gap:10px;}}`
-const style2 = `
-.my-button {
-    background-color: #007bff;
-    color: white;
-    media (max-width: 768px) {
-        font-size: 14px;
-        &:hover {
-            background-color: #0056b3;
-        }
-    }
-    &:hover {
-    background-color: #0056b3;
-    }
-}
-@media (max-width: 768px) {
-    .my-button {
-        font-size: 14px;
-        padding: 8px 16px;
-        &:hover {
-            background-color: #0056b3;
-        }
-    }
-    @supports (display: grid) {
-        .my-button-container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-        }
-    }
-}  
-@supports (display: grid) {
-  .my-button-container {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-  }
-}
-`
-const style3 = `
-/* Flat Mode (Basic) */
-:root {
-    /* Primary */
-    --primary-100: #f2ece4;
-    --primary-300: #d9d2c5;
-    --primary-500: #b0a899;
-    --primary-700: #8a8275;
-    --primary-900: #645b4f;
-    /* Secondary */
-    --secondary-100: #ececea;
-    --secondary-300: #d1d3cc;
-    --secondary-500: #a3a69c;
-    --secondary-700: #7b7f76;
-    --secondary-900: #535750;
-    /* Tertiary */
-    --tertiary-100: #f5f5f5;
-    --tertiary-300: #dcdcdc;
-    --tertiary-500: #b0b0b0;
-    --tertiary-700: #787878;
-    --tertiary-900: #404040;
-
-    /* Core Backgrounds */
-    --background-body: #fafafa;
-    --background: #ece9e4;
-    --background-alt: #f4f2ee;
-
-    /* Text Colors */
-    --text-main: #404040;
-    --text-bright: #1a1a1a;
-    --text-muted: #787878;
-
-    /* Interactive Elements */
-    --links: var(--primary-500);
-    --focus: rgba(0, 118, 209, 0.4);
-    /* Derived from primary-500 */
-    --button-base: var(--tertiary-300);
-    --button-hover: var(--tertiary-500);
-
-    /* Borders and Highlights */
-    --border: var(--tertiary-300);
-    --selection: var(--primary-300);
-    --highlight: #fff3b0;
-
-    /* Code and Forms */
-    --code: var(--text-bright);
-    --form-placeholder: var(--tertiary-500);
-    --form-text: var(--text-main);
-    --variable: var(--secondary-500);
-
-    /* Scrollbar */
-    --scrollbar-thumb: var(--tertiary-500);
-    --scrollbar-thumb-hover: var(--tertiary-700);
-
-    /* Animation */
-    --animation-duration: 0.2s;
-}
-
-/* Light Mode Overrides */
-:root[data-light-mode] {
-    /* Primary (Brand Color) */
-    --primary-100: #f0f7ff;
-    --primary-300: #b3d1ff;
-    --primary-500: #0076d1;
-    --primary-700: #0066b8;
-    --primary-900: #004785;
-
-    /* Secondary (Accent Color) */
-    --secondary-100: #f0faf0;
-    --secondary-300: #b3e6b3;
-    --secondary-500: #39a33c;
-    --secondary-700: #2f8c32;
-    --secondary-900: #1f6622;
-
-    /* Tertiary (Neutral/Support) */
-    --tertiary-100: #fafafa;
-    --tertiary-300: #e0e0e0;
-    --tertiary-500: #a0a0a0;
-    --tertiary-700: #6e6e6e;
-    --tertiary-900: #363636;
-
-    /* Core Backgrounds */
-    --background-body: #ffffff;
-    --background: #f5f5f5;
-    --background-alt: #fafafa;
-
-    /* Text Colors */
-    --text-main: #363636;
-    --text-bright: #000000;
-    --text-muted: #6e6e6e;
-
-    /* Interactive Elements */
-    --links: var(--primary-500);
-    --focus: rgba(0, 118, 209, 0.4);
-    --button-base: var(--tertiary-300);
-    --button-hover: var(--tertiary-500);
-
-    /* Borders and Highlights */
-    --border: var(--tertiary-300);
-    --selection: var(--primary-300);
-    --highlight: #fff9cc;
-
-    /* Scrollbar */
-    --scrollbar-thumb: var(--tertiary-500);
-    --scrollbar-thumb-hover: var(--tertiary-700);
-}
-
-/* Dark Mode Overrides */
-:root[data-dark-mode] {
-    /* Primary (Brand Color) - Adjusted to blend with dark backgrounds */
-    --primary-100: #8ab0d9;
-    --primary-300: #668cb3;
-    --primary-500: #42688c;
-    --primary-700: #2e4866;
-    --primary-900: #1a2c40;
-
-    /* Secondary - Toned down to match the muted theme */
-    --secondary-100: #d9c7d9;
-    --secondary-300: #b39fb3;
-    --secondary-500: #8c778c;
-    --secondary-700: #665566;
-    --secondary-900: #403340;
-
-    /* Tertiary - Refined neutrals to align with backgrounds */
-    --tertiary-100: #a0a8b3;
-    --tertiary-300: #7a8591;
-    --tertiary-500: #546170;
-    --tertiary-700: #3c4652;
-    --tertiary-900: #252b33;
-
-    /* Core Backgrounds - Unchanged, as the base for harmony */
-    --background-body: #1f252c;
-    --background: #1d2124;
-    --background-alt: #31363c;
-
-    /* Text Colors - Adjusted for contrast and cohesion */
-    --text-main: #d4d9e0;
-    --text-bright: #e6ecef;
-    --text-muted: #9ba4b0;
-
-    /* Interactive Elements - Aligned with primary and tertiary */
-    --links: var(--primary-500);
-    --focus: rgba(66, 104, 140, 0.4);
-    --button-base: var(--tertiary-700);
-    --button-hover: var(--tertiary-500);
-
-    /* Borders and Highlights - Subtler and tied to backgrounds */
-    --border: var(--tertiary-900);
-    --selection: var(--primary-300);
-    --highlight: #b3a873;
-
-    /* Code and Forms - Adjusted for harmony */
-    --code: #d9a57a;
-    --form-placeholder: var(--tertiary-300);
-    --form-text: var(--text-bright);
-    --variable: var(--secondary-500);
-
-    /* Scrollbar - Consistent with tertiary */
-    --scrollbar-thumb: var(--tertiary-500);
-    --scrollbar-thumb-hover: var(--tertiary-300);
-}
-
-/* Dimentions */
-:root {
-    --rem-override: 4px;
-    --page-width: 360rem;
-
-    /* For typical margin and padding */
-    --delta-box: 1rem;
-    --delta-inline: 4rem;
-    --delta-block: 6rem;
-
-    --font-size-h1: 8rem;
-    --font-size-h2: 6rem;
-    --font-size-h3: 5rem;
-    --font-size-h4: 4rem;
-    --font-size-h5: 3.5rem;
-    --font-size-h6: 3rem;
-    --font-size-p: 4rem;
-    --margin-bottom-large: 6rem;
-    --margin-bottom-medium: 4rem;
-    --margin-bottom-small: 3rem;
-    --margin-bottom-xsmall: 2rem;
-
-    --font-display: 'Display-Font', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif';
-    --font-heading: 'Heading-Font', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif';
-    --font-body: 'Body-Font', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'Open Sans', 'Arial', 'sans-serif';
-    --font-caption: 'Caption-Font', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'Open Sans', 'Arial', 'sans-serif';
-    --font-button: 'Button-Font', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif';
-    --font-link: 'Link-Font', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif';
-    --font-monospace: 'Monospace-Font', 'SF Mono', 'Menlo', 'Monaco', 'Consolas', 'Courier New', 'Courier', 'monospace';
-}
-`
-// console.log(JSON.stringify(reader(style1), ' ', 4))
-// console.log(JSON.stringify(reader(style2), ' ', 4))
-
-
-// const object = {
-//     "classA": {
-//         "": {
-//             "prop-s": "d"
-//         },
-//         "@layer global": {
-//             "prop-d": "p1",
-//             "prop-f": "p2"
-//         },
-//         "@media": {
-//             "prop-sx": "p1",
-//             "prop-sv": "p2"
-//         },
-//         "@media 5": {
-//             "prop-sx": "p1",
-//             "prop-sv": "p2"
-//         }
-//     },
-//     "": {
-//         '@keyframes fade': {
-//             "56%": {
-//                 'force': '89'
-//             },
-//             "58%": {
-//                 'force': '89'
-//             },
-//         },
-//         '@keyframes fadeout': {
-//             "56%": {
-//                 'force': '89'
-//             },
-//             "58%": {
-//                 'force': '89'
-//             },
-//         }
-//     },
-//     "classB": {
-//         "": {
-//             "j": "new",
-//             "@apply": "",
-//             "prop-e": "ds",
-//             "&inClass": {
-//                 "prop34": "jik"
-//             }
-//         },
-//         "@media 5": {
-//             "prop-su": "p1",
-//             "prop-sr": "p2",
-//             "&:hover": {
-//                 "prop34": "jik"
-//             }
-//         },
-//         "@container 6": {
-//             "prop-sj": "p1",
-//             "prop-se": "p2"
-//         }
-//     }
-// }
-// console.log(writer(object))

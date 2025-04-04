@@ -1,4 +1,4 @@
-import { classTable, currentFile } from "../0.env.js";
+import { classTable, currentFile } from "../src.js/appenv.js";
 
 const VALID_CHARS = /[\$a-z0-9-_]/i;
 

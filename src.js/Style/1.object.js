@@ -1,3 +1,4 @@
+
 function objectSwitch(srcObject) {
     if (!srcObject || typeof srcObject !== 'object') {
         return {};

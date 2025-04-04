@@ -7,7 +7,7 @@ import list from './3.list.js'
 const composeBlock = (headingType, heading, contents) => {
     if (contents.length) contents.push(unstyle)
     return [
-        headingType(heading) ,
+        headingType(heading),
         ...contents
     ].join('\n');
 }
@@ -39,7 +39,7 @@ const blockColor = {
 }
 
 export const compose = {
-    std: {
+    standard: {
         Text: (string, intent = 0) =>
             tab(intent) + string,
         Item: (string, intent = 0) =>
@@ -132,7 +132,7 @@ export const compose = {
 }
 
 export const write = {
-    std: {
+    standard: {
         Text: (string, intent = 0) =>
             console.log(tab(intent) + string),
         Item: (string, intent = 0) =>

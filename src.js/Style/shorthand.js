@@ -1,4 +1,4 @@
-import $ from '../Xhell/package.js';
+import S from '../Shell/index.js';
 
 const hashPattern = /\{#[a-z0-9]+\}/i;
 const preHashPattern = /(?<!\{)#\w+/g;
@@ -19,14 +19,14 @@ let SHORTHAND = {
         const errors = {
             recursionLoop: (recursionPreview, cause) => {
                 response.status = false;
-                recursionPreview["ERROR BY"] = $.custom.style.apply.bold.Red(cause)
-                response.result = $.compose.std.List(source + $.custom.style.apply.bold.Red(" : Shorthand recursion loop."), $.list.failed.Props(recursionPreview), $.list.failed.Waterfall, 1);
+                recursionPreview["ERROR BY"] = S.custom.style.apply.bold.Red(cause)
+                response.result = S.compose.standard.List(source + S.custom.style.apply.bold.Red(" : Shorthand recursion loop."), S.list.failed.Props(recursionPreview), S.list.failed.Waterfall, 1);
                 return response
             },
             undefinedHash: (recursionPreview, cause) => {
                 response.status = false;
-                recursionPreview["ERROR BY"] = $.custom.style.apply.bold.Red(cause)
-                response.result = $.compose.std.List(source + $.custom.style.apply.bold.Red(" : Undefined shorthand."), $.list.failed.Props(recursionPreview), $.list.failed.Waterfall, 1);
+                recursionPreview["ERROR BY"] = S.custom.style.apply.bold.Red(cause)
+                response.result = S.compose.standard.List(source + S.custom.style.apply.bold.Red(" : Undefined shorthand."), S.list.failed.Props(recursionPreview), S.list.failed.Waterfall, 1);
                 return response
             }
         }
@@ -51,7 +51,7 @@ let SHORTHAND = {
         return response;
     },
     UPLOAD: async (shorthands) => {
-        $.TASK('Attempting shorthand build.')
+        S.TASK('Attempting shorthand build.')
         const shorthandErrors = [];
 
         stash = shorthands;
@@ -70,11 +70,11 @@ let SHORTHAND = {
         stash = shorthands;
 
         if (Object.keys(stash).length)
-            $.WRITE.success.Section("Valid Shorthands", $.list.success.Props(shorthands), $.list.std.Bullets)
-        else $.WRITE.failed.Section("Unable to fetch Shorthands.")
+            S.WRITE.success.Section("Valid Shorthands", S.list.success.Props(shorthands), S.list.std.Bullets)
+        else S.WRITE.failed.Section("Unable to fetch Shorthands.")
 
         if (shorthandErrors.length)
-            $.WRITE.failed.Footer("Invalid Shorthands", shorthandErrors, $.list.std.Bullets)
+            S.WRITE.failed.Footer("Invalid Shorthands", shorthandErrors, S.list.std.Bullets)
     },
     RENDER: (string) => {
         string = SHORTHAND.IMPORT(string).result

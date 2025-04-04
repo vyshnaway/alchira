@@ -1,11 +1,18 @@
-import { currentCrumb, classCounter } from '../0.env.js';
+// import { classTable, 
 
+let classCounter = 1;
+let currentFile = ""
+let currentCrumb = "";
+
+function initiateFile (fileName) {
+    currentFile = fileName;
+    currentCrumb = ;
+}
+
+const digits = "0123456789abcdefghijklmnopqrstuvwxyz_ABCDEFGHIJKLMNOPQRSTUVWXYZ-";
+const base = digits.length;
 const enCounter = (number) => {
-    const digits = "0123456789abcdefghijklmnopqrstuvwxyz_ABCDEFGHIJKLMNOPQRSTUVWXYZ-";
-    const base = digits.length;
-
     if (number === 0) return "0";
-
     let result = "", num = number;
     while (num > 0) {
         result = digits[num % base] + result;
@@ -14,7 +21,8 @@ const enCounter = (number) => {
     return result;
 };
 
-export default function generateStyleName(string) {
+
+function generateStyleName(string) {
     let length = string.length,
         prefix = '',
         op = '',
@@ -51,6 +59,42 @@ export default function generateStyleName(string) {
 
     return (`${prefix}_${enCounter(classCounter++)}__${currentCrumb}${suffix}`)
 }
+
+
+const VALID_CHARS = /[\$a-z0-9-_]/i;
+function loadStyleProxy(input, currentFile) {
+    if (typeof input !== 'string') return '';
+
+    const result = [];
+    let buffer = '';
+
+    const currentScope = classTable[currentFile]?.className ?? {};
+    const fallbackScope = classTable['']?.className ?? {};
+
+    for (const char of input) {
+        if (VALID_CHARS.test(char)) {
+            buffer += char;
+        } else {
+            if (buffer) {
+                result.push(currentScope[buffer] ?? fallbackScope[buffer] ?? buffer);
+                buffer = '';
+            }
+            result.push(char);
+        }
+    }
+    if (buffer) {
+        result.push(currentScope[buffer] ?? fallbackScope[buffer] ?? buffer);
+    }
+    return result.join('');
+}
+
+
+export default {
+    setfile: initiateFile,
+    assigns: generateStyleName,
+    imports: loadStyleProxy 
+}
+
 
 // console.log('$' + '\n' + nameXtyle('$') + '\n')
 // console.log('$one' + '\n' + nameXtyle('$one') + '\n')

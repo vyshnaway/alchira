@@ -61,7 +61,6 @@ function orderToClassList(classSet, indexOrder) {
 
 }
 
-
 export default {
     createNumericArrays,
     sortByReference,

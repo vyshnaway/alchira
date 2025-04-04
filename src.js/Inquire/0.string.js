@@ -6,7 +6,6 @@ function normalize (string) {
 }
 
 function minify(string) {
-
     const length = string.length;
     const result = [];
     let lastCh = ' ';
@@ -26,6 +25,7 @@ function minify(string) {
     }
     return result.join('');
 }
+
 function breaks(string) {
     const length = string.length;
     const result = [];
