@@ -39,7 +39,7 @@ const blockColor = {
 }
 
 export const compose = {
-    standard: {
+    std: {
         Text: (string, intent = 0) =>
             tab(intent) + string,
         Item: (string, intent = 0) =>
@@ -132,7 +132,7 @@ export const compose = {
 }
 
 export const write = {
-    standard: {
+    std: {
         Text: (string, intent = 0) =>
             console.log(tab(intent) + string),
         Item: (string, intent = 0) =>
@@ -148,7 +148,7 @@ export const write = {
         List: (heading, contents = [], selectListType = list.std.Blocks, intent = 0) =>
             console.log(blockColor.std(blockType.Points, heading, selectListType(contents, intent))),
         Block: (contents = [], selectListType = list.std.Blocks, intent = 0) =>
-            console.log(style.text.White(selectListType(contents, intent)).join('\n') + '\n'),
+            console.log(style.text.White(selectListType(contents, intent).join("\n"))),
     },
     failed: {
         Text: (string, intent = 0) =>

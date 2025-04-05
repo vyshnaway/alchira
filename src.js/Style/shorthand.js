@@ -20,13 +20,13 @@ let SHORTHAND = {
             recursionLoop: (recursionPreview, cause) => {
                 response.status = false;
                 recursionPreview["ERROR BY"] = S.custom.style.apply.bold.Red(cause)
-                response.result = S.compose.standard.List(source + S.custom.style.apply.bold.Red(" : Shorthand recursion loop."), S.list.failed.Props(recursionPreview), S.list.failed.Waterfall, 1);
+                response.result = S.compose.std.List(source + S.custom.style.apply.bold.Red(" : Shorthand recursion loop."), S.list.failed.Props(recursionPreview), S.list.failed.Waterfall, 1);
                 return response
             },
             undefinedHash: (recursionPreview, cause) => {
                 response.status = false;
                 recursionPreview["ERROR BY"] = S.custom.style.apply.bold.Red(cause)
-                response.result = S.compose.standard.List(source + S.custom.style.apply.bold.Red(" : Undefined shorthand."), S.list.failed.Props(recursionPreview), S.list.failed.Waterfall, 1);
+                response.result = S.compose.std.List(source + S.custom.style.apply.bold.Red(" : Undefined shorthand."), S.list.failed.Props(recursionPreview), S.list.failed.Waterfall, 1);
                 return response
             }
         }

@@ -18,7 +18,7 @@ const clearPreviousCharacters = (characters) => {
 const refresh = (backRows, string = '') => {
     const rowsCreated = string.split('\n').length;
     clearPreviousLines(backRows);
-    if  (canvas.postActive) console.log(string);
+    if (canvas.postActive) console.log(string);
     return rowsCreated;
 }
 
@@ -66,14 +66,14 @@ const animation = {
             }, interval);
         });
     },
-    Rewrite: (backRows, string) => {
+    Rewrite: (string, backRows = 1) => {
         return refresh(backRows, string);
     },
-    Backrow: (lines) => {
+    Backrow: (lines = 1) => {
         clearPreviousLines(lines)
     },
-    Backspace: (lines) => {
-        clearPreviousCharacters(lines)
+    Backspace: (chars = 1) => {
+        clearPreviousCharacters(chars)
     }
 }
 

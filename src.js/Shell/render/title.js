@@ -15,7 +15,7 @@ export default (string) => {
         ...new Array(previewFrames * 2).fill([
             '', '',
             divider.mid,
-            '', ''
+            ''
         ]),
         ...new Array(previewFrames).fill([
             '',
@@ -59,5 +59,6 @@ export default (string) => {
         string = modifyString(string)
         renders.unshift(style.bold[canvas.title](blockType.Chapter(string, [])));
     }
-    return preview.concat(renders,);
+    
+    return preview.concat(renders);
 }

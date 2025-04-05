@@ -54,23 +54,35 @@ const appearance = {
     invertBoldDimItalicUline: 'invertBoldDimItalicUline'
 };
 
-const task = (string) => {
+const task = (string, rowshift = -1) => {
+    if (rowshift < 0) render.animation.Backrow(-rowshift)
     if (canvas.taskActive && canvas.postActive)
         console.log([
-            '\n',
+            (rowshift > 0) ? tag.Br(rowshift) : "",
             tag.Div(style.boldDim[canvas.primary]('>>>')),
             tab(),
-            tag.Div(style.boldItalic[canvas.tertiary](string + ' ...'))
+            tag.Div(style.boldItalic[canvas.tertiary](string + '.')),
+            tag.Br(1)
         ].join(''))
 }
-const step = (string) => {
+const step = (string, rowshift = -1) => {
+    if (rowshift < 0) render.animation.Backrow(-rowshift)
     if (canvas.taskActive && canvas.postActive)
         console.log([
+            (rowshift > 0) ? tag.Br(rowshift) : "",
             tag.Div(style.boldDim[canvas.primary]('>>>')),
             tab(),
             tag.Div(style.italic[canvas.tertiary](string + ' ...'))
         ].join(''))
 }
+const post = (string = "", customStyle = style.dim[canvas.text], customTag = tag.Div) => {
+    if (canvas.postActive) console.log(customStyle(customTag(
+        typeof (string) === 'string' ?
+            string :
+            JSON.stringify(string, null, 2)
+    )))
+}
+
 const head = (string, customStyle, pickTag) => {
     function hideHistory(numLinesToHide) {
         const cursorPos = process.stdout.rows - 1; // Go to last row
@@ -90,14 +102,6 @@ const head = (string, customStyle, pickTag) => {
     else
         console.log(customStyle(string))
 }
-const post = (string, customStyle = style.dim[canvas.text], customTag = tag.Div) => {
-    if (canvas.postActive) console.log(customStyle(customTag(
-        typeof (string) === 'string' ?
-            string :
-            JSON.stringify(string, null, 2)
-    )))
-}
-
 const custom = {
     tag,
     style: {
@@ -119,6 +123,6 @@ export default {
     TASK: task,
     STEP: step,
     POST: post,
-    HEAD: head,
+    // HEAD: head,
     WRITE: write
 }

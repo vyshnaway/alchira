@@ -4,18 +4,28 @@ import { fileURLToPath } from 'url';
 
 const FILEMAN = {
     path: {
-        ofRoot: () => path.resolve(fileURLToPath(import.meta.url), "../.."),
+        ofRoot: () => {
+            return path.resolve(fileURLToPath(import.meta.url), "../..")
+        },
         availability: async (pathString) => {
+            const result = { exist: false, type: null };
             try {
                 const stats = await fs.promises.stat(pathString);
-                return { exist: true, type: stats.isDirectory() ? "folder" : "file" };
+                result.exist = true;
+                result.type = stats.isDirectory() ? "folder" : "file";
             } catch (error) {
-                if (error.code !== 'ENOENT') console.error('Path check error:', error);
-                return { exist: false, type: null };
+                if (error.code !== 'ENOENT') {
+                    console.error('Path check error:', error);
+                }
             }
+            return result;
         },
-        ifFolder: async (pathString) => (await FILEMAN.path.availability(pathString)).type === "folder",
-        ifFile: async (pathString) => (await FILEMAN.path.availability(pathString)).type === "file",
+        ifFolder: async (pathString) => {
+            return (await FILEMAN.path.availability(pathString)).type === "folder";
+        },
+        ifFile: async (pathString) => {
+            return (await FILEMAN.path.availability(pathString)).type === "file";
+        },
         isAncestor: (ancestor, descendant) => {
             const relative = path.relative(ancestor, descendant);
             return !!relative && !relative.startsWith('..') && !path.isAbsolute(relative);
@@ -30,8 +40,9 @@ const FILEMAN = {
                         await fs.promises.unlink(pathToDelete);
                     }
                     return { success: true, message: 'Path deleted successfully.' };
+                } else {
+                    return { success: false, message: 'Path does not exist.' };
                 }
-                return { success: false, message: 'Path does not exist.' };
             } catch (error) {
                 console.error('Error deleting path:', error);
                 return { success: false, message: 'Error deleting path.' };
@@ -53,37 +64,50 @@ const FILEMAN = {
         return fileList;
     },
     cloneFolder: async (source, destination, ignoreFiles = []) => {
-        const copyRecursiveAsync = async (src, dest) => {
-            const stats = await fs.promises.stat(src);
-            if (stats.isDirectory()) {
-                await fs.promises.mkdir(dest, { recursive: true });
-                const children = await fs.promises.readdir(src);
-                for (const child of children) {
-                    const childSrc = path.join(src, child);
-                    const childDest = path.join(dest, child);
-                    if (!ignoreFiles.includes(childSrc)) {
-                        await copyRecursiveAsync(childSrc, childDest);
+        try {
+            if (!fs.existsSync(source)) {
+                throw new Error('Source folder does not exist.\n' + source);
+            }
+
+            const copyRecursiveAsync = async (src, dest) => {
+                const exists = fs.existsSync(src);
+                const stats = exists && (await fs.promises.stat(src));
+                const isDirectory = exists && stats.isDirectory();
+
+                if (isDirectory) {
+                    await fs.promises.mkdir(dest, { recursive: true });
+                    const children = await fs.promises.readdir(src);
+                    for (const childItemName of children) {
+                        const childSrcPath = path.join(src, childItemName);
+                        const childDestPath = path.join(dest, childItemName);
+                        if (!ignoreFiles.includes(childSrcPath)) {
+                            await copyRecursiveAsync(childSrcPath, childDestPath);
+                        }
+                    }
+                } else {
+                    if (!ignoreFiles.includes(src)) {
+                        await fs.promises.copyFile(src, dest);
                     }
                 }
-            } else if (!ignoreFiles.includes(src)) {
-                await fs.promises.copyFile(src, dest);
-            }
-        };
+            };
 
-        if (!fs.existsSync(source)) throw new Error('Source folder does not exist.\n' + source);
-        await copyRecursiveAsync(source, destination);
+            await copyRecursiveAsync(source, destination);
+        } catch (err) {
+            console.error(err);
+        }
     },
     safeCloneFolder: async (source, destination, ignoreFiles = []) => {
         const destinationFiles = fs.existsSync(destination)
             ? (await FILEMAN.getAllFiles(destination)).map(file => path.join(source, file.replace(destination, '')))
             : [];
-        await FILEMAN.cloneFolder(source, destination, [...ignoreFiles, ...destinationFiles]);
+        const updatedIgnoreFiles = [...ignoreFiles, ...destinationFiles];
+        await FILEMAN.cloneFolder(source, destination, updatedIgnoreFiles);
     },
     getFilesAndSync: async (target, extensions = [], source) => {
         const result = { fileContent: {}, syncMap: {} };
-        extensions = extensions.map(ext => '.' + ext);
+        extensions.map(ext => '.' + ext)
 
-        if (!source) {
+        if (source === undefined) {
             const files = await FILEMAN.getAllFiles(target);
             for (const file of files) {
                 if (extensions.includes(path.extname(file)) || extensions.length === 0) {
@@ -102,9 +126,11 @@ const FILEMAN = {
         const relativeTargetFiles = targetFiles.map(file => path.relative(target, file));
         const relativeSourceFiles = sourceFiles.map(file => path.relative(source, file));
 
+        // Delete excess files in source
         for (const file of relativeSourceFiles) {
             if (!relativeTargetFiles.includes(file)) {
-                await fs.promises.unlink(path.join(target, file));
+                const sourceFilePath = path.join(target, file);
+                await fs.promises.unlink(sourceFilePath);
             }
         }
 
@@ -119,7 +145,7 @@ const FILEMAN = {
                 if (!fs.existsSync(targetDirPath)) await fs.promises.mkdir(targetDirPath, { recursive: true });
             }
             if (extensions.includes(path.extname(file))) {
-                result.fileContent[sourceFilePath] = await fs.promises.readFile(targetFilePath, 'utf-8');
+                result.fileContent[path.join(source, file)] = await fs.promises.readFile(targetFilePath, 'utf-8');
             } else {
                 await fs.promises.copyFile(targetFilePath, sourceFilePath);
             }
@@ -135,6 +161,7 @@ const FILEMAN = {
             if (!fs.existsSync(sourceFolderPath)) continue;
             const relativeFolder = path.relative(target, sourceFolderPath);
             const targetFolderPath = path.join(source, relativeFolder);
+
             if (!fs.existsSync(targetFolderPath)) {
                 await fs.promises.rm(sourceFolderPath, { recursive: true, force: true });
             }
@@ -145,31 +172,38 @@ const FILEMAN = {
     writeToFile: async (filePath, content) => {
         try {
             const dir = path.dirname(filePath);
-            if (!fs.existsSync(dir)) await fs.promises.mkdir(dir, { recursive: true });
+            if (!fs.existsSync(dir)) {
+                await fs.promises.mkdir(dir, { recursive: true });
+            }
             await fs.promises.writeFile(filePath, content, 'utf8');
         } catch (err) {
             console.error(`Error writing to file ${filePath}:`, err);
         }
     },
     bulkWriteFiles: async (fileContentArray) => {
-        for (const [filePath, content] of fileContentArray) {
-            await FILEMAN.writeToFile(filePath, content);
+        for (const fileContent of fileContentArray) {
+            await FILEMAN.writeToFile(fileContent[0], fileContent[1]);
         }
     },
     JSON: {
         readData: async (pathString) => {
             try {
-                if (!fs.existsSync(pathString)) throw new Error(`File does not exist: ${pathString}`);
+                if (!fs.existsSync(pathString)) {
+                    throw new Error(`File does not exist: ${pathString}`);
+                }
                 const data = JSON.parse(await fs.promises.readFile(pathString, 'utf8'));
                 return { status: true, data };
-            } catch {
+            } catch (err) {
+                // console.error(`Error reading JSON data from ${filePath}:`, err);
                 return { status: false, data: null };
             }
         },
         writeFile: async (pathString, object) => {
             try {
                 const dir = path.dirname(pathString);
-                if (!fs.existsSync(dir)) await fs.promises.mkdir(dir, { recursive: true });
+                if (!fs.existsSync(dir)) {
+                    await fs.promises.mkdir(dir, { recursive: true });
+                }
                 await fs.promises.writeFile(pathString, JSON.stringify(object, null, 2), 'utf8');
             } catch (err) {
                 console.error(`Error writing JSON data to ${pathString}:`, err);
@@ -178,16 +212,18 @@ const FILEMAN = {
         fetchData: async (source) => {
             try {
                 const response = await fetch(source);
-                if (!response.ok) return { status: false, data: null };
+                if (!response.ok) {
+                    return { status: false, data: null };
+                }
                 const data = await response.json();
                 return { status: true, data };
-            } catch {
+            } catch (error) {
+                // console.error(`Error fetching JSON data from ${source}:`, error);
                 return { status: false, data: null };
             }
         }
     },
-    READ: (pathString) => fs.promises.readFile(pathString, 'utf8'),
-    JOIN: (pathString1, pathString2) => path.join(pathString1, pathString2)
-};
+    READ: async (pathString) => await fs.promises.readFile(pathString, 'utf8')
+}
 
 export default FILEMAN;
