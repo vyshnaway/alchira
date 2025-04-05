@@ -58,7 +58,7 @@ const task = (string, rowshift = -1) => {
     if (rowshift < 0) render.animation.Backrow(-rowshift)
     if (canvas.taskActive && canvas.postActive)
         console.log([
-            (rowshift > 0) ? tag.Br(rowshift) : "",
+            (rowshift >= 0) ? tag.Br(rowshift) : "",
             tag.Div(style.boldDim[canvas.primary]('>>>')),
             tab(),
             tag.Div(style.boldItalic[canvas.tertiary](string + '.')),
@@ -69,7 +69,7 @@ const step = (string, rowshift = -1) => {
     if (rowshift < 0) render.animation.Backrow(-rowshift)
     if (canvas.taskActive && canvas.postActive)
         console.log([
-            (rowshift > 0) ? tag.Br(rowshift) : "",
+            (rowshift >= 0) ? tag.Br(rowshift) : "",
             tag.Div(style.boldDim[canvas.primary]('>>>')),
             tab(),
             tag.Div(style.italic[canvas.tertiary](string + ' ...'))
@@ -111,8 +111,7 @@ const custom = {
         Reset: unstyle,
     },
     canvas,
-    animate: render.animate,
-    interval: render.interval,
+    render
 }
 
 export default {

@@ -38,6 +38,7 @@ const DATA = {
 }
 
 const NAV = {
+    status: false,
     path: ".",
     root: "/",
     agreements: "AGREEMENTS",
@@ -87,7 +88,7 @@ const NAV = {
 
         return NAV
     },
-    START: async (cmd) => {
+    START: async (CMD) => {
         await NAV.INIT();
         $.TASK("Verifying directory status")
 
@@ -95,7 +96,7 @@ const NAV = {
         const ifSetup = await FILEMAN.path.availability(NAV.project.setup);
         if (ifSetup.type === "folder") {
             await FILEMAN.safeCloneFolder(NAV.template.setup, NAV.project.setup);
-        } else if (!ifSetup.exist && cmd === "dev") {
+        } else if (!ifSetup.exist && CMD === "dev") {
             $.TASK("Initializing XCSS setup.")
             const modifyPackageJson = async (xcssPackageJsonPath, destPackageJsonPath) => {
                 const destJson = await FILEMAN.JSON.readData(destPackageJsonPath);
@@ -205,7 +206,7 @@ const NAV = {
         $.STEP("Path : " + NAV.project.vendorprefix)
         if (await FILEMAN.path.ifFile(NAV.project.vendorprefix)) {
             const current = await FILEMAN.JSON.readData(NAV.project.vendorprefix);
-            const latest = ["init", "preview", "build"].includes(cmd) ?
+            const latest = ["init", "build"].includes(CMD) ?
                 await FILEMAN.JSON.fetchData(APP.live.vendorprefixes) : { status: false, data: {} };
             let vendorprefixes = {
                 ...((latest.status && (typeof (latest.data) === "object")) ? latest.data : {}),
@@ -216,7 +217,7 @@ const NAV = {
                 if (Array.isArray(vendorprefixes[prefix])) DATA.vendorprefix[prefix] = vendorprefixes[prefix];
             }
 
-            if ("init" === cmd) {
+            if ("init" === CMD) {
                 if (current.status && latest.status) {
                     $.TASK("Updating vendor-prefixes.json")
                     FILEMAN.JSON.writeFile(NAV.project.vendorprefix, vendorprefixes)
@@ -286,36 +287,48 @@ const NAV = {
             return false;
         }
 
-        $.STEP("Path : " + NAV.project.source)
-        if (!(await FILEMAN.path.ifFolder(NAV.project.source))) {
-            $.WRITE.failed.Footer("Path error : " + NAV.project.source, ["Folder expected."], $.list.failed.Bullets)
-            return false;
-        }
-
-        $.STEP("Path : " + NAV.project.target)
-        const targetIf = await FILEMAN.path.availability(NAV.project.target);
-        if (!targetIf.exist) {
-            $.STEP("Creating target folder")
-            FILEMAN.safeCloneFolder(NAV.project.source, NAV.project.target)
-        } else if (targetIf.type !== "folder") {
-            $.WRITE.failed.Footer("Path error : " + NAV.project.refers, ["Folder expected."], $.list.failed.Bullets)
-            return false;
-        } else {
-            const files = await FILEMAN.getFilesAndSync(NAV.project.target, NAV.project.extensions, NAV.project.source);
-            DATA.files = files.fileContent;
-            FILEMAN.JSON.writeFile(NAV.project.syncmap, files.syncMap)
-        }
-
-        $.STEP("Path : " + NAV.project.stylesheet)
-        if (await FILEMAN.path.ifFile(NAV.project.stylesheet)) {
-            DATA.originstyle.stylesheet = await FILEMAN.READ(NAV.project.stylesheet);
-        } else {
-            $.WRITE.failed.Footer("Path error : " + NAV.project.stylesheet)
-            return false;
-        }
+        
         $.TASK("Verified all files")
+        NAV.status = await NAV.FETCH();
+        return NAV.status;
+    },
+    FETCH: async () => {
+        if (NAV.status) {
+            $.STEP("Path : " + NAV.project.source)
+            if (!(await FILEMAN.path.ifFolder(NAV.project.source))) {
+                $.WRITE.failed.Footer("Path error : " + NAV.project.source, ["Folder expected."], $.list.failed.Bullets)
+                return false;
+            }
 
-        return true;
+            $.STEP("Path : " + NAV.project.target)
+            const targetIf = await FILEMAN.path.availability(NAV.project.target);
+            if (!targetIf.exist) {
+                $.STEP("Creating target folder")
+                await FILEMAN.safeCloneFolder(NAV.project.source, NAV.project.target)
+                const files = await FILEMAN.getFilesAndSync(NAV.project.target, NAV.project.extensions, NAV.project.source);
+                DATA.files = files.fileContent;
+                FILEMAN.JSON.writeFile(NAV.project.syncmap, files.syncMap)
+            } else if (targetIf.type !== "folder") {
+                $.WRITE.failed.Footer("Path error : " + NAV.project.refers, ["Folder expected."], $.list.failed.Bullets)
+                return false;
+            } else {
+                const files = await FILEMAN.getFilesAndSync(NAV.project.target, NAV.project.extensions, NAV.project.source);
+                DATA.files = files.fileContent;
+                FILEMAN.JSON.writeFile(NAV.project.syncmap, files.syncMap)
+            }
+
+            $.STEP("Path : " + NAV.project.stylesheet)
+            if (await FILEMAN.path.ifFile(NAV.project.stylesheet)) {
+                DATA.originstyle.stylesheet = await FILEMAN.READ(NAV.project.stylesheet);
+            } else {
+                $.WRITE.failed.Footer("Path error : " + NAV.project.stylesheet)
+                return false;
+            }
+            $.TASK("Collected latest files")
+            return true
+        } else {
+            return false
+        }
     }
 };
 
@@ -330,33 +343,50 @@ const commander = async (args) => {
             break;
         case 'dev':
             $.POST($.compose.std.Chapter(APP.name + ' : Active Runtime'));
-            if (await NAV.START(CMD)) EXECUTOR(DATA, CMD);
-            WATCHDOG([NAV.project.target, NAV.project.setup], async (DATA, CMD) => {
-                if (await NAV.START(CMD)) await EXECUTOR(DATA, CMD);
-            });
-
-            $.WRITE.failed.Section("Press Ctrl+C to stop watching.")
-            process.on('SIGINT', () => {
-                $.WRITE.primary.Footer("Terminated Command.")
-                process.exit(0);
-            });
+            if (await NAV.START(CMD)) {
+                EXECUTOR(DATA, CMD);
+                $.WRITE.primary.Section(new Date())
+                WATCHDOG([NAV.project.setup], async () => {
+                    NAV.status = false;
+                    if (await NAV.FETCH(CMD)) {
+                        await EXECUTOR(DATA, CMD);
+                        $.WRITE.success.Footer("Build Success.")
+                    } else $.WRITE.failed.Footer("Build Failed.")
+                });
+                WATCHDOG([NAV.project.target], async () => {
+                    if (await NAV.FETCH(CMD)) {
+                        await EXECUTOR(DATA, CMD);
+                        $.WRITE.success.Footer("Build Success.")
+                    } else $.WRITE.failed.Footer("Build Failed.")
+                });
+                process.on('SIGINT', () => {
+                    $.custom.render.animation.Backrow(),
+                        $.POST()
+                    $.WRITE.primary.Footer("Command Terminated.")
+                    process.exit(0);
+                });
+                $.WRITE.failed.Footer("Press Ctrl+C to stop watching.")
+            }
             break;
         case 'preview':
             $.POST($.compose.std.Chapter(APP.name + ' : Preview Build'));
-            if (await NAV.START(CMD)) await EXECUTOR(DATA, CMD);
-            $.WRITE.primary.Footer("Command Success")
+            if (await NAV.FETCH(CMD)) {
+                await EXECUTOR(DATA, CMD);
+                $.WRITE.primary.Footer("Command Success")
+            }
             break;
         case 'build':
             $.POST($.compose.std.Chapter(APP.name + ' : Build Project'));
-            if (await NAV.START(CMD)) await EXECUTOR(DATA, CMD, KEY);
-            $.WRITE.primary.Footer("Command Success")
+            if (await NAV.FETCH(CMD)) {
+                await EXECUTOR(DATA, CMD, KEY);
+                $.WRITE.primary.Footer("Command Success")
+            }
             break;
         default:
             $.POST()
             $.WRITE.std.Section(`${APP.command} @ ` + APP.version, APP.commandList, $.list.std.Props)
             $.WRITE.std.Footer('Available Commands.')
     }
-
 }
 
 export default commander;
