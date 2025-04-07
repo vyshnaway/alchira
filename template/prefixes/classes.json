@@ -1,0 +1,41 @@
+{
+    ":active": [],
+    ":checked": [],
+    ":disabled": [],
+    ":empty": [],
+    ":enabled": [],
+    ":first-child": [],
+    ":first-of-type": [],
+    ":focus": [],
+    ":hover": [],
+    ":in-range": [],
+    ":invalid": [],
+    ":lang()": [],
+    ":last-child": [],
+    ":last-of-type": [],
+    ":link": [],
+    ":not()": [],
+    ":nth-child()": [],
+    ":nth-last-child()": [],
+    ":nth-last-of-type()": [],
+    ":nth-of-type()": [],
+    ":only-child": [],
+    ":only-of-type": [],
+    ":optional": [],
+    ":out-of-range": [],
+    ":read-only": [],
+    ":read-write": [],
+    ":required": [],
+    ":root": [],
+    ":target": [],
+    ":valid": [],
+    ":visited": [],
+    ":fullscreen": [
+        ":-webkit-full-screen",
+        ":-moz-full-screen",
+        ":-ms-fullscreen"
+    ],
+    ":selection": [
+        ":-moz-selection"
+    ]
+}

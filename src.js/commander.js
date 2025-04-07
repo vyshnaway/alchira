@@ -15,10 +15,13 @@ const APP = {
         build: 'Build minified.'
     },
     live: {
-        vendorprefixes: "https://xcdn.xpktr.com/xcss/library/vendor-prefixes.json",
+        atrules: "https://xcdn.xpktr.com/xcss/library/prefixes/atrules.json",
+        classes: "https://xcdn.xpktr.com/xcss/library/prefixes/classes.json",
+        elements: "https://xcdn.xpktr.com/xcss/library/prefixes/elements.json",
+        properties: "https://xcdn.xpktr.com/xcss/library/prefixes/properties.json",
         agreements: "https://xcdn.xpktr.com/xcss/agreements-txt/index.json",
         build: "https://workers.xpktr.com/api/xcss-build-request",
-        console: "https://console.xpktr.com/",
+        console: "https://console.xpktr.com/"
     }
 };
 
@@ -39,25 +42,31 @@ const DATA = {
 
 const NAV = {
     status: false,
-    path: ".",
-    root: "/",
     agreements: "AGREEMENTS",
-    template: {
-        setup: "templates/xtyles",
-        refer: "templates/refers"
+    root: {
+        root: "/",
+        setup: "template/xtyles",
+        refer: "template/refers",
+        atrules: "template/prefixes/atrules.json",
+        classes: "template/prefixes/classes.json",
+        elements: "template/prefixes/elements.json",
+        properties: "template/prefixes/properties.json",
+
+    },
+    setup: {
+        path: "xtyles/",
+        cache: "xtyles/.cache",
+        syncmap: "xtyles/.cache/sync-map.json",
+        styleslist: "xtyles/.caches/tyles-list.json",
+        refers: "xtyles/references",
+        atrules: "xtyles/#at-rules.css",
+        constants: "xtyles/#constants.css",
+        elements: "xtyles/#tag-styles.css",
+        extends: "xtyles/#extends.css",
+        configure: "xtyles/configure.json",
+        shorthand: "xtyles/short-hands.json", 
     },
     project: {
-        setup: "xtyles",
-        cache: ".cache",
-        syncmap: "sync-map.json",
-        styleslist: "styles-list.json",
-        refers: "references",
-        atrules: "#at-rules.css",
-        constants: "#constants.css",
-        tagstyles: "#tag-styles.css",
-        configure: "configure.json",
-        shorthand: "short-hands.json",
-        vendorprefix: "vendor-prefix.json",
         source: "",
         target: "",
         stylesheet: "",
@@ -128,11 +137,16 @@ const NAV = {
                 "To create production build": $.custom.style.apply.bold.White("xcss build") + $.custom.style.Reset
             }, $.list.std.Props)
 
-            $.WRITE.std.Footer("Build command instructions.", [
-                "Create a new project and use its access key. For action visit " + $.custom.style.apply.bold.Orange((APP.live.console)),
-                "For personal projects you can use key in " + $.custom.style.apply.bold.Orange(NAV.project.configure),
-                "If you are using it in CI/CD workflow it is suggested to use as " + $.custom.style.apply.bold.Orange("xcss build {key}"),
-            ], $.list.std.Bullets)
+            $.WRITE.std.Footer("Build command instructions.", APP.version.startsWith("0") ?
+                [
+                    "This command uses internet connection."
+                ] :
+                [
+                    "Create a new project and use its access key. For action visit " + $.custom.style.apply.bold.Orange((APP.live.console)),
+                    "For personal projects you can use key in " + $.custom.style.apply.bold.Orange(NAV.project.configure),
+                    "If you are using it in CI/CD workflow it is suggested to use as " + $.custom.style.apply.bold.Orange("xcss build {key}"),
+                ]
+                , $.list.std.Bullets)
             return false;
         } else {
             $.WRITE.failed.Footer("Path error : " + NAV.project.setup, ["Folder expected."], $.list.failed.Bullets)
@@ -287,7 +301,7 @@ const NAV = {
             return false;
         }
 
-        
+
         $.TASK("Verified all files")
         NAV.status = await NAV.FETCH();
         return NAV.status;

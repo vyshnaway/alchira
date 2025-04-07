@@ -1,0 +1,29 @@
+{
+    "charset": [],
+    "counter-style": [
+        "@-moz-counter-style"
+    ],
+    "document": [
+        "@-moz-document"
+    ],
+    "font-face": [],
+    "font-feature-values": [
+        "@-moz-font-feature-values",
+        "@-webkit-font-feature-values"
+    ],
+    "import": [],
+    "keyframes": [
+        "@-webkit-keyframes",
+        "@-moz-keyframes",
+        "@-ms-keyframes",
+        "@-o-keyframes"
+    ],
+    "media": [],
+    "namespace": [],
+    "page": [],
+    "supports": [],
+    "viewport": [
+        "@-ms-viewport",
+        "@-o-viewport"
+    ]
+}
