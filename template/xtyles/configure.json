@@ -1,9 +1,0 @@
-{
-    "source": "src",
-    "target": "xrc",
-    "stylesheet": "assets/styles/global.css",
-    "extensions": [
-        "html"
-    ],
-    "key": ""
-}

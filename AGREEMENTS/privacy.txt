@@ -1,0 +1,66 @@
+XPKTR LABS PRIVACY POLICY FOR XCSS
+
+Effective Date: March 20, 2025
+
+XPKTR Labs ("We," "Us") respects your privacy while providing XCSS (Xtensible Cascading Style Sheet). This Privacy Policy explains how we collect, use, and protect your data.
+
+1. DATA WE COLLECT
+
+USER PROFILE INFORMATION
+
+    • Email address and username
+    • Organization name (if applicable)
+    • Billing information for licensed features
+
+PROPRIETARY FEATURES USAGE METRICS
+
+For users of Proprietary Features (e.g., xcss build), we collect:
+
+    • Command usage frequency and patterns
+    • Build configuration settings
+    • Resource utilization metrics
+    • Project ID and Access Key metadata
+    • Error logs and debugging information
+
+SYSTEM INFORMATION
+
+    • Operating system and version
+    • Node.js version
+    • XCSS CLI version
+
+COMMUNITY CONTRIBUTIONS
+
+Feedback or examples shared via [github.com/yshell-dev/xcss-online] or [xcss@xpktr.com]
+
+NO PREVIEW DATA
+
+The Preview Command (e.g., xcss preview) does not collect usage metrics
+
+2. HOW WE USE YOUR DATA
+
+    • To provide and maintain XCSS services
+    • To monitor and improve performance and reliability
+    • To analyze usage patterns for feature optimization
+    • To enforce license agreements and usage limits
+    • To provide technical support and troubleshooting
+    • To communicate product updates and changes
+    • Data is not sold or shared with third parties, except as required by law
+
+3. DATA PROTECTION
+
+    • We use secure storage and encryption for Access Keys and metrics.
+    • Access is limited to authorized XPKTR Labs personnel.
+
+4. YOUR RIGHTS
+
+    • Request access to or deletion of your data by contacting [xcss@xpktr.com].
+    • Opt out of metrics collection by not using Proprietary Features.
+
+5. CHANGES
+
+    • We may update this policy, with notice via [xcss.xpktr.com].
+
+6. CONTACT
+
+    • Email: xcss@xpktr.com
+    • Address: XPKTR Labs, Kerala, India
