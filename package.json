@@ -1,7 +1,7 @@
 {
   "name": "xcss",
   "description": "A lazy way to write luxurious CSS.",
-  "version": "0.1.0",
+  "version": "0.0.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/yshell-dev/xcss-online"
@@ -29,7 +29,7 @@
   },
   "author": "Yshell.dev",
   "license": "SEE LICENSE IN AGREEMENTS/LICENSE.md",
-  "homepage": "xcss.xpktr.com",
+  "homepage": "https://xcss.xpktr.com/",
   "keywords": [
     "css",
     "xcss",

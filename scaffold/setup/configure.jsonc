@@ -6,7 +6,7 @@
         "html"
     ],
     "shorthands": {
-        "DesignApproach": "#MobileFirst"
-        // Approach: Switch between #MobileFirst and #DesktopFirst
+        // "DesignApproach": "#DesktopFirst"
+        // Switch between #MobileFirst and #DesktopFirst
     }
 }

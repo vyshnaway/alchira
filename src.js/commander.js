@@ -1,363 +1,306 @@
-import $ from '../src.as/Shell/index.js';
+import $ from './Shell/index.js';
 import EXECUTOR from './executor.js';
-import FILEMAN from './fileman.js';
+import FILEMAN, { CSSImport } from './fileman.js';
 import WATCHDOG from './watchdog.js';
 
+const PACKAGE = (await FILEMAN.READ.json(FILEMAN.PATH.fromRoot("package.json"))).data
+// console.log(PACKAGE)
+
 const APP = {
-    name: "XCSS",
-    package: "xpktr-css",
-    command: "xcss",
-    version: '0.1.0',
+    name: PACKAGE.name,
+    version: PACKAGE.version,
+    website: PACKAGE.homepage,
+    command: Object.keys(PACKAGE.bin),
+    console: "https://console.xpktr.com/",
+    content: "https://xcdn.xpktr.com/xcss/version/" + PACKAGE.version.split(".")[0],
     commandList: {
         init: 'Initiate or Update & Verify setup.',
         dev: 'Live build for dev environment',
         preview: 'Fast build, preserves class names.',
         build: 'Build minified.'
     },
-    agreements: {
-        LICENSE: 'license.txt',
-        TERMS: 'terms.txt',
-        PRIVACY: 'privacy.txt',
-    },
 };
-
+// console.log(APP)
+const LIVE = {
+    DOCS: {
+        readme: {
+            title: "README",
+            url: APP.content + "/readme.md",
+            path: FILEMAN.PATH.fromRoot("readme.md")
+        },
+        alerts: {
+            title: "ALERTS",
+            url: APP.content + "/alerts.md",
+            path: FILEMAN.PATH.fromRoot("alerts.md")
+        },
+    },
+    AGREEMENT: {
+        license: {
+            title: "LICENSE",
+            url: APP.content + "/agreements-txt/license.txt",
+            path: FILEMAN.PATH.fromRoot('AGREEMENTS/license.txt')
+        },
+        terms: {
+            title: "TERMS & CONDITIONS",
+            url: APP.content + "/agreements-txt/terms.txt",
+            path: FILEMAN.PATH.fromRoot('AGREEMENTS/terms.txt')
+        },
+        privacy: {
+            title: "PRIVACY POLICY",
+            url: APP.content + "/agreements-txt/privacy.txt",
+            path: FILEMAN.PATH.fromRoot('AGREEMENTS/privacy.txt')
+        },
+    },
+    PREFIX: {
+        atrules: {
+            url: APP.content + "/prefixes/atrules.json",
+            path: FILEMAN.PATH.fromRoot("scaffold/prefix/atrules.json")
+        },
+        classes: {
+            url: APP.content + "/prefixes/classes.json",
+            path: FILEMAN.PATH.fromRoot("scaffold/prefix/classes.json")
+        },
+        elements: {
+            url: APP.content + "/prefixes/elements.json",
+            path: FILEMAN.PATH.fromRoot("scaffold/prefix/elements.json")
+        },
+        properties: {
+            url: APP.content + "/prefixes/properties.json",
+            path: FILEMAN.PATH.fromRoot("scaffold/prefix/properties.json")
+        },
+    },
+}
+// console.log(SYNC)
 const NAV = {
-    status: false,
-    agreements: "AGREEMENTS",
     scaffold: {
-        path: "scaffold",
-        setup: "scaffold/xtyles",
-        refers: "scaffold/refers",
-        prefix: "scaffold/prefix"
+        setup: FILEMAN.PATH.fromRoot("scaffold/setup"),
+        refers: FILEMAN.PATH.fromRoot("scaffold/refers")
     },
-    prefix: {
-        atrules: "scaffold/prefix/atrules.json",
-        classes: "scaffold/prefix/classes.json",
-        elements: "scaffold/prefix/elements.json",
-        properties: "scaffold/prefix/properties.json",
-    },
-    setup: {
-        path: "xtyles/",
+    folder: {
+        setup: "xtyles/",
         cache: "xtyles/.cache",
-        syncmap: "xtyles/.cache/sync-map.json",
-        styleslist: "xtyles/.caches/styles-list.json",
         refers: "xtyles/references",
+    },
+    css: {
         atrules: "xtyles/#at-rules.css",
         constants: "xtyles/#constants.css",
         elements: "xtyles/#elements.css",
         extends: "xtyles/#extends.css",
-        configure: "xtyles/configure.json",
-        shorthand: "xtyles/short-hands.json",
     },
-    project: {
-        source: "",
-        target: "",
-        stylesheet: "",
-        key: "",
-        extensions: [],
-    },
-}
-
-const LIVE = {
-    xcdn: "https://xcdn.xpktr.com/",
-    console: "https://console.xpktr.com/",
-    agreements: "https://xcdn.xpktr.com/xcss/agreements-txt/index.json",
-    prefix: {
-        classes: "https://xcdn.xpktr.com/xcss/library/prefixes/classes.json",
-        atrules: "https://xcdn.xpktr.com/xcss/library/prefixes/atrules.json",
-        elements: "https://xcdn.xpktr.com/xcss/library/prefixes/elements.json",
-        properties: "https://xcdn.xpktr.com/xcss/library/prefixes/properties.json",
+    json: {
+        configure: "xtyles/configure.jsonc",
+        shorthand: "xtyles/shorthand.jsonc",
+        syncmap: "xtyles/.cache/sync-map.json",
+        styleslist: "xtyles/.cache/styles-list.json",
     }
 }
-
+// console.log(NAV)
 const DATA = {
-    key: "",
-    stylePath: "",
-    shorthand: {},
-    stylesheet: {
-        // prefix: "",
-        // suffix: ""
+    PREFIX: {}
+};
+const ACTION = {
+    FetchDocs: async () => {
+        const readmeMd = FILEMAN.SYNC.file(LIVE.DOCS.readme.url, LIVE.DOCS.readme.path);
+        const alertsMd = FILEMAN.SYNC.file(LIVE.DOCS.alerts.url, LIVE.DOCS.alerts.path);
+        const license = FILEMAN.SYNC.file(LIVE.AGREEMENT.license.url, LIVE.AGREEMENT.license.path);
+        const terms = FILEMAN.SYNC.file(LIVE.AGREEMENT.terms.url, LIVE.AGREEMENT.terms.path);
+        const privacy = FILEMAN.SYNC.file(LIVE.AGREEMENT.privacy.url, LIVE.AGREEMENT.privacy.path);
+
+        LIVE.DOCS.readme.content = await readmeMd;
+        LIVE.DOCS.alerts.content = await alertsMd;
+        LIVE.AGREEMENT.license.content = await license;
+        LIVE.AGREEMENT.terms.content = await terms;
+        LIVE.AGREEMENT.privacy.content = await privacy;
     },
-    prefix: {
-        // atrules: {},
-        // classes: {},
-        // elements: {},
-        // properties: {}
+    FetchPrefix: async () => {
+        $.TASK("Loading vendor-prefixes", 0)
+
+        const classes = FILEMAN.SYNC.json(LIVE.PREFIX.classes.url, LIVE.PREFIX.classes.path);
+        const atrules = FILEMAN.SYNC.json(LIVE.PREFIX.atrules.url, LIVE.PREFIX.atrules.path);
+        const elements = FILEMAN.SYNC.json(LIVE.PREFIX.elements.url, LIVE.PREFIX.elements.path);
+        const properties = FILEMAN.SYNC.json(LIVE.PREFIX.properties.url, LIVE.PREFIX.properties.path);
+
+        DATA.PREFIX.classes = await classes
+        DATA.PREFIX.atrules = await atrules
+        DATA.PREFIX.elements = await elements
+        DATA.PREFIX.properties = await properties
     },
-    refers: {},
-    files: {},
-}
+    Initialize: async () => {
+        try {
+            $.TASK("Initializing XCSS setup.", 0);
 
-async function initialize(cmd) {
-    $.TASK("Initializing navigaiton", 0)
-    const root = FILEMAN.path.ofRoot();
+            $.TASK('Cloning scaffold to Project');
+            await FILEMAN.CLONE.safe(NAV.scaffold.setup, NAV.folder.setup);
+            await FILEMAN.CLONE.safe(NAV.scaffold.refers, NAV.folder.refers);
 
-    NAV.agreements = FILEMAN.JOIN(root, NAV.agreements)
-
-    NAV.scaffold.path = FILEMAN.JOIN(root, NAV.scaffold.path);
-    NAV.scaffold.setup = FILEMAN.JOIN(root, NAV.scaffold.setup);
-    NAV.scaffold.refers = FILEMAN.JOIN(root, NAV.scaffold.refers);
-
-    for (const agreement in NAV.prefix)
-        NAV.prefix[agreement] = FILEMAN.JOIN(root, NAV.prefix[agreement]);
-
-    for (const agreement in APP.agreements)
-        APP.agreements[agreement] = FILEMAN.JOIN(NAV.agreements, agreement);
-
-    $.TASK("Updating Vendor Prefixes")
-    await Promise.all(Object.keys(NAV.prefix).map(async source => {
-        const latest = ["init", "build"].includes(cmd) ?
-            await FILEMAN.JSON.fetchData(LIVE.prefix[source]) : { status: false, data: {} };
-        const current = (latest.status && (typeof (latest.data) === "object")) ?
-            { status: false, data: {} } : await FILEMAN.JSON.readData(NAV.prefix[source]);
-        DATA.prefix[source] = (current.status) ? current.data : latest.data;
-        if (latest.status && cmd !== "build") {
-            await FILEMAN.JSON.writeFile(NAV.prefix[source], DATA.prefix[source]);
-        }
-    }));
-
-    if(cmd === "init"){
-        $.TASK("Updating Agreements")
-        const agreements = await FILEMAN.JSON.fetchData(LIVE.agreements);
-        if (agreements.status) {
-            await Promise.all(agreements.data.files.map(async file => {
-                const agreement = await fetch(LIVE.xcdn + file.path);
-                if (agreement.ok)
-                    FILEMAN.writeToFile(FILEMAN.JOIN(NAV.agreements, file.name), await agreement.text());
-            }))
-        }
-    }
-}
-
-async function verify(CMD) {
-    await initialize();
-    $.TASK("Verifying directory status")
-
-    $.STEP("Path : " + NAV.setup.setup)
-    const ifSetup = await FILEMAN.path.availability(NAV.setup.setup);
-    if (ifSetup.type === "folder") {
-        await FILEMAN.safeCloneFolder(NAV.scaffold.setup, NAV.setup.setup);
-    } else if (!ifSetup.exist && CMD === "dev") {
-        $.TASK("Initializing XCSS setup.")
-        const modifyPackageJson = async (xcssPackageJsonPath, destPackageJsonPath) => {
-            const destJson = await FILEMAN.JSON.readData(destPackageJsonPath);
-            const xcssJson = await FILEMAN.JSON.readData(xcssPackageJsonPath);
-            destJson.data.scripts[`${APP.command}:install`] = `npm install -g ${APP.package}`;
-            for (const key of ["init", "dev", "preview", "build"])
-                if (xcssJson.data.scripts.hasOwnProperty(key))
-                    destJson.data.scripts[`${APP.command}:${key}`] = xcssJson.data.scripts[key];
-            await FILEMAN.JSON.writeFile(destPackageJsonPath, destJson.data)
-        }
-
-        const xcssPackageJasonPath = FILEMAN.JOIN(NAV.scaffold, 'package.json');
-        const destPackageJsonPath = FILEMAN.JOIN(NAV.path, 'package.json');
-
-        $.TASK(`Cloning scaffold to : ${NAV.path} `)
-        await FILEMAN.safeCloneFolder(NAV.scaffold.setup, NAV.setup.setup);
-        await FILEMAN.safeCloneFolder(NAV.scaffold.refers, NAV.setup.refers);
-
-        if (await FILEMAN.path.ifFile(destPackageJsonPath)) {
-            $.TASK('Adding additional scripts to project');
-            await modifyPackageJson(xcssPackageJasonPath, destPackageJsonPath)
-        }
-
-        $.WRITE.std.Section("XCSS Initalized.", {
-            "Configure file": NAV.setup.configure,
-            "To verify run ": $.custom.style.apply.bold.White("xcss start") + $.custom.style.Reset,
-            "To start dev environment": $.custom.style.apply.bold.White("xcss dev") + $.custom.style.Reset,
-            "To create preview build": $.custom.style.apply.bold.White("xcss preview") + $.custom.style.Reset,
-            "To create production build": $.custom.style.apply.bold.White("xcss build") + $.custom.style.Reset
-        }, $.list.std.Props)
-
-        $.WRITE.std.Footer("Build command instructions.", APP.version.startsWith("0") ?
-            [
-                "This command uses internet connection."
-            ] :
-            [
-                "Create a new project and use its access key. For action visit " + $.custom.style.apply.bold.Orange((LIVE.console)),
-                "For personal projects you can use key in " + $.custom.style.apply.bold.Orange(NAV.setup.configure),
-                "If you are using it in CI/CD workflow it is suggested to use as " + $.custom.style.apply.bold.Orange("xcss build {key}"),
-            ]
-            , $.list.std.Bullets)
-        return false;
-    } else {
-        $.WRITE.failed.Footer("Path error : " + NAV.setup.setup, ["Folder expected."], $.list.failed.Bullets)
-        return false;
-    }
-
-    $.STEP("Path : " + NAV.setup.cache)
-    if (!(await FILEMAN.path.ifFolder(NAV.setup.cache))) {
-        $.WRITE.failed.Footer("Path error : " + NAV.setup.cache, ["Folder expected."], $.list.failed.Bullets)
-        return false;
-    }
-
-    $.STEP("Path : " + NAV.setup.syncmap)
-    if (!(await FILEMAN.path.ifFile(NAV.setup.syncmap))) {
-        $.WRITE.failed.Footer("Path error : " + NAV.setup.syncmap, ["File expected."], $.list.failed.Bullets)
-        return false;
-    }
-
-    $.STEP("Path : " + NAV.setup.styleslist)
-    if (!(await FILEMAN.path.ifFile(NAV.setup.styleslist))) {
-        $.WRITE.failed.Footer("Path error : " + NAV.setup.styleslist, ["File expected."], $.list.failed.Bullets)
-        return false;
-    }
-
-    $.STEP("Path : " + NAV.setup.atrules)
-    if (await FILEMAN.path.ifFile(NAV.setup.atrules)) {
-        DATA.originstyle.atrules = await FILEMAN.READ(NAV.setup.atrules);
-    } else {
-        $.WRITE.failed.Footer("Path error : " + NAV.setup.atrules, ["File expected."], $.list.failed.Bullets)
-        return false;
-    }
-
-    $.STEP("Path : " + NAV.setup.constants)
-    if (await FILEMAN.path.ifFile(NAV.setup.constants)) {
-        DATA.originstyle.constants = await FILEMAN.READ(NAV.setup.constants);
-    } else {
-        $.WRITE.failed.Footer("Path error : " + NAV.setup.constants, ["File expected."], $.list.failed.Bullets)
-        return false;
-    }
-
-    $.STEP("Path : " + NAV.setup.tagstyles)
-    if (await FILEMAN.path.ifFile(NAV.setup.tagstyles)) {
-        DATA.originstyle.tagstyles = await FILEMAN.READ(NAV.setup.tagstyles);
-    } else {
-        $.WRITE.failed.Footer("Path error : " + NAV.setup.tagstyles, ["File expected."], $.list.failed.Bullets)
-        return false;
-    }
-
-    $.STEP("Path : " + NAV.setup.refers)
-    if (await FILEMAN.path.ifFolder(NAV.setup.refers)) {
-        DATA.refers = (await FILEMAN.getFilesAndSync(NAV.setup.refers, ["css"])).fileContent;
-    } else {
-        $.WRITE.failed.Footer("Path error : " + NAV.setup.refers, ["Folder expected."], $.list.failed.Bullets)
-        return false;
-    }
-
-    $.STEP("Path : " + NAV.setup.shorthand)
-    if (await FILEMAN.path.ifFile(NAV.setup.shorthand)) {
-        const shorthands = await FILEMAN.JSON.readData(NAV.setup.shorthand);
-        if (shorthands.status && typeof (shorthands.data) === "object") {
-            DATA.shorthand = {};
-            for (const tag in shorthands.data) {
-                if (typeof (shorthands.data[tag]) === "string") DATA.shorthand[tag] = shorthands.data[tag];
-            }
-        } else $.WRITE.failed.Footer("JSON ERROR : " + NAV.setup.shorthand)
-    } else {
-        $.WRITE.failed.Footer("Path error : " + NAV.setup.shorthand, ["File expected."], $.list.failed.Bullets)
-        return false;
-    }
-
-    $.STEP("Path : " + NAV.setup.configure)
-    if (await FILEMAN.path.ifFile(NAV.setup.configure)) {
-        const configure = await FILEMAN.JSON.readData(NAV.setup.configure);
-        if (configure.status) {
-            const errors = []
-
-            if (typeof (configure.data.source) === 'string') {
-                NAV.setup.source = configure.data.source;
-            } else {
-                errors.push('Entry: "source" must be of type string.')
+            if (await FILEMAN.PATH.ifFile('package.json')) {
+                $.TASK('Adding additional scripts to project');
+                const destJson = await FILEMAN.READ.json("./package.json");
+                destJson.data.scripts[`${APP.command}:install`] = `npm install -g ${APP.name}`;
+                for (const key of Object.keys(APP.commandList)) {
+                    if (PACKAGE.scripts[key]) {
+                        destJson.data.scripts[`${APP.command}:${key}`] = PACKAGE.scripts[key];
+                    }
+                }
+                await FILEMAN.WRITE.json("./package.json", destJson.data);
             }
 
-            if (typeof (configure.data.target) === 'string') {
-                NAV.setup.target = configure.data.target;
-            } else {
-                errors.push('Entry: "target" must be of type string.')
-            }
-
-            if (typeof (configure.data.stylesheet) === 'string') {
-                NAV.setup.stylesheet = FILEMAN.JOIN(configure.data.target, configure.data.stylesheet);
-                DATA.stylePath = FILEMAN.JOIN(configure.data.source, configure.data.stylesheet);
-            } else {
-                errors.push('Entry: "stylesheet" must be of type string.')
-            }
-
-            if (typeof (configure.data.key) === 'string' || configure.data.key === undefined) {
-                DATA.key = configure.data.key ?? '';
-            } else {
-                errors.push('Entry: "key" must be of type string or undefined.')
-            }
-
-            if (Array.isArray(configure.data.extensions)) {
-                configure.data.extensions.forEach(ext => {
-                    if (typeof (ext) === "string") NAV.setup.extensions.push(ext)
-                });
-            } else {
-                errors.push('Entry: "extensions" must be of type array.')
-            }
-
-            if (FILEMAN.path.isAncestor(NAV.setup.source, NAV.setup.target) || FILEMAN.path.isAncestor(NAV.setup.target, NAV.setup.source)) {
-                errors.push('Source and Target folders must be independent.')
-            }
-
-            if (errors.length) {
-                $.WRITE.failed.Footer("Errors in definition", errors, $.list.failed.Bullets)
-                return false
-            }
-        } else $.WRITE.failed.Item("SYNTAX ERROR: Unable to read JSON data.")
-    } else {
-        $.WRITE.failed.Footer("Path error : " + NAV.setup.configure, ["File expected."], $.list.failed.Bullets)
-        return false;
-    }
+            $.WRITE.std.Section("Next Steps", [
+                'Adjust ' + $.custom.style.apply.bold.Orange(NAV.json.configure) + $.custom.style.Reset + ' according to the requirements of your project.',
+                'Execute ' + $.custom.style.apply.bold.Orange('"init"') + $.custom.style.Reset + ' again to generate the necessary configuration folders.',
+                'During execution ' + $.custom.style.apply.bold.Orange('{target}') + $.custom.style.Reset + ' folder will be cloned from ' + $.custom.style.apply.bold.Orange('{source}') + $.custom.style.Reset + ' folder.',
+                'This folder will act as proxy for ' + APP.name + '.',
+                'In the ' + $.custom.style.apply.bold.Orange('{target}/{stylesheet}') + $.custom.style.Reset + ', content from ' + $.custom.style.apply.bold.Orange('{target}/{stylesheet}') + $.custom.style.Reset + ' will be appended.'
+            ], $.list.std.Bullets);
 
 
-    $.TASK("Verified all files")
-    NAV.status = await NAV.FETCH();
-    return NAV.status;
-}
+            $.WRITE.std.Section('Available Commands', APP.commandList, $.list.std.Props)
 
-async function fetchFiles(CMD) {
-    if (NAV.status) {
-        $.STEP("Path : " + NAV.setup.source)
-        if (!(await FILEMAN.path.ifFolder(NAV.setup.source))) {
-            $.WRITE.failed.Footer("Path error : " + NAV.setup.source, ["Folder expected."], $.list.failed.Bullets)
+            $.WRITE.std.Section("Build command instructions.",
+                (PACKAGE.version.split(".")[0] === "0") ? ["This command uses an internet connection."]
+                    : [
+                        "Create a new project and use its access key. For action visit " + $.custom.style.apply.bold.Orange(LIVE.console),
+                        "For personal projects, you can use the key in " + $.custom.style.apply.bold.Orange(NAV.json.configure),
+                        "If using in CI/CD workflow, it is suggested to use " + $.custom.style.apply.bold.Orange("xcss build {key}")
+                    ], $.list.std.Bullets);
+
+            return true;
+        } catch (err) {
+            $.WRITE.failed.Footer("Initialization failed.", [err.message], $.list.failed.Bullets);
             return false;
         }
+    },
+    VerifySetup: async () => {
+        const errors = {}, passed = {};
 
-        $.STEP("Path : " + NAV.setup.target)
-        const targetIf = await FILEMAN.path.availability(NAV.setup.target);
-        if (!targetIf.exist) {
-            $.STEP("Creating target folder")
-            await FILEMAN.safeCloneFolder(NAV.setup.source, NAV.setup.target)
-            const files = await FILEMAN.getFilesAndSync(NAV.setup.target, NAV.setup.extensions, NAV.setup.source);
-            DATA.files = files.fileContent;
-            FILEMAN.JSON.writeFile(NAV.setup.syncmap, files.syncMap)
-        } else if (targetIf.type !== "folder") {
-            $.WRITE.failed.Footer("Path error : " + NAV.setup.refers, ["Folder expected."], $.list.failed.Bullets)
-            return false;
-        } else {
-            const files = await FILEMAN.getFilesAndSync(NAV.setup.target, NAV.setup.extensions, NAV.setup.source);
-            DATA.files = files.fileContent;
-            FILEMAN.JSON.writeFile(NAV.setup.syncmap, files.syncMap)
+        $.TASK("Verifying directory status", 0)
+        for (const item of Object.values(NAV.css)) {
+            $.STEP("Path : " + item)
+            if (await FILEMAN.PATH.ifFile(item)) {
+                passed[item] = "Ok";
+            } else {
+                errors[item] = "File not found.";
+            }
         }
+        for (const item of Object.values(NAV.json)) {
+            $.STEP("Path : " + item)
+            if (await FILEMAN.PATH.ifFile(item)) {
+                passed[item] = "Ok";
+            } else {
+                errors[item] = "File not found.";
+            }
+        }
+        $.TASK("Verification complete")
 
-        $.STEP("Path : " + NAV.setup.stylesheet)
-        if (await FILEMAN.path.ifFile(NAV.setup.stylesheet)) {
-            DATA.originstyle.stylesheet = await FILEMAN.READ(NAV.setup.stylesheet);
-        } else {
-            $.WRITE.failed.Footer("Path error : " + NAV.setup.stylesheet)
-            return false;
+        return {
+            unstart: !(await FILEMAN.PATH.available(NAV.folder.setup)).exist,
+            proceed: Object.keys(errors).length === 0,
+            report: (Object.keys(errors).length !== 0 && Object.keys(passed).length !== 0) ?
+                $.compose.failed.Footer("Error Paths", errors, $.list.failed.Props) : $.compose.success.Footer("Setup Healthy")
+        };
+    },
+    VerifyConfigs: async () => {
+        const errors = {};
+        const configure = FILEMAN.READ.json(NAV.json.configure)
+        const shorthand = FILEMAN.READ.json(NAV.json.shorthand)
+
+        $.TASK("Initializing configs")
+        $.STEP("PATH : " + NAV.json.configure)
+        if ((await configure).status) {
+            DATA.CONFIGURE = (await configure).data
+            if (FILEMAN.PATH.ifFolder(DATA.CONFIGURE.source)) {
+                const av = await FILEMAN.PATH.available(DATA.CONFIGURE.target);
+                if (!av.exist)
+                    await FILEMAN.CLONE.safe(DATA.CONFIGURE.source, DATA.CONFIGURE.target)
+                else if (av.type !== "folder")
+                    errors[DATA.CONFIGURE.target] = "Folder not found."
+                else if (!await FILEMAN.PATH.ifFile(FILEMAN.PATH.join(DATA.CONFIGURE.target, DATA.CONFIGURE.stylesheet)))
+                    errors[FILEMAN.PATH.join(DATA.CONFIGURE.target, DATA.CONFIGURE.stylesheet)] = "*.css file not found."
+            } else
+                errors[DATA.CONFIGURE.source] = "Folder not found."
+        } else errors[NAV.json.configure] = "Bad json file."
+
+        $.STEP("PATH : " + NAV.json.shorthand)
+        if ((await shorthand).status) {
+            if (typeof ((await shorthand).data) === "object") {
+                DATA.SHORTHAND = Object.fromEntries(
+                    Object.entries((await shorthand).data).filter(([key, value]) => typeof value === 'string')
+                );
+            } else errors[NAV.json.shorthand] = "Error data type"
+        } else errors[NAV.json.shorthand] = "Bad json file."
+
+        $.TASK("Initializing complete")
+        return {
+            status: Object.keys(errors).length === 0,
+            report: Object.keys(errors).length === 0 ?
+                $.compose.success.Footer("Configs Healthy", errors, $.list.failed.Props) :
+                $.compose.failed.Footer("Error Paths", errors, $.list.failed.Props)
         }
-        $.TASK("Collected latest files")
-        return true
-    } else {
-        return false
+    },
+    SaveSetup: async () => {
+        $.TASK("Fetching from Setup", 0)
+        $.STEP("Loading Reference styles")
+        const refers = FILEMAN.READ.bulk(NAV.folder.refers, ["css"]);
+        $.STEP("Loading Origin styles")
+        const stylePrefix = CSSImport([
+            NAV.css.atrules,
+            NAV.css.constants,
+            NAV.css.elements,
+            NAV.css.extends,
+        ]);
+        $.TASK("Saving styles")
+        DATA.refers = await refers;
+        DATA.CSS.Index = await stylePrefix;
+        DATA.shorthand = {
+            ...DATA.SHORTHAND,
+            ...DATA.CONFIGURE.shorthand
+        };
+    },
+    SaveFiles: async () => {
+        const files = FILEMAN.SYNC.bulk(CONFIGURE.target, CONFIGURE.source, CONFIGURE.extensions);
+        const stylePath = FILEMAN.PATH.join(CONFIGURE.target, CONFIGURE.stylesheet);
+        const styleSuffix = CSSImport([stylePath]);
+
+        DATA.CSS.Path = stylePath
+        DATA.CSS.Appendix = await styleSuffix
+        DATA.Files = (await files).fileContent
+
+        await FILEMAN.WRITE.json(NAV.setup.syncmap, (await files).syncMap)
     }
+}
+
+const begins = async () => {
+    const setupInit = await ACTION.VerifySetup()
+    const response = { status: setupInit.proceed, report: setupInit.report }
+    if (setupInit.unstart) {
+        response.report = $.compose.failed.Footer('Project not initialized. Use "init" command to initialize.')
+    } else if (setupInit.proceed) {
+        const configInit = await ACTION.VerifyConfigs();
+        response.report = configInit.report;
+        response.status = configInit.status;
+    }
+    return response
 }
 
 const commander = async (args) => {
     const CMD = args[2], KEY = args[3];
-    await initialize(CMD)
 
     switch (CMD) {
         case 'init':
             await $.PLAY.Title(APP.name + ' : Initialize', 500);
-            if (await NAV.START(CMD))
-                $.WRITE.success.Footer("Initialization Successfull.")
+            const setupInit = await ACTION.VerifySetup()
+            if (setupInit.unstart) {
+                await ACTION.Initialize();
+                $.WRITE.success.Footer("Initialized directory")
+            } else if (setupInit.proceed) {
+                const configInit = await ACTION.VerifyConfigs();
+                $.POST(configInit.report)
+            } else {
+                $.POST(setupInit.report)
+            }
             break;
         case 'dev':
+            await Initialize(CMD)
             $.POST($.compose.std.Chapter(APP.name + ' : Active Runtime'));
             if (await NAV.START(CMD)) {
                 EXECUTOR(DATA, CMD);
@@ -386,12 +329,14 @@ const commander = async (args) => {
             break;
         case 'preview':
             $.POST($.compose.std.Chapter(APP.name + ' : Preview Build'));
-            if (await NAV.FETCH(CMD)) {
-                await EXECUTOR(DATA, CMD);
-                $.WRITE.primary.Footer("Command Success")
-            }
+            await ACTION.FetchPrefix()
+            const verifiedPreview = await begins()
+            if (verifiedPreview.status) {
+                $.POST(verifiedPreview.report)
+            } else $.POST(verifiedPreview.report)
             break;
         case 'build':
+            await ACTION.FetchPrefix(CMD)
             $.POST($.compose.std.Chapter(APP.name + ' : Build Project'));
             if (await NAV.FETCH(CMD)) {
                 await EXECUTOR(DATA, CMD, KEY);
@@ -399,9 +344,13 @@ const commander = async (args) => {
             }
             break;
         default:
-            $.POST()
-            $.WRITE.std.Section(`${APP.command} @ ` + APP.version, APP.commandList, $.list.std.Props)
-            $.WRITE.std.Footer('Available Commands.')
+            await ACTION.FetchDocs()
+            $.WRITE.std.Chapter(`${APP.command} @ ` + APP.version, [LIVE.DOCS.alerts.content])
+            $.WRITE.success.Section('Available Commands', APP.commandList, $.list.std.Props)
+            $.WRITE.success.Section('Agreements',
+                Object.values(LIVE.AGREEMENT).reduce((acc, i) => { acc[i.title] = i.path; return acc }, {}), $.list.std.Props)
+            $.WRITE.success.Section("Documentation : " + LIVE.DOCS.readme.path,
+                ['For more information visit ' + $.custom.style.apply.bold.White(APP.website)])
     }
 }
 export default commander;

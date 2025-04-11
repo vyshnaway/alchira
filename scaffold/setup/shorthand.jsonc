@@ -1,4 +1,5 @@
 {
+    "DesignApproach": "#MobileFirst",
     // Values for #DesignApproach
     "MobileFirst": "min-width",
     "DesktopFirst": "max-width",

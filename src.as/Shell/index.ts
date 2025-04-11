@@ -1,10 +1,10 @@
-import { canvas, tab, unstyle } from "./0.root.js";
-import style from "./1.style.js";
-import tag from "./2.tag.js";
-import list from "./3.list.js";
-import { compose, write } from './4.compose.js'
-import render from "./5.render.js"
-import play from './6.play.js'
+import { canvas, tab, unstyle } from "./0.root";
+import style from "./1.style";
+import tag from "./2.tag";
+import list from "./3.list";
+import { compose, write } from './4.compose'
+import render from "./5.render"
+import play from './6.play'
 
 const color = {
     Red: 'Red',
@@ -19,6 +19,7 @@ const color = {
     Grey: 'Grey',
     White: 'White',
 }
+
 const appearance = {
     ends: 'ends',
     text: 'text',
@@ -54,7 +55,7 @@ const appearance = {
     invertBoldDimItalicUline: 'invertBoldDimItalicUline'
 };
 
-const task = (string, rowshift = -1) => {
+const task = (string: string, rowshift: i32 = -1): void => {
     if (rowshift < 0) render.animation.Backrow(-rowshift)
     if (canvas.taskActive && canvas.postActive)
         console.log([
@@ -65,7 +66,8 @@ const task = (string, rowshift = -1) => {
             tag.Br(1)
         ].join(''))
 }
-const step = (string, rowshift = -1) => {
+
+const step = (string: string, rowshift: i32 = -1): void => {
     if (rowshift < 0) render.animation.Backrow(-rowshift)
     if (canvas.taskActive && canvas.postActive)
         console.log([
@@ -75,7 +77,8 @@ const step = (string, rowshift = -1) => {
             tag.Div(style.italic[canvas.tertiary](string + ' ...'))
         ].join(''))
 }
-const post = (string = "", customStyle = style.dim[canvas.text], customTag = tag.Div) => {
+
+const post = (string: string = "", customStyle = style.dim[canvas.text], customTag = tag.Div): void => {
     if (canvas.postActive) console.log(customStyle(customTag(
         typeof (string) === 'string' ?
             string :
@@ -83,9 +86,9 @@ const post = (string = "", customStyle = style.dim[canvas.text], customTag = tag
     )))
 }
 
-const head = (string, customStyle, pickTag) => {
-    function hideHistory(numLinesToHide) {
-        const cursorPos = process.stdout.rows - 1; // Go to last row
+const head = (string: string, customStyle: any, pickTag: any): void => {
+    function hideHistory(numLinesToHide: i32): void {
+        const cursorPos: i32 = process.stdout.rows - 1; // Go to last row
         // 2. Move the cursor up by numLinesToHide
         process.stdout.moveCursor(0, - process.stdout.rows - 1);
         // 3. Clear the lines (from the new cursor position downwards)
@@ -102,6 +105,7 @@ const head = (string, customStyle, pickTag) => {
     else
         console.log(customStyle(string))
 }
+
 const custom = {
     tag,
     style: {
