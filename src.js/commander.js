@@ -89,16 +89,34 @@ const NAV = {
     },
     json: {
         configure: "xtyles/configure.jsonc",
-        shorthand: "xtyles/shorthand.jsonc",
+        shorthand: "xtyles/shorthands.jsonc",
         syncmap: "xtyles/.cache/sync-map.json",
         styleslist: "xtyles/.cache/styles-list.json",
     }
 }
 // console.log(NAV)
 const DATA = {
-    PREFIX: {}
+    CMD: "",
+    KEY: "",
+    SOURCE: "",
+    SHORTHAND: {},
+    PREFIX: {
+        classes: {},
+        atrules: {},
+        elements: {},
+        properties: {},
+    },
+    CSS: {
+        Path: {},
+        Index: {},
+        Appendix: {},
+    },
+    REFERS: {},
+    FILES: {}
 };
+
 const ACTION = {
+    CONFIGURE: {},
     FetchDocs: async () => {
         const readmeMd = FILEMAN.SYNC.file(LIVE.DOCS.readme.url, LIVE.DOCS.readme.path);
         const alertsMd = FILEMAN.SYNC.file(LIVE.DOCS.alerts.url, LIVE.DOCS.alerts.path);
@@ -111,19 +129,6 @@ const ACTION = {
         LIVE.AGREEMENT.license.content = await license;
         LIVE.AGREEMENT.terms.content = await terms;
         LIVE.AGREEMENT.privacy.content = await privacy;
-    },
-    FetchPrefix: async () => {
-        $.TASK("Loading vendor-prefixes", 0)
-
-        const classes = FILEMAN.SYNC.json(LIVE.PREFIX.classes.url, LIVE.PREFIX.classes.path);
-        const atrules = FILEMAN.SYNC.json(LIVE.PREFIX.atrules.url, LIVE.PREFIX.atrules.path);
-        const elements = FILEMAN.SYNC.json(LIVE.PREFIX.elements.url, LIVE.PREFIX.elements.path);
-        const properties = FILEMAN.SYNC.json(LIVE.PREFIX.properties.url, LIVE.PREFIX.properties.path);
-
-        DATA.PREFIX.classes = await classes
-        DATA.PREFIX.atrules = await atrules
-        DATA.PREFIX.elements = await elements
-        DATA.PREFIX.properties = await properties
     },
     Initialize: async () => {
         try {
@@ -170,6 +175,19 @@ const ACTION = {
             return false;
         }
     },
+    FetchPrefix: async () => {
+        $.TASK("Loading vendor-prefixes", 0)
+
+        const classes = FILEMAN.SYNC.json(LIVE.PREFIX.classes.url, LIVE.PREFIX.classes.path);
+        const atrules = FILEMAN.SYNC.json(LIVE.PREFIX.atrules.url, LIVE.PREFIX.atrules.path);
+        const elements = FILEMAN.SYNC.json(LIVE.PREFIX.elements.url, LIVE.PREFIX.elements.path);
+        const properties = FILEMAN.SYNC.json(LIVE.PREFIX.properties.url, LIVE.PREFIX.properties.path);
+
+        DATA.PREFIX.classes = await classes
+        DATA.PREFIX.atrules = await atrules
+        DATA.PREFIX.elements = await elements
+        DATA.PREFIX.properties = await properties
+    },
     VerifySetup: async () => {
         const errors = {}, passed = {};
 
@@ -205,19 +223,30 @@ const ACTION = {
         const shorthand = FILEMAN.READ.json(NAV.json.shorthand)
 
         $.TASK("Initializing configs")
+
         $.STEP("PATH : " + NAV.json.configure)
         if ((await configure).status) {
-            DATA.CONFIGURE = (await configure).data
-            if (FILEMAN.PATH.ifFolder(DATA.CONFIGURE.source)) {
-                const av = await FILEMAN.PATH.available(DATA.CONFIGURE.target);
-                if (!av.exist)
-                    await FILEMAN.CLONE.safe(DATA.CONFIGURE.source, DATA.CONFIGURE.target)
-                else if (av.type !== "folder")
-                    errors[DATA.CONFIGURE.target] = "Folder not found."
-                else if (!await FILEMAN.PATH.ifFile(FILEMAN.PATH.join(DATA.CONFIGURE.target, DATA.CONFIGURE.stylesheet)))
-                    errors[FILEMAN.PATH.join(DATA.CONFIGURE.target, DATA.CONFIGURE.stylesheet)] = "*.css file not found."
+            ACTION.CONFIGURE = (await configure).data
+            DATA.KEY = DATA.KEY ?? ACTION.CONFIGURE.key
+            DATA.SOURCE = ACTION.CONFIGURE.source
+            if (FILEMAN.PATH.isAncestor(ACTION.CONFIGURE.source, NAV.folder.setup) || FILEMAN.PATH.isAncestor(ACTION.CONFIGURE.source, NAV.folder.setup)) {
+                errors[ACTION.CONFIGURE.source] = "Dependence with " + NAV.folder.setup + " not allowed."
+            } else if (FILEMAN.PATH.ifFolder(ACTION.CONFIGURE.source)) {
+                if (FILEMAN.PATH.isAncestor(ACTION.CONFIGURE.target, NAV.folder.setup) || FILEMAN.PATH.isAncestor(ACTION.CONFIGURE.target, NAV.folder.setup)) {
+                    errors[ACTION.CONFIGURE.target] = "Dependence with " + NAV.folder.setup + " not allowed."
+                } else if (FILEMAN.PATH.isAncestor(ACTION.CONFIGURE.target, ACTION.CONFIGURE.source) || FILEMAN.PATH.isAncestor(ACTION.CONFIGURE.target, ACTION.CONFIGURE.source)) {
+                    errors[ACTION.CONFIGURE.target] = "Dependence with " + ACTION.CONFIGURE.source + " not allowed."
+                }else {
+                    const av = await FILEMAN.PATH.available(ACTION.CONFIGURE.target);
+                    if (!av.exist)
+                        await FILEMAN.CLONE.safe(ACTION.CONFIGURE.source, ACTION.CONFIGURE.target)
+                    else if (av.type !== "folder")
+                        errors[ACTION.CONFIGURE.target] = "Folder not found."
+                    else if (!await FILEMAN.PATH.ifFile(FILEMAN.PATH.join(ACTION.CONFIGURE.target, ACTION.CONFIGURE.stylesheet)))
+                        errors[FILEMAN.PATH.join(ACTION.CONFIGURE.target, ACTION.CONFIGURE.stylesheet)] = "*.css file not found."
+                }
             } else
-                errors[DATA.CONFIGURE.source] = "Folder not found."
+                errors[ACTION.CONFIGURE.source] = "Folder not found."
         } else errors[NAV.json.configure] = "Bad json file."
 
         $.STEP("PATH : " + NAV.json.shorthand)
@@ -249,25 +278,30 @@ const ACTION = {
             NAV.css.extends,
         ]);
         $.TASK("Saving styles")
-        DATA.refers = await refers;
+        DATA.REFERS = await refers;
         DATA.CSS.Index = await stylePrefix;
-        DATA.shorthand = {
+        DATA.SHORTHAND = {
             ...DATA.SHORTHAND,
-            ...DATA.CONFIGURE.shorthand
+            ...ACTION.CONFIGURE.shorthands
         };
     },
     SaveFiles: async () => {
-        const files = FILEMAN.SYNC.bulk(CONFIGURE.target, CONFIGURE.source, CONFIGURE.extensions);
-        const stylePath = FILEMAN.PATH.join(CONFIGURE.target, CONFIGURE.stylesheet);
-        const styleSuffix = CSSImport([stylePath]);
+        $.TASK("Fetching target files", 0)
+        $.TASK("Syncing untargeted files")
+        const files = FILEMAN.SYNC.bulk(ACTION.CONFIGURE.target, ACTION.CONFIGURE.source, ACTION.CONFIGURE.extensions);
 
-        DATA.CSS.Path = stylePath
-        DATA.CSS.Appendix = await styleSuffix
-        DATA.Files = (await files).fileContent
+        DATA.CSS.Path = FILEMAN.PATH.join(ACTION.CONFIGURE.source, ACTION.CONFIGURE.stylesheet)
+        DATA.CSS.Appendix = await CSSImport([
+            FILEMAN.PATH.join(ACTION.CONFIGURE.target, ACTION.CONFIGURE.stylesheet)
+        ]);
 
-        await FILEMAN.WRITE.json(NAV.setup.syncmap, (await files).syncMap)
+        $.TASK("Saving targeted files")
+        DATA.FILES = (await files).fileContent
+
+        $.TASK("Updating " + NAV.json.syncmap)
+        await FILEMAN.WRITE.json(NAV.json.syncmap, (await files).syncMap)
     }
-}
+};
 
 const begins = async () => {
     const setupInit = await ACTION.VerifySetup()
@@ -283,9 +317,10 @@ const begins = async () => {
 }
 
 const commander = async (args) => {
-    const CMD = args[2], KEY = args[3];
+    DATA.CMD = args[2];
+    DATA.KEY = args[3];
 
-    switch (CMD) {
+    switch (DATA.CMD) {
         case 'init':
             await $.PLAY.Title(APP.name + ' : Initialize', 500);
             const setupInit = await ACTION.VerifySetup()
@@ -300,21 +335,21 @@ const commander = async (args) => {
             }
             break;
         case 'dev':
-            await Initialize(CMD)
+            await Initialize(DATA.CMD)
             $.POST($.compose.std.Chapter(APP.name + ' : Active Runtime'));
-            if (await NAV.START(CMD)) {
-                EXECUTOR(DATA, CMD);
+            if (await NAV.START(DATA.CMD)) {
+                EXECUTOR(DATA, DATA.CMD);
                 $.WRITE.primary.Section(new Date())
                 WATCHDOG([NAV.setup.setup], async () => {
                     NAV.status = false;
-                    if (await NAV.FETCH(CMD)) {
-                        await EXECUTOR(DATA, CMD);
+                    if (await NAV.FETCH(DATA.CMD)) {
+                        await EXECUTOR(DATA, DATA.CMD);
                         $.WRITE.success.Footer("Build Success.")
                     } else $.WRITE.failed.Footer("Build Failed.")
                 });
                 WATCHDOG([NAV.setup.target], async () => {
-                    if (await NAV.FETCH(CMD)) {
-                        await EXECUTOR(DATA, CMD);
+                    if (await NAV.FETCH(DATA.CMD)) {
+                        await EXECUTOR(DATA, DATA.CMD);
                         $.WRITE.success.Footer("Build Success.")
                     } else $.WRITE.failed.Footer("Build Failed.")
                 });
@@ -332,16 +367,19 @@ const commander = async (args) => {
             await ACTION.FetchPrefix()
             const verifiedPreview = await begins()
             if (verifiedPreview.status) {
-                $.POST(verifiedPreview.report)
+                await ACTION.SaveSetup()
+                await ACTION.SaveFiles()
+                const response = await EXECUTOR(...DATA)
             } else $.POST(verifiedPreview.report)
             break;
         case 'build':
-            await ACTION.FetchPrefix(CMD)
-            $.POST($.compose.std.Chapter(APP.name + ' : Build Project'));
-            if (await NAV.FETCH(CMD)) {
-                await EXECUTOR(DATA, CMD, KEY);
-                $.WRITE.primary.Footer("Command Success")
-            }
+            $.POST($.compose.std.Chapter(APP.name + ' : Preview Build'));
+            await ACTION.FetchPrefix()
+            const verifiedBuild = await begins()
+            if (verifiedBuild.status) {
+                await ACTION.SaveSetup()
+                await ACTION.SaveFiles()
+            } else $.POST(verifiedPreview.report)
             break;
         default:
             await ACTION.FetchDocs()

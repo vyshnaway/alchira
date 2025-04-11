@@ -207,7 +207,7 @@ const FILEMAN = {
                     if (!fs.existsSync(sourceDirPath)) await fs.promises.mkdir(sourceDirPath, { recursive: true });
                 }
                 if (extensions.includes(path.extname(file))) {
-                    result.fileContent[targetFilePath] = await fs.promises.readFile(sourceFilePath, 'utf-8');
+                    result.fileContent[file] = await fs.promises.readFile(sourceFilePath, 'utf-8');
                 } else {
                     await fs.promises.copyFile(sourceFilePath, targetFilePath);
                 }
