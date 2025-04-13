@@ -1,3 +1,3 @@
 #!/usr/bin/env node
-import command from "../src.js/commander.js"
+import command from "../src/commander.js"
 await command(process.argv)

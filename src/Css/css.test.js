@@ -1,5 +1,45 @@
-@import url("./#at-rules.css");
+import css from "./compose.js"
 
+const style1 = `.my-button{background-color:#007bff;color:white;media(max-width:738px){font-size: 14px;&:hover{background-color:#0056b3;}}&:hover{background-color:#0056b3;}}.my-button:active{background-color:#003f8e;}@fontface dfk;@media(max-width: 768px){.my-button{font-size:14px;padding:8px 16px;&:hover{background-color:#0056b3;}}@supports(display: grid){.my-button-container{display:grid;grid-template-columns:1fr 1fr;gap:10px;}}}@supports(display:grid){.my-button-container{display:grid;grid-template-columns:1fr 1fr;gap:10px;}}`
+const style2 = `
+.my-button {
+    background-color: #007bff;
+    color: white;
+    media (max-width: 768px) {
+        font-size: 14px;
+        &:hover {
+            background-color: #0056b3;
+        }
+    }
+    &:hover {
+    background-color: #0056b3;
+    }
+}
+@media (max-width: 768px) {
+    .my-button {
+        font-size: 14px;
+        padding: 8px 16px;
+        &:hover {
+            background-color: #0056b3;
+        }
+    }
+    @supports (display: grid) {
+        .my-button-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+    }
+}  
+@supports (display: grid) {
+  .my-button-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+}
+`
+const style3 = `
 /* Flat Mode (Basic) */
 :root {
     /* Primary */
@@ -20,7 +60,7 @@
     --tertiary-500: #b0b0b0;
     --tertiary-700: #787878;
     --tertiary-900: #404040;
- 
+
     /* Core Backgrounds */
     --background-body: #fafafa;
     --background: #ece9e4;
@@ -166,20 +206,10 @@
     --rem-override: 4px;
     --page-width: 360rem;
 
-    --rounded-sm: .5rem;
-    --rounded-md: 2rem;
-    --rounded-lg: 8rem;
-
     /* For typical margin and padding */
-    --delta-box-sm: 2rem;
-    --delta-box-md: 4rem;
-    --delta-box-lg: 8rem;
-    --delta-block-sm: 4rem;
-    --delta-block-md: 8rem;
-    --delta-block-lg: 16rem;
-    --delta-inline-sm: 6rem;
-    --delta-inline-md: 12rem;
-    --delta-inline-lg: 18rem;
+    --delta-box: 1rem;
+    --delta-inline: 4rem;
+    --delta-block: 6rem;
 
     --font-size-h1: 8rem;
     --font-size-h2: 6rem;
@@ -201,3 +231,72 @@
     --font-link: 'Link-Font', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif';
     --font-monospace: 'Monospace-Font', 'SF Mono', 'Menlo', 'Monaco', 'Consolas', 'Courier New', 'Courier', 'monospace';
 }
+`
+
+
+const object = {
+    "classA": {
+        "": {
+            "prop-s": "d"
+        },
+        "@layer global": {
+            "prop-d": "p1",
+            "prop-f": "p2"
+        },
+        "@media": {
+            "prop-sx": "p1",
+            "prop-sv": "p2"
+        },
+        "@media 5": {
+            "prop-sx": "p1",
+            "prop-sv": "p2"
+        }
+    },
+    "": {
+        '@keyframes fade': {
+            "56%": {
+                'force': '89'
+            },
+            "58%": {
+                'force': '89'
+            },
+        },
+        '@keyframes fadeout': {
+            "56%": {
+                'force': '89'
+            },
+            "58%": {
+                'force': '89'
+            },
+        }
+    },
+    "classB": {
+        "": {
+            "j": "new",
+            "@apply": "",
+            "prop-e": "ds",
+            "&inClass": {
+                "prop34": "jik"
+            }
+        },
+        "@media 5": {
+            "prop-su": "p1",
+            "prop-sr": "p2",
+            "&:hover": {
+                "prop34": "jik"
+            }
+        },
+        "@container 6": {
+            "prop-sj": "p1",
+            "prop-se": "p2"
+        }
+    }
+}
+// console.log(css.compose(object))
+// console.log(css.compose(object).length)
+// console.log(css.compose(object, true))
+// console.log(css.compose(object, true).length)
+
+console.log(JSON.stringify(css.parse(style1), ' ', 4))
+console.log(JSON.stringify(css.parse(style2), ' ', 4))
+console.log(JSON.stringify(css.parse(style3), ' ', 4))
