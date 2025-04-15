@@ -55,7 +55,7 @@ export const compose = {
         List: (heading, contents = [], selectListType = list.std.Blocks, intent = 0) =>
             blockColor.std(blockType.Points, heading, selectListType(contents, intent)),
         Block: (contents = [], selectListType = list.std.Blocks, intent = 0) =>
-            style.text.White(selectListType(contents, intent)).join('\n') + '\n',
+            style.text.White(selectListType(contents, intent).join('\n')) + '\n',
     },
     failed: {
         Text: (string, intent = 0) =>
@@ -73,7 +73,7 @@ export const compose = {
         List: (heading, contents = [], selectListType = list.failed.Blocks, intent = 0) =>
             blockColor.failed(blockType.Points, heading, selectListType(contents, intent)),
         Block: (contents = [], selectListType = list.failed.Blocks, intent = 0) =>
-            style.text.Red(selectListType(contents, intent)).join('\n') + '\n',
+            style.text.Red(selectListType(contents, intent).join('\n')) + '\n',
     },
     success: {
         Text: (string, intent = 0) =>
@@ -91,7 +91,7 @@ export const compose = {
         List: (heading, contents = [], selectListType = list.success.Blocks, intent = 0) =>
             blockColor.success(blockType.Points, heading, selectListType(contents, intent)),
         Block: (contents = [], selectListType = list.success.Blocks, intent = 0) =>
-            style.text.Green(selectListType(contents, intent)).join('\n') + '\n',
+            style.text.Green(selectListType(contents, intent).join('\n')) + '\n',
     },
     primary: {
         Text: (string, intent = 0) =>
@@ -109,7 +109,7 @@ export const compose = {
         List: (heading, contents = [], selectListType = list.primary.Blocks, intent = 0) =>
             blockColor.primary(blockType.Points, heading, selectListType(contents, intent)),
         Block: (contents = [], selectListType = list.primary.Blocks, intent = 0) =>
-            style.text[canvas.primary](selectListType(contents, intent)).join('\n') + '\n',
+            style.text[canvas.primary](selectListType(contents, intent).join('\n')) + '\n',
     },
     secondary: {
         Text: (string, intent = 0) =>
@@ -127,7 +127,7 @@ export const compose = {
         List: (heading, contents = [], selectListType = list.primary.Blocks, intent = 0) =>
             blockColor.secondary(blockType.Points, heading, selectListType(contents, intent)),
         Block: (contents = [], selectListType = list.primary.Blocks, intent = 0) =>
-            style.text[canvas.secondary](selectListType(contents, intent)).join('\n') + '\n',
+            style.text[canvas.secondary](selectListType(contents, intent).join('\n')) + '\n',
     },
 }
 
@@ -166,7 +166,7 @@ export const write = {
         List: (heading, contents = [], selectListType = list.failed.Blocks, intent = 0) =>
             console.log(blockColor.failed(blockType.Points, heading, selectListType(contents, intent))),
         Block: (contents = [], selectListType = list.failed.Blocks, intent = 0) =>
-            console.log(style.text.Red(selectListType(contents, intent)).join('\n') + '\n'),
+            console.log(style.text.Red(selectListType(contents, intent).join('\n')) + '\n'),
     },
     success: {
         Text: (string, intent = 0) =>
@@ -184,7 +184,7 @@ export const write = {
         List: (heading, contents = [], selectListType = list.success.Blocks, intent = 0) =>
             console.log(blockColor.success(blockType.Points, heading, selectListType(contents, intent))),
         Block: (contents = [], selectListType = list.success.Blocks, intent = 0) =>
-            console.log(style.text.Green(selectListType(contents, intent)).join('\n') + '\n'),
+            console.log(style.text.Green(selectListType(contents, intent).join('\n')) + '\n'),
     },
     primary: {
         Text: (string, intent = 0) =>
@@ -202,7 +202,7 @@ export const write = {
         List: (heading, contents = [], selectListType = list.primary.Blocks, intent = 0) =>
             console.log(blockColor.primary(blockType.Points, heading, selectListType(contents, intent))),
         Block: (contents = [], selectListType = list.primary.Blocks, intent = 0) =>
-            console.log(style.text[canvas.primary](selectListType(contents, intent)).join('\n') + '\n'),
+            console.log(style.text[canvas.primary](selectListType(contents, intent).join('\n')) + '\n'),
     },
     secondary: {
         Text: (string, intent = 0) =>
@@ -220,6 +220,6 @@ export const write = {
         List: (heading, contents = [], selectListType = list.primary.Blocks, intent = 0) =>
             console.log(blockColor.secondary(blockType.Points, heading, selectListType(contents, intent))),
         Block: (contents = [], selectListType = list.primary.Blocks, intent = 0) =>
-            console.log(style.text[canvas.secondary](selectListType(contents, intent)).join('\n') + '\n'),
+            console.log(style.text[canvas.secondary](selectListType(contents, intent).join('\n')) + '\n'),
     },
 }

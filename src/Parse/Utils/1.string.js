@@ -1,9 +1,9 @@
-const NON_ALPHANUMERIC_EXCEPT_SLASH = /[^a-z0-9/]/gi;
-const SLASH = /\//g;
+const NON_ALPHANUMERIC_AND_US = /[^a-z0-9_]/gi;
+const SPACE = /\s/g;
 
 export default {
     normalize: (string) => {
-        return string.replace(NON_ALPHANUMERIC_EXCEPT_SLASH, '-').replace(SLASH, '_')
+        return string.replace(SPACE, '_').replace(NON_ALPHANUMERIC_AND_US, '-')
     },
     minify: (string) => {
         const length = string.length;

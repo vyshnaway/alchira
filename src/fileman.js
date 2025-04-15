@@ -256,7 +256,6 @@ export async function CSSImport(filePathArray = []) {
     const processedFiles = new Set(filePathArray.reverse().map(filePath => path.resolve(filePath)).reverse());
 
     async function process(pathString) {
-        console.log(pathString)
         const directory = path.dirname(pathString)
         let result = (await FILEMAN.READ.file(pathString)).data;
         for (const [match, filePath] of result.matchAll(/@import\s+url\(["']?(.*?)["']?\);/g)) {

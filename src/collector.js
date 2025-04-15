@@ -1,3 +1,5 @@
+import cleaner from "./cleaner.js";
+
 const NON_ALPHANUMERIC_EXCEPT_SLASH = /[^a-z0-9/\\]/gi;
 const LIB_CHARSET = /[^a-z0-9\$-]/gi;
 const SLASH = /[/\\]/g;
@@ -12,14 +14,14 @@ function groupFinder(head, tail) {
     return { type: "atomic", stamp: "" };
 }
 
-function libFinder(pathString, noGroup = false) {
+function libFinder(filePath, content, noGroup = false) {
     let
-        marker = pathString.length,
+        marker = filePath.length,
         scanning = true,
-        endMarker = pathString.length;
+        endMarker = filePath.length;
 
     while (scanning) {
-        const char = pathString[--marker]
+        const char = filePath[--marker]
         if (char === "$")
             endMarker = marker;
         if (!["/", "\\"].includes(char) && endMarker !== 0)
@@ -33,20 +35,19 @@ function libFinder(pathString, noGroup = false) {
     }
 
     const group = (!noGroup) ?
-        groupFinder(pathString.substring(marker, endMarker), pathString.substring(endMarker)) :
+        groupFinder(filePath.substring(marker, endMarker), filePath.substring(endMarker)) :
         { type: "", stamp: "" };
-    const normalPath = pathString.replace(NON_ALPHANUMERIC_EXCEPT_SLASH, '-').replace(SLASH, '_');
-    const library = pathString.substring(marker, endMarker).replace(LIB_CHARSET, '-');
+    const normalPath = filePath.replace(NON_ALPHANUMERIC_EXCEPT_SLASH, '-').replace(SLASH, '_');
+    const library = filePath.substring(marker, endMarker).replace(LIB_CHARSET, '-');
 
     return {
         group: group.type,
         response: {
-            library: (group.stamp === "") ? "" :
-                pathString.substring(marker, endMarker) + group.stamp,
-            path: pathString,
-            meta: (library === "" || group.stamp === "") ?
-                `${group.type}__${normalPath}__` :
-                `${group.type}_${library}__${normalPath}__`
+            idFront: (group.stamp === "") ? "" :
+                filePath.substring(marker, endMarker) + group.stamp,
+            metaFront: (library === "" || group.stamp === "") ?
+                `${group.type}__${normalPath}__` : `${library}_${group.type}__${normalPath}__`,
+            content: cleaner.uncomment.Css(content),
         },
     }
 }
@@ -54,16 +55,17 @@ function libFinder(pathString, noGroup = false) {
 export default {
     css: (filesArray) => {
         const response = {
-            atomic: [],
-            micros: [],
-            macros: [],
-            compose: [],
-            composite: [],
+            atomic:{list: [], data: []},
+            micros:{list: [], data: []},
+            macros:{list: [], data: []},
+            compose:{list: [], data: []},
+            composite:{list: [], data: []},
         }
 
-        filesArray.forEach(filePath => {
-            const lib = libFinder(filePath);
-            response[lib.group].push(lib.response)
+        Object.keys(filesArray).forEach(filePath => {
+            const lib = libFinder(filePath, filesArray[filePath]);
+            response[lib.group].list.push(filePath)
+            response[lib.group].data.push(lib.response)
         })
 
         return response;

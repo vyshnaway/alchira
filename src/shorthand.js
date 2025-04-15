@@ -70,13 +70,15 @@ let SHORTHAND = {
             }
         });
         stash = shorthands;
+        let response = [];
 
         if (Object.keys(stash).length)
-            $.WRITE.success.Section("Valid Shorthands", $.list.success.Props(shorthands), $.list.std.Bullets)
-        else $.WRITE.failed.Section("Unable to fetch Shorthands.")
+            response.push($.compose.success.Section("Valid Shorthands", $.list.success.Props(shorthands), $.list.std.Bullets))
 
         if (shorthandErrors.length)
-            $.WRITE.failed.Footer("Invalid Shorthands", shorthandErrors, $.list.std.Bullets)
+            response.push($.compose.failed.Footer("Invalid Shorthands", shorthandErrors, $.list.std.Bullets))
+
+        return $.compose.std.Block(response)
     },
     RENDER: (string) => {
         string = SHORTHAND.IMPORT(string).result

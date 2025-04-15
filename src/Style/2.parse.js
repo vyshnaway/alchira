@@ -1,4 +1,4 @@
-import stringJS from '../Utils/1.string.js'
+import stringJS from '../Parse/Utils/1.string.js'
 
 function keyFrameIdentity(string) {
     const match = keyFrameRegex.exec(string);

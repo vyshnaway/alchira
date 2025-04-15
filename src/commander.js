@@ -102,6 +102,7 @@ const DATA = {
     CSSPath: "",
     CSSIndex: "",
     CSSAppendix: "",
+    StylesListPath: NAV.json.styleslist,
     PREFIX: {
         classes: {},
         atrules: {},
