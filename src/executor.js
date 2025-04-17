@@ -2,7 +2,7 @@ import $ from "./Shell/index.js"
 import shorthandJS from "./shorthand.js";
 import cleaner from "./cleaner.js";
 import grouperJS from "./collector.js"
-import CSSParse from "./Parse/1.atomic.js";
+import CSSParse from "./Styles/file.js";
 
 const minify = {
     dev: (content) => cleaner.uncomment.Css(content),
@@ -29,13 +29,18 @@ export default async function EXECUTOR({
     report.push(await shorthandJS.UPLOAD(SHORTHAND))
 
     const references = grouperJS.css(REFERS);
+    const atomicStyles = CSSParse.READER(references["atomic"].data, false);
+    const microsStyles = CSSParse.READER(references["micros"].data, false);
+    const macrosStyles = CSSParse.READER(references["macros"].data, false);
+    const composeStyles = CSSParse.READER(references["compose"].data, true);
+    const compositeStyles = CSSParse.READER(references["composite"].data, true);
     const scope = {
-        scopeStyles: {
-            "micros": CSSParse.savior(references["atomic"].data, CMD),
-            "macros": CSSParse.savior(references["micros"].data, CMD),
-            "compose": CSSParse.savior(references["macros"].data, CMD),
-            "composite": CSSParse.savior(references["compose"].data, CMD),
-            "source": CSSParse.savior(references["composite"].data, CMD),
+        cumulates: {
+            "micros": atomicStyles,
+            "macros": microsStyles,
+            "compose": macrosStyles,
+            "composite": composeStyles,
+            "source": compositeStyles,
             "global": [],
             "globalLib": []
         },
@@ -47,10 +52,9 @@ export default async function EXECUTOR({
     references["compose"].list.forEach(element => scope.referScope[element] = "compose");
     references["composite"].list.forEach(element => scope.referScope[element] = "composite");
 
-    files[CSSPath] = minify[CMD]([CSSIndex, "/*rendered*/", CSSAppendix].join("\n"))
+    files[CSSPath] = minify[CMD]([CSSIndex, "/*rendered*/", CSSParse.RENDER(CSSAppendix)].join("\n"))
     report.push($.compose.std.Footer(`Output size: ${(files[CSSPath].length / 1024).toFixed(2)} kb`))
-
-    files[StylesListPath] = JSON.stringify(scope, null, 4);
+    files[StylesListPath] = JSON.stringify(scope);
 
     return {
         files: files,

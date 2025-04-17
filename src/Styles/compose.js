@@ -1,10 +1,6 @@
-import objectSwitch from '../../.dump/4.switch.js'
-import code from '../cleaner.js'
-// import extract from './1.extract.js'
-// import getBlock from './StyleBlock/0.block.js'
-// import U from '../../.dump/Utils/package.js'
+import U from "./Utils/index.js"
 
-function compose(object, minify = false) {
+export default function compose(object, minify = false) {
     const tb = (count = 0) => minify ? '' : '    '.repeat(count)
     const br = (count = 1) => minify ? '' : '\n'.repeat(count);
     const sp = (count = 1) => minify ? '' : ' '.repeat(count);
@@ -43,27 +39,13 @@ function compose(object, minify = false) {
     }
 
     let styleSheet = '';
-    const switchedObj = objectSwitch(object)
+    const switchedObj = U.object.switch(object)
     for (const rule in switchedObj) {
         if (rule === '')
             styleSheet += genRuleBlock(switchedObj[rule])
         else
             styleSheet += `${br()}${rule}${sp()}{${br()}${genRuleBlock(switchedObj[rule])}}${br()}`
     }
+    
     return styleSheet
-}
-
-function render(styleSheets = [], command = "dev") {
-    const renderOpt = {
-        dev: code.uncomment.Css,
-        preview: code.minify.Lite,
-        build: code.minify.Strict,
-    };
-    return styleSheets.map(sheet => renderOpt[command](sheet))
-}
-
-export default {
-    parse,
-    compose,
-    render
 }

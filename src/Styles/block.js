@@ -1,52 +1,22 @@
 import U from "./Utils/index.js"
 
-function xtylemerge(classList, blocks = true) {
-    function deepMerge(target, source, includeInnerObjects = true) {
-        if (!source || typeof source !== 'object') return target;
-
-        for (const key in source) {
-            const sourceValue = source[key];
-            if (sourceValue === undefined) continue;
-
-            const targetValue = target[key];
-
-            if (includeInnerObjects &&
-                targetValue &&
-                sourceValue &&
-                typeof targetValue === 'object' &&
-                typeof sourceValue === 'object' &&
-                !Array.isArray(targetValue)) {
-                target[key] = deepMerge(targetValue, sourceValue);
-            } else {
-                target[key] = sourceValue;
-            }
-        }
-
-        return target;
-    }
-    const result = {};
-    for (const className of classList) {
-        deepMerge(result, styleBlocks[className], blocks);
-    }
-    return result;
-}
-
 const OPEN_CHARS = ['{', '[', '('];
 const CLOSE_CHARS = ['}', ']', ')'];
 const QUOTE_CHARS = ['`', "'", '"'];
 
-export default function parseCssToObject(string, refs = true, props = true, nests = true, flats = true, rules = true, classes = true) {
+export default function parseCssToObject(string, links = true, props = true, nests = true, flats = true, rules = true, classes = true) {
     string += ';'
     let keyStart = 0,
         valStart = 0,
         deviance = 0,
         quote = '',
         key = '',
+        linksArray = [],
         isProp = true,
         length = string.length;
 
     let properties = {
-        refs: [], props: {}, nests: {}, flats: {}, rules: {}, classes: {}
+        mixins: [], preBinds: [], postBinds: [], props: {}, nests: {}, flats: {}, rules: {}, classes: {}
     };
 
     for (let index = 0; index < length; index++) {
@@ -81,28 +51,34 @@ export default function parseCssToObject(string, refs = true, props = true, nest
                                 switch (key[0]) {
                                     case "@":
                                         if (rules) {
-                                            properties.rules[key] = parseCssToObject(value).props;
+                                            properties.rules[key] = value;
                                         }
                                         break;
                                     case "&":
                                         if (nests) {
-                                            properties.nests[key] = parseCssToObject(value).props;
+                                            properties.nests[key] = value;
                                         }
                                         break;
                                     case ".":
-                                        if (classes && U.identity.ClassName !== "") {
-                                            properties.classes[key] = parseCssToObject(value).props;
-                                            break;
-                                        }
+                                        if (classes && U.identity.ClassName !== "")
+                                            properties.classes[key] = value;
                                     default:
                                         if (flats)
-                                            properties.flats[key] = parseCssToObject(value).props;
-                                        break;
+                                            properties.flats[key] = value;
                                 }
                             } else if (key[0] !== '@' && props) properties.props[key] = value;
                         } else if (isProp) {
                             if (value[0] === '@' && props) properties.props[value] = '';
-                            else if (refs) properties.refs.push(...U.string.breaks(value));
+                            else if (links) {
+                                const breaks = U.string.breaks(value);
+                                const groupMap = { "<": "preBinds", ">": "postBinds", "+": "mixins" };
+                                const group = groupMap[breaks[0]] || "mixins";
+                                if (Object.keys(groupMap).includes(breaks[0])) breaks.shift();
+                                breaks.forEach(link => {
+                                    const targetGroup = groupMap[link[0]] || group;
+                                    properties[targetGroup].push(link[0] in groupMap ? link.slice(1) : link);
+                                });
+                            }
                         }
                         keyStart = index + 1;
                         valStart = index + 1;
@@ -114,6 +90,6 @@ export default function parseCssToObject(string, refs = true, props = true, nest
             if (OPEN_CHARS.includes(ch)) deviance++;
         }
     }
-    // properties.refs = INQUIRE.classList(properties.refs)
+
     return properties;
 }

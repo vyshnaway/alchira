@@ -1,4 +1,4 @@
-import fn from "./0.block.js"
+import fn from "./block.js"
 
 
 const string = `

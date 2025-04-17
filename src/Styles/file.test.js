@@ -1,4 +1,4 @@
-import fn from "./1.atomic.js"
+import fn from "./file.js"
 
 console.log(fn(`
     .font-display { font-family: 'Display-Font'; font-weight: 700; }
