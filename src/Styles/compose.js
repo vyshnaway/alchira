@@ -1,6 +1,18 @@
 import U from "./Utils/index.js"
 
-export default function compose(object, minify = false) {
+const enCounter = () => {
+    const digits = "_0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-";
+    const base = digits.length;
+
+    let result = "", num = ++counter;
+    while (num > 0) {
+        result = digits[num % base] + result;
+        num = Math.floor(num / base);
+    }
+    return "_" + result;
+};
+
+export default function compose(object, dotPrefix = false, minify = false, order = []) {
     const tb = (count = 0) => minify ? '' : '    '.repeat(count)
     const br = (count = 1) => minify ? '' : '\n'.repeat(count);
     const sp = (count = 1) => minify ? '' : ' '.repeat(count);
@@ -28,24 +40,24 @@ export default function compose(object, minify = false) {
     }
     function genRuleBlock(ruleObj) {
         let output = '';
-        for (const className in ruleObj) {
-            const value = ruleObj[className]
-            if (className === '')
-                output += genClassBlock(value, className);
+        for (const selector in ruleObj) {
+            const value = ruleObj[selector]
+            if (selector === '___')
+                output += genClassBlock(value, selector);
             else
-                output += `.${className}${sp()}{${br()}${genClassBlock(value, className)}}${br()}`;
+                output += (dotPrefix ? "." : "") + `${selector}${sp()}{${br()}${genClassBlock(value, selector)}}${br()}`;
         }
         return output;
     }
 
     let styleSheet = '';
-    const switchedObj = U.object.switch(object)
+    const switchedObj = order.length ? U.object.switch(object) :    Object.fromEntries(order.map((I) => [I, object[I]]))
     for (const rule in switchedObj) {
         if (rule === '')
             styleSheet += genRuleBlock(switchedObj[rule])
         else
             styleSheet += `${br()}${rule}${sp()}{${br()}${genRuleBlock(switchedObj[rule])}}${br()}`
     }
-    
+
     return styleSheet
 }

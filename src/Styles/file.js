@@ -3,19 +3,8 @@ import compose from "./compose.js"
 import U from "./Utils/index.js"
 
 const stash = {};
-let counter = 64;
-
-const enCounter = () => {
-    const digits = "_0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-";
-    const base = digits.length;
-
-    let result = "", num = ++counter;
-    while (num > 0) {
-        result = digits[num % base] + result;
-        num = Math.floor(num / base);
-    }
-    return "_" + result;
-};
+const index = {};
+let counter = 0;
 
 function xtylemerge(classList, nested) {
     function deepMerge(target, source, includeInnerObjects = true, comment = "") {
@@ -63,11 +52,12 @@ function parse({ content, idFront, metaFront }, nested) {
                     return [key, { ...xtylemerge(nest.mixins, false), ...nest.props }]
                 })
             ) : {};
-            response[idFront + modKey] = {
+            index[++counter] = idFront + modKey;
+            response[index[counter]] = {
                 preBinds: styles.preBinds,
                 postBinds: styles.postBinds,
                 selector: key,
-                buildClass: enCounter(),
+                index: counter,
                 metaClass: metaFront + modKey,
                 style: {
                     ...xtylemerge(styles.mixins, nested),
@@ -91,7 +81,7 @@ function parse({ content, idFront, metaFront }, nested) {
                 preBinds: styles.preBinds,
                 postBinds: styles.postBinds,
                 selector: key,
-                buildClass: "___",
+                index: 0,
                 metaClass: metaFront + modKey,
                 style: {
                     ...xtylemerge(styles.mixins, nested),
@@ -101,7 +91,7 @@ function parse({ content, idFront, metaFront }, nested) {
             };
         }
     }
-
+    
     return response;
 };
 
@@ -119,5 +109,8 @@ export default {
         }
         return Object.keys(stash);
     },
-    RENDER: (content) => compose(parse({content}, true)) 
+    RENDER: (content) => compose(Object.values(parse({ content }, true)).reduce((A, I) => {
+            A[I.selector] = I.style;
+            return A
+        }, {}))
 }

@@ -1,4 +1,4 @@
-import css from "../Parse/compose.js"
+import compose from "./compose.js"
 
 const style1 = `.my-button{background-color:#007bff;color:white;media(max-width:738px){font-size: 14px;&:hover{background-color:#0056b3;}}&:hover{background-color:#0056b3;}}.my-button:active{background-color:#003f8e;}@fontface dfk;@media(max-width: 768px){.my-button{font-size:14px;padding:8px 16px;&:hover{background-color:#0056b3;}}@supports(display: grid){.my-button-container{display:grid;grid-template-columns:1fr 1fr;gap:10px;}}}@supports(display:grid){.my-button-container{display:grid;grid-template-columns:1fr 1fr;gap:10px;}}`
 const style2 = `
@@ -251,7 +251,7 @@ const object = {
             "prop-sv": "p2"
         }
     },
-    "": {
+    "___": {
         '@keyframes fade': {
             "56%": {
                 'force': '89'
@@ -291,9 +291,5 @@ const object = {
         }
     }
 }
-// console.log(css.compose(object))
-// console.log(css.compose(object).length)
-// console.log(css.compose(object, true))
-// console.log(css.compose(object, true).length)
 
-console.log(css.compose(object))
+console.log(compose(object, true))

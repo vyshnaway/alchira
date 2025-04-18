@@ -78,7 +78,10 @@ let SHORTHAND = {
         if (shorthandErrors.length)
             response.push($.compose.failed.Footer("Invalid Shorthands", shorthandErrors, $.list.std.Bullets))
 
-        return $.compose.std.Block(response)
+        return {
+            list: Object.keys(stash),
+            report: $.compose.std.Block(response)
+        }
     },
     RENDER: (string) => {
         string = SHORTHAND.IMPORT(string).result

@@ -290,9 +290,9 @@ const ACTION = {
         const files = FILEMAN.SYNC.bulk(ACTION.CONFIGURE.target, ACTION.CONFIGURE.source, ACTION.CONFIGURE.extensions);
 
         DATA.CSSPath = FILEMAN.PATH.join(ACTION.CONFIGURE.source, ACTION.CONFIGURE.stylesheet)
-        // DATA.CSSAppendix = await CSSImport([
-        //     FILEMAN.PATH.join(ACTION.CONFIGURE.target, ACTION.CONFIGURE.stylesheet)
-        // ]);
+        DATA.CSSAppendix = await CSSImport([
+            FILEMAN.PATH.join(ACTION.CONFIGURE.target, ACTION.CONFIGURE.stylesheet)
+        ]);
 
         $.TASK("Saving targeted files")
         DATA.FILES = (await files).fileContent

@@ -26,7 +26,7 @@ export default async function EXECUTOR({
     const files = {}
     const report = [];
 
-    report.push(await shorthandJS.UPLOAD(SHORTHAND))
+    const shorthands = await shorthandJS.UPLOAD(SHORTHAND)
 
     const references = grouperJS.css(REFERS);
     const atomicStyles = CSSParse.READER(references["atomic"].data, false);
@@ -34,7 +34,9 @@ export default async function EXECUTOR({
     const macrosStyles = CSSParse.READER(references["macros"].data, false);
     const composeStyles = CSSParse.READER(references["compose"].data, true);
     const compositeStyles = CSSParse.READER(references["composite"].data, true);
+
     const scope = {
+        shorthands: shorthands.list,
         cumulates: {
             "micros": atomicStyles,
             "macros": microsStyles,
@@ -47,14 +49,16 @@ export default async function EXECUTOR({
         referScope: {},
         sourceScope: {}
     }
+
     references["micros"].list.forEach(element => scope.referScope[element] = "micros");
     references["macros"].list.forEach(element => scope.referScope[element] = "macros");
     references["compose"].list.forEach(element => scope.referScope[element] = "compose");
     references["composite"].list.forEach(element => scope.referScope[element] = "composite");
-
+    
     files[CSSPath] = minify[CMD]([CSSIndex, "/*rendered*/", CSSParse.RENDER(CSSAppendix)].join("\n"))
     report.push($.compose.std.Footer(`Output size: ${(files[CSSPath].length / 1024).toFixed(2)} kb`))
     files[StylesListPath] = JSON.stringify(scope);
+
 
     return {
         files: files,
