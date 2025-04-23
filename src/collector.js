@@ -47,6 +47,7 @@ function libFinder(filePath, content, noGroup = false) {
                 filePath.substring(marker, endMarker) + group.stamp,
             metaFront: (library === "" || group.stamp === "") ?
                 `${group.type}__${normalPath}__` : `${library}_${group.type}__${normalPath}__`,
+            pathString: filePath ,
             content: cleaner.uncomment.Css(content),
         },
     }
@@ -55,11 +56,11 @@ function libFinder(filePath, content, noGroup = false) {
 export default {
     css: (filesArray) => {
         const response = {
-            atomic:{list: [], data: []},
-            micros:{list: [], data: []},
-            macros:{list: [], data: []},
-            compose:{list: [], data: []},
-            composite:{list: [], data: []},
+            atomic: { list: [], data: [] },
+            micros: { list: [], data: [] },
+            macros: { list: [], data: [] },
+            compose: { list: [], data: [] },
+            composite: { list: [], data: [] },
         }
 
         Object.keys(filesArray).forEach(filePath => {

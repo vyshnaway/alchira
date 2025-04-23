@@ -1,579 +1,579 @@
 {
   "align-content": [
-    "-webkit-",
-    "-moz-",
-    "-ms-"
+    "-webkit-align-content",
+    "-moz-align-content",
+    "-ms-align-content"
   ],
   "align-items": [
-    "-webkit-",
-    "-moz-",
-    "-ms-"
+    "-webkit-align-items",
+    "-moz-align-items",
+    "-ms-align-items"
   ],
   "align-self": [
-    "-webkit-",
-    "-moz-",
-    "-ms-"
+    "-webkit-align-self",
+    "-moz-align-self",
+    "-ms-align-self"
   ],
   "all": [
-    "-webkit-"
+    "-webkit-all"
   ],
   "animation": [
-    "-webkit-",
-    "-moz-",
-    "-o-"
+    "-webkit-animation",
+    "-moz-animation",
+    "-o-animation"
   ],
   "animation-delay": [
-    "-webkit-",
-    "-moz-",
-    "-o-"
+    "-webkit-animation-delay",
+    "-moz-animation-delay",
+    "-o-animation-delay"
   ],
   "animation-direction": [
-    "-webkit-",
-    "-moz-",
-    "-o-"
+    "-webkit-animation-direction",
+    "-moz-animation-direction",
+    "-o-animation-direction"
   ],
   "animation-duration": [
-    "-webkit-",
-    "-moz-",
-    "-o-"
+    "-webkit-animation-duration",
+    "-moz-animation-duration",
+    "-o-animation-duration"
   ],
   "animation-fill-mode": [
-    "-webkit-",
-    "-moz-",
-    "-o-"
+    "-webkit-animation-fill-mode",
+    "-moz-animation-fill-mode",
+    "-o-animation-fill-mode"
   ],
   "animation-iteration-count": [
-    "-webkit-",
-    "-moz-",
-    "-o-"
+    "-webkit-animation-iteration-count",
+    "-moz-animation-iteration-count",
+    "-o-animation-iteration-count"
   ],
   "animation-name": [
-    "-webkit-",
-    "-moz-",
-    "-o-"
+    "-webkit-animation-name",
+    "-moz-animation-name",
+    "-o-animation-name"
   ],
   "animation-play-state": [
-    "-webkit-",
-    "-moz-",
-    "-o-"
+    "-webkit-animation-play-state",
+    "-moz-animation-play-state",
+    "-o-animation-play-state"
   ],
   "animation-timing-function": [
-    "-webkit-",
-    "-moz-",
-    "-o-"
+    "-webkit-animation-timing-function",
+    "-moz-animation-timing-function",
+    "-o-animation-timing-function"
   ],
   "appearance": [
-    "-webkit-",
-    "-moz-"
+    "-webkit-appearance",
+    "-moz-appearance"
   ],
   "backface-visibility": [
-    "-webkit-",
-    "-moz-"
+    "-webkit-backface-visibility",
+    "-moz-backface-visibility"
   ],
   "background-blend-mode": [
-    "-webkit-"
+    "-webkit-background-blend-mode"
   ],
   "background-clip": [
-    "-webkit-"
+    "-webkit-background-clip"
   ],
   "background-origin": [
-    "-webkit-"
+    "-webkit-background-origin"
   ],
   "background-size": [
-    "-webkit-"
+    "-webkit-background-size"
   ],
   "border-bottom-left-radius": [
-    "-webkit-",
-    "-moz-"
+    "-webkit-border-bottom-left-radius",
+    "-moz-border-bottom-left-radius"
   ],
   "border-bottom-right-radius": [
-    "-webkit-",
-    "-moz-"
+    "-webkit-border-bottom-right-radius",
+    "-moz-border-bottom-right-radius"
   ],
   "border-image": [
-    "-webkit-",
-    "-moz-",
-    "-o-"
+    "-webkit-border-image",
+    "-moz-border-image",
+    "-o-border-image"
   ],
   "border-image-outset": [
-    "-webkit-",
-    "-moz-",
-    "-o-"
+    "-webkit-border-image-outset",
+    "-moz-border-image-outset",
+    "-o-border-image-outset"
   ],
   "border-image-repeat": [
-    "-webkit-",
-    "-moz-",
-    "-o-"
+    "-webkit-border-image-repeat",
+    "-moz-border-image-repeat",
+    "-o-border-image-repeat"
   ],
   "border-image-slice": [
-    "-webkit-",
-    "-moz-",
-    "-o-"
+    "-webkit-border-image-slice",
+    "-moz-border-image-slice",
+    "-o-border-image-slice"
   ],
   "border-image-source": [
-    "-webkit-",
-    "-moz-",
-    "-o-"
+    "-webkit-border-image-source",
+    "-moz-border-image-source",
+    "-o-border-image-source"
   ],
   "border-image-width": [
-    "-webkit-",
-    "-moz-",
-    "-o-"
+    "-webkit-border-image-width",
+    "-moz-border-image-width",
+    "-o-border-image-width"
   ],
   "border-radius": [
-    "-webkit-",
-    "-moz-"
+    "-webkit-border-radius",
+    "-moz-border-radius"
   ],
   "border-top-left-radius": [
-    "-webkit-",
-    "-moz-"
+    "-webkit-border-top-left-radius",
+    "-moz-border-top-left-radius"
   ],
   "border-top-right-radius": [
-    "-webkit-",
-    "-moz-"
+    "-webkit-border-top-right-radius",
+    "-moz-border-top-right-radius"
   ],
   "box-decoration-break": [
-    "-webkit-"
+    "-webkit-box-decoration-break"
   ],
   "box-shadow": [
-    "-webkit-",
-    "-moz-"
+    "-webkit-box-shadow",
+    "-moz-box-shadow"
   ],
   "box-sizing": [
-    "-webkit-",
-    "-moz-"
+    "-webkit-box-sizing",
+    "-moz-box-sizing"
   ],
   "break-after": [
-    "-webkit-",
-    "-ms-"
+    "-webkit-break-after",
+    "-ms-break-after"
   ],
   "break-before": [
-    "-webkit-",
-    "-ms-"
+    "-webkit-break-before",
+    "-ms-break-before"
   ],
   "break-inside": [
-    "-webkit-",
-    "-ms-"
+    "-webkit-break-inside",
+    "-ms-break-inside"
   ],
   "clip-path": [
-    "-webkit-"
+    "-webkit-clip-path"
   ],
   "color-adjust": [
-    "-webkit-"
+    "-webkit-color-adjust"
   ],
   "column-count": [
-    "-webkit-",
-    "-moz-"
+    "-webkit-column-count",
+    "-moz-column-count"
   ],
   "column-fill": [
-    "-webkit-",
-    "-moz-"
+    "-webkit-column-fill",
+    "-moz-column-fill"
   ],
   "column-gap": [
-    "-webkit-",
-    "-moz-"
+    "-webkit-column-gap",
+    "-moz-column-gap"
   ],
   "column-rule": [
-    "-webkit-",
-    "-moz-"
+    "-webkit-column-rule",
+    "-moz-column-rule"
   ],
   "column-rule-color": [
-    "-webkit-",
-    "-moz-"
+    "-webkit-column-rule-color",
+    "-moz-column-rule-color"
   ],
   "column-rule-style": [
-    "-webkit-",
-    "-moz-"
+    "-webkit-column-rule-style",
+    "-moz-column-rule-style"
   ],
   "column-rule-width": [
-    "-webkit-",
-    "-moz-"
+    "-webkit-column-rule-width",
+    "-moz-column-rule-width"
   ],
   "column-span": [
-    "-webkit-",
-    "-moz-"
+    "-webkit-column-span",
+    "-moz-column-span"
   ],
   "column-width": [
-    "-webkit-",
-    "-moz-"
+    "-webkit-column-width",
+    "-moz-column-width"
   ],
   "columns": [
-    "-webkit-",
-    "-moz-"
+    "-webkit-columns",
+    "-moz-columns"
   ],
   "filter": [
-    "-webkit-"
+    "-webkit-filter"
   ],
   "flex": [
-    "-webkit-"
+    "-webkit-flex"
   ],
   "flex-basis": [
-    "-webkit-"
+    "-webkit-flex-basis"
   ],
   "flex-direction": [
-    "-webkit-"
+    "-webkit-flex-direction"
   ],
   "flex-flow": [
-    "-webkit-"
+    "-webkit-flex-flow"
   ],
   "flex-grow": [
-    "-webkit-"
+    "-webkit-flex-grow"
   ],
   "flex-shrink": [
-    "-webkit-"
+    "-webkit-flex-shrink"
   ],
   "flex-wrap": [
-    "-webkit-"
+    "-webkit-flex-wrap"
   ],
   "float": [
-    "-webkit-",
-    "-moz-"
+    "-webkit-float",
+    "-moz-float"
   ],
   "font-feature-settings": [
-    "-webkit-",
-    "-moz-"
+    "-webkit-font-feature-settings",
+    "-moz-font-feature-settings"
   ],
   "font-kerning": [
-    "-webkit-"
+    "-webkit-font-kerning"
   ],
   "font-variant-ligatures": [
-    "-webkit-",
-    "-moz-"
+    "-webkit-font-variant-ligatures",
+    "-moz-font-variant-ligatures"
   ],
   "grid": [
-    "-webkit-",
-    "-ms-"
+    "-webkit-grid",
+    "-ms-grid"
   ],
   "grid-area": [
-    "-webkit-",
-    "-ms-"
+    "-webkit-grid-area",
+    "-ms-grid-area"
   ],
   "grid-auto-columns": [
-    "-webkit-",
-    "-ms-"
+    "-webkit-grid-auto-columns",
+    "-ms-grid-auto-columns"
   ],
   "grid-auto-flow": [
-    "-webkit-",
-    "-ms-"
+    "-webkit-grid-auto-flow",
+    "-ms-grid-auto-flow"
   ],
   "grid-auto-rows": [
-    "-webkit-",
-    "-ms-"
+    "-webkit-grid-auto-rows",
+    "-ms-grid-auto-rows"
   ],
   "grid-column": [
-    "-webkit-",
-    "-ms-"
+    "-webkit-grid-column",
+    "-ms-grid-column"
   ],
   "grid-column-end": [
-    "-webkit-",
-    "-ms-"
+    "-webkit-grid-column-end",
+    "-ms-grid-column-end"
   ],
   "grid-column-gap": [
-    "-webkit-",
-    "-ms-"
+    "-webkit-grid-column-gap",
+    "-ms-grid-column-gap"
   ],
   "grid-column-start": [
-    "-webkit-",
-    "-ms-"
+    "-webkit-grid-column-start",
+    "-ms-grid-column-start"
   ],
   "grid-gap": [
-    "-webkit-",
-    "-ms-"
+    "-webkit-grid-gap",
+    "-ms-grid-gap"
   ],
   "grid-row": [
-    "-webkit-",
-    "-ms-"
+    "-webkit-grid-row",
+    "-ms-grid-row"
   ],
   "grid-row-end": [
-    "-webkit-",
-    "-ms-"
+    "-webkit-grid-row-end",
+    "-ms-grid-row-end"
   ],
   "grid-row-gap": [
-    "-webkit-",
-    "-ms-"
+    "-webkit-grid-row-gap",
+    "-ms-grid-row-gap"
   ],
   "grid-row-start": [
-    "-webkit-",
-    "-ms-"
+    "-webkit-grid-row-start",
+    "-ms-grid-row-start"
   ],
   "grid-template": [
-    "-webkit-",
-    "-ms-"
+    "-webkit-grid-template",
+    "-ms-grid-template"
   ],
   "grid-template-areas": [
-    "-webkit-",
-    "-ms-"
+    "-webkit-grid-template-areas",
+    "-ms-grid-template-areas"
   ],
   "grid-template-columns": [
-    "-webkit-",
-    "-ms-"
+    "-webkit-grid-template-columns",
+    "-ms-grid-template-columns"
   ],
   "grid-template-rows": [
-    "-webkit-",
-    "-ms-"
+    "-webkit-grid-template-rows",
+    "-ms-grid-template-rows"
   ],
   "hanging-punctuation": [
-    "-webkit-"
+    "-webkit-hanging-punctuation"
   ],
   "hyphens": [
-    "-webkit-",
-    "-moz-",
-    "-ms-"
+    "-webkit-hyphens",
+    "-moz-hyphens",
+    "-ms-hyphens"
   ],
   "image-rendering": [
-    "-webkit-",
-    "-moz-",
-    "-ms-"
+    "-webkit-image-rendering",
+    "-moz-image-rendering",
+    "-ms-image-rendering"
   ],
   "justify-content": [
-    "-webkit-"
+    "-webkit-justify-content"
   ],
   "line-break": [
-    "-webkit-"
+    "-webkit-line-break"
   ],
   "mask": [
-    "-webkit-"
+    "-webkit-mask"
   ],
   "mask-clip": [
-    "-webkit-"
+    "-webkit-mask-clip"
   ],
   "mask-composite": [
-    "-webkit-"
+    "-webkit-mask-composite"
   ],
   "mask-image": [
-    "-webkit-"
+    "-webkit-mask-image"
   ],
   "mask-mode": [
-    "-webkit-"
+    "-webkit-mask-mode"
   ],
   "mask-origin": [
-    "-webkit-"
+    "-webkit-mask-origin"
   ],
   "mask-position": [
-    "-webkit-"
+    "-webkit-mask-position"
   ],
   "mask-repeat": [
-    "-webkit-"
+    "-webkit-mask-repeat"
   ],
   "mask-size": [
-    "-webkit-"
+    "-webkit-mask-size"
   ],
   "object-fit": [
-    "-webkit-",
-    "-moz-",
-    "-o-"
+    "-webkit-object-fit",
+    "-moz-object-fit",
+    "-o-object-fit"
   ],
   "object-position": [
-    "-webkit-",
-    "-moz-",
-    "-o-"
+    "-webkit-object-position",
+    "-moz-object-position",
+    "-o-object-position"
   ],
   "opacity": [
-    "-webkit-",
-    "-moz-"
+    "-webkit-opacity",
+    "-moz-opacity"
   ],
   "order": [
-    "-webkit-"
+    "-webkit-order"
   ],
   "outline": [
-    "-webkit-",
-    "-moz-"
+    "-webkit-outline",
+    "-moz-outline"
   ],
   "overflow-wrap": [
-    "-webkit-",
-    "-ms-"
+    "-webkit-overflow-wrap",
+    "-ms-overflow-wrap"
   ],
   "perspective": [
-    "-webkit-",
-    "-moz-"
+    "-webkit-perspective",
+    "-moz-perspective"
   ],
   "perspective-origin": [
-    "-webkit-",
-    "-moz-"
+    "-webkit-perspective-origin",
+    "-moz-perspective-origin"
   ],
   "place-content": [
-    "-webkit-"
+    "-webkit-place-content"
   ],
   "place-items": [
-    "-webkit-"
+    "-webkit-place-items"
   ],
   "place-self": [
-    "-webkit-"
+    "-webkit-place-self"
   ],
   "pointer-events": [
-    "-webkit-",
-    "-moz-"
+    "-webkit-pointer-events",
+    "-moz-pointer-events"
   ],
   "resize": [
-    "-webkit-",
-    "-moz-"
+    "-webkit-resize",
+    "-moz-resize"
   ],
   "scroll-behavior": [
-    "-webkit-",
-    "-moz-",
-    "-ms-"
+    "-webkit-scroll-behavior",
+    "-moz-scroll-behavior",
+    "-ms-scroll-behavior"
   ],
   "scroll-snap-align": [
-    "-webkit-",
-    "-ms-"
+    "-webkit-scroll-snap-align",
+    "-ms-scroll-snap-align"
   ],
   "scroll-snap-stop": [
-    "-webkit-",
-    "-ms-"
+    "-webkit-scroll-snap-stop",
+    "-ms-scroll-snap-stop"
   ],
   "scroll-snap-type": [
-    "-webkit-",
-    "-ms-"
+    "-webkit-scroll-snap-type",
+    "-ms-scroll-snap-type"
   ],
   "shape-image-threshold": [
-    "-webkit-"
+    "-webkit-shape-image-threshold"
   ],
   "shape-margin": [
-    "-webkit-"
+    "-webkit-shape-margin"
   ],
   "shape-outside": [
-    "-webkit-"
+    "-webkit-shape-outside"
   ],
   "tab-size": [
-    "-webkit-",
-    "-moz-"
+    "-webkit-tab-size",
+    "-moz-tab-size"
   ],
   "text-align-last": [
-    "-webkit-",
-    "-moz-",
-    "-ms-"
+    "-webkit-text-align-last",
+    "-moz-text-align-last",
+    "-ms-text-align-last"
   ],
   "text-combine-upright": [
-    "-webkit-",
-    "-ms-"
+    "-webkit-text-combine-upright",
+    "-ms-text-combine-upright"
   ],
   "text-decoration": [
-    "-webkit-",
-    "-moz-"
+    "-webkit-text-decoration",
+    "-moz-text-decoration"
   ],
   "text-decoration-color": [
-    "-webkit-",
-    "-moz-"
+    "-webkit-text-decoration-color",
+    "-moz-text-decoration-color"
   ],
   "text-decoration-line": [
-    "-webkit-",
-    "-moz-"
+    "-webkit-text-decoration-line",
+    "-moz-text-decoration-line"
   ],
   "text-decoration-style": [
-    "-webkit-",
-    "-moz-"
+    "-webkit-text-decoration-style",
+    "-moz-text-decoration-style"
   ],
   "text-emphasis": [
-    "-webkit-"
+    "-webkit-text-emphasis"
   ],
   "text-emphasis-color": [
-    "-webkit-"
+    "-webkit-text-emphasis-color"
   ],
   "text-emphasis-position": [
-    "-webkit-"
+    "-webkit-text-emphasis-position"
   ],
   "text-emphasis-style": [
-    "-webkit-"
+    "-webkit-text-emphasis-style"
   ],
   "text-orientation": [
-    "-webkit-"
+    "-webkit-text-orientation"
   ],
   "text-overflow": [
-    "-webkit-",
-    "-moz-",
-    "-ms-"
+    "-webkit-text-overflow",
+    "-moz-text-overflow",
+    "-ms-text-overflow"
   ],
   "text-rendering": [
-    "-webkit-",
-    "-moz-"
+    "-webkit-text-rendering",
+    "-moz-text-rendering"
   ],
   "text-size-adjust": [
-    "-webkit-",
-    "-ms-"
+    "-webkit-text-size-adjust",
+    "-ms-text-size-adjust"
   ],
   "touch-action": [
-    "-webkit-",
-    "-ms-"
+    "-webkit-touch-action",
+    "-ms-touch-action"
   ],
   "transform": [
-    "-webkit-",
-    "-moz-",
-    "-ms-",
-    "-o-"
+    "-webkit-transform",
+    "-moz-transform",
+    "-ms-transform",
+    "-o-transform"
   ],
   "transform-box": [
-    "-webkit-",
-    "-moz-"
+    "-webkit-transform-box",
+    "-moz-transform-box"
   ],
   "transform-origin": [
-    "-webkit-",
-    "-moz-",
-    "-ms-",
-    "-o-"
+    "-webkit-transform-origin",
+    "-moz-transform-origin",
+    "-ms-transform-origin",
+    "-o-transform-origin"
   ],
   "transform-style": [
-    "-webkit-",
-    "-moz-"
+    "-webkit-transform-style",
+    "-moz-transform-style"
   ],
   "transition": [
-    "-webkit-",
-    "-moz-",
-    "-o-"
+    "-webkit-transition",
+    "-moz-transition",
+    "-o-transition"
   ],
   "transition-delay": [
-    "-webkit-",
-    "-moz-",
-    "-o-"
+    "-webkit-transition-delay",
+    "-moz-transition-delay",
+    "-o-transition-delay"
   ],
   "transition-duration": [
-    "-webkit-",
-    "-moz-",
-    "-o-"
+    "-webkit-transition-duration",
+    "-moz-transition-duration",
+    "-o-transition-duration"
   ],
   "transition-property": [
-    "-webkit-",
-    "-moz-",
-    "-o-"
+    "-webkit-transition-property",
+    "-moz-transition-property",
+    "-o-transition-property"
   ],
   "transition-timing-function": [
-    "-webkit-",
-    "-moz-",
-    "-o-"
+    "-webkit-transition-timing-function",
+    "-moz-transition-timing-function",
+    "-o-transition-timing-function"
   ],
   "user-select": [
-    "-webkit-",
-    "-moz-",
-    "-ms-"
+    "-webkit-user-select",
+    "-moz-user-select",
+    "-ms-user-select"
   ],
   "vertical-align": [
-    "-webkit-",
-    "-moz-"
+    "-webkit-vertical-align",
+    "-moz-vertical-align"
   ],
   "white-space": [
-    "-webkit-",
-    "-moz-"
+    "-webkit-white-space",
+    "-moz-white-space"
   ],
   "will-change": [
-    "-webkit-"
+    "-webkit-will-change"
   ],
   "word-break": [
-    "-webkit-",
-    "-ms-"
+    "-webkit-word-break",
+    "-ms-word-break"
   ],
   "word-spacing": [
-    "-webkit-",
-    "-moz-"
+    "-webkit-word-spacing",
+    "-moz-word-spacing"
   ],
   "word-wrap": [
-    "-webkit-",
-    "-ms-"
+    "-webkit-word-wrap",
+    "-ms-word-wrap"
   ],
   "writing-mode": [
-    "-webkit-",
-    "-ms-"
+    "-webkit-writing-mode",
+    "-ms-writing-mode"
   ],
   "zoom": [
-    "-webkit-",
-    "-ms-"
+    "-webkit-zoom",
+    "-ms-zoom"
   ]
 }

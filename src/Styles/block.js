@@ -4,23 +4,31 @@ const OPEN_CHARS = ['{', '[', '('];
 const CLOSE_CHARS = ['}', ']', ')'];
 const QUOTE_CHARS = ['`', "'", '"'];
 
-export default function parseCssToObject(string, links = true, props = true, nests = true, flats = true, rules = true, classes = true) {
-    string += ';'
+export default function parseCssToObject(content) {
+    content += ';'
     let keyStart = 0,
         valStart = 0,
         deviance = 0,
         quote = '',
         key = '',
-        linksArray = [],
         isProp = true,
-        length = string.length;
+        length = content.length;
 
     let properties = {
-        mixins: [], preBinds: [], postBinds: [], props: {}, nests: {}, flats: {}, rules: {}, classes: {}
+        adds: [],
+        binds: [],
+        preBinds: [],
+        postBinds: [],
+        props: {},
+        nests: {},
+        flats: {},
+        classes: {},
+        atRrules: {},
+        atProps: {}
     };
 
     for (let index = 0; index < length; index++) {
-        const ch = string[index];
+        const ch = content[index];
         if (ch === '\\') {
             index++;
             continue;
@@ -40,39 +48,53 @@ export default function parseCssToObject(string, links = true, props = true, nes
                 switch (ch) {
                     case '{': isProp = false;
                     case ':':
-                        key = U.string.minify(string.slice(keyStart, index));
+                        key = U.string.minify(content.slice(keyStart, index));
                         valStart = index + 1;
                         break;
                     case '}':
                     case ';':
-                        const value = U.string.minify(string.slice(valStart, index));
+                        const value = U.string.minify(content.slice(valStart, index));
                         if (key !== '') {
                             if (!isProp) {
                                 switch (key[0]) {
                                     case "@":
-                                        if (rules) {
-                                            properties.rules[key] = value;
-                                        }
+                                        properties.atRrules[key] = value;
                                         break;
                                     case "&":
-                                        if (nests) {
-                                            properties.nests[key] = value;
-                                        }
+                                        properties.nests[key] = value;
                                         break;
                                     case ".":
-                                        if (classes && U.identity.ClassName !== "")
+                                        if (U.identity.ClassName !== "")
                                             properties.classes[key] = value;
                                     default:
-                                        if (flats)
-                                            properties.flats[key] = value;
+                                        properties.flats[key] = value;
                                 }
-                            } else if (key[0] !== '@' && props) properties.props[key] = value;
+                            } else if (key[0] !== '@') properties.props[key] = value;
                         } else if (isProp) {
-                            if (value[0] === '@' && props) properties.props[value] = '';
-                            else if (links) {
+                            if (value[0] === '@') {
+                                const spaceIndex = value.indexOf(" ")
+                                const directive = value.slice(0, spaceIndex);
+                                switch (directive) {
+                                    case "@bind":
+                                        properties.binds.push(...U.string.breaks(value.slice(spaceIndex)));
+                                        break;
+                                    case "@post-bind":
+                                        properties.preBinds.push(...U.string.breaks(value.slice(spaceIndex)));
+                                        break;
+                                    case "@pre-bind":
+                                        properties.postBinds.push(...U.string.breaks(value.slice(spaceIndex)));
+                                        break;
+                                    case "@adds":
+                                        properties.adds.push(...U.string.breaks(value.slice(spaceIndex)));
+                                        break;
+                                    default:
+                                        properties.atProps[directive] = value.slice(spaceIndex + 1);
+                                }
+                            }
+                            else {
                                 const breaks = U.string.breaks(value);
-                                const groupMap = { "<": "preBinds", ">": "postBinds", "+": "mixins" };
-                                const group = groupMap[breaks[0]] || "mixins";
+                                const groupMap = { "<": "preBinds", ">": "postBinds", "+": "adds", "*": "binds" };
+                                const group = groupMap[breaks[0]] || "adds";
                                 if (Object.keys(groupMap).includes(breaks[0])) breaks.shift();
                                 breaks.forEach(link => {
                                     const targetGroup = groupMap[link[0]] || group;

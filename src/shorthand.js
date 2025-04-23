@@ -44,7 +44,7 @@ let SHORTHAND = {
                 return errors.recursionLoop(recursionPreview, hash);
 
             string = string.replace(hashPattern, replacement)
-                .replace(preHashPattern, match => "{" + match + "}"); // added for recursion detection
+                .replace(preHashPattern, match => "{" + match + "}");
 
             recursionSequence.push(hash);
         }

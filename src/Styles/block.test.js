@@ -18,6 +18,11 @@ prop3: val3;
     props4 : hinokins4;
 }
 };
+@adds asd;
+@bind asd;
+> dfd +67u <od;
+< dfd +67u >df *uu;
+df <67, >78; 
 @:hover {
     prop4 : 'hinokin';
     prop43 : 'hinokin';

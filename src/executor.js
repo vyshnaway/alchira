@@ -5,7 +5,7 @@ import grouperJS from "./collector.js"
 import CSSParse from "./Styles/file.js";
 
 const minify = {
-    dev: (content) => cleaner.uncomment.Css(content),
+    dev: (content) => content,
     preview: (content) => cleaner.minify.Lite(cleaner.uncomment.Css(content)),
     build: (content) => cleaner.minify.Strict(cleaner.uncomment.Script(content)),
 }

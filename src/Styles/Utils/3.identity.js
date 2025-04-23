@@ -3,7 +3,7 @@ const nestSelectorRegex = /^\&.+$/i;
 const keyFrameRegex = /^(from|to|[0-9]+%)$/i;
 
 export default {
-    ClassName: (string) => {
+     ClassName: (string) => {
         const match = classNameRegex.exec(string);
         return match ? match[1] : '';
     },
