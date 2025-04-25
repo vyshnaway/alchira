@@ -6,6 +6,18 @@ const stash = {};
 const index = {};
 let counter = 0;
 
+const enCounter = () => {
+    const digits = "_0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-";
+    const base = digits.length;
+
+    let result = "", num = ++counter;
+    while (num > 0) {
+        result = digits[num % base] + result;
+        num = Math.floor(num / base);
+    }
+    return "_" + result;
+};
+
 function xtylemerge(classList, nested) {
     function deepMerge(target, source, includeInnerObjects = true) {
         if (!source || typeof source !== 'object') return target;
@@ -47,11 +59,11 @@ function parse({ content, idFront, metaFront, pathString }, nested) {
         if (extracts.classes.hasOwnProperty(key)) {
             const styles = read(extracts.classes[key]);
             const nests = nested ? Object.fromEntries(
-                Object.entries(styles.nests).map(([key, value]) => {
+                Object.entries(styles.nested).map(([key, value]) => {
                     const nest = read(value)
                     return [key, {
                         ...xtylemerge(nest.mixins, false),
-                        ...Object.entries(nest.props).reduce((acc, [propKey, propValue]) => {
+                        ...Object.entries(nest.properties).reduce((acc, [propKey, propValue]) => {
                             acc[propKey] = `${propValue} /* ${key} @ ${pathString} */`;
                             return acc;
                         }, {})
@@ -67,8 +79,8 @@ function parse({ content, idFront, metaFront, pathString }, nested) {
                 metaClass: metaFront + modKey,
                 style: {
                     ...xtylemerge(styles.mixins, nested),
-                    ...Object.entries(styles.props).reduce((acc, [propKey, propValue]) => {
-                        acc[propKey] = `${propValue} /* ${key} @ ${pathString} */`;
+                    ...Object.entries(styles.properties).reduce((acc, [propKey, propValue]) => {
+                        acc[propKey] = `${propValue} /* ${pathString} :: ${key} */`;
                         return acc;
                     }, {}), ...nests
                 }
@@ -76,16 +88,16 @@ function parse({ content, idFront, metaFront, pathString }, nested) {
         }
     }
 
-    for (const rule in extracts.atRrules) {
+    for (const rule in extracts.atRules) {
         const modKey = U.string.normalize(rule);
-        if (extracts.atRrules.hasOwnProperty(rule)) {
-            const styles = read(extracts.atRrules[rule])
+        if (extracts.atRules.hasOwnProperty(rule)) {
+            const styles = read(extracts.atRules[rule])
             const nests = Object.fromEntries(
-                Object.entries(styles.flats).map(([key, value]) => {
+                Object.entries(styles.blocks).map(([key, value]) => {
                     const nest = read(value)
                     return [key, {
                         ...xtylemerge(nest.mixins, false),
-                        ...Object.entries(nest.props).reduce((acc, [propKey, propValue]) => {
+                        ...Object.entries(nest.properties).reduce((acc, [propKey, propValue]) => {
                             acc[propKey] = `${propValue} /* ${pathString} :: ${rule} */`;
                             return acc;
                         }, {})
@@ -100,7 +112,7 @@ function parse({ content, idFront, metaFront, pathString }, nested) {
                 metaClass: metaFront + modKey,
                 style: {
                     ...xtylemerge(styles.mixins, nested),
-                    ...Object.entries(styles.props).reduce((acc, [propKey, propValue]) => {
+                    ...Object.entries(styles.properties).reduce((acc, [propKey, propValue]) => {
                         acc[propKey] = `${propValue} /* ${pathString} :: ${rule} */`;
                         return acc;
                     }, {}),

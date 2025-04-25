@@ -28,12 +28,13 @@ df <67, >78;
     prop43 : 'hinokin';
     @applay hg;
 a b csd;
-};
+};+;>;<;
 a b csd;
 gha b csd;
+--fd: df;
 `
 
-console.log(JSON.stringify(fn(string), ' ', 4))
+console.log(fn(string))
 
 // function testDeepMerge() {
 //     // Helper function to compare objects

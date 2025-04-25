@@ -1,17 +1,5 @@
 import U from "./Utils/index.js"
 
-const enCounter = () => {
-    const digits = "_0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-";
-    const base = digits.length;
-
-    let result = "", num = ++counter;
-    while (num > 0) {
-        result = digits[num % base] + result;
-        num = Math.floor(num / base);
-    }
-    return "_" + result;
-};
-
 export default function compose(object, dotPrefix = false, minify = false, order = []) {
     const tb = (count = 0) => minify ? '' : '    '.repeat(count)
     const br = (count = 1) => minify ? '' : '\n'.repeat(count);

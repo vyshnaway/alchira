@@ -1,4 +1,4 @@
-import { classTable, currentFile } from "../0.env.js";
+import { classTable, currentFile } from "../../../.dump/src.js/0.env.js";
 
 function setback(array) {
     const lastSeen = new Map();
