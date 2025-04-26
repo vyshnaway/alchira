@@ -5,7 +5,7 @@ console.log(scan(`
 import Navbar from "$lib/Navbar.svelte";
 </script>
 
-<header>
+<header class="huih">
 	<Navbar isConsole="false" />
 </header>
 

@@ -84,7 +84,7 @@ export default function scan(content, start = 0, proxyLoad = false, classProp = 
         } else if (ch === "=") isVal = true;
 
         if (deviance === 0 &&
-            [" ", "\n", "\r", ">"].includes(ch) 
+            [" ", "\n", "\r", ">"].includes(ch)
             & attr !== ""
         ) {
 

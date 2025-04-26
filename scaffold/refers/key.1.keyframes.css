@@ -1,0 +1,329 @@
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+.fade-in {
+  @bind $$-keyframes_fade-in;
+  animation-name: fade-in;
+}
+
+@keyframes fade-out {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
+}
+
+.fade-out {
+  @bind $$-keyframes_fade-out;
+  animation-name: fade-out;
+}
+
+@keyframes slide-in-left {
+  from {
+    transform: translateX(-100%);
+  }
+
+  to {
+    transform: translateX(0);
+  }
+}
+
+.slide-in-left {
+  @bind $$-keyframes_slide-in-left;
+  animation-name: slide-in-left;
+}
+
+@keyframes slide-in-right {
+  from {
+    transform: translateX(100%);
+  }
+
+  to {
+    transform: translateX(0);
+  }
+}
+
+.slide-in-right {
+  @bind $$-keyframes_slide-in-right;
+  animation-name: slide-in-right;
+}
+
+@keyframes slide-in-top {
+  from {
+    transform: translateY(-100%);
+  }
+
+  to {
+    transform: translateY(0);
+  }
+}
+
+.slide-in-top {
+  @bind $$-keyframes_slide-in-top;
+  animation-name: slide-in-top;
+}
+
+@keyframes slide-in-bottom {
+  from {
+    transform: translateY(100%);
+  }
+
+  to {
+    transform: translateY(0);
+  }
+}
+
+.slide-in-bottom {
+  @bind $$-keyframes_slide-in-bottom;
+  animation-name: slide-in-bottom;
+}
+
+@keyframes slide-out-left {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-100%);
+  }
+}
+
+.slide-out-left {
+  @bind $$-keyframes_slide-out-left;
+  animation-name: slide-out-left;
+}
+
+@keyframes slide-out-right {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(100%);
+  }
+}
+
+.slide-out-right {
+  @bind $$-keyframes_slide-out-right;
+  animation-name: slide-out-right;
+}
+
+@keyframes slide-out-top {
+  from {
+    transform: translateY(0);
+  }
+
+  to {
+    transform: translateY(-100%);
+  }
+}
+
+.slide-out-top {
+  @bind $$-keyframes_slide-out-top;
+  animation-name: slide-out-top;
+}
+
+@keyframes slide-out-bottom {
+  from {
+    transform: translateY(0);
+  }
+
+  to {
+    transform: translateY(100%);
+  }
+}
+
+.slide-out-bottom {
+  @bind $$-keyframes_slide-out-bottom;
+  animation-name: slide-out-bottom;
+}
+
+@keyframes scale-in {
+  from {
+    transform: scale(0);
+  }
+
+  to {
+    transform: scale(1);
+  }
+}
+
+.scale-in {
+  @bind $$-keyframes_scale-in;
+  animation-name: scale-in;
+}
+
+@keyframes scale-out {
+  from {
+    transform: scale(1);
+  }
+
+  to {
+    transform: scale(0);
+  }
+}
+
+.scale-out {
+  @bind $$-keyframes_scale-out;
+  animation-name: scale-out;
+}
+
+@keyframes scale-up {
+  from {
+    transform: scale(1);
+  }
+
+  to {
+    transform: scale(1.1);
+  }
+}
+
+.scale-up {
+  @bind $$-keyframes_scale-up;
+  animation-name: scale-up;
+}
+
+@keyframes scale-down {
+  from {
+    transform: scale(1);
+  }
+
+  to {
+    transform: scale(0.9);
+  }
+}
+
+.scale-down {
+  @bind $$-keyframes_scale-down;
+  animation-name: scale-down;
+}
+
+@keyframes rotate-clockwise {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.rotate-clockwise {
+  @bind $$-keyframes_rotate-clockwise;
+  animation-name: rotate-clockwise;
+}
+
+@keyframes rotate-counterclockwise {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(-360deg);
+  }
+}
+
+.rotate-counterclockwise {
+  @bind $$-keyframes_rotate-counterclockwise;
+  animation-name: rotate-counterclockwise;
+}
+
+@keyframes expand-width {
+  from {
+    width: 0;
+  }
+
+  to {
+    width: 100%;
+  }
+}
+
+.expand-width {
+  @bind $$-keyframes_expand-width;
+  animation-name: expand-width;
+}
+
+@keyframes collapse-width {
+  from {
+    width: 100%;
+  }
+
+  to {
+    width: 0;
+  }
+}
+
+.collapse-width {
+  @bind $$-keyframes_collapse-width;
+  animation-name: collapse-width;
+}
+
+@keyframes expand-height {
+  from {
+    height: 0;
+  }
+
+  to {
+    height: 100%;
+  }
+}
+
+.expand-height {
+  @bind $$-keyframes_expand-height;
+  animation-name: expand-height;
+}
+
+@keyframes collapse-height {
+  from {
+    height: 100%;
+  }
+
+  to {
+    height: 0;
+  }
+}
+
+.collapse-height {
+  @bind $$-keyframes_collapse-height;
+  animation-name: collapse-height;
+}
+
+@keyframes blur-in {
+  from {
+    filter: blur(10px);
+  }
+
+  to {
+    filter: blur(0px);
+  }
+}
+
+.blur-in {
+  @bind $$-keyframes_blur-in;
+  animation-name: blur-in;
+}
+
+@keyframes blur-out {
+  from {
+    filter: blur(0px);
+  }
+
+  to {
+    filter: blur(10px);
+  }
+}
+
+.blur-out {
+  @bind $$-keyframes_blur-out;
+  animation-name: blur-out;
+}

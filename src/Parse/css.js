@@ -1,6 +1,7 @@
 import read from "./block.js"
 import compose from "./compose.js"
 import U from "./Utils/index.js"
+import { stash } from "../executor.js";
 
 const stash = {};
 const index = {};

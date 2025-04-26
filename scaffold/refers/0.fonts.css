@@ -1,11 +1,13 @@
-.font-display { font-family: 'Display-Font'; font-weight: 700; }
-.font-heading { font-family: 'Heading-Font'; font-weight: 500; }
-.font-heading-bold { font-family: 'Heading-Font'; font-weight: 900; }
-.font-body { font-family: 'Body-Font'; font-weight: 400; }
-.font-caption { font-family: 'Caption-Font'; font-weight: 300; }
-.font-button { font-family: 'Button-Font'; font-weight: 600; }
-.font-link { font-family: 'Link-Font'; font-weight: 500; }
-.font-monospace { font-family: 'Monospace-Font'; font-weight: 400; }
+@import url("../../setup/#constants.css");
+
+.font-display { font-family: var(--font-display); font-weight: 700; }
+.font-heading { font-family: var(--font-heading); font-weight: 500; }
+.font-heading-bold { font-family: var(--font-heading); font-weight: 900; }
+.font-body { font-family: var(--font-body); font-weight: 400; }
+.font-caption { font-family: var(--font-caption); font-weight: 300; }
+.font-button { font-family: var(--font-button); font-weight: 600; }
+.font-link { font-family: var(--font-link); font-weight: 500; }
+.font-monospace { font-family: var(--font-monospace); font-weight: 400; }
 
 .f-bold { font-weight: 700;}
 .f-italic { font-style: italic;}

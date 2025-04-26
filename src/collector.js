@@ -1,53 +1,38 @@
 import cleaner from "./cleaner.js";
 
-const NON_ALPHANUMERIC_EXCEPT_SLASH = /[^a-z0-9/\\]/gi;
-const LIB_CHARSET = /[^a-z0-9\$-]/gi;
-const SLASH = /[/\\]/g;
+function objectToNumberedArray(obj, length) {
+    const arr = new Array(length + 1);
 
-function groupFinder(head, tail) {
-    if (tail.startsWith("$$")) {
-        return { type: head ? "composite" : "compose", stamp: "$$" };
+    for (const key in obj) {
+        if (Object.hasOwnProperty.call(obj, key)) {
+            const index = Number(key);
+            arr[index] = obj[key] ?? [];
+        }
     }
-    if (tail.startsWith("$")) {
-        return { type: head ? "macros" : "micros", stamp: "$" };
-    }
-    return { type: "atomic", stamp: "" };
+    return arr;
 }
 
-function libFinder(filePath, content, noGroup = false) {
-    let
-        marker = filePath.length,
-        scanning = true,
-        endMarker = filePath.length;
+const NON_ALPHANUMERIC_EXCEPT_SLASH = /[^a-z0-9/\\]/gi;
+const LIB_CHARSET = /[^\w-]/gi;
+const SLASH = /[/\\]/g;
 
-    while (scanning) {
-        const char = filePath[--marker]
-        if (char === "$")
-            endMarker = marker;
-        if (!["/", "\\"].includes(char) && endMarker !== 0)
-            marker;
-        if (["/", "\\"].includes(char)) {
-            marker++
-            scanning = false;
-        }
-        if (marker === 0)
-            scanning = false;
-    }
+function libFinder(filePath, content, useLevel) {
 
-    const group = (!noGroup) ?
-        groupFinder(filePath.substring(marker, endMarker), filePath.substring(endMarker)) :
-        { type: "", stamp: "" };
+    let [extension, fileName, level, library] = filePath.slice(filePath.lastIndexOf("/") + 1).split(".").reverse()
+    level = (isNaN(level) || level < 0) ? 0 : parseInt(level, 10);
+    library = library ?? "".replace(LIB_CHARSET, '-');
+
+    const stamp = library + "$".repeat(level)
     const normalPath = filePath.replace(NON_ALPHANUMERIC_EXCEPT_SLASH, '-').replace(SLASH, '_');
-    const library = filePath.substring(marker, endMarker).replace(LIB_CHARSET, '-');
 
     return {
-        group: group.type,
-        response: {
-            idFront: (group.stamp === "") ? "" :
-                filePath.substring(marker, endMarker) + group.stamp,
-            metaFront: (library === "" || group.stamp === "") ?
-                `${group.type}__${normalPath}__` : `${library}_${group.type}__${normalPath}__`,
-            pathString: filePath ,
+        level,
+        data: {
+            stamp,
+            fileName,
+            extension,
+            filePath,
+            metaFront: (useLevel ? `level-${level}` + (library.length > 0 ? `_${library}` : ``) : "") + `__${normalPath}__`,
             content: cleaner.uncomment.Css(content),
         },
     }
@@ -55,27 +40,28 @@ function libFinder(filePath, content, noGroup = false) {
 
 export default {
     css: (filesArray) => {
-        const response = {
-            atomic: { list: [], data: [] },
-            micros: { list: [], data: [] },
-            macros: { list: [], data: [] },
-            compose: { list: [], data: [] },
-            composite: { list: [], data: [] },
-        }
+        const list = {}, index = {};
+        let length = 0;
 
         Object.keys(filesArray).forEach(filePath => {
-            const lib = libFinder(filePath, filesArray[filePath]);
-            response[lib.group].list.push(filePath)
-            response[lib.group].data.push(lib.response)
-        })
+            const lib = libFinder(filePath, filesArray[filePath], true);
+            const { level } = lib;
 
-        return response;
+            if (!list[level]) list[level] = [];
+            list[level].push(filePath);
+
+            if (!index[level]) index[level] = [];
+            index[level].push(lib.data);
+
+            if (level > length) length = level;
+        });
+        
+        return { list, index: objectToNumberedArray(index, length) };
     },
     files: (filesArray) => {
-        const response = {};
-        filesArray.forEach(filePath => {
-            const lib = libFinder(filePath, true);
-            response[lib.response.path] = lib.response.source
+        const response = [];
+        Object.keys(filesArray).forEach(filePath => {
+            response.push(libFinder(filePath, filesArray[filePath], false).data);
         })
         return response
     }

@@ -1,8 +1,8 @@
-import $ from './Shell/index.js';
+import $ from '../Shell/index.js';
+import { stash } from '../executor.js';
 
 const hashPattern = /\{#[a-z0-9]+\}/i;
 const preHashPattern = /(?<!\{)#\w+/g;
-let stash = {};
 
 let SHORTHAND = {
     IMPORT: (string, watchUndef = true) => {
@@ -34,7 +34,7 @@ let SHORTHAND = {
         while (hashMatch = hashPattern.exec(string)) {
             const hash = hashMatch[0];
             const key = hash.slice(2, -1);
-            const replacement = watchUndef ? (stash[key] ?? hash) : stash[key];
+            const replacement = watchUndef ? (stash.shorthands[key] ?? hash) : stash.shorthands[key];
             recursionPreview["FROM " + hash] = `GETS ${replacement}`
 
             if (replacement === undefined)
@@ -56,7 +56,7 @@ let SHORTHAND = {
         $.TASK('Attempting shorthand build.')
         const shorthandErrors = [];
 
-        stash = shorthands;
+        stash.shorthands = shorthands;
         Object.keys(shorthands).map(key => {
             const hash = '#' + key
             const response = SHORTHAND.IMPORT(hash);
@@ -69,17 +69,17 @@ let SHORTHAND = {
                 }
             }
         });
-        stash = shorthands;
+        stash.shorthands = shorthands;
         let response = [];
 
-        if (Object.keys(stash).length)
+        if (Object.keys(stash.shorthands).length)
             response.push($.compose.success.Section("Valid Shorthands", $.list.success.Props(shorthands), $.list.std.Bullets))
 
         if (shorthandErrors.length)
             response.push($.compose.failed.Footer("Invalid Shorthands", shorthandErrors, $.list.std.Bullets))
 
         return {
-            list: Object.keys(stash),
+            list: Object.keys(stash.shorthands),
             report: $.compose.std.Block(response)
         }
     },

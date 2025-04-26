@@ -1,4 +1,4 @@
-@import url("../0.const.css");
+@import url("../../setup/#constants.css");
 
 /* Background Colors */
 .bg-primary-100 { background-color: var(--primary-100); }

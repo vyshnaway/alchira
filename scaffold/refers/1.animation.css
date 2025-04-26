@@ -1,12 +1,14 @@
-/* Transition Utilities (for smoother animations) */
 .none { transition: none; }
+
 .all { transition: all 300ms ease; }
 .transform { transition: transform 300ms ease; }
 .opacity { transition: opacity 300ms ease; }
+
 .duration-100 { transition-duration: 100ms; }
 .duration-200 { transition-duration: 200ms; }
 .duration-300 { transition-duration: 300ms; }
 .duration-500 { transition-duration: 500ms; }
+
 .ease { transition-timing-function: ease; }
 .linear { transition-timing-function: linear; }
 .ease-in { transition-timing-function: ease-in; }
