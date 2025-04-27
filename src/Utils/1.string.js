@@ -1,6 +1,9 @@
 const NON_ALPHANUMERIC_AND_US = /[^a-z0-9_]/gi;
 const SPACE = /\s/g;
 
+const digits = "_0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-";
+const base = digits.length;
+
 export default {
     normalize: (string) => {
         return string.replace(SPACE, '_').replace(NON_ALPHANUMERIC_AND_US, '-')
@@ -46,5 +49,14 @@ export default {
         }
 
         return result;
+    },
+    enCounter: (number) => {
+        let result = "", num = ++number;
+
+        while (num > 0) {
+            result = digits[num % base] + result;
+            num = Math.floor(num / base);
+        }
+        return "_" + result;
     }
 }

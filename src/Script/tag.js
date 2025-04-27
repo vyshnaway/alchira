@@ -1,40 +1,4 @@
-function classExtract(string, proxyLoad) {
-    let marker = 0,
-        ch = string[marker],
-        quotes = ["'", "`", '"'],
-        activeQuote = "",
-        active = false,
-        entry = "",
-        classList = [],
-        proxy = "";
-
-    while (ch !== undefined) {
-
-        if (ch === activeQuote) {
-            proxy += (proxyLoad ? "entry" : entry) + ch
-            active = false;
-            activeQuote = "";
-            classList.push(entry);
-            entry = ""
-        } else if (active) {
-            if (ch === " ") {
-                proxy += (proxyLoad ? "entry" : entry) + ch
-                classList.push(entry);
-                entry = ""
-            } else entry += ch
-        } else {
-            proxy += ch;
-            if (quotes.includes(ch)) {
-                active = true;
-                activeQuote = ch;
-            }
-        }
-
-        ch = string[++marker];
-    }
-
-    return { classList, proxy }
-}
+import classExtract from "./proxy.x.js"
 
 const bracePair = {
     "{": "}",
@@ -45,7 +9,7 @@ const bracePair = {
     '"': '"',
 }, openBraces = ["[", "{", "(", "'", '"', "`"], closeBraces = ["]", "}", ")"];
 
-export default function scan(content, start = 0, proxyLoad = false, classProp = "class") {
+export default function tagScan(content, start = 0, proxyLoad = false, classProp = "class") {
 
     let deviance = 0,
         marker = start + 1,
@@ -57,9 +21,9 @@ export default function scan(content, start = 0, proxyLoad = false, classProp = 
             attributes: {},
         },
         styleObject = {
+            scope: "style",
             selector: "",
-            styles: "",
-            varients: {}
+            styles: {},
         },
         attr = "",
         value = "",
@@ -87,17 +51,19 @@ export default function scan(content, start = 0, proxyLoad = false, classProp = 
             [" ", "\n", "\r", ">"].includes(ch)
             & attr !== ""
         ) {
-
             if (!tagObject.element) {
                 tagObject.element = attr;
+                if (value !== "") styleObject.styles[""] = value.slice(1, -1);
             } else if (/^[\w\-]*\$+[\w\-]+$/i.test(attr)) {
+                styleObject.scope = /\$\$/.test(attr) ? "global" : "local"
                 styleObject.selector = attr;
-                styleObject.styles = value;
+                if (value !== "") styleObject.styles[""] = value.slice(1, -1);
             } else if (/[\$@#]/.test(attr)) {
-                styleObject.varients[attr] = value;
+                styleObject.styles[attr] = value.slice(1, -1);
             } else {
                 if (attr === classProp) {
                     const result = classExtract(value, proxyLoad);
+                    styleObject.collection = result.collection;
                     classList.push(...result.classList)
                     tagObject.attributes[classProp] = result.proxy;
                 } else tagObject.attributes[attr] = value;

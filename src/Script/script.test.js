@@ -9,7 +9,7 @@ import Navbar from "$lib/Navbar.svelte";
 	<Navbar isConsole="false" />
 </header>
 
-<main>
+<main $sok="displey: flex" media@norm={} #forge="" $:80="abc" >
 	<slot />
 </main>
 

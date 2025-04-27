@@ -1,5 +1,5 @@
-import $ from '../Shell/index.js';
-import { stash } from '../executor.js';
+import $ from './Shell/index.js';
+import { stash } from './executor.js';
 
 const hashPattern = /\{#[a-z0-9]+\}/i;
 const preHashPattern = /(?<!\{)#\w+/g;
@@ -134,7 +134,7 @@ let SHORTHAND = {
             }
         }
 
-        return { rule: rule.join(''), selector: selector.join('') };
+        return { rule: rule.join(''), selector: selector.length ? "&" + selector.join('') : "" };
     },
 }
 

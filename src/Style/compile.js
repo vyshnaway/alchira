@@ -1,4 +1,4 @@
-import U from "./Utils/index.js"
+import U from "../Utils/index.js"
 
 export default function compose(object, dotPrefix = false, minify = false, order = []) {
     const tb = (count = 0) => minify ? '' : '    '.repeat(count)
@@ -39,7 +39,7 @@ export default function compose(object, dotPrefix = false, minify = false, order
     }
 
     let styleSheet = '';
-    const switchedObj = order.length ? U.object.switch(object) :    Object.fromEntries(order.map((I) => [I, object[I]]))
+    const switchedObj = order.length ? U.object.switch(object) : Object.fromEntries(order.map((I) => [I, object[I]]))
     for (const rule in switchedObj) {
         if (rule === '')
             styleSheet += genRuleBlock(switchedObj[rule])

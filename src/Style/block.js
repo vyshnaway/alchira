@@ -1,4 +1,4 @@
-import U from "./Utils/index.js"
+import U from "../Utils/index.js"
 
 const OPEN_CHARS = ['{', '[', '('];
 const CLOSE_CHARS = ['}', ']', ')'];
@@ -23,8 +23,9 @@ export default function parseBlock(content) {
         atProps: {},
         atRules: {},
         nested: {},
-        blocks: {},
         classes: {},
+        flats: {},
+        allBlocks: {},
         properties: {},
     };
 
@@ -98,11 +99,12 @@ export default function parseBlock(content) {
                                     properties.nested[key] = value;
                                     break;
                                 case ".":
-                                    if (U.identity.ClassName !== "")
-                                        properties.classes[key] = value;
+                                    properties.classes[key] = value;
+                                    break;
                                 default:
-                                    properties.blocks[key] = value;
+                                    properties.flats[key] = value;
                             }
+                            properties.allBlocks[key] = value;
                         }
                         keyStart = index + 1;
                         valStart = index + 1;

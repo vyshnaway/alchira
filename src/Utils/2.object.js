@@ -23,7 +23,31 @@ function objectSwitch(srcObject) {
     return output;
 }
 
-function objectMerge(objectArray = [], aggressive = false, arrayMerge = false) {
+
+function deepMerge(target, source) {
+    if (!source || typeof source !== 'object') return target;
+
+    for (const key in source) {
+        const sourceValue = source[key];
+        if (sourceValue === undefined) continue;
+
+        const targetValue = target[key];
+
+        if (targetValue &&
+            sourceValue &&
+            typeof targetValue === 'object' &&
+            typeof sourceValue === 'object' &&
+            !Array.isArray(targetValue)) {
+            target[key] = deepMerge(targetValue, sourceValue);
+        } else {
+            target[key] = sourceValue;
+        }
+    }
+
+    return target;
+}
+
+function bulkMerge(objectArray = [], aggressive = false, arrayMerge = false) {
     // Input validation: return empty object if input is invalid or empty
     if (!objectArray || !Array.isArray(objectArray) || objectArray.length === 0) {
         return {};
@@ -177,7 +201,8 @@ function objectBoolean(objectA, objectB, onlyA = true, intersect = true, onlyB =
 }
 
 export default {
-    merge: objectMerge,
     switch: objectSwitch,
-    extract: objectBoolean
+    extract: objectBoolean,
+    deepMerge: deepMerge,
+    multiMerge: bulkMerge,
 }
