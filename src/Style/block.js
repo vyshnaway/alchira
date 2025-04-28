@@ -66,22 +66,22 @@ export default function parseBlock(content) {
                                 const directive = value.slice(0, spaceIndex);
                                 switch (directive) {
                                     case "@bind":
-                                        properties.binds.push(...U.string.breaks(value.slice(spaceIndex)));
+                                        properties.binds.push(...U.string.zeroBreaks(value.slice(spaceIndex)));
                                         break;
                                     case "@post-bind":
-                                        properties.preBinds.push(...U.string.breaks(value.slice(spaceIndex)));
+                                        properties.preBinds.push(...U.string.zeroBreaks(value.slice(spaceIndex)));
                                         break;
                                     case "@pre-bind":
-                                        properties.postBinds.push(...U.string.breaks(value.slice(spaceIndex)));
+                                        properties.postBinds.push(...U.string.zeroBreaks(value.slice(spaceIndex)));
                                         break;
                                     case "@adds":
-                                        properties.adds.push(...U.string.breaks(value.slice(spaceIndex)));
+                                        properties.adds.push(...U.string.zeroBreaks(value.slice(spaceIndex)));
                                         break;
                                     default:
                                         properties.atProps[directive] = value.slice(spaceIndex + 1);
                                 }
                             } else {
-                                const breaks = U.string.breaks(value);
+                                const breaks = U.string.zeroBreaks(value);
                                 const groupMap = { "<": "preBinds", ">": "postBinds", "+": "adds", "*": "binds" };
                                 const group = groupMap[breaks[0]] || "adds";
                                 if (Object.keys(groupMap).includes(breaks[0])) breaks.shift();

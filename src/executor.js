@@ -4,12 +4,12 @@ import shorthandJS from "./shorthand.js";
 import cleaner from "./cleaner.js";
 import collector from "./collector.js"
 import STYLE from "./Style/parse.js";
-import SCRIPTParse from "./Script/script.js"
+import SCRIPTParse from "./Script/script.js";
+import COMPILE from "./Style/compile.js"
 
 export const prefix = {
-    class: {},
     atRule: {},
-    element: {},
+    selector: {},
     property: {},
 }
 
@@ -56,10 +56,9 @@ export default async function EXECUTOR({
     CSSPath,
     StylesListPath,
 }) {
-    prefix.class = PREFIX.classes;
     prefix.atRule = PREFIX.atrules;
-    prefix.element = PREFIX.elements;
     prefix.property = PREFIX.properties;
+    prefix.selector = { ...PREFIX.classes, ...PREFIX.elements }
 
     env.devMode = CMD === "dev";
     env.unSpaced = CMD === "dev" || CMD === "preview";
@@ -104,12 +103,12 @@ export default async function EXECUTOR({
 
 
 
-    files[CSSPath] = minify[CMD]([
-        // STYLE.RENDER(CSSIndexScanned.styles),
+    files[CSSPath] = ([
+        COMPILE.object(CSSIndexScanned.styles),
         // STYLE.RENDER(lists.preBinds),
         // STYLE.RENDER(RESULT),
         // STYLE.RENDER(lists.postBinds),
-        // STYLE.RENDER(CSSAppendixScanned.styles)
+        COMPILE.object(CSSAppendixScanned.styles)
     ].join("\n"))
 
     const fileSize = (files[CSSPath].length / 1024).toFixed(2)

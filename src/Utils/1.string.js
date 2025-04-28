@@ -28,7 +28,7 @@ export default {
         }
         return result.join('');
     },
-    breaks: (string) => {
+    zeroBreaks: (string, conditions = [" ", "\n", ","]) => {
         const length = string.length;
         const result = [];
         let start = 0;
@@ -36,7 +36,7 @@ export default {
         for (let i = 0; i < length; i++) {
             const ch = string[i];
 
-            if (ch === ' ' || ch === '\n' || ch === ',') {
+            if (conditions.includes(ch)) {
                 if (i > start) {
                     result.push(string.substring(start, i));
                 }

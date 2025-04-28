@@ -1,6 +1,5 @@
 import U from "../Utils/index.js";
 import read from "./block.js";
-import compile from "./compile.js"
 import SHORTHAND from "../shorthand.js";
 import { stash, lists, env } from "../executor.js";
 
@@ -54,7 +53,6 @@ function SCANNER(content, sourceSelector, filePath) {
 
 export default {
     SCANNER: (content) => SCANNER(content, "AXIOM", "xtyles"),
-    RENDER: (content) => compile(styleObj,),
     CSSBULK: (sources = []) => {
         const selectors = {};
         sources.forEach(source => {
