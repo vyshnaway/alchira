@@ -4,7 +4,7 @@ const OPEN_CHARS = ['{', '[', '('];
 const CLOSE_CHARS = ['}', ']', ')'];
 const QUOTE_CHARS = ['`', "'", '"'];
 
-export default function parseBlock(content) {
+export default function parseBlock(content, blockArrays = false) {
     content += ';'
     let keyStart = 0,
         valStart = 0,
@@ -14,19 +14,26 @@ export default function parseBlock(content) {
         isProp = true,
         length = content.length;
 
-    let properties = {
+    let result = {
         adds: [],
         binds: [],
         preBinds: [],
         postBinds: [],
         variables: [],
+        XatProps: [],
         atProps: {},
-        atRules: {},
-        nested: {},
-        classes: {},
-        flats: {},
-        allBlocks: {},
+        Xproperties: [],
         properties: {},
+        XatRules: [],
+        atRules: {},
+        Xnested: [],
+        nested: {},
+        Xclasses: [],
+        classes: {},
+        Xflats: [],
+        flats: {},
+        XallBlocks: [],
+        allBlocks: {},
     };
 
     for (let index = 0; index < length; index++) {
@@ -59,26 +66,28 @@ export default function parseBlock(content) {
                         if (isProp) {
                             if (key.length > 0) {
                                 if (key.startsWith("--"))
-                                    properties.variables.push(key);
-                                properties.properties[key] = value;
+                                    result.variables.push(key);
+                                result.properties[key] = value;
+                                if (blockArrays) result.Xproperties.push([key, value]);
                             } else if (value[0] === '@') {
                                 const spaceIndex = value.indexOf(" ")
                                 const directive = value.slice(0, spaceIndex);
                                 switch (directive) {
                                     case "@bind":
-                                        properties.binds.push(...U.string.zeroBreaks(value.slice(spaceIndex)));
-                                        break;
-                                    case "@post-bind":
-                                        properties.preBinds.push(...U.string.zeroBreaks(value.slice(spaceIndex)));
+                                        result.binds.push(...U.string.zeroBreaks(value.slice(spaceIndex)));
                                         break;
                                     case "@pre-bind":
-                                        properties.postBinds.push(...U.string.zeroBreaks(value.slice(spaceIndex)));
+                                        result.preBinds.push(...U.string.zeroBreaks(value.slice(spaceIndex)));
+                                        break;
+                                    case "@post-bind":
+                                        result.postBinds.push(...U.string.zeroBreaks(value.slice(spaceIndex)));
                                         break;
                                     case "@adds":
-                                        properties.adds.push(...U.string.zeroBreaks(value.slice(spaceIndex)));
+                                        result.adds.push(...U.string.zeroBreaks(value.slice(spaceIndex)));
                                         break;
                                     default:
-                                        properties.atProps[directive] = value.slice(spaceIndex + 1);
+                                        result.atProps[value] = "";
+                                        if (blockArrays) result.XatProps.push([value, ""]);
                                 }
                             } else {
                                 const breaks = U.string.zeroBreaks(value);
@@ -87,24 +96,29 @@ export default function parseBlock(content) {
                                 if (Object.keys(groupMap).includes(breaks[0])) breaks.shift();
                                 breaks.forEach(link => {
                                     const targetGroup = groupMap[link[0]] || group;
-                                    properties[targetGroup].push(link[0] in groupMap ? link.slice(1) : link);
+                                    result[targetGroup].push(link[0] in groupMap ? link.slice(1) : link);
                                 });
                             }
                         } else {
                             switch (key[0]) {
                                 case "@":
-                                    properties.atRules[key] = value;
+                                    result.atRules[key] = value;
+                                    if (blockArrays) result.XatRules.push([key, value]);
                                     break;
                                 case "&":
-                                    properties.nested[key] = value;
+                                    result.nested[key] = value;
+                                    if (blockArrays) result.Xnested.push([key, value]);
                                     break;
                                 case ".":
-                                    properties.classes[key] = value;
+                                    result.classes[key] = value;
+                                    if (blockArrays) result.Xclasses.push([key, value]);
                                     break;
                                 default:
-                                    properties.flats[key] = value;
+                                    result.flats[key] = value;
+                                    if (blockArrays) result.Xflats.push([key, value]);
                             }
-                            properties.allBlocks[key] = value;
+                            result.allBlocks[key] = value;
+                            if (blockArrays) result.XallBlocks.push([key, value]);
                         }
                         keyStart = index + 1;
                         valStart = index + 1;
@@ -117,5 +131,5 @@ export default function parseBlock(content) {
         }
     }
 
-    return properties;
+    return result;
 }

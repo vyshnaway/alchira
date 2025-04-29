@@ -99,6 +99,7 @@ const DATA = {
     CMD: "",
     KEY: "",
     SOURCE: "",
+    TARGET: "",
     CSSPath: "",
     CSSIndex: "",
     CSSAppendix: "",
@@ -289,7 +290,8 @@ const ACTION = {
         $.TASK("Syncing untargeted files")
         const files = FILEMAN.SYNC.bulk(ACTION.CONFIGURE.target, ACTION.CONFIGURE.source, ACTION.CONFIGURE.extensions);
 
-        DATA.CSSPath = FILEMAN.PATH.join(ACTION.CONFIGURE.source, ACTION.CONFIGURE.stylesheet)
+        DATA.TARGET = ACTION.CONFIGURE.target
+        DATA.CSSPath = ACTION.CONFIGURE.stylesheet
         DATA.CSSAppendix = await CSSImport([
             FILEMAN.PATH.join(ACTION.CONFIGURE.target, ACTION.CONFIGURE.stylesheet)
         ]);

@@ -46,7 +46,7 @@ function getAtRulePrefixes(content = "", prefixes = ["webkit", "moz", "ms", "o"]
 
     const result = prefixes.reduce((a, group) => {
         if (prefix.atRule[rule] && prefix.atRule[rule][group])
-            a[group] = prefix.atRule[rule][group];
+            a[group] = prefix.atRule[rule][group] + data;;
         return a;
     }, {});
     result[""] = content
@@ -54,15 +54,20 @@ function getAtRulePrefixes(content = "", prefixes = ["webkit", "moz", "ms", "o"]
 }
 
 function getAtPropPrefixes(content = "", prefixes = ["webkit", "moz", "ms", "o"]) {
+    let index = content.indexOf(" ");
+    index = index < 0 ? content.length : index
+    const rule = content.slice(0, index), data = content.slice(index);
+
     const result = prefixes.reduce((a, group) => {
-        if (prefix.atRule[content] && prefix.atRule[content][group]) {
-            a.push(prefix.atRule[content][group]);
+        if (prefix.atRule[rule] && prefix.atRule[rule][group]) {
+            a.push(prefix.atRule[rule][group] + data);
         }
         return a;
     }, []);
     result.push(content)
     return result;
 }
+
 
 function propListBuild(object) {
     return Object.entries(object).reduce((A, [key, value]) => {
@@ -76,44 +81,108 @@ function propListBuild(object) {
     }, {})
 }
 
-function compose(object, minify = false, prefixes = ["webkit", "moz", "ms", "o"]) {
-    const tab = minify ? "" : "    ", space = minify ? "" : " ", br = minify ? "" : "\n";
+function styleLoad(selectorIndexObject) {
+    return Object.entries(selectorIndexObject).reduce((A, [S, I]) => {
+        A[S] = stash.indexStyles[I].styles; return A
+    }, {})
+}
+
+function styleSwitch(object) {
+    const switched = U.object.switch(object);
+    const mins = [], maxs = [], flats = [];
+    Object.keys(switched).forEach(key => {
+        const min = key.indexOf("min"), max = key.indexOf("max");
+        if (key !== "") {
+            if (min < max) mins.push(key)
+            if (min > max) maxs.push(key)
+            if (min === max) flats.push(key)
+        }
+    })
+
+    const keys = [
+        ...flats.sort(),
+        ...mins.sort().reverse(),
+        ...maxs.sort()
+    ]
+
+    const result = switched[""] ?? {}
+    keys.forEach(key => result[key] = switched[key])
+    return result
+}
+
+
+function objectCompose(object, minify = !env.devMode, prefixes = ["webkit", "moz", "ms", "o"]) {
+    const tab = minify ? "" : "    ", space = minify ? "" : " ", br = "";
     let styleSheet = [];
 
     for (const key in object) {
         const value = object[key];
         if ((typeof value) === "object") {
-            const subObject = propListBuild(value); 
+            const subObject = propListBuild(value);
             if (key[0] === "@") {
                 const selectors = Object.entries(getAtRulePrefixes(key, prefixes));
-                selectors.forEach(([group, selector]) => styleSheet.push(selector, "{", ...compose(subObject, minify, [group]).map(i => tab + i), "}" + br))
+                selectors.forEach(([group, selector]) => styleSheet.push(selector, "{", ...objectCompose(subObject, minify, [group]).map(i => tab + i), "}"));
             } else {
-                styleSheet.push(...getSelectorPrefixes(key, prefixes), "{", ...compose(subObject, minify, prefixes).map(i => tab + i), "}" + br)
+                styleSheet.push(...getSelectorPrefixes(key, prefixes), "{", ...objectCompose(subObject, minify, prefixes).map(i => tab + i), "}");
             }
         }
         else {
             if (key[0] === "@") {
-                styleSheet.push(...getAtPropPrefixes(key, prefixes).map(rule => rule + " " + value + ";"))
+                styleSheet.push(...getAtPropPrefixes(key, prefixes).map(rule => rule + ";"));
             } else {
-                styleSheet.push(key + ":" + space + value + ";")
+                styleSheet.push(key + ":" + space + value + ";");
             }
         }
     }
     return styleSheet
 }
 
-function styleSwitch(object) {
+function arrayCompose(array, minify = !env.devMode, prefixes = ["webkit", "moz", "ms", "o"]) {
+    const tab = minify ? "" : "    ", space = minify ? "" : " ", br = "";
+    let styleSheet = [];
 
-
+    array.forEach(([key, value]) => {
+        if ((typeof value) === "object") {
+            const subObject = propListBuild(value);
+            if (key[0] === "@") {
+                const selectors = Object.entries(getAtRulePrefixes(key, prefixes));
+                selectors.forEach(([group, selector]) => styleSheet.push(br, selector, "{", ...objectCompose(subObject, minify, [group]).map(i => tab + i), "}"));
+            } else {
+                styleSheet.push(br, ...getSelectorPrefixes(key, prefixes), "{", ...objectCompose(subObject, minify, prefixes).map(i => tab + i), "}");
+            }
+        }
+        else {
+            if (key[0] === "@") {
+                styleSheet.push(...getAtPropPrefixes(key, prefixes).map(rule => rule + ";"));
+            } else {
+                styleSheet.push(key + ":" + space + value + ";");
+            }
+        }
+    })
+    return styleSheet
 }
 
+
 export default {
-    object: (object, minify = false) => {
-        const styleSheet = compose(object, minify);
+    array: (object, minify = !env.devMode) => {
+        const styleSheet = arrayCompose(object, minify);
         return styleSheet.join(minify ? "" : "\n");
     },
-    switch: (object) => {
-        const styleSheet = styleSwitch(object);
-        compose(styleSheet)
+    list: (order, minify = !env.devMode) => {
+        const styleSheet = Object.entries(styleSwitch(order.reduce((A, I) => {
+            if (stash.styleRefers[I])
+                A[stash.indexStyles[stash.styleRefers[I]].selector] =
+                    stash.indexStyles[stash.styleRefers[I]].object;
+            return A;
+        }, {})))
+        return arrayCompose(styleSheet).join(minify ? "" : "\n")
+    },
+    map: (selectorIndexPair, minify = !env.devMode) => {
+        const styleSheet = Object.entries(selectorIndexPair).reduce((A, [S, I]) => {
+            if (stash.styleRefers[I])
+                A.push(S, stash.indexStyles[stash.styleRefers[I]].object);
+            return A;
+        }, [])
+        return arrayCompose(styleSheet).join(minify ? "" : "\n")
     }
 }
