@@ -1,12 +1,5 @@
 import cleaner from "./cleaner.js";
-
-function objectToNumberedArray(obj, maxKey) {
-    const arr = new Array(maxKey + 1);
-    for (let i = 0; i <= maxKey; i++) {
-        arr[i] = obj[i] ?? [];
-    }
-    return arr;
-}
+import Utils from "./Utils/index.js";
 
 const NON_ALPHANUMERIC_EXCEPT_SLASH = /[^a-z0-9/\\]/gi;
 const LIB_CHARSET = /[^\w-]/gi;
@@ -54,8 +47,8 @@ export default {
 
         return {
             list,
-            axiom: objectToNumberedArray(index.axiom, length),
-            library: objectToNumberedArray(index.library, length)
+            axiom: Utils.array.formNumberedObject(index.axiom, length),
+            library: Utils.array.formNumberedObject(index.library, length)
         };
     },
     files: (filesArray) => {

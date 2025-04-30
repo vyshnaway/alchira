@@ -100,6 +100,7 @@ const DATA = {
     KEY: "",
     SOURCE: "",
     TARGET: "",
+    EXTPROPS: {},
     CSSPath: "",
     CSSIndex: "",
     CSSAppendix: "",
@@ -288,10 +289,11 @@ const ACTION = {
     SaveFiles: async () => {
         $.TASK("Fetching target files", 0)
         $.TASK("Syncing untargeted files")
-        const files = FILEMAN.SYNC.bulk(ACTION.CONFIGURE.target, ACTION.CONFIGURE.source, ACTION.CONFIGURE.extensions);
+        const files = FILEMAN.SYNC.bulk(ACTION.CONFIGURE.target, ACTION.CONFIGURE.source, Object.keys(ACTION.CONFIGURE.extensions));
 
         DATA.TARGET = ACTION.CONFIGURE.target
         DATA.CSSPath = ACTION.CONFIGURE.stylesheet
+        DATA.EXTPROPS = ACTION.CONFIGURE.extensions
         DATA.CSSAppendix = await CSSImport([
             FILEMAN.PATH.join(ACTION.CONFIGURE.target, ACTION.CONFIGURE.stylesheet)
         ]);
@@ -339,30 +341,37 @@ const commander = async (args) => {
             $.POST($.compose.std.Chapter(APP.name + ' : Active Runtime'));
             await ACTION.FetchPrefix()
             const verifiedDev = await begins()
+            // if (verifiedDev.status) {
+            //     EXECUTOR(DATA);
+            //     WATCHDOG([NAV.setup.setup], async () => {
+            //         NAV.status = false;
+            //         $.WRITE.primary.Section(new Date())
+            //         if (await NAV.FETCH(DATA.CMD)) {
+            //             await EXECUTOR(DATA, DATA.CMD);
+            //             $.WRITE.success.Footer("Build Success.")
+            //         } else $.WRITE.failed.Footer("Build Failed.")
+            //     });
+            //     WATCHDOG([NAV.setup.target], async () => {
+            //         if (await NAV.FETCH(DATA.CMD)) {
+            //             await EXECUTOR(DATA, DATA.CMD);
+            //             $.WRITE.success.Footer("Build Success.")
+            //         } else $.WRITE.failed.Footer("Build Failed.")
+            //     });
+            //     process.on('SIGINT', () => {
+            //         $.custom.render.animation.Backrow(),
+            //             $.POST()
+            //         $.WRITE.primary.Footer("Command Terminated.")
+            //         process.exit(0);
+            //     });
+            //     $.WRITE.failed.Footer("Press Ctrl+C to stop watching.")
+            // }
             if (verifiedDev.status) {
-                EXECUTOR(DATA);
-                WATCHDOG([NAV.setup.setup], async () => {
-                    NAV.status = false;
-                    $.WRITE.primary.Section(new Date())
-                    if (await NAV.FETCH(DATA.CMD)) {
-                        await EXECUTOR(DATA, DATA.CMD);
-                        $.WRITE.success.Footer("Build Success.")
-                    } else $.WRITE.failed.Footer("Build Failed.")
-                });
-                WATCHDOG([NAV.setup.target], async () => {
-                    if (await NAV.FETCH(DATA.CMD)) {
-                        await EXECUTOR(DATA, DATA.CMD);
-                        $.WRITE.success.Footer("Build Success.")
-                    } else $.WRITE.failed.Footer("Build Failed.")
-                });
-                process.on('SIGINT', () => {
-                    $.custom.render.animation.Backrow(),
-                        $.POST()
-                    $.WRITE.primary.Footer("Command Terminated.")
-                    process.exit(0);
-                });
-                $.WRITE.failed.Footer("Press Ctrl+C to stop watching.")
-            }
+                await ACTION.SaveSetup()
+                await ACTION.SaveFiles()
+                const response = await EXECUTOR(DATA)
+                await FILEMAN.WRITE.bulk(response.files)
+                $.POST(response.report)
+            } else $.POST(verifiedPreview.report)
             break;
         case 'preview':
             $.POST($.compose.std.Chapter(APP.name + ' : Preview Build'));

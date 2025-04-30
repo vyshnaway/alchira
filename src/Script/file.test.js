@@ -1,4 +1,4 @@
-import scan from "./script.js"
+import scan from "./file.js"
 
 console.log(scan(`
 <script>

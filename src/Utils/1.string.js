@@ -1,7 +1,7 @@
 const NON_ALPHANUMERIC_AND_US = /[^a-z0-9_]/gi;
 const SPACE = /\s/g;
 
-const digits = "_0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-";
+const digits = "-0123456789_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 const base = digits.length;
 
 export default {
@@ -51,12 +51,13 @@ export default {
         return result;
     },
     enCounter: (number) => {
-        let result = "", num = ++number;
+        let result = "", reminder = 0;
 
-        while (num > 0) {
-            result = digits[num % base] + result;
-            num = Math.floor(num / base);
+        while (number) {
+            reminder = number % base;
+            result = digits[reminder] + result;
+            number = Math.floor(number / base);
         }
-        return "_" + result;
+        return result;
     }
 }

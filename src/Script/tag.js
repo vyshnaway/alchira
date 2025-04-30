@@ -1,4 +1,5 @@
-import classExtract from "./proxy.x.js"
+import classExtract from "./proxy.js";
+import { env } from "../executor.js"
 
 const bracePair = {
     "{": "}",
@@ -9,8 +10,7 @@ const bracePair = {
     '"': '"',
 }, openBraces = ["[", "{", "(", "'", '"', "`"], closeBraces = ["]", "}", ")"];
 
-export default function tagScan(content, start = 0, proxyLoad = false, classProp = "class") {
-
+export default function tagScan(content, start, action, classProps, fileData) {
     let deviance = 0,
         marker = start + 1,
         ch = content[marker],
@@ -61,11 +61,11 @@ export default function tagScan(content, start = 0, proxyLoad = false, classProp
             } else if (/[\$@#]/.test(attr)) {
                 styleObject.styles[attr] = value.slice(1, -1);
             } else {
-                if (attr === classProp) {
-                    const result = classExtract(value, proxyLoad);
+                if (classProps.includes(attr)) {
+                    const result = classExtract(value, action, fileData, env.tagCount++);
                     styleObject.collection = result.collection;
                     classList.push(...result.classList)
-                    tagObject.attributes[classProp] = result.proxy;
+                    tagObject.attributes[attr] = result.scribed;
                 } else tagObject.attributes[attr] = value;
             }
 

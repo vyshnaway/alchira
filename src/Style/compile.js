@@ -83,7 +83,7 @@ function propListBuild(object) {
 
 function styleLoad(selectorIndexObject) {
     return Object.entries(selectorIndexObject).reduce((A, [S, I]) => {
-        A[S] = stash.indexStyles[I].styles; return A
+        A[S] = stash.indexStyles[I].object; return A;
     }, {})
 }
 
@@ -140,7 +140,6 @@ function objectCompose(object, minify = !env.devMode, prefixes = ["webkit", "moz
 function arrayCompose(array, minify = !env.devMode, prefixes = ["webkit", "moz", "ms", "o"]) {
     const tab = minify ? "" : "    ", space = minify ? "" : " ", br = "";
     let styleSheet = [];
-
     array.forEach(([key, value]) => {
         if ((typeof value) === "object") {
             const subObject = propListBuild(value);
@@ -178,11 +177,8 @@ export default {
         return arrayCompose(styleSheet).join(minify ? "" : "\n")
     },
     map: (selectorIndexPair, minify = !env.devMode) => {
-        const styleSheet = Object.entries(selectorIndexPair).reduce((A, [S, I]) => {
-            if (stash.styleRefers[I])
-                A.push(S, stash.indexStyles[stash.styleRefers[I]].object);
-            return A;
-        }, [])
+        const styleSheet = Object.entries(styleSwitch(styleLoad(selectorIndexPair)))
+
         return arrayCompose(styleSheet).join(minify ? "" : "\n")
     }
 }

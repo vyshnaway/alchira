@@ -8,8 +8,14 @@ import tag from "./tag.js"
 //     key="value" hjk/>
 //     `, 0, true, "className"))
 
-console.log(tag(`</h1>`, 0, true, "className"))
-console.log(tag(`<h1>
-    `, 0, true, "className"))
 console.log(tag(`</h1>
-    `, 0, true, "className"))
+`, 0, true, "className"))
+
+console.log(tag(`<h1 $>
+`, 0, true, "className"))
+
+console.log(tag(`</h1 df$h={f} >
+`, 0, true, "className"))
+
+console.log(tag(`<$>
+`, 0, true, "className"))
