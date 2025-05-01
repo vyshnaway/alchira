@@ -96,8 +96,8 @@ function CSSBULK(sources = []) {
     return Object.keys(stash.styleRefers);
 }
 
-function TAGSTYLE({ scope, selector, styles, collection }, metaFront, filePath) {
-    const metaClass = scope + metaFront + U.string.normalize(selector);
+function TAGSTYLE({ isGlobal, selector, styles, collection }, metaFront, filePath) {
+    const metaClass = (isGlobal? "GLOBAL": "LOCAL") + metaFront + U.string.normalize(selector);
     const compiled = {}, preBinds = [], postBinds = [];
     const CLX = createXtyle();
 
@@ -106,7 +106,7 @@ function TAGSTYLE({ scope, selector, styles, collection }, metaFront, filePath) 
         const styleObj = SCANNER(styles[style], filePath, style === "" ? selector : `${selector} => ${style}`)
         postBinds.push(...styleObj.postBinds)
         preBinds.push(...styleObj.preBinds)
-        if(env.devMode) {
+        if (env.devMode) {
             styleObj.postBinds.forEach(E => lists.postBinds.add(E))
             styleObj.preBinds.forEach(E => lists.preBinds.add(E))
         }
@@ -117,18 +117,17 @@ function TAGSTYLE({ scope, selector, styles, collection }, metaFront, filePath) 
     }
 
     if (selector === "") {
-        Object.keys(essentials).forEach(key => {
-            if (key === "")
-                essentials.push(...compiled[""]);
-            else
-                essentials.push(compiled[key]);
+        Object.entries(compiled).forEach(([key, value]) => {
+            if (key !== "") {
+                essentials.push([key, value[""]]);
+            }
         })
         postBinds.forEach(E => lists.postBinds.add(E))
         preBinds.forEach(E => lists.preBinds.add(E))
     } else {
         stash.indexStyles[CLX.number] = {
             class: CLX.class,
-            scope,
+            scope: isGlobal,
             selector,
             collection,
             preBinds,
@@ -137,12 +136,8 @@ function TAGSTYLE({ scope, selector, styles, collection }, metaFront, filePath) 
             object: compiled
         }
 
-        switch (scope) {
-            case "global": stash.styleGlobals = env.styleCount;
-                break;
-            case "local": stash.styleLocals[filePath][selector] = env.styleCount;
-                break;
-        }
+        if (isGlobal) stash.styleGlobals[selector] = env.styleCount;
+        else stash.styleLocals[filePath][selector] = env.styleCount;
     }
 }
 

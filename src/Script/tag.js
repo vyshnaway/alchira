@@ -21,7 +21,7 @@ export default function tagScan(content, start, action, classProps, fileData) {
             attributes: {},
         },
         styleObject = {
-            scope: "style",
+            isGlobal: false,
             selector: "",
             styles: {},
         },
@@ -42,47 +42,46 @@ export default function tagScan(content, start, action, classProps, fileData) {
             awaitBrace = bracePair[ch]
         } else if (deviance === 0 && closeBraces.includes(ch)) break;
 
-        if ((deviance === 0 && ![" ", "=", "\n", "\r", ">"].includes(ch)) || deviance !== 0) {
+        if ((deviance === 0 && ![" ", "=", "\n", "\r", "\t", ">"].includes(ch)) || deviance !== 0) {
             if (isVal) value += ch;
             else attr += ch;
         } else if (ch === "=") isVal = true;
 
         if (deviance === 0 &&
-            [" ", "\n", "\r", ">"].includes(ch)
+            [" ", "\n", "\r", ">", "\t"].includes(ch)
             & attr !== ""
         ) {
             if (!tagObject.element) {
                 tagObject.element = attr;
                 if (value !== "") styleObject.styles[""] = value.slice(1, -1);
             } else if (/^[\w\-]*\$+[\w\-]+$/i.test(attr)) {
-                styleObject.scope = /\$\$/.test(attr) ? "global" : "local"
                 styleObject.selector = attr;
+                if (/\$\$/.test(attr)) styleObject.isGlobal = true
                 if (value !== "") styleObject.styles[""] = value.slice(1, -1);
             } else if (/[\$@#]/.test(attr)) {
                 styleObject.styles[attr] = value.slice(1, -1);
             } else {
                 if (classProps.includes(attr)) {
                     const result = classExtract(value, action, fileData, env.tagCount++);
-                    styleObject.collection = result.collection;
                     classList.push(...result.classList)
                     tagObject.attributes[attr] = result.scribed;
                 } else tagObject.attributes[attr] = value;
             }
-
             isVal = false;
             attr = "";
             value = "";
         }
-
+        
         if (ok) break
         else if (deviance === 0 && ch === ">") ok = true;
         else if (deviance === 0 && ch === ";") break;
-
+        
         ch = content[++marker];
     }
+    console.log(styleObject)
 
-    const newTag = tagObject.element === "$" ? "" : "<" + tagObject.element + Object.entries(tagObject.attributes)
-        .reduce((A, [P, V]) => A += " " + P + ((V === "") ? "" : "=" + V), "") + ">";
+    const newTag = tagObject.element === env.styleTag ? "" : "<" + tagObject.element + 
+    Object.entries(tagObject.attributes).reduce((A, [P, V]) => A += " " + P + ((V === "") ? "" : "=" + V), "") + ">";
     return {
         ok,
         marker,

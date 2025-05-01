@@ -146,6 +146,9 @@ function arrayCompose(array, minify = !env.devMode, prefixes = ["webkit", "moz",
             if (key[0] === "@") {
                 const selectors = Object.entries(getAtRulePrefixes(key, prefixes));
                 selectors.forEach(([group, selector]) => styleSheet.push(br, selector, "{", ...objectCompose(subObject, minify, [group]).map(i => tab + i), "}"));
+            // } else if (key[0] === "& ") {
+            //     const selectors = Object.entries(getAtRulePrefixes(key, prefixes));
+            //     selectors.forEach(([group, selector]) => styleSheet.push(br, selector, "{", ...objectCompose(subObject, minify, [group]).map(i => tab + i), "}"));
             } else {
                 styleSheet.push(br, ...getSelectorPrefixes(key, prefixes), "{", ...objectCompose(subObject, minify, prefixes).map(i => tab + i), "}");
             }

@@ -44,10 +44,10 @@ export default function classExtract(string, action, fileData, shrad) {
     }
 
     if (action !== "read") {
-        const metaFront = "_tag-" + shrad + fileData.metaFront;
+        const metaFront = "TAG-" + shrad + "" + fileData.metaFront + "_";
         activeQuote = "", entry = "", scribed = "", marker = 0, inQuote = false, ch = string[marker];
         const activeIndexes = (action === "dev") ? [] :
-            Utils.array.longestSubChain(lists.ordered, loadActiveIndexes(classList, fileData.filePath));
+            Utils.array.longestSubChain(lists.ordered, loadActiveIndexes(Utils.array.setback(classList), fileData.filePath));
         const activeStyles = loadActiveStyles(activeIndexes);
 
         while (ch !== undefined) {
@@ -65,6 +65,8 @@ export default function classExtract(string, action, fileData, shrad) {
                                     lists.preBinds.add(className)
                                 else lists.postBinds.add(className)
                         }
+                        if (!(className[0] === "-" || /\$-/.test(className)))
+                            scribed += className;
                     } else {
                         const index = (stash.styleRefers[entry] ?? 0) +
                             (stash.styleGlobals[entry] ?? 0) +
@@ -72,7 +74,7 @@ export default function classExtract(string, action, fileData, shrad) {
                         if (index) {
                             switch (action) {
                                 case "dev":
-                                    const devClass = stash.indexStyles[index].scope + metaFront + stash.indexStyles[index].metaClass;
+                                    const devClass = metaFront + stash.indexStyles[index].metaClass;
                                     scribed += devClass;
                                     finals["." + devClass] = index;
                                     break;
@@ -80,22 +82,23 @@ export default function classExtract(string, action, fileData, shrad) {
                                     if (activeIndexes.includes(index)) {
                                         scribed += stash.indexStyles[index].class;
                                     } else {
-                                        const className = "." + createXtyle().class;
-                                        finals[className] = index;
-                                        scribed += className;
+                                        const identity = createXtyle();
+                                        finals["." + identity.class] = index;
+                                        scribed += identity.class;
                                     }
                                     break;
                                 case "build":
                                     if (activeIndexes.includes(index)) {
                                         scribed += stash.indexStyles[index].class;
                                     } else {
-                                        const deltaStyles = Utils.object.extract(activeStyles, stash.indexStyles[index].object);
-                                        if (Object.keys(deltaStyles).length) scribed += stash.indexStyles[index].class;
+                                        const deltaStyles = Utils.object.onlyB(activeStyles, stash.indexStyles[index].object);
+                                        if (deltaStyles.score) scribed += stash.indexStyles[index].class;
                                         else {
                                             const identity = createXtyle();
-                                            stash.indexStyles["." + identity.class] = deltaStyles;
-                                            finals[className] = index;
                                             scribed += identity.class;
+                                            console.log()
+                                            stash.indexStyles["." + identity.class] = deltaStyles.result;
+                                            finals[className] = index;
                                         }
                                     }
                                     break;

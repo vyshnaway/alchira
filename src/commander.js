@@ -347,13 +347,13 @@ const commander = async (args) => {
             //         NAV.status = false;
             //         $.WRITE.primary.Section(new Date())
             //         if (await NAV.FETCH(DATA.CMD)) {
-            //             await EXECUTOR(DATA, DATA.CMD);
+            //             EXECUTOR(DATA, DATA.CMD);
             //             $.WRITE.success.Footer("Build Success.")
             //         } else $.WRITE.failed.Footer("Build Failed.")
             //     });
             //     WATCHDOG([NAV.setup.target], async () => {
             //         if (await NAV.FETCH(DATA.CMD)) {
-            //             await EXECUTOR(DATA, DATA.CMD);
+            //             EXECUTOR(DATA, DATA.CMD);
             //             $.WRITE.success.Footer("Build Success.")
             //         } else $.WRITE.failed.Footer("Build Failed.")
             //     });
@@ -368,7 +368,7 @@ const commander = async (args) => {
             if (verifiedDev.status) {
                 await ACTION.SaveSetup()
                 await ACTION.SaveFiles()
-                const response = await EXECUTOR(DATA)
+                const response = EXECUTOR(DATA)
                 await FILEMAN.WRITE.bulk(response.files)
                 $.POST(response.report)
             } else $.POST(verifiedPreview.report)
@@ -380,7 +380,7 @@ const commander = async (args) => {
             if (verifiedPreview.status) {
                 await ACTION.SaveSetup()
                 await ACTION.SaveFiles()
-                const response = await EXECUTOR(DATA)
+                const response = EXECUTOR(DATA)
                 await FILEMAN.WRITE.bulk(response.files)
                 $.POST(response.report)
             } else $.POST(verifiedPreview.report)
@@ -392,7 +392,7 @@ const commander = async (args) => {
             if (verifiedBuild.status) {
                 await ACTION.SaveSetup()
                 await ACTION.SaveFiles()
-                const response = await EXECUTOR(DATA)
+                const response = EXECUTOR(DATA)
                 await FILEMAN.WRITE.bulk(response.files)
                 $.POST(response.report)
             } else $.POST(verifiedPreview.report)

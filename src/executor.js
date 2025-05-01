@@ -27,26 +27,33 @@ export const lists = {
     classGroups: {},
     classTracks: [],
     ordered: [],
+    globalStyles: [],
     preBinds: new Set(),
     postBinds: new Set()
 }
 
 export const env = {
+    styleTag: "xtyle",
     styleCount: 0,
     tagCount: 0,
     devMode: true,
-    unSpaced: true
+    unSpaced: true,
+    buildApi: ""
 }
 
-export const essentials = []
-export const finals = {}
+export const
+    report = [],
+    essentials = [],
+    finals = {},
+    filesOut = {},
+    scope = { files: {} }
 
 export function createXtyle() {
     ++env.styleCount;
     return { number: env.styleCount, class: "_" + Utils.string.enCounter(env.styleCount + 768) }
 }
 
-export default async function EXECUTOR({
+function MANDATES({
     CMD,
     SHORTHAND,
     REFERS,
@@ -68,9 +75,23 @@ export default async function EXECUTOR({
 
     env.devMode = CMD === "dev";
     env.unSpaced = CMD === "dev" || CMD === "preview";
-    const filesOut = {}, scope = { local: {} }, report = [];
+}
 
-
+function SETUPRUN({
+    CMD,
+    SHORTHAND,
+    REFERS,
+    FILES,
+    CSSIndex,
+    CSSAppendix,
+    PREFIX,
+    KEY,
+    EXTPROPS,
+    SOURCE,
+    TARGET,
+    CSSPath,
+    StylesListPath,
+}) {
     // References
     const referFiles = collector.css(REFERS);
     scope.refer = referFiles.list
@@ -86,16 +107,31 @@ export default async function EXECUTOR({
 
     // CSS Files
     const CSSIndexScanned = (STYLE.XCANNER(cleaner.uncomment.Css(CSSIndex), "xtyles", "AXIOM"));
-    const CSSAppendixScanned = (STYLE.XCANNER(cleaner.uncomment.Css(CSSAppendix), `${TARGET}/${CSSPath}`, "APPENDIX"));
     scope.variables = Utils.array.setback(CSSIndexScanned.variables);
-    CSSAppendixScanned.preBinds.forEach(E => lists.preBinds.add(E));
-    CSSAppendixScanned.postBinds.forEach(E => lists.postBinds.add(E));
 
-    const shorthandResponse = await shorthandJS.UPLOAD(SHORTHAND)
+
+    const shorthandResponse = shorthandJS.UPLOAD(SHORTHAND)
     scope.shorthands = shorthandResponse.list;
     report.push(shorthandResponse.report)
 
+    return CSSIndexScanned.styles;
+}
 
+function SOURCEPROCESS({
+    CMD,
+    SHORTHAND,
+    REFERS,
+    FILES,
+    CSSIndex,
+    CSSAppendix,
+    PREFIX,
+    KEY,
+    EXTPROPS,
+    SOURCE,
+    TARGET,
+    CSSPath,
+    StylesListPath,
+}) {
     // Read source files
     const sourceFiles = collector.files(FILES);
     sourceFiles.forEach((file) => {
@@ -133,35 +169,138 @@ export default async function EXECUTOR({
                 stash.indexStyles[I].postBinds.forEach(E => lists.preBinds.add(E))
                 finals["." + stash.indexStyles[I].class] = I;
             });
-        } else CMD = "dev";
+        } else CMD = "preview";
     }
 
 
+    scope.compose = Object.keys(stash.styleRefers);
+    scope.globals = Object.keys(stash.styleGlobals);
     // Write source files
     sourceFiles.forEach((file) => {
+        scope.files[file.filePath] = Object.keys(stash.styleLocals[file.filePath])
         const response = SCRIPT[CMD](file, EXTPROPS[file.extension])
         filesOut[`${SOURCE}/${file.filePath}`] = response.scribed;
     })
+}
 
+function FINALGEN({
+    CMD,
+    SHORTHAND,
+    REFERS,
+    FILES,
+    CSSIndex,
+    CSSAppendix,
+    PREFIX,
+    KEY,
+    EXTPROPS,
+    SOURCE,
+    TARGET,
+    CSSPath,
+    StylesListPath,
+}, CSSIndexStyles) {
+    SOURCEPROCESS({
+        CMD,
+        SHORTHAND,
+        REFERS,
+        FILES,
+        CSSIndex,
+        CSSAppendix,
+        PREFIX,
+        KEY,
+        EXTPROPS,
+        SOURCE,
+        TARGET,
+        CSSPath,
+        StylesListPath,
+    })
 
+    
     // Render stylesheet
+    const CSSAppendixScanned = (STYLE.XCANNER(cleaner.uncomment.Css(CSSAppendix), `${TARGET}/${CSSPath}`, "APPENDIX"));
+    CSSAppendixScanned.preBinds.forEach(E => lists.preBinds.add(E));
+    CSSAppendixScanned.postBinds.forEach(E => lists.postBinds.add(E));
+    
     const { preBinds, postBinds } =
         buildBinds(lists.preBinds, lists.postBinds, stash.indexStyles, stash.styleRefers)
 
-    filesOut[`${SOURCE}/${CSSPath}`] = ([
-        COMPILE.array(CSSIndexScanned.styles),
-        COMPILE.list(preBinds),
-        COMPILE.array(essentials),
+    const result = ([
+        // COMPILE.array(CSSIndexStyles),
+        // COMPILE.list(preBinds),
+        // COMPILE.array(essentials),
         COMPILE.map(finals),
-        COMPILE.list(postBinds),
-        COMPILE.array(CSSAppendixScanned.styles)
+        // COMPILE.list(postBinds),
+        // COMPILE.array(CSSAppendixScanned.styles)
     ].join(env.devMode ? "\n" : ""))
-
 
     // Finalize
     filesOut[StylesListPath] = JSON.stringify(scope);
-    const fileSize = (filesOut[`${SOURCE}/${CSSPath}`].length / 1024).toFixed(2)
-    report.push($.compose.std.Footer(`Output size: ${fileSize} kb`))
+    report.push($.compose.std.Footer(`Output size: ${(result.length / 1024).toFixed(2)} kb`))
+
+    return result;
+}
+
+export default function EXECUTOR({
+    CMD,
+    SHORTHAND,
+    REFERS,
+    FILES,
+    CSSIndex,
+    CSSAppendix,
+    PREFIX,
+    KEY,
+    EXTPROPS,
+    SOURCE,
+    TARGET,
+    CSSPath,
+    StylesListPath,
+}) {
+    MANDATES({
+        CMD,
+        SHORTHAND,
+        REFERS,
+        FILES,
+        CSSIndex,
+        CSSAppendix,
+        PREFIX,
+        KEY,
+        EXTPROPS,
+        SOURCE,
+        TARGET,
+        CSSPath,
+        StylesListPath,
+    }) 
+
+    const CSSIndexStyles = SETUPRUN({
+        CMD,
+        SHORTHAND,
+        REFERS,
+        FILES,
+        CSSIndex,
+        CSSAppendix,
+        PREFIX,
+        KEY,
+        EXTPROPS,
+        SOURCE,
+        TARGET,
+        CSSPath,
+        StylesListPath,
+    })
+
+    filesOut[`${SOURCE}/${CSSPath}`] = FINALGEN({
+        CMD,
+        SHORTHAND,
+        REFERS,
+        FILES,
+        CSSIndex,
+        CSSAppendix,
+        PREFIX,
+        KEY,
+        EXTPROPS,
+        SOURCE,
+        TARGET,
+        CSSPath,
+        StylesListPath,
+    }, CSSIndexStyles)
 
     return {
         files: filesOut,

@@ -200,7 +200,43 @@ function objectBoolean(objectA, objectB, onlyA = true, intersect = true, onlyB =
     return result;
 }
 
+function BminusA(A = {}, B = {}) {
+    let score = 0, result = {};
+    Object.entries(B).forEach(([Bkey, Bvalue]) => {
+        switch (typeof Bvalue) {
+            case "string":
+                score++
+                result[Bkey] = Bvalue
+                break;
+            case "object":
+                if (typeof A[Bkey] === "object") {
+                    const subobj = BminusA(A[Bkey], Bvalue);
+                    result[Bkey] = subobj.result;
+                    score += subobj.score;
+                } else result[Bkey] = Bvalue
+                break;
+        }
+    });
+    return { result, score }
+}
+
+// console.log(BminusA({
+//     a: "b",
+//     b: "c",
+//     d: {
+//         a: "b",
+//         b: "c"
+//     }
+// }, {
+//     a: "a",
+//     d: "c",
+//     d: {
+//         b: "h"
+//     }
+// }))
+
 export default {
+    onlyB: BminusA,
     switch: objectSwitch,
     extract: objectBoolean,
     deepMerge: deepMerge,
