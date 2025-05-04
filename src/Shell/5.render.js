@@ -15,6 +15,26 @@ const clearPreviousCharacters = (characters) => {
     }
 }
 
+const rewrite = (string, backRows = 1) => {
+    const stdout = process.stdout;
+    const lines = string.split('\n');
+    const excessLines = backRows - lines.length;
+
+    // Move cursor up by backRows
+    stdout.write(`\x1b[${backRows}A`);
+
+    // Write the new string
+    stdout.write(string);
+
+    // Clear excess lines if any
+    if (excessLines > 0) {
+        for (let i = 0; i < excessLines; i++) {
+            stdout.write('\x1b[K\x1b[1B'); // Clear line and move cursor down
+        }
+        stdout.write(`\x1b[${excessLines}A`); // Move cursor back up
+    }
+};
+
 const refresh = (backRows, string = '') => {
     const rowsCreated = string.split('\n').length;
     clearPreviousLines(backRows);
@@ -68,6 +88,7 @@ const animation = {
     },
     Rewrite: (string, backRows = 1) => {
         return refresh(backRows, string);
+        // return rewrite(string, backRows);
     },
     Backrow: (lines = 1) => {
         clearPreviousLines(lines)

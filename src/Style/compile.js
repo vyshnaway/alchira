@@ -3,7 +3,7 @@ import { prefix, env, stash } from "../executor.js";
 
 function getSelectorPrefixes(content = "", prefixes = ["webkit", "moz", "ms", "o"]) {
     const stringList = U.string.zeroBreaks(content, [","]).map(i => i.trim()), selectors = [];
-    
+
     stringList.forEach((string = "") => {
         const result = {
             webkit: { out: "", score: 0 },
@@ -19,7 +19,7 @@ function getSelectorPrefixes(content = "", prefixes = ["webkit", "moz", "ms", "o
                 return (prefix.selector[selector] && prefix.selector[selector][group]) || prefix.selector[selector] || selector;
             })
         })
-        
+
         selectors.push(...Object.values(result).reduce((acc, item) => {
             if (item.score) acc.push(item.out);
             return acc;
@@ -83,9 +83,7 @@ function propListBuild(object) {
 
 function styleLoad(selectorIndexObject) {
     return Object.entries(selectorIndexObject).reduce((A, [S, I]) => {
-        A[S] = stash.indexStyles[I].object; 
-        // console.log(I)
-        // console.log(stash.indexStyles[I].object)
+        A[S] = stash.indexStyles[I].object;
         return A;
     }, {})
 }
@@ -119,12 +117,17 @@ function unNester(selector = "", object = {}) {
             if (subSelector[0] === "&") {
                 const xelector = selector + subSelector.slice(1);
                 const subResult = unNester(xelector, object[subSelector]);
-                nests[subResult.selector] = subResult.result
-                Object.entries(subResult.nests).forEach(([nest, block]) => nests[nest] = block)
+                if(subSelector[1] === " "){
+                    Object.entries(subResult.nests).forEach(([nest, block]) => nests[nest] = block);
+                    nests[subResult.selector] = subResult.result
+                }else{
+                    nests[subResult.selector] = subResult.result
+                    Object.entries(subResult.nests).forEach(([nest, block]) => nests[nest] = block);
+                }
             } else {
                 const subResult = unNester(subSelector, object[subSelector]);
-                result[subSelector] = subResult.result
-                Object.entries(subResult.nests).forEach(([nest, block]) => result[nest] = block)
+                result[subSelector] = subResult.result;
+                Object.entries(subResult.nests).forEach(([nest, block]) => result[nest] = block);
             }
         } else result[subSelector] = object[subSelector];
         return result
@@ -140,11 +143,13 @@ function objectCompose(object, minify = !env.devMode, prefixes = ["webkit", "moz
         const value = object[key];
         if ((typeof value) === "object") {
             const subObject = propListBuild(value);
-            if (key[0] === "@") {
-                const selectors = Object.entries(getAtRulePrefixes(key, prefixes));
-                selectors.forEach(([group, selector]) => styleSheet.push(selector, "{", ...objectCompose(subObject, minify, [group]).map(i => tab + i), "}"));
-            } else {
-                styleSheet.push(...getSelectorPrefixes(key, prefixes), "{", ...objectCompose(subObject, minify, prefixes).map(i => tab + i), "}");
+            if (Object.keys(subObject).length) {
+                if (key[0] === "@") {
+                    const selectors = Object.entries(getAtRulePrefixes(key, prefixes));
+                    selectors.forEach(([group, selector]) => styleSheet.push(selector, "{", ...objectCompose(subObject, minify, [group]).map(i => tab + i), "}"));
+                } else {
+                    styleSheet.push(...getSelectorPrefixes(key, prefixes), "{", ...objectCompose(subObject, minify, prefixes).map(i => tab + i), "}");
+                }
             }
         }
         else {
@@ -163,7 +168,7 @@ function arrayCompose(array, minify = !env.devMode, prefixes = ["webkit", "moz",
     let styleSheet = [];
     array.forEach(([key, value]) => {
         const process = typeof value === "object" ? unNester(key, value) : { selector: key, result: value, nests: {} };
-        [[process.selector, process.result], ...Object.entries(process.nests)].forEach(([newKey, newValue]) => {
+        [...Object.entries(process.nests), [process.selector, process.result]].forEach(([newKey, newValue]) => {
             if ((typeof newValue) === "object") {
                 const subObject = propListBuild(newValue);
                 if (newKey[0] === "@") {

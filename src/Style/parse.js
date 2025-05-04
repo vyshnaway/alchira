@@ -33,6 +33,27 @@ function SCANNER(content, filePath, sourceSelector) {
         }, {})
     });
 
+    Object.assign(styles, U.object.deepMerge(merged, {
+        ...Object.entries(response.atProps).reduce((acc, [propKey, propValue]) => {
+            acc[propKey] = env.devMode ? `${propValue} /* [${sourceSelector}] FROM [${filePath}] */` : propValue;
+            return acc;
+        }, {}),
+        ...Object.entries(response.properties).reduce((acc, [propKey, propValue]) => {
+            acc[propKey] = env.devMode ? `${propValue} /* [${sourceSelector}] FROM [${filePath}] */` : propValue;
+            return acc;
+        }, {})
+    }))
+
+    // Object.assign(styles, U.object.deepMerge(merged, {
+    //     ...Object.entries(response.atProps).reduce((acc, [propKey, propValue]) => {
+    //         acc[propKey] = env.devMode ? `${propValue} /* [${sourceSelector}] FROM [${filePath}] */` : propValue;
+    //         return acc;
+    //     }, {}),
+    //     ...Object.entries(response.properties).reduce((acc, [propKey, propValue]) => {
+    //         acc[propKey] = env.devMode ? `${propValue} /* [${sourceSelector}] FROM [${filePath}] */` : propValue;
+    //         return acc;
+    //     }, {})
+    // }))
 
     for (let selector in response.allBlocks) {
         const result = SCANNER(response.allBlocks[selector], filePath, sourceSelector + " -> " + selector)
@@ -96,7 +117,7 @@ function CSSBULK(sources = []) {
 }
 
 function TAGSTYLE({ isGlobal, selector, styles, collection, rowMarker, columnMarker }, metaFront, filePath) {
-    const metaClass = (isGlobal ? "GLOBAL" : "LOCAL") + `-R${rowMarker}C${columnMarker}` + metaFront + U.string.normalize(selector);
+    const metaClass = (isGlobal ? "GLOBAL" : "LOCAL") + metaFront + `R${rowMarker}C${columnMarker}__` + U.string.normalize(selector);
     const compiled = {}, preBinds = [], postBinds = [], errors = [], CLX = createXtyle();
 
     for (let subSelector in styles) {

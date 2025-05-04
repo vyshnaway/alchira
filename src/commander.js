@@ -324,23 +324,29 @@ const begins = async () => {
     return response
 }
 
-const execute = async (isDev = false) => {
-    let backRows = 0;
+const execute = async (isDev = false, backRows = 0) => {
     const verified = await begins()
     if (verified.status) {
         await ACTION.SaveSetup()
         await ACTION.SaveFiles()
         const response = await EXECUTOR(DATA)
+
         if (isDev) {
+            let report = "";
             const now = new Date();
-            $.WRITE.primary.Chapter(`${now.getHours()}:${now.getMinutes()}:${now.getSeconds()} ${now.getDate()}-${now.getMonth()}-${now.getFullYear()}`)
+            const heading = $.compose.primary.Chapter(`Active Runtime : ${now.getFullYear()}-${now.getMonth()}-${now.getDate()} ${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}`)
+            const footer = $.compose.failed.Footer("Press Ctrl+C to stop watching.");
+            report = [heading, response.errors, footer].join('\n')
+            $.custom.render.animation.Rewrite(report, backRows);
+            backRows = report.split("\n").length;
+        } else {
+            $.POST(response.report)
         }
-        $.POST(response.report)
-        if (isDev) $.WRITE.failed.Footer("Press Ctrl+C to stop watching.")
+
         await FILEMAN.WRITE.bulk(response.files)
     }
     else {
-        $.POST(verified.report)
+        $.POST(verified.response.report)
     }
     return backRows
 }
@@ -367,17 +373,15 @@ const commander = async (args) => {
             $.POST($.compose.std.Chapter(APP.name + ' : Active Runtime'));
             await ACTION.FetchPrefix();
             process.on('SIGINT', () => {
-                $.custom.render.animation.Backrow();
+                $.custom.render.animation.Backrow(4);
                 $.POST()
                 $.WRITE.primary.Footer("Command Terminated.")
                 process.exit(0);
             });
-            await execute(true);
-            let backRows = 0
-            setInterval(async () => {
-                backRows = await execute(true);
-                $.custom.render.animation.Backrow(backRows);
-            }, (isNaN(ACTION.CONFIGURE.interval) ? 0 : ACTION.CONFIGURE.interval) + 200);
+            let backRows = await execute(true,5);
+            while (1) {
+                backRows = await execute(true, backRows);
+            }
             break;
         case 'preview':
             $.POST($.compose.std.Chapter(APP.name + ' : Preview Build'));

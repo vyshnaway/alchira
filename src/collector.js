@@ -22,7 +22,7 @@ function libFinder(filePath, content, prefix = false, uncomment = false) {
             fileName,
             extension,
             filePath,
-            metaFront: (prefix ? `${axiom ? "AXIOM-level" : "LEVEL"}-${level}` + ((library ?? "").length > 0 ? `_${library}` : ``) : "") + `__${normalPath}__`,
+            metaFront: (prefix ? `${axiom ? "AXIOM-level" : "LEVEL"}-${level}` + ((library ?? "").length > 0 ? `_${library}` : ``) : "") + `__${normalPath}_`,
             content: uncomment ? cleaner.uncomment.Css(content): content,
         },
     }

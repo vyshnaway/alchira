@@ -41,6 +41,7 @@ export const env = {
 }
 
 export const
+    errors = [],
     report = [],
     errorList = [],
     essentials = [],
@@ -72,7 +73,7 @@ function MANDATES({
     TARGET,
     CSSPath,
     StylesListPath,
-}) {    
+}) {
     Object.assign(prefix, {
         atRule: {},
         selector: {},
@@ -105,6 +106,7 @@ function MANDATES({
     });
 
     report.length = 0;
+    errors.length = 0;
     errorList.length = 0;
     essentials.length = 0;
     Object.keys(finals).forEach(key => delete finals[key]);
@@ -218,8 +220,10 @@ async function SOURCEPROCESS({
             $.compose.std.Footer("Local styles : " + locals.length, locals, $.list.secondary.Entries)
         ], $.list.std.Blocks))
     })
+
     stash.global = Object.keys(stash.styleGlobals)
     report.push($.compose.failed.Section(errorList.length + " Errors", errorList))
+    errors.push($.compose.failed.Section(errorList.length + " Errors", errorList))
 
     // Organize styles
     if ("dev" === CMD) {
@@ -276,7 +280,7 @@ async function SOURCEPROCESS({
         } else CMD = "preview";
 
     }
-     
+
 
     scope.compose = Object.keys(stash.styleRefers);
     scope.globals = Object.keys(stash.styleGlobals);
@@ -358,7 +362,7 @@ async function FINALGEN({
 
     // Finalize
     filesOut[StylesListPath] = JSON.stringify(scope);
-    if(CMD !== "dev"){
+    if (CMD !== "dev") {
         report.push($.compose[errorList.length ? "failed" : "success"].Section(finalMessage, memChart, $.list.std.Props))
         report.push($.compose.std.Footer('Output size : ' + stringMem(result)))
     }
@@ -431,6 +435,7 @@ export default async function EXECUTOR({
 
     return {
         files: filesOut,
+        errors: $.compose.std.Block(errors),
         report: $.compose.std.Block(report)
     };
 }
