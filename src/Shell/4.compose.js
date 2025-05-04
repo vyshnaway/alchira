@@ -6,6 +6,7 @@ import list from './3.list.js'
 
 const composeBlock = (headingType, heading, contents) => {
     if (contents.length) contents.push(unstyle)
+        
     return [
         headingType(heading),
         ...contents

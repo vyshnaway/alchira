@@ -1,5 +1,6 @@
 import classExtract from "./proxy.js";
 import { env } from "../executor.js"
+import { cursor } from "./file.js"
 
 const bracePair = {
     "{": "}",
@@ -10,10 +11,10 @@ const bracePair = {
     '"': '"',
 }, openBraces = ["[", "{", "(", "'", '"', "`"], closeBraces = ["]", "}", ")"];
 
-export default function tagScan(content, start, action, classProps, fileData) {
+export default function tagScan(content, action, classProps, fileData) {
+    cursor.marker++;
     let deviance = 0,
-        marker = start + 1,
-        ch = content[marker],
+        ch = content[cursor.marker],
         classList = [],
         braceTrack = [],
         tagObject = {
@@ -21,6 +22,9 @@ export default function tagScan(content, start, action, classProps, fileData) {
             attributes: {},
         },
         styleObject = {
+            rowMarker: cursor.rowMarker,
+            columnMarker: cursor.columnMarker,
+            tagCount: cursor.tagCount,
             isGlobal: false,
             selector: "",
             styles: {},
@@ -32,6 +36,11 @@ export default function tagScan(content, start, action, classProps, fileData) {
         awaitBrace;
 
     while (ch !== undefined) {
+        ch = content[cursor.marker++];
+        if (ch === "\n") { cursor.rowMarker++; cursor.columnMarker = 0 }
+        else cursor.columnMarker++;
+        // console.log({ CH: ch, cur: cursor.marker, row: cursor.rowMarker, col: cursor.columnMarker })
+
         if (awaitBrace === ch) {
             braceTrack.pop();
             deviance = braceTrack.length;
@@ -62,7 +71,7 @@ export default function tagScan(content, start, action, classProps, fileData) {
                 styleObject.styles[attr] = value.slice(1, -1);
             } else {
                 if (classProps.includes(attr)) {
-                    const result = classExtract(value, action, fileData, env.tagCount++);
+                    const result = classExtract(value, action, fileData, cursor.tagCount);
                     classList.push(...result.classList)
                     tagObject.attributes[attr] = result.scribed;
                 } else tagObject.attributes[attr] = value;
@@ -71,22 +80,21 @@ export default function tagScan(content, start, action, classProps, fileData) {
             attr = "";
             value = "";
         }
-        
-        if (ok) break
-        else if (deviance === 0 && ch === ">") ok = true;
-        else if (deviance === 0 && ch === ";") break;
-        
-        ch = content[++marker];
-    }
-    console.log(styleObject)
 
-    const newTag = tagObject.element === env.styleTag ? "" : "<" + tagObject.element + 
-    Object.entries(tagObject.attributes).reduce((A, [P, V]) => A += " " + P + ((V === "") ? "" : "=" + V), "") + ">";
+        if (deviance === 0 && ch === ">") { ok = true; break; }
+        else if (deviance === 0 && ch === ";") break;
+    }
+
+
+    const newTag = tagObject.element === env.styleTag ? "" : "<" + tagObject.element +
+        Object.entries(tagObject.attributes).reduce((A, [P, V]) => A += " " + P + ((V === "") ? "" : "=" + V), "") + ">";
     return {
         ok,
-        marker,
+        marker: cursor.marker,
+        rowMarker: cursor.rowMarker,
+        columnMarker: cursor.columnMarker,
         reading: Boolean(ch),
-        content: ok ? newTag : content.slice(start, marker),
+        content: ok ? newTag : content.slice(cursor.marker, cursor.marker),
         classList,
         styleObject
     }

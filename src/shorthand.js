@@ -8,6 +8,7 @@ function IMPORT(string, watchUndef = true) {
     const response = {
         status: true,
         result: "",
+        error: ""
     }
     let hashMatch;
     const source = string;
@@ -19,13 +20,13 @@ function IMPORT(string, watchUndef = true) {
         recursionLoop: (recursionPreview, cause) => {
             response.status = false;
             recursionPreview["ERROR BY"] = $.custom.style.apply.bold.Red(cause)
-            response.result = $.compose.std.List(source + $.custom.style.apply.bold.Red(" : Shorthand recursion loop."), $.list.failed.Props(recursionPreview), $.list.failed.Waterfall, 1);
+            response.error = $.compose.std.List(source + $.custom.style.apply.bold.Red(" : Shorthand recursion loop."), $.list.failed.Props(recursionPreview), $.list.failed.Waterfall, 1);
             return response
         },
         undefinedHash: (recursionPreview, cause) => {
             response.status = false;
             recursionPreview["ERROR BY"] = $.custom.style.apply.bold.Red(cause)
-            response.result = $.compose.std.List(source + $.custom.style.apply.bold.Red(" : Undefined shorthand."), $.list.failed.Props(recursionPreview), $.list.failed.Waterfall, 1);
+            response.error = $.compose.std.List(source + $.custom.style.apply.bold.Red(" : Undefined shorthand."), $.list.failed.Props(recursionPreview), $.list.failed.Waterfall, 1);
             return response
         }
     }
@@ -33,15 +34,15 @@ function IMPORT(string, watchUndef = true) {
     while (hashMatch = hashPattern.exec(string)) {
         const hash = hashMatch[0];
         const key = hash.slice(2, -1);
-        const replacement = watchUndef ? (stash.shorthands[key] ?? hash) : stash.shorthands[key];
+        const replacement = watchUndef ? stash.shorthands[key]:(stash.shorthands[key] ?? hash) ;
         recursionPreview["FROM " + hash] = `GETS ${replacement}`
 
-        if (replacement === undefined)
+        if (replacement === undefined) {
             return errors.undefinedHash(recursionPreview, hash);
-
-        if (recursionSequence.includes(hash))
+        }
+        if (recursionSequence.includes(hash)) {
             return errors.recursionLoop(recursionPreview, hash);
-
+        }
         string = string.replace(hashPattern, replacement)
             .replace(preHashPattern, match => "{" + match + "}");
 
@@ -51,9 +52,9 @@ function IMPORT(string, watchUndef = true) {
     response.result = string
     return response;
 }
+
 function UPLOAD(shorthands) {
-    $.TASK('Attempting shorthand build.')
-    const shorthandErrors = [];
+    const shorthandErrors = [], report = [];
 
     stash.shorthands = shorthands;
     Object.keys(shorthands).map(key => {
@@ -64,26 +65,26 @@ function UPLOAD(shorthands) {
                 shorthands[key] = response.result;
             } else {
                 delete shorthands[key]
-                shorthandErrors.push(response.result)
+                shorthandErrors.push(response.error)
             }
         }
     });
     stash.shorthands = shorthands;
-    let response = [];
-
+    
     if (Object.keys(stash.shorthands).length)
-        response.push($.compose.success.Section("Valid Shorthands", $.list.success.Props(shorthands), $.list.std.Bullets))
-
+        report.push($.compose.success.Section("Valid Shorthands", $.list.success.Props(shorthands), $.list.std.Bullets))
     if (shorthandErrors.length)
-        response.push($.compose.failed.Footer("Invalid Shorthands", shorthandErrors, $.list.std.Bullets))
+        report.push($.compose.failed.Footer("Invalid Shorthands", shorthandErrors, $.list.std.Bullets))
 
     return {
         list: Object.keys(stash.shorthands),
-        report: $.compose.std.Block(response)
+        report: $.compose.std.Block(report)
     }
 }
+
 function RENDER(string) {
-    string = IMPORT(string).result
+    const extended = IMPORT(string)
+    string = extended.result
     let rule = [],
         selector = [],
         $Marker = 0,
@@ -133,7 +134,7 @@ function RENDER(string) {
         }
     }
 
-    return { rule: rule.join(''), selector: selector.length ? "&" + selector.join('') : "" };
+    return { rule: rule.join(''), subSelector: selector.join(''), status: extended.status, error: extended.error };
 }
 
 export default {

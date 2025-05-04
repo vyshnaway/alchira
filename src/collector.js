@@ -5,7 +5,7 @@ const NON_ALPHANUMERIC_EXCEPT_SLASH = /[^a-z0-9/\\]/gi;
 const LIB_CHARSET = /[^\w-]/gi;
 const SLASH = /[/\\]/g;
 
-function libFinder(filePath, content, prefix = false) {
+function libFinder(filePath, content, prefix = false, uncomment = false) {
 
     let [extension, fileName, level, library] = filePath.slice(filePath.lastIndexOf("/") + 1).split(".").reverse()
     level = (isNaN(level) || level < 0) ? 0 : parseInt(level, 10);
@@ -23,7 +23,7 @@ function libFinder(filePath, content, prefix = false) {
             extension,
             filePath,
             metaFront: (prefix ? `${axiom ? "AXIOM-level" : "LEVEL"}-${level}` + ((library ?? "").length > 0 ? `_${library}` : ``) : "") + `__${normalPath}__`,
-            content: cleaner.uncomment.Css(content),
+            content: uncomment ? cleaner.uncomment.Css(content): content,
         },
     }
 }
@@ -34,7 +34,7 @@ export default {
         let length = 0;
 
         Object.keys(filesArray).forEach(filePath => {
-            const lib = libFinder(filePath, filesArray[filePath], true);
+            const lib = libFinder(filePath, filesArray[filePath], true, true);
             const { level, axiom } = lib;
             const group = axiom ? "axiom" : "library";
 

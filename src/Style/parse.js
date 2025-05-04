@@ -24,11 +24,11 @@ function SCANNER(content, filePath, sourceSelector) {
 
     const styles = U.object.deepMerge(merged, {
         ...Object.entries(response.atProps).reduce((acc, [propKey, propValue]) => {
-            acc[propKey] = env.devMode ? `${propValue} /* ${sourceSelector} @ ${filePath} */` : propValue;
+            acc[propKey] = env.devMode ? `${propValue} /* [${sourceSelector}] FROM [${filePath}] */` : propValue;
             return acc;
         }, {}),
         ...Object.entries(response.properties).reduce((acc, [propKey, propValue]) => {
-            acc[propKey] = env.devMode ? `${propValue} /* ${sourceSelector} @ ${filePath} */` : propValue;
+            acc[propKey] = env.devMode ? `${propValue} /* [${sourceSelector}] FROM [${filePath}] */` : propValue;
             return acc;
         }, {})
     });
@@ -78,7 +78,6 @@ function CSSBULK(sources = []) {
                     class: CLX.class,
                     scope: "global",
                     selector,
-                    collection: [],
                     preBinds: scannedStyle.preBinds,
                     postBinds: scannedStyle.postBinds,
                     metaClass: metaFront + metaSelector,
@@ -93,17 +92,17 @@ function CSSBULK(sources = []) {
         stash.styleRefers[selector] = selectors[selector].index;
     }
 
-    return Object.keys(stash.styleRefers);
+    return { tillStyles: Object.keys(stash.styleRefers), exclusiveStyles: Object.keys(selectors) };
 }
 
-function TAGSTYLE({ isGlobal, selector, styles, collection }, metaFront, filePath) {
-    const metaClass = (isGlobal? "GLOBAL": "LOCAL") + metaFront + U.string.normalize(selector);
-    const compiled = {}, preBinds = [], postBinds = [];
-    const CLX = createXtyle();
+function TAGSTYLE({ isGlobal, selector, styles, collection, rowMarker, columnMarker }, metaFront, filePath) {
+    const metaClass = (isGlobal ? "GLOBAL" : "LOCAL") + `-R${rowMarker}C${columnMarker}` + metaFront + U.string.normalize(selector);
+    const compiled = {}, preBinds = [], postBinds = [], errors = [], CLX = createXtyle();
 
-    for (let style in styles) {
-        const query = SHORTHAND.RENDER(style);
-        const styleObj = SCANNER(styles[style], filePath, style === "" ? selector : `${selector} => ${style}`)
+    for (let subSelector in styles) {
+        const query = SHORTHAND.RENDER(subSelector);
+        if (!query.status) errors.push(query.error)
+        const styleObj = SCANNER(styles[subSelector], filePath, subSelector === "" ? selector : `${selector} => ${subSelector}`)
         postBinds.push(...styleObj.postBinds)
         preBinds.push(...styleObj.preBinds)
         if (env.devMode) {
@@ -111,16 +110,31 @@ function TAGSTYLE({ isGlobal, selector, styles, collection }, metaFront, filePat
             styleObj.preBinds.forEach(E => lists.preBinds.add(E))
         }
 
-        if (!compiled[query.rule]) compiled[query.rule] = {}
-        if (Object.keys(styleObj.styles).length)
-            compiled[query.rule][query.selector] = styleObj.styles
+        if (Object.keys(styleObj).length) {
+            if (selector === "") {
+                if (query.rule === "") {
+                    if (query.subSelector !== "") { compiled[query.subSelector] = styleObj.styles }
+                } else {
+                    if (query.subSelector === "") {
+                        compiled[query.rule] = styleObj.styles;
+                    }
+                    else {
+                        if (!compiled[query.rule]) compiled[query.rule] = {}
+                        compiled[query.rule][query.subSelector] = styleObj.styles;
+                    }
+                }
+            } else {
+                if (!compiled[query.rule]) compiled[query.rule] = {}
+                if (query.subSelector === "")
+                    compiled[query.rule] = { ...compiled[query.rule], ...styleObj.styles }
+                else
+                    compiled[query.rule]["&" + query.subSelector] = styleObj.styles;
+            }
+        }
     }
-
     if (selector === "") {
         Object.entries(compiled).forEach(([key, value]) => {
-            if (key !== "") {
-                essentials.push([key, value[""]]);
-            }
+            if (key !== "") essentials.push([key, value]);
         })
         postBinds.forEach(E => lists.postBinds.add(E))
         preBinds.forEach(E => lists.preBinds.add(E))
@@ -129,7 +143,6 @@ function TAGSTYLE({ isGlobal, selector, styles, collection }, metaFront, filePat
             class: CLX.class,
             scope: isGlobal,
             selector,
-            collection,
             preBinds,
             postBinds,
             metaClass,
@@ -139,6 +152,8 @@ function TAGSTYLE({ isGlobal, selector, styles, collection }, metaFront, filePat
         if (isGlobal) stash.styleGlobals[selector] = env.styleCount;
         else stash.styleLocals[filePath][selector] = env.styleCount;
     }
+
+    return errors;
 }
 
 export default {

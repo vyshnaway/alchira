@@ -2,11 +2,13 @@
     "source": "src",
     "target": "xrc",
     "stylesheet": "styles.css",
+    "interval": "5000",
     "extensions": {
         "html": ["class"]
     },
     "shorthands": {
         // "DesignApproach": "#DesktopFirst"
         // Switch between #MobileFirst and #DesktopFirst
-    }
+    },
+    "key": ""
 }

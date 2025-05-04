@@ -1,5 +1,6 @@
 import { stash, lists, finals, createXtyle } from "../executor.js"
 import Utils from "../Utils/index.js";
+import { cursor } from "./file.js"
 
 function loadActiveIndexes(classList = [], filePath) {
     return classList.reduce((A, entry) => {
@@ -19,7 +20,7 @@ function loadActiveStyles(classList, filePath) {
     }, []), true)
 }
 
-export default function classExtract(string, action, fileData, shrad) {
+export default function classExtract(string, action, fileData) {
     const classList = [], quotes = ["'", "`", '"'];
     let activeQuote = "", entry = "", scribed = string,
         marker = 0, ch = string[marker], inQuote = false;
@@ -44,7 +45,7 @@ export default function classExtract(string, action, fileData, shrad) {
     }
 
     if (action !== "read") {
-        const metaFront = "TAG-" + shrad + "" + fileData.metaFront + "_";
+        const metaFront = "TAG-" + cursor.tagCount + "" + fileData.metaFront + "_";
         activeQuote = "", entry = "", scribed = "", marker = 0, inQuote = false, ch = string[marker];
         const activeIndexes = (action === "dev") ? [] :
             Utils.array.longestSubChain(lists.ordered, loadActiveIndexes(Utils.array.setback(classList), fileData.filePath));
@@ -65,8 +66,8 @@ export default function classExtract(string, action, fileData, shrad) {
                                     lists.preBinds.add(className)
                                 else lists.postBinds.add(className)
                         }
-                        if (!(className[0] === "-" || /\$-/.test(className)))
-                            scribed += className;
+                        // if (!(className[0] === "-" || /\$-/.test(className)))
+                        //     scribed += className;
                     } else {
                         const index = (stash.styleRefers[entry] ?? 0) +
                             (stash.styleGlobals[entry] ?? 0) +

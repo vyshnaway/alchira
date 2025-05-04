@@ -33,43 +33,43 @@ export default function WATCHDOG(directories = [], callbackFuntion) {
         }
 
         // let lastStats = {};
-        // setInterval(() => {
-        //     fs.readdir(dir, { withFileTypes: true }, (err, files) => {
-        //         if (err) {
-        //             console.error(`Polling error reading ${dir}: ${err.message}`);
-        //             return;
-        //         }
+        setInterval(() => {
+            fs.readdir(dir, { withFileTypes: true }, (err, files) => {
+                if (err) {
+                    console.error(`Polling error reading ${dir}: ${err.message}`);
+                    return;
+                }
 
-        //         const currentStats = {};
-        //         files.forEach(file => {
-        //             const fullPath = path.join(dir, file.name);
-        //             try {
-        //                 currentStats[fullPath] = fs.statSync(fullPath).mtimeMs;
-        //             } catch (error) {
-        //                 console.error(`Stat error for ${fullPath}: ${error.message}`);
-        //             }
-        //         });
+                const currentStats = {};
+                files.forEach(file => {
+                    const fullPath = path.join(dir, file.name);
+                    try {
+                        currentStats[fullPath] = fs.statSync(fullPath).mtimeMs;
+                    } catch (error) {
+                        console.error(`Stat error for ${fullPath}: ${error.message}`);
+                    }
+                });
 
-        //         Object.keys(lastStats).forEach(file => {
-        //             if (!currentStats[file]) callbackFuntion('delete', file);
-        //         });
-        //         Object.keys(currentStats).forEach(file => {
-        //             if (!lastStats[file]) callbackFuntion('add', file);
-        //             else if (lastStats[file] !== currentStats[file]) callbackFuntion('change', file);
-        //         });
+                Object.keys(lastStats).forEach(file => {
+                    if (!currentStats[file]) callbackFuntion('delete', file);
+                });
+                Object.keys(currentStats).forEach(file => {
+                    if (!lastStats[file]) callbackFuntion('add', file);
+                    else if (lastStats[file] !== currentStats[file]) callbackFuntion('change', file);
+                });
 
-        //         lastStats = { ...currentStats };
-        //     });
+                lastStats = { ...currentStats };
+            });
 
-        //     fs.readdir(dir, { withFileTypes: true }, (err, files) => {
-        //         if (err) return;
-        //         files.forEach(file => {
-        //             if (file.isDirectory()) {
-        //                 const subDir = path.join(dir, file.name);
-        //                 if (!resolvedDirs.includes(subDir)) WATCHDOG([subDir], callbackFuntion);
-        //             }
-        //         });
-        //     });
-        // }, 1000);
+            fs.readdir(dir, { withFileTypes: true }, (err, files) => {
+                if (err) return;
+                files.forEach(file => {
+                    if (file.isDirectory()) {
+                        const subDir = path.join(dir, file.name);
+                        if (!resolvedDirs.includes(subDir)) WATCHDOG([subDir], callbackFuntion);
+                    }
+                });
+            });
+        }, 1000);
     });
 }

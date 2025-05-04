@@ -1,14 +1,20 @@
-import tagReader from "./tag.js"
-import { env } from "../executor.js";
+import tagReader from "./tag.js";
+
+export const cursor = { marker: 0, rowMarker: 0, columnMarker: 0, tagCount: 0 };
 
 function scanner(fileData, classProps, action) {
-    env.tagCount = 0;
+    cursor.tagCount = 1, cursor.rowMarker = 1, cursor.columnMarker = 1, cursor.marker = 0;
     const stylesList = [], classesList = [];
-    let ch = fileData.content[0], marker = 0, reading = true, scribed = "";
+    let ch = fileData.content[0], reading = true, scribed = "";
 
-    while (marker < fileData.content.length) {
+    while (cursor.marker < fileData.content.length) {
+        if (ch === "\n") { cursor.rowMarker++; cursor.columnMarker = 0 }
+        else cursor.columnMarker++;
+        // console.log({ ch, cur: cursor.marker,row: cursor.rowMarker, col: cursor.columnMarker })
+
         if (ch === "<") {
-            const response = tagReader(fileData.content, marker, action, classProps, fileData);
+            cursor.tagCount++;
+            const response = tagReader(fileData.content, action, classProps, fileData);
             if (response.ok) {
                 if (Object.keys(response.styleObject.styles).length > 0)
                     stylesList.push(response.styleObject)
@@ -16,12 +22,12 @@ function scanner(fileData, classProps, action) {
             }
             scribed += response.content
             reading = response.reading
-            marker = response.marker
         } else {
-            scribed += ch;
-            marker++;
+            scribed += ch; 
+            cursor.marker++
         }
-        ch = fileData.content[marker]
+
+        ch = fileData.content[cursor.marker]
     }
 
     return { scribed, classesList, stylesList }

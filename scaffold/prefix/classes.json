@@ -1,32 +1,41 @@
 {
-  ":fullscreen": {
-    "webkit": ":-webkit-full-screen",
-    "moz": ":-moz-full-screen",
-    "ms": ":-ms-fullscreen"
-  },
-  ":selection": {
-    "webkit": "::-webkit-selection",
-    "moz": "::-moz-selection"
-  },
-  ":placeholder": {
-    "webkit": "::-webkit-input-placeholder",
-    "moz": ":-moz-placeholder",
-    "ms": ":-ms-input-placeholder"
-  },
-  ":read-only": {
-    "webkit": ":-webkit-read-only",
-    "moz": ":-moz-read-only"
-  },
-  ":read-write": {
-    "webkit": ":-webkit-read-write",
-    "moz": ":-moz-read-write"
-  },
-  ":in-range": {
-    "webkit": ":-webkit-in-range",
-    "moz": ":-moz-in-range"
-  },
-  ":out-of-range": {
-    "webkit": ":-webkit-out-of-range",
-    "moz": ":-moz-out-of-range"
-  }
+  ":active": [],
+  ":checked": [],
+  ":disabled": [],
+  ":empty": [],
+  ":enabled": [],
+  ":first-child": [],
+  ":first-of-type": [],
+  ":focus": [],
+  ":hover": [],
+  ":in-range": [],
+  ":invalid": [],
+  ":lang()": [],
+  ":last-child": [],
+  ":last-of-type": [],
+  ":link": [],
+  ":not()": [],
+  ":nth-child()": [],
+  ":nth-last-child()": [],
+  ":nth-last-of-type()": [],
+  ":nth-of-type()": [],
+  ":only-child": [],
+  ":only-of-type": [],
+  ":optional": [],
+  ":out-of-range": [],
+  ":read-only": [],
+  ":read-write": [],
+  ":required": [],
+  ":root": [],
+  ":target": [],
+  ":valid": [],
+  ":visited": [],
+  ":fullscreen": [
+    ":-webkit-full-screen",
+    ":-moz-full-screen",
+    ":-ms-fullscreen"
+  ],
+  ":selection": [
+    ":-moz-selection"
+  ]
 }

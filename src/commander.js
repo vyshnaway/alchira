@@ -133,14 +133,14 @@ const ACTION = {
     },
     Initialize: async () => {
         try {
-            $.TASK("Initializing XCSS setup.", 0);
+            if (DATA.CMD !== "dev") $.TASK("Initializing XCSS setup.", 0);
 
-            $.TASK('Cloning scaffold to Project');
+            if (DATA.CMD !== "dev") $.TASK('Cloning scaffold to Project');
             await FILEMAN.CLONE.safe(NAV.scaffold.setup, NAV.folder.setup);
             await FILEMAN.CLONE.safe(NAV.scaffold.refers, NAV.folder.refers);
 
             if (await FILEMAN.PATH.ifFile('package.json')) {
-                $.TASK('Adding additional scripts to project');
+                if (DATA.CMD !== "dev") $.TASK('Adding additional scripts to project');
                 const destJson = await FILEMAN.READ.json("./package.json");
                 destJson.data.scripts[`${APP.command}:install`] = `npm install -g ${APP.name}`;
                 for (const key of Object.keys(APP.commandList)) {
@@ -177,7 +177,7 @@ const ACTION = {
         }
     },
     FetchPrefix: async () => {
-        $.TASK("Loading vendor-prefixes", 0)
+        if (DATA.CMD !== "dev") $.TASK("Loading vendor-prefixes", 0)
 
         const classes = FILEMAN.SYNC.json(LIVE.PREFIX.classes.url, LIVE.PREFIX.classes.path);
         const atrules = FILEMAN.SYNC.json(LIVE.PREFIX.atrules.url, LIVE.PREFIX.atrules.path);
@@ -192,9 +192,9 @@ const ACTION = {
     VerifySetup: async () => {
         const errors = {}, passed = {};
 
-        $.TASK("Verifying directory status", 0)
+        if (DATA.CMD !== "dev") $.TASK("Verifying directory status", 0)
         for (const item of Object.values(NAV.css)) {
-            $.STEP("Path : " + item)
+            if (DATA.CMD !== "dev") $.STEP("Path : " + item)
             if (await FILEMAN.PATH.ifFile(item)) {
                 passed[item] = "Ok";
             } else {
@@ -202,14 +202,14 @@ const ACTION = {
             }
         }
         for (const item of Object.values(NAV.json)) {
-            $.STEP("Path : " + item)
+            if (DATA.CMD !== "dev") $.STEP("Path : " + item)
             if (await FILEMAN.PATH.ifFile(item)) {
                 passed[item] = "Ok";
             } else {
                 errors[item] = "File not found.";
             }
         }
-        $.TASK("Verification complete")
+        if (DATA.CMD !== "dev") $.TASK("Verification complete")
 
         return {
             unstart: !(await FILEMAN.PATH.available(NAV.folder.setup)).exist,
@@ -223,9 +223,9 @@ const ACTION = {
         const configure = FILEMAN.READ.json(NAV.json.configure)
         const shorthand = FILEMAN.READ.json(NAV.json.shorthand)
 
-        $.TASK("Initializing configs")
+        if (DATA.CMD !== "dev") $.TASK("Initializing configs")
 
-        $.STEP("PATH : " + NAV.json.configure)
+        if (DATA.CMD !== "dev") $.STEP("PATH : " + NAV.json.configure)
         if ((await configure).status) {
             ACTION.CONFIGURE = (await configure).data
             DATA.KEY = DATA.KEY ?? ACTION.CONFIGURE.key
@@ -250,7 +250,7 @@ const ACTION = {
                 errors[ACTION.CONFIGURE.source] = "Folder not found."
         } else errors[NAV.json.configure] = "Bad json file."
 
-        $.STEP("PATH : " + NAV.json.shorthand)
+        if (DATA.CMD !== "dev") $.STEP("PATH : " + NAV.json.shorthand)
         if ((await shorthand).status) {
             if (typeof ((await shorthand).data) === "object") {
                 DATA.SHORTHAND = Object.fromEntries(
@@ -259,7 +259,7 @@ const ACTION = {
             } else errors[NAV.json.shorthand] = "Error data type"
         } else errors[NAV.json.shorthand] = "Bad json file."
 
-        $.TASK("Initializing complete")
+        if (DATA.CMD !== "dev") $.TASK("Initializing complete")
         return {
             status: Object.keys(errors).length === 0,
             report: Object.keys(errors).length === 0 ?
@@ -268,17 +268,17 @@ const ACTION = {
         }
     },
     SaveSetup: async () => {
-        $.TASK("Fetching from Setup", 0)
-        $.STEP("Loading Reference styles")
+        if (DATA.CMD !== "dev") $.TASK("Fetching from Setup", 0)
+        if (DATA.CMD !== "dev") $.STEP("Loading Reference styles")
         const refers = FILEMAN.READ.bulk(NAV.folder.refers, ["css"]);
-        $.STEP("Loading Origin styles")
+        if (DATA.CMD !== "dev") $.STEP("Loading Origin styles")
         const stylePrefix = CSSImport([
             NAV.css.atrules,
             NAV.css.constants,
             NAV.css.elements,
             NAV.css.extends,
         ]);
-        $.TASK("Saving styles")
+        if (DATA.CMD !== "dev") $.TASK("Saving styles")
         DATA.REFERS = await refers;
         DATA.CSSIndex = await stylePrefix;
         DATA.SHORTHAND = {
@@ -287,9 +287,14 @@ const ACTION = {
         };
     },
     SaveFiles: async () => {
-        $.TASK("Fetching target files", 0)
-        $.TASK("Syncing untargeted files")
-        const files = FILEMAN.SYNC.bulk(ACTION.CONFIGURE.target, ACTION.CONFIGURE.source, Object.keys(ACTION.CONFIGURE.extensions));
+        if (DATA.CMD !== "dev") $.TASK("Fetching target files", 0)
+        if (DATA.CMD !== "dev") $.TASK("Syncing untargeted files")
+        const files = FILEMAN.SYNC.bulk(
+            ACTION.CONFIGURE.target,
+            ACTION.CONFIGURE.source,
+            Object.keys(ACTION.CONFIGURE.extensions),
+            [ACTION.CONFIGURE.stylesheet]
+        );
 
         DATA.TARGET = ACTION.CONFIGURE.target
         DATA.CSSPath = ACTION.CONFIGURE.stylesheet
@@ -298,10 +303,10 @@ const ACTION = {
             FILEMAN.PATH.join(ACTION.CONFIGURE.target, ACTION.CONFIGURE.stylesheet)
         ]);
 
-        $.TASK("Saving targeted files")
+        if (DATA.CMD !== "dev") $.TASK("Saving targeted files")
         DATA.FILES = (await files).fileContent
 
-        $.TASK("Updating " + NAV.json.syncmap)
+        if (DATA.CMD !== "dev") $.TASK("Updating " + NAV.json.syncmap)
         await FILEMAN.WRITE.json(NAV.json.syncmap, (await files).syncMap)
     }
 };
@@ -317,6 +322,27 @@ const begins = async () => {
         response.status = configInit.status;
     }
     return response
+}
+
+const execute = async (isDev = false) => {
+    let backRows = 0;
+    const verified = await begins()
+    if (verified.status) {
+        await ACTION.SaveSetup()
+        await ACTION.SaveFiles()
+        const response = await EXECUTOR(DATA)
+        if (isDev) {
+            const now = new Date();
+            $.WRITE.primary.Chapter(`${now.getHours()}:${now.getMinutes()}:${now.getSeconds()} ${now.getDate()}-${now.getMonth()}-${now.getFullYear()}`)
+        }
+        $.POST(response.report)
+        if (isDev) $.WRITE.failed.Footer("Press Ctrl+C to stop watching.")
+        await FILEMAN.WRITE.bulk(response.files)
+    }
+    else {
+        $.POST(verified.report)
+    }
+    return backRows
 }
 
 const commander = async (args) => {
@@ -339,63 +365,29 @@ const commander = async (args) => {
             break;
         case 'dev':
             $.POST($.compose.std.Chapter(APP.name + ' : Active Runtime'));
-            await ACTION.FetchPrefix()
-            const verifiedDev = await begins()
-            // if (verifiedDev.status) {
-            //     EXECUTOR(DATA);
-            //     WATCHDOG([NAV.setup.setup], async () => {
-            //         NAV.status = false;
-            //         $.WRITE.primary.Section(new Date())
-            //         if (await NAV.FETCH(DATA.CMD)) {
-            //             EXECUTOR(DATA, DATA.CMD);
-            //             $.WRITE.success.Footer("Build Success.")
-            //         } else $.WRITE.failed.Footer("Build Failed.")
-            //     });
-            //     WATCHDOG([NAV.setup.target], async () => {
-            //         if (await NAV.FETCH(DATA.CMD)) {
-            //             EXECUTOR(DATA, DATA.CMD);
-            //             $.WRITE.success.Footer("Build Success.")
-            //         } else $.WRITE.failed.Footer("Build Failed.")
-            //     });
-            //     process.on('SIGINT', () => {
-            //         $.custom.render.animation.Backrow(),
-            //             $.POST()
-            //         $.WRITE.primary.Footer("Command Terminated.")
-            //         process.exit(0);
-            //     });
-            //     $.WRITE.failed.Footer("Press Ctrl+C to stop watching.")
-            // }
-            if (verifiedDev.status) {
-                await ACTION.SaveSetup()
-                await ACTION.SaveFiles()
-                const response = EXECUTOR(DATA)
-                await FILEMAN.WRITE.bulk(response.files)
-                $.POST(response.report)
-            } else $.POST(verifiedPreview.report)
+            await ACTION.FetchPrefix();
+            process.on('SIGINT', () => {
+                $.custom.render.animation.Backrow();
+                $.POST()
+                $.WRITE.primary.Footer("Command Terminated.")
+                process.exit(0);
+            });
+            await execute(true);
+            let backRows = 0
+            setInterval(async () => {
+                backRows = await execute(true);
+                $.custom.render.animation.Backrow(backRows);
+            }, (isNaN(ACTION.CONFIGURE.interval) ? 0 : ACTION.CONFIGURE.interval) + 200);
             break;
         case 'preview':
             $.POST($.compose.std.Chapter(APP.name + ' : Preview Build'));
             await ACTION.FetchPrefix()
-            const verifiedPreview = await begins()
-            if (verifiedPreview.status) {
-                await ACTION.SaveSetup()
-                await ACTION.SaveFiles()
-                const response = EXECUTOR(DATA)
-                await FILEMAN.WRITE.bulk(response.files)
-                $.POST(response.report)
-            } else $.POST(verifiedPreview.report)
+            await execute()
             break;
         case 'build':
             $.POST($.compose.std.Chapter(APP.name + ' : Preview Build'));
             await ACTION.FetchPrefix()
-            const verifiedBuild = await begins()
-            if (verifiedBuild.status) {
-                await ACTION.SaveSetup()
-                await ACTION.SaveFiles()
-                const response = EXECUTOR(DATA)
-                await FILEMAN.WRITE.bulk(response.files)
-                $.POST(response.report)
-            } else $.POST(verifiedPreview.report)
+            await execute()
             break;
         default:
             await ACTION.FetchDocs()

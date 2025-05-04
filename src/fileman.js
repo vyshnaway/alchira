@@ -172,7 +172,7 @@ const FILEMAN = {
             const current = await FILEMAN.READ.json(path);
             return (current.status) ? current.data : {}
         },
-        bulk: async (source, target, extensions = []) => {
+        bulk: async (source, target, extensions = [], ignoreFiles = []) => {
             const result = { status: true, fileContent: {}, syncMap: {} };
             extensions = extensions.map(ext => '.' + ext);
 
@@ -187,8 +187,13 @@ const FILEMAN = {
             const sourceFiles = FILEMAN.PATH.listFiles(source);
             const targetFiles = FILEMAN.PATH.listFiles(target);
 
-            const relativeSourceFiles = (await sourceFiles).map(file => path.relative(source, file));
-            const relativeTargetFiles = (await targetFiles).map(file => path.relative(target, file));
+            const relativeTargetFiles = (await targetFiles)
+                .map(file => path.relative(target, file))
+                .filter(file => !ignoreFiles.some(ignore => file.startsWith(ignore)));
+
+            const relativeSourceFiles = (await sourceFiles)
+                .map(file => path.relative(source, file))
+                .filter(file => !ignoreFiles.some(ignore => file.startsWith(ignore)));
 
             for (const file of relativeTargetFiles) {
                 if (!relativeSourceFiles.includes(file)) {

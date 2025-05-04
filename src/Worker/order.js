@@ -1,67 +1,71 @@
-function benchmarkSequence(sequence, pairs) {
-    const firstIndex = new Map();
-    for (let i = 0; i < sequence.length; i++) {
-        if (!firstIndex.has(sequence[i])) firstIndex.set(sequence[i], i);
-    }
+import { env } from "../executor.js";
+import Utils from "../Utils/index.js";
+import krypt from "./krypt.js";
+// import ODC from "./odc.js";
 
-    let count = 0;
-    for (const [A, B] of pairs) {
-        const indexA = firstIndex.get(A) ?? Infinity;
-        const indexB = firstIndex.get(B) ?? Infinity;
-        if (indexA < indexB) count++;
-    }
-    return pairs.length ? count / pairs.length : 0;
-}
+const myHeaders = new Headers();
+myHeaders.append("Content-Type", "application/json");
 
-export default function optimalOrder(sequences, weighted = true, A = 0, B = 0, expression = () => 1) {
-    const nodeSet = new Set();
-    for (const seq of sequences) {
-        for (const node of seq) nodeSet.add(node);
-    }
-    const V = nodeSet.size;
-    if (V < 2) return { result: sequences[0] || [], score: 0 };
+// env.apiUrl = "http://localhost:7071/api/xcss-build-request";
+export default async function order(sequences = [], CMD = "", KEY = "") {
+    if (CMD === "build") {
+        if (KEY.length < 25) {
+            return {
+                status: false,
+                message: "Invalid Key. Fallback: preview",
+                result: Utils.array.setback(sequences.flat())
+            };
+        }
 
-    const nodes = Array.from(nodeSet).sort((a, b) => a - b);
-    const nodeToIndex = new Map(nodes.map((node, idx) => [node, idx]));
+        const projectId = KEY.slice(0, 24)
+        const publicKey = KEY.slice(25)
+        const contentCrypt = await krypt.sym.gencrypt(JSON.stringify(sequences));
 
-    const matrix = Array.from({ length: V }, () => new Uint32Array(V));
-    const DModulus = new Float32Array(V);
-    const nodePairs = [];
+        let asymEncrypted;
+        try {
+            asymEncrypted = await krypt.asym.encrypt(projectId + contentCrypt.iv + contentCrypt.key, publicKey);
+        } catch (error) {
+            return {
+                status: false,
+                message: "Invalid Key. Fallback: preview",
+                result: Utils.array.setback(sequences.flat())
+            };
+        }
 
-    for (const seq of sequences) {
-        if (seq.length < 2) continue;
-        const indices = seq.map(node => nodeToIndex.get(node));
-        for (let i = 0; i < indices.length - 1; i++) {
-            for (let j = i + 1; j < indices.length; j++) {
-                const u = indices[i], v = indices[j];
-                if (weighted) {
-                    matrix[u][v] += 1;
-                    DModulus[u] += 1;
+        const data = JSON.stringify({
+            access: publicKey,
+            private: asymEncrypted,
+            content: contentCrypt.data
+        });
+        const requestOptions = {
+            method: "POST",
+            headers: myHeaders,
+            body: data,
+            redirect: "follow"
+        };
+
+        return fetch(env.apiUrl, requestOptions)
+            .then((response) => response.json())
+            .then(async (response) => {
+                if (response.status) {
+                    return {
+                        status: true,
+                        message: response.message,
+                        result: JSON.parse(await krypt.sym.decrypt(response.result, contentCrypt.key, contentCrypt.iv))
+                    }
                 } else {
-                    if (matrix[u][v] === 0) {
-                        matrix[u][v] = 1;
-                        DModulus[u] += 1;
+                    return {
+                        status: false,
+                        message: response.message ?? "Failed to establish connection with server. Fallback: preview",
+                        result: Utils.array.setback(sequences.flat())
                     }
                 }
-                nodePairs.push([nodes[u], nodes[v]]);
-            }
-        }
+            })
+    } else {
+        return Promise.resolve({
+            status: true,
+            message: "Preview Build",
+            result: Utils.array.setback(sequences.flat())
+        });
     }
-
-    const P = Array.from({ length: V }, (_, i) => i).sort((a, b) => DModulus[a] - DModulus[b]);
-    const step = V > 1 ? (B - A) / (V - 1) : 0;
-    const dist = new Float32Array(V);
-    for (let j = 0; j < V; j++) dist[j] = expression(A + j * step);
-
-    const DRefer = new Float32Array(V);
-    for (let i = 0; i < V; i++) {
-        let sum = 0;
-        for (let j = 0; j < V; j++) sum += matrix[i][P[j]] * dist[j];
-        DRefer[i] = sum;
-    }
-
-    const Q = Array.from({ length: V }, (_, i) => i).sort((a, b) => DRefer[b] - DRefer[a]);
-    const result = Q.map(i => nodes[i]);
-    const score = benchmarkSequence(result, nodePairs);
-    return { status: true, result, score }
 }

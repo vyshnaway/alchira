@@ -1,47 +1,30 @@
 {
-  "::after": {
-    "webkit": ":-webkit-after",
-    "moz": ":-moz-after",
-    "ms": ":-ms-after"
-  },
-  "::before": {
-    "webkit": ":-webkit-before",
-    "moz": ":-moz-before",
-    "ms": ":-ms-before"
-  },
-  "::first-letter": {
-    "webkit": ":-webkit-first-letter",
-    "moz": ":-moz-first-letter",
-    "ms": ":-ms-first-letter"
-  },
-  "::first-line": {
-    "webkit": ":-webkit-first-line",
-    "moz": ":-moz-first-line",
-    "ms": ":-ms-first-line"
-  },
-  "::selection": {
-    "webkit": "::-webkit-selection",
-    "moz": "::-moz-selection",
-    "ms": "::-ms-selection"
-  },
-  "::backdrop": {
-    "webkit": ":-webkit-backdrop",
-    "moz": ":-moz-backdrop",
-    "ms": ":-ms-backdrop"
-  },
-  "::marker": {
-    "webkit": ":-webkit-marker",
-    "moz": ":-moz-marker",
-    "ms": ":-ms-marker"
-  },
-  "::placeholder": {
-    "webkit": ":-webkit-input-placeholder",
-    "moz": ":-moz-placeholder",
-    "ms": ":-ms-input-placeholder"
-  },
-  "::file-selector-button": {
-    "webkit": ":-webkit-file-upload-button",
-    "moz": ":-moz-file-selector-button",
-    "ms": ":-ms-file-selector-button"
-  }
+  "::after": [
+    ":-webkit-after",
+    ":-moz-after"
+  ],
+  "::before": [
+    ":-webkit-before",
+    ":-moz-before"
+  ],
+  "::first-letter": [],
+  "::first-line": [],
+  "::selection": [
+    "::-moz-selection"
+  ],
+  "::backdrop": [
+    ":-webkit-backdrop"
+  ],
+  "::marker": [
+    ":-webkit-marker"
+  ],
+  "::placeholder": [
+    ":-webkit-input-placeholder",
+    ":-moz-placeholder",
+    ":-ms-input-placeholder"
+  ],
+  "::file-selector-button": [
+    ":-webkit-file-upload-button",
+    ":-ms-file-selector-button"
+  ]
 }
