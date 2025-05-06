@@ -44,17 +44,6 @@ function SCANNER(content, filePath, sourceSelector) {
         }, {})
     }))
 
-    // Object.assign(styles, U.object.deepMerge(merged, {
-    //     ...Object.entries(response.atProps).reduce((acc, [propKey, propValue]) => {
-    //         acc[propKey] = env.devMode ? `${propValue} /* [${sourceSelector}] FROM [${filePath}] */` : propValue;
-    //         return acc;
-    //     }, {}),
-    //     ...Object.entries(response.properties).reduce((acc, [propKey, propValue]) => {
-    //         acc[propKey] = env.devMode ? `${propValue} /* [${sourceSelector}] FROM [${filePath}] */` : propValue;
-    //         return acc;
-    //     }, {})
-    // }))
-
     for (let selector in response.allBlocks) {
         const result = SCANNER(response.allBlocks[selector], filePath, sourceSelector + " -> " + selector)
         variables.push(...result.variables);

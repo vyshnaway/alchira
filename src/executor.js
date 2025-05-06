@@ -47,7 +47,7 @@ export const
     essentials = [],
     finals = {},
     filesOut = {},
-    scope = { files: {} }
+    scope = { file: {}, local: {}, global: {} }
 
 
 export function createXtyle() {
@@ -111,7 +111,7 @@ function MANDATES({
     essentials.length = 0;
     Object.keys(finals).forEach(key => delete finals[key]);
     Object.keys(filesOut).forEach(key => delete filesOut[key]);
-    Object.assign(scope, { files: {} });
+    Object.assign(scope, { file: {}, local: {}, global: {} });
 
     // Initialize
     prefix.atRule = PREFIX.atrules;
@@ -143,30 +143,30 @@ function SETUPRUN({
 
     // References
     const referFiles = collector.css(REFERS);
-    scope.refer = referFiles.list;
+    scope.file = referFiles.list;
 
     const axiomChart = [];
     let axiomCount = 0;
-    scope.axiom = referFiles.axiom.reduce((levels, referLevel, index) => {
+    scope.axiom = referFiles.axiom.reduce((id, referLevel, index) => {
         const classes = STYLE.CSSBULK(referLevel)
-        levels[index] = classes.tillStyles
+        id[index] = classes.exclusiveStyles
         axiomChart.push($.compose.secondary.Footer(`Level ${index}:  ${classes.exclusiveStyles.length} Styles`, classes.exclusiveStyles, $.list.secondary.Entries))
         axiomCount += classes.exclusiveStyles.length;
-        return levels
+        return id
     }, {})
-    report.push($.compose.success.Section("Axiom Index", [$.compose.std.Item(axiomCount + " Styles")]))
+    report.push($.compose.primary.Section("Axiom Index", [$.compose.std.Item(axiomCount + " Styles")]))
     report.push($.compose.success.Block(axiomChart))
 
     const libraryChart = [];
     let libraryCount = 0;
-    scope.library = referFiles.library.reduce((levels, referLevel, index) => {
+    scope.library = referFiles.library.reduce((id, referLevel, index) => {
         const classes = STYLE.CSSBULK(referLevel)
-        levels[index] = classes.tillStyles
+        id[index] = classes.exclusiveStyles
         libraryChart.push($.compose.secondary.Footer(`Level ${index}:  ${classes.exclusiveStyles.length} Styles`, classes.exclusiveStyles, $.list.secondary.Entries))
         libraryCount += classes.exclusiveStyles.length;
-        return levels
+        return id
     }, {})
-    report.push($.compose.success.Section("Library Index", [$.compose.std.Item(libraryCount + " Styles")]))
+    report.push($.compose.primary.Section("Library Index", [$.compose.std.Item(libraryCount + " Styles")]))
     report.push($.compose.success.Block(libraryChart))
 
     // Shorthands
@@ -175,7 +175,7 @@ function SETUPRUN({
     report.push(shorthandResponse.report)
 
 
-    report.push($.compose.success.Section("Root variables", scope.variables, $.list.secondary.Entries))
+    report.push($.compose.primary.Section("Root variables", scope.variables, $.list.secondary.Entries))
     return CSSIndexScanned.styles;
 }
 
@@ -213,15 +213,17 @@ async function SOURCEPROCESS({
                 const block = $.compose.failed.Note(`${TARGET}/${file.filePath}:${style.rowMarker}:${style.columnMarker}`, responseErrors, $.list.failed.Bullets);
                 errorList.push(block)
             }
-        })
-        report.push($.compose.secondary.Section(`File ${index + 1}:  ${TARGET}/${file.filePath}`, [
+        });
+        scope.file[`${TARGET}/${file.filePath}`] = { group: "target", id: `${TARGET}/${file.filePath}` }
+        scope.global[`${TARGET}/${file.filePath}`] = globals;
+        scope.local[`${TARGET}/${file.filePath}`] = locals;
+        report.push($.compose.std.Section(`File ${index + 1}:  ${TARGET}/${file.filePath}`, [
             $.compose.std.Item((globals.length + locals.length) + " style definitions.\n"),
-            $.compose.std.Footer("Global styles : " + globals.length, globals, $.list.secondary.Entries),
-            $.compose.std.Footer("Local styles : " + locals.length, locals, $.list.secondary.Entries)
+            $.compose.secondary.Footer("Global styles : " + globals.length, globals, $.list.secondary.Entries),
+            $.compose.secondary.Footer("Local styles : " + locals.length, locals, $.list.secondary.Entries)
         ], $.list.std.Blocks))
     })
 
-    stash.global = Object.keys(stash.styleGlobals)
     report.push($.compose.failed.Section(errorList.length + " Errors", errorList))
     errors.push($.compose.failed.Section(errorList.length + " Errors", errorList))
 
@@ -281,12 +283,8 @@ async function SOURCEPROCESS({
 
     }
 
-
-    scope.compose = Object.keys(stash.styleRefers);
-    scope.globals = Object.keys(stash.styleGlobals);
     // Write source files
     sourceFiles.forEach((file) => {
-        scope.files[file.filePath] = Object.keys(stash.styleLocals[file.filePath])
         const response = SCRIPT[CMD](file, EXTPROPS[file.extension])
         filesOut[`${SOURCE}/${file.filePath}`] = response.scribed;
     })

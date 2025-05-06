@@ -72,7 +72,7 @@ function UPLOAD(shorthands) {
     stash.shorthands = shorthands;
     
     if (Object.keys(stash.shorthands).length)
-        report.push($.compose.success.Section("Valid Shorthands", $.list.success.Props(shorthands), $.list.std.Bullets))
+        report.push($.compose.primary.Section("Valid Shorthands", $.list.std.Props(shorthands), $.list.std.Bullets))
     if (shorthandErrors.length)
         report.push($.compose.failed.Footer("Invalid Shorthands", shorthandErrors, $.list.std.Bullets))
 

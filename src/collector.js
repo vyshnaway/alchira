@@ -23,7 +23,7 @@ function libFinder(filePath, content, prefix = false, uncomment = false) {
             extension,
             filePath,
             metaFront: (prefix ? `${axiom ? "AXIOM-level" : "LEVEL"}-${level}` + ((library ?? "").length > 0 ? `_${library}` : ``) : "") + `__${normalPath}_`,
-            content: uncomment ? cleaner.uncomment.Css(content): content,
+            content: uncomment ? cleaner.uncomment.Css(content) : content,
         },
     }
 }
@@ -38,7 +38,7 @@ export default {
             const { level, axiom } = lib;
             const group = axiom ? "axiom" : "library";
 
-            list[filePath] = {group, level};
+            list[filePath] = { group, id: level };
             if (!index[group][level]) index[group][level] = [];
             index[group][level].push(lib.data);
 

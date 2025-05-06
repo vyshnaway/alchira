@@ -90,8 +90,7 @@ const NAV = {
     json: {
         configure: "xtyles/configure.jsonc",
         shorthand: "xtyles/shorthands.jsonc",
-        syncmap: "xtyles/.cache/sync-map.json",
-        styleslist: "xtyles/.cache/styles-list.json",
+        styleMap: "xtyles/.cache/style-map.json",
     }
 }
 // console.log(NAV)
@@ -104,7 +103,7 @@ const DATA = {
     CSSPath: "",
     CSSIndex: "",
     CSSAppendix: "",
-    StylesListPath: NAV.json.styleslist,
+    StylesListPath: NAV.json.styleMap,
     PREFIX: {
         classes: {},
         atrules: {},
@@ -305,9 +304,6 @@ const ACTION = {
 
         if (DATA.CMD !== "dev") $.TASK("Saving targeted files")
         DATA.FILES = (await files).fileContent
-
-        if (DATA.CMD !== "dev") $.TASK("Updating " + NAV.json.syncmap)
-        await FILEMAN.WRITE.json(NAV.json.syncmap, (await files).syncMap)
     }
 };
 
@@ -346,11 +342,12 @@ const execute = async (isDev = false, backRows = 0) => {
         await FILEMAN.WRITE.bulk(response.files)
     }
     else {
-        $.POST(verified.response.report)
+        $.POST(verified.report)
     }
     return backRows
 }
-
+$.custom.canvas.primary = $.custom.style.color.White
+// $.custom.canvas.secondary = $.custom.style.color.Cyan
 const commander = async (args) => {
     DATA.CMD = args[2];
     DATA.KEY = args[3];
@@ -396,10 +393,10 @@ const commander = async (args) => {
         default:
             await ACTION.FetchDocs()
             $.WRITE.std.Chapter(`${APP.command} @ ` + APP.version, [LIVE.DOCS.alerts.content])
-            $.WRITE.success.Section('Available Commands', APP.commandList, $.list.std.Props)
-            $.WRITE.success.Section('Agreements',
+            $.WRITE.secondary.Section('Available Commands', APP.commandList, $.list.std.Props)
+            $.WRITE.secondary.Section('Agreements',
                 Object.values(LIVE.AGREEMENT).reduce((acc, i) => { acc[i.title] = i.path; return acc }, {}), $.list.std.Props)
-            $.WRITE.success.Section("Documentation : " + LIVE.DOCS.readme.path,
+            $.WRITE.secondary.Section("Documentation : " + LIVE.DOCS.readme.path,
                 ['For more information visit ' + $.custom.style.apply.bold.White(APP.website)])
     }
 }
