@@ -22,6 +22,15 @@ function scanner(fileData, classProps, action) {
             }
             scribed += response.content
             reading = response.reading
+        } else if (ch === '"' || ch === "'" || ch === "`") {
+            const quote = ch;
+            cursor.marker++;
+            ch = fileData.content[cursor.marker];
+            while (cursor.marker < fileData.content.length && (ch !== quote || fileData.content[cursor.marker - 1] === "\\")) {
+                cursor.marker++;
+                ch = fileData.content[cursor.marker];
+            }
+            cursor.marker++; // Skip the closing quote
         } else {
             scribed += ch; 
             cursor.marker++

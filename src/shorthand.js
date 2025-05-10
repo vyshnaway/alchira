@@ -77,7 +77,7 @@ function UPLOAD(shorthands) {
         report.push($.compose.failed.Footer("Invalid Shorthands", shorthandErrors, $.list.std.Bullets))
 
     return {
-        list: Object.keys(stash.shorthands),
+        list: stash.shorthands,
         report: $.compose.std.Block(report)
     }
 }

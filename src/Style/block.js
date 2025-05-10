@@ -82,7 +82,7 @@ export default function parseBlock(content, blockArrays = false) {
                                     case "@post-bind":
                                         result.postBinds.push(...U.string.zeroBreaks(value.slice(spaceIndex)));
                                         break;
-                                    case "@adds":
+                                    case "@assemble":
                                         result.adds.push(...U.string.zeroBreaks(value.slice(spaceIndex)));
                                         break;
                                     default:

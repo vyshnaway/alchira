@@ -288,6 +288,7 @@ async function SOURCEPROCESS({
         const response = SCRIPT[CMD](file, EXTPROPS[file.extension])
         filesOut[`${SOURCE}/${file.filePath}`] = response.scribed;
     })
+    scope.file[`${TARGET}/${CSSPath}`] = { group: "stylesheet", id: `${SOURCE}/${CSSPath}` }
 
     return finalMessage;
 }

@@ -136,7 +136,7 @@ function unNester(selector = "", object = {}) {
 }
 
 function objectCompose(object, minify = !env.devMode, prefixes = ["webkit", "moz", "ms", "o"]) {
-    const tab = minify ? "" : "    ", space = minify ? "" : " ";
+    const tab = minify ? "" : "  ", space = minify ? "" : " ";
     let styleSheet = [];
 
     for (const key in object) {
@@ -150,7 +150,7 @@ function objectCompose(object, minify = !env.devMode, prefixes = ["webkit", "moz
                 } else {
                     styleSheet.push(...getSelectorPrefixes(key, prefixes), "{", ...objectCompose(subObject, minify, prefixes).map(i => tab + i), "}");
                 }
-            }
+            } 
         }
         else {
             if (key[0] === "@") {
@@ -164,7 +164,7 @@ function objectCompose(object, minify = !env.devMode, prefixes = ["webkit", "moz
 }
 
 function arrayCompose(array, minify = !env.devMode, prefixes = ["webkit", "moz", "ms", "o"]) {
-    const tab = minify ? "" : "    ", space = minify ? "" : " ", br = "";
+    const tab = minify ? "" : "  ", space = minify ? "" : " ", br = "";
     let styleSheet = [];
     array.forEach(([key, value]) => {
         const process = typeof value === "object" ? unNester(key, value) : { selector: key, result: value, nests: {} };
