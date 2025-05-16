@@ -12,8 +12,9 @@
     "xdev": "./binary/xdev.js"
   },
   "scripts": {
+    "postinstall": "xcss init",
     "init": "xcss init",
-    "dev": "xcss dev",
+    "watch": "xcss watch",
     "preview": "xcss preview",
     "build": "xcss build",
     "help": "xcss help",
@@ -46,6 +47,7 @@
   },
   "dependencies": {
     "@assemblyscript/loader": "^0.18.0",
-    "@wasmer/wasi": "^1.2.2"
+    "@wasmer/wasi": "^1.2.2",
+    "chokidar": "^4.0.3"
   }
 }

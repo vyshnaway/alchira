@@ -1,3 +1,52 @@
+export const color = {
+    Red: 'Red',
+    Orange: 'Orange',
+    Yellow: 'Yellow',
+    Green: 'Green',
+    Cyan: 'Cyan',
+    Blue: 'Blue',
+    Purple: 'Purple',
+    Magenta: 'Magenta',
+    Pink: 'Pink',
+    Grey: 'Grey',
+    White: 'White',
+}
+
+export const appearance = {
+    ends: 'ends',
+    text: 'text',
+    bold: 'bold',
+    dim: 'dim',
+    italic: 'italic',
+    uline: 'uline',
+    shade: 'shade',
+    boldItalic: 'boldItalic',
+    boldUline: 'boldUline',
+    italicUline: 'italicUline',
+    boldItalicUline: 'boldItalicUline',
+    boldDim: 'boldDim',
+    dimItalic: 'dimItalic',
+    dimUline: 'dimUline',
+    boldDimItalic: 'boldDimItalic',
+    boldDimUline: 'boldDimUline',
+    boldDimItalicUline: 'boldDimItalicUline',
+    invertDim: 'invertDim',
+    invertBoldDim: 'invertBoldDim',
+    invertDimItalic: 'invertDimItalic',
+    invertDimUline: 'invertDimUline',
+    invert: 'invert',
+    invertBold: 'invertBold',
+    invertItalic: 'invertItalic',
+    invertBoldItalic: 'invertBoldItalic',
+    invertBoldUline: 'invertBoldUline',
+    invertItalicUline: 'invertItalicUline',
+    invertBoldItalicUline: 'invertBoldItalicUline',
+    invertBoldDimItalic: 'invertBoldDimItalic',
+    invertBoldDimUline: 'invertBoldDimUline',
+    invertDimItalicUline: 'invertDimItalicUline',
+    invertBoldDimItalicUline: 'invertBoldDimItalicUline'
+};
+
 export const canvas = {
     title: 'Green',
     text: 'White',
@@ -20,7 +69,7 @@ export const tab = (count = 1) =>
     ' '.repeat(canvas.tabSpace * count)
 
 export const divider = {
-    top: '‾'.repeat(width),
-    mid: '─'.repeat(width),
-    low: '_'.repeat(width)
+    top: '‾'.repeat(canvas.width),
+    mid: '─'.repeat(canvas.width),
+    low: '_'.repeat(canvas.width)
 };

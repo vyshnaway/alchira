@@ -1,58 +1,9 @@
-import { canvas, tab, unstyle } from "./0.root.js";
-import style from "./1.style.js";
-import tag from "./2.tag.js";
-import list from "./3.list.js";
+import { canvas, tab, unstyle, appearance, color } from "./0.root.js";
 import { compose, write } from './4.compose.js'
-import render from "./5.render.js"
-import play from './6.play.js'
-
-const color = {
-    Red: 'Red',
-    Orange: 'Orange',
-    Yellow: 'Yellow',
-    Green: 'Green',
-    Cyan: 'Cyan',
-    Blue: 'Blue',
-    Purple: 'Purple',
-    Magenta: 'Magenta',
-    Pink: 'Pink',
-    Grey: 'Grey',
-    White: 'White',
-}
-const appearance = {
-    ends: 'ends',
-    text: 'text',
-    bold: 'bold',
-    dim: 'dim',
-    italic: 'italic',
-    uline: 'uline',
-    shade: 'shade',
-    boldItalic: 'boldItalic',
-    boldUline: 'boldUline',
-    italicUline: 'italicUline',
-    boldItalicUline: 'boldItalicUline',
-    boldDim: 'boldDim',
-    dimItalic: 'dimItalic',
-    dimUline: 'dimUline',
-    boldDimItalic: 'boldDimItalic',
-    boldDimUline: 'boldDimUline',
-    boldDimItalicUline: 'boldDimItalicUline',
-    invertDim: 'invertDim',
-    invertBoldDim: 'invertBoldDim',
-    invertDimItalic: 'invertDimItalic',
-    invertDimUline: 'invertDimUline',
-    invert: 'invert',
-    invertBold: 'invertBold',
-    invertItalic: 'invertItalic',
-    invertBoldItalic: 'invertBoldItalic',
-    invertBoldUline: 'invertBoldUline',
-    invertItalicUline: 'invertItalicUline',
-    invertBoldItalicUline: 'invertBoldItalicUline',
-    invertBoldDimItalic: 'invertBoldDimItalic',
-    invertBoldDimUline: 'invertBoldDimUline',
-    invertDimItalicUline: 'invertDimItalicUline',
-    invertBoldDimItalicUline: 'invertBoldDimItalicUline'
-};
+import style from "./1.style.js";
+import list from "./3.list.js";
+import play from './6.animate.js'
+import tag from "./2.tag.js";
 
 const task = (string, rowshift = -1) => {
     if (rowshift < 0) render.animation.Backrow(-rowshift)

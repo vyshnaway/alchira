@@ -1,16 +1,9 @@
 import $ from './Shell/index.js';
 import EXECUTOR from './executor.js';
 import FILEMAN, { CSSImport } from './fileman.js';
+import WATCHDOG from './watchdog.js';
 
-interface PackageJSON {
-    name: string;
-    version: string;
-    homepage: string;
-    bin: { [key: string]: string };
-    scripts: { [key: string]: string };
-}
-
-const PACKAGE = (await FILEMAN.READ.json(FILEMAN.PATH.fromRoot("package.json"))).data as PackageJSON
+const PACKAGE = (await FILEMAN.READ.json(FILEMAN.PATH.fromRoot("package.json"))).data
 // console.log(PACKAGE)
 
 const APP = {
@@ -25,7 +18,7 @@ const APP = {
         dev: 'Live build for dev environment',
         preview: 'Fast build, preserves class names.',
         build: 'Build minified.'
-    }
+    },
 };
 // console.log(APP)
 const LIVE = {
@@ -33,14 +26,12 @@ const LIVE = {
         readme: {
             title: "README",
             url: APP.content + "/readme.md",
-            path: FILEMAN.PATH.fromRoot("readme.md"),
-            content: ""
+            path: FILEMAN.PATH.fromRoot("readme.md")
         },
         alerts: {
             title: "ALERTS",
             url: APP.content + "/alerts.md",
-            path: FILEMAN.PATH.fromRoot("alerts.md"), 
-            content: ""
+            path: FILEMAN.PATH.fromRoot("alerts.md")
         },
     },
     AGREEMENT: {
@@ -99,8 +90,7 @@ const NAV = {
     json: {
         configure: "xtyles/configure.jsonc",
         shorthand: "xtyles/shorthands.jsonc",
-        syncmap: "xtyles/.cache/sync-map.json",
-        styleslist: "xtyles/.cache/styles-list.json",
+        styleMap: "xtyles/.cache/style-map.json",
     }
 }
 // console.log(NAV)
@@ -108,47 +98,48 @@ const DATA = {
     CMD: "",
     KEY: "",
     SOURCE: "",
-    SHORTHAND: {},
+    TARGET: "",
+    EXTPROPS: {},
+    CSSPath: "",
+    CSSIndex: "",
+    CSSAppendix: "",
+    StylesListPath: NAV.json.styleMap,
     PREFIX: {
         classes: {},
         atrules: {},
         elements: {},
         properties: {},
     },
-    CSS: {
-        Path: {},
-        Index: {},
-        Appendix: {},
-    },
+    SHORTHAND: {},
     REFERS: {},
     FILES: {}
 };
 
 const ACTION = {
     CONFIGURE: {},
-    FetchDocs: async (): Promise<void> => {
+    FetchDocs: async () => {
+        const readmeMd = FILEMAN.SYNC.file(LIVE.DOCS.readme.url, LIVE.DOCS.readme.path);
+        const alertsMd = FILEMAN.SYNC.file(LIVE.DOCS.alerts.url, LIVE.DOCS.alerts.path);
         const license = FILEMAN.SYNC.file(LIVE.AGREEMENT.license.url, LIVE.AGREEMENT.license.path);
         const terms = FILEMAN.SYNC.file(LIVE.AGREEMENT.terms.url, LIVE.AGREEMENT.terms.path);
         const privacy = FILEMAN.SYNC.file(LIVE.AGREEMENT.privacy.url, LIVE.AGREEMENT.privacy.path);
-        const readmeMd = FILEMAN.SYNC.file(LIVE.DOCS.readme.url, LIVE.DOCS.readme.path);
-        const alertsMd = FILEMAN.SYNC.file(LIVE.DOCS.alerts.url, LIVE.DOCS.alerts.path);
 
-        await license;
-        await terms;
-        await privacy;
         LIVE.DOCS.readme.content = await readmeMd;
         LIVE.DOCS.alerts.content = await alertsMd;
+        LIVE.AGREEMENT.license.content = await license;
+        LIVE.AGREEMENT.terms.content = await terms;
+        LIVE.AGREEMENT.privacy.content = await privacy;
     },
-    Initialize: async (): Promise<boolean> => {
+    Initialize: async () => {
         try {
-            $.TASK("Initializing XCSS setup.", 0);
+            if (DATA.CMD !== "dev") $.TASK("Initializing XCSS setup.", 0);
 
-            $.TASK('Cloning scaffold to Project');
+            if (DATA.CMD !== "dev") $.TASK('Cloning scaffold to Project');
             await FILEMAN.CLONE.safe(NAV.scaffold.setup, NAV.folder.setup);
             await FILEMAN.CLONE.safe(NAV.scaffold.refers, NAV.folder.refers);
 
             if (await FILEMAN.PATH.ifFile('package.json')) {
-                $.TASK('Adding additional scripts to project');
+                if (DATA.CMD !== "dev") $.TASK('Adding additional scripts to project');
                 const destJson = await FILEMAN.READ.json("./package.json");
                 destJson.data.scripts[`${APP.command}:install`] = `npm install -g ${APP.name}`;
                 for (const key of Object.keys(APP.commandList)) {
@@ -168,24 +159,24 @@ const ACTION = {
             ], $.list.std.Bullets);
 
 
-            $.WRITE.std.Section('Available Commands', Object.entries(APP.commandList), $.list.std.Props)
+            $.WRITE.std.Section('Available Commands', APP.commandList, $.list.std.Props)
 
             $.WRITE.std.Section("Build command instructions.",
                 (PACKAGE.version.split(".")[0] === "0") ? ["This command uses an internet connection."]
                     : [
-                        "Create a new project and use its access key. For action visit " + $.custom.style.apply.bold.Orange(APP.console),
+                        "Create a new project and use its access key. For action visit " + $.custom.style.apply.bold.Orange(LIVE.console),
                         "For personal projects, you can use the key in " + $.custom.style.apply.bold.Orange(NAV.json.configure),
                         "If using in CI/CD workflow, it is suggested to use " + $.custom.style.apply.bold.Orange("xcss build {key}")
                     ], $.list.std.Bullets);
 
             return true;
-        } catch (err: any) {
+        } catch (err) {
             $.WRITE.failed.Footer("Initialization failed.", [err.message], $.list.failed.Bullets);
             return false;
         }
     },
-    FetchPrefix: async (): Promise<void> => {
-        $.TASK("Loading vendor-prefixes", 0)
+    FetchPrefix: async () => {
+        if (DATA.CMD !== "dev") $.TASK("Loading vendor-prefixes", 0)
 
         const classes = FILEMAN.SYNC.json(LIVE.PREFIX.classes.url, LIVE.PREFIX.classes.path);
         const atrules = FILEMAN.SYNC.json(LIVE.PREFIX.atrules.url, LIVE.PREFIX.atrules.path);
@@ -197,13 +188,12 @@ const ACTION = {
         DATA.PREFIX.elements = await elements
         DATA.PREFIX.properties = await properties
     },
-    VerifySetup: async (): Promise<{ unstart: boolean, proceed: boolean, report: string }> => {
-        const errors: { [key: string]: string } = {};
-        const passed: { [key: string]: string } = {};
+    VerifySetup: async () => {
+        const errors = {}, passed = {};
 
-        $.TASK("Verifying directory status", 0)
+        if (DATA.CMD !== "dev") $.TASK("Verifying directory status", 0)
         for (const item of Object.values(NAV.css)) {
-            $.STEP("Path : " + item)
+            if (DATA.CMD !== "dev") $.STEP("Path : " + item)
             if (await FILEMAN.PATH.ifFile(item)) {
                 passed[item] = "Ok";
             } else {
@@ -211,14 +201,14 @@ const ACTION = {
             }
         }
         for (const item of Object.values(NAV.json)) {
-            $.STEP("Path : " + item)
+            if (DATA.CMD !== "dev") $.STEP("Path : " + item)
             if (await FILEMAN.PATH.ifFile(item)) {
                 passed[item] = "Ok";
             } else {
                 errors[item] = "File not found.";
             }
         }
-        $.TASK("Verification complete")
+        if (DATA.CMD !== "dev") $.TASK("Verification complete")
 
         return {
             unstart: !(await FILEMAN.PATH.available(NAV.folder.setup)).exist,
@@ -227,14 +217,14 @@ const ACTION = {
                 $.compose.failed.Footer("Error Paths", errors, $.list.failed.Props) : $.compose.success.Footer("Setup Healthy")
         };
     },
-    VerifyConfigs: async (): Promise<{ status: boolean, report: string }> => {
-        const errors: { [key: string]: string } = {};
+    VerifyConfigs: async () => {
+        const errors = {};
         const configure = FILEMAN.READ.json(NAV.json.configure)
         const shorthand = FILEMAN.READ.json(NAV.json.shorthand)
 
-        $.TASK("Initializing configs")
+        if (DATA.CMD !== "dev") $.TASK("Initializing configs")
 
-        $.STEP("PATH : " + NAV.json.configure)
+        if (DATA.CMD !== "dev") $.STEP("PATH : " + NAV.json.configure)
         if ((await configure).status) {
             ACTION.CONFIGURE = (await configure).data
             DATA.KEY = DATA.KEY ?? ACTION.CONFIGURE.key
@@ -259,7 +249,7 @@ const ACTION = {
                 errors[ACTION.CONFIGURE.source] = "Folder not found."
         } else errors[NAV.json.configure] = "Bad json file."
 
-        $.STEP("PATH : " + NAV.json.shorthand)
+        if (DATA.CMD !== "dev") $.STEP("PATH : " + NAV.json.shorthand)
         if ((await shorthand).status) {
             if (typeof ((await shorthand).data) === "object") {
                 DATA.SHORTHAND = Object.fromEntries(
@@ -268,7 +258,7 @@ const ACTION = {
             } else errors[NAV.json.shorthand] = "Error data type"
         } else errors[NAV.json.shorthand] = "Bad json file."
 
-        $.TASK("Initializing complete")
+        if (DATA.CMD !== "dev") $.TASK("Initializing complete")
         return {
             status: Object.keys(errors).length === 0,
             report: Object.keys(errors).length === 0 ?
@@ -276,44 +266,48 @@ const ACTION = {
                 $.compose.failed.Footer("Error Paths", errors, $.list.failed.Props)
         }
     },
-    SaveSetup: async (): Promise<void> => {
-        $.TASK("Fetching from Setup", 0)
-        $.STEP("Loading Reference styles")
+    SaveSetup: async () => {
+        if (DATA.CMD !== "dev") $.TASK("Fetching from Setup", 0)
+        if (DATA.CMD !== "dev") $.STEP("Loading Reference styles")
         const refers = FILEMAN.READ.bulk(NAV.folder.refers, ["css"]);
-        $.STEP("Loading Origin styles")
+        if (DATA.CMD !== "dev") $.STEP("Loading Origin styles")
         const stylePrefix = CSSImport([
             NAV.css.atrules,
             NAV.css.constants,
             NAV.css.elements,
             NAV.css.extends,
         ]);
-        $.TASK("Saving styles")
+        if (DATA.CMD !== "dev") $.TASK("Saving styles")
         DATA.REFERS = await refers;
-        DATA.CSS.Index = await stylePrefix;
+        DATA.CSSIndex = await stylePrefix;
         DATA.SHORTHAND = {
             ...DATA.SHORTHAND,
             ...ACTION.CONFIGURE.shorthands
         };
     },
-    SaveFiles: async (): Promise<void> => {
-        $.TASK("Fetching target files", 0)
-        $.TASK("Syncing untargeted files")
-        const files = FILEMAN.SYNC.bulk(ACTION.CONFIGURE.target, ACTION.CONFIGURE.source, ACTION.CONFIGURE.extensions);
+    SaveFiles: async () => {
+        if (DATA.CMD !== "dev") $.TASK("Fetching target files", 0)
+        if (DATA.CMD !== "dev") $.TASK("Syncing untargeted files")
+        const files = FILEMAN.SYNC.bulk(
+            ACTION.CONFIGURE.target,
+            ACTION.CONFIGURE.source,
+            Object.keys(ACTION.CONFIGURE.extensions),
+            [ACTION.CONFIGURE.stylesheet]
+        );
 
-        DATA.CSS.Path = FILEMAN.PATH.join(ACTION.CONFIGURE.source, ACTION.CONFIGURE.stylesheet)
-        DATA.CSS.Appendix = await CSSImport([
+        DATA.TARGET = ACTION.CONFIGURE.target
+        DATA.CSSPath = ACTION.CONFIGURE.stylesheet
+        DATA.EXTPROPS = ACTION.CONFIGURE.extensions
+        DATA.CSSAppendix = await CSSImport([
             FILEMAN.PATH.join(ACTION.CONFIGURE.target, ACTION.CONFIGURE.stylesheet)
         ]);
 
-        $.TASK("Saving targeted files")
+        if (DATA.CMD !== "dev") $.TASK("Saving targeted files")
         DATA.FILES = (await files).fileContent
-
-        $.TASK("Updating " + NAV.json.syncmap)
-        await FILEMAN.WRITE.json(NAV.json.syncmap, (await files).syncMap)
     }
 };
 
-const begins = async (): Promise<{ status: boolean, report: string }> => {
+const begins = async () => {
     const setupInit = await ACTION.VerifySetup()
     const response = { status: setupInit.proceed, report: setupInit.report }
     if (setupInit.unstart) {
@@ -326,7 +320,35 @@ const begins = async (): Promise<{ status: boolean, report: string }> => {
     return response
 }
 
-const commander = async (args: string[]): Promise<void> => {
+const execute = async (isDev = false, backRows = 0) => {
+    const verified = await begins()
+    if (verified.status) {
+        await ACTION.SaveSetup()
+        await ACTION.SaveFiles()
+        const response = await EXECUTOR(DATA)
+
+        if (isDev) {
+            let report = "";
+            const now = new Date();
+            const heading = $.compose.primary.Chapter(`Active Runtime : ${now.getFullYear()}-${now.getMonth()}-${now.getDate()} ${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}`)
+            const footer = $.compose.failed.Footer("Press Ctrl+C to stop watching.");
+            report = [heading, response.errors, footer].join('\n')
+            $.custom.render.animation.Rewrite(report, backRows);
+            backRows = report.split("\n").length;
+        } else {
+            $.POST(response.report)
+        }
+
+        await FILEMAN.WRITE.bulk(response.files)
+    }
+    else {
+        $.POST(verified.report)
+    }
+    return backRows
+}
+$.custom.canvas.primary = $.custom.style.color.White
+// $.custom.canvas.secondary = $.custom.style.color.Cyan
+const commander = async (args) => {
     DATA.CMD = args[2];
     DATA.KEY = args[3];
 
@@ -346,42 +368,35 @@ const commander = async (args: string[]): Promise<void> => {
             break;
         case 'dev':
             $.POST($.compose.std.Chapter(APP.name + ' : Active Runtime'));
-            await ACTION.FetchPrefix()
-            const verifiedDev = await begins()
-            if (verifiedDev.status) {
+            await ACTION.FetchPrefix();
+            process.on('SIGINT', () => {
+                $.custom.render.animation.Backrow(4);
+                $.POST()
+                $.WRITE.primary.Footer("Command Terminated.")
+                process.exit(0);
+            });
+            let backRows = await execute(true,5);
+            while (1) {
+                backRows = await execute(true, backRows);
             }
             break;
         case 'preview':
             $.POST($.compose.std.Chapter(APP.name + ' : Preview Build'));
             await ACTION.FetchPrefix()
-            const verifiedPreview = await begins()
-            if (verifiedPreview.status) {
-                await ACTION.SaveSetup()
-                await ACTION.SaveFiles()
-                const response = await EXECUTOR(DATA)
-                await FILEMAN.WRITE.bulk(response.files)
-                $.POST(response.report)
-            } else $.POST(verifiedPreview.report)
+            await execute()
             break;
         case 'build':
             $.POST($.compose.std.Chapter(APP.name + ' : Preview Build'));
             await ACTION.FetchPrefix()
-            const verifiedBuild = await begins()
-            if (verifiedBuild.status) {
-                await ACTION.SaveSetup()
-                await ACTION.SaveFiles()
-                const response = await EXECUTOR(DATA)
-                await FILEMAN.WRITE.bulk(response.files)
-                $.POST(response.report)
-            } else $.POST(verifiedPreview.report)
+            await execute()
             break;
         default:
             await ACTION.FetchDocs()
             $.WRITE.std.Chapter(`${APP.command} @ ` + APP.version, [LIVE.DOCS.alerts.content])
-            $.WRITE.success.Section('Available Commands', APP.commandList, $.list.std.Props)
-            $.WRITE.success.Section('Agreements',
+            $.WRITE.secondary.Section('Available Commands', APP.commandList, $.list.std.Props)
+            $.WRITE.secondary.Section('Agreements',
                 Object.values(LIVE.AGREEMENT).reduce((acc, i) => { acc[i.title] = i.path; return acc }, {}), $.list.std.Props)
-            $.WRITE.success.Section("Documentation : " + LIVE.DOCS.readme.path,
+            $.WRITE.secondary.Section("Documentation : " + LIVE.DOCS.readme.path,
                 ['For more information visit ' + $.custom.style.apply.bold.White(APP.website)])
     }
 }

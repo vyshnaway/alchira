@@ -1,0 +1,1 @@
+import { DATA } from "./metadata.js";
