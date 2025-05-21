@@ -13,11 +13,11 @@ const fileman = {
         },
         available: (pathString) => {
             try {
-                const stats = fs.stat(pathString);
+                const stats = fs.statSync(pathString);
                 return { exist: true, type: stats.isDirectory() ? "folder" : "file" };
             } catch (error) {
                 if (error.code === 'ENOENT') {
-                    return { exist: false, type: null };
+                    return { exist: false, type: '' };
                 }
                 console.error('Path check error:', error);
                 throw error;
@@ -29,9 +29,11 @@ const fileman = {
         ifFile: (pathString) => {
             return fileman.path.available(pathString).type === "file"
         },
-        isAncestor: (ancestor, descendant) => {
-            const relative = path.relative(ancestor, descendant);
-            return relative && !relative.startsWith('..') && !path.isAbsolute(relative);
+        isIndependent: (folder1, folder2) => {
+            const relative1 = path.relative(folder1, folder2);
+            const relative2 = path.relative(folder2, folder1);
+            const notInside = (relative) => relative && relative.startsWith('..') || path.isAbsolute(relative);
+            return notInside(relative1) && notInside(relative2);
         },
         listFiles: async (dir, fileList = []) => {
             if (!fs.existsSync(dir)) return fileList;
@@ -104,7 +106,7 @@ const fileman = {
                     return {
                         status: true,
                         data: JSON.parse((await fs.promises.readFile(target, 'utf8'))
-                                .replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, ''))
+                            .replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, ''))
                     };
                 }
             } catch (error) {
@@ -168,9 +170,9 @@ const fileman = {
             return (current.status) ? current.data : {}
         },
         bulk: async (source, target, extensions = [], ignoreFiles = []) => {
-            const result = { status: true, fileContent: {}, syncMap: {} };
+            const result = { status: true, fileContents: {}, syncMap: {} };
             extensions = extensions.map(ext => '.' + ext);
-
+            
             if (!fs.existsSync(source) && !fs.existsSync(target)) {
                 return { status: false, fileContent: {}, syncMap: {} }
             } else if (!fs.existsSync(source)) {
@@ -182,10 +184,16 @@ const fileman = {
             const sourceFiles = fileman.path.listFiles(source);
             const targetFiles = fileman.path.listFiles(target);
 
+            ignoreFiles.forEach(file => {
+                const targetFile = path.join(target, file); 
+                const sourceFile = path.join(source, file); 
+                result.syncMap[targetFile] = sourceFile; 
+                result.syncMap[sourceFile] = targetFile; 
+            })
+
             const relativeTargetFiles = (await targetFiles)
                 .map(file => path.relative(target, file))
                 .filter(file => !ignoreFiles.some(ignore => file.startsWith(ignore)));
-
             const relativeSourceFiles = (await sourceFiles)
                 .map(file => path.relative(source, file))
                 .filter(file => !ignoreFiles.some(ignore => file.startsWith(ignore)));
@@ -207,13 +215,12 @@ const fileman = {
                     if (!fs.existsSync(sourceDirPath)) await fs.promises.mkdir(sourceDirPath, { recursive: true });
                 }
                 if (extensions.includes(path.extname(file))) {
-                    result.fileContent[file] = await fs.promises.readFile(sourceFilePath, 'utf-8');
+                    result.fileContents[file] = await fs.promises.readFile(sourceFilePath, 'utf-8');
                 } else {
                     await fs.promises.copyFile(sourceFilePath, targetFilePath);
                 }
             }
 
-            // Delete excess folders in source
             const targetFolders = (await targetFiles)
                 .map(file => path.dirname(path.relative(source, file)))
                 .filter((value, index, self) => self.indexOf(value) === index);

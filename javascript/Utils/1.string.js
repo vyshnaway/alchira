@@ -59,5 +59,6 @@ export default {
             number = Math.floor(number / base);
         }
         return result;
-    }
+    },
+    stringMem: (string) => (string.length / 1024).toFixed(2)
 }

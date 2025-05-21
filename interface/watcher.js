@@ -1,5 +1,6 @@
+import path from 'path'
 import chokidar from 'chokidar'
-import fileman from './files.js'
+import fileman from './fileman.js'
 
 export async function cssImport(filePathArray = []) {
     const processedFiles = new Set(filePathArray.reverse().map(filePath => path.resolve(filePath)).reverse());
@@ -16,59 +17,59 @@ export async function cssImport(filePathArray = []) {
     return result.join("")
 }
 
-const xtylesDirectory = "./xtyles";
-
-export async function proxyMapDependency(proxyMap = []) {
-    const cssWarnings = [];
-    const folderWarnings = [];
+export async function proxyMapDependency(proxyMap = [], xtylesDirectory) {
+    const warnings = [];
     const notifications = [];
 
     await Promise.all(proxyMap.map(async (map, index) => {
-        if (fileman.path.isAncestor(map.source, map.target) || fileman.path.isAncestor(map.target, map.source) ||
-            fileman.path.isAncestor(map.source, xtylesDirectory) || fileman.path.isAncestor(map.target, xtylesDirectory) ||
-            fileman.path.isAncestor(xtylesDirectory, map.target) || fileman.path.isAncestor(xtylesDirectory, map.source)) {
-            folderWarnings.push(`[${index}]:source::"${map.source}" & [${index}]:target::"${map.target}" are not independent.`);
+        if (!fileman.path.isIndependent(map.source, map.target)) {
+            warnings.push(`[${index}]:source::"${map.source}" & [${index}]:target::"${map.target}" are not independent.`);
+        }
+        if (!fileman.path.isIndependent(map.source, xtylesDirectory)) {
+            warnings.push(`[${index}]:source::"${map.source}" should not dependent on "${xtylesDirectory}".`);
+        }
+        if (!fileman.path.isIndependent(xtylesDirectory, map.target)) {
+            warnings.push(`[${index}]:target::"${map.target}" should not be dependent on "${xtylesDirectory}".`);
         }
 
         if (fileman.path.ifFolder(map.source)) {
             const targetStat = fileman.path.available(map.target);
             if (targetStat.type === "file") {
-                folderWarnings.push(`[${index}]:"${map.target}" expected folder instead of file.`);
+                warnings.push(`[${index}]:"${map.target}" expected folder instead of file.`);
             } else {
-                if (!targetStat.exist) {
+                if (fileman.path.isIndependent(xtylesDirectory, map.source)) {
                     await fileman.clone.safe(map.source, map.target);
-                    notifications.push(`[${index}]:"${map.target}" created from [${index}]:"${map.source}"`)
+                    notifications.push(`[${index}]:"${map.target}" cloned from [${index}]:"${map.source}"`)
                 }
                 const sourceStylesheetExists = fileman.path.ifFile(fileman.path.join(map.source, map.stylesheet));
                 const targetStylesheetExists = fileman.path.ifFile(fileman.path.join(map.target, map.stylesheet));
-                if (!sourceStylesheetExists || !targetStylesheetExists) {
-                    cssWarnings.push(`[${index}]:"${map.stylesheet}" file not found in ${sourceStylesheetExists ? 'target' : 'source'} folder.`);
-                }
+                if (!sourceStylesheetExists) { warnings.push(`[${index}]:stylesheet::"${map.stylesheet}" file not found in "${map.source}" folder.`); }
+                if (!targetStylesheetExists) { warnings.push(`[${index}]:stylesheet::"${map.stylesheet}" file not found in "${map.target}" folder.`); }
             }
         } else {
-            folderWarnings.push(`[${index}]:"${map.source}" folder not found.`);
+            warnings.push(`[${index}]:"${map.source}" folder not found.`);
         }
     }));
 
     for (let i = 0; i < proxyMap.length; i++) {
         for (let j = i + 1; j < proxyMap.length; j++) {
-            if (fileman.path.isAncestor(proxyMap[i].target, proxyMap[j].source) || fileman.path.isAncestor(proxyMap[j].source, proxyMap[i].target)) {
-                folderWarnings.push(`[${i}]:target::"${proxyMap[i].target}" & [${j}]:source::"${proxyMap[j].source}" are not independent.`);
+            if (fileman.path.isIndependent(proxyMap[i].target, proxyMap[j].source) || fileman.path.isIndependent(proxyMap[j].source, proxyMap[i].target)) {
+                warnings.push(`[${i}]:target::"${proxyMap[i].target}" & [${j}]:source::"${proxyMap[j].source}" are not independent.`);
             }
-            if (fileman.path.isAncestor(proxyMap[i].source, proxyMap[j].target) || fileman.path.isAncestor(proxyMap[j].target, proxyMap[i].source)) {
-                folderWarnings.push(`[${i}]:source::"${proxyMap[i].source}" & [${j}]:target::"${proxyMap[j].target}" are not independent.`);
+            if (fileman.path.isIndependent(proxyMap[i].source, proxyMap[j].target) || fileman.path.isIndependent(proxyMap[j].target, proxyMap[i].source)) {
+                warnings.push(`[${i}]:source::"${proxyMap[i].source}" & [${j}]:target::"${proxyMap[j].target}" are not independent.`);
             }
         }
     }
 
-    return { cssWarnings, folderWarnings, notifications };
+    return { warnings, notifications };
 }
 
 export async function proxyMapSync(proxyMap = []) {
     await Promise.all(proxyMap.map(async (map) => {
-        const syncResult = await fileman.sync.bulk(fileman.target, fileman.source, Object.keys(map.extensions), fileman.path.join(map.stylesheet));
+        const syncResult = await fileman.sync.bulk(map.target, map.source, Object.keys(map.extensions), [map.stylesheet]);
         Object.assign(map, syncResult);
-        map.stylesheetContent = await fileman.read.file(fileman.path.join(map.source, map.stylesheet))
+        map.stylesheetContent = (await fileman.read.file(fileman.path.join(map.target, map.stylesheet))).data
     }));
     return proxyMap;
 }

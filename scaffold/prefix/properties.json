@@ -1,9 +1,63 @@
 {
-  "align-content": [
-    "-webkit-",
-    "-moz-",
-    "-ms-"
-  ],
+  "align-content": {
+    "-webkit-": {
+      "values": [
+        "flex-start",
+        "flex-end",
+        "center",
+        "space-between",
+        "space-around",
+        "stretch",
+        "start",
+        "end",
+        "safe center",
+        "unsafe center"
+      ]
+    },
+    "-moz-": {
+      "values": [
+        "flex-start",
+        "flex-end",
+        "center",
+        "space-between",
+        "space-around",
+        "stretch",
+        "start",
+        "end",
+        "safe center",
+        "unsafe center"
+      ]
+    },
+    "-ms-": {
+      "values": [
+        "flex-start",
+        "flex-end",
+        "center",
+        "space-between",
+        "space-around",
+        "stretch",
+        "start",
+        "end",
+        "safe center",
+        "unsafe center"
+      ]
+    },
+    "": {
+      "values": [
+        "flex-start",
+        "flex-end",
+        "center",
+        "space-between",
+        "space-around",
+        "space-evenly",
+        "stretch",
+        "start",
+        "end",
+        "safe center",
+        "unsafe center"
+      ]
+    }
+  },
   "align-items": [
     "-webkit-",
     "-moz-",

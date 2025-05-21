@@ -1,4 +1,4 @@
-import { env } from "../executor.js";
+import { ENV } from "../craftsmen.js";
 import Utils from "../Utils/index.js";
 import krypt from "./krypt.js";
 // import ODC from "./odc.js";
@@ -44,7 +44,7 @@ export default async function order(sequences = [], CMD = "", KEY = "") {
             redirect: "follow"
         };
 
-        return fetch(env.apiUrl, requestOptions)
+        return fetch(ENV.apiUrl, requestOptions)
             .then((response) => response.json())
             .then(async (response) => {
                 if (response.status) {

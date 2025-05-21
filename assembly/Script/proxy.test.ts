@@ -1,4 +1,4 @@
-import { lists, stash, finals } from "../executor.js"
+import { lists, stash, finals } from "../creator.js"
 
 export default function classExtract(string, action, fileData, shrad) {
     let marker = 0,

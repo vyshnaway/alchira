@@ -1,5 +1,5 @@
-import { canvas } from './0.root'; // Renamed to lowercase
-import { style } from './1.style';  // Renamed to lowercase
+import canvas from './0.root.js'; 
+import style from './1.style.js';  
 
 const textFormatter = { // Changed to named export
     H1: (heading) => {
@@ -68,10 +68,10 @@ const textFormatter = { // Changed to named export
     },
 
     P: (content) =>
-        canvas.tab() + content + canvas.unstyle + '\n',
+        canvas.tab + content + canvas.unstyle + '\n',
 
     Li: (str) => // Changed parameter name to str
-        style.bold[canvas.settings.tertiary]('>') + canvas.tab() + str + canvas.unstyle,
+        style.bold[canvas.settings.tertiary]('>') + canvas.tab + str + canvas.unstyle,
 
     Br: (repeat = 1) =>
         '\n'.repeat(repeat) + canvas.unstyle,
@@ -79,8 +79,8 @@ const textFormatter = { // Changed to named export
     Hr: (character = '─') =>
         '\n' + character.charAt(0).repeat(canvas.width) + canvas.unstyle,
 
-    Tab: (repeat = 1) =>
-        canvas.tab(repeat) + canvas.unstyle,
+    Tab: (count = 1) =>
+        canvas.tab.repeat(count) + canvas.unstyle,
 
     Div: (content) =>
         content + canvas.unstyle,

@@ -1,5 +1,5 @@
 import $ from './Shell/index.js';
-import EXECUTOR from './executor.js';
+import EXECUTOR from './creator.js';
 import FILEMAN, { CSSImport } from './fileman.js';
 import WATCHDOG from './watchdog.js';
 
@@ -151,11 +151,11 @@ const ACTION = {
             }
 
             $.WRITE.std.Section("Next Steps", [
-                'Adjust ' + $.custom.style.apply.bold.Orange(NAV.json.configure) + $.custom.style.Reset + ' according to the requirements of your project.',
-                'Execute ' + $.custom.style.apply.bold.Orange('"init"') + $.custom.style.Reset + ' again to generate the necessary configuration folders.',
-                'During execution ' + $.custom.style.apply.bold.Orange('{target}') + $.custom.style.Reset + ' folder will be cloned from ' + $.custom.style.apply.bold.Orange('{source}') + $.custom.style.Reset + ' folder.',
+                'Adjust ' + $.style.bold.Orange(NAV.json.configure) + $.style.Reset + ' according to the requirements of your project.',
+                'Execute ' + $.style.bold.Orange('"init"') + $.style.Reset + ' again to generate the necessary configuration folders.',
+                'During execution ' + $.style.bold.Orange('{target}') + $.style.Reset + ' folder will be cloned from ' + $.style.bold.Orange('{source}') + $.style.Reset + ' folder.',
                 'This folder will act as proxy for ' + APP.name + '.',
-                'In the ' + $.custom.style.apply.bold.Orange('{target}/{stylesheet}') + $.custom.style.Reset + ', content from ' + $.custom.style.apply.bold.Orange('{target}/{stylesheet}') + $.custom.style.Reset + ' will be appended.'
+                'In the ' + $.style.bold.Orange('{target}/{stylesheet}') + $.style.Reset + ', content from ' + $.style.bold.Orange('{target}/{stylesheet}') + $.style.Reset + ' will be appended.'
             ], $.list.std.Bullets);
 
 
@@ -164,9 +164,9 @@ const ACTION = {
             $.WRITE.std.Section("Build command instructions.",
                 (PACKAGE.version.split(".")[0] === "0") ? ["This command uses an internet connection."]
                     : [
-                        "Create a new project and use its access key. For action visit " + $.custom.style.apply.bold.Orange(LIVE.console),
-                        "For personal projects, you can use the key in " + $.custom.style.apply.bold.Orange(NAV.json.configure),
-                        "If using in CI/CD workflow, it is suggested to use " + $.custom.style.apply.bold.Orange("xcss build {key}")
+                        "Create a new project and use its access key. For action visit " + $.style.bold.Orange(LIVE.console),
+                        "For personal projects, you can use the key in " + $.style.bold.Orange(NAV.json.configure),
+                        "If using in CI/CD workflow, it is suggested to use " + $.style.bold.Orange("xcss build {key}")
                     ], $.list.std.Bullets);
 
             return true;
@@ -346,8 +346,8 @@ const execute = async (isDev = false, backRows = 0) => {
     }
     return backRows
 }
-$.custom.canvas.primary = $.custom.style.color.White
-// $.custom.canvas.secondary = $.custom.style.color.Cyan
+$.custom.canvas.primary = $.style.color.White
+// $.custom.canvas.secondary = $.style.color.Cyan
 const commander = async (args) => {
     DATA.CMD = args[2];
     DATA.KEY = args[3];
@@ -375,7 +375,7 @@ const commander = async (args) => {
                 $.WRITE.primary.Footer("Command Terminated.")
                 process.exit(0);
             });
-            let backRows = await execute(true,5);
+            let backRows = await execute(true, 5);
             while (1) {
                 backRows = await execute(true, backRows);
             }
@@ -397,7 +397,7 @@ const commander = async (args) => {
             $.WRITE.secondary.Section('Agreements',
                 Object.values(LIVE.AGREEMENT).reduce((acc, i) => { acc[i.title] = i.path; return acc }, {}), $.list.std.Props)
             $.WRITE.secondary.Section("Documentation : " + LIVE.DOCS.readme.path,
-                ['For more information visit ' + $.custom.style.apply.bold.White(APP.website)])
+                ['For more information visit ' + $.style.bold.White(APP.website)])
     }
 }
 export default commander;

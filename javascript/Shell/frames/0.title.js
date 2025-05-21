@@ -18,7 +18,7 @@ export default (string) => {
         ]),
         ...new Array(previewFrames).fill([
             '',
-            style.boldUline[canvas.title](canvas.divider.top),
+            style.boldUline[canvas.settings.title](canvas.divider.top),
             '', ''
         ]),
         ...new Array(previewFrames).fill([
@@ -42,7 +42,7 @@ export default (string) => {
             canvas.divider.low,
             ''
         ]),
-    ].map(frame => style.bold[canvas.title](frame.join('\n')));
+    ].map(frame => style.bold[canvas.settings.title](frame.join('\n')));
     const modifyString = (str) => {
         str = str.substring(1, str.length - 1)
         if (str.startsWith(' ')) {
@@ -56,7 +56,7 @@ export default (string) => {
     string = '   ' + string + '   ';
     while ((string.length !== 1) && (string.length !== 2)) {
         string = modifyString(string)
-        renders.unshift(style.bold[canvas.title](blockType.Chapter(string, [])));
+        renders.unshift(style.bold[canvas.settings.title](blockType.Chapter(string, [])));
     }
 
     return preview.concat(renders);

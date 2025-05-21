@@ -1,13 +1,13 @@
 import U from "../Utils/index.js";
 import read from "./block.js";
-import SHORTHAND from "../shorthand.js";
-import { stash, lists, env, createXtyle, essentials } from "../executor.js";
+import SHORTHAND from "../Worker/shorthand.js";
+import { STASH, ENV, MakeStyle } from "../craftsmen.js";
 
 function xtylemerge(classList = []) {
     return classList.reduce((A, className) => {
-        const index = stash.styleRefers[className];
+        const index = STASH.LibraryStyle2Index[className];
         if (index) {
-            A = U.object.multiMerge([A, stash.indexStyles[index].object[""]], true);
+            A = U.object.multiMerge([A, STASH.Index2StylesObject[index].object[""]], true);
         }
         return A
     }, {})
@@ -24,22 +24,22 @@ function SCANNER(content, filePath, sourceSelector) {
 
     const styles = U.object.deepMerge(merged, {
         ...Object.entries(response.atProps).reduce((acc, [propKey, propValue]) => {
-            acc[propKey] = env.devMode ? `${propValue} /* [${sourceSelector}] FROM [${filePath}] */` : propValue;
+            acc[propKey] = ENV.devMode ? `${propValue} /* [${sourceSelector}] FROM [${filePath}] */` : propValue;
             return acc;
         }, {}),
         ...Object.entries(response.properties).reduce((acc, [propKey, propValue]) => {
-            acc[propKey] = env.devMode ? `${propValue} /* [${sourceSelector}] FROM [${filePath}] */` : propValue;
+            acc[propKey] = ENV.devMode ? `${propValue} /* [${sourceSelector}] FROM [${filePath}] */` : propValue;
             return acc;
         }, {})
     });
 
     Object.assign(styles, U.object.deepMerge(merged, {
         ...Object.entries(response.atProps).reduce((acc, [propKey, propValue]) => {
-            acc[propKey] = env.devMode ? `${propValue} /* [${sourceSelector}] FROM [${filePath}] */` : propValue;
+            acc[propKey] = ENV.devMode ? `${propValue} /* [${sourceSelector}] FROM [${filePath}] */` : propValue;
             return acc;
         }, {}),
         ...Object.entries(response.properties).reduce((acc, [propKey, propValue]) => {
-            acc[propKey] = env.devMode ? `${propValue} /* [${sourceSelector}] FROM [${filePath}] */` : propValue;
+            acc[propKey] = ENV.devMode ? `${propValue} /* [${sourceSelector}] FROM [${filePath}] */` : propValue;
             return acc;
         }, {})
     }))
@@ -72,16 +72,18 @@ function XCANNER(content, filePath, sourceSelector) {
     return { preBinds, postBinds, styles, variables }
 }
 
-function CSSBULK(sources = []) {
-    const selectors = {};
+function CSSMULTIPLES(sources = []) {
+    const selectors = {}, indexes = [];
     sources.forEach(source => {
-        const { stamp, fileName, extension, filePath, metaFront, content } = source;
+        const { stamp, filePath, metaFront, content } = source.data;
         const scannedObj = read(content).allBlocks;
         for (const selector in scannedObj) {
             const metaSelector = U.string.normalize(selector[0] === "." ? selector.slice(1) : selector);
             const stampSelector = stamp + metaSelector;
             const scannedStyle = SCANNER(scannedObj[selector], filePath, selector);
-            const CLX = createXtyle();
+
+            const CLX = MakeStyle();
+            indexes.push(CLX.number)
             selectors[stampSelector] = {
                 index: CLX.number,
                 data: {
@@ -98,16 +100,16 @@ function CSSBULK(sources = []) {
     })
 
     for (const selector in selectors) {
-        stash.indexStyles[selectors[selector].index] = selectors[selector].data;
-        stash.styleRefers[selector] = selectors[selector].index;
+        STASH.Index2StylesObject[selectors[selector].index] = selectors[selector].data;
+        STASH.LibraryStyle2Index[selector] = selectors[selector].index;
     }
 
-    return { tillStyles: Object.keys(stash.styleRefers), exclusiveStyles: Object.keys(selectors) };
+    return { tillStyles: Object.keys(STASH.LibraryStyle2Index), exclusiveStyles: Object.keys(selectors), usedIndexes: indexes };
 }
 
 function TAGSTYLE({ isGlobal, selector, styles, collection, rowMarker, columnMarker }, metaFront, filePath) {
     const metaClass = (isGlobal ? "GLOBAL" : "LOCAL") + metaFront + `R${rowMarker}C${columnMarker}__` + U.string.normalize(selector);
-    const compiled = {}, preBinds = [], postBinds = [], errors = [], CLX = createXtyle();
+    const compiled = {}, preBinds = [], postBinds = [], errors = [], CLX = MakeStyle(), essentials = [];
 
     for (let subSelector in styles) {
         const query = SHORTHAND.RENDER(subSelector);
@@ -115,10 +117,6 @@ function TAGSTYLE({ isGlobal, selector, styles, collection, rowMarker, columnMar
         const styleObj = SCANNER(styles[subSelector], filePath, subSelector === "" ? selector : `${selector} => ${subSelector}`)
         postBinds.push(...styleObj.postBinds)
         preBinds.push(...styleObj.preBinds)
-        if (env.devMode) {
-            styleObj.postBinds.forEach(E => lists.postBinds.add(E))
-            styleObj.preBinds.forEach(E => lists.preBinds.add(E))
-        }
 
         if (Object.keys(styleObj).length) {
             if (selector === "") {
@@ -144,12 +142,10 @@ function TAGSTYLE({ isGlobal, selector, styles, collection, rowMarker, columnMar
     }
     if (selector === "") {
         Object.entries(compiled).forEach(([key, value]) => {
-            if (key !== "") essentials.push([key, value]);
+            essentials.push([key, value]);
         })
-        postBinds.forEach(E => lists.postBinds.add(E))
-        preBinds.forEach(E => lists.preBinds.add(E))
     } else {
-        stash.indexStyles[CLX.number] = {
+        STASH.Index2StylesObject[CLX.number] = {
             class: CLX.class,
             scope: isGlobal,
             selector,
@@ -158,17 +154,13 @@ function TAGSTYLE({ isGlobal, selector, styles, collection, rowMarker, columnMar
             metaClass,
             object: compiled
         }
-
-        if (isGlobal) stash.styleGlobals[selector] = env.styleCount;
-        else stash.styleLocals[filePath][selector] = env.styleCount;
     }
 
-    return errors;
+    return { index: ENV.styleCount, errors, essentials, preBinds, postBinds };
 }
 
 export default {
     XCANNER,
-    SCANNER,
-    CSSBULK,
+    CSSBULK: CSSMULTIPLES,
     TAGSTYLE
 }

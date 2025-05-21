@@ -1,7 +1,7 @@
 import U from "../Utils/index.js";
 import read from "./block.js";
 import SHORTHAND from "../shorthand.js";
-import { stash, lists, env, createXtyle, essentials } from "../executor.js";
+import { stash, lists, env, createXtyle, essentials } from "../creator.js";
 
 function xtylemerge(classList = []) {
     return classList.reduce((A, className) => {

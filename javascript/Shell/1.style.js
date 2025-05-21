@@ -1,4 +1,4 @@
-export const style = {
+export default {
     text: {
         Red: (text) => '\x1b[0m\x1b[31m' + text,
         Orange: (text) => '\x1b[0m\x1b[38;5;214m' + text,

@@ -1,5 +1,5 @@
-import $ from './Shell/index.js';
-import { stash } from './executor.js';
+import $ from '../Shell/index.js';
+import { STASH } from '../craftsmen.js';
 
 const hashPattern = /\{#[a-z0-9]+\}/i;
 const preHashPattern = /(?<!\{)#\w+/g;
@@ -19,14 +19,14 @@ function IMPORT(string, watchUndef = true) {
     const errors = {
         recursionLoop: (recursionPreview, cause) => {
             response.status = false;
-            recursionPreview["ERROR BY"] = $.custom.style.apply.bold.Red(cause)
-            response.error = $.compose.std.List(source + $.custom.style.apply.bold.Red(" : Shorthand recursion loop."), $.list.failed.Props(recursionPreview), $.list.failed.Waterfall, 1);
+            recursionPreview["ERROR BY"] = $.style.bold.Red(cause)
+            response.error = $.MOLD.std.List(source + $.style.bold.Red(" : Shorthand recursion loop."), $.list.failed.Props(recursionPreview), $.list.failed.Waterfall, 1);
             return response
         },
         undefinedHash: (recursionPreview, cause) => {
             response.status = false;
-            recursionPreview["ERROR BY"] = $.custom.style.apply.bold.Red(cause)
-            response.error = $.compose.std.List(source + $.custom.style.apply.bold.Red(" : Undefined shorthand."), $.list.failed.Props(recursionPreview), $.list.failed.Waterfall, 1);
+            recursionPreview["ERROR BY"] = $.style.bold.Red(cause)
+            response.error = $.MOLD.std.List(source + $.style.bold.Red(" : Undefined shorthand."), $.list.failed.Props(recursionPreview), $.list.failed.Waterfall, 1);
             return response
         }
     }
@@ -34,7 +34,7 @@ function IMPORT(string, watchUndef = true) {
     while (hashMatch = hashPattern.exec(string)) {
         const hash = hashMatch[0];
         const key = hash.slice(2, -1);
-        const replacement = watchUndef ? stash.shorthands[key]:(stash.shorthands[key] ?? hash) ;
+        const replacement = watchUndef ? STASH.Shorthands[key] : (STASH.Shorthands[key] ?? hash);
         recursionPreview["FROM " + hash] = `GETS ${replacement}`
 
         if (replacement === undefined) {
@@ -56,7 +56,7 @@ function IMPORT(string, watchUndef = true) {
 function UPLOAD(shorthands) {
     const shorthandErrors = [], report = [];
 
-    stash.shorthands = shorthands;
+    STASH.Shorthands = shorthands;
     Object.keys(shorthands).map(key => {
         const hash = '#' + key
         const response = IMPORT(hash);
@@ -69,16 +69,16 @@ function UPLOAD(shorthands) {
             }
         }
     });
-    stash.shorthands = shorthands;
-    
-    if (Object.keys(stash.shorthands).length)
-        report.push($.compose.primary.Section("Valid Shorthands", $.list.std.Props(shorthands), $.list.std.Bullets))
+    STASH.Shorthands = shorthands;
+
+    if (Object.keys(STASH.Shorthands).length)
+        report.push($.MOLD.primary.Section("Valid Shorthands", $.list.std.Props(shorthands), $.list.std.Bullets))
     if (shorthandErrors.length)
-        report.push($.compose.failed.Footer("Invalid Shorthands", shorthandErrors, $.list.std.Bullets))
+        report.push($.MOLD.failed.Footer("Invalid Shorthands", shorthandErrors, $.list.std.Bullets))
 
     return {
-        list: stash.shorthands,
-        report: $.compose.std.Block(report)
+        list: STASH.Shorthands,
+        report: $.MOLD.std.Block(report)
     }
 }
 

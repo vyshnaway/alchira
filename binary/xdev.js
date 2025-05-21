@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
 import fs from 'fs';
-import fileman from '../interface/files.js';
-import commander from "../javascript/commander.js"
+import fileman from '../interface/fileman.js';
+import commander from "../javascript/pacakge.js"
 
 const rootPath = fileman.path.fromRoot(".");
 const packagePath = 'package.json';
@@ -31,11 +31,11 @@ if (projectPackageJson.status && commandList.includes(command)) {
     for (const cmd of commandList) {
         if (rootPackageJson.data.scripts[cmd] && !projectPackageJson.data.scripts[cmd]) {
             addedCommands++;
-            projectPackageJson.scripts[`${rootPackageJson.data.name}:${cmd}`] = rootPackageJson.data.scripts[cmd];
+            projectPackageJson.data.scripts[`${rootPackageJson.data.name}:${cmd}`] = rootPackageJson.data.scripts[cmd];
         };
     }
     if (addedCommands) {
-        fs.writeFileSync(packagePath, JSON.stringify(projectPackageJson, null, 2), 'utf8')
+        fs.writeFileSync(packagePath, JSON.stringify(projectPackageJson.data, null, 2), 'utf8')
     }
 }
 

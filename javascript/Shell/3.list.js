@@ -17,11 +17,11 @@ const types = {
         const keyLength = Object.keys(items).reduce((max, key) => (key.length > max) ? key.length : max, 0);
         return Object.entries(items).map(([key, value]) => {
             const keyColumn = key.padEnd(keyLength);
-            return (canvas.tab(intent) + style.bold[canvas.settings.secondary](keyColumn + canvas.tab() + ":") + tag.Div(color(canvas.tab() + value)));
+            return (canvas.tab.repeat(intent) + style.bold[canvas.settings.secondary](keyColumn + canvas.tab + ":") + tag.Div(color(canvas.tab + value)));
         });
     },
     entries: (items, color, intent) => {
-        const size = items.reduce((length, item) => { if (item.length > length) length = item.length; return length }, 0) + intent + canvas.tabSpace;
+        const size = items.reduce((length, item) => { if (item.length > length) length = item.length; return length }, 0) + intent + canvas.tab.repeatSpace;
         const cols = Math.floor(canvas.width / (size + 4))
 
         let result = [], subResult = "";
@@ -39,15 +39,15 @@ const types = {
         return result
     },
     blocks: (items, color, intent) =>
-        items.map(item => canvas.tab(intent) + tag.Div(color(item))),
+        items.map(item => canvas.tab.repeat(intent) + tag.Div(color(item))),
     bullets: (items, color, intent) =>
-        items.map(item => canvas.tab(intent) + tag.Li(color(item))),
+        items.map(item => canvas.tab.repeat(intent) + tag.Li(color(item))),
     numbers: (items, color, intent) =>
-        items.map((item, index) => canvas.tab(intent) + style.bold[canvas.settings.secondary](index + 1) + canvas.tab() + tag.Div(color(item))),
+        items.map((item, index) => canvas.tab.repeat(intent) + style.bold[canvas.settings.secondary](index + 1) + canvas.tab.repeat() + tag.Div(color(item))),
     paragraphs: (items, color, intent) =>
         items.map(item => '\n'.repeat(intent - 1) + tag.P(color(item))),
     waterfall: (items, color, intent) =>
-        items.map((item, key) => canvas.tab(intent) + ' '.repeat(canvas.tabSpace - 1) + style.bold[canvas.settings.secondary](key === items.length - 1 ? "└─>" : "├─>") + color(canvas.tab() + item))
+        items.map((item, key) => canvas.tab.repeat(intent) + ' '.repeat(canvas.tab.length - 1) + style.bold[canvas.settings.secondary](key === items.length - 1 ? "└─>" : "├─>") + color(canvas.tab.repeat() + item))
 }
 
 export default {

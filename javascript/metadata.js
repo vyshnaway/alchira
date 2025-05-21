@@ -3,14 +3,14 @@ export const DATA = {
     ARG: "",
     CSSIndex: "",
     SHORTHAND: {},
+    PROXYMAP: {},
     LIBRARY: {},
-    TARGETS: {},
     PREFIX: {
         classes: {},
         atrules: {},
         elements: {},
         properties: {},
-    },
+    }
 };
 
 export const APP = {
@@ -34,7 +34,7 @@ export const NAV = {
         refers: "/scaffold/refers"
     },
     folder: {
-        setup: "xtyles/",
+        setup: "xtyles",
         cache: "xtyles/.cache",
         refers: "xtyles/references",
     },
@@ -45,9 +45,10 @@ export const NAV = {
         extends: "xtyles/#extends.css",
     },
     json: {
-        configure: "xtyles/configure.jsonc",
+        proxymap: "xtyles/proxy-map.jsonc",
         shorthand: "xtyles/shorthands.jsonc",
         styleMap: "xtyles/.cache/style-map.json",
+        switchMap: "xtyles/.cache/switch-map.json",
     }
 };
 
@@ -104,12 +105,12 @@ export const ROOT = {
 export default function SetData(rootPath, packageJson) {
     APP.name = packageJson.name
     APP.version = packageJson.version
-    APP.website = packageJson.homepage
+    APP.website = packageJson.website
     APP.command = packageJson.command
     APP.cdn = packageJson.command + packageJson.version.split('.')[1]
 
     NAV.scaffold.setup = rootPath + NAV.scaffold.setup;
-    NAV.scaffold.refers = rootPath + NAV.scaffold.setup;
+    NAV.scaffold.refers = rootPath + NAV.scaffold.refers;
 
     Object.values(ROOT).forEach(group => Object.values(group).forEach(entry => {
         entry.url = APP.cdn + entry.url;

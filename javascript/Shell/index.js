@@ -8,35 +8,35 @@ import play from './frames/index.js'
 import render from "../../interface/console.js";
 
 const task = (string, rowshift = -1) => {
-    if (rowshift < 0) render.animation.Backrow(-rowshift)
-    if (canvas.taskActive && canvas.postActive)
+    if (canvas.settings.taskActive && canvas.settings.postActive)
         render.write([
             (rowshift >= 0) ? tag.Br(rowshift) : "",
-            tag.Div(style.boldDim[canvas.primary]('>>>')),
-            tab(),
-            tag.Div(style.boldItalic[canvas.tertiary](string + '.')),
+            tag.Div(style.boldDim[canvas.settings.primary]('>>>')),
+            canvas.tab,
+            tag.Div(style.boldItalic[canvas.settings.tertiary](string + '.')),
             tag.Br(1)
-        ].join(''))
+        ].join(''), rowshift < 0 ? -rowshift : rowshift)
 }
 
 const step = (string, rowshift = -1) => {
-    if (rowshift < 0) render.animation.Backrow(-rowshift)
-    if (canvas.taskActive && canvas.postActive)
+    if (canvas.settings.taskActive && canvas.settings.postActive)
         render.write([
             (rowshift >= 0) ? tag.Br(rowshift) : "",
-            tag.Div(style.boldDim[canvas.primary]('>>>')),
-            tab(),
-            tag.Div(style.italic[canvas.tertiary](string + ' ...'))
-        ].join(''))
+            tag.Div(style.boldDim[canvas.settings.primary]('>>>')),
+            canvas.tab,
+            tag.Div(style.italic[canvas.settings.tertiary](string + ' ...'))
+        ].join(''), rowshift < 0 ? -rowshift : rowshift)
 }
 
-const post = (string = "", customStyle = style.dim[canvas.text], customTag = tag.Div) => {
-    if (canvas.postActive)
-        render.write(customStyle(customTag(typeof (string) === 'string' ? string : JSON.stringify(string, null, 2))))
+const post = (string = "", customStyle = style.dim[canvas.settings.text], customTag = tag.Div) => {
+    if (canvas.settings.postActive) { render.write(customStyle(customTag(string))) }
 }
 
-function initialize(canvasWidth) {
-    canvas.width = Math.min(canvasWidth, canvas.width) || canvas.width;
+function initialize(canvasWidth, taskActive = true, postActive = true, tabWidth = 2) {
+    canvas.tab = canvas.tab.repeat(tabWidth);
+    canvas.settings.taskActive = taskActive;
+    canvas.settings.postActive = postActive;
+    canvas.width = canvasWidth;
     canvas.divider.low = canvas.divider.low.repeat(canvas.width);
     canvas.divider.mid = canvas.divider.mid.repeat(canvas.width);
     canvas.divider.top = canvas.divider.top.repeat(canvas.width);

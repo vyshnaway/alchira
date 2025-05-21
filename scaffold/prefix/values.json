@@ -1,0 +1,403 @@
+{
+    "align-content": {
+        "start": [
+            "-webkit-start",
+            "-moz-start",
+            "-ms-start"
+        ],
+        "end": [
+            "-webkit-end",
+            "-moz-end",
+            "-ms-end"
+        ],
+        "center": [
+            "-webkit-center",
+            "-moz-center",
+            "-ms-center"
+        ],
+        "flex-start": [
+            "-webkit-flex-start",
+            "-moz-flex-start",
+            "-ms-flex-start"
+        ],
+        "flex-end": [
+            "-webkit-flex-end",
+            "-moz-flex-end",
+            "-ms-flex-end"
+        ],
+        "space-between": [
+            "-webkit-space-between",
+            "-moz-space-between",
+            "-ms-space-between"
+        ],
+        "space-around": [
+            "-webkit-space-around",
+            "-moz-space-around",
+            "-ms-space-around"
+        ],
+        "space-evenly": [
+            "-webkit-space-evenly",
+            "-moz-space-evenly",
+            "-ms-space-evenly"
+        ],
+        "stretch": [
+            "-webkit-stretch",
+            "-moz-stretch",
+            "-ms-stretch"
+        ],
+        "safe center": [
+            "-webkit-safe-center",
+            "-moz-safe-center",
+            "-ms-safe-center"
+        ],
+        "unsafe center": [
+            "-webkit-unsafe-center",
+            "-moz-unsafe-center",
+            "-ms-unsafe-center"
+        ]
+    },
+    "align-items": {
+        "flex-start": [
+            "-webkit-flex-start",
+            "-moz-flex-start",
+            "-ms-flex-start"
+        ],
+        "flex-end": [
+            "-webkit-flex-end",
+            "-moz-flex-end",
+            "-ms-flex-end"
+        ],
+        "center": [
+            "-webkit-center",
+            "-moz-center",
+            "-ms-center"
+        ],
+        "baseline": [
+            "-webkit-baseline",
+            "-moz-baseline",
+            "-ms-baseline"
+        ],
+        "stretch": [
+            "-webkit-stretch",
+            "-moz-stretch",
+            "-ms-stretch"
+        ]
+    },
+    "align-self": {
+        "flex-start": [
+            "-webkit-flex-start",
+            "-moz-flex-start",
+            "-ms-flex-start"
+        ],
+        "flex-end": [
+            "-webkit-flex-end",
+            "-moz-flex-end",
+            "-ms-flex-end"
+        ],
+        "center": [
+            "-webkit-center",
+            "-moz-center",
+            "-ms-center"
+        ],
+        "baseline": [
+            "-webkit-baseline",
+            "-moz-baseline",
+            "-ms-baseline"
+        ],
+        "stretch": [
+            "-webkit-stretch",
+            "-moz-stretch",
+            "-ms-stretch"
+        ]
+    },
+    "display": {
+        "box": [
+            "-webkit-box",
+            "-moz-box"
+        ],
+        "inline-box": [
+            "-webkit-inline-box",
+            "-moz-inline-box"
+        ],
+        "flex": [
+            "-webkit-flex",
+            "-moz-flex",
+            "-ms-flex"
+        ],
+        "inline-flex": [
+            "-webkit-inline-flex",
+            "-moz-inline-flex",
+            "-ms-inline-flex"
+        ],
+        "grid": [
+            "-webkit-grid",
+            "-moz-grid"
+        ],
+        "inline-grid": [
+            "-webkit-inline-grid",
+            "-moz-inline-grid"
+        ],
+        "flow-root": [
+            "-webkit-flow-root",
+            "-moz-flow-root"
+        ]
+    },
+    "flex-direction": {
+        "row": [
+            "-webkit-row",
+            "-moz-row"
+        ],
+        "row-reverse": [
+            "-webkit-row-reverse",
+            "-moz-row-reverse"
+        ],
+        "column": [
+            "-webkit-column",
+            "-moz-column"
+        ],
+        "column-reverse": [
+            "-webkit-column-reverse",
+            "-moz-column-reverse"
+        ]
+    },
+    "flex-wrap": {
+        "nowrap": [
+            "-webkit-nowrap"
+        ],
+        "wrap": [
+            "-webkit-wrap"
+        ],
+        "wrap-reverse": [
+            "-webkit-wrap-reverse"
+        ]
+    },
+    "justify-content": {
+        "flex-start": [
+            "-webkit-flex-start",
+            "-moz-flex-start"
+        ],
+        "flex-end": [
+            "-webkit-flex-end",
+            "-moz-flex-end"
+        ],
+        "center": [
+            "-webkit-center",
+            "-moz-center"
+        ],
+        "space-between": [
+            "-webkit-space-between",
+            "-moz-space-between"
+        ],
+        "space-around": [
+            "-webkit-space-around",
+            "-moz-space-around"
+        ],
+        "space-evenly": [
+            "-webkit-space-evenly",
+            "-moz-space-evenly"
+        ]
+    },
+    "writing-mode": {
+        "horizontal-tb": [
+            "-webkit-horizontal-tb",
+            "-ms-horizontal-tb"
+        ],
+        "vertical-rl": [
+            "-webkit-vertical-rl",
+            "-ms-vertical-rl"
+        ],
+        "vertical-lr": [
+            "-webkit-vertical-lr",
+            "-ms-vertical-lr"
+        ]
+    },
+    "appearance": {
+        "none": [
+            "-moz-appearance-none",
+            "-webkit-appearance-none"
+        ],
+        "auto": [
+            "-moz-appearance-auto",
+            "-webkit-appearance-auto"
+        ],
+        "textfield": [
+            "-moz-appearance-textfield",
+            "-webkit-appearance-textfield"
+        ],
+        "button": [
+            "-moz-appearance-button",
+            "-webkit-appearance-button"
+        ],
+        "searchfield": [
+            "-moz-appearance-searchfield",
+            "-webkit-appearance-searchfield"
+        ],
+        "textarea": [
+            "-moz-appearance-textarea",
+            "-webkit-appearance-textarea"
+        ],
+        "menulist": [
+            "-moz-appearance-menulist",
+            "-webkit-appearance-menulist"
+        ],
+        "menulist-button": [
+            "-moz-appearance-menulist-button",
+            "-webkit-appearance-menulist-button"
+        ],
+        "menulist-text": [
+            "-moz-appearance-menulist-text",
+            "-webkit-appearance-menulist-text"
+        ],
+        "menulist-value": [
+            "-moz-appearance-menulist-value",
+            "-webkit-appearance-menulist-value"
+        ],
+        "checkbox": [
+            "-moz-appearance-checkbox",
+            "-webkit-appearance-checkbox"
+        ],
+        "radio": [
+            "-moz-appearance-radio",
+            "-webkit-appearance-radio"
+        ],
+        "push-button": [
+            "-moz-appearance-push-button",
+            "-webkit-appearance-push-button"
+        ],
+        "square-button": [
+            "-moz-appearance-square-button",
+            "-webkit-appearance-square-button"
+        ],
+        "slider-horizontal": [
+            "-moz-appearance-slider-horizontal",
+            "-webkit-appearance-slider-horizontal"
+        ]
+    },
+    "background-clip": {
+        "border-box": [
+            "-webkit-border-box",
+            "-moz-border-box"
+        ],
+        "padding-box": [
+            "-webkit-padding-box",
+            "-moz-padding-box"
+        ],
+        "content-box": [
+            "-webkit-content-box",
+            "-moz-content-box"
+        ],
+        "text": [
+            "-webkit-text",
+            "-moz-text"
+        ]
+    },
+    "box-sizing": {
+        "content-box": [
+            "-moz-content-box",
+            "-webkit-content-box"
+        ],
+        "border-box": [
+            "-moz-border-box",
+            "-webkit-border-box"
+        ]
+    },
+    "cursor": {
+        "grab": [
+            "-webkit-grab",
+            "-moz-grab"
+        ],
+        "grabbing": [
+            "-webkit-grabbing",
+            "-moz-grabbing"
+        ],
+        "zoom-in": [
+            "-webkit-zoom-in",
+            "-moz-zoom-in"
+        ],
+        "zoom-out": [
+            "-webkit-zoom-out",
+            "-moz-zoom-out"
+        ]
+    },
+    "hyphens": {
+        "none": [
+            "-webkit-none",
+            "-moz-none",
+            "-ms-none"
+        ],
+        "manual": [
+            "-webkit-manual",
+            "-moz-manual",
+            "-ms-manual"
+        ],
+        "auto": [
+            "-webkit-auto",
+            "-moz-auto",
+            "-ms-auto"
+        ]
+    },
+    "overflow-wrap": {
+        "normal": [
+            "-webkit-normal",
+            "-moz-normal"
+        ],
+        "break-word": [
+            "-webkit-break-word",
+            "-moz-break-word"
+        ]
+    },
+    "text-orientation": {
+        "mixed": [
+            "-webkit-mixed",
+            "-moz-mixed",
+            "-ms-mixed"
+        ],
+        "upright": [
+            "-webkit-upright",
+            "-moz-upright",
+            "-ms-upright"
+        ],
+        "sideways": [
+            "-webkit-sideways",
+            "-moz-sideways",
+            "-ms-sideways"
+        ],
+        "sideways-right": [
+            "-webkit-sideways-right",
+            "-moz-sideways-right",
+            "-ms-sideways-right"
+        ],
+        "sideways-left": [
+            "-webkit-sideways-left",
+            "-moz-sideways-left",
+            "-ms-sideways-left"
+        ]
+    },
+    "user-select": {
+        "auto": [
+            "-moz-user-select-auto",
+            "-webkit-user-select-auto",
+            "-ms-user-select-auto"
+        ],
+        "text": [
+            "-moz-user-select-text",
+            "-webkit-user-select-text",
+            "-ms-user-select-text"
+        ],
+        "none": [
+            "-moz-user-select-none",
+            "-webkit-user-select-none",
+            "-ms-user-select-none"
+        ],
+        "contain": [
+            "-moz-user-select-contain",
+            "-webkit-user-select-contain",
+            "-ms-user-select-contain"
+        ],
+        "all": [
+            "-moz-user-select-all",
+            "-webkit-user-select-all",
+            "-ms-user-select-all"
+        ]
+    }
+}

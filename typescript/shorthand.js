@@ -1,5 +1,5 @@
 import $ from './Shell/index.js';
-import { stash } from './executor.js';
+import { stash } from './creator.js';
 
 const hashPattern = /\{#[a-z0-9]+\}/i;
 const preHashPattern = /(?<!\{)#\w+/g;
@@ -19,14 +19,14 @@ function IMPORT(string, watchUndef = true) {
     const errors = {
         recursionLoop: (recursionPreview, cause) => {
             response.status = false;
-            recursionPreview["ERROR BY"] = $.custom.style.apply.bold.Red(cause)
-            response.error = $.compose.std.List(source + $.custom.style.apply.bold.Red(" : Shorthand recursion loop."), $.list.failed.Props(recursionPreview), $.list.failed.Waterfall, 1);
+            recursionPreview["ERROR BY"] = $.style.bold.Red(cause)
+            response.error = $.compose.std.List(source + $.style.bold.Red(" : Shorthand recursion loop."), $.list.failed.Props(recursionPreview), $.list.failed.Waterfall, 1);
             return response
         },
         undefinedHash: (recursionPreview, cause) => {
             response.status = false;
-            recursionPreview["ERROR BY"] = $.custom.style.apply.bold.Red(cause)
-            response.error = $.compose.std.List(source + $.custom.style.apply.bold.Red(" : Undefined shorthand."), $.list.failed.Props(recursionPreview), $.list.failed.Waterfall, 1);
+            recursionPreview["ERROR BY"] = $.style.bold.Red(cause)
+            response.error = $.compose.std.List(source + $.style.bold.Red(" : Undefined shorthand."), $.list.failed.Props(recursionPreview), $.list.failed.Waterfall, 1);
             return response
         }
     }
@@ -34,7 +34,7 @@ function IMPORT(string, watchUndef = true) {
     while (hashMatch = hashPattern.exec(string)) {
         const hash = hashMatch[0];
         const key = hash.slice(2, -1);
-        const replacement = watchUndef ? stash.shorthands[key]:(stash.shorthands[key] ?? hash) ;
+        const replacement = watchUndef ? stash.shorthands[key] : (stash.shorthands[key] ?? hash);
         recursionPreview["FROM " + hash] = `GETS ${replacement}`
 
         if (replacement === undefined) {
@@ -70,7 +70,7 @@ function UPLOAD(shorthands) {
         }
     });
     stash.shorthands = shorthands;
-    
+
     if (Object.keys(stash.shorthands).length)
         report.push($.compose.primary.Section("Valid Shorthands", $.list.std.Props(shorthands), $.list.std.Bullets))
     if (shorthandErrors.length)

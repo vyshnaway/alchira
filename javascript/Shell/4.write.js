@@ -21,7 +21,7 @@ export const blockType = {
         composeBlock(tag.H5, heading, contents, startWith),
 }
 
-const blockColor = {
+export const blockColor = {
     std: (blockType, heading, contents) =>
         style.bold[canvas.settings.primary](blockType(heading, contents.map(content => content))),
     primary: (blockType, heading, contents) =>
@@ -33,15 +33,15 @@ const blockColor = {
     success: (blockType, heading, contents) =>
         style.bold.Green(blockType(heading, contents.map(content => style.text.Green(content)))),
     warning: (blockType, heading, contents) =>
-        style.bold.Orange(blockType(heading, contents.map(content => style.text.Orange(content)))),
+        style.bold.Orange(blockType(heading, contents.map(content => style.text.Yellow(content)))),
 }
 
 export default {
     std: {
         Text: (string, intent = 0) =>
-            canvas.tab(intent) + string,
+            canvas.tab.repeat(intent) + string,
         Item: (string, intent = 0) =>
-            canvas.tab(intent) + tag.Li(string),
+            canvas.tab.repeat(intent) + tag.Li(string),
         Chapter: (heading, contents = [], selectListType = list.std.Blocks, intent = 0) =>
             blockColor.std(blockType.Chapter, heading, selectListType(contents, intent)),
         Section: (heading, contents = [], selectListType = list.std.Blocks, intent = 0) =>
@@ -57,9 +57,9 @@ export default {
     },
     failed: {
         Text: (string, intent = 0) =>
-            canvas.tab(intent) + style.text.Red(string),
+            canvas.tab.repeat(intent) + style.text.Red(string),
         Item: (string, intent = 0) =>
-            canvas.tab(intent) + tag.Li(style.text.Red(string)),
+            canvas.tab.repeat(intent) + tag.Li(style.text.Red(string)),
         Chapter: (heading, contents = [], selectListType = list.failed.Blocks, intent = 0) =>
             blockColor.failed(blockType.Chapter, heading, selectListType(contents, intent)),
         Section: (heading, contents = [], selectListType = list.failed.Blocks, intent = 0) =>
@@ -75,9 +75,9 @@ export default {
     },
     success: {
         Text: (string, intent = 0) =>
-            canvas.tab(intent) + style.text.Green(string),
+            canvas.tab.repeat(intent) + style.text.Green(string),
         Item: (string, intent = 0) =>
-            canvas.tab(intent) + tag.Li(style.text.Green(string)),
+            canvas.tab.repeat(intent) + tag.Li(style.text.Green(string)),
         Chapter: (heading, contents = [], selectListType = list.success.Blocks, intent = 0) =>
             blockColor.success(blockType.Chapter, heading, selectListType(contents, intent)),
         Section: (heading, contents = [], selectListType = list.success.Blocks, intent = 0) =>
@@ -93,9 +93,9 @@ export default {
     },
     primary: {
         Text: (string, intent = 0) =>
-            canvas.tab(intent) + style.text[canvas.settings.primary](string),
+            canvas.tab.repeat(intent) + style.text[canvas.settings.primary](string),
         Item: (string, intent = 0) =>
-            canvas.tab(intent) + tag.Li(style.text[canvas.settings.primary](string)),
+            canvas.tab.repeat(intent) + tag.Li(style.text[canvas.settings.primary](string)),
         Chapter: (heading, contents = [], selectListType = list.primary.Blocks, intent = 0) =>
             blockColor.primary(blockType.Chapter, heading, selectListType(contents, intent)),
         Section: (heading, contents = [], selectListType = list.primary.Blocks, intent = 0) =>
@@ -111,9 +111,9 @@ export default {
     },
     secondary: {
         Text: (string, intent = 0) =>
-            canvas.tab(intent) + style.text[canvas.secondary](string),
+            canvas.tab.repeat(intent) + style.text[canvas.secondary](string),
         Item: (string, intent = 0) =>
-            canvas.tab(intent) + tag.Li(style.text[canvas.secondary](string)),
+            canvas.tab.repeat(intent) + tag.Li(style.text[canvas.secondary](string)),
         Chapter: (heading, contents = [], selectListType = list.primary.Blocks, intent = 0) =>
             blockColor.secondary(blockType.Chapter, heading, selectListType(contents, intent)),
         Section: (heading, contents = [], selectListType = list.primary.Blocks, intent = 0) =>
@@ -126,5 +126,23 @@ export default {
             blockColor.secondary(blockType.Points, heading, selectListType(contents, intent)),
         Block: (contents = [], selectListType = list.primary.Blocks, intent = 0) =>
             style.text[canvas.secondary](selectListType(contents, intent).join('\n')) + '\n',
+    },
+    warning: {
+        Text: (string, intent = 0) =>
+            canvas.tab.repeat(intent) + style.text.Yellow(string),
+        Item: (string, intent = 0) =>
+            canvas.tab.repeat(intent) + tag.Li(style.text.Yellow(string)),
+        Chapter: (heading, contents = [], selectListType = list.primary.Blocks, intent = 0) =>
+            blockColor.warning(blockType.Chapter, heading, selectListType(contents, intent)),
+        Section: (heading, contents = [], selectListType = list.primary.Blocks, intent = 0) =>
+            blockColor.warning(blockType.Section, heading, selectListType(contents, intent)),
+        Footer: (heading, contents = [], selectListType = list.primary.Blocks, intent = 0) =>
+            blockColor.warning(blockType.Footer, heading, selectListType(contents, intent)),
+        Note: (heading, contents = [], selectListType = list.primary.Blocks, intent = 0) =>
+            blockColor.warning(blockType.Note, heading, selectListType(contents, intent)),
+        List: (heading, contents = [], selectListType = list.primary.Blocks, intent = 0) =>
+            blockColor.warning(blockType.Points, heading, selectListType(contents, intent)),
+        Block: (contents = [], selectListType = list.primary.Blocks, intent = 0) =>
+            style.text.Yellow(selectListType(contents, intent).join('\n')) + '\n',
     },
 }

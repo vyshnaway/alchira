@@ -1,4 +1,4 @@
-import render from "./5.render.js"
+import render from "../../../interface/console.js"
 
 import renderTitle from './0.title.js'
 import renderLoki from './1.loki.js'

@@ -1,6 +1,6 @@
 import $ from './Shell/index.js';
-import fileman from '../interface/files.js';
-import { PACKAGE, ROOT, NAV, APP, } from './metadata.js';
+import fileman from '../interface/fileman.js';
+import { ROOT, NAV, APP, DATA } from './metadata.js';
 
 export async function FetchDocs() {
     const readmeMd = fileman.sync.file(ROOT.DOCS.readme.url, ROOT.DOCS.readme.path);
@@ -34,28 +34,28 @@ export async function Initialize() {
     try {
         $.TASK("Initializing XCSS setup.", 0);
         $.TASK('Cloning scaffold to Project');
+
         await fileman.clone.safe(NAV.scaffold.setup, NAV.folder.setup);
         await fileman.clone.safe(NAV.scaffold.refers, NAV.folder.refers);
 
         $.POST($.MOLD.std.Section("Next Steps", [
-            'Adjust ' + $.custom.style.apply.bold.Orange(NAV.json.configure) + $.custom.style.Reset + ' according to the requirements of your project.',
-            'Execute ' + $.custom.style.apply.bold.Orange('"init"') + $.custom.style.Reset + ' again to generate the necessary configuration folders.',
-            'During execution ' + $.custom.style.apply.bold.Orange('{target}') + $.custom.style.Reset + ' folder will be cloned from ' + $.custom.style.apply.bold.Orange('{source}') + $.custom.style.Reset + ' folder.',
+            'Adjust ' + $.style.bold.Orange(NAV.json.proxymap) + $.canvas.unstyle + ' according to the requirements of your project.',
+            'Execute ' + $.style.bold.Orange('"init"') + $.canvas.unstyle + ' again to generate the necessary configuration folders.',
+            'During execution ' + $.style.bold.Orange('{target}') + $.canvas.unstyle + ' folder will be cloned from ' + $.style.bold.Orange('{source}') + $.canvas.unstyle + ' folder.',
             'This folder will act as proxy for ' + APP.name + '.',
-            'In the ' + $.custom.style.apply.bold.Orange('{target}/{stylesheet}') + $.custom.style.Reset + ', content from ' + $.custom.style.apply.bold.Orange('{target}/{stylesheet}') + $.custom.style.Reset + ' will be appended.'
+            'In the ' + $.style.bold.Orange('{target}/{stylesheet}') + $.canvas.unstyle + ', content from ' + $.style.bold.Orange('{target}/{stylesheet}') + $.canvas.unstyle + ' will be appended.'
         ], $.list.std.Bullets));
 
         $.POST($.MOLD.std.Section('Available Commands', APP.commandList, $.list.std.Props))
         $.POST($.MOLD.std.Section("Build command instructions.",
-            (PACKAGE.version.split(".")[0] === "0") ? ["This command uses an internet connection."] : [
-                "Create a new project and use its access key. For action visit " + $.custom.style.apply.bold.Orange(ROOT.console),
-                "For personal projects, you can use the key in " + $.custom.style.apply.bold.Orange(NAV.json.configure),
-                "If using in CI/CD workflow, it is suggested to use " + $.custom.style.apply.bold.Orange("xcss build {key}")
+            (APP.version === "0") ? ["This command uses an internet connection."] : [
+                "Create a new project and use its access key. For action visit " + $.style.bold.Orange(ROOT.console),
+                "For personal projects, you can use the key in " + $.style.bold.Orange(NAV.json.proxymap),
+                "If using in CI/CD workflow, it is suggested to use " + $.style.bold.Orange("xcss build {key}")
             ], $.list.std.Bullets));
 
-        return true;
+        return $.MOLD.success.Footer("Initialized directory");
     } catch (err) {
-        $.POST($.MOLD.failed.Footer("Initialization failed.", [err.message], $.list.failed.Bullets));
-        return false;
+        return $.MOLD.failed.Footer("Initialization failed.", [err.message], $.list.failed.Bullets);
     }
 }

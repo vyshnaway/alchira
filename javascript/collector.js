@@ -1,61 +1,75 @@
-import cleaner from "./Worker/cleaner.js";
-import Utils from "./Utils/index.js";
+import $ from './Shell/index.js';
+import { NAV, DATA } from "./metadata.js";
+import { ProxyTargets } from "./craftsmen.js";
+import fileman from "../interface/fileman.js";
+import * as watcher from "../interface/watcher.js";
 
-const NON_ALPHANUMERIC_EXCEPT_SLASH = /[^a-z0-9/\\]/gi;
-const LIB_CHARSET = /[^\w-]/gi;
-const SLASH = /[/\\]/g;
+export async function Step0_VerifySetupStructure() {
+    const result = { unstart: true, proceed: false, report: "" };
 
-function libFinder(filePath, content, prefix = false, uncomment = false) {
+    if (fileman.path.ifFolder(NAV.folder.setup)) {
+        const errors = {};
+        $.TASK("Verifying directory status", 0)
+        for (const item of Object.values(NAV.css)) {
+            $.STEP("Path : " + item);
+            if (!fileman.path.ifFile(item)) { errors[item] = "File not found."; }
+        }
+        for (const item of Object.values(NAV.json)) {
+            $.STEP("Path : " + item);
+            if (!fileman.path.ifFile(item)) { errors[item] = "File not found."; }
+        }
+        $.TASK("Verification finished")
 
-    let [extension, fileName, level, library] = filePath.slice(filePath.lastIndexOf("/") + 1).split(".").reverse()
-    level = (isNaN(level) || level < 0) ? 0 : parseInt(level, 10);
+        result.unstart = false;
+        result.proceed = Object.keys(errors).length === 0;
+        result.report = (Object.keys(errors).length === 0) ?
+            $.MOLD.success.Footer("Setup Healthy") :
+            $.MOLD.failed.Footer("Error Paths", errors, $.list.failed.Props)
+    } else {
+        result.report = $.MOLD.warning.Footer("XCSS is not yet initialized in directory.",
+            [`Use "init" command to initialize.`], $.list.warning.Bullets)
+    }
 
-    const axiom = !Boolean(library);
-    const stamp = level === 0 ? "" : (library ?? "".replace(LIB_CHARSET, '-')) + "$".repeat(level)
-    const normalPath = filePath.replace(NON_ALPHANUMERIC_EXCEPT_SLASH, '-').replace(SLASH, '_');
+    return result
+}
 
+export async function Step1_VerifySetupConfigs() {
+    $.TASK("Initializing configs", 0);
+    const errors = [], alerts = [];
+    await fileman.clone.safe(NAV.scaffold.setup, NAV.folder.setup);
+
+    $.STEP("PATH : " + NAV.json.proxymap);
+    const proxyMap = await fileman.read.json(NAV.json.proxymap);
+    if (proxyMap.status) {
+        DATA.PROXYMAP = proxyMap.data;
+        const results = await watcher.proxyMapDependency(proxyMap.data, NAV.folder.setup);
+        errors.push(...results.warnings);
+    } else { errors.push(`${NAV.json.proxymap} : Bad json file.`); }
+
+    $.STEP("PATH : " + NAV.json.shorthand);
+    const shorthand = await fileman.read.json(NAV.json.shorthand);
+    if (shorthand.status) { DATA.SHORTHAND = shorthand.data; }
+    else { errors.push(`${NAV.json.shorthand} : Bad json file.`); };
+
+    $.TASK("Initialization finished")
     return {
-        level,
-        axiom,
-        data: {
-            stamp,
-            fileName,
-            extension,
-            filePath,
-            metaFront: (prefix ? `${axiom ? "AXIOM-level" : "LEVEL"}-${level}` + ((library ?? "").length > 0 ? `_${library}` : ``) : "") + `__${normalPath}_`,
-            content: uncomment ? cleaner.uncomment.Css(content) : content,
-        },
+        status: Object.keys(errors).length === 0,
+        report: Object.keys(errors).length === 0 ?
+            $.MOLD.success.Footer("Configs Healthy", alerts, $.list.success.Bullets) :
+            $.MOLD.failed.Footer("Error Paths", errors, $.list.failed.Bullets)
     }
 }
 
-export default {
-    css: (filesArray) => {
-        const list = {}, index = { axiom: {}, library: {} };
-        let length = 0;
+export async function Step2_UpdateSetupContent() {
+    $.TASK("Reading setup folder", 0);
+    DATA.CSSIndex = await watcher.cssImport(Object.values(NAV.css));
+    $.TASK("Collecting library files");
+    DATA.LIBRARY = await fileman.read.bulk(NAV.folder.refers, ["css"]);
+    $.TASK("Reading setup finished");
+}
 
-        Object.keys(filesArray).forEach(filePath => {
-            const lib = libFinder(filePath, filesArray[filePath], true, true);
-            const { level, axiom } = lib;
-            const group = axiom ? "axiom" : "library";
-
-            list[filePath] = { group, id: level };
-            if (!index[group][level]) index[group][level] = [];
-            index[group][level].push(lib.data);
-
-            if (level > length) length = level;
-        });
-
-        return {
-            list,
-            axiom: Utils.array.formNumberedObject(index.axiom, length),
-            library: Utils.array.formNumberedObject(index.library, length)
-        };
-    },
-    files: (filesArray) => {
-        const response = [];
-        Object.keys(filesArray).forEach(filePath => {
-            response.push(libFinder(filePath, filesArray[filePath], false).data);
-        })
-        return response
-    }
+export async function Step3_UpdateTargets() {
+    $.TASK("Syncing proxy folders", 0);
+    ProxyTargets.push(...(await watcher.proxyMapSync(DATA.PROXYMAP)));
+    $.TASK("Reading target folders.");
 }

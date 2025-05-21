@@ -1,5 +1,5 @@
 import U from "../Utils/index.js"
-import { prefix, env, stash } from "../executor.js";
+import { prefix, env, stash } from "../creator.js";
 
 function getSelectorPrefixes(content = "", prefixes = ["webkit", "moz", "ms", "o"]) {
     const stringList = U.string.zeroBreaks(content, [","]).map(i => i.trim()), selectors = [];
@@ -117,10 +117,10 @@ function unNester(selector = "", object = {}) {
             if (subSelector[0] === "&") {
                 const xelector = selector + subSelector.slice(1);
                 const subResult = unNester(xelector, object[subSelector]);
-                if(subSelector[1] === " "){
+                if (subSelector[1] === " ") {
                     Object.entries(subResult.nests).forEach(([nest, block]) => nests[nest] = block);
                     nests[subResult.selector] = subResult.result
-                }else{
+                } else {
                     nests[subResult.selector] = subResult.result
                     Object.entries(subResult.nests).forEach(([nest, block]) => nests[nest] = block);
                 }
@@ -150,7 +150,7 @@ function objectCompose(object, minify = !env.devMode, prefixes = ["webkit", "moz
                 } else {
                     styleSheet.push(...getSelectorPrefixes(key, prefixes), "{", ...objectCompose(subObject, minify, prefixes).map(i => tab + i), "}");
                 }
-            } 
+            }
         }
         else {
             if (key[0] === "@") {

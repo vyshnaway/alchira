@@ -1,5 +1,5 @@
 import U from "../Utils/index.js"
-import { prefix, env, stash } from "../executor.js";
+import { LISTEDPREFIX, ENV, STASH } from "../craftsmen.js";
 
 function getSelectorPrefixes(content = "", prefixes = ["webkit", "moz", "ms", "o"]) {
     const stringList = U.string.zeroBreaks(content, [","]).map(i => i.trim()), selectors = [];
@@ -15,8 +15,8 @@ function getSelectorPrefixes(content = "", prefixes = ["webkit", "moz", "ms", "o
 
         prefixes.forEach((group) => {
             result[group].out = string.replace(/:+[\w-]+/g, (selector) => {
-                if (prefix.selector[selector] && prefix.selector[selector][group]) result[group].score++;
-                return (prefix.selector[selector] && prefix.selector[selector][group]) || prefix.selector[selector] || selector;
+                if (LISTEDPREFIX.selector[selector] && LISTEDPREFIX.selector[selector][group]) result[group].score++;
+                return (LISTEDPREFIX.selector[selector] && LISTEDPREFIX.selector[selector][group]) || LISTEDPREFIX.selector[selector] || selector;
             })
         })
 
@@ -31,8 +31,8 @@ function getSelectorPrefixes(content = "", prefixes = ["webkit", "moz", "ms", "o
 
 function getPropPrefixes(content = "", prefixes = ["webkit", "moz", "ms", "o"]) {
     const result = prefixes.reduce((a, group) => {
-        if (prefix.property[content] && prefix.property[content][group])
-            a.push(prefix.property[content][group]);
+        if (LISTEDPREFIX.property[content] && LISTEDPREFIX.property[content][group])
+            a.push(LISTEDPREFIX.property[content][group]);
         return a;
     }, []);
     result.push(content)
@@ -45,8 +45,8 @@ function getAtRulePrefixes(content = "", prefixes = ["webkit", "moz", "ms", "o"]
     const rule = content.slice(0, index), data = content.slice(index);
 
     const result = prefixes.reduce((a, group) => {
-        if (prefix.atRule[rule] && prefix.atRule[rule][group])
-            a[group] = prefix.atRule[rule][group] + data;;
+        if (LISTEDPREFIX.atRule[rule] && LISTEDPREFIX.atRule[rule][group])
+            a[group] = LISTEDPREFIX.atRule[rule][group] + data;;
         return a;
     }, {});
     result[""] = content
@@ -59,8 +59,8 @@ function getAtPropPrefixes(content = "", prefixes = ["webkit", "moz", "ms", "o"]
     const rule = content.slice(0, index), data = content.slice(index);
 
     const result = prefixes.reduce((a, group) => {
-        if (prefix.atRule[rule] && prefix.atRule[rule][group]) {
-            a.push(prefix.atRule[rule][group] + data);
+        if (LISTEDPREFIX.atRule[rule] && LISTEDPREFIX.atRule[rule][group]) {
+            a.push(LISTEDPREFIX.atRule[rule][group] + data);
         }
         return a;
     }, []);
@@ -81,35 +81,6 @@ function propListBuild(object) {
     }, {})
 }
 
-function styleLoad(selectorIndexObject) {
-    return Object.entries(selectorIndexObject).reduce((A, [S, I]) => {
-        A[S] = stash.indexStyles[I].object;
-        return A;
-    }, {})
-}
-
-function styleSwitch(object) {
-    const switched = U.object.switch(object);
-    const mins = [], maxs = [], flats = [];
-    Object.keys(switched).forEach(key => {
-        const min = key.indexOf("min"), max = key.indexOf("max");
-        if (key !== "") {
-            if (min < max) mins.push(key)
-            if (min > max) maxs.push(key)
-            if (min === max) flats.push(key)
-        }
-    })
-
-    const keys = [
-        ...flats.sort(),
-        ...mins.sort().reverse(),
-        ...maxs.sort()
-    ]
-    const result = switched[""] ?? {}
-    keys.forEach(key => result[key] = switched[key])
-    return result
-}
-
 function unNester(selector = "", object = {}) {
     const nests = {}, result = {};
     Object.keys(object).forEach((subSelector) => {
@@ -117,10 +88,10 @@ function unNester(selector = "", object = {}) {
             if (subSelector[0] === "&") {
                 const xelector = selector + subSelector.slice(1);
                 const subResult = unNester(xelector, object[subSelector]);
-                if(subSelector[1] === " "){
+                if (subSelector[1] === " ") {
                     Object.entries(subResult.nests).forEach(([nest, block]) => nests[nest] = block);
                     nests[subResult.selector] = subResult.result
-                }else{
+                } else {
                     nests[subResult.selector] = subResult.result
                     Object.entries(subResult.nests).forEach(([nest, block]) => nests[nest] = block);
                 }
@@ -135,7 +106,8 @@ function unNester(selector = "", object = {}) {
     return { nests, selector, result }
 }
 
-function objectCompose(object, minify = !env.devMode, prefixes = ["webkit", "moz", "ms", "o"]) {
+function objectCompose(object, prefixes = ["webkit", "moz", "ms", "o"]) {
+    const minify = !ENV.devMode;
     const tab = minify ? "" : "  ", space = minify ? "" : " ";
     let styleSheet = [];
 
@@ -150,7 +122,7 @@ function objectCompose(object, minify = !env.devMode, prefixes = ["webkit", "moz
                 } else {
                     styleSheet.push(...getSelectorPrefixes(key, prefixes), "{", ...objectCompose(subObject, minify, prefixes).map(i => tab + i), "}");
                 }
-            } 
+            }
         }
         else {
             if (key[0] === "@") {
@@ -163,7 +135,8 @@ function objectCompose(object, minify = !env.devMode, prefixes = ["webkit", "moz
     return styleSheet
 }
 
-function arrayCompose(array, minify = !env.devMode, prefixes = ["webkit", "moz", "ms", "o"]) {
+export default function arrayCompose(array, prefixes = ["webkit", "moz", "ms", "o"]) {
+    const minify = !ENV.devMode;
     const tab = minify ? "" : "  ", space = minify ? "" : " ", br = "";
     let styleSheet = [];
     array.forEach(([key, value]) => {
@@ -173,9 +146,9 @@ function arrayCompose(array, minify = !env.devMode, prefixes = ["webkit", "moz",
                 const subObject = propListBuild(newValue);
                 if (newKey[0] === "@") {
                     const selectors = Object.entries(getAtRulePrefixes(newKey, prefixes));
-                    selectors.forEach(([group, selector]) => styleSheet.push(br, selector, "{", ...objectCompose(subObject, minify, [group]).map(i => tab + i), "}"));
+                    selectors.forEach(([group, selector]) => styleSheet.push(br, selector, "{", ...objectCompose(subObject, [group]).map(i => tab + i), "}"));
                 } else {
-                    styleSheet.push(br, ...getSelectorPrefixes(newKey, prefixes), "{", ...objectCompose(subObject, minify, prefixes).map(i => tab + i), "}");
+                    styleSheet.push(br, ...getSelectorPrefixes(newKey, prefixes), "{", ...objectCompose(subObject, prefixes).map(i => tab + i), "}");
                 }
             }
             else {
@@ -188,26 +161,5 @@ function arrayCompose(array, minify = !env.devMode, prefixes = ["webkit", "moz",
         })
     })
 
-    return styleSheet
-}
-
-
-export default {
-    array: (object, minify = !env.devMode) => {
-        const styleSheet = arrayCompose(object, minify);
-        return styleSheet.join(minify ? "" : "\n");
-    },
-    list: (order, minify = !env.devMode) => {
-        const styleSheet = Object.entries(styleSwitch(order.reduce((A, I) => {
-            if (stash.styleRefers[I])
-                A[stash.indexStyles[stash.styleRefers[I]].selector] =
-                    stash.indexStyles[stash.styleRefers[I]].object;
-            return A;
-        }, {})))
-        return arrayCompose(styleSheet).join(minify ? "" : "\n")
-    },
-    map: (selectorIndexPair, minify = !env.devMode) => {
-        const styleSheet = Object.entries(styleSwitch(styleLoad(selectorIndexPair)))
-        return arrayCompose(styleSheet).join(minify ? "" : "\n")
-    }
+    return styleSheet.join(minify ? "" : "\n")
 }

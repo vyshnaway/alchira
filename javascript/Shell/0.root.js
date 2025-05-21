@@ -50,14 +50,14 @@ const canvas = {
         White: 'White',
     },
 
-    width: 32,
+    width:80,
 
     settings: {
-        title: this.color.Green,
-        text: this.color.White,
-        primary: this.color.Orange,
-        secondary: this.color.Yellow,
-        tertiary: this.color.Grey,
+        title: "Green",
+        text: "White",
+        primary: "Orange",
+        secondary: "Yellow",
+        tertiary: "Grey",
         taskActive: true,
         postActive: true,
         tabSpace: 2,
@@ -69,9 +69,7 @@ const canvas = {
         low: '_',
     },
     
-    tab(count = 1) {
-        return ' '.repeat(this.settings.tabSpace * count);
-    }
+    tab: ' '
 };
 
 export default canvas;

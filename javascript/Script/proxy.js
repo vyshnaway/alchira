@@ -1,12 +1,12 @@
-import { stash, lists, finals, createXtyle } from "../executor.js"
 import Utils from "../Utils/index.js";
 import { cursor } from "./file.js"
+import { STASH, MIDWAY, MakeStyle } from "../craftsmen.js"
 
 function loadActiveIndexes(classList = [], filePath) {
     return classList.reduce((A, entry) => {
-        const index = (stash.styleRefers[entry] ?? 0) +
-            (stash.styleGlobals[entry] ?? 0) +
-            ((stash.styleLocals[filePath] && stash.styleLocals[filePath][entry]) ?? 0)
+        const index = (STASH.LibraryStyle2Index[entry] ?? 0) +
+            (STASH.GlobalsStyle2Index[entry] ?? 0) +
+            ((STASH.styleLocals[filePath] && STASH.styleLocals[filePath][entry]) ?? 0)
         if (index) A.push(index);
 
         return A;
@@ -15,8 +15,8 @@ function loadActiveIndexes(classList = [], filePath) {
 
 function loadActiveStyles(classList) {
     return Utils.object.multiMerge(classList.reduce((A, index) => {
-        A.push(stash.indexStyles[index].object);
-        
+        A.push(STASH.Index2StylesObject[index].object);
+
         return A;
     }, []), true)
 }
@@ -49,7 +49,7 @@ export default function classExtract(string, action, fileData) {
         const metaFront = "TAG-" + cursor.tagCount + "" + fileData.metaFront + "_";
         activeQuote = "", entry = "", scribed = "", marker = 0, inQuote = false, ch = string[marker];
         const activeIndexes = (action === "dev") ? [] :
-            Utils.array.longestSubChain(lists.ordered, loadActiveIndexes(Utils.array.setback(classList), fileData.filePath));
+            Utils.array.longestSubChain(STASH.SortedIndexes, loadActiveIndexes(Utils.array.setback(classList), fileData.filePath));
         const activeStyles = loadActiveStyles(activeIndexes);
 
         while (ch !== undefined) {
@@ -59,48 +59,48 @@ export default function classExtract(string, action, fileData) {
                         const className = entry.slice(1);
                         switch (entry[0]) {
                             case ">":
-                                lists.postBinds.add(className)
+                                STASH.FinalPostBinds.add(className)
                             case "<":
-                                lists.preBinds.add(className)
+                                STASH.FinalPreBinds.add(className)
                             case "*":
                                 if (className[0] === "-" || /\$-/.test(className))
-                                    lists.preBinds.add(className)
-                                else lists.postBinds.add(className)
+                                    STASH.FinalPreBinds.add(className)
+                                else STASH.FinalPostBinds.add(className)
                         }
                         // if (!(className[0] === "-" || /\$-/.test(className)))
                         //     scribed += className;
                     } else {
-                        const index = (stash.styleRefers[entry] ?? 0) +
-                            (stash.styleGlobals[entry] ?? 0) +
-                            ((stash.styleLocals[fileData.filePath] && stash.styleLocals[fileData.filePath][entry]) ?? 0);
+                        const index = (STASH.LibraryStyle2Index[entry] ?? 0) +
+                            (STASH.GlobalsStyle2Index[entry] ?? 0) +
+                            ((STASH.styleLocals[fileData.filePath] && STASH.styleLocals[fileData.filePath][entry]) ?? 0);
                         if (index) {
                             switch (action) {
                                 case "dev":
-                                    const devClass = metaFront + stash.indexStyles[index].metaClass;
+                                    const devClass = metaFront + STASH.Index2StylesObject[index].metaClass;
                                     scribed += devClass;
-                                    finals["." + devClass] = index;
+                                    MIDWAY.RENDERS["." + devClass] = index;
                                     break;
                                 case "preview":
                                     if (activeIndexes.includes(index)) {
-                                        scribed += stash.indexStyles[index].class;
+                                        scribed += STASH.Index2StylesObject[index].class;
                                     } else {
-                                        const identity = createXtyle();
-                                        finals["." + identity.class] = index;
+                                        const identity = MakeStyle();
+                                        MIDWAY.RENDERS["." + identity.class] = index;
                                         scribed += identity.class;
                                     }
                                     break;
                                 case "build":
                                     if (activeIndexes.includes(index)) {
-                                        scribed += stash.indexStyles[index].class;
+                                        scribed += STASH.Index2StylesObject[index].class;
                                     } else {
-                                        const deltaStyles = Utils.object.onlyB(activeStyles, stash.indexStyles[index].object);
-                                        if (deltaStyles.score) scribed += stash.indexStyles[index].class;
+                                        const deltaStyles = Utils.object.onlyB(activeStyles, STASH.Index2StylesObject[index].object);
+                                        if (deltaStyles.score) scribed += STASH.Index2StylesObject[index].class;
                                         else {
-                                            const identity = createXtyle();
+                                            const identity = MakeStyle();
                                             scribed += identity.class;
                                             console.log()
-                                            stash.indexStyles["." + identity.class] = deltaStyles.result;
-                                            finals[className] = index;
+                                            STASH.Index2StylesObject["." + identity.class] = deltaStyles.result;
+                                            MIDWAY.RENDERS[className] = index;
                                         }
                                     }
                                     break;

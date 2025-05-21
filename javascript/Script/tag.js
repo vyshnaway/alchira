@@ -1,5 +1,5 @@
 import classExtract from "./proxy.js";
-import { env } from "../executor.js"
+import { ENV } from "../craftsmen.js"
 import { cursor } from "./file.js"
 
 const bracePair = {
@@ -86,7 +86,7 @@ export default function tagScan(content, action, classProps, fileData) {
     }
 
 
-    const newTag = tagObject.element === env.styleTag ? "" : "<" + tagObject.element +
+    const newTag = tagObject.element === ENV.styleTag ? "" : "<" + tagObject.element +
         Object.entries(tagObject.attributes).reduce((A, [P, V]) => A += " " + P + ((V === "") ? "" : "=" + V), "") + ">";
     return {
         ok,
