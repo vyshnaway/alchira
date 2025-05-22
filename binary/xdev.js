@@ -2,7 +2,7 @@
 
 import fs from 'fs';
 import fileman from '../interface/fileman.js';
-import commander from "../javascript/pacakge.js"
+import commander from "../javascript/package.js"
 
 const rootPath = fileman.path.fromRoot(".");
 const packagePath = 'package.json';

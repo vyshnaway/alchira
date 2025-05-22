@@ -2,7 +2,7 @@ import LibSetter from "./Worker/lib-setter.js";
 import SCRIPT from "./Script/file.js"
 import STYLE from "./Style/parse.js"
 import $ from "./Shell/index.js"
-import { UnresIndexes, STASH } from "./craftsmen.js";
+import { UnresIndexes, STASH } from "./data-cache.js";
 
 export default class Proxy {
     source = "";
@@ -30,7 +30,7 @@ export default class Proxy {
 
     _UploadFile(filePath, fileContent) {
         const file = LibSetter(this.target, this.source, filePath, fileContent, false).data;
-        const response = SCRIPT.read(file, this.extnsProps[file.extension])
+        const response = SCRIPT(file, this.extnsProps[file.extension], "read")
         this.fileCache[file.targetPath] = file;
 
         file.parsed = response.scribed;
@@ -45,6 +45,7 @@ export default class Proxy {
 
         response.stylesList.forEach(style => {
             const response = STYLE.TAGSTYLE(style, file.metaFront, file.filePath);
+            file.usedIndexes.add(response.index);
             const styleMap = style.isGlobal ? file.styleGlobals : file.styleLocals;
             styleMap[style.selector] = response.index;
 
@@ -110,18 +111,23 @@ export default class Proxy {
 
     SaveFile(filePath, fileContent) {
         this._UploadFile(filePath, fileContent)
-        this.Accumulator();
     }
 
     DeleteFile(filePath) {
+        // this.fileCache[filePath]file.preBinds
+        // this.fileCache[filePath]file.postBinds
         UnresIndexes.push(
             ...Object.values(this.fileCache[filePath].styleLocals),
-            ...Object.values(this.fileCache[filePath].styleGlobals))
+            ...Object.values(this.fileCache[filePath].styleGlobals)
+        )
         delete this.fileCache[filePath];
-        this.Accumulator();
     }
 
     RenderFiles(Command = "", LibraryStyles = {}, GlobalStyles = {}) {
-
+        Object.values(this.fileCache).forEach(file => {
+           file.final = SCRIPT[Command](file, this.extnsProps[file.extension], {
+            Library: LibraryStyles, Local: file.styleLocals, Global: GlobalStyles
+           })
+        })
     }
 }

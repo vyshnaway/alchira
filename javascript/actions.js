@@ -1,6 +1,6 @@
 import $ from './Shell/index.js';
 import fileman from '../interface/fileman.js';
-import { ROOT, NAV, APP, DATA } from './metadata.js';
+import { ROOT, NAV, APP, DATA } from './data-meta.js';
 
 export async function FetchDocs() {
     const readmeMd = fileman.sync.file(ROOT.DOCS.readme.url, ROOT.DOCS.readme.path);

@@ -1,202 +1,75 @@
-import $ from "./Shell/index.js"
-import Utils from "./Utils/index.js";
+import $ from "./Shell/index.js";
+import Use from "./Utils/index.js";
 import shorthandJS from "./Worker/shorthand.js";
 import cleaner from "./Worker/cleaner.js";
 import STYLE from "./Style/parse.js";
-import SCRIPT from "./Script/file.js";
 import COMPILE from "./Style/compile.js";
-import FORGE from "./forger.js";
-import ORGANIZER from "./Worker/order.js";
-import { DATA, NAV } from "./metadata.js";
+import FORGE from "./forgent.js";
+import ORGANIZER from "./Worker/order-api.js";
+import { DATA, NAV } from "./data-meta.js";
 import Proxy from "./class-proxy.js";
-import Library from "./class-library.js";
-
-export const ENV = {
-    styleTag: "xtyle",
-    styleCount: 0,
-    devMode: true,
-    unSpaced: true,
-    apiUrl: "https://workers.xpktr.com/api/xcss-build-request"
-}
-export const LISTEDPREFIX = {
-    atRule: {},
-    selector: {},
-    property: {},
-}
-export const STASH = {
-    Shorthands: {},
-    SortedIndexes: [],
-    LibraryStyle2Index: {},
-    GlobalsStyle2Index: {},
-    Index2StylesObject: {},
-    FinalPreBinds: new Set(),
-    FinalPostBinds: new Set(),
-    Midway: {
-        Essentials: [],
-        Finals: {},
-        Renders: {},
-    }
-}
-export const PUBLISH = {
-    SwitchMap: {},
-    FinalFiles: {},
-    ConsoleErrors: [],
-    Report: {
-        library: '',
-        variables: '',
-        shorthand: '',
-        errorList: '',
-        finalMessage: ''
-    },
-    StyleMap: {
-        variables: {},
-        shorthands: {},
-        file: {},
-        local: {},
-        global: {},
-        axiom: {},
-        library: {}
-    },
-}
-export const RENDERFRAGS = {
-    INDEX: "",
-    ESSENTIALS: "",
-    PREBINDS: "",
-    RENDERED: "",
-    POSTBINDS: "",
-    APPENDIX: "",
-}
-export const CUMULATES = {
-    report: [],
-    errors: [],
-    styleMap: [],
-    essentials: [],
-    classGroups: [],
-    classTracks: [],
-    preBinds: new Set(),
-    postBinds: new Set(),
-    styleGlobals: {},
-};
-
-export const ProxyTargets = [];
-export const UnresIndexes = [];
-
-export function MakeStyle() {
-    const number = UnresIndexes.length ? ENV.unresIndexes.pop() : ++ENV.styleCount;
-    return { number, class: "_" + Utils.string.enCounter(number + 768) }
-}
-export function GenAccumulates() {
-    const
-        report = [],
-        errors = [],
-        essentials = [],
-        styleMap = [],
-        preBinds = new Set(),
-        postBinds = new Set(),
-        styleGlobals = {},
-        classGroups = [],
-        classTracks = [];
-
-    ProxyTargets.forEach(proxy => {
-        proxy.cache.Accumulator();
-        const cumulated = proxy.cache.cumulated;
-
-        report.push(...cumulated.report);
-        errors.push(...cumulated.errors);
-        styleMap.push(...cumulated.styleMap);
-        essentials.push(...cumulated.essentials);
-        classGroups.push(...cumulated.classGroups);
-        classTracks.push(...cumulated.classTracks);
-        Object.assign(styleGlobals, cumulated.styleGlobals);
-        cumulated.preBinds.forEach(bind => preBinds.add(bind));
-        cumulated.postBinds.forEach(bind => postBinds.add(bind));
-    });
-
-    Object.assign(CUMULATES, {
-        report,
-        errors,
-        essentials,
-        styleMap,
-        preBinds,
-        postBinds,
-        styleGlobals,
-        classGroups,
-        classTracks
-    });
-}
-
-export function Initialize() {
-    ENV.devMode = DATA.CMD === "dev";
-    ENV.unSpaced = DATA.CMD !== "build";
-
-    LISTEDPREFIX.atRule = DATA.PREFIX.atrules;
-    LISTEDPREFIX.property = DATA.PREFIX.properties;
-    LISTEDPREFIX.selector = { ...DATA.PREFIX.classes, ...DATA.PREFIX.elements }
-}
-export function ResetCache() {
-    Object.assign(STASH, {
-        Shorthands: {},
-        SortedIndexes: [],
-        LibraryStyle2Index: {},
-        GlobalsStyle2Index: {},
-        Index2StylesObject: {},
-        FinalPreBinds: new Set(),
-        FinalPostBinds: new Set(),
-        Midway: {
-            Essentials: [],
-            Finals: {},
-            Renders: {},
-        }
-    });
-    Object.assign(PUBLISH, {
-        SwitchMap: {},
-        FinalFiles: {},
-        ConsoleErrors: [],
-        Report: {
-            library: '',
-            variables: '',
-            shorthand: '',
-            errorList: '',
-            finalMessage: ''
-        },
-        StyleMap: {
-            variables: {},
-            shorthands: {},
-            file: {},
-            local: {},
-            global: {},
-            axiom: {},
-            library: {}
-        },
-    });
-
-    ENV.styleCount = 0;
-    ProxyTargets.length = 0;
-    UnresIndexes.length = 0;
-
-    Library.ClearStash();
-}
+import Library from "./class-refers.js";
+import {
+    ENV,
+    STASH,
+    PUBLISH,
+    RENDERFRAGS,
+    CUMULATES,
+    ProxyTargets,
+    UnresIndexes,
+    DECLARESTYLE,
+    GenAccumulates,
+    Initialize,
+    ResetCache
+} from "./data-cache.js";
 
 // On library edit.
-export function UpdateLibrary() {
+export function UpdateLibrary(action = "upload", filePath, fileContent) {
     ResetCache();
 
-    Library.UploadFiles(DATA.LIBRARY);
+    switch (action) {
+        case "upload":
+            Library.UploadFiles(DATA.LIBRARY);
+            break;
+        case "delete":
+            Library.DeleteFiles(filePath);
+            break;
+        case "save":
+            Library.SaveFile(filePath, fileContent);
+            break;
+    }
+
     const { consoleReport, referTable, AxiomStyleMap, LibraryStyleMap } = Library.Renders();
-    Object.assign(PUBLISH.StyleMap.axiom, AxiomStyleMap);
-    Object.assign(PUBLISH.StyleMap.library, LibraryStyleMap);
-    Object.assign(PUBLISH.StyleMap.file, referTable);
+    PUBLISH.StyleMap.axiom = AxiomStyleMap;
+    PUBLISH.StyleMap.library = LibraryStyleMap;
+    PUBLISH.StyleMap.file = referTable;
     PUBLISH.Report.library = $.MOLD.std.Block(consoleReport);
 }
+
 // On shorthands edit.
 export function UpdateShorthands() {
     const shorthandResponse = shorthandJS.UPLOAD(DATA.SHORTHAND)
     PUBLISH.StyleMap.shorthands = shorthandResponse.list;
     PUBLISH.Report.shorthand = shorthandResponse.report;
 }
+
 // On target files edit.
-export async function ProcessProxies() {
-    ProxyTargets.forEach(proxy => { proxy.cache = new Proxy(proxy); });
+export async function ProcessProxies(action = "upload", targetFolder, filePath, fileContent) {
+    switch (action) {
+        case "upload":
+            Object.values(ProxyTargets).forEach(proxy => { proxy.cache = new Proxy(proxy); });
+            break;
+        case "delete":
+            ProxyTargets[targetFolder].cache.DeleteFile(filePath)
+            break;
+        case "save":
+            ProxyTargets[targetFolder].cache.SaveFile(filePath, fileContent);
+            break;
+        case "stylesheet":
+            ProxyTargets[targetFolder].cache.SaveFile(filePath, fileContent);
+            break;
+    }
+
     GenAccumulates();
 
     let finalMessage;
@@ -239,10 +112,10 @@ export async function ProcessProxies() {
 }
 
 const RENDER = {
-    axiom: () => {
+    index: () => {
         const CSSIndexScanned = (STYLE.XCANNER(cleaner.uncomment.Css(DATA.CSSIndex), "xtyles", "AXIOM"));
         RENDERFRAGS.INDEX = COMPILE(CSSIndexScanned.styles);
-        PUBLISH.StyleMap.variables = Utils.array.setback(CSSIndexScanned.variables);
+        PUBLISH.StyleMap.variables = Use.array.setback(CSSIndexScanned.variables);
         REPORT.variables = $.MOLD.primary.Section("Root variables", PUBLISH.StyleMap.variables, $.list.secondary.Entries);
     },
     binds: () => {
@@ -274,31 +147,29 @@ const RENDER = {
 export async function GenerateFinal() {
 
     // Render stylesheet
-    RENDERFRAGS.RENDERED = COMPILE(MIDWAY.FINALS);
-
 
     // Finalize
     const FinalStylesheet = Object.values(RENDERFRAGS).join(ENV.devMode ? "\n" : "");
-    ProxyTargets.forEach(proxy => { FILESOUT[proxy.cache.sourceStylesheet] = FinalStylesheet; });
+    ProxyTargets.forEach(proxy => { PUBLISH.FinalFiles[proxy.cache.sourceStylesheet] = FinalStylesheet; });
 
-    if (CMD === "dev") {
-        FILESOUT[NAV.json.styleMap] = JSON.stringify(PUBLISH.StyleMap);
-        FILESOUT[NAV.json.switchMap] = JSON.stringify(PUBLISH.SwitchMap);
+    if (DATA.CMD === "dev") {
+        PUBLISH.FinalFiles[NAV.json.styleMap] = JSON.stringify(PUBLISH.StyleMap);
+        PUBLISH.FinalFiles[NAV.json.switchMap] = JSON.stringify(PUBLISH.SwitchMap);
     } else {
         const memChart = {
-            Index: Utils.string.stringMem(RENDERFRAGS.INDEX),
-            Essentials: Utils.string.stringMem(RENDERFRAGS.ESSENTIALS),
-            Prebinds: Utils.string.stringMem(RENDERFRAGS.PREBINDS),
-            Rendered: Utils.string.stringMem(RENDERFRAGS.RENDERED),
-            Postbinds: Utils.string.stringMem(RENDERFRAGS.POSTBINDS),
-            Appendix: Utils.string.stringMem(RENDERFRAGS.APPENDIX),
+            Index: Use.string.stringMem(RENDERFRAGS.INDEX),
+            Essentials: Use.string.stringMem(RENDERFRAGS.ESSENTIALS),
+            Prebinds: Use.string.stringMem(RENDERFRAGS.PREBINDS),
+            Rendered: Use.string.stringMem(RENDERFRAGS.RENDERED),
+            Postbinds: Use.string.stringMem(RENDERFRAGS.POSTBINDS),
+            Appendix: Use.string.stringMem(RENDERFRAGS.APPENDIX),
         }
-        STASH.ConsoleReport.push($.MOLD[ACUM.errors.length ? "failed" : "success"].Section(finalMessage, memChart, $.list.std.Props))
-        STASH.ConsoleReport.push($.MOLD.std.Footer('Output size : ' + Object.values(memChart).reduce((M, I) => I + M, 0)))
+        // STASH.ConsoleReport.push($.MOLD[ACUM.errors.length ? "failed" : "success"].Section(finalMessage, Object.entries(memChart), $.list.std.Props))
+        // STASH.ConsoleReport.push($.MOLD.std.Footer('Output size : ' + Object.values(memChart).reduce((M, I) => I + M, 0)))
     }
 
     return {
-        files: FILESOUT,
+        files: PUBLISH.FinalFiles,
         errors: $.MOLD.std.Block(PUBLISH.ConsoleErrors),
         report: $.MOLD.std.Block(STASH.ConsoleReport)
     };

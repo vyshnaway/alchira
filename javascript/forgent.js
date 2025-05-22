@@ -1,5 +1,5 @@
 import Utils from "./Utils/index.js"
-import { STASH } from "./craftsmen.js";
+import { STASH } from "./data-cache.js";
 
 function styleSwitch(object) {
     const switched = Utils.object.switch(object);

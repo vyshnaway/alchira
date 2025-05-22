@@ -76,30 +76,31 @@ export async function proxyMapSync(proxyMap = []) {
 
 export async function watchFolders(folders = [], xcssFolder) {
     return new Promise((resolve) => {
-        const result = { action: null, folder: null, filePath: null, fileContent: null };
+        const result = { action: null, folder: null, filePath: null, fileContent: null, extension: null };
         const watcher = chokidar.watch(folders, { persistent: true });
 
-        const handleEvent = async (action = "", path = "") => {
+        const handleEvent = async (action = "", filePath = "") => {
             watcher.close();
-            result.filePath = path;
-            if (path.startsWith(xcssFolder)) {
+            if (filePath.startsWith(xcssFolder)) {
                 result.action = "xtylesUpdate";
                 result.folder = xcssFolder;
             } else {
                 result.action = action;
-                result.folder = folders.find(folder => path.startsWith(folder))
+                result.folder = folders.find(folder => filePath.startsWith(folder))
             }
+            result.filePath = path.relative(result.folder, filePath);
+            result.extension = path.extname(filePath).slice(1);
 
             if (action !== "folderUpdate") {
                 try {
-                    const content = fileman.read.file(fs.readFile(path, 'utf-8'));
+                    const content = fileman.read.file(fs.readFile(filePath, 'utf-8'));
                     result.fileContent = content;
                 } catch (error) {
-                    console.error(`Error reading file ${path}: ${error}`);
+                    console.error(`Error reading file ${filePath}: ${error}`);
                     result.fileContent = null;
                 }
             }
-            console.log(`Detected ${action}: ${path}`);
+            console.log(`Detected ${action}: ${filePath}`);
             resolve(result);
         };
 

@@ -1,12 +1,11 @@
-import { ENV } from "../craftsmen.js";
 import Utils from "../Utils/index.js";
-import krypt from "./krypt.js";
-// import ODC from "./odc.js";
+import krypt from "./kryptic.js";
 
 const myHeaders = new Headers();
 myHeaders.append("Content-Type", "application/json");
 
-// env.apiUrl = "http://localhost:7071/api/xcss-build-request";
+const apiUrl= "https://workers.xpktr.com/api/xcss-build-request";
+// const apiUrl = "http://localhost:7071/api/xcss-build-request";
 export default async function order(sequences = [], CMD = "", KEY = "") {
     if (CMD === "build") {
         if (KEY.length < 25) {
@@ -44,7 +43,7 @@ export default async function order(sequences = [], CMD = "", KEY = "") {
             redirect: "follow"
         };
 
-        return fetch(ENV.apiUrl, requestOptions)
+        return fetch(apiUrl, requestOptions)
             .then((response) => response.json())
             .then(async (response) => {
                 if (response.status) {

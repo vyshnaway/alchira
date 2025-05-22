@@ -25,6 +25,7 @@ export default function libFinder(target, source, filePath, content, prefix = fa
             extension,
             targetPath,
             sourcePath,
+            usedIndexes: new Set(),
             metaFront: (prefix ? `${axiom ? "AXIOM-level" : "LEVEL"}-${level}` + ((library ?? "").length > 0 ? `_${library}` : ``) : "") + `__${normalPath}_`,
             content: uncomment ? cleaner.uncomment.Css(content) : content,
         },

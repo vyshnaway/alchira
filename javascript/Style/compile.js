@@ -1,8 +1,13 @@
-import U from "../Utils/index.js"
-import { LISTEDPREFIX, ENV, STASH } from "../craftsmen.js";
+import Use from "../Utils/index.js"
+
+export const LISTEDPREFIX = {
+    atRule: {},
+    selector: {},
+    property: {},
+}
 
 function getSelectorPrefixes(content = "", prefixes = ["webkit", "moz", "ms", "o"]) {
-    const stringList = U.string.zeroBreaks(content, [","]).map(i => i.trim()), selectors = [];
+    const stringList = Use.string.zeroBreaks(content, [","]).map(i => i.trim()), selectors = [];
 
     stringList.forEach((string = "") => {
         const result = {
@@ -106,8 +111,7 @@ function unNester(selector = "", object = {}) {
     return { nests, selector, result }
 }
 
-function objectCompose(object, prefixes = ["webkit", "moz", "ms", "o"]) {
-    const minify = !ENV.devMode;
+function objectCompose(object, minify = false, prefixes = ["webkit", "moz", "ms", "o"]) {
     const tab = minify ? "" : "  ", space = minify ? "" : " ";
     let styleSheet = [];
 
@@ -135,8 +139,7 @@ function objectCompose(object, prefixes = ["webkit", "moz", "ms", "o"]) {
     return styleSheet
 }
 
-export default function arrayCompose(array, prefixes = ["webkit", "moz", "ms", "o"]) {
-    const minify = !ENV.devMode;
+export default function arrayCompose(array, minify = false, prefixes = ["webkit", "moz", "ms", "o"]) {
     const tab = minify ? "" : "  ", space = minify ? "" : " ", br = "";
     let styleSheet = [];
     array.forEach(([key, value]) => {
@@ -146,9 +149,9 @@ export default function arrayCompose(array, prefixes = ["webkit", "moz", "ms", "
                 const subObject = propListBuild(newValue);
                 if (newKey[0] === "@") {
                     const selectors = Object.entries(getAtRulePrefixes(newKey, prefixes));
-                    selectors.forEach(([group, selector]) => styleSheet.push(br, selector, "{", ...objectCompose(subObject, [group]).map(i => tab + i), "}"));
+                    selectors.forEach(([group, selector]) => styleSheet.push(br, selector, "{", ...objectCompose(subObject, minify = false, [group]).map(i => tab + i), "}"));
                 } else {
-                    styleSheet.push(br, ...getSelectorPrefixes(newKey, prefixes), "{", ...objectCompose(subObject, prefixes).map(i => tab + i), "}");
+                    styleSheet.push(br, ...getSelectorPrefixes(newKey, prefixes), "{", ...objectCompose(subObject, minify = false, prefixes).map(i => tab + i), "}");
                 }
             }
             else {

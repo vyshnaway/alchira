@@ -1,22 +1,18 @@
-import Utils from "../Utils/index.js";
-import { cursor } from "./file.js"
-import { STASH, MIDWAY, MakeStyle } from "../craftsmen.js"
+import Use from "../Utils/index.js";
+import { STASH, DECLARESTYLE } from "../data-cache.js"
+import { FileCursor, StyleStack } from "./file.js"
 
-function loadActiveIndexes(classList = [], filePath) {
+function loadActiveIndexes(classList = []) {
     return classList.reduce((A, entry) => {
-        const index = (STASH.LibraryStyle2Index[entry] ?? 0) +
-            (STASH.GlobalsStyle2Index[entry] ?? 0) +
-            ((STASH.styleLocals[filePath] && STASH.styleLocals[filePath][entry]) ?? 0)
+        const index = (StyleStack.Library[entry] ?? 0) + (StyleStack.Global[entry] ?? 0) + ((StyleStack.Local[entry]) ?? 0);
         if (index) A.push(index);
-
         return A;
     }, [])
 }
 
 function loadActiveStyles(classList) {
-    return Utils.object.multiMerge(classList.reduce((A, index) => {
+    return Use.object.multiMerge(classList.reduce((A, index) => {
         A.push(STASH.Index2StylesObject[index].object);
-
         return A;
     }, []), true)
 }
@@ -46,10 +42,10 @@ export default function classExtract(string, action, fileData) {
     }
 
     if (action !== "read") {
-        const metaFront = "TAG-" + cursor.tagCount + "" + fileData.metaFront + "_";
+        const metaFront = "TAG-" + FileCursor.tagCount + "" + fileData.metaFront + "_";
         activeQuote = "", entry = "", scribed = "", marker = 0, inQuote = false, ch = string[marker];
         const activeIndexes = (action === "dev") ? [] :
-            Utils.array.longestSubChain(STASH.SortedIndexes, loadActiveIndexes(Utils.array.setback(classList), fileData.filePath));
+            Use.array.longestSubChain(STASH.SortedIndexes, loadActiveIndexes(Use.array.setback(classList), fileData.filePath));
         const activeStyles = loadActiveStyles(activeIndexes);
 
         while (ch !== undefined) {
@@ -70,22 +66,21 @@ export default function classExtract(string, action, fileData) {
                         // if (!(className[0] === "-" || /\$-/.test(className)))
                         //     scribed += className;
                     } else {
-                        const index = (STASH.LibraryStyle2Index[entry] ?? 0) +
-                            (STASH.GlobalsStyle2Index[entry] ?? 0) +
-                            ((STASH.styleLocals[fileData.filePath] && STASH.styleLocals[fileData.filePath][entry]) ?? 0);
+                        const index = (StyleStack.Library[entry] ?? 0) + (StyleStack.Global[entry] ?? 0) + ((StyleStack.Local[entry]) ?? 0);
                         if (index) {
                             switch (action) {
                                 case "dev":
                                     const devClass = metaFront + STASH.Index2StylesObject[index].metaClass;
                                     scribed += devClass;
-                                    MIDWAY.RENDERS["." + devClass] = index;
+                                    STASH.Midway.Finals["." + devClass] = index;
                                     break;
                                 case "preview":
                                     if (activeIndexes.includes(index)) {
                                         scribed += STASH.Index2StylesObject[index].class;
                                     } else {
-                                        const identity = MakeStyle();
-                                        MIDWAY.RENDERS["." + identity.class] = index;
+                                        const identity = DECLARESTYLE();
+                                        fileData.usedIndexes.add(identity.number);
+                                        STASH.Midway.Finals["." + identity.class] = index;
                                         scribed += identity.class;
                                     }
                                     break;
@@ -93,14 +88,15 @@ export default function classExtract(string, action, fileData) {
                                     if (activeIndexes.includes(index)) {
                                         scribed += STASH.Index2StylesObject[index].class;
                                     } else {
-                                        const deltaStyles = Utils.object.onlyB(activeStyles, STASH.Index2StylesObject[index].object);
+                                        const deltaStyles = Use.object.onlyB(activeStyles, STASH.Index2StylesObject[index].object);
                                         if (deltaStyles.score) scribed += STASH.Index2StylesObject[index].class;
                                         else {
-                                            const identity = MakeStyle();
+                                            const identity = DECLARESTYLE();
+                                            fileData.usedIndexes.add(identity.number);
                                             scribed += identity.class;
                                             console.log()
                                             STASH.Index2StylesObject["." + identity.class] = deltaStyles.result;
-                                            MIDWAY.RENDERS[className] = index;
+                                            STASH.Midway.Finals[className] = index;
                                         }
                                     }
                                     break;

@@ -2,6 +2,7 @@ import $ from "./Shell/index.js";
 import STYLE from "./Style/parse.js";
 import Utils from "./Utils/index.js";
 import LibSetter from "./Worker/lib-setter.js";
+import { STASH, UnresIndexes } from "./data-cache.js";
 
 const files = {};
 
@@ -28,41 +29,53 @@ function _accumulator() {
 
 
 function UploadFiles(FileContents = {}) {
+    ClearStash();
     Object.entries(FileContents).forEach(([filePath, fileContent]) => {
-        if (files[filePath]) DeleteFile(filePath);
-        files[filePath] = LibSetter("", "", filePath, fileContent, true, true);
+        files[filePath] = SaveFile(filePath, fileContent);
     })
 }
 
 function ClearStash() {
-    Object.keys(files).forEach(filePath => delete this.fileCache[filePath]);
+    DeleteFiles(Object.keys(files));
 }
 
-function DeleteFile(filePath) {
-    delete this.fileCache[filePath];
+function _returnUsedIndexes(filePath) {
+    filePath.data.usedIndexes.forEach(index => {
+        UnresIndexes.push(index);
+        delete STASH.Index2StylesObject[index];
+    })
 }
 
-function AddFile(filePath, fileContent) {
-    if (files[filePath]) DeleteFile(filePath);
+function DeleteFiles(...filePaths) {
+    filePaths.forEach(filePath => {
+        _returnUsedIndexes(filePath);
+        delete files[filePath];
+    })
+}
+
+function SaveFile(filePath, fileContent) {
+    if (files[filePath]) DeleteFiles(filePath);
     files[filePath] = LibSetter("", "", filePath, fileContent, true, true);
 }
 
 function Renders() {
+    Object.keys(files).forEach(filePath => _returnUsedIndexes(filePath));
+
     let axiomCount = 0, libraryCount = 0;
     const consoleReport = [], axiomChart = [], libraryChart = [];
     const { referTable, axiomsArray, librariesArray } = _accumulator();
-    const AxiomStyleMap = axiomsArray.reduce((id, referLevel, index) => {
-        const classes = STYLE.CSSBULK(referLevel)
-        id[index] = classes.exclusiveStyles
-        axiomChart.push($.MOLD.secondary.Footer(`Level ${index}:  ${classes.exclusiveStyles.length} Styles`, classes.exclusiveStyles, $.list.secondary.Entries))
+    const AxiomStyleMap = axiomsArray.reduce((collection, fileData, index) => {
+        const classes = STYLE.CSSMULTI(fileData);
+        collection[index] = classes.exclusiveStyles;
+        axiomChart.push($.MOLD.secondary.Footer(`Level ${index}:  ${classes.exclusiveStyles.length} Styles`, classes.exclusiveStyles, $.list.secondary.Entries));
         axiomCount += classes.exclusiveStyles.length;
-        return id
+        return collection
     }, {});
     consoleReport.push($.MOLD.primary.Section("Axiom Index", [$.MOLD.std.Item(axiomCount + " Styles")]));
     consoleReport.push($.MOLD.success.Block(axiomChart));
 
     const LibraryStyleMap = librariesArray.reduce((id, referLevel, index) => {
-        const classes = STYLE.CSSBULK(referLevel)
+        const classes = STYLE.CSSMULTI(referLevel)
         id[index] = classes.exclusiveStyles;
         libraryChart.push($.MOLD.secondary.Footer(`Level ${index}:  ${classes.exclusiveStyles.length} Styles`, classes.exclusiveStyles, $.list.secondary.Entries));
         libraryCount += classes.exclusiveStyles.length;
@@ -76,8 +89,8 @@ function Renders() {
 
 export default {
     UploadFiles,
+    DeleteFiles,
     ClearStash,
-    DeleteFile,
-    AddFile,
+    SaveFile,
     Renders
 }

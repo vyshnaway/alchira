@@ -81,123 +81,7 @@ function bulkMerge(objectArray = [], aggressive = false, arrayMerge = false) {
         return target;
     }
 
-    // Merge all objects into a single result object
     return objectArray.reduce((result, obj) => deepMerge(structuredClone(result), obj), {});
-}
-
-function objectBoolean(objectA, objectB, onlyA = true, intersect = true, onlyB = true, notA = true, notB = true) {
-    // Result object to store all boolean operations
-    const result = {};
-
-    // Helper function to deep compare two values
-    function deepCompare(valA, valB) {
-        if (valA === valB) return true;
-        if (typeof valA !== 'object' || typeof valB !== 'object' || valA === null || valB === null) return false;
-
-        const keysA = Object.keys(valA);
-        const keysB = Object.keys(valB);
-        if (keysA.length !== keysB.length) return false;
-
-        return keysA.every(key => deepCompare(valA[key], valB[key]));
-    }
-
-    // Helper function to get all paths in an object
-    function getAllPaths(obj, currentPath = '') {
-        let paths = [];
-        for (const key in obj) {
-            const newPath = currentPath ? `${currentPath}.${key}` : key;
-            if (typeof obj[key] === 'object' && obj[key] !== null && !Array.isArray(obj[key])) {
-                paths = paths.concat(getAllPaths(obj[key], newPath));
-            } else {
-                paths.push(newPath);
-            }
-        }
-        return paths;
-    }
-
-    // Convert arrays to objects with numeric keys for consistent processing
-    function normalizeInput(obj) {
-        if (Array.isArray(obj)) {
-            return Object.fromEntries(obj.map((item, index) => [index, item]));
-        }
-        return obj;
-    }
-
-    const normalizedA = normalizeInput(objectA);
-    const normalizedB = normalizeInput(objectB);
-    const pathsA = getAllPaths(normalizedA);
-    const pathsB = getAllPaths(normalizedB);
-
-    // Only in A (A - B)
-    if (onlyA) {
-        result.onlyA = {};
-        pathsA.forEach(path => {
-            if (!pathsB.includes(path)) {
-                const value = path.split('.').reduce((acc, key) => acc[key], normalizedA);
-                setNestedValue(result.onlyA, path, value);
-            }
-        });
-    }
-
-    // Intersection (A ∩ B)
-    if (intersect) {
-        result.intersect = {};
-        pathsA.forEach(path => {
-            if (pathsB.includes(path)) {
-                const valA = path.split('.').reduce((acc, key) => acc[key], normalizedA);
-                const valB = path.split('.').reduce((acc, key) => acc[key], normalizedB);
-                if (deepCompare(valA, valB)) {
-                    setNestedValue(result.intersect, path, valA);
-                }
-            }
-        });
-    }
-
-    // Only in B (B - A)
-    if (onlyB) {
-        result.onlyB = {};
-        pathsB.forEach(path => {
-            if (!pathsA.includes(path)) {
-                const value = path.split('.').reduce((acc, key) => acc[key], normalizedB);
-                setNestedValue(result.onlyB, path, value);
-            }
-        });
-    }
-
-    // Not in A (complement of A with respect to both)
-    if (notA) {
-        result.notA = {};
-        pathsB.forEach(path => {
-            if (!pathsA.includes(path)) {
-                const value = path.split('.').reduce((acc, key) => acc[key], normalizedB);
-                setNestedValue(result.notA, path, value);
-            }
-        });
-    }
-
-    // Not in B (complement of B with respect to both)
-    if (notB) {
-        result.notB = {};
-        pathsA.forEach(path => {
-            if (!pathsB.includes(path)) {
-                const value = path.split('.').reduce((acc, key) => acc[key], normalizedA);
-                setNestedValue(result.notB, path, value);
-            }
-        });
-    }
-
-    // Helper function to set nested value
-    function setNestedValue(obj, path, value) {
-        const parts = path.split('.');
-        let current = obj;
-        for (let i = 0; i < parts.length - 1; i++) {
-            current[parts[i]] = current[parts[i]] || {};
-            current = current[parts[i]];
-        }
-        current[parts[parts.length - 1]] = value;
-    }
-
-    return result;
 }
 
 function BminusA(A = {}, B = {}) {
@@ -220,25 +104,9 @@ function BminusA(A = {}, B = {}) {
     return { result, score }
 }
 
-// console.log(BminusA({
-//     a: "b",
-//     b: "c",
-//     d: {
-//         a: "b",
-//         b: "c"
-//     }
-// }, {
-//     a: "a",
-//     d: "c",
-//     d: {
-//         b: "h"
-//     }
-// }))
-
 export default {
     onlyB: BminusA,
     switch: objectSwitch,
-    extract: objectBoolean,
     deepMerge: deepMerge,
     multiMerge: bulkMerge,
 }

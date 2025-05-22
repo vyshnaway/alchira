@@ -1,19 +1,22 @@
 import tagReader from "./tag.js";
 
-export const cursor = { marker: 0, rowMarker: 0, columnMarker: 0, tagCount: 0 };
+export const xtyleTag = "xtyle";
+export const FileCursor = { marker: 0, rowMarker: 0, columnMarker: 0, tagCount: 0 };
+export const StyleStack = { Library: {}, Local: {}, Global: {} };
 
-function scanner(fileData, classProps, action) {
-    cursor.tagCount = 1, cursor.rowMarker = 1, cursor.columnMarker = 1, cursor.marker = 0;
+export default function scanner(fileData, classProps, action, styleStack = { Library: {}, Local: {}, Global: {} }) {
+    Object.assign(StyleStack, styleStack);
+    FileCursor.tagCount = 1, FileCursor.rowMarker = 1, FileCursor.columnMarker = 1, FileCursor.marker = 0;
     const stylesList = [], classesList = [];
     let ch = fileData.content[0], reading = true, scribed = "";
 
-    while (cursor.marker < fileData.content.length) {
-        if (ch === "\n") { cursor.rowMarker++; cursor.columnMarker = 0 }
-        else cursor.columnMarker++;
+    while (FileCursor.marker < fileData.content.length) {
+        if (ch === "\n") { FileCursor.rowMarker++; FileCursor.columnMarker = 0 }
+        else FileCursor.columnMarker++;
         // console.log({ ch, cur: cursor.marker, row: cursor.rowMarker, col: cursor.columnMarker })
 
         if (ch === "<") {
-            cursor.tagCount++;
+            FileCursor.tagCount++;
             const response = tagReader(fileData.content, action, classProps, fileData);
             if (response.ok) {
                 if (Object.keys(response.styleObject.styles).length > 0)
@@ -24,27 +27,20 @@ function scanner(fileData, classProps, action) {
             reading = response.reading
         } else if (ch === '"' || ch === "'" || ch === "`") {
             const quote = ch;
-            cursor.marker++;
-            ch = fileData.content[cursor.marker];
-            while (cursor.marker < fileData.content.length && (ch !== quote || fileData.content[cursor.marker - 1] === "\\")) {
-                cursor.marker++;
-                ch = fileData.content[cursor.marker];
+            FileCursor.marker++;
+            ch = fileData.content[FileCursor.marker];
+            while (FileCursor.marker < fileData.content.length && (ch !== quote || fileData.content[FileCursor.marker - 1] === "\\")) {
+                FileCursor.marker++;
+                ch = fileData.content[FileCursor.marker];
             }
-            cursor.marker++; // Skip the closing quote
+            FileCursor.marker++; // Skip the closing quote
         } else {
-            scribed += ch; 
-            cursor.marker++
+            scribed += ch;
+            FileCursor.marker++
         }
 
-        ch = fileData.content[cursor.marker]
+        ch = fileData.content[FileCursor.marker]
     }
 
     return { scribed, classesList, stylesList }
-}
-
-export default {
-    read: (fileData, classProps) => scanner(fileData, classProps, "read"),
-    dev: (fileData, classProps) => scanner(fileData, classProps, "dev"),
-    preview: (fileData, classProps) => scanner(fileData, classProps, "preview"),
-    build: (fileData, classProps) => scanner(fileData, classProps, "build"),
 }

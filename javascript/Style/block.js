@@ -1,4 +1,4 @@
-import U from "../Utils/index.js"
+import Use from "../Utils/index.js"
 
 const OPEN_CHARS = ['{', '[', '('];
 const CLOSE_CHARS = ['}', ']', ')'];
@@ -57,12 +57,12 @@ export default function parseBlock(content, blockArrays = false) {
                 switch (ch) {
                     case '{': isProp = false;
                     case ':':
-                        key = U.string.minify(content.slice(keyStart, index));
+                        key = Use.string.minify(content.slice(keyStart, index));
                         valStart = index + 1;
                         break;
                     case '}':
                     case ';':
-                        const value = U.string.minify(content.slice(valStart, index));
+                        const value = Use.string.minify(content.slice(valStart, index));
                         if (isProp) {
                             if (key.length > 0) {
                                 if (key.startsWith("--"))
@@ -74,23 +74,23 @@ export default function parseBlock(content, blockArrays = false) {
                                 const directive = value.slice(0, spaceIndex);
                                 switch (directive) {
                                     case "@bind":
-                                        result.binds.push(...U.string.zeroBreaks(value.slice(spaceIndex)));
+                                        result.binds.push(...Use.string.zeroBreaks(value.slice(spaceIndex)));
                                         break;
                                     case "@pre-bind":
-                                        result.preBinds.push(...U.string.zeroBreaks(value.slice(spaceIndex)));
+                                        result.preBinds.push(...Use.string.zeroBreaks(value.slice(spaceIndex)));
                                         break;
                                     case "@post-bind":
-                                        result.postBinds.push(...U.string.zeroBreaks(value.slice(spaceIndex)));
+                                        result.postBinds.push(...Use.string.zeroBreaks(value.slice(spaceIndex)));
                                         break;
                                     case "@assemble":
-                                        result.adds.push(...U.string.zeroBreaks(value.slice(spaceIndex)));
+                                        result.adds.push(...Use.string.zeroBreaks(value.slice(spaceIndex)));
                                         break;
                                     default:
                                         result.atProps[value] = "";
                                         if (blockArrays) result.XatProps.push([value, ""]);
                                 }
                             } else {
-                                const breaks = U.string.zeroBreaks(value);
+                                const breaks = Use.string.zeroBreaks(value);
                                 const groupMap = { "<": "preBinds", ">": "postBinds", "+": "adds", "*": "binds" };
                                 const group = groupMap[breaks[0]] || "adds";
                                 if (Object.keys(groupMap).includes(breaks[0])) breaks.shift();

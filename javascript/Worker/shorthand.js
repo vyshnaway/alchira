@@ -1,5 +1,5 @@
 import $ from '../Shell/index.js';
-import { STASH } from '../craftsmen.js';
+import { STASH } from '../data-cache.js';
 
 const hashPattern = /\{#[a-z0-9]+\}/i;
 const preHashPattern = /(?<!\{)#\w+/g;
