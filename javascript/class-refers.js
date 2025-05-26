@@ -2,7 +2,7 @@ import $ from "./Shell/index.js";
 import STYLE from "./Style/parse.js";
 import Utils from "./Utils/index.js";
 import LibSetter from "./Worker/lib-setter.js";
-import { STASH, UnresIndexes } from "./data-cache.js";
+import { STYLEIN } from "./data-cache.js";
 
 const files = {};
 
@@ -27,36 +27,42 @@ function _accumulator() {
     return { referTable, axiomsArray, librariesArray }
 }
 
+function _returnUsedIndexes(filePath) {
+    STYLEIN.DISPOSE(...files[filePath].data.usedIndexes)
+}
 
-function UploadFiles(FileContents = {}) {
-    ClearStash();
-    Object.entries(FileContents).forEach(([filePath, fileContent]) => {
-        files[filePath] = SaveFile(filePath, fileContent);
-    })
+
+
+function DeleteFile(filePath) {
+    if (files[filePath]) {
+        _returnUsedIndexes(filePath);
+        delete files[filePath];
+    }
+
 }
 
 function ClearStash() {
-    DeleteFiles(Object.keys(files));
+    Object.keys(files).forEach(filePath => DeleteFile(filePath));
+
 }
 
-function _returnUsedIndexes(filePath) {
-    filePath.data.usedIndexes.forEach(index => {
-        UnresIndexes.push(index);
-        delete STASH.Index2StylesObject[index];
-    })
-}
 
-function DeleteFiles(...filePaths) {
-    filePaths.forEach(filePath => {
-        _returnUsedIndexes(filePath);
-        delete files[filePath];
+
+function UploadFiles(FileContents = {}) {
+    ClearStash();
+
+    Object.entries(FileContents).forEach(([filePath, fileContent]) => {
+        SaveFile(filePath, fileContent);
     })
+
 }
 
 function SaveFile(filePath, fileContent) {
-    if (files[filePath]) DeleteFiles(filePath);
+    if (files[filePath]) DeleteFile(filePath);
     files[filePath] = LibSetter("", "", filePath, fileContent, true, true);
 }
+
+
 
 function Renders() {
     Object.keys(files).forEach(filePath => _returnUsedIndexes(filePath));
@@ -89,7 +95,7 @@ function Renders() {
 
 export default {
     UploadFiles,
-    DeleteFiles,
+    DeleteFile,
     ClearStash,
     SaveFile,
     Renders

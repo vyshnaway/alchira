@@ -14,7 +14,7 @@ export default {
         let lastCh = ' ';
 
         for (let i = 0; i < length; i++) {
-            const ch = (string[i] === '\n') ? ' ' : string[i];
+            const ch = (string[i] === '\n' || string[i] === '\r' || string[i] === '\t') ? ' ' : string[i];
 
             if (ch === ' ' && lastCh !== ' ') {
                 result.push(ch);

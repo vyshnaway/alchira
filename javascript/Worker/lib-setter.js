@@ -21,8 +21,8 @@ export default function libFinder(target, source, filePath, content, prefix = fa
         data: {
             stamp,
             fileName,
-            filePath,
             extension,
+            filePath,
             targetPath,
             sourcePath,
             usedIndexes: new Set(),

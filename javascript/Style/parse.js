@@ -1,28 +1,30 @@
 import Use from "../Utils/index.js";
 import READS from "./block.js";
 import SHORTHAND from "../Worker/shorthand.js";
-import { STASH, ENV, DECLARESTYLE } from "../data-cache.js";
+import { STASH, ENV, DECLARESTYLE, STYLEIN } from "../data-cache.js";
 
 function xtylemerge(classList = []) {
-    return classList.reduce((A, className) => {
+    let result = {}, preBinds = [], postBinds = [];
+    classList.forEach((className) => {
         const index = STASH.LibraryStyle2Index[className];
         if (index) {
-            A = Use.object.multiMerge([A, STASH.Index2StylesObject[index].object[""]], true);
+            const found = STASH.Index2StylesObject[index];
+            preBinds.push(...found.preBinds)
+            postBinds.push(...found.postBinds)
+            result = Use.object.multiMerge([result, found.object[""]], true);
         }
-        return A
-    }, {})
+    })
+    return { result, preBinds, postBinds }
 };
 
 function SCANNER(content, filePath, sourceSelector) {
     const response = READS(content);
     const variables = response.variables;
-    const merged = xtylemerge(response.adds);
-    const preBinds = response.preBinds, postBinds = response.postBinds;
+    const merged = xtylemerge(response.assemble);
+    const preBinds = [...merged.preBinds, ...response.preBinds],
+        postBinds = [...merged.postBinds, ...response.postBinds];
 
-    response.binds.forEach(bind => /(^-|\$-)/.test(bind) ?
-        preBinds.push(bind) : postBinds.push(bind))
-
-    const styles = Use.object.deepMerge(merged, {
+    const styles = Use.object.deepMerge(merged.result, {
         ...Object.entries(response.atProps).reduce((acc, [propKey, propValue]) => {
             acc[propKey] = ENV.devMode ? `${propValue} /* [${sourceSelector}] FROM [${filePath}] */` : propValue;
             return acc;
@@ -33,29 +35,18 @@ function SCANNER(content, filePath, sourceSelector) {
         }, {})
     });
 
-    Object.assign(styles, Use.object.deepMerge(merged, {
-        ...Object.entries(response.atProps).reduce((acc, [propKey, propValue]) => {
-            acc[propKey] = ENV.devMode ? `${propValue} /* [${sourceSelector}] FROM [${filePath}] */` : propValue;
-            return acc;
-        }, {}),
-        ...Object.entries(response.properties).reduce((acc, [propKey, propValue]) => {
-            acc[propKey] = ENV.devMode ? `${propValue} /* [${sourceSelector}] FROM [${filePath}] */` : propValue;
-            return acc;
-        }, {})
-    }))
-
     for (let selector in response.allBlocks) {
         const result = SCANNER(response.allBlocks[selector], filePath, sourceSelector + " -> " + selector)
         variables.push(...result.variables);
         preBinds.push(...result.preBinds)
         postBinds.push(...result.postBinds)
-        styles[selector] = result.styles
+        styles[selector] = result.styles;
     }
 
     return { preBinds, postBinds, styles, variables }
 }
 
-function XCANNER(content, filePath, sourceSelector) {
+function CSSCANNER(content, filePath, sourceSelector) {
     const variables = [];
     const response = READS(content, true);
     const styles = response.XatProps;
@@ -99,7 +90,6 @@ function CSSMULTI(fileDatas = []) {
             }
         }
     })
-
     for (const selector in selectors) {
         STASH.Index2StylesObject[selectors[selector].index] = selectors[selector].data;
         STASH.LibraryStyle2Index[selector] = selectors[selector].index;
@@ -110,12 +100,12 @@ function CSSMULTI(fileDatas = []) {
 
 function TAGSTYLE({ isGlobal, selector, styles, rowMarker, columnMarker }, metaFront, filePath) {
     const metaClass = (isGlobal ? "GLOBAL" : "LOCAL") + metaFront + `R${rowMarker}C${columnMarker}__` + Use.string.normalize(selector);
-    const compiled = {}, preBinds = [], postBinds = [], errors = [], CLX = DECLARESTYLE(), essentials = [];
+    const compiled = {}, preBinds = [], postBinds = [], errors = [], essentials = [];
 
     for (let subSelector in styles) {
         const query = SHORTHAND.RENDER(subSelector);
         if (!query.status) errors.push(query.error)
-        const styleObj = SCANNER(styles[subSelector], filePath, subSelector === "" ? selector : `${selector} => ${subSelector}`)
+        const styleObj = SCANNER(styles[subSelector], filePath, subSelector === "" ? selector : `${selector} => ${subSelector}`);
         postBinds.push(...styleObj.postBinds)
         preBinds.push(...styleObj.preBinds)
 
@@ -146,6 +136,7 @@ function TAGSTYLE({ isGlobal, selector, styles, rowMarker, columnMarker }, metaF
             essentials.push([key, value]);
         })
     } else {
+        const CLX = DECLARESTYLE()
         STASH.Index2StylesObject[CLX.number] = {
             class: CLX.class,
             scope: isGlobal,
@@ -156,12 +147,11 @@ function TAGSTYLE({ isGlobal, selector, styles, rowMarker, columnMarker }, metaF
             object: compiled
         }
     }
-
-    return { index: ENV.styleCount, errors, essentials, preBinds, postBinds };
+    return { isEssentials: selector === "", index: STYLEIN.NOW, errors, essentials, preBinds, postBinds };
 }
 
 export default {
-    XCANNER,
+    CSSCANNER,
     CSSMULTI,
     TAGSTYLE
 }

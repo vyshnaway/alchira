@@ -8,7 +8,7 @@ import FORGE from "./forgent.js";
 import ORGANIZER from "./Worker/order-api.js";
 import { DATA, NAV } from "./data-meta.js";
 import Proxy from "./class-proxy.js";
-import Library from "./class-refers.js";
+import Refers from "./class-refers.js";
 import {
     ENV,
     STASH,
@@ -16,7 +16,6 @@ import {
     RENDERFRAGS,
     CUMULATES,
     ProxyTargets,
-    UnresIndexes,
     DECLARESTYLE,
     GenAccumulates,
     Initialize,
@@ -26,20 +25,13 @@ import {
 // On library edit.
 export function UpdateLibrary(action = "upload", filePath, fileContent) {
     ResetCache();
-
     switch (action) {
-        case "upload":
-            Library.UploadFiles(DATA.LIBRARY);
-            break;
-        case "delete":
-            Library.DeleteFiles(filePath);
-            break;
-        case "save":
-            Library.SaveFile(filePath, fileContent);
-            break;
+        case "upload": Refers.UploadFiles(DATA.LIBRARY); break;
+        case "delete": Refers.DeleteFile(filePath); break;
+        case "save": Refers.SaveFile(filePath, fileContent); break;
     }
 
-    const { consoleReport, referTable, AxiomStyleMap, LibraryStyleMap } = Library.Renders();
+    const { consoleReport, referTable, AxiomStyleMap, LibraryStyleMap } = Refers.Renders();
     PUBLISH.StyleMap.axiom = AxiomStyleMap;
     PUBLISH.StyleMap.library = LibraryStyleMap;
     PUBLISH.StyleMap.file = referTable;
@@ -55,21 +47,21 @@ export function UpdateShorthands() {
 
 // On target files edit.
 export async function ProcessProxies(action = "upload", targetFolder, filePath, fileContent) {
+    const subPath = action !== "upload" ? filePath.slice(targetFolder.length + 1) : "";
     switch (action) {
         case "upload":
             Object.values(ProxyTargets).forEach(proxy => { proxy.cache = new Proxy(proxy); });
             break;
         case "delete":
-            ProxyTargets[targetFolder].cache.DeleteFile(filePath)
+            delete ProxyTargets.fileContents[subPath];
+            ProxyTargets[targetFolder].cache.DeleteFile(filePath);
             break;
         case "save":
-            ProxyTargets[targetFolder].cache.SaveFile(filePath, fileContent);
-            break;
-        case "stylesheet":
-            ProxyTargets[targetFolder].cache.SaveFile(filePath, fileContent);
+            ProxyTargets.fileContents[subPath] = fileContent;
+            ProxyTargets[targetFolder].cache.SaveFile(subPath, fileContent);
             break;
     }
-
+    // console.log(Object.values(ProxyTargets.xrc.cache.fileCache)[0])
     GenAccumulates();
 
     let finalMessage;
@@ -98,8 +90,8 @@ export async function ProcessProxies(action = "upload", targetFolder, filePath, 
 
         if (output.status) {
             output.result.forEach(I => {
-                STASH.Index2StylesObject[I].preBinds.forEach(E => lists.FinalPostBinds.add(E))
-                STASH.Index2StylesObject[I].postBinds.forEach(E => lists.FinalPreBinds.add(E))
+                // STASH.Index2StylesObject[I].preBinds.forEach(E => lists.FinalPostBinds.add(E))
+                // STASH.Index2StylesObject[I].postBinds.forEach(E => lists.FinalPreBinds.add(E))
                 STASH.Midway.Finals["." + STASH.Index2StylesObject[I].class] = I;
             });
         } else DATA.CMD = "preview";
@@ -113,7 +105,7 @@ export async function ProcessProxies(action = "upload", targetFolder, filePath, 
 
 const RENDER = {
     index: () => {
-        const CSSIndexScanned = (STYLE.XCANNER(cleaner.uncomment.Css(DATA.CSSIndex), "xtyles", "AXIOM"));
+        const CSSIndexScanned = (STYLE.CSSCANNER(cleaner.uncomment.Css(DATA.CSSIndex), "xtyles", "AXIOM"));
         RENDERFRAGS.INDEX = COMPILE(CSSIndexScanned.styles);
         PUBLISH.StyleMap.variables = Use.array.setback(CSSIndexScanned.variables);
         REPORT.variables = $.MOLD.primary.Section("Root variables", PUBLISH.StyleMap.variables, $.list.secondary.Entries);
@@ -127,13 +119,13 @@ const RENDER = {
         RENDERFRAGS.POSTBINDS = COMPILE(postBinds);
     },
     appendix: () => {
-        const CSSAppendixScanned = (STYLE.XCANNER(cleaner.uncomment.Css(CSSAppendix), `${TARGET}/${CSSPath}`, "APPENDIX"));
+        const CSSAppendixScanned = (STYLE.CSSCANNER(cleaner.uncomment.Css(CSSAppendix), `${TARGET}/${CSSPath}`, "APPENDIX"));
         CSSAppendixScanned.preBinds.forEach(E => lists.FinalPreBinds.add(E));
         CSSAppendixScanned.postBinds.forEach(E => lists.FinalPostBinds.add(E));
         RENDERFRAGS.APPENDIX = COMPILE(ProxyTargets.reduce((accum, proxy) => {
             scanned.preBinds.forEach(bind => STASH.FinalPreBinds.add(bind));
             scanned.postBinds.forEach(bind => STASH.FinalPostBinds.add(bind));
-            const scanned = STYLE.XCANNER(cleaner.uncomment.Css(proxy.stylesheetContent), proxy.cache.targetStylesheet, "APPENDIX");
+            const scanned = STYLE.CSSCANNER(cleaner.uncomment.Css(proxy.stylesheetContent), proxy.cache.targetStylesheet, "APPENDIX");
             accum.push(...scanned.styles);
             return accum;
         }, []));

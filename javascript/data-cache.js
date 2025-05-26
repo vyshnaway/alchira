@@ -5,7 +5,6 @@ import Library from "./class-refers.js";
 
 export const ENV = {
     styleTag: "xtyle",
-    styleCount: 0,
     devMode: true,
     unSpaced: true,
 }
@@ -69,11 +68,24 @@ export const CUMULATES = {
 };
 
 export const ProxyTargets = {};
-export const UnresIndexes = [];
 
-export function DECLARESTYLE() {
-    const number = UnresIndexes.length ? ENV.unresIndexes.pop() : ++ENV.styleCount;
-    return { number, class: "_" + Use.string.enCounter(number + 768) }
+export const STYLEIN = {
+    NOW: 0,
+    BIN: [],
+    DECLARE: () => {
+        const number = STYLEIN.BIN.length ? STYLEIN.BIN.pop() : ++STYLEIN.NOW;
+        return { number, class: "_" + Use.string.enCounter(number + 768) };
+    }, 
+    DISPOSE: (...indexes) => {
+        indexes.forEach(index => {
+            STYLEIN.BIN.push(index);
+            delete STASH.Index2StylesObject[index];
+        })
+    },
+    RESET: () => {
+        STYLEIN.NOW = 0;
+        Object.keys(STASH.Index2StylesObject).forEach(key => delete STASH.Index2StylesObject(key))
+    }
 }
 
 export function Initialize() {
@@ -122,9 +134,7 @@ export function ResetCache() {
         },
     });
 
-    ENV.styleCount = 0;
-    UnresIndexes.length = 0;
-
+    STYLEIN.RESET();
     Library.ClearStash();
 }
 

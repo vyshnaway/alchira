@@ -4,7 +4,7 @@ import * as ACTION from './actions.js';
 import * as CRAFT from './craftsmen.js';
 import * as CACHE from './data-cache.js';
 import * as watcher from '../interface/watcher.js';
-import Library from "./class-library.js";
+import Library from "./class-refers.js";
 import fileman from '../interface/fileman.js';
 import SETDATA, { ROOT, APP, DATA, NAV } from './data-meta.js';
 
@@ -32,7 +32,6 @@ const executes = async (isDev = false, backRows = 0) => {
 }
 
 async function execute(step = "Initialize") {
-
     do {
         switch (step) {
             case "Initialize":
@@ -41,25 +40,20 @@ async function execute(step = "Initialize") {
 
             case "VerifySetupStruct":
                 const verifyStructResult = await COLLECT.Step0_VerifySetupStruct();
-                if (!verifyStructResult.proceed) {
-                    $.POST(verifyStructResult.report);
-                    break;
-                }
+                if (!verifyStructResult.proceed) { $.POST(verifyStructResult.report); break; }
             case "VerifyProxyMap":
                 const verifyConfigsResult = await COLLECT.Step1_VerifyProxyMap();
-                if (verifyConfigsResult.status) {
-                    $.POST(verifyConfigsResult.report);
-                    break;
-                }
+                if (!verifyConfigsResult.status) { $.POST(verifyConfigsResult.report); break; }
 
             case "ReadLibraries":
                 await COLLECT.Step2_UpdateLibrary();
             case "ReadTargetFolders":
                 await COLLECT.Step3_UpdateProxies();
             case "ReadAxiomFrags":
-                await COLLECT.Step5_FetchIndexContent();
+                await COLLECT.Step4_FetchIndexContent();
             case "ReadShorthands":
-                await COLLECT.Step4_AnalyzeShorthands();
+                const shorthandAnalysis = await COLLECT.Step5_AnalyzeShorthands();
+                if (!shorthandAnalysis.status) { $.POST(shorthandAnalysis.report); break; }
 
             case "ProcessLibraries":
                 CRAFT.UpdateLibrary();
@@ -68,9 +62,9 @@ async function execute(step = "Initialize") {
             case "ProcessTargetFolders":
                 await CRAFT.ProcessProxies();
 
-            case "GenerateFinals":
-                await CRAFT.GenerateFinal();
-            case "Deploy":
+            // case "GenerateFinals":
+            //     await CRAFT.GenerateFinal();
+            // case "Deploy":
             // await fileman.write.bulk(response.files)
 
         }

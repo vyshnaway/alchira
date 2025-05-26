@@ -15,8 +15,7 @@ export default function parseBlock(content, blockArrays = false) {
         length = content.length;
 
     let result = {
-        adds: [],
-        binds: [],
+        assemble: [],
         preBinds: [],
         postBinds: [],
         variables: [],
@@ -70,12 +69,11 @@ export default function parseBlock(content, blockArrays = false) {
                                 result.properties[key] = value;
                                 if (blockArrays) result.Xproperties.push([key, value]);
                             } else if (value[0] === '@') {
-                                const spaceIndex = value.indexOf(" ")
+                                const firstSpaceIndex = value.indexOf(" ");
+                                const spaceIndex = firstSpaceIndex < 0 ? value.length : firstSpaceIndex;
                                 const directive = value.slice(0, spaceIndex);
+                                
                                 switch (directive) {
-                                    case "@bind":
-                                        result.binds.push(...Use.string.zeroBreaks(value.slice(spaceIndex)));
-                                        break;
                                     case "@pre-bind":
                                         result.preBinds.push(...Use.string.zeroBreaks(value.slice(spaceIndex)));
                                         break;
@@ -83,7 +81,7 @@ export default function parseBlock(content, blockArrays = false) {
                                         result.postBinds.push(...Use.string.zeroBreaks(value.slice(spaceIndex)));
                                         break;
                                     case "@assemble":
-                                        result.adds.push(...Use.string.zeroBreaks(value.slice(spaceIndex)));
+                                        result.assemble.push(...Use.string.zeroBreaks(value.slice(spaceIndex)));
                                         break;
                                     default:
                                         result.atProps[value] = "";
@@ -91,13 +89,20 @@ export default function parseBlock(content, blockArrays = false) {
                                 }
                             } else {
                                 const breaks = Use.string.zeroBreaks(value);
-                                const groupMap = { "<": "preBinds", ">": "postBinds", "+": "adds", "*": "binds" };
-                                const group = groupMap[breaks[0]] || "adds";
-                                if (Object.keys(groupMap).includes(breaks[0])) breaks.shift();
-                                breaks.forEach(link => {
-                                    const targetGroup = groupMap[link[0]] || group;
-                                    result[targetGroup].push(link[0] in groupMap ? link.slice(1) : link);
-                                });
+                                switch (breaks[0]) {
+                                    case "<":
+                                        breaks.shift()
+                                        result.preBinds.push(...breaks);
+                                        break;
+                                    case ">":
+                                        breaks.shift()
+                                        result.postBinds.push(...breaks);
+                                        break;
+                                    case "+":
+                                        breaks.shift()
+                                        result.assemble.push(...breaks);
+                                        break;
+                                }
                             }
                         } else {
                             switch (key[0]) {

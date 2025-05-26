@@ -2,7 +2,15 @@ import LibSetter from "./Worker/lib-setter.js";
 import SCRIPT from "./Script/file.js"
 import STYLE from "./Style/parse.js"
 import $ from "./Shell/index.js"
-import { UnresIndexes, STASH } from "./data-cache.js";
+import { STYLEIN, STASH } from "./data-cache.js";
+
+function importBinds(classes = []) {
+    return classes.reduce((list, className) => {
+        const index = STASH.LibraryStyle2Index[className];
+        if (index) list.push(index);
+        return list
+    }, [])
+}
 
 export default class Proxy {
     source = "";
@@ -31,27 +39,32 @@ export default class Proxy {
     _UploadFile(filePath, fileContent) {
         const file = LibSetter(this.target, this.source, filePath, fileContent, false).data;
         const response = SCRIPT(file, this.extnsProps[file.extension], "read")
-        this.fileCache[file.targetPath] = file;
+        this.fileCache[file.filePath] = file;
 
+        file.content = fileContent;
         file.parsed = response.scribed;
         file.classGroups = response.classesList;
 
         file.styleLocals = {};
         file.styleGlobals = {};
         file.errors = [];
-        file.preBinds = []
-        file.postBinds = []
-        file.essentials = []
+        file.essentials = [];
+        file.preBinds = [];
+        file.postBinds = [];
 
         response.stylesList.forEach(style => {
             const response = STYLE.TAGSTYLE(style, file.metaFront, file.filePath);
-            file.usedIndexes.add(response.index);
-            const styleMap = style.isGlobal ? file.styleGlobals : file.styleLocals;
-            styleMap[style.selector] = response.index;
 
-            file.preBinds.push(...response.preBinds)
-            file.postBinds.push(...response.postBinds)
-            file.essentials.push(...response.essentials)
+            if (response.isEssentials) {
+                file.preBinds.push(...response.preBinds)
+                file.postBinds.push(...response.postBinds)
+                file.essentials.push(...response.essentials)
+            } else {
+                file.usedIndexes.add(response.index);
+                const styleMap = style.isGlobal ? file.styleGlobals : file.styleLocals;
+                styleMap[style.selector] = response.index;
+            }
+
             if (response.errors.length) {
                 const block = $.MOLD.failed.Note(`${file.targetPath}:${style.rowMarker}:${style.columnMarker}`, response.errors, $.list.failed.Bullets);
                 file.errors.push(block);
@@ -69,6 +82,7 @@ export default class Proxy {
             $.MOLD.secondary.Footer("Global styles : " + file.styleMap.global.length, file.styleMap.global, $.list.secondary.Entries),
             $.MOLD.secondary.Footer("Local styles : " + file.styleMap.local.length, file.styleMap.local, $.list.secondary.Entries)
         ], $.list.std.Blocks)
+        console.log(file)
     }
 
     _LoadTracks(file) {
@@ -86,15 +100,15 @@ export default class Proxy {
     }
 
     Accumulator() {
-        this.cumulated.styleMap = [];
         this.cumulated.report = [];
         this.cumulated.errors = [];
-        this.cumulated.preBinds = new Set();
-        this.cumulated.postBinds = new Set();
-        this.cumulated.styleGlobals = {};
+        this.cumulated.styleMap = [];
+        this.cumulated.essentials = [];
         this.cumulated.classGroups = [];
         this.cumulated.classTracks = [];
-        this.cumulated.essentials = [];
+        this.cumulated.styleGlobals = {};
+        this.cumulated.preBinds = new Set();
+        this.cumulated.postBinds = new Set();
 
         Object.values(this.fileCache).forEach(file => {
             this.cumulated.styleMap.push(file.styleMap);
@@ -114,20 +128,25 @@ export default class Proxy {
     }
 
     DeleteFile(filePath) {
-        // this.fileCache[filePath]file.preBinds
-        // this.fileCache[filePath]file.postBinds
-        UnresIndexes.push(
-            ...Object.values(this.fileCache[filePath].styleLocals),
-            ...Object.values(this.fileCache[filePath].styleGlobals)
-        )
+        STYLEIN.DISPOSE(...Object.values(this.fileCache[filePath].styleLocals));
+        STYLEIN.DISPOSE(...Object.values(this.fileCache[filePath].styleGlobals));
         delete this.fileCache[filePath];
     }
 
     RenderFiles(Command = "", LibraryStyles = {}, GlobalStyles = {}) {
         Object.values(this.fileCache).forEach(file => {
-           file.final = SCRIPT[Command](file, this.extnsProps[file.extension], {
-            Library: LibraryStyles, Local: file.styleLocals, Global: GlobalStyles
-           })
+            file.final = SCRIPT[Command](file, this.extnsProps[file.extension], {
+                Library: LibraryStyles, Local: file.styleLocals, Global: GlobalStyles
+            })
         })
+    }
+
+    UpdateCache() {
+        Object.entries(this.fileCache).forEach(([file, cache]) => { 
+            const filePath = file;
+            const fileContent = cache.content
+            this.DeleteFile(filePath);
+            this._UploadFile(filePath, fileContent);
+         })
     }
 }

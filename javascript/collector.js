@@ -35,11 +35,6 @@ export async function Step0_VerifySetupStruct() {
     return result
 }
 
-export async function Step2_UpdateLibrary() {
-    $.TASK("Updating Library");
-    DATA.LIBRARY = await fileman.read.bulk(NAV.folder.refers, ["css"]);
-}
-
 export async function Step1_VerifyProxyMap() {
     $.TASK("Initializing configs", 0);
     const errors = [], alerts = [];
@@ -61,33 +56,40 @@ export async function Step1_VerifyProxyMap() {
     }
 }
 
+export async function Step2_UpdateLibrary() {
+    $.TASK("Updating Library");
+    DATA.LIBRARY = await fileman.read.bulk(NAV.folder.refers, ["css"]);
+}
+
 export async function Step3_UpdateProxies() {
     $.TASK("Syncing proxy folders", 0);
     Object.keys(ProxyTargets).forEach(key => delete ProxyTargets[key]);
     const proxies = await watcher.proxyMapSync(DATA.PROXYMAP);
     proxies.forEach(proxy => ProxyTargets[proxy.target] = proxy);
-    $.TASK("Read target folders.");
+    $.TASK("Reading target folders");
 }
 
-export async function Step4_AnalyzeShorthands() {
-    $.TASK("Initializing configs", 0);
-    const errors = [], alerts = [];
+export async function Step4_FetchIndexContent() {
+    $.TASK("Loading Axiom");
+    DATA.CSSIndex = await watcher.cssImport(Object.values(NAV.css));
+}
+
+export async function Step5_AnalyzeShorthands() {
+    $.TASK("Updating shorthands", 0);
+    const errors = [];
 
     $.STEP("PATH : " + NAV.json.shorthand);
     const shorthand = await fileman.read.json(NAV.json.shorthand);
-    if (shorthand.status) { DATA.SHORTHAND = shorthand.data; }
+    if (shorthand.status) {
+        Object.entries(shorthand.data).forEach(([key, value]) => {
+            if (typeof value === "string") { DATA.SHORTHAND = shorthand.data; }
+            else { errors.push(`Shorthand: ${key} does not have a value of type STRING.`) }
+        })
+    }
     else { errors.push(`${NAV.json.shorthand} : Bad json file.`); };
-
-    $.TASK("Initialization finished")
+    $.TASK("Analysis comnplete")
     return {
         status: Object.keys(errors).length === 0,
-        report: Object.keys(errors).length === 0 ?
-            $.MOLD.success.Footer("Configs Healthy", alerts, $.list.success.Bullets) :
-            $.MOLD.failed.Footer("Error Paths", errors, $.list.failed.Bullets)
+        report: $.MOLD.failed.Footer("Error Paths", errors, $.list.failed.Bullets)
     }
-}
-
-export async function Step5_FetchIndexContent() {
-    $.TASK("Loading Axiom");
-    DATA.CSSIndex = await watcher.cssImport(Object.values(NAV.css));
 }
