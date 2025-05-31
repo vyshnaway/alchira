@@ -16,7 +16,6 @@ import {
     RENDERFRAGS,
     CUMULATES,
     ProxyTargets,
-    DECLARESTYLE,
     GenAccumulates,
     Initialize,
     ResetCache

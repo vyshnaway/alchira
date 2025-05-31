@@ -1,7 +1,7 @@
 import Use from "../Utils/index.js";
 import READS from "./block.js";
 import SHORTHAND from "../Worker/shorthand.js";
-import { STASH, ENV, DECLARESTYLE, STYLEIN } from "../data-cache.js";
+import { STASH, ENV, STYLEIN } from "../data-cache.js";
 
 function xtylemerge(classList = []) {
     let result = {}, preBinds = [], postBinds = [];
@@ -74,7 +74,7 @@ function CSSMULTI(fileDatas = []) {
             const stampSelector = stamp + metaSelector;
             const scannedStyle = SCANNER(scannedObj[selector], filePath, selector);
 
-            const CLX = DECLARESTYLE();
+            const CLX = STYLEIN.DECLARE();
             source.data.usedIndexes.add(CLX.number)
             selectors[stampSelector] = {
                 index: CLX.number,

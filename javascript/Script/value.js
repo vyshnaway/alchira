@@ -1,5 +1,5 @@
 import Use from "../Utils/index.js";
-import { STASH, DECLARESTYLE } from "../data-cache.js"
+import { STASH, STYLEIN } from "../data-cache.js"
 import { FileCursor, StyleStack } from "./file.js"
 
 function loadActiveIndexes(classList = []) {
@@ -78,7 +78,7 @@ export default function classExtract(string, action, fileData) {
                                     if (activeIndexes.includes(index)) {
                                         scribed += STASH.Index2StylesObject[index].class;
                                     } else {
-                                        const identity = DECLARESTYLE();
+                                        const identity = STYLEIN.DECLARE();
                                         fileData.usedIndexes.add(identity.number);
                                         STASH.Midway.Finals["." + identity.class] = index;
                                         scribed += identity.class;
@@ -91,7 +91,7 @@ export default function classExtract(string, action, fileData) {
                                         const deltaStyles = Use.object.onlyB(activeStyles, STASH.Index2StylesObject[index].object);
                                         if (deltaStyles.score) scribed += STASH.Index2StylesObject[index].class;
                                         else {
-                                            const identity = DECLARESTYLE();
+                                            const identity = STYLEIN.DECLARE();
                                             fileData.usedIndexes.add(identity.number);
                                             scribed += identity.class;
                                             console.log()

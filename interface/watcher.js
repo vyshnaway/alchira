@@ -1,6 +1,8 @@
 import path from 'path'
 import chokidar from 'chokidar'
-import fileman from './fileman.js'
+import shell from './console.js';
+import fileman from './fileman.js';
+import { handleEvent } from './eventface.js';
 
 export async function cssImport(filePathArray = []) {
     const processedFiles = new Set(filePathArray.reverse().map(filePath => path.resolve(filePath)).reverse());
@@ -74,41 +76,103 @@ export async function proxyMapSync(proxyMap = []) {
     return proxyMap;
 }
 
-export async function watchFolders(folders = [], xcssFolder) {
-    return new Promise((resolve) => {
-        const result = { action: null, folder: null, filePath: null, fileContent: null, extension: null };
-        const watcher = chokidar.watch(folders, { persistent: true });
+export function watchFolders(folders = [], xcssFolder, onEvent = handleEvent) { // Default to imported handleEvent
+    // Resolve paths to absolute paths
+    const resolvedFolders = folders.map(folder => path.resolve(folder));
+    const resolvedXcssFolder = path.resolve(xcssFolder);
+    const allPaths = [...resolvedFolders, resolvedXcssFolder];
 
-        const handleEvent = async (action = "", filePath = "") => {
-            watcher.close();
-            if (filePath.startsWith(xcssFolder)) {
-                result.action = "xtylesUpdate";
-                result.folder = xcssFolder;
-            } else {
-                result.action = action;
-                result.folder = folders.find(folder => filePath.startsWith(folder))
-            }
-            result.filePath = path.relative(result.folder, filePath);
-            result.extension = path.extname(filePath).slice(1);
+    // Define the path to ignore: xtyles/.cache/ and its contents
+    const cachePathToIgnore = path.join(resolvedXcssFolder, '.cache', '**');
 
-            if (action !== "folderUpdate") {
-                try {
-                    const content = fileman.read.file(fs.readFile(filePath, 'utf-8'));
-                    result.fileContent = content;
-                } catch (error) {
-                    console.error(`Error reading file ${filePath}: ${error}`);
-                    result.fileContent = null;
-                }
-            }
-            console.log(`Detected ${action}: ${filePath}`);
-            resolve(result);
+    const watcher = chokidar.watch(allPaths, {
+        persistent: true,
+        ignoreInitial: true,
+        awaitWriteFinish: {
+            stabilityThreshold: 200,
+            pollInterval: 100,
+        },
+        usePolling: true,
+        interval: 100,
+        binaryInterval: 300,
+        alwaysStat: true,
+        ignored: [
+            /(^|[\/\\])\../,
+            '**/node_modules/**',
+            cachePathToIgnore
+        ]
+    });
+
+    console.log(`Watching folders: ${allPaths.join(', ')}`);
+    console.log(`Ignoring changes in: ${cachePathToIgnore}`);
+
+    const handleEventInternal = async (action, filePath) => {
+        console.log(`Raw event - Action: ${action}, Path: ${filePath}`);
+
+        const result = {
+            action: null,
+            folder: null,
+            filePath: null,
+            fileContent: null,
+            extension: null,
         };
 
-        watcher
-            .on('change', (path) => handleEvent('fileEdit', path))
-            .on('add', (path) => handleEvent('fileAdd', path))
-            .on('unlink', (path) => handleEvent('fileDelete', path))
-            .on('addDir', (path) => handleEvent('folderUpdate', path))
-            .on('unlinkDir', (path) => handleEvent('folderUpdate', path))
-    });
+        if (filePath.startsWith(resolvedXcssFolder)) {
+            result.action = 'xtylesUpdate';
+            result.folder = resolvedXcssFolder;
+        } else {
+            result.action = action;
+            result.folder = resolvedFolders.find((folder) => filePath.startsWith(folder)) || null;
+        }
+
+        if (!result.folder) {
+            console.warn(`No matching folder found for ${filePath}, but proceeding with event`);
+            result.folder = filePath.startsWith(resolvedXcssFolder) ? resolvedXcssFolder : resolvedFolders[0];
+        }
+
+        result.filePath = path.relative(result.folder, filePath);
+        result.extension = path.extname(filePath).slice(1);
+
+        if (action !== 'folderUpdate') {
+            try {
+                const content = (await fileman.read.file(filePath, 'utf-8')).data;
+                result.fileContent = fileman.read.file(content);
+            } catch (error) {
+                console.error(`Error reading file ${filePath}: ${error.message}`);
+                result.fileContent = null;
+            }
+        }
+
+        console.log(`Detected ${action}: ${filePath}`);
+        onEvent(result); // Calls the imported handleEvent
+    };
+
+    watcher
+        .on('change', (filePath) => {
+            console.log(`Change event triggered for ${filePath}`);
+            handleEventInternal('fileEdit', filePath);
+        })
+        .on('add', (filePath) => {
+            console.log(`Add event triggered for ${filePath}`);
+            handleEventInternal('fileAdd', filePath);
+        })
+        .on('unlink', (filePath) => {
+            console.log(`Unlink event triggered for ${filePath}`);
+            handleEventInternal('fileDelete', filePath);
+        })
+        .on('addDir', (filePath) => {
+            console.log(`AddDir event triggered for ${filePath}`);
+            handleEventInternal('folderUpdate', filePath);
+        })
+        .on('unlinkDir', (filePath) => {
+            console.log(`UnlinkDir event triggered for ${filePath}`);
+            handleEventInternal('folderUpdate', filePath);
+        })
+        .on('error', (error) => console.error(`Watcher error: ${error.message}`))
+        .on('ready', () => console.log('Watcher is ready and listening for changes'));
+
+    return () => {
+        console.log('Stopping watcher');
+        watcher.close();
+    };
 }
