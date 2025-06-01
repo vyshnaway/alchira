@@ -48,6 +48,7 @@
   "dependencies": {
     "@assemblyscript/loader": "^0.18.0",
     "@wasmer/wasi": "^1.2.2",
-    "chokidar": "^4.0.3"
+    "chokidar": "^4.0.3",
+    "fb-watchman": "^2.0.2"
   }
 }

@@ -21,9 +21,9 @@ const executes = async (isDev = false, backRows = 0) => {
     } else { $.POST(response.report) }; return backRows
 }
 
-async function execute(step = "Initialize") {
-    let stopWatcher = null;
+let stopWatcher = null;
 
+async function execute(step = "Initialize") {
     do {
         switch (step) {
             case "Initialize":
@@ -103,21 +103,25 @@ async function execute(step = "Initialize") {
                 if (DATA.CMD !== "dev") {
                     if (stopWatcher) {
                         stopWatcher();
+                        stopWatcher = null;
                     }
                     return;
                 }
 
                 if (!stopWatcher) {
-                    stopWatcher = watcher.watchFolders(
-                        Object.keys(ProxyTargets),
-                        NAV.folder.setup
-                    ); // Uses default handleEvent from eventInterface
+                    const targetFolders = [...Object.keys(ProxyTargets), NAV.folder.setup];
+                    const ignoreFolders = [NAV.folder.cache];
+                    stopWatcher = watcher.watchFolders(targetFolders, ignoreFolders,
+                        $.MOLD.primary.Block([
+                            $.MOLD.success.Section("Target Folders", Object.keys(ProxyTargets), $.list.std.Bullets)
+                        ])
+                    );
                 }
 
                 if (hasEvents()) {
                     const response = dequeueEvent();
                     if (response) {
-                        console.log(`Processing event: ${JSON.stringify(response)}`);
+                        console.log(response);
                         if (response.action === "folderUpdate") {
                             console.log("Folder update detected, restarting setup...");
                             step = "VerifySetupStruct";
@@ -138,6 +142,7 @@ async function execute(step = "Initialize") {
 
     if (stopWatcher) {
         stopWatcher();
+        stopWatcher = null;
     }
 }
 
@@ -160,6 +165,13 @@ async function commander(cmd, arg, rootPath, consoleWidth, packageJson) {
             break;
         case 'dev':
             $.POST($.MOLD.std.Chapter(APP.name + ' : Active Runtime'));
+            process.on('SIGINT', () => {
+                if (stopWatcher) {
+                    stopWatcher();
+                    stopWatcher = null;
+                }
+                process.exit();
+            });
             execute();
             break;
         case 'preview':

@@ -2,7 +2,7 @@ import path from 'path'
 import chokidar from 'chokidar'
 import shell from './console.js';
 import fileman from './fileman.js';
-import { handleEvent } from './eventface.js';
+import { queueEvent } from './eventface.js';
 
 export async function cssImport(filePathArray = []) {
     const processedFiles = new Set(filePathArray.reverse().map(filePath => path.resolve(filePath)).reverse());
@@ -76,100 +76,69 @@ export async function proxyMapSync(proxyMap = []) {
     return proxyMap;
 }
 
-export function watchFolders(folders = [], xcssFolder, onEvent = handleEvent) { // Default to imported handleEvent
-    // Resolve paths to absolute paths
+export function watchFolders(folders = [], ignores = [], initialMessage) {
     const resolvedFolders = folders.map(folder => path.resolve(folder));
-    const resolvedXcssFolder = path.resolve(xcssFolder);
-    const allPaths = [...resolvedFolders, resolvedXcssFolder];
-
-    // Define the path to ignore: xtyles/.cache/ and its contents
-    const cachePathToIgnore = path.join(resolvedXcssFolder, '.cache', '**');
-
-    const watcher = chokidar.watch(allPaths, {
-        persistent: true,
-        ignoreInitial: true,
-        awaitWriteFinish: {
-            stabilityThreshold: 200,
-            pollInterval: 100,
-        },
-        usePolling: true,
-        interval: 100,
-        binaryInterval: 300,
-        alwaysStat: true,
-        ignored: [
-            /(^|[\/\\])\../,
-            '**/node_modules/**',
-            cachePathToIgnore
-        ]
-    });
-
-    console.log(`Watching folders: ${allPaths.join(', ')}`);
-    console.log(`Ignoring changes in: ${cachePathToIgnore}`);
+    const resolvedIgnores = ignores.map(p => path.join(path.resolve(p), '**'));
 
     const handleEventInternal = async (action, filePath) => {
-        console.log(`Raw event - Action: ${action}, Path: ${filePath}`);
-
         const result = {
+            timeStamp: null,
             action: null,
             folder: null,
             filePath: null,
             fileContent: null,
-            extension: null,
         };
 
-        if (filePath.startsWith(resolvedXcssFolder)) {
-            result.action = 'xtylesUpdate';
-            result.folder = resolvedXcssFolder;
-        } else {
-            result.action = action;
-            result.folder = resolvedFolders.find((folder) => filePath.startsWith(folder)) || null;
-        }
+        const t = new Date();
+        result.timeStamp = `${t.getFullYear()}-${t.getMonth().toString().padStart(2, '0')}-${t.getDate().toString().padStart(2, '0')} ${t.getHours().toString().padStart(2, '0')}:${t.getMinutes().toString().padStart(2, '0')}:${t.getSeconds().toString().padStart(2, '0')}`;
 
-        if (!result.folder) {
-            console.warn(`No matching folder found for ${filePath}, but proceeding with event`);
-            result.folder = filePath.startsWith(resolvedXcssFolder) ? resolvedXcssFolder : resolvedFolders[0];
-        }
-
+        result.action = action;
+        result.folder = resolvedFolders.find((folder) => filePath.startsWith(folder)) || null;
         result.filePath = path.relative(result.folder, filePath);
-        result.extension = path.extname(filePath).slice(1);
 
-        if (action !== 'folderUpdate') {
-            try {
-                const content = (await fileman.read.file(filePath, 'utf-8')).data;
-                result.fileContent = fileman.read.file(content);
-            } catch (error) {
-                console.error(`Error reading file ${filePath}: ${error.message}`);
-                result.fileContent = null;
-            }
+        if (action === 'add' || action === "change") {
+            const content = await fileman.read.file(filePath);
+            if (content.status) { result.fileContent = content.data; }
         }
 
-        console.log(`Detected ${action}: ${filePath}`);
-        onEvent(result); // Calls the imported handleEvent
+        queueEvent(result);
     };
 
+    const watcher = chokidar.watch(resolvedFolders, {
+        persistent: true,
+        ignoreInitial: true,
+        alwaysStat: true,
+        awaitWriteFinish: {
+            stabilityThreshold: 200,
+            pollInterval: 100,
+        },
+        ignored: [
+            /(^|[\/\\])\../,
+            '**/node_modules/**',
+            ...resolvedIgnores
+        ],
+        usePolling: true,
+        interval: 100,
+        binaryInterval: 300
+    });
+
+
     watcher
-        .on('change', (filePath) => {
-            console.log(`Change event triggered for ${filePath}`);
-            handleEventInternal('fileEdit', filePath);
-        })
-        .on('add', (filePath) => {
-            console.log(`Add event triggered for ${filePath}`);
-            handleEventInternal('fileAdd', filePath);
-        })
-        .on('unlink', (filePath) => {
-            console.log(`Unlink event triggered for ${filePath}`);
-            handleEventInternal('fileDelete', filePath);
-        })
-        .on('addDir', (filePath) => {
-            console.log(`AddDir event triggered for ${filePath}`);
-            handleEventInternal('folderUpdate', filePath);
-        })
-        .on('unlinkDir', (filePath) => {
-            console.log(`UnlinkDir event triggered for ${filePath}`);
-            handleEventInternal('folderUpdate', filePath);
-        })
+        .on('change', (filePath) => handleEventInternal('change', filePath))
+        .on('add', (filePath) => handleEventInternal('add', filePath))
+        .on('unlink', (filePath) => handleEventInternal('unlink', filePath))
+        .on('addDir', (filePath) => handleEventInternal('addDir', filePath))
+        .on('unlinkDir', (filePath) => handleEventInternal('unlinkDir', filePath))
+        .on('all', (event, path) => console.log(`\nEvent: ${event}\nPath: ${path}\n`))
         .on('error', (error) => console.error(`Watcher error: ${error.message}`))
-        .on('ready', () => console.log('Watcher is ready and listening for changes'));
+        .on('ready', () => {
+            if (initialMessage) {
+                console.log(initialMessage)
+            } else {
+                console.log(`Watching folders: ${resolvedFolders.join(', ')}`);
+                console.log(`Ignoring changes in: ${resolvedIgnores.join(', ')}`);
+            }
+        });
 
     return () => {
         console.log('Stopping watcher');
