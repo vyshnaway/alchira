@@ -134,19 +134,23 @@ export default class Proxy {
     }
 
     RenderFiles(Command = "", LibraryStyles = {}, GlobalStyles = {}) {
-        Object.values(this.fileCache).forEach(file => {
-            file.final = SCRIPT[Command](file, this.extnsProps[file.extension], {
-                Library: LibraryStyles, Local: file.styleLocals, Global: GlobalStyles
+        Object.values(this.fileCache).forEach(filePath => {
+            filePath.final = SCRIPT[Command](filePath, this.extnsProps[filePath.extension], {
+                Library: LibraryStyles, Local: filePath.styleLocals, Global: GlobalStyles
             })
         })
     }
 
     UpdateCache() {
-        Object.entries(this.fileCache).forEach(([file, cache]) => { 
+        Object.entries(this.fileCache).forEach(([file, cache]) => {
             const filePath = file;
             const fileContent = cache.content
             this.DeleteFile(filePath);
             this._UploadFile(filePath, fileContent);
-         })
+        })
+    }
+
+    ClearFiles() {
+        Object.values(this.fileCache).forEach(filePath => this.DeleteFile(filePath));
     }
 }

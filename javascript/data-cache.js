@@ -6,7 +6,7 @@ import Library from "./class-refers.js";
 export const ENV = {
     styleTag: "xtyle",
     devMode: true,
-    unSpaced: true,
+    minified: true,
 }
 
 export const STASH = {
@@ -90,7 +90,7 @@ export const STYLEIN = {
 
 export function Initialize() {
     ENV.devMode = DATA.CMD === "dev";
-    ENV.unSpaced = DATA.CMD !== "build";
+    ENV.minified = DATA.CMD !== "build";
 
     LISTEDPREFIX.atRule = DATA.PREFIX.atrules;
     LISTEDPREFIX.property = DATA.PREFIX.properties;

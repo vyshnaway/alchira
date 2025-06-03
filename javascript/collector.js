@@ -3,8 +3,9 @@ import { NAV, DATA } from "./data-meta.js";
 import fileman from "../interface/fileman.js";
 import * as watcher from "../interface/watcher.js";
 import { ProxyTargets } from "./data-cache.js";
+import ClassRefers from './class-refers.js';
 
-export async function Step0_VerifySetupStruct() {
+export async function VerifySetupStruct() {
     const result = { unstart: true, proceed: false, report: "" };
 
     if (fileman.path.ifFolder(NAV.folder.setup)) {
@@ -35,7 +36,7 @@ export async function Step0_VerifySetupStruct() {
     return result
 }
 
-export async function Step1_VerifyProxyMap() {
+export async function VerifyProxyMap() {
     $.TASK("Initializing configs", 0);
     const errors = [], alerts = [];
 
@@ -56,25 +57,30 @@ export async function Step1_VerifyProxyMap() {
     }
 }
 
-export async function Step2_UpdateLibrary() {
+export async function UpdateLibrary() {
+    ClassRefers.ClearStash();
     $.TASK("Updating Library");
     DATA.LIBRARY = await fileman.read.bulk(NAV.folder.refers, ["css"]);
 }
 
-export async function Step3_UpdateProxies() {
+export async function UpdateProxies() {
     $.TASK("Syncing proxy folders", 0);
-    Object.keys(ProxyTargets).forEach(key => delete ProxyTargets[key]);
+    Object.keys(ProxyTargets).forEach(key => {
+        if (ProxyTargets[key].cache)
+            ProxyTargets[key].cache.ClearFiles();
+        delete ProxyTargets[key];
+    });
     const proxies = await watcher.proxyMapSync(DATA.PROXYMAP);
-    proxies.forEach(proxy => ProxyTargets[proxy.target] = proxy);
+    proxies.forEach(proxy => ProxyTargets[DATA.WorkPath + "/" + proxy.target] = proxy);
     $.TASK("Reading target folders");
 }
 
-export async function Step4_FetchIndexContent() {
+export async function FetchIndexContent() {
     $.TASK("Loading Axiom");
     DATA.CSSIndex = await watcher.cssImport(Object.values(NAV.css));
 }
 
-export async function Step5_AnalyzeShorthands() {
+export async function AnalyzeShorthands() {
     $.TASK("Updating shorthands", 0);
     const errors = [];
 

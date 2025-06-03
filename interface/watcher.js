@@ -77,7 +77,10 @@ export async function proxyMapSync(proxyMap = []) {
 }
 
 export function watchFolders(folders = [], ignores = [], initialMessage) {
-    const resolvedFolders = folders.map(folder => path.resolve(folder));
+    const folderMaps = folders.reduce((acc, folder) => {
+        acc[path.resolve(folder)] = folder; return acc;
+    }, {})
+    const resolvedFolders = Object.keys(folderMaps);
     const resolvedIgnores = ignores.map(p => path.join(path.resolve(p), '**'));
 
     const handleEventInternal = async (action, filePath) => {
@@ -93,7 +96,7 @@ export function watchFolders(folders = [], ignores = [], initialMessage) {
         result.timeStamp = `${t.getFullYear()}-${t.getMonth().toString().padStart(2, '0')}-${t.getDate().toString().padStart(2, '0')} ${t.getHours().toString().padStart(2, '0')}:${t.getMinutes().toString().padStart(2, '0')}:${t.getSeconds().toString().padStart(2, '0')}`;
 
         result.action = action;
-        result.folder = resolvedFolders.find((folder) => filePath.startsWith(folder)) || null;
+        result.folder = folderMaps[resolvedFolders.find((folder) => filePath.startsWith(folder))] || null;
         result.filePath = path.relative(result.folder, filePath);
 
         if (action === 'add' || action === "change") {
@@ -124,13 +127,13 @@ export function watchFolders(folders = [], ignores = [], initialMessage) {
 
 
     watcher
-        .on('change', (filePath) => handleEventInternal('change', filePath))
-        .on('add', (filePath) => handleEventInternal('add', filePath))
-        .on('unlink', (filePath) => handleEventInternal('unlink', filePath))
-        .on('addDir', (filePath) => handleEventInternal('addDir', filePath))
-        .on('unlinkDir', (filePath) => handleEventInternal('unlinkDir', filePath))
-        .on('all', (event, path) => console.log(`\nEvent: ${event}\nPath: ${path}\n`))
+        // .on('change', (filePath) => handleEventInternal('change', filePath))
+        // .on('add', (filePath) => handleEventInternal('add', filePath))
+        // .on('unlink', (filePath) => handleEventInternal('unlink', filePath))
+        // .on('addDir', (filePath) => handleEventInternal('addDir', filePath))
+        // .on('unlinkDir', (filePath) => handleEventInternal('unlinkDir', filePath))
         .on('error', (error) => console.error(`Watcher error: ${error.message}`))
+        .on('all', (event, filePath) => handleEventInternal(event, filePath))
         .on('ready', () => {
             if (initialMessage) {
                 console.log(initialMessage)

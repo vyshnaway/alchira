@@ -29,7 +29,7 @@ export function UpdateLibrary(action = "upload", filePath, fileContent) {
         case "delete": Refers.DeleteFile(filePath); break;
         case "save": Refers.SaveFile(filePath, fileContent); break;
     }
-
+    
     const { consoleReport, referTable, AxiomStyleMap, LibraryStyleMap } = Refers.Renders();
     PUBLISH.StyleMap.axiom = AxiomStyleMap;
     PUBLISH.StyleMap.library = LibraryStyleMap;

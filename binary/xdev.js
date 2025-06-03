@@ -5,6 +5,7 @@ import fileman from '../interface/fileman.js';
 import commander from "../javascript/package.js"
 
 const rootPath = fileman.path.fromRoot(".");
+const workPath = fileman.path.resolves(".");
 const packagePath = 'package.json';
 const rootPackagePath = fileman.path.fromRoot(packagePath);
 
@@ -39,4 +40,4 @@ if (projectPackageJson.status && commandList.includes(command)) {
     }
 }
 
-await commander(command, argument, rootPath, consoleWidth, packageEssential);
+await commander(command, argument, rootPath, workPath, consoleWidth, packageEssential);

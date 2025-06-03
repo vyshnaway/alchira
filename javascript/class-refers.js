@@ -3,6 +3,7 @@ import STYLE from "./Style/parse.js";
 import Utils from "./Utils/index.js";
 import LibSetter from "./Worker/lib-setter.js";
 import { STYLEIN } from "./data-cache.js";
+import { NAV } from "./data-meta.js";
 
 const files = {};
 
@@ -43,7 +44,6 @@ function DeleteFile(filePath) {
 
 function ClearStash() {
     Object.keys(files).forEach(filePath => DeleteFile(filePath));
-
 }
 
 
@@ -59,7 +59,7 @@ function UploadFiles(FileContents = {}) {
 
 function SaveFile(filePath, fileContent) {
     if (files[filePath]) DeleteFile(filePath);
-    files[filePath] = LibSetter("", "", filePath, fileContent, true, true);
+    files[filePath] = LibSetter("", "", filePath.slice(NAV.folder.refers.length+1), fileContent, true, true);
 }
 
 

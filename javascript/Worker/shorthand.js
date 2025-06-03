@@ -56,7 +56,7 @@ function IMPORT(string, watchUndef = true) {
 function UPLOAD(shorthands) {
     const shorthandErrors = [], report = [];
 
-    STASH.Shorthands = shorthands;
+    STASH.Shorthands = { ...shorthands };
     Object.keys(shorthands).map(key => {
         const hash = '#' + key
         const response = IMPORT(hash);

@@ -11,6 +11,9 @@ const fileman = {
         fromRoot: (...pathString) => {
             return path.join(root, ...pathString)
         },
+        resolves: (pathString) => {
+            return path.resolve(pathString)
+        },
         available: (pathString) => {
             try {
                 const stats = fs.statSync(pathString);

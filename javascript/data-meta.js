@@ -2,6 +2,8 @@ export const DATA = {
     CMD: "",
     ARG: "",
     CSSIndex: "",
+    RootPath: "",
+    WorkPath: "",
     SHORTHAND: {},
     PROXYMAP: {},
     LIBRARY: {},
@@ -34,21 +36,21 @@ export const NAV = {
         refers: "/scaffold/refers"
     },
     folder: {
-        setup: "xtyles",
-        cache: "xtyles/.cache",
-        refers: "xtyles/references",
+        setup: "/xtyles",
+        cache: "/xtyles/.cache",
+        refers: "/xtyles/references",
     },
     css: {
-        atrules: "xtyles/#at-rules.css",
-        constants: "xtyles/#constants.css",
-        elements: "xtyles/#elements.css",
-        extends: "xtyles/#extends.css",
+        atrules: "/xtyles/#at-rules.css",
+        constants: "/xtyles/#constants.css",
+        elements: "/xtyles/#elements.css",
+        extends: "/xtyles/#extends.css",
     },
     json: {
-        proxymap: "xtyles/proxy-map.jsonc",
-        shorthand: "xtyles/shorthands.jsonc",
-        styleMap: "xtyles/.cache/style-map.json",
-        switchMap: "xtyles/.cache/switch-map.json",
+        proxymap: "/xtyles/proxy-map.jsonc",
+        shorthand: "/xtyles/shorthands.jsonc",
+        styleMap: "/xtyles/.cache/style-map.json",
+        switchMap: "/xtyles/.cache/switch-map.json",
     }
 };
 
@@ -69,17 +71,17 @@ export const ROOT = {
         license: {
             title: "LICENSE",
             url: "/agreements-txt/license.txt",
-            path: '/AGREEMENTS/license.txt'
+            path: '/agreements/license.txt'
         },
         terms: {
             title: "TERMS & CONDITIONS",
             url: "/agreements-txt/terms.txt",
-            path: '/AGREEMENTS/terms.txt'
+            path: '/agreements/terms.txt'
         },
         privacy: {
             title: "PRIVACY POLICY",
             url: "/agreements-txt/privacy.txt",
-            path: '/AGREEMENTS/privacy.txt'
+            path: '/agreements/privacy.txt'
         },
     },
     PREFIX: {
@@ -102,15 +104,27 @@ export const ROOT = {
     },
 };
 
-export default function SetData(rootPath, packageJson) {
+export default function SetData(rootPath, workPath, packageJson) {
     APP.name = packageJson.name
     APP.version = packageJson.version
     APP.website = packageJson.website
     APP.command = packageJson.command
-    APP.cdn = packageJson.command + packageJson.version.split('.')[1]
-
-    NAV.scaffold.setup = rootPath + NAV.scaffold.setup;
-    NAV.scaffold.refers = rootPath + NAV.scaffold.refers;
+    APP.cdn = APP.cdn + packageJson.version.split('.')[1]
+    
+    DATA.RootPath = rootPath;
+    DATA.WorkPath = workPath;
+    
+    Object.entries(NAV).forEach(([groupName, groupPaths]) => {
+        if (groupName === "scaffold") {
+            Object.entries(groupPaths).forEach(([pathId, pathString]) => {
+                groupPaths[pathId] = rootPath + pathString;
+            });
+        } else {
+            Object.entries(groupPaths).forEach(([pathId, pathString]) => {
+                groupPaths[pathId] = workPath + pathString;
+            });
+        }
+    });
 
     Object.values(ROOT).forEach(group => Object.values(group).forEach(entry => {
         entry.url = APP.cdn + entry.url;

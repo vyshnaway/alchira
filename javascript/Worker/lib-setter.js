@@ -5,8 +5,8 @@ const LIB_CHARSET = /[^\w-]/gi;
 const SLASH = /[/\\]/g;
 
 export default function libFinder(target, source, filePath, content, prefix = false, uncomment = false) {
-    const targetPath = target + "/" + filePath;
-    const sourcePath = source + "/" + filePath;
+    const targetPath = target.length ? (target + "/" + filePath) : filePath;
+    const sourcePath = source.length ? (source + "/" + filePath) : filePath;
 
     let [extension, fileName, level, library] = targetPath.slice(targetPath.lastIndexOf("/") + 1).split(".").reverse()
     level = (isNaN(level) || level < 0) ? 0 : parseInt(level, 10);
@@ -26,7 +26,7 @@ export default function libFinder(target, source, filePath, content, prefix = fa
             targetPath,
             sourcePath,
             usedIndexes: new Set(),
-            metaFront: (prefix ? `${axiom ? "AXIOM-level" : "LEVEL"}-${level}` + ((library ?? "").length > 0 ? `_${library}` : ``) : "") + `__${normalPath}_`,
+            metaFront: (prefix ? `${axiom ? "AXIOM" : "LIBRARY"}` : "") + `__${normalPath}${prefix ? "__" : "_"}`,
             content: uncomment ? cleaner.uncomment.Css(content) : content,
         },
     }

@@ -27,7 +27,7 @@ const textFormatter = { // Changed to named export
             const rightPad = " ".repeat(Math.max(0, Math.ceil(padding / 2)));
             paddedLines.push(`>>>${leftPad}${line}${rightPad}<<<`);
         }
-
+        
         return [
             '',
             canvas.divider.mid,

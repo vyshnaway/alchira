@@ -94,7 +94,7 @@ function CSSMULTI(fileDatas = []) {
         STASH.Index2StylesObject[selectors[selector].index] = selectors[selector].data;
         STASH.LibraryStyle2Index[selector] = selectors[selector].index;
     }
-
+    
     return { tillStyles: Object.keys(STASH.LibraryStyle2Index), exclusiveStyles: Object.keys(selectors) };
 }
 

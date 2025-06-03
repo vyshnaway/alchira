@@ -47,6 +47,7 @@ export default {
     list,
     style,
     canvas,
+    render,
     initialize,
     TASK: task,
     STEP: step,

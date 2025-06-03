@@ -10,94 +10,63 @@ import fileman from '../interface/fileman.js';
 import SETDATA, { ROOT, APP, DATA, NAV } from './data-meta.js';
 import { hasEvents, dequeueEvent } from '../interface/eventface.js';
 
-const executes = async (isDev = false, backRows = 0) => {
-
-    if (isDev) {
-        const heading = $.MOLD.primary.Chapter(`Active Runtime : ${nows}`)
-        const footer = $.MOLD.failed.Footer("Press Ctrl+C to stop watching.");
-        report = [heading, response.errors, footer].join('\n')
-        $.custom.render.animation.Rewrite(report, backRows);
-        backRows = report.split("\n").length;
-    } else { $.POST(response.report) }; return backRows
-}
-
 let stopWatcher = null;
 
 async function execute(step = "Initialize") {
+    const footer = $.MOLD.failed.Footer("Press Ctrl+C to stop watching.");
+    let backRows = 0,
+        outputMessage = '',
+        heading = $.MOLD.primary.Chapter(`Initial Build`);
+
     do {
         switch (step) {
             case "Initialize":
                 await ACTION.FetchPrefix();
                 CACHE.Initialize();
-                step = "VerifySetupStruct";
-                break;
-
             case "VerifySetupStruct":
-                const verifyStructResult = await COLLECT.Step0_VerifySetupStruct();
+                const verifyStructResult = await COLLECT.VerifySetupStruct();
                 if (!verifyStructResult.proceed) {
-                    $.POST(verifyStructResult.report);
-                    return;
-                }
-                step = "VerifyProxyMap";
-                break;
+                    outputMessage = verifyStructResult.report
+                    break;
+                };
 
-            case "VerifyProxyMap":
-                const verifyConfigsResult = await COLLECT.Step1_VerifyProxyMap();
-                if (!verifyConfigsResult.status) {
-                    $.POST(verifyConfigsResult.report);
-                    return;
-                }
-                step = "ReadLibraries";
-                break;
+            case "ReadIndex":
+                await COLLECT.FetchIndexContent();
 
             case "ReadLibraries":
-                await COLLECT.Step2_UpdateLibrary();
-                step = "ReadTargetFolders";
-                break;
+                await COLLECT.UpdateLibrary();
 
-            case "ReadTargetFolders":
-                await COLLECT.Step3_UpdateProxies();
-                step = "ReadAxiomFrags";
-                break;
+            case "VerifyProxyMap":
+                const verifyConfigsResult = await COLLECT.VerifyProxyMap();
+                if (!verifyConfigsResult.status) {
+                    outputMessage = verifyConfigsResult.report;
+                    break;
+                };
 
-            case "ReadAxiomFrags":
-                await COLLECT.Step4_FetchIndexContent();
-                step = "ReadShorthands";
-                break;
+            case "ReadProxyFolders":
+                await COLLECT.UpdateProxies();
 
             case "ReadShorthands":
-                const shorthandAnalysis = await COLLECT.Step5_AnalyzeShorthands();
+                const shorthandAnalysis = await COLLECT.AnalyzeShorthands();
                 if (!shorthandAnalysis.status) {
-                    $.POST(shorthandAnalysis.report);
-                    return;
+                    outputMessage = shorthandAnalysis.report;
+                    break;
                 }
-                step = "ProcessLibraries";
-                break;
 
             case "ProcessLibraries":
                 CRAFT.UpdateLibrary();
-                step = "ProcessShorthands";
-                break;
 
             case "ProcessShorthands":
                 CRAFT.UpdateShorthands();
-                step = "ProcessTargetFolders";
-                break;
 
-            case "ProcessTargetFolders":
-                // await CRAFT.ProcessProxies();
-                step = "GenerateFinals";
-                break;
+            case "ProcessProxyFolders":
+            // await CRAFT.ProcessProxies();
 
             case "GenerateFinals":
-                // await CRAFT.GenerateFinal();
-                step = "Deploy";
-                break;
+            // await CRAFT.GenerateFinal();
 
-            case "Deploy":
-                // await fileman.write.bulk(response.files);
-                step = "WatchFolders";
-                break;
+            case "Publish":
+            // await fileman.write.bulk(response.files);
 
             case "WatchFolders":
                 if (DATA.CMD !== "dev") {
@@ -105,60 +74,88 @@ async function execute(step = "Initialize") {
                         stopWatcher();
                         stopWatcher = null;
                     }
-                    return;
+                    break;
                 }
 
                 if (!stopWatcher) {
                     const targetFolders = [...Object.keys(ProxyTargets), NAV.folder.setup];
                     const ignoreFolders = [NAV.folder.cache];
-                    stopWatcher = watcher.watchFolders(targetFolders, ignoreFolders,
-                        $.MOLD.primary.Block([
-                            $.MOLD.success.Section("Target Folders", Object.keys(ProxyTargets), $.list.std.Bullets)
-                        ])
-                    );
+                    stopWatcher = watcher.watchFolders(targetFolders, ignoreFolders, $.MOLD.primary.Block([
+                        $.MOLD.success.Section("Target Folders", Object.keys(ProxyTargets), $.list.std.Bullets)
+                    ]));
                 }
 
                 if (hasEvents()) {
-                    const response = dequeueEvent();
-                    if (response) {
-                        console.log(response);
-                        if (response.action === "folderUpdate") {
-                            console.log("Folder update detected, restarting setup...");
-                            step = "VerifySetupStruct";
-                        } else if (["fileEdit", "fileAdd", "fileDelete"].includes(response.action)) {
-                            console.log("File change detected, processing...");
-                            step = "ReadTargetFolders";
-                        } else if (response.action === "xtylesUpdate") {
-                            console.log("Xstyles update detected, re-analyzing shorthands...");
-                            step = "ReadShorthands";
+                    const event = dequeueEvent();
+                    // console.log(event);
+                    if (event.folder === NAV.folder.setup) {
+                        if (event.action === "change") {
+                            switch (event.filePath) {
+                                case NAV.css.atrules:
+                                case NAV.css.constants:
+                                case NAV.css.elements:
+                                case NAV.css.extends:
+                                    await COLLECT.FetchIndexContent();
+                                    step = "GenerateFinals";
+                                    break;
+                                case NAV.json.proxymap:
+                                    step = "VerifyProxyMap"
+                                    break;
+                                case NAV.json.shorthand:
+                                    step = "ReadShorthands"
+                                    break;
+                                default:
+                                    CRAFT.UpdateLibrary(event.action, event.filePath, event.fileContent)
+                                    step = "ProcessTargetFolders"
+                            }
+                        } else {
+                            const verifyStructResult = await COLLECT.VerifySetupStruct();
+                            if (!verifyStructResult.proceed) {
+                                outputMessage = verifyStructResult.report
+                                break;
+                            };
+                        }
+                    } else {
+                        switch (event.action) {
+                            case "change":
+                                await CRAFT.ProcessProxies(event.action, event.folder, event.filePath, event.fileContent);
+                                step = "GenerateFinals"
+                                break;
+                            default:
+                                step = "ReadProxyFolders";
                         }
                     }
+                    heading = $.MOLD.primary.Chapter(`Active Runtime : ${event.timestamp}`);
+                    if (DATA.CMD === "dev") outputMessage = [heading, outputMessage, footer].join('\n');
+                    backRows = $.render.write(outputMessage, backRows);
+                    outputMessage = "";
                 }
 
                 await new Promise((resolve) => setTimeout(resolve, 100));
-                break;
         }
     } while (DATA.CMD === "dev");
 
     if (stopWatcher) {
         stopWatcher();
         stopWatcher = null;
+    }else {
+        $.POST(outputMessage);
     }
 }
 
-async function commander(cmd, arg, rootPath, consoleWidth, packageJson) {
+async function commander(cmd, arg, rootPath, workPath, consoleWidth, packageJson) {
     DATA.CMD = cmd; DATA.ARG = arg;
-    SETDATA(rootPath, packageJson);
+    SETDATA(rootPath, workPath, packageJson);
     $.initialize(consoleWidth, cmd !== "dev");
 
     switch (DATA.CMD) {
         case 'init':
             await $.PLAY.Title(APP.name + ' : Initialize', 500);
-            const setupInit = await COLLECT.Step0_VerifySetupStruct();
+            const setupInit = await COLLECT.VerifySetupStruct();
             if (setupInit.unstart)
                 $.POST(await ACTION.Initialize());
             else if (setupInit.proceed) {
-                $.POST((await COLLECT.Step1_VerifyProxyMap()).report);
+                $.POST((await COLLECT.VerifyProxyMap()).report);
             } else {
                 $.POST(setupInit.report);
             }
@@ -169,6 +166,7 @@ async function commander(cmd, arg, rootPath, consoleWidth, packageJson) {
                 if (stopWatcher) {
                     stopWatcher();
                     stopWatcher = null;
+                    $.render.write("\n", 2)
                 }
                 process.exit();
             });
