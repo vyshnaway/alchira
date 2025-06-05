@@ -21,9 +21,8 @@ const types = {
         });
     },
     entries: (items, color, intent) => {
-        const size = items.reduce((length, item) => { if (item.length > length) length = item.length; return length }, 0) + intent + canvas.tab.repeatSpace;
+        const size = items.reduce((length, item) => { if (item.length > length) length = item.length; return length }, 0) + intent + canvas.tab.length;
         const cols = Math.floor(canvas.width / (size + 4))
-
         let result = [], subResult = "";
         items.forEach((item, index) => {
             if ((index + 1) % cols) {
@@ -34,8 +33,7 @@ const types = {
                 result.push(subResult); subResult = ""
             }
         })
-        if (subResult.length) result.push(subResult)
-
+        if (subResult.length) result.push(subResult);
         return result
     },
     blocks: (items, color, intent) =>

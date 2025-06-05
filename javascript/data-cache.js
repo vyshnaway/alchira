@@ -1,12 +1,10 @@
 import { LISTEDPREFIX } from "./Style/compile.js";
 import { DATA } from "./data-meta.js";
-import Use from "./Utils/index.js";
+import STYLE from "./Style/parse.js"
 import Library from "./class-refers.js";
 
 export const ENV = {
-    styleTag: "xtyle",
-    devMode: true,
-    minified: true,
+    DevMode: true,
 }
 
 export const STASH = {
@@ -15,28 +13,20 @@ export const STASH = {
     LibraryStyle2Index: {},
     GlobalsStyle2Index: {},
     Index2StylesObject: {},
-    FinalPreBinds: new Set(),
-    FinalPostBinds: new Set(),
-    Midway: {
-        Essentials: [],
-        Finals: {},
-        Renders: {},
-    }
+    FinalStack: {},
 }
 
 export const PUBLISH = {
-    SwitchMap: {},
-    FinalFiles: {},
-    ConsoleErrors: [],
     Report: {
         library: '',
         variables: '',
         shorthand: '',
         errorList: '',
-        finalMessage: ''
+        memChart: '',
+        footer: ''
     },
     StyleMap: {
-        variables: {},
+        variables: [],
         shorthands: {},
         file: {},
         local: {},
@@ -48,10 +38,10 @@ export const PUBLISH = {
 
 export const RENDERFRAGS = {
     INDEX: "",
-    ESSENTIALS: "",
     PREBINDS: "",
     RENDERED: "",
     POSTBINDS: "",
+    ESSENTIALS: "",
     APPENDIX: "",
 }
 
@@ -69,29 +59,7 @@ export const CUMULATES = {
 
 export const ProxyTargets = {};
 
-export const STYLEIN = {
-    NOW: 0,
-    BIN: [],
-    DECLARE: () => {
-        const number = STYLEIN.BIN.length ? STYLEIN.BIN.pop() : ++STYLEIN.NOW;
-        return { number, class: "_" + Use.string.enCounter(number + 768) };
-    }, 
-    DISPOSE: (...indexes) => {
-        indexes.forEach(index => {
-            STYLEIN.BIN.push(index);
-            delete STASH.Index2StylesObject[index];
-        })
-    },
-    RESET: () => {
-        STYLEIN.NOW = 0;
-        Object.keys(STASH.Index2StylesObject).forEach(key => delete STASH.Index2StylesObject(key))
-    }
-}
-
 export function Initialize() {
-    ENV.devMode = DATA.CMD === "dev";
-    ENV.minified = DATA.CMD !== "build";
-
     LISTEDPREFIX.atRule = DATA.PREFIX.atrules;
     LISTEDPREFIX.property = DATA.PREFIX.properties;
     LISTEDPREFIX.selector = { ...DATA.PREFIX.classes, ...DATA.PREFIX.elements }
@@ -113,18 +81,17 @@ export function ResetCache() {
         }
     });
     Object.assign(PUBLISH, {
-        SwitchMap: {},
-        FinalFiles: {},
-        ConsoleErrors: [],
+        finalMessage: '',
         Report: {
             library: '',
             variables: '',
             shorthand: '',
             errorList: '',
-            finalMessage: ''
+            memChart: '',
+            footer: ''
         },
         StyleMap: {
-            variables: {},
+            variables: [],
             shorthands: {},
             file: {},
             local: {},
@@ -134,7 +101,7 @@ export function ResetCache() {
         },
     });
 
-    STYLEIN.RESET();
+    STYLE.INDEX.RESET();
     Library.ClearStash();
 }
 
@@ -176,4 +143,6 @@ export function GenAccumulates() {
         classGroups,
         classTracks
     });
+
+    return CUMULATES;
 }

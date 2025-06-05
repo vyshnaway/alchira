@@ -1,19 +1,24 @@
 import tagReader from "./tag.js";
 
 export const xtyleTag = "xtyle";
-export const FileCursor = { marker: 0, rowMarker: 0, columnMarker: 0, tagCount: 0 };
+export const FileCursor = { marker: 0, rowMarker: 0, colMarker: 0, tagCount: 0 };
 export const StyleStack = { Library: {}, Local: {}, Global: {} };
+export const BindStack = { preBinds: new Set(), postBinds: new Set() }
 
-export default function scanner(fileData, classProps, action, styleStack = { Library: {}, Local: {}, Global: {} }) {
+export default function scanner(
+    fileData, classProps, action,
+    bindStack = { preBinds: new Set(), postBinds: new Set() },
+    styleStack = { Library: {}, Local: {}, Global: {} }
+) {
     Object.assign(StyleStack, styleStack);
-    FileCursor.tagCount = 1, FileCursor.rowMarker = 1, FileCursor.columnMarker = 1, FileCursor.marker = 0;
+    Object.assign(BindStack, bindStack);
+    FileCursor.tagCount = 1, FileCursor.rowMarker = 1, FileCursor.colMarker = 1, FileCursor.marker = 0;
     const stylesList = [], classesList = [];
     let ch = fileData.content[0], reading = true, scribed = "";
 
     while (FileCursor.marker < fileData.content.length) {
-        if (ch === "\n") { FileCursor.rowMarker++; FileCursor.columnMarker = 0 }
-        else FileCursor.columnMarker++;
-        // console.log({ ch, cur: cursor.marker, row: cursor.rowMarker, col: cursor.columnMarker })
+        if (ch === "\n") { FileCursor.rowMarker++; FileCursor.colMarker = 0 }
+        else FileCursor.colMarker++;
 
         if (ch === "<") {
             FileCursor.tagCount++;
@@ -36,7 +41,7 @@ export default function scanner(fileData, classProps, action, styleStack = { Lib
             FileCursor.marker++; // Skip the closing quote
         } else {
             scribed += ch;
-            FileCursor.marker++
+            FileCursor.marker++;
         }
 
         ch = fileData.content[FileCursor.marker]

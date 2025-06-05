@@ -1,4 +1,4 @@
-import Utils from "../Utils/index.js";
+import Use from "../Utils/index.js";
 import krypt from "./kryptic.js";
 
 const myHeaders = new Headers();
@@ -12,7 +12,7 @@ export default async function order(sequences = [], CMD = "", KEY = "") {
             return {
                 status: false,
                 message: "Invalid Key. Fallback: preview",
-                result: Utils.array.setback(sequences.flat())
+                result: Use.array.setback(sequences.flat())
             };
         }
 
@@ -27,7 +27,7 @@ export default async function order(sequences = [], CMD = "", KEY = "") {
             return {
                 status: false,
                 message: "Invalid Key. Fallback: preview",
-                result: Utils.array.setback(sequences.flat())
+                result: Use.array.setback(sequences.flat())
             };
         }
 
@@ -56,7 +56,7 @@ export default async function order(sequences = [], CMD = "", KEY = "") {
                     return {
                         status: false,
                         message: response.message ?? "Failed to establish connection with server. Fallback: preview",
-                        result: Utils.array.setback(sequences.flat())
+                        result: Use.array.setback(sequences.flat())
                     }
                 }
             })
@@ -64,7 +64,7 @@ export default async function order(sequences = [], CMD = "", KEY = "") {
         return Promise.resolve({
             status: true,
             message: "Preview Build",
-            result: Utils.array.setback(sequences.flat())
+            result: Use.array.setback(sequences.flat())
         });
     }
 }

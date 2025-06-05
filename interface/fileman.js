@@ -175,7 +175,7 @@ const fileman = {
         bulk: async (source, target, extensions = [], ignoreFiles = []) => {
             const result = { status: true, fileContents: {}, syncMap: {} };
             extensions = extensions.map(ext => '.' + ext);
-            
+
             if (!fs.existsSync(source) && !fs.existsSync(target)) {
                 return { status: false, fileContent: {}, syncMap: {} }
             } else if (!fs.existsSync(source)) {
@@ -188,10 +188,10 @@ const fileman = {
             const targetFiles = fileman.path.listFiles(target);
 
             ignoreFiles.forEach(file => {
-                const targetFile = path.join(target, file); 
-                const sourceFile = path.join(source, file); 
-                result.syncMap[targetFile] = sourceFile; 
-                result.syncMap[sourceFile] = targetFile; 
+                const targetFile = path.join(target, file);
+                const sourceFile = path.join(source, file);
+                result.syncMap[targetFile] = sourceFile;
+                result.syncMap[sourceFile] = targetFile;
             })
 
             const relativeTargetFiles = (await targetFiles)
@@ -240,21 +240,26 @@ const fileman = {
             return result;
         },
     },
-    delete: async (pathToDelete) => {
-        try {
-            if (fs.existsSync(pathToDelete)) {
-                const stats = await fs.promises.stat(pathToDelete);
-                if (stats.isDirectory()) {
-                    await fs.promises.rm(pathToDelete, { recursive: true, force: true });
-                } else {
-                    await fs.promises.unlink(pathToDelete);
+    delete: {
+        file: async (pathToDelete) => {
+            try {
+                if (fs.existsSync(pathToDelete)) {
+                    const stats = await fs.promises.stat(pathToDelete);
+                    if (stats.isDirectory()) {
+                        await fs.promises.rm(pathToDelete, { recursive: true, force: true });
+                    } else {
+                        await fs.promises.unlink(pathToDelete);
+                    }
+                    return { success: true, message: 'Path deleted successfully.' };
                 }
-                return { success: true, message: 'Path deleted successfully.' };
+                return { success: false, message: 'Path does not exist.' };
+            } catch (error) {
+                console.error('Error deleting path:', error);
+                return { success: false, message: 'Error deleting path.' };
             }
-            return { success: false, message: 'Path does not exist.' };
-        } catch (error) {
-            console.error('Error deleting path:', error);
-            return { success: false, message: 'Error deleting path.' };
+        },
+        bulk: async (...pathsToDelete) => {
+            pathsToDelete.forEach(pathString => fileman.delete.file(pathString))
         }
     }
 };

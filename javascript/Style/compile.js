@@ -139,7 +139,7 @@ function objectCompose(object, minify = false, prefixes = ["webkit", "moz", "ms"
     return styleSheet
 }
 
-export default function arrayCompose(array, minify = false, prefixes = ["webkit", "moz", "ms", "o"]) {
+export default function arrayCompose(array, minify, prefixes = ["webkit", "moz", "ms", "o"]) {
     const tab = minify ? "" : "  ", space = minify ? "" : " ", br = "";
     let styleSheet = [];
     array.forEach(([key, value]) => {
@@ -149,9 +149,9 @@ export default function arrayCompose(array, minify = false, prefixes = ["webkit"
                 const subObject = propListBuild(newValue);
                 if (newKey[0] === "@") {
                     const selectors = Object.entries(getAtRulePrefixes(newKey, prefixes));
-                    selectors.forEach(([group, selector]) => styleSheet.push(br, selector, "{", ...objectCompose(subObject, minify = false, [group]).map(i => tab + i), "}"));
+                    selectors.forEach(([group, selector]) => styleSheet.push(br, selector, "{", ...objectCompose(subObject, minify, [group]).map(i => tab + i), "}"));
                 } else {
-                    styleSheet.push(br, ...getSelectorPrefixes(newKey, prefixes), "{", ...objectCompose(subObject, minify = false, prefixes).map(i => tab + i), "}");
+                    styleSheet.push(br, ...getSelectorPrefixes(newKey, prefixes), "{", ...objectCompose(subObject, minify, prefixes).map(i => tab + i), "}");
                 }
             }
             else {

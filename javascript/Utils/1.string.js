@@ -60,5 +60,5 @@ export default {
         }
         return result;
     },
-    stringMem: (string) => (string.length / 1024).toFixed(2)
+    stringMem: (string) => Number((string.length / 1024).toFixed(2))
 }

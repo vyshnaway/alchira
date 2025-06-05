@@ -2,7 +2,6 @@ import $ from "./Shell/index.js";
 import STYLE from "./Style/parse.js";
 import Utils from "./Utils/index.js";
 import LibSetter from "./Worker/lib-setter.js";
-import { STYLEIN } from "./data-cache.js";
 import { NAV } from "./data-meta.js";
 
 const files = {};
@@ -29,7 +28,7 @@ function _accumulator() {
 }
 
 function _returnUsedIndexes(filePath) {
-    STYLEIN.DISPOSE(...files[filePath].data.usedIndexes)
+    STYLE.INDEX.DISPOSE(...files[filePath].data.usedIndexes)
 }
 
 

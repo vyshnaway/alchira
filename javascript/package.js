@@ -5,7 +5,6 @@ import * as CRAFT from './craftsmen.js';
 import { ProxyTargets } from './data-cache.js';
 import * as CACHE from './data-cache.js';
 import * as watcher from '../interface/watcher.js';
-import Library from "./class-refers.js";
 import fileman from '../interface/fileman.js';
 import SETDATA, { ROOT, APP, DATA, NAV } from './data-meta.js';
 import { hasEvents, dequeueEvent } from '../interface/eventface.js';
@@ -60,13 +59,15 @@ async function execute(step = "Initialize") {
                 CRAFT.UpdateShorthands();
 
             case "ProcessProxyFolders":
-            // await CRAFT.ProcessProxies();
+                CRAFT.ProcessProxies();
 
             case "GenerateFinals":
-            // await CRAFT.GenerateFinal();
+                const { SaveFiles, DeleteFiles, ConsoleReport } = await CRAFT.GenerateFinal();
+                outputMessage = ConsoleReport;
 
             case "Publish":
-            // await fileman.write.bulk(response.files);
+                await fileman.write.bulk(SaveFiles);
+                await fileman.delete.bulk(DeleteFiles);
 
             case "WatchFolders":
                 if (DATA.CMD !== "dev") {
@@ -81,7 +82,7 @@ async function execute(step = "Initialize") {
                     const targetFolders = [...Object.keys(ProxyTargets), NAV.folder.setup];
                     const ignoreFolders = [NAV.folder.cache];
                     stopWatcher = watcher.watchFolders(targetFolders, ignoreFolders, $.MOLD.primary.Block([
-                        $.MOLD.success.Section("Target Folders", Object.keys(ProxyTargets), $.list.std.Bullets)
+                        $.MOLD.success.Section("Target Folders", Object.keys(ProxyTargets), $.list.primary.Bullets)
                     ]));
                 }
 
@@ -133,18 +134,18 @@ async function execute(step = "Initialize") {
 
                 await new Promise((resolve) => setTimeout(resolve, 100));
         }
-    } while (DATA.CMD === "dev");
-
+    } while (DATA.CMD === "devs");
+    
     if (stopWatcher) {
         stopWatcher();
         stopWatcher = null;
-    }else {
-        $.POST(outputMessage);
+    } else {
+        // $.POST(outputMessage);
     }
 }
 
 async function commander(cmd, arg, rootPath, workPath, consoleWidth, packageJson) {
-    DATA.CMD = cmd; DATA.ARG = arg;
+    DATA.CMD = cmd; DATA.ARG = arg; DATA.ISDEV = cmd === 'dev';
     SETDATA(rootPath, workPath, packageJson);
     $.initialize(consoleWidth, cmd !== "dev");
 

@@ -1,6 +1,7 @@
 import Use from "../Utils/index.js";
-import { STASH, STYLEIN } from "../data-cache.js"
-import { FileCursor, StyleStack } from "./file.js"
+import STYLE from "../Style/parse.js"
+import { STASH } from "../data-cache.js";
+import { BindStack, FileCursor, StyleStack } from "./file.js"
 
 function loadActiveIndexes(classList = []) {
     return classList.reduce((A, entry) => {
@@ -42,7 +43,7 @@ export default function classExtract(string, action, fileData) {
     }
 
     if (action !== "read") {
-        const metaFront = "TAG-" + FileCursor.tagCount + "" + fileData.metaFront + "_";
+        const metaFront = `L${FileCursor.rowMarker}${fileData.metaFront}__`;
         activeQuote = "", entry = "", scribed = "", marker = 0, inQuote = false, ch = string[marker];
         const activeIndexes = (action === "dev") ? [] :
             Use.array.longestSubChain(STASH.SortedIndexes, loadActiveIndexes(Use.array.setback(classList), fileData.filePath));
@@ -51,20 +52,16 @@ export default function classExtract(string, action, fileData) {
         while (ch !== undefined) {
             if (inQuote) {
                 if (ch === " " || ch === activeQuote) {
-                    if (["<", ">", "*"].includes(entry[0])) {
+                    if (["<", ">"].includes(entry[0])) {
                         const className = entry.slice(1);
                         switch (entry[0]) {
-                            case ">":
-                                STASH.FinalPostBinds.add(className)
                             case "<":
-                                STASH.FinalPreBinds.add(className)
-                            case "*":
-                                if (className[0] === "-" || /\$-/.test(className))
-                                    STASH.FinalPreBinds.add(className)
-                                else STASH.FinalPostBinds.add(className)
+                                BindStack.preBinds.add(className);
+                                break;
+                            case ">":
+                                BindStack.postBinds.add(className);
+                                break;
                         }
-                        // if (!(className[0] === "-" || /\$-/.test(className)))
-                        //     scribed += className;
                     } else {
                         const index = (StyleStack.Library[entry] ?? 0) + (StyleStack.Global[entry] ?? 0) + ((StyleStack.Local[entry]) ?? 0);
                         if (index) {
@@ -72,15 +69,15 @@ export default function classExtract(string, action, fileData) {
                                 case "dev":
                                     const devClass = metaFront + STASH.Index2StylesObject[index].metaClass;
                                     scribed += devClass;
-                                    STASH.Midway.Finals["." + devClass] = index;
+                                    STASH.FinalStack["." + devClass] = index;
                                     break;
                                 case "preview":
                                     if (activeIndexes.includes(index)) {
                                         scribed += STASH.Index2StylesObject[index].class;
                                     } else {
-                                        const identity = STYLEIN.DECLARE();
+                                        const identity = STYLE.INDEX.DECLARE();
                                         fileData.usedIndexes.add(identity.number);
-                                        STASH.Midway.Finals["." + identity.class] = index;
+                                        STASH.FinalStack["." + identity.class] = index;
                                         scribed += identity.class;
                                     }
                                     break;
@@ -89,14 +86,13 @@ export default function classExtract(string, action, fileData) {
                                         scribed += STASH.Index2StylesObject[index].class;
                                     } else {
                                         const deltaStyles = Use.object.onlyB(activeStyles, STASH.Index2StylesObject[index].object);
-                                        if (deltaStyles.score) scribed += STASH.Index2StylesObject[index].class;
+                                        if (!deltaStyles.score) scribed += STASH.Index2StylesObject[index].class;
                                         else {
-                                            const identity = STYLEIN.DECLARE();
+                                            const identity = STYLE.INDEX.DECLARE();
                                             fileData.usedIndexes.add(identity.number);
                                             scribed += identity.class;
-                                            console.log()
-                                            STASH.Index2StylesObject["." + identity.class] = deltaStyles.result;
-                                            STASH.Midway.Finals[className] = index;
+                                            STASH.Index2StylesObject[identity.number] = deltaStyles.result;
+                                            STASH.FinalStack["."+identity.class] = identity.number;
                                         }
                                     }
                                     break;

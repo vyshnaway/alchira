@@ -127,13 +127,6 @@ export function watchFolders(folders = [], ignores = [], initialMessage) {
 
 
     watcher
-        // .on('change', (filePath) => handleEventInternal('change', filePath))
-        // .on('add', (filePath) => handleEventInternal('add', filePath))
-        // .on('unlink', (filePath) => handleEventInternal('unlink', filePath))
-        // .on('addDir', (filePath) => handleEventInternal('addDir', filePath))
-        // .on('unlinkDir', (filePath) => handleEventInternal('unlinkDir', filePath))
-        .on('error', (error) => console.error(`Watcher error: ${error.message}`))
-        .on('all', (event, filePath) => handleEventInternal(event, filePath))
         .on('ready', () => {
             if (initialMessage) {
                 console.log(initialMessage)
@@ -141,7 +134,14 @@ export function watchFolders(folders = [], ignores = [], initialMessage) {
                 console.log(`Watching folders: ${resolvedFolders.join(', ')}`);
                 console.log(`Ignoring changes in: ${resolvedIgnores.join(', ')}`);
             }
-        });
+        })
+        // .on('change', (filePath) => handleEventInternal('change', filePath))
+        // .on('add', (filePath) => handleEventInternal('add', filePath))
+        // .on('unlink', (filePath) => handleEventInternal('unlink', filePath))
+        // .on('addDir', (filePath) => handleEventInternal('addDir', filePath))
+        // .on('unlinkDir', (filePath) => handleEventInternal('unlinkDir', filePath))
+        .on('all', (event, filePath) => handleEventInternal(event, filePath))
+        .on('error', (error) => console.error(`Watcher error: ${error.message}`))
 
     return () => {
         console.log('Stopping watcher');

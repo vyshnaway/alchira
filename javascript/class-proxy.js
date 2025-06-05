@@ -2,7 +2,7 @@ import LibSetter from "./Worker/lib-setter.js";
 import SCRIPT from "./Script/file.js"
 import STYLE from "./Style/parse.js"
 import $ from "./Shell/index.js"
-import { STYLEIN, STASH } from "./data-cache.js";
+import { STASH } from "./data-cache.js";
 
 function importBinds(classes = []) {
     return classes.reduce((list, className) => {
@@ -54,10 +54,9 @@ export default class Proxy {
 
         response.stylesList.forEach(style => {
             const response = STYLE.TAGSTYLE(style, file.metaFront, file.filePath);
-
+            file.preBinds.push(...response.preBinds)
+            file.postBinds.push(...response.postBinds)
             if (response.isEssentials) {
-                file.preBinds.push(...response.preBinds)
-                file.postBinds.push(...response.postBinds)
                 file.essentials.push(...response.essentials)
             } else {
                 file.usedIndexes.add(response.index);
@@ -82,7 +81,6 @@ export default class Proxy {
             $.MOLD.secondary.Footer("Global styles : " + file.styleMap.global.length, file.styleMap.global, $.list.secondary.Entries),
             $.MOLD.secondary.Footer("Local styles : " + file.styleMap.local.length, file.styleMap.local, $.list.secondary.Entries)
         ], $.list.std.Blocks)
-        console.log(file)
     }
 
     _LoadTracks(file) {
@@ -111,6 +109,7 @@ export default class Proxy {
         this.cumulated.postBinds = new Set();
 
         Object.values(this.fileCache).forEach(file => {
+            // console.log(file)
             this.cumulated.styleMap.push(file.styleMap);
             this.cumulated.report.push(file.report);
             this.cumulated.errors.push(...file.errors);
@@ -128,17 +127,18 @@ export default class Proxy {
     }
 
     DeleteFile(filePath) {
-        STYLEIN.DISPOSE(...Object.values(this.fileCache[filePath].styleLocals));
-        STYLEIN.DISPOSE(...Object.values(this.fileCache[filePath].styleGlobals));
+        STYLE.INDEX.DISPOSE(...Object.values(this.fileCache[filePath].styleLocals));
+        STYLE.INDEX.DISPOSE(...Object.values(this.fileCache[filePath].styleGlobals));
         delete this.fileCache[filePath];
     }
 
-    RenderFiles(Command = "", LibraryStyles = {}, GlobalStyles = {}) {
-        Object.values(this.fileCache).forEach(filePath => {
-            filePath.final = SCRIPT[Command](filePath, this.extnsProps[filePath.extension], {
-                Library: LibraryStyles, Local: filePath.styleLocals, Global: GlobalStyles
+    RenderFiles(SaveFiles = {}, preBinds = new Set(), postBinds = new Set(), Command = "") {
+        Object.values(this.fileCache).forEach(file => {
+            const result = SCRIPT(file, this.extnsProps[file.extension], Command, { preBinds, postBinds }, {
+                Library: STASH.LibraryStyle2Index, Local: file.styleLocals, Global: STASH.GlobalsStyle2Index
             })
-        })
+            SaveFiles[file.sourcePath] = result.scribed;
+        });
     }
 
     UpdateCache() {

@@ -1,5 +1,6 @@
 import classExtract from "./value.js";
-import { FileCursor, xtyleTag } from "./file.js"
+import { FileCursor } from "./file.js"
+import { APP } from "../data-meta.js";
 
 const bracePair = {
     "{": "}",
@@ -22,7 +23,7 @@ export default function tagScan(content, action, classProps, fileData) {
         },
         styleObject = {
             rowMarker: FileCursor.rowMarker,
-            columnMarker: FileCursor.columnMarker,
+            columnMarker: FileCursor.colMarker,
             tagCount: FileCursor.tagCount,
             isGlobal: false,
             selector: "",
@@ -36,8 +37,8 @@ export default function tagScan(content, action, classProps, fileData) {
 
     while (ch !== undefined) {
         ch = content[FileCursor.marker++];
-        if (ch === "\n") { FileCursor.rowMarker++; FileCursor.columnMarker = 0 }
-        else FileCursor.columnMarker++;
+        if (ch === "\n") { FileCursor.rowMarker++; FileCursor.colMarker = 0 }
+        else FileCursor.colMarker++;
         // console.log({ CH: ch, cur: cursor.marker, row: cursor.rowMarker, col: cursor.columnMarker })
 
         if (awaitBrace === ch) {
@@ -85,13 +86,13 @@ export default function tagScan(content, action, classProps, fileData) {
     }
 
 
-    const newTag = tagObject.element === xtyleTag ? "" : "<" + tagObject.element +
+    const newTag = tagObject.element === APP.styleTag ? "" : "<" + tagObject.element +
         Object.entries(tagObject.attributes).reduce((A, [P, V]) => A += " " + P + ((V === "") ? "" : "=" + V), "") + ">";
     return {
         ok,
         marker: FileCursor.marker,
         rowMarker: FileCursor.rowMarker,
-        columnMarker: FileCursor.columnMarker,
+        columnMarker: FileCursor.colMarker,
         reading: Boolean(ch),
         content: ok ? newTag : content.slice(FileCursor.marker, FileCursor.marker),
         classList,

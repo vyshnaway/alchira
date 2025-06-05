@@ -4,6 +4,7 @@ export const DATA = {
     CSSIndex: "",
     RootPath: "",
     WorkPath: "",
+    ISDEV: false,
     SHORTHAND: {},
     PROXYMAP: {},
     LIBRARY: {},
@@ -20,6 +21,7 @@ export const APP = {
     version: '',
     website: '',
     command: '',
+    styleTag: 'xtyle',
     cdn: "https://xcdn.xpktr.com/xcss/version/",
     console: "https://console.xpktr.com/",
     commandList: {
@@ -49,8 +51,7 @@ export const NAV = {
     json: {
         proxymap: "/xtyles/proxy-map.jsonc",
         shorthand: "/xtyles/shorthands.jsonc",
-        styleMap: "/xtyles/.cache/style-map.json",
-        switchMap: "/xtyles/.cache/switch-map.json",
+        styleMap: "/xtyles/.cache/style-map.json"
     }
 };
 
@@ -113,7 +114,7 @@ export default function SetData(rootPath, workPath, packageJson) {
     
     DATA.RootPath = rootPath;
     DATA.WorkPath = workPath;
-    
+
     Object.entries(NAV).forEach(([groupName, groupPaths]) => {
         if (groupName === "scaffold") {
             Object.entries(groupPaths).forEach(([pathId, pathString]) => {
