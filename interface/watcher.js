@@ -1,6 +1,5 @@
 import path from 'path'
-import chokidar from 'chokidar'
-import shell from './console.js';
+import chokidar from 'chokidar';
 import fileman from './fileman.js';
 import { queueEvent } from './eventface.js';
 
@@ -90,10 +89,13 @@ export function watchFolders(folders = [], ignores = [], initialMessage) {
             folder: null,
             filePath: null,
             fileContent: null,
+            consoleWidth: process.stdout.columns,
+            extension: path.extname(filePath)?.slice(1)
         };
 
         const t = new Date();
-        result.timeStamp = `${t.getFullYear()}-${t.getMonth().toString().padStart(2, '0')}-${t.getDate().toString().padStart(2, '0')} ${t.getHours().toString().padStart(2, '0')}:${t.getMinutes().toString().padStart(2, '0')}:${t.getSeconds().toString().padStart(2, '0')}`;
+        // result.timeStamp = `${t.getFullYear()}-${t.getMonth().toString().padStart(2, '0')}-${t.getDate().toString().padStart(2, '0')} ${t.getHours().toString().padStart(2, '0')}:${t.getMinutes().toString().padStart(2, '0')}:${t.getSeconds().toString().padStart(2, '0')}`;
+        result.timeStamp = `${t.getHours().toString().padStart(2, '0')}:${t.getMinutes().toString().padStart(2, '0')}:${t.getSeconds().toString().padStart(2, '0')}`;
 
         result.action = action;
         result.folder = folderMaps[resolvedFolders.find((folder) => filePath.startsWith(folder))] || null;
@@ -127,21 +129,21 @@ export function watchFolders(folders = [], ignores = [], initialMessage) {
 
 
     watcher
-        .on('ready', () => {
-            if (initialMessage) {
-                console.log(initialMessage)
-            } else {
-                console.log(`Watching folders: ${resolvedFolders.join(', ')}`);
-                console.log(`Ignoring changes in: ${resolvedIgnores.join(', ')}`);
-            }
-        })
+        .on('all', (event, filePath) => handleEventInternal(event, filePath))
+        .on('error', (error) => console.error(`Watcher error: ${error.message}`))
         // .on('change', (filePath) => handleEventInternal('change', filePath))
         // .on('add', (filePath) => handleEventInternal('add', filePath))
         // .on('unlink', (filePath) => handleEventInternal('unlink', filePath))
         // .on('addDir', (filePath) => handleEventInternal('addDir', filePath))
         // .on('unlinkDir', (filePath) => handleEventInternal('unlinkDir', filePath))
-        .on('all', (event, filePath) => handleEventInternal(event, filePath))
-        .on('error', (error) => console.error(`Watcher error: ${error.message}`))
+        // .on('ready', () => {
+        //     if (initialMessage) {
+        //         console.log(initialMessage)
+        //     } else {
+        //         console.log(`Watching folders: ${resolvedFolders.join(', ')}`);
+        //         console.log(`Ignoring changes in: ${resolvedIgnores.join(', ')}`);
+        //     }
+        // })
 
     return () => {
         console.log('Stopping watcher');

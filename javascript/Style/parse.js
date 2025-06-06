@@ -46,11 +46,11 @@ function SCANNER(content, filePath, sourceSelector) {
 
     const styles = Use.object.deepMerge(merged.result, {
         ...Object.entries(response.atProps).reduce((acc, [propKey, propValue]) => {
-            acc[propKey] = DATA.ISDEV ? `${propValue} /* ${filePath} :: ${sourceSelector} */` : propValue;
+            acc[propKey] = DATA.WATCH ? `${propValue} /* ${filePath} :: ${sourceSelector} */` : propValue;
             return acc;
         }, {}),
         ...Object.entries(response.properties).reduce((acc, [propKey, propValue]) => {
-            acc[propKey] = DATA.ISDEV ? `${propValue} /* ${filePath} :: ${sourceSelector} */` : propValue;
+            acc[propKey] = DATA.WATCH ? `${propValue} /* ${filePath} :: ${sourceSelector} */` : propValue;
             return acc;
         }, {})
     });

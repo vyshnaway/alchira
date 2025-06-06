@@ -45,7 +45,7 @@ export default function classExtract(string, action, fileData) {
     if (action !== "read") {
         const metaFront = `L${FileCursor.rowMarker}${fileData.metaFront}__`;
         activeQuote = "", entry = "", scribed = "", marker = 0, inQuote = false, ch = string[marker];
-        const activeIndexes = (action === "dev") ? [] :
+        const activeIndexes = (action === "watch") ? [] :
             Use.array.longestSubChain(STASH.SortedIndexes, loadActiveIndexes(Use.array.setback(classList), fileData.filePath));
         const activeStyles = loadActiveStyles(activeIndexes);
 
@@ -66,7 +66,7 @@ export default function classExtract(string, action, fileData) {
                         const index = (StyleStack.Library[entry] ?? 0) + (StyleStack.Global[entry] ?? 0) + ((StyleStack.Local[entry]) ?? 0);
                         if (index) {
                             switch (action) {
-                                case "dev":
+                                case "watch":
                                     const devClass = metaFront + STASH.Index2StylesObject[index].metaClass;
                                     scribed += devClass;
                                     STASH.FinalStack["." + devClass] = index;
@@ -81,12 +81,12 @@ export default function classExtract(string, action, fileData) {
                                         scribed += identity.class;
                                     }
                                     break;
-                                case "build":
+                                case "publish":
                                     if (activeIndexes.includes(index)) {
                                         scribed += STASH.Index2StylesObject[index].class;
                                     } else {
                                         const deltaStyles = Use.object.onlyB(activeStyles, STASH.Index2StylesObject[index].object);
-                                        if (!deltaStyles.score) scribed += STASH.Index2StylesObject[index].class;
+                                        if (deltaStyles.score) scribed += STASH.Index2StylesObject[index].class;
                                         else {
                                             const identity = STYLE.INDEX.DECLARE();
                                             fileData.usedIndexes.add(identity.number);

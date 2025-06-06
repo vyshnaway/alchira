@@ -58,38 +58,42 @@ function UploadFiles(FileContents = {}) {
 
 function SaveFile(filePath, fileContent) {
     if (files[filePath]) DeleteFile(filePath);
-    files[filePath] = LibSetter("", "", filePath.slice(NAV.folder.refers.length+1), fileContent, true, true);
+    files[filePath] = LibSetter("", "", filePath.slice(NAV.folder.refers.length + 1), fileContent, true, true);
 }
 
-
+let axiomCount = 0, libraryCount = 0, axiomChart = {}, libraryChart = {};
 
 function Renders() {
+    axiomCount = 0, libraryCount = 0, axiomChart = {}, libraryChart = {};
     Object.keys(files).forEach(filePath => _returnUsedIndexes(filePath));
 
-    let axiomCount = 0, libraryCount = 0;
-    const consoleReport = [], axiomChart = [], libraryChart = [];
     const { referTable, axiomsArray, librariesArray } = _accumulator();
     const AxiomStyleMap = axiomsArray.reduce((collection, fileData, index) => {
         const classes = STYLE.CSSMULTI(fileData);
         collection[index] = classes.exclusiveStyles;
-        axiomChart.push($.MOLD.secondary.Footer(`Level ${index}:  ${classes.exclusiveStyles.length} Styles`, classes.exclusiveStyles, $.list.secondary.Entries));
+        axiomChart[`Level ${index}:  ${classes.exclusiveStyles.length} Styles`] = classes.exclusiveStyles;
         axiomCount += classes.exclusiveStyles.length;
         return collection
     }, {});
-    consoleReport.push($.MOLD.primary.Section("Axiom Index", [$.MOLD.std.Item(axiomCount + " Styles")]));
-    consoleReport.push($.MOLD.success.Block(axiomChart));
 
     const LibraryStyleMap = librariesArray.reduce((id, referLevel, index) => {
         const classes = STYLE.CSSMULTI(referLevel)
         id[index] = classes.exclusiveStyles;
-        libraryChart.push($.MOLD.secondary.Footer(`Level ${index}:  ${classes.exclusiveStyles.length} Styles`, classes.exclusiveStyles, $.list.secondary.Entries));
+        libraryChart[`Level ${index}:  ${classes.exclusiveStyles.length} Styles`] = classes.exclusiveStyles;
         libraryCount += classes.exclusiveStyles.length;
         return id;
     }, {});
-    consoleReport.push($.MOLD.primary.Section("Library Index", [$.MOLD.std.Item(libraryCount + " Styles")]));
-    consoleReport.push($.MOLD.success.Block(libraryChart));
 
-    return { consoleReport, referTable, AxiomStyleMap, LibraryStyleMap }
+    return { referTable, AxiomStyleMap, LibraryStyleMap }
+}
+
+function Report() {
+    return [
+        $.MOLD.primary.Section(`Axiom Styles: ${axiomCount}`, Object.entries(axiomChart).map(([heading, entries]) =>
+            $.MOLD.tertiary.Topic(heading, entries, $.list.text.Entries))),
+        $.MOLD.primary.Section(`Library Styles: ${libraryCount}`, Object.entries(libraryChart).map(([heading, entries]) => 
+            $.MOLD.tertiary.Topic(heading, entries, $.list.text.Entries)))
+    ].join("");
 }
 
 export default {
@@ -97,5 +101,6 @@ export default {
     DeleteFile,
     ClearStash,
     SaveFile,
-    Renders
+    Renders,
+    Report
 }

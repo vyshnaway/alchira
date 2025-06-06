@@ -4,6 +4,15 @@ import { STASH } from '../data-cache.js';
 const hashPattern = /\{#[a-z0-9]+\}/i;
 const preHashPattern = /(?<!\{)#\w+/g;
 
+let report = "", errors = "";
+
+function REPORT() {
+    return $.MOLD.std.Block([
+        $.MOLD.primary.Section("Active Shorthands"), report,
+        ...(errors.length > 0 ? [$.MOLD.failed.Footer("Invalid Shorthands"), errors] : [])
+    ]);
+}
+
 function IMPORT(string, watchUndef = true) {
     const response = {
         status: true,
@@ -20,13 +29,15 @@ function IMPORT(string, watchUndef = true) {
         recursionLoop: (recursionPreview, cause) => {
             response.status = false;
             recursionPreview["ERROR BY"] = $.style.bold.Red(cause)
-            response.error = $.MOLD.std.List(source + $.style.bold.Red(" : Shorthand recursion loop."), $.list.failed.Props(recursionPreview), $.list.failed.Waterfall, 1);
+            response.error = $.MOLD.std.List(source + $.style.bold.Red(" : Shorthand recursion loop."),
+                $.list.failed.Props(recursionPreview), $.list.failed.Waterfall);
             return response
         },
         undefinedHash: (recursionPreview, cause) => {
             response.status = false;
             recursionPreview["ERROR BY"] = $.style.bold.Red(cause)
-            response.error = $.MOLD.std.List(source + $.style.bold.Red(" : Undefined shorthand."), $.list.failed.Props(recursionPreview), $.list.failed.Waterfall, 1);
+            response.error = $.MOLD.std.List(source + $.style.bold.Red(" : Undefined shorthand."),
+                $.list.failed.Props(recursionPreview), $.list.failed.Waterfall);
             return response
         }
     }
@@ -54,7 +65,7 @@ function IMPORT(string, watchUndef = true) {
 }
 
 function UPLOAD(shorthands) {
-    const shorthandErrors = [], report = [];
+    const shorthandErrors = [];
 
     STASH.Shorthands = { ...shorthands };
     Object.keys(shorthands).map(key => {
@@ -71,15 +82,10 @@ function UPLOAD(shorthands) {
     });
     STASH.Shorthands = shorthands;
 
-    if (Object.keys(STASH.Shorthands).length)
-        report.push($.MOLD.primary.Section("Valid Shorthands", $.list.std.Props(shorthands), $.list.std.Bullets))
-    if (shorthandErrors.length)
-        report.push($.MOLD.failed.Footer("Invalid Shorthands", shorthandErrors, $.list.std.Bullets))
+    report = $.MOLD.std.Block($.list.text.Props(shorthands), $.list.std.Bullets);
+    errors = shorthandErrors.join("");
 
-    return {
-        list: STASH.Shorthands,
-        report: $.MOLD.std.Block(report)
-    }
+    return STASH.Shorthands;
 }
 
 function RENDER(string) {
@@ -140,5 +146,6 @@ function RENDER(string) {
 export default {
     IMPORT,
     UPLOAD,
-    RENDER
+    RENDER,
+    REPORT
 };

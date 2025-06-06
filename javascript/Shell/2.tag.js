@@ -1,10 +1,10 @@
-import canvas from './0.root.js'; 
-import style from './1.style.js';  
+import canvas from './0.root.js';
+import style from './1.style.js';
 
 const textFormatter = { // Changed to named export
     H1: (heading) => {
         const minWidth = 10;
-        const width = Math.max(canvas.width, minWidth);
+        const width = Math.max(canvas.settings.width, minWidth);
         const lines = [];
         let currentLine = "";
         const words = heading.split(" ");
@@ -27,7 +27,7 @@ const textFormatter = { // Changed to named export
             const rightPad = " ".repeat(Math.max(0, Math.ceil(padding / 2)));
             paddedLines.push(`>>>${leftPad}${line}${rightPad}<<<`);
         }
-        
+
         return [
             '',
             canvas.divider.mid,
@@ -53,15 +53,22 @@ const textFormatter = { // Changed to named export
             ''
         ].join('\n') + canvas.unstyle;
     },
-
+    
     H4: (heading) => {
+        return [
+            heading,
+            canvas.divider.mid,
+        ].join('\n') + canvas.unstyle;
+    },
+
+    H5: (heading) => {
         return [
             heading,
             '',
         ].join('\n') + canvas.unstyle;
     },
 
-    H5: (heading) => {
+    H6: (heading) => {
         return [
             heading,
         ].join('\n') + canvas.unstyle;
@@ -77,7 +84,7 @@ const textFormatter = { // Changed to named export
         '\n'.repeat(repeat) + canvas.unstyle,
 
     Hr: (character = '─') =>
-        '\n' + character.charAt(0).repeat(canvas.width) + canvas.unstyle,
+        '\n' + character.charAt(0).repeat(canvas.settings.width) + canvas.unstyle,
 
     Tab: (count = 1) =>
         canvas.tab.repeat(count) + canvas.unstyle,

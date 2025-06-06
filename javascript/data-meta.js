@@ -1,10 +1,10 @@
 export const DATA = {
     CMD: "",
     ARG: "",
+    WATCH: false,
     CSSIndex: "",
     RootPath: "",
     WorkPath: "",
-    ISDEV: false,
     SHORTHAND: {},
     PROXYMAP: {},
     LIBRARY: {},
@@ -26,9 +26,9 @@ export const APP = {
     console: "https://console.xpktr.com/",
     commandList: {
         init: 'Initiate or Update & Verify setup.',
-        dev: 'Live build for dev environment',
-        preview: 'Fast build, preserves class names.',
-        build: 'Build minified.'
+        watch: 'Live build for developer environment',
+        preview: 'Test build. Pass test for "publish" command.',
+        publish: 'Optimized build, uses web-api.'
     },
 }
 
@@ -111,7 +111,7 @@ export default function SetData(rootPath, workPath, packageJson) {
     APP.website = packageJson.website
     APP.command = packageJson.command
     APP.cdn = APP.cdn + packageJson.version.split('.')[1]
-    
+
     DATA.RootPath = rootPath;
     DATA.WorkPath = workPath;
 

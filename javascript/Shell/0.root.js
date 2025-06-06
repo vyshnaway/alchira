@@ -50,7 +50,6 @@ const canvas = {
         White: 'White',
     },
 
-    width:80,
 
     settings: {
         title: "Green",
@@ -58,8 +57,12 @@ const canvas = {
         primary: "Orange",
         secondary: "Yellow",
         tertiary: "Grey",
+        success: "Green",
+        failed: "Red",
+        warning: "Orange",
         taskActive: true,
         postActive: true,
+        width: 80,
         tabSpace: 2,
     },
 
@@ -68,7 +71,7 @@ const canvas = {
         mid: '─',
         low: '_',
     },
-    
+
     tab: ' '
 };
 

@@ -1,5 +1,5 @@
 {
-  "name": "xcss",
+  "name": "xcss-init",
   "description": "A lazy way to write luxurious CSS.",
   "version": "0.0.0",
   "repository": {
@@ -16,7 +16,7 @@
     "init": "xcss init",
     "watch": "xcss watch",
     "preview": "xcss preview",
-    "build": "xcss build",
+    "publish": "xcss publish",
     "help": "xcss help",
     "dev:test": "jest",
     "dev:lint": "eslint . --ext .ts",

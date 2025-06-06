@@ -33,13 +33,13 @@ const post = (string = "", customStyle = style.dim[canvas.settings.text], custom
 }
 
 function initialize(canvasWidth, taskActive = true, postActive = true, tabWidth = 2) {
-    canvas.tab = canvas.tab.repeat(tabWidth);
+    canvas.tab = canvas.tab[0].repeat(tabWidth);
     canvas.settings.taskActive = taskActive;
     canvas.settings.postActive = postActive;
-    canvas.width = canvasWidth;
-    canvas.divider.low = canvas.divider.low.repeat(canvas.width);
-    canvas.divider.mid = canvas.divider.mid.repeat(canvas.width);
-    canvas.divider.top = canvas.divider.top.repeat(canvas.width);
+    canvas.settings.width = canvasWidth;
+    canvas.divider.low = canvas.divider.low[0].repeat(canvas.settings.width);
+    canvas.divider.mid = canvas.divider.mid[0].repeat(canvas.settings.width);
+    canvas.divider.top = canvas.divider.top[0].repeat(canvas.settings.width);
 }
 
 export default {

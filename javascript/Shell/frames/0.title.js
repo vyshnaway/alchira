@@ -24,21 +24,21 @@ export default (string) => {
         ...new Array(previewFrames).fill([
             '',
             canvas.divider.low,
-            '·' + padBothSides('·', canvas.width - 2) + '·',
+            '·' + padBothSides('·', canvas.settings.width - 2) + '·',
             canvas.divider.top,
             ''
         ]),
         ...new Array(previewFrames).fill([
             '',
             canvas.divider.mid,
-            '>' + padBothSides('-', canvas.width - 2) + '<',
+            '>' + padBothSides('-', canvas.settings.width - 2) + '<',
             canvas.divider.mid,
             ''
         ]),
         ...new Array(previewFrames).fill([
             '',
             canvas.divider.top,
-            '>>' + padBothSides('×', canvas.width - 4) + '<<',
+            '>>' + padBothSides('×', canvas.settings.width - 4) + '<<',
             canvas.divider.low,
             ''
         ]),

@@ -13,6 +13,8 @@ const write = (string = '', backRows = 0) => {
     if (backRows > 0) {
         readline.moveCursor(process.stdout, 0, -backRows);
         readline.clearScreenDown(process.stdout);
+    } else if (backRows < 0) {
+        console.clear();
     }
     const rowsCreated = string.split('\n').length;
     console.log(string);
@@ -26,7 +28,7 @@ const write = (string = '', backRows = 0) => {
  * @param {number} repeat = 0 => infinite loop
  * @returns {null}
  */
-const animate = (frames = [], duration = 1000, repeat = 0) => { 
+const animate = (frames = [], duration = 1000, repeat = 0) => {
     const interval = Math.ceil(duration / (frames.length * (repeat || 1))) || 1;
 
     let iteration = 0, backRows = 0, frameIndex = 0;

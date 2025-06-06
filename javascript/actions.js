@@ -47,11 +47,11 @@ export async function Initialize() {
         ], $.list.std.Bullets));
 
         $.POST($.MOLD.std.Section('Available Commands', APP.commandList, $.list.std.Props))
-        $.POST($.MOLD.std.Section("Build command instructions.",
+        $.POST($.MOLD.std.Section("Publish command instructions.",
             (APP.version === "0") ? ["This command uses an internet connection."] : [
                 "Create a new project and use its access key. For action visit " + $.style.bold.Orange(ROOT.console),
                 "For personal projects, you can use the key in " + $.style.bold.Orange(NAV.json.proxymap),
-                "If using in CI/CD workflow, it is suggested to use " + $.style.bold.Orange("xcss build {key}")
+                "If using in CI/CD workflow, it is suggested to use " + $.style.bold.Orange("xcss publish {key}")
             ], $.list.std.Bullets));
 
         return $.MOLD.success.Footer("Initialized directory");

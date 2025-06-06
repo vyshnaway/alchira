@@ -61,15 +61,15 @@ export const canvas = {
 
 export const unstyle = '\x1b[0m'
 
-export const width = (canvas.width < 24) ?
+export const width = (canvas.settings.width < 24) ?
     process.stdout.columns :
-    Math.min(process.stdout.columns, canvas.width)
+    Math.min(process.stdout.columns, canvas.settings.width)
 
 export const tab = (count = 1) =>
     ' '.repeat(canvas.tabSpace * count)
 
 export const divider = {
-    top: '‾'.repeat(canvas.width),
-    mid: '─'.repeat(canvas.width),
-    low: '_'.repeat(canvas.width)
+    top: '‾'.repeat(canvas.settings.width),
+    mid: '─'.repeat(canvas.settings.width),
+    low: '_'.repeat(canvas.settings.width)
 };

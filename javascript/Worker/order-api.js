@@ -7,7 +7,7 @@ myHeaders.append("Content-Type", "application/json");
 const apiUrl= "https://workers.xpktr.com/api/xcss-build-request";
 // const apiUrl = "http://localhost:7071/api/xcss-build-request";
 export default async function order(sequences = [], CMD = "", KEY = "") {
-    if (CMD === "build") {
+    if (CMD === "publish") {
         if (KEY.length < 25) {
             return {
                 status: false,

@@ -4,21 +4,12 @@ import STYLE from "./Style/parse.js"
 import $ from "./Shell/index.js"
 import { STASH } from "./data-cache.js";
 
-function importBinds(classes = []) {
-    return classes.reduce((list, className) => {
-        const index = STASH.LibraryStyle2Index[className];
-        if (index) list.push(index);
-        return list
-    }, [])
-}
-
 export default class Proxy {
     source = "";
     target = "";
     extensions = [];
     extnsProps = {};
     fileCache = {};
-    cumulated = {}
 
     constructor({
         source,
@@ -33,16 +24,16 @@ export default class Proxy {
         this.extensions = Object.keys(extensions);
         this.sourceStylesheet = source + "/" + stylesheet;
         this.targetStylesheet = target + "/" + stylesheet;
-        Object.entries(fileContents).forEach(([filePath, fileContent]) => this._UploadFile(filePath, fileContent));
+        Object.entries(fileContents).forEach(([filePath, fileContent]) => this.SaveFile(filePath, fileContent));
     }
 
-    _UploadFile(filePath, fileContent) {
+    SaveFile(filePath, fileContent) {
+        this.DeleteFile(filePath);
         const file = LibSetter(this.target, this.source, filePath, fileContent, false).data;
-        const response = SCRIPT(file, this.extnsProps[file.extension], "read")
-        this.fileCache[file.filePath] = file;
+        const response = SCRIPT(file, this.extnsProps[file.extension], "read");
 
+        this.fileCache[file.filePath] = file;
         file.content = fileContent;
-        file.parsed = response.scribed;
         file.classGroups = response.classesList;
 
         file.styleLocals = {};
@@ -65,8 +56,8 @@ export default class Proxy {
             }
 
             if (response.errors.length) {
-                const block = $.MOLD.failed.Note(`${file.targetPath}:${style.rowMarker}:${style.columnMarker}`, response.errors, $.list.failed.Bullets);
-                file.errors.push(block);
+                file.errors.push($.MOLD.tertiary.Topic(`${file.targetPath}:${style.rowMarker}:${style.columnMarker}`)
+                    + "\n" + response.errors);
             }
         });
 
@@ -75,12 +66,73 @@ export default class Proxy {
             global: Object.keys(file.styleGlobals),
             local: Object.keys(file.styleLocals)
         }
+    }
 
-        file.report = $.MOLD.std.Section(`File :  ${file.targetPath}`, [
-            $.MOLD.std.Item((file.styleMap.global.length + file.styleMap.local.length) + " style definitions.\n"),
-            $.MOLD.secondary.Footer("Global styles : " + file.styleMap.global.length, file.styleMap.global, $.list.secondary.Entries),
-            $.MOLD.secondary.Footer("Local styles : " + file.styleMap.local.length, file.styleMap.local, $.list.secondary.Entries)
-        ], $.list.std.Blocks)
+    Accumulator() {
+        const C = {
+            report: [],
+            errors: [],
+            styleMap: [],
+            essentials: [],
+            classGroups: [],
+            classTracks: [],
+            styleGlobals: {},
+            preBinds: new Set(),
+            postBinds: new Set()
+        };
+        let localCount = 0, globalCount = 0;
+
+        Object.values(this.fileCache).forEach(file => {
+            C.styleMap.push(file.styleMap);
+            C.errors.push(...file.errors);
+            C.essentials.push(...file.essentials);
+            C.classGroups.push(...file.classGroups);
+            C.classTracks.push(...this._LoadTracks(file));
+            file.preBinds.forEach(bind => C.preBinds.add(bind));
+            file.postBinds.forEach(bind => C.postBinds.add(bind));
+            Object.assign(C.styleGlobals, file.styleGlobals);
+
+            const fileLocalCount = Object.keys(file.styleLocals).length;
+            const fileGlobalCount = Object.keys(file.styleGlobals).length;
+            localCount += fileLocalCount;
+            globalCount += fileGlobalCount;
+            const calcString = `${fileLocalCount}L + ${fileGlobalCount}G = ${(fileLocalCount + fileGlobalCount)}T`
+            C.report.push($.MOLD.tertiary.Topic(`[ ${calcString} ] : ${file.targetPath}`, [
+                ...Object.keys(file.styleLocals).map(c => $.style.text.White(c)),
+                ...Object.keys(file.styleGlobals).map(c => $.style.text.Yellow(c))
+            ], $.list.std.Entries));
+        });
+
+        const calcString = `${localCount}L + ${globalCount}G = ${(localCount + globalCount)}T`
+        C.report.unshift($.MOLD.primary.Section(`PROXY : [ ${calcString} ] : ${this.target} -> ${this.source}`))
+
+        return C;
+    }
+
+    DeleteFile(filePath) {
+        if (this.fileCache[filePath]) {
+            this.fileCache[filePath].usedIndexes.forEach(index => STYLE.INDEX.DISPOSE(index))
+            delete this.fileCache[filePath];
+        }
+    }
+
+    RenderFiles(SaveFiles = {}, preBinds = new Set(), postBinds = new Set(), Command = "") {
+        Object.values(this.fileCache).forEach(file => {
+            const result = SCRIPT(file, this.extnsProps[file.extension], Command, { preBinds, postBinds },
+                { Library: STASH.LibraryStyle2Index, Local: file.styleLocals, Global: STASH.GlobalsStyle2Index })
+            SaveFiles[file.sourcePath] = result.scribed;
+        });
+    }
+
+    UpdateCache() {
+        Object.entries(this.fileCache).forEach(([file, cache]) => {
+            const fileContent = cache.content;
+            this.SaveFile(file, fileContent);
+        })
+    }
+
+    ClearFiles() {
+        Object.values(this.fileCache).forEach(filePath => this.DeleteFile(filePath));
     }
 
     _LoadTracks(file) {
@@ -95,62 +147,5 @@ export default class Proxy {
             if (indexGroup.length) ACC.push(indexGroup)
             return ACC
         }, [])
-    }
-
-    Accumulator() {
-        this.cumulated.report = [];
-        this.cumulated.errors = [];
-        this.cumulated.styleMap = [];
-        this.cumulated.essentials = [];
-        this.cumulated.classGroups = [];
-        this.cumulated.classTracks = [];
-        this.cumulated.styleGlobals = {};
-        this.cumulated.preBinds = new Set();
-        this.cumulated.postBinds = new Set();
-
-        Object.values(this.fileCache).forEach(file => {
-            // console.log(file)
-            this.cumulated.styleMap.push(file.styleMap);
-            this.cumulated.report.push(file.report);
-            this.cumulated.errors.push(...file.errors);
-            this.cumulated.essentials.push(...file.essentials);
-            this.cumulated.classGroups.push(...file.classGroups);
-            this.cumulated.classTracks.push(...this._LoadTracks(file));
-            Object.assign(this.cumulated.styleGlobals, file.styleGlobals);
-            file.preBinds.forEach(bind => this.cumulated.preBinds.add(bind));
-            file.postBinds.forEach(bind => this.cumulated.postBinds.add(bind));
-        })
-    }
-
-    SaveFile(filePath, fileContent) {
-        this._UploadFile(filePath, fileContent)
-    }
-
-    DeleteFile(filePath) {
-        STYLE.INDEX.DISPOSE(...Object.values(this.fileCache[filePath].styleLocals));
-        STYLE.INDEX.DISPOSE(...Object.values(this.fileCache[filePath].styleGlobals));
-        delete this.fileCache[filePath];
-    }
-
-    RenderFiles(SaveFiles = {}, preBinds = new Set(), postBinds = new Set(), Command = "") {
-        Object.values(this.fileCache).forEach(file => {
-            const result = SCRIPT(file, this.extnsProps[file.extension], Command, { preBinds, postBinds }, {
-                Library: STASH.LibraryStyle2Index, Local: file.styleLocals, Global: STASH.GlobalsStyle2Index
-            })
-            SaveFiles[file.sourcePath] = result.scribed;
-        });
-    }
-
-    UpdateCache() {
-        Object.entries(this.fileCache).forEach(([file, cache]) => {
-            const filePath = file;
-            const fileContent = cache.content
-            this.DeleteFile(filePath);
-            this._UploadFile(filePath, fileContent);
-        })
-    }
-
-    ClearFiles() {
-        Object.values(this.fileCache).forEach(filePath => this.DeleteFile(filePath));
     }
 }

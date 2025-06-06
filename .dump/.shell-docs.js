@@ -9,7 +9,7 @@ const canvas = {
     width: 80
 };
 
-const canvasWidth = (canvas.width < 24) ? process.stdout.columns : Math.min(process.stdout.columns, canvas.width)
+const canvasWidth = (canvas.settings.width < 24) ? process.stdout.columns : Math.min(process.stdout.columns, canvas.settings.width)
 const styleReset = '\x1b[0m';
 const divider = {
     top: '‾'.repeat(canvasWidth),
@@ -504,7 +504,7 @@ const tag = {
         '\n' + character.charAt(0).repeat(canvasWidth),
 }
 
-const composeBlock = (headingType, heading, contents =[], startWith = '') => {
+const composeBlock = (headingType, heading, contents = [], startWith = '') => {
     contents = contents.map(item => startWith + item)
     if (contents.length) contents.push('')
     return [

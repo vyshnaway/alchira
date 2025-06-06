@@ -1,4 +1,4 @@
-import { canvas, tab, unstyle, canvas.width } from './0.root.js'
+import { canvas, tab, unstyle, canvas.settings.width } from './0.root.js'
 import style from './1.style.js';
 import tag from './2.tag.js'
 
@@ -21,7 +21,7 @@ const types = {
     },
     entries: (items, color, intent) => {
         const size = items.reduce((length, item) => { if (item.length > length) length = item.length; return length }, 0) + intent + canvas.tabSpace;
-        const cols = Math.floor(canvas.width / (size + 4))
+        const cols = Math.floor(canvas.settings.width / (size + 4))
 
         let result = [], subResult = "";
         items.forEach((item, index) => {
@@ -34,7 +34,7 @@ const types = {
             }
         })
         if (subResult.length) result.push(subResult)
-            
+
         return result
     },
     blocks: (items, color, intent) =>

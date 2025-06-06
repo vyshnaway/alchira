@@ -2,20 +2,29 @@ import $ from './Shell/index.js';
 import * as COLLECT from "./collector.js";
 import * as ACTION from './actions.js';
 import * as CRAFT from './craftsmen.js';
-import { ProxyTargets } from './data-cache.js';
 import * as CACHE from './data-cache.js';
 import * as watcher from '../interface/watcher.js';
-import fileman from '../interface/fileman.js';
-import SETDATA, { ROOT, APP, DATA, NAV } from './data-meta.js';
+import { ProxyTargets } from './data-cache.js';
 import { hasEvents, dequeueEvent } from '../interface/eventface.js';
+import SETDATA, { ROOT, APP, DATA, NAV } from './data-meta.js';
+import fileman from '../interface/fileman.js';
 
-let stopWatcher = null;
 
-async function execute(step = "Initialize") {
-    const footer = $.MOLD.failed.Footer("Press Ctrl+C to stop watching.");
-    let backRows = 0,
-        outputMessage = '',
-        heading = $.MOLD.primary.Chapter(`Initial Build`);
+function reporter(chapter, heading, report) {
+    return $.MOLD.std.Block([
+        $.MOLD.title.Chapter(chapter, Object.keys(ProxyTargets), $.list.text.Entries),
+        $.MOLD.primary.Chapter(heading, [report]),
+        $.MOLD.failed.Footer("Press Ctrl+C to stop watching.")
+    ])
+}
+
+async function execute(chapter) {
+    let stopWatcher = null;
+    let report = "",
+        step = "Initialize",
+        heading = "Initial Build";
+
+    if (!DATA.WATCH) $.POST($.MOLD.success.Chapter(chapter))
 
     do {
         switch (step) {
@@ -25,7 +34,7 @@ async function execute(step = "Initialize") {
             case "VerifySetupStruct":
                 const verifyStructResult = await COLLECT.VerifySetupStruct();
                 if (!verifyStructResult.proceed) {
-                    outputMessage = verifyStructResult.report
+                    report = verifyStructResult.report
                     break;
                 };
 
@@ -38,7 +47,7 @@ async function execute(step = "Initialize") {
             case "VerifyProxyMap":
                 const verifyConfigsResult = await COLLECT.VerifyProxyMap();
                 if (!verifyConfigsResult.status) {
-                    outputMessage = verifyConfigsResult.report;
+                    report = verifyConfigsResult.report;
                     break;
                 };
 
@@ -48,7 +57,7 @@ async function execute(step = "Initialize") {
             case "ReadShorthands":
                 const shorthandAnalysis = await COLLECT.AnalyzeShorthands();
                 if (!shorthandAnalysis.status) {
-                    outputMessage = shorthandAnalysis.report;
+                    report = shorthandAnalysis.report;
                     break;
                 }
 
@@ -62,15 +71,18 @@ async function execute(step = "Initialize") {
                 CRAFT.ProcessProxies();
 
             case "GenerateFinals":
-                const { SaveFiles, DeleteFiles, ConsoleReport } = await CRAFT.GenerateFinal();
-                outputMessage = ConsoleReport;
+                const { SaveFiles, ConsoleReport } = await CRAFT.GenerateFinal();
+                report = ConsoleReport;
 
             case "Publish":
-                await fileman.write.bulk(SaveFiles);
-                await fileman.delete.bulk(DeleteFiles);
+                if (Object.keys(SaveFiles).length)
+                    await fileman.write.bulk(SaveFiles);
 
             case "WatchFolders":
-                if (DATA.CMD !== "dev") {
+
+                if (DATA.WATCH) {
+                    step = "WatchFolders";
+                } else {
                     if (stopWatcher) {
                         stopWatcher();
                         stopWatcher = null;
@@ -81,17 +93,27 @@ async function execute(step = "Initialize") {
                 if (!stopWatcher) {
                     const targetFolders = [...Object.keys(ProxyTargets), NAV.folder.setup];
                     const ignoreFolders = [NAV.folder.cache];
-                    stopWatcher = watcher.watchFolders(targetFolders, ignoreFolders, $.MOLD.primary.Block([
-                        $.MOLD.success.Section("Target Folders", Object.keys(ProxyTargets), $.list.primary.Bullets)
-                    ]));
+                    process.on('SIGINT', () => {
+                        if (stopWatcher) { stopWatcher(); stopWatcher = null; $.render.write("\n", 2) }
+                        process.exit();
+                    });
+                    stopWatcher = watcher.watchFolders(targetFolders, ignoreFolders, "");
+                    $.render.write(reporter(chapter, heading, report));
                 }
 
                 if (hasEvents()) {
                     const event = dequeueEvent();
-                    // console.log(event);
+                    $.initialize(event.consoleWidth, !DATA.WATCH);
+                    // console.log({ action: event.action, folder: event.folder, file: event.filePath, extn: event.extension });
                     if (event.folder === NAV.folder.setup) {
-                        if (event.action === "change") {
-                            switch (event.filePath) {
+                        const filePath = `${event.folder}/${event.filePath}`;
+                        if (event.action === "add" || event.action === "change") {
+                            switch (filePath) {
+                                case NAV.json.proxymap:
+                                    stopWatcher();
+                                    stopWatcher = null;
+                                    step = "VerifyProxyMap"
+                                    break;
                                 case NAV.css.atrules:
                                 case NAV.css.constants:
                                 case NAV.css.elements:
@@ -99,55 +121,45 @@ async function execute(step = "Initialize") {
                                     await COLLECT.FetchIndexContent();
                                     step = "GenerateFinals";
                                     break;
-                                case NAV.json.proxymap:
-                                    step = "VerifyProxyMap"
-                                    break;
                                 case NAV.json.shorthand:
                                     step = "ReadShorthands"
                                     break;
                                 default:
-                                    CRAFT.UpdateLibrary(event.action, event.filePath, event.fileContent)
-                                    step = "ProcessTargetFolders"
+                                    DATA.LIBRARY[filePath] = event.fileContent;
+                                    step = "ProcessLibraries"
                             }
                         } else {
-                            const verifyStructResult = await COLLECT.VerifySetupStruct();
-                            if (!verifyStructResult.proceed) {
-                                outputMessage = verifyStructResult.report
-                                break;
-                            };
+                            step = "VerifySetupStruct"
                         }
                     } else {
-                        switch (event.action) {
-                            case "change":
-                                await CRAFT.ProcessProxies(event.action, event.folder, event.filePath, event.fileContent);
-                                step = "GenerateFinals"
-                                break;
-                            default:
-                                step = "ReadProxyFolders";
+                        if (event.action === "add" || event.action === "change") {
+                            CRAFT.ProcessProxies(event.action, event.folder, event.filePath, event.fileContent, event.extension);
+                            step = "GenerateFinals"
+                        } else {
+                            step = "ReadProxyFolders";
                         }
                     }
-                    heading = $.MOLD.primary.Chapter(`Active Runtime : ${event.timestamp}`);
-                    if (DATA.CMD === "dev") outputMessage = [heading, outputMessage, footer].join('\n');
-                    backRows = $.render.write(outputMessage, backRows);
-                    outputMessage = "";
+
+                    heading = `[${event.timeStamp}] | ${event.filePath} | [${event.action}]`;
+                    $.render.write(reporter(chapter, heading, report));
                 }
 
-                await new Promise((resolve) => setTimeout(resolve, 100));
+                await new Promise((resolve) => setTimeout(resolve, 50));
         }
-    } while (DATA.CMD === "devs");
-    
+    } while (DATA.WATCH);
+
     if (stopWatcher) {
         stopWatcher();
         stopWatcher = null;
     } else {
-        // $.POST(outputMessage);
+        $.POST(report);
     }
 }
 
 async function commander(cmd, arg, rootPath, workPath, consoleWidth, packageJson) {
-    DATA.CMD = cmd; DATA.ARG = arg; DATA.ISDEV = cmd === 'dev';
+    DATA.CMD = cmd; DATA.ARG = arg; DATA.WATCH = cmd === 'watch';
     SETDATA(rootPath, workPath, packageJson);
-    $.initialize(consoleWidth, cmd !== "dev");
+    $.initialize(consoleWidth, !DATA.WATCH);
 
     switch (DATA.CMD) {
         case 'init':
@@ -161,25 +173,14 @@ async function commander(cmd, arg, rootPath, workPath, consoleWidth, packageJson
                 $.POST(setupInit.report);
             }
             break;
-        case 'dev':
-            $.POST($.MOLD.std.Chapter(APP.name + ' : Active Runtime'));
-            process.on('SIGINT', () => {
-                if (stopWatcher) {
-                    stopWatcher();
-                    stopWatcher = null;
-                    $.render.write("\n", 2)
-                }
-                process.exit();
-            });
-            execute();
+        case 'watch':
+            execute(APP.name + ' : Active Runtime');
             break;
         case 'preview':
-            $.POST($.MOLD.std.Chapter(APP.name + ' : Preview Build'));
-            await execute()
+            await execute(APP.name + ' : Preview Build')
             break;
-        case 'build':
-            $.POST($.MOLD.std.Chapter(APP.name + ' : Final Build'));
-            await execute()
+        case 'publish':
+            await execute(APP.name + ' : Final Build');
             break;
         default:
             await ACTION.FetchDocs();

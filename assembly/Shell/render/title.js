@@ -1,4 +1,4 @@
-import { divider, canvas, canvas.width } from "../0.root.js";
+import { divider, canvas, canvas.settings.width } from "../0.root.js";
 import style from "../1.style.js";
 import tag from "../2.tag.js";
 import { blockType } from "../4.compose.js";
@@ -25,21 +25,21 @@ export default (string) => {
         ...new Array(previewFrames).fill([
             '',
             divider.low,
-            '·' + padBothSides('·', canvas.width - 2) + '·',
+            '·' + padBothSides('·', canvas.settings.width - 2) + '·',
             divider.top,
             ''
         ]),
         ...new Array(previewFrames).fill([
             '',
             divider.mid,
-            '>' + padBothSides('-', canvas.width - 2) + '<',
+            '>' + padBothSides('-', canvas.settings.width - 2) + '<',
             divider.mid,
             ''
         ]),
         ...new Array(previewFrames).fill([
             '',
             divider.top,
-            '>>' + padBothSides('×', canvas.width - 4) + '<<',
+            '>>' + padBothSides('×', canvas.settings.width - 4) + '<<',
             divider.low,
             ''
         ]),

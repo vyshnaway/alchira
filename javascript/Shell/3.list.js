@@ -4,12 +4,14 @@ import tag from './2.tag.js'
 
 const colors = {
     std: (item) => canvas.unstyle + item,
-    white: (item) => style.text.White(item),
+    title: (item) => style.text[canvas.settings.title](item),
+    text: (item) => style.text[canvas.settings.text](item),
     primary: (item) => style.text[canvas.settings.primary](item),
     secondary: (item) => style.text[canvas.settings.secondary](item),
-    warning: (item) => style.text.Orange(item),
-    failed: (item) => style.text.Red(item),
-    success: (item) => style.text.Green(item),
+    tertiary: (item) => style.text[canvas.settings.tertiary](item),
+    warning: (item) => style.text[canvas.settings.warning](item),
+    failed: (item) => style.text[canvas.settings.failed](item),
+    success: (item) => style.text[canvas.settings.success](item),
 }
 
 const types = {
@@ -22,7 +24,7 @@ const types = {
     },
     entries: (items, color, intent) => {
         const size = items.reduce((length, item) => { if (item.length > length) length = item.length; return length }, 0) + intent + canvas.tab.length;
-        const cols = Math.floor(canvas.width / (size + 4))
+        const cols = Math.floor(canvas.settings.width / (size + 3))
         let result = [], subResult = "";
         items.forEach((item, index) => {
             if ((index + 1) % cols) {
@@ -41,11 +43,17 @@ const types = {
     bullets: (items, color, intent) =>
         items.map(item => canvas.tab.repeat(intent) + tag.Li(color(item))),
     numbers: (items, color, intent) =>
-        items.map((item, index) => canvas.tab.repeat(intent) + style.bold[canvas.settings.secondary](index + 1) + canvas.tab.repeat() + tag.Div(color(item))),
+        items.map((item, index) =>
+            canvas.tab.repeat(intent) + style.bold[canvas.settings.secondary](index + 1) + canvas.tab.repeat() + tag.Div(color(item))
+        ),
     paragraphs: (items, color, intent) =>
         items.map(item => '\n'.repeat(intent - 1) + tag.P(color(item))),
     waterfall: (items, color, intent) =>
-        items.map((item, key) => canvas.tab.repeat(intent) + ' '.repeat(canvas.tab.length - 1) + style.bold[canvas.settings.secondary](key === items.length - 1 ? "└─>" : "├─>") + color(canvas.tab.repeat() + item))
+        items.map((item, key) => {
+            return canvas.tab.repeat(intent) + 
+                style.bold[canvas.settings.secondary](key === items.length - 1 ? "└─>" : "├─>") +
+                color(canvas.tab.repeat() + item)
+        })
 }
 
 export default {
@@ -58,14 +66,50 @@ export default {
         Intents: (items = [], intent = 0) => types.paragraphs(items, colors.std, intent),
         Waterfall: (items = [], intent = 0) => types.waterfall(items, colors.std, intent),
     },
-    white: {
-        Props: (items = [], intent = 0) => types.props(items, colors.white, intent),
-        Blocks: (items = [], intent = 0) => types.blocks(items, colors.white, intent),
-        Entries: (items = [], intent = 0) => types.entries(items, colors.white, intent),
-        Bullets: (items = [], intent = 0) => types.bullets(items, colors.white, intent),
-        Numbers: (items = [], intent = 0) => types.numbers(items, colors.white, intent),
-        Intents: (items = [], intent = 0) => types.paragraphs(items, colors.white, intent),
-        Waterfall: (items = [], intent = 0) => types.waterfall(items, colors.white, intent),
+    title: {
+        Props: (items = [], intent = 0) => types.props(items, colors.title, intent),
+        Blocks: (items = [], intent = 0) => types.blocks(items, colors.title, intent),
+        Entries: (items = [], intent = 0) => types.entries(items, colors.title, intent),
+        Bullets: (items = [], intent = 0) => types.bullets(items, colors.title, intent),
+        Numbers: (items = [], intent = 0) => types.numbers(items, colors.title, intent),
+        Intents: (items = [], intent = 0) => types.paragraphs(items, colors.title, intent),
+        Waterfall: (items = [], intent = 0) => types.waterfall(items, colors.title, intent),
+    },
+    text: {
+        Props: (items = [], intent = 0) => types.props(items, colors.text, intent),
+        Blocks: (items = [], intent = 0) => types.blocks(items, colors.text, intent),
+        Entries: (items = [], intent = 0) => types.entries(items, colors.text, intent),
+        Bullets: (items = [], intent = 0) => types.bullets(items, colors.text, intent),
+        Numbers: (items = [], intent = 0) => types.numbers(items, colors.text, intent),
+        Intents: (items = [], intent = 0) => types.paragraphs(items, colors.text, intent),
+        Waterfall: (items = [], intent = 0) => types.waterfall(items, colors.text, intent),
+    },
+    primary: {
+        Props: (items = [], intent = 0) => types.props(items, colors.primary, intent),
+        Blocks: (items = [], intent = 0) => types.blocks(items, colors.primary, intent),
+        Entries: (items = [], intent = 0) => types.entries(items, colors.primary, intent),
+        Bullets: (items = [], intent = 0) => types.bullets(items, colors.primary, intent),
+        Numbers: (items = [], intent = 0) => types.numbers(items, colors.primary, intent),
+        Intents: (items = [], intent = 0) => types.paragraphs(items, colors.primary, intent),
+        Waterfall: (items = [], intent = 0) => types.waterfall(items, colors.primary, intent),
+    },
+    secondary: {
+        Props: (items = [], intent = 0) => types.props(items, colors.secondary, intent),
+        Blocks: (items = [], intent = 0) => types.blocks(items, colors.secondary, intent),
+        Entries: (items = [], intent = 0) => types.entries(items, colors.secondary, intent),
+        Bullets: (items = [], intent = 0) => types.bullets(items, colors.secondary, intent),
+        Numbers: (items = [], intent = 0) => types.numbers(items, colors.secondary, intent),
+        Intents: (items = [], intent = 0) => types.paragraphs(items, colors.secondary, intent),
+        Waterfall: (items = [], intent = 0) => types.waterfall(items, colors.secondary, intent),
+    },
+    tertiary: {
+        Props: (items = [], intent = 0) => types.props(items, colors.tertiary, intent),
+        Blocks: (items = [], intent = 0) => types.blocks(items, colors.tertiary, intent),
+        Entries: (items = [], intent = 0) => types.entries(items, colors.tertiary, intent),
+        Bullets: (items = [], intent = 0) => types.bullets(items, colors.tertiary, intent),
+        Numbers: (items = [], intent = 0) => types.numbers(items, colors.tertiary, intent),
+        Intents: (items = [], intent = 0) => types.paragraphs(items, colors.tertiary, intent),
+        Waterfall: (items = [], intent = 0) => types.waterfall(items, colors.tertiary, intent),
     },
     failed: {
         Props: (items = [], intent = 0) => types.props(items, colors.failed, intent),
@@ -93,23 +137,5 @@ export default {
         Numbers: (items = [], intent = 0) => types.numbers(items, colors.warning, intent),
         Intents: (items = [], intent = 0) => types.paragraphs(items, colors.warning, intent),
         Waterfall: (items = [], intent = 0) => types.waterfall(items, colors.warning, intent),
-    },
-    primary: {
-        Props: (items = [], intent = 0) => types.props(items, colors.primary, intent),
-        Blocks: (items = [], intent = 0) => types.blocks(items, colors.primary, intent),
-        Entries: (items = [], intent = 0) => types.entries(items, colors.primary, intent),
-        Bullets: (items = [], intent = 0) => types.bullets(items, colors.primary, intent),
-        Numbers: (items = [], intent = 0) => types.numbers(items, colors.primary, intent),
-        Intents: (items = [], intent = 0) => types.paragraphs(items, colors.primary, intent),
-        Waterfall: (items = [], intent = 0) => types.waterfall(items, colors.primary, intent),
-    },
-    secondary: {
-        Props: (items = [], intent = 0) => types.props(items, colors.secondary, intent),
-        Blocks: (items = [], intent = 0) => types.blocks(items, colors.secondary, intent),
-        Entries: (items = [], intent = 0) => types.entries(items, colors.secondary, intent),
-        Bullets: (items = [], intent = 0) => types.bullets(items, colors.secondary, intent),
-        Numbers: (items = [], intent = 0) => types.numbers(items, colors.secondary, intent),
-        Intents: (items = [], intent = 0) => types.paragraphs(items, colors.secondary, intent),
-        Waterfall: (items = [], intent = 0) => types.waterfall(items, colors.secondary, intent),
     },
 }
