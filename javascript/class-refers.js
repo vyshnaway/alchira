@@ -89,10 +89,12 @@ function Renders() {
 
 function Report() {
     return [
-        $.MOLD.primary.Section(`Axiom Styles: ${axiomCount}`, Object.entries(axiomChart).map(([heading, entries]) =>
-            $.MOLD.tertiary.Topic(heading, entries, $.list.text.Entries))),
-        $.MOLD.primary.Section(`Library Styles: ${libraryCount}`, Object.entries(libraryChart).map(([heading, entries]) => 
-            $.MOLD.tertiary.Topic(heading, entries, $.list.text.Entries)))
+        $.MOLD.primary.Section(`Axiom Styles: ${axiomCount}`,
+            Object.entries(axiomChart).map(([heading, entries]) => $.MOLD.tertiary.Topic(heading, entries, $.list.text.Entries))
+        ),
+        $.MOLD.primary.Section(`Library Styles: ${libraryCount}`,
+            Object.entries(libraryChart).map(([heading, entries]) => $.MOLD.tertiary.Topic(heading, entries, $.list.text.Entries))
+        )
     ].join("");
 }
 

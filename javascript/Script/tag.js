@@ -11,8 +11,12 @@ const bracePair = {
     '"': '"',
 }, openBraces = ["[", "{", "(", "'", '"', "`"], closeBraces = ["]", "}", ")"];
 
+export const xtyleTag = `<${APP.styleTag} />`;
+const tagRegex = new RegExp(`<\\s*${APP.styleTag}\\s*/\\s*>`)
+const tagCheck = (string) => tagRegex.test(string);
+
 export default function tagScan(content, action, classProps, fileData) {
-    FileCursor.marker++;
+    const startMarker = FileCursor.marker++;
     let deviance = 0,
         ch = content[FileCursor.marker],
         classList = [],
@@ -85,16 +89,19 @@ export default function tagScan(content, action, classProps, fileData) {
         else if (deviance === 0 && ch === ";") break;
     }
 
+    const renderedTag = `<${tagObject.element}${Object.entries(tagObject.attributes)
+        .reduce((A, [P, V]) => A += " " + P + ((V === "") ? "" : "=" + V), "")}>`;
+    const replacement = (tagObject.element !== APP.styleTag) ? renderedTag :
+        (tagCheck(content.slice(startMarker, FileCursor.marker))) ? xtyleTag : "";
 
-    const newTag = tagObject.element === APP.styleTag ? "" : "<" + tagObject.element +
-        Object.entries(tagObject.attributes).reduce((A, [P, V]) => A += " " + P + ((V === "") ? "" : "=" + V), "") + ">";
+
     return {
         ok,
         marker: FileCursor.marker,
         rowMarker: FileCursor.rowMarker,
         columnMarker: FileCursor.colMarker,
         reading: Boolean(ch),
-        content: ok ? newTag : content.slice(FileCursor.marker, FileCursor.marker),
+        content: ok ? replacement : fragment,
         classList,
         styleObject
     }

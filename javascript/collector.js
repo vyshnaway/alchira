@@ -1,8 +1,8 @@
 import $ from './Shell/index.js';
 import { NAV, DATA } from "./data-meta.js";
 import fileman from "../interface/fileman.js";
-import * as watcher from "../interface/watcher.js";
-import { ProxyTargets } from "./data-cache.js";
+import * as worker from "../interface/worker.js";
+import { PROXY } from "./data-cache.js";
 import ClassRefers from './class-refers.js';
 
 export async function VerifySetupStruct() {
@@ -44,7 +44,7 @@ export async function VerifyProxyMap() {
     const proxyMap = await fileman.read.json(NAV.json.proxymap);
     if (proxyMap.status) {
         DATA.PROXYMAP = proxyMap.data;
-        const results = await watcher.proxyMapDependency(proxyMap.data, NAV.folder.setup);
+        const results = await worker.proxyMapDependency(proxyMap.data, NAV.folder.setup);
         errors.push(...results.warnings);
     } else { errors.push(`${NAV.json.proxymap} : Bad json file.`); }
 
@@ -65,19 +65,15 @@ export async function UpdateLibrary() {
 
 export async function UpdateProxies() {
     $.TASK("Syncing proxy folders", 0);
-    Object.keys(ProxyTargets).forEach(key => {
-        if (ProxyTargets[key].cache)
-            ProxyTargets[key].cache.ClearFiles();
-        delete ProxyTargets[key];
-    });
-    const proxies = await watcher.proxyMapSync(DATA.PROXYMAP);
-    proxies.forEach(proxy => ProxyTargets[DATA.WorkPath + "/" + proxy.target] = proxy);
+    Object.keys(PROXY.FILES).forEach(key => delete PROXY.FILES[key])
+    const proxies = await worker.proxyMapSync(DATA.PROXYMAP);
+    proxies.forEach(proxy => PROXY.FILES[DATA.WorkPath + "/" + proxy.target] = proxy);
     $.TASK("Reading target folders");
 }
 
 export async function FetchIndexContent() {
     $.TASK("Loading Axiom");
-    DATA.CSSIndex = await watcher.cssImport(Object.values(NAV.css));
+    DATA.CSSIndex = await worker.cssImport(Object.values(NAV.css));
 }
 
 export async function AnalyzeShorthands() {

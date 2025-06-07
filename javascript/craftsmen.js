@@ -10,9 +10,9 @@ import { DATA, NAV } from "./data-meta.js";
 import Proxy from "./class-proxy.js";
 import Refers from "./class-refers.js";
 import {
+    PROXY,
     STASH,
     PUBLISH,
-    ProxyTargets,
     ResetCache
 } from "./data-cache.js";
 
@@ -35,21 +35,28 @@ export function UpdateShorthands() {
 // On target files edit.
 export function ProcessProxies(action = "upload", targetFolder, filePath, fileContent, extension) {
     switch (action) {
-        case "upload":
-            Object.values(ProxyTargets).forEach(proxy => { proxy.cache = new Proxy(proxy); });
-            break;
         case "add": case "change":
-            if (Object.keys(ProxyTargets[targetFolder].extensions).includes(extension)) {
-                ProxyTargets[targetFolder].fileContents[filePath] = fileContent;
-                ProxyTargets[targetFolder].cache.SaveFile(filePath, fileContent);
-                ProxyTargets[targetFolder].cache.UpdateCache();
-                PUBLISH.DeltaPath = `${ProxyTargets[targetFolder].target}/${filePath}`;
+            if (PROXY.CACHE[targetFolder].extensions.includes(extension)) {
+                PROXY.FILES[targetFolder][filePath] = fileContent;
+                PROXY.CACHE[targetFolder].SaveFile(filePath, fileContent);
+                PROXY.CACHE[targetFolder].UpdateCache();
+                PUBLISH.DeltaPath = `${PROXY.CACHE[targetFolder].source}/${filePath}`;
                 PUBLISH.DeltaContent = '';
+            } else if (PROXY.CACHE[targetFolder].stylesheet === filePath) {
+                PROXY.CACHE[targetFolder].stylesheetContent = fileContent;
             } else {
-                PUBLISH.DeltaPath = `${ProxyTargets[targetFolder].source}/${filePath}`;
+                PUBLISH.DeltaPath = `${PROXY.CACHE[targetFolder].source}/${filePath}`;
                 PUBLISH.DeltaContent = fileContent;
             }
             break;
+        default:
+            Object.entries(PROXY.CACHE).forEach(([key, cache]) => {
+                cache.ClearFiles();
+                delete PROXY.CACHE[key];
+            });
+            Object.entries(PROXY.FILES).forEach(([key, files]) => {
+                PROXY.CACHE[key] = new Proxy(files);
+            });
     }
 }
 
@@ -66,8 +73,8 @@ async function Accumulate() {
         postBinds: new Set(),
     }
 
-    Object.values(ProxyTargets).forEach(proxy => {
-        const cumulated = proxy.cache.Accumulator();
+    Object.values(PROXY.CACHE).forEach(cache => {
+        const cumulated = cache.Accumulator();
 
         CUMULATES.report.push(...cumulated.report);
         CUMULATES.errors.push(...cumulated.errors);
@@ -97,7 +104,7 @@ async function Accumulate() {
                 else CUMULATES.errors.push(PUBLISH.FinalMessage);
             }
         } else {
-            PUBLISH.FinalMessage = CUMULATES.errors.length === 0 ? "Preview verified. Procceed to 'publish' using a key." :
+            PUBLISH.FinalMessage = CUMULATES.errors.length === 0 ? "Preview verified. Procceed to 'publish' using your key." :
                 "Errors in " + CUMULATES.errors.length + " Tags. Rectify them to proceed with 'publish' command.";
             output = await ORGANIZER(CUMULATES.classTracks, DATA.CMD, DATA.ARG);
         }
@@ -106,7 +113,7 @@ async function Accumulate() {
         STASH.SortedIndexes = output.result;
     }
     PUBLISH.ErrorCount = CUMULATES.errors.length;
-    PUBLISH.Report.errors = $.MOLD.failed.Section(CUMULATES.errors.length + " Errors", CUMULATES.errors);
+    PUBLISH.Report.errors = $.MOLD[PUBLISH.ErrorCount ? "failed" : "success"].Section(CUMULATES.errors.length + " Errors", CUMULATES.errors);
     PUBLISH.Report.targets = $.MOLD.std.Block(CUMULATES.report);
 
     return CUMULATES;
@@ -121,24 +128,20 @@ const RENDER = {
         return { preBinds: scanned.preBinds, postBinds: scanned.postBinds }
     },
     essentials: (CUMULATES) => {
-        PUBLISH.RENDERFRAGS.ESSENTIALS = COMPILE(CUMULATES.essentials, DATA.WATCH)
+        PUBLISH.RENDERFRAGS.ESSENTIALS = COMPILE(CUMULATES.essentials, !DATA.WATCH)
         return { preBinds: CUMULATES.preBinds, postBinds: CUMULATES.postBinds }
     },
-    rendered: (SaveFiles = {}) => {
+    rendered: () => {
         const preBinds = new Set(), postBinds = new Set();
 
-        Object.values(ProxyTargets).reduce((rendered, proxy) => {
-            proxy.cache.RenderFiles(SaveFiles, preBinds, postBinds, DATA.CMD);
-            return rendered;
-        }, [])
-
+        Object.values(PROXY.CACHE).forEach((cache) => cache.RenderFiles(preBinds, postBinds, DATA.CMD))
         PUBLISH.RENDERFRAGS.RENDERED = COMPILE(FORGE.indexMaps(STASH.FinalStack), !DATA.WATCH)
         return { preBinds, postBinds }
     },
     appendix: () => {
         const preBinds = [], postBinds = [];
-        PUBLISH.RENDERFRAGS.APPENDIX = COMPILE(Object.values(ProxyTargets).reduce((appendix, proxy) => {
-            const scanned = STYLE.CSSCANNER(cleaner.uncomment.Css(proxy.stylesheetContent), proxy.cache.targetStylesheet);
+        PUBLISH.RENDERFRAGS.APPENDIX = COMPILE(Object.values(PROXY.CACHE).reduce((appendix, cache) => {
+            const scanned = STYLE.CSSCANNER(cleaner.uncomment.Css(cache.stylesheetContent), cache.targetStylesheet);
             appendix.push(...scanned.styles);
             preBinds.push(...scanned.preBinds);
             postBinds.push(...scanned.postBinds);
@@ -164,23 +167,23 @@ export async function GenerateFinal() {
     PUBLISH.Report.shorthand = shorthandJS.REPORT();
 
     if (PUBLISH.DeltaContent.length) {
-        SaveFiles[PUBLISH.DeltaPath] = PUBLISH.DeltaPath
+        SaveFiles[PUBLISH.DeltaPath] = PUBLISH.DeltaContent
     } else {
         const indexBinds = RENDER.index();
         const appendixBinds = RENDER.appendix();
-        const renderedBinds = RENDER.rendered(SaveFiles);
+        const renderedBinds = RENDER.rendered();
         const essentialsBinds = RENDER.essentials(Cumulates);
 
         RENDER.binds([...indexBinds.preBinds, ...essentialsBinds.preBinds, ...appendixBinds.preBinds, ...renderedBinds.preBinds],
             [...indexBinds.postBinds, ...essentialsBinds.postBinds, ...appendixBinds.postBinds, ...renderedBinds.postBinds]);
 
+        const FinalStylesheet = Object.values(PUBLISH.RENDERFRAGS).filter(string => string !== '').join(DATA.WATCH ? "\n" : "");
+        Object.values(PROXY.CACHE).forEach((cache) => cache.SummonFiles(SaveFiles, FinalStylesheet))
+
         if (PUBLISH.DeltaPath.length) {
             Object.keys(SaveFiles).forEach(filePath => { if (PUBLISH.DeltaPath !== filePath) { delete SaveFiles[filePath] } })
             PUBLISH.SaveDepenFiles = [];
         }
-
-        const FinalStylesheet = Object.values(PUBLISH.RENDERFRAGS).filter(string => string !== '').join(DATA.WATCH ? "\n" : "");
-        Object.values(ProxyTargets).forEach(proxy => { SaveFiles[proxy.cache.sourceStylesheet] = FinalStylesheet; });
 
         if (DATA.WATCH) {
             SaveFiles[NAV.json.styleMap] = JSON.stringify(PUBLISH.StyleMap);
@@ -194,11 +197,11 @@ export async function GenerateFinal() {
                 Appendix: Use.string.stringMem(PUBLISH.RENDERFRAGS.APPENDIX),
             }
             PUBLISH.Report.memChart = $.MOLD[PUBLISH.ErrorCount ? "failed" : "success"].Section(
-                PUBLISH.FinalMessage, Object.entries(memChart).reduce((ch, [k, v]) => { ch[k] = `${v} Kb`; return ch }, {}), $.list.std.Props)
-            PUBLISH.Report.footer = $.MOLD.std.Footer(`Output size :  ${(Object.values(memChart).reduce((M, I) => I + M, 0))} Kb`)
+                PUBLISH.FinalMessage, Object.entries(memChart).reduce((ch, [k, v]) => { ch[k] = `${v} Kb`.padStart(9, " "); return ch }, {}), $.list.std.Props)
+            PUBLISH.Report.footer = $.MOLD.std.Footer("Output size :  " + `${Use.string.stringMem(FinalStylesheet)} Kb`.padStart(9, " "))
         }
     }
-    
+
     PUBLISH.DeltaPath = '';
     PUBLISH.DeltaContent = '';
     return {

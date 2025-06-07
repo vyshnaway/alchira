@@ -38,7 +38,8 @@ export async function proxyMapDependency(proxyMap = [], xtylesDirectory) {
             if (targetStat.type === "file") {
                 warnings.push(`[${index}]:"${map.target}" expected folder instead of file.`);
             } else {
-                if (fileman.path.isIndependent(xtylesDirectory, map.source)) {
+                if (!targetStat.exist) {
+                    // if (fileman.path.isIndependent(xtylesDirectory, map.source)) {
                     await fileman.clone.safe(map.source, map.target);
                     notifications.push(`[${index}]:"${map.target}" cloned from [${index}]:"${map.source}"`)
                 }
@@ -68,9 +69,12 @@ export async function proxyMapDependency(proxyMap = [], xtylesDirectory) {
 
 export async function proxyMapSync(proxyMap = []) {
     await Promise.all(proxyMap.map(async (map) => {
-        const syncResult = await fileman.sync.bulk(map.target, map.source, Object.keys(map.extensions), [map.stylesheet]);
-        Object.assign(map, syncResult);
-        map.stylesheetContent = (await fileman.read.file(fileman.path.join(map.target, map.stylesheet))).data
+        map.extensions.xcss = [];
+        const syncResult = await fileman.sync.bulk(map.target, map.source, Object.keys(map.extensions), ["xcss"], [map.stylesheet]);
+        if (syncResult.status) {
+            map.fileContents = syncResult.fileContents;
+            map.stylesheetContent = (await fileman.read.file(fileman.path.join(map.target, map.stylesheet))).data
+        }
     }));
     return proxyMap;
 }
@@ -131,19 +135,19 @@ export function watchFolders(folders = [], ignores = [], initialMessage) {
     watcher
         .on('all', (event, filePath) => handleEventInternal(event, filePath))
         .on('error', (error) => console.error(`Watcher error: ${error.message}`))
-        // .on('change', (filePath) => handleEventInternal('change', filePath))
-        // .on('add', (filePath) => handleEventInternal('add', filePath))
-        // .on('unlink', (filePath) => handleEventInternal('unlink', filePath))
-        // .on('addDir', (filePath) => handleEventInternal('addDir', filePath))
-        // .on('unlinkDir', (filePath) => handleEventInternal('unlinkDir', filePath))
-        // .on('ready', () => {
-        //     if (initialMessage) {
-        //         console.log(initialMessage)
-        //     } else {
-        //         console.log(`Watching folders: ${resolvedFolders.join(', ')}`);
-        //         console.log(`Ignoring changes in: ${resolvedIgnores.join(', ')}`);
-        //     }
-        // })
+    // .on('change', (filePath) => handleEventInternal('change', filePath))
+    // .on('add', (filePath) => handleEventInternal('add', filePath))
+    // .on('unlink', (filePath) => handleEventInternal('unlink', filePath))
+    // .on('unlinkDir', (filePath) => handleEventInternal('unlinkDir', filePath))
+    // .on('addDir', (filePath) => handleEventInternal('addDir', filePath))
+    // .on('ready', () => {
+    //     if (initialMessage) {
+    //         console.log(initialMessage)
+    //     } else {
+    //         console.log(`Watching folders: ${resolvedFolders.join(', ')}`);
+    //         console.log(`Ignoring changes in: ${resolvedIgnores.join(', ')}`);
+    //     }
+    // })
 
     return () => {
         console.log('Stopping watcher');

@@ -3,19 +3,19 @@ import * as COLLECT from "./collector.js";
 import * as ACTION from './actions.js';
 import * as CRAFT from './craftsmen.js';
 import * as CACHE from './data-cache.js';
-import * as watcher from '../interface/watcher.js';
-import { ProxyTargets } from './data-cache.js';
+import * as worker from '../interface/worker.js';
+import { PROXY } from './data-cache.js';
 import { hasEvents, dequeueEvent } from '../interface/eventface.js';
 import SETDATA, { ROOT, APP, DATA, NAV } from './data-meta.js';
 import fileman from '../interface/fileman.js';
 
 
 function reporter(chapter, heading, report) {
-    return $.MOLD.std.Block([
-        $.MOLD.title.Chapter(chapter, Object.keys(ProxyTargets), $.list.text.Entries),
+    $.POST($.MOLD.std.Block([
+        $.MOLD.title.Chapter(chapter, Object.keys(PROXY.CACHE), $.list.text.Entries),
         $.MOLD.primary.Chapter(heading, [report]),
         $.MOLD.failed.Footer("Press Ctrl+C to stop watching.")
-    ])
+    ]))
 }
 
 async function execute(chapter) {
@@ -91,14 +91,14 @@ async function execute(chapter) {
                 }
 
                 if (!stopWatcher) {
-                    const targetFolders = [...Object.keys(ProxyTargets), NAV.folder.setup];
+                    const targetFolders = [...Object.keys(PROXY.CACHE), NAV.folder.setup];
                     const ignoreFolders = [NAV.folder.cache];
                     process.on('SIGINT', () => {
                         if (stopWatcher) { stopWatcher(); stopWatcher = null; $.render.write("\n", 2) }
                         process.exit();
                     });
-                    stopWatcher = watcher.watchFolders(targetFolders, ignoreFolders, "");
-                    $.render.write(reporter(chapter, heading, report));
+                    stopWatcher = worker.watchFolders(targetFolders, ignoreFolders, "");
+                    reporter(chapter, heading, report);
                 }
 
                 if (hasEvents()) {
@@ -141,7 +141,7 @@ async function execute(chapter) {
                     }
 
                     heading = `[${event.timeStamp}] | ${event.filePath} | [${event.action}]`;
-                    $.render.write(reporter(chapter, heading, report));
+                    reporter(chapter, heading, report)
                 }
 
                 await new Promise((resolve) => setTimeout(resolve, 50));

@@ -46,7 +46,10 @@ export const STASH = {
     FinalStack: {},
 }
 
-export const ProxyTargets = {};
+export const PROXY = {
+    FILES: {},
+    CACHE: {}
+}
 
 export function Initialize() {
     LISTEDPREFIX.atRule = DATA.PREFIX.atrules;

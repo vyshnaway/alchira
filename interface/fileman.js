@@ -172,52 +172,40 @@ const fileman = {
             const current = await fileman.read.json(path);
             return (current.status) ? current.data : {}
         },
-        bulk: async (source, target, extensions = [], ignoreFiles = []) => {
-            const result = { status: true, fileContents: {}, syncMap: {} };
-            extensions = extensions.map(ext => '.' + ext);
+        bulk: async (source, target, extInclude = [], extnUnsync = [], fileExcludes = []) => {
+            const result = { status: true, fileContents: {} };
+            extInclude = extInclude.map(ext => '.' + ext);
+            extnUnsync = extnUnsync.map(ext => '.' + ext);
 
-            if (!fs.existsSync(source) && !fs.existsSync(target)) {
-                return { status: false, fileContent: {}, syncMap: {} }
-            } else if (!fs.existsSync(source)) {
-                await fileman.clone.safe(target, source);
-            } else if (!fs.existsSync(target)) {
-                await fileman.clone.safe(source, target);
-            }
+            const sourceExists = fs.existsSync(source);
+            const targetExists = fs.existsSync(target);
+            if (!sourceExists && !targetExists) return { status: false, fileContents: {} };
+            if (!targetExists) await fileman.clone.safe(target, source);
+            if (!sourceExists) await fileman.clone.safe(source, target);
 
-            const sourceFiles = fileman.path.listFiles(source);
             const targetFiles = fileman.path.listFiles(target);
-
-            ignoreFiles.forEach(file => {
-                const targetFile = path.join(target, file);
-                const sourceFile = path.join(source, file);
-                result.syncMap[targetFile] = sourceFile;
-                result.syncMap[sourceFile] = targetFile;
-            })
-
-            const relativeTargetFiles = (await targetFiles)
-                .map(file => path.relative(target, file))
-                .filter(file => !ignoreFiles.some(ignore => file.startsWith(ignore)));
-            const relativeSourceFiles = (await sourceFiles)
-                .map(file => path.relative(source, file))
-                .filter(file => !ignoreFiles.some(ignore => file.startsWith(ignore)));
+            const relativeTargetFiles = (await targetFiles).map(file => path.relative(target, file))
+                .filter(file => !fileExcludes.some(ignore => file.startsWith(ignore)));
+            const sourceFiles = fileman.path.listFiles(source);
+            const relativeSourceFiles = (await sourceFiles).map(file => path.relative(source, file))
+                .filter(file => !fileExcludes.some(ignore => file.startsWith(ignore)));
 
             for (const file of relativeTargetFiles) {
-                if (!relativeSourceFiles.includes(file)) {
-                    fs.promises.unlink(path.join(source, file));
+                if (!relativeSourceFiles.includes(file) || extnUnsync.includes(path.extname(file))) {
+                    await fs.promises.unlink(path.join(target, file));
                 }
             }
 
             for (const file of relativeSourceFiles) {
                 const sourceFilePath = path.join(source, file);
                 const targetFilePath = path.join(target, file);
-                result.syncMap[sourceFilePath] = targetFilePath;
-                result.syncMap[targetFilePath] = sourceFilePath;
 
                 if (!fs.existsSync(targetFilePath)) {
                     const sourceDirPath = path.dirname(sourceFilePath);
                     if (!fs.existsSync(sourceDirPath)) await fs.promises.mkdir(sourceDirPath, { recursive: true });
                 }
-                if (extensions.includes(path.extname(file))) {
+
+                if (extInclude.includes(path.extname(file))) {
                     result.fileContents[file] = await fs.promises.readFile(sourceFilePath, 'utf-8');
                 } else {
                     await fs.promises.copyFile(sourceFilePath, targetFilePath);

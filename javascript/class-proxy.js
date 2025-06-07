@@ -3,6 +3,7 @@ import SCRIPT from "./Script/file.js"
 import STYLE from "./Style/parse.js"
 import $ from "./Shell/index.js"
 import { STASH } from "./data-cache.js";
+import { xtyleTag } from "./Script/tag.js";
 
 export default class Proxy {
     source = "";
@@ -10,25 +11,32 @@ export default class Proxy {
     extensions = [];
     extnsProps = {};
     fileCache = {};
+    stylesheetPath = '';
+    sourceStylesheet = '';
+    targetStylesheet = '';
+    stylesheetContent = '';
 
     constructor({
         source,
         target,
         stylesheet,
         extensions,
-        fileContents
+        fileContents,
+        stylesheetContent
     }) {
         this.source = source;
         this.target = target;
         this.extnsProps = extensions;
+        this.stylesheet = stylesheet;
         this.extensions = Object.keys(extensions);
+        this.stylesheetContent = stylesheetContent;
         this.sourceStylesheet = source + "/" + stylesheet;
         this.targetStylesheet = target + "/" + stylesheet;
         Object.entries(fileContents).forEach(([filePath, fileContent]) => this.SaveFile(filePath, fileContent));
     }
 
     SaveFile(filePath, fileContent) {
-        this.DeleteFile(filePath);
+        this._DeleteFile(filePath);
         const file = LibSetter(this.target, this.source, filePath, fileContent, false).data;
         const response = SCRIPT(file, this.extnsProps[file.extension], "read");
 
@@ -109,19 +117,21 @@ export default class Proxy {
         return C;
     }
 
-    DeleteFile(filePath) {
-        if (this.fileCache[filePath]) {
-            this.fileCache[filePath].usedIndexes.forEach(index => STYLE.INDEX.DISPOSE(index))
-            delete this.fileCache[filePath];
-        }
-    }
-
-    RenderFiles(SaveFiles = {}, preBinds = new Set(), postBinds = new Set(), Command = "") {
+    RenderFiles(preBinds = new Set(), postBinds = new Set(), Command = "") {
         Object.values(this.fileCache).forEach(file => {
             const result = SCRIPT(file, this.extnsProps[file.extension], Command, { preBinds, postBinds },
                 { Library: STASH.LibraryStyle2Index, Local: file.styleLocals, Global: STASH.GlobalsStyle2Index })
-            SaveFiles[file.sourcePath] = result.scribed;
+            file.midway = result.scribed;
         });
+    }
+
+    SummonFiles(SaveFiles = {}, stylesheet) {
+        const styleBlock = `<style>${stylesheet}</style>`
+        Object.values(this.fileCache).forEach(file => {
+            if (file.extension !== "xcss")
+                SaveFiles[file.sourcePath] = file.summon ? file.midway.replace(xtyleTag, styleBlock) : file.midway;
+        })
+        SaveFiles[this.sourceStylesheet] = stylesheet;
     }
 
     UpdateCache() {
@@ -132,7 +142,7 @@ export default class Proxy {
     }
 
     ClearFiles() {
-        Object.values(this.fileCache).forEach(filePath => this.DeleteFile(filePath));
+        Object.values(this.fileCache).forEach(filePath => this._DeleteFile(filePath));
     }
 
     _LoadTracks(file) {
@@ -147,5 +157,12 @@ export default class Proxy {
             if (indexGroup.length) ACC.push(indexGroup)
             return ACC
         }, [])
+    }
+
+    _DeleteFile(filePath) {
+        if (this.fileCache[filePath]) {
+            this.fileCache[filePath].usedIndexes.forEach(index => STYLE.INDEX.DISPOSE(index))
+            delete this.fileCache[filePath];
+        }
     }
 }

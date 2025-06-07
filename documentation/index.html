@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="en" style="scroll-behavior: smooth;">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XCSS: Style Like You Think. Build at Light Speed.</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts - Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+            /* Prevent horizontal scroll from animations */
+        }
+
+        /* Custom Keyframe Animations for a futuristic feel */
+        @keyframes fadeInScaleUp {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes glow {
+            0% {
+                text-shadow: 0 0 5px rgba(125, 211, 252, 0.5), 0 0 10px rgba(125, 211, 252, 0.3);
+            }
+
+            50% {
+                text-shadow: 0 0 15px rgba(125, 211, 252, 0.8), 0 0 25px rgba(125, 211, 252, 0.6);
+            }
+
+            100% {
+                text-shadow: 0 0 5px rgba(125, 211, 252, 0.5), 0 0 10px rgba(125, 211, 252, 0.3);
+            }
+        }
+
+        /* Applying animations */
+        .animate-fade-in-scale {
+            animation: fadeInScaleUp 0.8s ease-out forwards;
+        }
+
+        .animate-fade-in-up {
+            animation: fadeInUp 0.7s ease-out forwards;
+        }
+
+        .animate-text-glow {
+            animation: glow 3s ease-in-out infinite alternate;
+        }
+
+        /* Delay utilities for staggered animations */
+        .delay-100 {
+            animation-delay: 0.1s;
+        }
+
+        .delay-200 {
+            animation-delay: 0.2s;
+        }
+
+        .delay-300 {
+            animation-delay: 0.3s;
+        }
+
+        .delay-400 {
+            animation-delay: 0.4s;
+        }
+
+        .delay-500 {
+            animation-delay: 0.5s;
+        }
+
+        .delay-600 {
+            animation-delay: 0.6s;
+        }
+
+        .delay-700 {
+            animation-delay: 0.7s;
+        }
+
+        /* Custom button styling for a more futuristic look */
+        .btn-primary {
+            position: relative;
+            overflow: hidden;
+            background-image: linear-gradient(to right, #8B5CF6, #6B49F7);
+            /* Purple-Indigo */
+            transition: all 0.4s ease-in-out;
+            box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: scale(1.05);
+            background-image: linear-gradient(to right, #6D28D9, #4C1D95);
+            /* Deeper Purple */
+            box-shadow: 0 6px 20px rgba(139, 92, 246, 0.6);
+        }
+
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: all 0.7s ease-in-out;
+        }
+
+        .btn-primary:hover::before {
+            left: 100%;
+        }
+
+        .btn-secondary {
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background-color: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(5px);
+            transition: all 0.3s ease-in-out;
+        }
+
+        .btn-secondary:hover {
+            border-color: rgba(255, 255, 255, 0.4);
+            background-color: rgba(255, 255, 255, 0.15);
+            transform: scale(1.03);
+        }
+
+        /* Frosted glass effect for cards */
+        .glass-card {
+            background-color: rgba(255, 255, 255, 0.08);
+            /* Slightly less opaque for better effect */
+            backdrop-filter: blur(12px);
+            /* Stronger blur */
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            /* Lighter border */
+            border-radius: 1.5rem;
+            /* More rounded */
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            /* Stronger shadow */
+            transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+        }
+
+        .glass-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.5);
+        }
+
+        /* Code block styling */
+        .code-block-container {
+            background-color: #1a202c;
+            /* Darker charcoal */
+            border: 1px solid #2d3748;
+            /* Darker border */
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+            border-radius: 1rem;
+            overflow: hidden;
+            /* For pre-wrap */
+        }
+
+        .code-block-container pre {
+            padding: 1.5rem;
+            white-space: pre-wrap;
+            /* Ensures wrapping for smaller screens */
+        }
+
+        /* Mobile menu button for small screens */
+        .mobile-menu-button {
+            position: fixed;
+            top: 1rem;
+            left: 1rem;
+            z-index: 60;
+            /* Higher than sidebar for mobile */
+            background-color: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 0.75rem;
+            border-radius: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease-in-out;
+        }
+
+        .mobile-menu-button:hover {
+            background-color: rgba(255, 255, 255, 0.25);
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+
+<body class="flex bg-gray-950 text-gray-100 min-h-screen">
+
+    <!-- Mobile Menu Button (visible on small screens only) -->
+    <button class="mobile-menu-button md:hidden focus:outline-none">
+        <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
+        </svg>
+    </button>
+
+    <!-- Left Navigation Bar -->
+    <aside
+        class="fixed left-0 top-0 bottom-0 w-64 bg-gray-800 bg-opacity-30 backdrop-blur-lg z-50 p-6 flex flex-col items-center justify-start rounded-r-2xl border-r border-gray-700 hidden md:flex">
+        <!-- Logo/Title -->
+        <div class="mb-10 mt-8">
+            <h2
+                class="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-teal-400 animate-text-glow">
+                XCSS</h2>
+        </div>
+        <!-- Navigation Links -->
+        <nav class="space-y-6 w-full">
+            <a href="#hero"
+                class="flex items-center px-4 py-3 text-lg font-medium text-gray-200 hover:text-white hover:bg-white hover:bg-opacity-10 rounded-lg transition-all duration-300 group">
+                <svg class="w-6 h-6 mr-3 text-blue-300 group-hover:text-blue-200 transition-colors duration-300"
+                    fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m0 0l7-7 7 7M19 10v10a1 1 0 01-1 1h-3m-7 0h-3a2 2 0 01-2-2V7m7 13v-3a2 2 0 00-2-2H9a2 2 0 00-2 2v3m7 0h2a2 2 0 002-2v-3m0 0H9">
+                    </path>
+                </svg>
+                Home
+            </a>
+            <a href="#documentation"
+                class="flex items-center px-4 py-3 text-lg font-medium text-gray-200 hover:text-white hover:bg-white hover:bg-opacity-10 rounded-lg transition-all duration-300 group">
+                <svg class="w-6 h-6 mr-3 text-teal-300 group-hover:text-teal-200 transition-colors duration-300"
+                    fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.747 0-3.332.477-4.5 1.253">
+                    </path>
+                </svg>
+                Documentation
+            </a>
+            <a href="#contact"
+                class="flex items-center px-4 py-3 text-lg font-medium text-gray-200 hover:text-white hover:bg-white hover:bg-opacity-10 rounded-lg transition-all duration-300 group">
+                <svg class="w-6 h-6 mr-3 text-purple-300 group-hover:text-purple-200 transition-colors duration-300"
+                    fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8m-9 13v-2m-3-1l-3-3m6 0l3-3m3 3l-3 3"></path>
+                </svg>
+                Contact Us
+            </a>
+        </nav>
+    </aside>
+
+    <!-- Main Content Area -->
+    <div class="flex-1 md:ml-64">
+        <!-- Hero Section -->
+        <section id="hero"
+            class="relative h-screen flex items-center justify-center text-center p-6 md:p-12 overflow-hidden">
+            <!-- Background elements for futuristic feel -->
+            <div class="absolute inset-0 z-0 opacity-10"
+                style="background-image: url('https://placehold.co/1920x1080/0A0A0A/000000?text='); background-size: cover; background-position: center; filter: grayscale(100%) brightness(50%);">
+            </div>
+            <div class="absolute inset-0 bg-gradient-to-br from-black to-indigo-900 opacity-70 z-10"></div>
+            <div class="absolute inset-0 z-20"
+                style="background-image: radial-gradient(circle at center, rgba(125, 211, 252, 0.05) 0%, transparent 60%);">
+            </div>
+
+            <div class="relative z-30 max-w-5xl mx-auto">
+                <h1 class="text-6xl md:text-8xl font-extrabold leading-tight mb-6 animate-fade-in-up animate-text-glow">
+                    XCSS: <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-teal-400">Style
+                        Like You Think.</span> Build at <span
+                        class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-emerald-400">Light
+                        Speed.</span>
+                </h1>
+                <p class="text-xl md:text-2xl text-gray-300 mb-10 leading-relaxed animate-fade-in-up delay-200">
+                    Finally, a CSS framework that's <span class="font-semibold text-white">intuitive, lightning-fast,
+                        and built for zero tech debt.</span> Get predictable styles, lean bundles, and effortless
+                    maintenance, for any project.
+                </p>
+                <div
+                    class="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-6 animate-fade-in-up delay-300">
+                    <a href="#"
+                        class="inline-block btn-primary text-white font-bold py-4 px-8 rounded-full text-lg shadow-xl focus:outline-none focus:ring-4 focus:ring-purple-600 focus:ring-opacity-60">
+                        Get Started with XCSS
+                    </a>
+                    <a href="#"
+                        class="inline-block btn-secondary text-white font-bold py-4 px-8 rounded-full text-lg shadow-xl focus:outline-none focus:ring-4 focus:ring-white focus:ring-opacity-40">
+                        Watch Demo
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features Section 1: Intuitive & Predictable Styling -->
+        <section class="py-24 px-6 md:px-12 bg-gray-900 overflow-hidden">
+            <div class="max-w-7xl mx-auto grid md:grid-cols-2 gap-16 items-center">
+                <div class="md:order-2 animate-fade-in-up delay-100">
+                    <h2 class="text-4xl md:text-5xl font-extrabold mb-4 text-blue-300">Intuitive & Predictable Styling
+                    </h2>
+                    <h3 class="text-2xl md:text-3xl font-bold mb-6 text-gray-200">Style Like You Think</h3>
+                    <p class="text-lg text-gray-300 mb-6 leading-relaxed">
+                        Stop fighting your CSS. XCSS's human-readable syntax (<code
+                            class="bg-gray-800 text-blue-200 px-2 py-1 rounded-md text-sm">$normals { @assemble d-flex; }</code>)
+                        feels like natural CSS but scales effortlessly. Say goodbye to specificity nightmares—XCSS
+                        ensures styles behave consistently, eliminating surprises from cascading or specificity
+                        conflicts.
+                    </p>
+                    <ul class="space-y-4 text-lg text-gray-300">
+                        <li class="flex items-center animate-fade-in-up delay-200">
+                            <svg class="w-7 h-7 text-green-400 mr-3 flex-shrink-0" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <span class="font-medium text-white">Human-Readable Syntax:</span> Write CSS that makes
+                            sense.
+                        </li>
+                        <li class="flex items-center animate-fade-in-up delay-300">
+                            <svg class="w-7 h-7 text-green-400 mr-3 flex-shrink-0" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <span class="font-medium text-white">Predictable Behavior:</span> Consistent styling, every
+                            time.
+                        </li>
+                        <li class="flex items-center animate-fade-in-up delay-400">
+                            <svg class="w-7 h-7 text-green-400 mr-3 flex-shrink-0" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <span class="font-medium text-white">Rapid Learning Curve:</span> Master XCSS in just <span
+                                class="font-bold text-teal-300">15 minutes</span> (4/10 effort).
+                        </li>
+                        <li class="flex items-center animate-fade-in-up delay-500">
+                            <svg class="w-7 h-7 text-green-400 mr-3 flex-shrink-0" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <span class="font-medium text-white">Ideal for Any Project:</span> SPAs, non-JS frameworks,
+                            raw HTML, and templating languages (Pug, Handlebars, Jinja2).
+                        </li>
+                    </ul>
+                </div>
+                <div class="md:order-1 flex justify-center items-center animate-fade-in-scale delay-200">
+                    <!-- Code Snippet for visual appeal -->
+                    <div class="code-block-container w-full max-w-md">
+                        <pre class="text-blue-200 text-sm font-mono leading-relaxed"><code>
+/* XCSS Example */
+<span class="text-purple-400">$button</span> {
+    <span class="text-cyan-400">@assemble</span> d-flex items-center justify-center;
+    padding: <span class="text-orange-300">1rem</span> <span class="text-orange-300">2rem</span>;
+    border-radius: <span class="text-orange-300">9999px</span>;
+    background-color: <span class="text-red-300">#6d28d9</span>; <span class="text-gray-500">/* purple-700 */</span>
+    color: <span class="text-red-300">white</span>;
+    font-weight: <span class="text-orange-300">700</span>;
+    transition: all <span class="text-orange-300">0.3s</span> ease;
+}
+
+<span class="text-purple-400">$button:hover</span> {
+    background-color: <span class="text-red-300">#5b21b6</span>; <span class="text-gray-500">/* purple-800 */</span>
+    transform: scale(<span class="text-orange-300">1.05</span>);
+}
+                        </code></pre>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features Section 2: Unrivaled Performance -->
+        <section id="documentation"
+            class="py-24 px-6 md:px-12 bg-gradient-to-r from-gray-950 to-indigo-950 overflow-hidden">
+            <div class="max-w-7xl mx-auto">
+                <h2 class="text-4xl md:text-5xl font-extrabold mb-4 text-teal-300 text-center animate-fade-in-up">
+                    Unrivaled Performance</h2>
+                <h3 class="text-2xl md:text-3xl font-bold mb-16 text-gray-200 text-center animate-fade-in-up delay-100">
+                    Unleash Speed: Lightning-Fast Builds & Lean Bundles</h3>
+
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-10">
+                    <!-- Feature Card 1 -->
+                    <div class="glass-card p-8 rounded-2xl animate-fade-in-up delay-200">
+                        <h4 class="text-2xl font-bold text-white mb-4">Lightning-Fast Builds</h4>
+                        <p class="text-lg text-gray-300 leading-relaxed">
+                            Compile <span class="font-bold text-blue-300">1K-2K styles in 200ms</span> (~2-6x faster
+                            than Sass/Tailwind), scaling to <span class="font-bold text-blue-300">10K+ classes in
+                                ~300-500ms.</span> Incremental updates in <span
+                                class="font-bold text-blue-300">8-15ms.</span>
+                        </p>
+                    </div>
+                    <!-- Feature Card 2 -->
+                    <div class="glass-card p-8 rounded-2xl animate-fade-in-up delay-300">
+                        <h4 class="text-2xl font-bold text-white mb-4">Lean Bundles</h4>
+                        <p class="text-lg text-gray-300 leading-relaxed">
+                            Output <span class="font-bold text-blue-300">10-19KB CSS bundles</span>, ~40-60% smaller
+                            than Sass or Tailwind. Automatic deduping and purging of unused styles.
+                        </p>
+                    </div>
+                    <!-- Feature Card 3 -->
+                    <div class="glass-card p-8 rounded-2xl animate-fade-in-up delay-400">
+                        <h4 class="text-2xl font-bold text-white mb-4">Blazing Runtime</h4>
+                        <p class="text-lg text-gray-300 leading-relaxed">
+                            Achieve <span class="font-bold text-blue-300">&lt;1ms runtime</span>, ~5-20x quicker than
+                            CSS-in-JS.
+                        </p>
+                    </div>
+                    <!-- Feature Card 4 -->
+                    <div
+                        class="glass-card p-8 rounded-2xl animate-fade-in-up delay-500 col-span-full md:col-span-1 md:col-start-2">
+                        <h4 class="text-2xl font-bold text-white mb-4">Optimized for Production</h4>
+                        <p class="text-lg text-gray-300 leading-relaxed">
+                            3-character classes (e.g., <code
+                                class="bg-gray-800 text-blue-200 px-2 py-1 rounded-md text-sm">_gX</code>) for minimal
+                            production output.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features Section 3: Effortless Debugging & Maintenance -->
+        <section class="py-24 px-6 md:px-12 bg-gray-900 overflow-hidden">
+            <div class="max-w-7xl mx-auto grid md:grid-cols-2 gap-16 items-center">
+                <div class="animate-fade-in-up delay-100">
+                    <h2 class="text-4xl md:text-5xl font-extrabold mb-4 text-purple-300">Effortless Debugging &
+                        Maintenance</h2>
+                    <h3 class="text-2xl md:text-3xl font-bold mb-6 text-gray-200">Grow Without the Groan: Zero Tech
+                        Debt, Maximum Productivity</h3>
+                    <p class="text-lg text-gray-300 mb-6 leading-relaxed">
+                        XCSS automates the tedious, so you can focus on innovation. Debug styles in seconds, integrate
+                        new components seamlessly, and eliminate styling tech debt.
+                    </p>
+                    <ul class="space-y-4 text-lg text-gray-300">
+                        <li class="flex items-start animate-fade-in-up delay-200">
+                            <svg class="w-7 h-7 text-yellow-400 mr-3 flex-shrink-0 mt-1" fill="none"
+                                stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                            </svg>
+                            <span class="font-medium text-white">Dynamic Libraries:</span> Axiom (253 styles) and
+                            Library (174 styles) adapt and integrate new styles automatically via <code
+                                class="bg-gray-800 text-blue-200 px-2 py-1 rounded-md text-sm">@assemble</code>—no
+                            manual imports.
+                        </li>
+                        <li class="flex items-start animate-fade-in-up delay-300">
+                            <svg class="w-7 h-7 text-yellow-400 mr-3 flex-shrink-0 mt-1" fill="none"
+                                stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.747 0-3.332.477-4.5 1.253">
+                                </path>
+                            </svg>
+                            <span class="font-medium text-white">Dynamic Documentation:</span> Debug like a detective
+                            with self-commented origins (<code
+                                class="bg-gray-800 text-blue-200 px-2 py-1 rounded-md text-sm">/* xtyles :: AXIOM => :root */</code>)
+                            and metaclasses (<code
+                                class="bg-gray-800 text-blue-200 px-2 py-1 rounded-md text-sm">L14__*</code>) that trace
+                            styles to their source (e.g., <span
+                                class="font-bold text-teal-300">app.html.xcss:14</span>). Cut debugging time to <span
+                                class="font-bold text-teal-300">30-60s/style.</span>
+                        </li>
+                        <li class="flex items-start animate-fade-in-up delay-400">
+                            <svg class="w-7 h-7 text-yellow-400 mr-3 flex-shrink-0 mt-1" fill="none"
+                                stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z">
+                                </path>
+                            </svg>
+                            <span class="font-medium text-white">Assistive VSCode Extension:</span> Instant insights and
+                            suggestions right in your editor.
+                        </li>
+                        <li class="flex items-start animate-fade-in-up delay-500">
+                            <svg class="w-7 h-7 text-yellow-400 mr-3 flex-shrink-0 mt-1" fill="none"
+                                stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path>
+                            </svg>
+                            <span class="font-medium text-white">"CSS Commits For You":</span> XCSS automates style
+                            updates, drastically reducing manual effort and version control hassles.
+                        </li>
+                        <li class="flex items-start animate-fade-in-up delay-600">
+                            <svg class="w-7 h-7 text-yellow-400 mr-3 flex-shrink-0 mt-1" fill="none"
+                                stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <span class="font-medium text-white">Near Zero Tech Debt:</span> Minimize styling overhead
+                            and keep your codebase clean as you scale.
+                        </li>
+                    </ul>
+                </div>
+                <div class="flex justify-center items-center animate-fade-in-scale delay-200">
+                    <!-- Placeholder for a visual, e.g., a debugger screenshot -->
+                    <img src="https://placehold.co/500x300/1E1E1E/B8B8B8?text=Advanced+Debugging"
+                        alt="Debugging Screenshot" class="rounded-xl shadow-2xl w-full max-w-md object-cover">
+                </div>
+            </div>
+        </section>
+
+        <!-- Features Section 4: Universal Compatibility & Future-Proof -->
+        <section class="py-24 px-6 md:px-12 bg-gradient-to-r from-gray-950 to-indigo-950 overflow-hidden">
+            <div class="max-w-7xl mx-auto">
+                <h2 class="text-4xl md:text-5xl font-extrabold mb-4 text-green-300 text-center animate-fade-in-up">
+                    Universal Compatibility & Future-Proof</h2>
+                <h3 class="text-2xl md:text-3xl font-bold mb-16 text-gray-200 text-center animate-fade-in-up delay-100">
+                    Style Anything, Anywhere. Ready for Tomorrow.</h3>
+
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-10">
+                    <!-- Compatibility Card 1 -->
+                    <div class="glass-card p-8 rounded-2xl animate-fade-in-up delay-200">
+                        <h4 class="text-2xl font-bold text-white mb-4">Universal Compatibility</h4>
+                        <p class="text-lg text-gray-300 leading-relaxed">
+                            Works with non-JS frameworks, raw HTML, and all templating languages (Pug, Jinja2,
+                            Handlebars)—<span class="font-bold text-blue-300">no JavaScript required.</span>
+                        </p>
+                    </div>
+                    <!-- Compatibility Card 2 -->
+                    <div class="glass-card p-8 rounded-2xl animate-fade-in-up delay-300">
+                        <h4 class="text-2xl font-bold text-white mb-4">Seamless Integration</h4>
+                        <p class="text-lg text-gray-300 leading-relaxed">
+                            Use alongside your existing frameworks; plug-in and plug-out from existing projects with no
+                            lock-in.
+                        </p>
+                    </div>
+                    <!-- Compatibility Card 3 -->
+                    <div class="glass-card p-8 rounded-2xl animate-fade-in-up delay-400">
+                        <h4 class="text-2xl font-bold text-white mb-4">Auto Vendor Prefixing</h4>
+                        <p class="text-lg text-gray-300 leading-relaxed">
+                            Ensures cross-browser support automatically.
+                        </p>
+                    </div>
+                    <!-- Compatibility Card 4 -->
+                    <div class="glass-card p-8 rounded-2xl animate-fade-in-up delay-500">
+                        <h4 class="text-2xl font-bold text-white mb-4">Scalable Variants</h4>
+                        <p class="text-lg text-gray-300 leading-relaxed">
+                            Easily manage <span class="font-bold text-blue-300">10K+ variants</span> with attributes
+                            like <code
+                                class="bg-gray-800 text-blue-200 px-2 py-1 rounded-md text-sm">[varient='red']</code>
+                            and <code
+                                class="bg-gray-800 text-blue-200 px-2 py-1 rounded-md text-sm">[data-dark-mode]</code>.
+                        </p>
+                    </div>
+                    <!-- Compatibility Card 5 -->
+                    <div
+                        class="glass-card p-8 rounded-2xl animate-fade-in-up delay-600 col-span-full md:col-span-1 md:col-start-2">
+                        <h4 class="text-2xl font-bold text-white mb-4">AI-Ready Manifests</h4>
+                        <p class="text-lg text-gray-300 leading-relaxed">
+                            Manifests map components (<code
+                                class="bg-gray-800 text-blue-200 px-2 py-1 rounded-md text-sm">L14__*</code> to <code
+                                class="bg-gray-800 text-blue-200 px-2 py-1 rounded-md text-sm">_gX</code>), enabling AI
+                            tools like Copilot to debug styles and bridge human-AI workflows.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Call to Action Section -->
+        <section id="contact" class="py-24 px-6 md:px-12 bg-gray-900 text-center overflow-hidden">
+            <div class="max-w-5xl mx-auto animate-fade-in-up">
+                <h2 class="text-4xl md:text-5xl font-extrabold mb-6 text-white animate-text-glow">Ready to Revolutionize
+                    Your CSS Workflow?</h2>
+                <p class="text-xl md:text-2xl text-gray-300 mb-10 leading-relaxed animate-fade-in-up delay-100">
+                    Stop wasting time on unpredictable styles and bloated bundles. Join the future of web development
+                    with XCSS.
+                </p>
+                <div
+                    class="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-6 animate-fade-in-up delay-200">
+                    <a href="#"
+                        class="inline-block btn-primary text-white font-bold py-4 px-8 rounded-full text-lg shadow-xl focus:outline-none focus:ring-4 focus:ring-teal-500 focus:ring-opacity-60">
+                        Get Started with XCSS Today
+                    </a>
+                    <a href="#documentation"
+                        class="inline-block btn-secondary text-white font-bold py-4 px-8 rounded-full text-lg shadow-xl focus:outline-none focus:ring-4 focus:ring-white focus:ring-opacity-40">
+                        Explore Documentation
+                    </a>
+                    <a href="#"
+                        class="inline-block btn-secondary text-white font-bold py-4 px-8 rounded-full text-lg shadow-xl focus:outline-none focus:ring-4 focus:ring-white focus:ring-opacity-40">
+                        Join Our Community
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Simple Footer -->
+        <footer class="py-8 text-center text-gray-500 text-sm bg-gray-950 border-t border-gray-800">
+            &copy; 2025 XCSS. All rights reserved.
+        </footer>
+    </div>
+</body>
+
+</html>
