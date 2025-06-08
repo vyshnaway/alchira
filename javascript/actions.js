@@ -21,7 +21,7 @@ export async function FetchPrefix() {
     $.TASK("Loading vendor-prefixes", 0);
 
     const PrefixGroup = {
-        props: {},
+        attributes: {},
         values: {},
         atrules: {},
         classes: {},

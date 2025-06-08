@@ -80,9 +80,9 @@ export const ROOT = {
         },
     },
     PREFIX: {
-        props: {
-            url: "/xcss/prefixes/props.json",
-            path: "/scaffold/prefix/props.json"
+        attributes: {
+            url: "/xcss/prefixes/attributes.json",
+            path: "/scaffold/prefix/attributes.json"
         },
         values: {
             url: "/xcss/prefixes/values.json",
@@ -102,7 +102,7 @@ export const ROOT = {
         },
         clrprops: {
             url: "/xcss/prefixes/clrprops.json",
-            path: "/scaffold/prefix/elements.json"
+            path: "/scaffold/prefix/clrprops.json"
         },
     },
 };

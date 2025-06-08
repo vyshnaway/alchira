@@ -1,11 +1,12 @@
 import Use from "../Utils/index.js"
-import loadColorFallback from "./color.js"
+import cleaner from "../Worker/cleaner.js";
+import { LoadColorFallback } from "./color.js"
 
 const PREFIX = {
     clrprops: [],
     atRule: {},
     selector: {},
-    property: {},
+    attributes: {},
     values: {},
 }
 
@@ -14,17 +15,33 @@ export default function SavePrefix({
     elements,
     atrules,
     classes,
-    props,
+    attributes,
     values,
 }) {
     PREFIX.clrprops = clrprops;
     PREFIX.selector = { ...classes, ...elements };
-    PREFIX.property = props;
+    PREFIX.attributes = attributes;
     PREFIX.atRule = atrules;
     PREFIX.values = values;
 }
 
-export function getSelectorPrefixes(content = "", prefixes = ["webkit", "moz", "ms", "o"]) {
+
+export function forAtRule(content = "", prefixes = ["webkit", "moz", "ms", "o"]) {
+    let index = content.indexOf(" ");
+    index = index < 0 ? content.length : index
+    const rule = content.slice(0, index), data = content.slice(index);
+
+    const result = {}
+    prefixes.forEach((group) => {
+        if (PREFIX.atRule[rule] && PREFIX.atRule[rule][group])
+            result[group] = PREFIX.atRule[rule][group] + data;;
+    }, {});
+    result[""] = content;
+    
+    return result
+}
+
+export function forSelector(content = "", prefixes = ["webkit", "moz", "ms", "o"]) {
     const stringList = Use.string.zeroBreaks(content, [","]).map(i => i.trim()), selectors = [];
     stringList.forEach((string = "") => {
         const result = {
@@ -49,49 +66,49 @@ export function getSelectorPrefixes(content = "", prefixes = ["webkit", "moz", "
     })
     const finalIndex = selectors.length - 1;
     const result = selectors.map((s, i) => (finalIndex !== i) ? s + "," : s);
-    // console.log(result)
+
     return result;
 }
 
-export function getAtRulePrefixes(content = "", prefixes = ["webkit", "moz", "ms", "o"]) {
-    let index = content.indexOf(" ");
-    index = index < 0 ? content.length : index
-    const rule = content.slice(0, index), data = content.slice(index);
+function forAttribute(content = "", prefixes = ["webkit", "moz", "ms", "o"]) {
+    const attrVals = PREFIX.attributes[content]
+    if (!attrVals) return { "": content };
 
-    const result = prefixes.reduce((a, group) => {
-        if (PREFIX.atRule[rule] && PREFIX.atRule[rule][group])
-            a[group] = PREFIX.atRule[rule][group] + data;;
-        return a;
-    }, {});
-    result[""] = content
-    // console.log(result)
-    return result
-}
+    const result = {};
+    Object.entries(attrVals).forEach(([vendor, value]) => {
+        if (prefixes.includes(vendor)) result[vendor] = value;
+    });
+    result[""] = content;
 
-export function getAtPropPrefixes(content = "", prefixes = ["webkit", "moz", "ms", "o"]) {
-    let index = content.indexOf(" ");
-    index = index < 0 ? content.length : index
-    const rule = content.slice(0, index), data = content.slice(index);
-
-    const result = prefixes.reduce((a, group) => {
-        if (PREFIX.atRule[rule] && PREFIX.atRule[rule][group]) {
-            a.push(PREFIX.atRule[rule][group] + data);
-        }
-        return a;
-    }, []);
-    result.push(content)
-    // console.log(result)
     return result;
 }
 
+function forValues(attribute, value, prefixes = ["webkit", "moz", "ms", "o"]) {
+    const cleanValue = cleaner.uncomment.Css(value);
+    const venVals = PREFIX.values?.[attribute]?.[cleanValue];
+    if (!venVals) return { "": value };
 
-export function getPropPrefixes(property = "", prefixes = ["webkit", "moz", "ms", "o"]) {
-    const result = prefixes.reduce((a, group) => {
-        if (PREFIX.property[property] && PREFIX.property[property][group])
-            a.push(PREFIX.property[property][group]);
-        return a;
-    }, []);
-    result.push(property)
-    // console.log(result)
+    const result = {};
+    Object.entries(venVals).forEach(([vendor, val]) => {
+        if (prefixes.includes(vendor)) result[vendor] = value.replace(cleanValue, val);
+    });
+    result[""] = value;
+
     return result;
+}
+
+export function LoadProps(attribute = "", value = "", prefixes = ["webkit", "moz", "ms", "o"]) {
+    const results = [];
+    const attributes = forAttribute(attribute, prefixes);
+    const values = PREFIX.clrprops.includes(attribute) ? LoadColorFallback(value) : forValues(attribute, value);
+
+    Object.entries(attributes).forEach(([attrVen, attr]) => {
+        Object.entries(values).forEach(([valVen, val]) => {
+            if (attrVen === valVen || valVen === '') {
+                results.push([attr, val]);
+            }
+        })
+    })
+    
+    return results
 }

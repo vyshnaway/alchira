@@ -102,7 +102,7 @@ function collectAndCountLines(directoryPath) {
 }
 
 // Example usage:
-const directoryToAnalyze = './src'; // Replace with the path to your directory
+const directoryToAnalyze = '../javascript'; // Replace with the path to your directory
 const result = collectAndCountLines(directoryToAnalyze);
 
 if (result) {

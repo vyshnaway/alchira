@@ -471,7 +471,7 @@ const targetMethods = [
  * @param {string} string - The input string containing color values. Defaults to an empty string.
  * @returns {object} An object containing the score (number of conversions) and the modified string.
  */
-export default function loadColorFallback(string = '') {
+export function LoadColorFallback(string = '') {
     let result = string, score = 0;
 
     // Process each specified color method.
@@ -577,5 +577,5 @@ export default function loadColorFallback(string = '') {
         return convert.LoadHex(rgb.r, rgb.g, rgb.b);
     });
 
-    return { changed: Boolean(score), result };
+    return Boolean(score) ? [result, string] : [string];
 }
