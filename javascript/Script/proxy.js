@@ -1,9 +1,9 @@
-import LibSetter from "./Worker/lib-setter.js";
-import SCRIPT from "./Script/file.js"
-import STYLE from "./Style/parse.js"
-import $ from "./Shell/index.js"
-import { STASH } from "./data-cache.js";
-import { xtyleTag } from "./Script/tag.js";
+import LibSetter from "../Worker/lib-setter.js";
+import SCRIPT from "./file.js"
+import STYLE from "../Style/parse.js"
+import $ from "../Shell/index.js"
+import { STASH } from "../data-cache.js";
+import { xtyleTag } from "./tag.js";
 
 export default class Proxy {
     source = "";

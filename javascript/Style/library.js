@@ -1,18 +1,18 @@
-import $ from "./Shell/index.js";
-import STYLE from "./Style/parse.js";
-import Utils from "./Utils/index.js";
-import LibSetter from "./Worker/lib-setter.js";
-import { NAV } from "./data-meta.js";
+import $ from "../Shell/index.js";
+import STYLE from "./parse.js";
+import Utils from "../Utils/index.js";
+import LibSetter from "../Worker/lib-setter.js";
+import { NAV } from "../data-meta.js";
 
 const files = {};
 
 function _accumulator() {
     let length = 0;
-    const index = { axiom: {}, library: {} }, referTable = {};
+    const index = { axiom: {}, cluster: {} }, referTable = {};
 
     Object.entries(files).forEach(([filePath, fileData]) => {
         const { level, axiom } = fileData;
-        const group = axiom ? "axiom" : "library";
+        const group = axiom ? "axiom" : "cluster";
         referTable[filePath] = { group: group, id: level };
 
         if (!index[group][level]) index[group][level] = [];
@@ -22,9 +22,9 @@ function _accumulator() {
     })
 
     const axiomsArray = Utils.array.formNumberedObject(index.axiom, length);
-    const librariesArray = Utils.array.formNumberedObject(index.library, length);
+    const clustersArray = Utils.array.formNumberedObject(index.cluster, length);
 
-    return { referTable, axiomsArray, librariesArray }
+    return { referTable, axiomsArray, clustersArray }
 }
 
 function _returnUsedIndexes(filePath) {
@@ -61,30 +61,30 @@ function SaveFile(filePath, fileContent) {
     files[filePath] = LibSetter("", "", filePath.slice(NAV.folder.refers.length + 1), fileContent, true, true);
 }
 
-let axiomCount = 0, libraryCount = 0, axiomChart = {}, libraryChart = {};
+let axiomCount = 0, clusterCount = 0, axiomChart = {}, clusterChart = {};
 
 function Renders() {
-    axiomCount = 0, libraryCount = 0, axiomChart = {}, libraryChart = {};
+    axiomCount = 0, clusterCount = 0, axiomChart = {}, clusterChart = {};
     Object.keys(files).forEach(filePath => _returnUsedIndexes(filePath));
 
-    const { referTable, axiomsArray, librariesArray } = _accumulator();
+    const { referTable, axiomsArray, clustersArray } = _accumulator();
     const AxiomStyleMap = axiomsArray.reduce((collection, fileData, index) => {
-        const classes = STYLE.CSSMULTI(fileData);
+        const classes = STYLE.CSSLIBRARY(fileData, "AXIOM");
         collection[index] = classes.exclusiveStyles;
         axiomChart[`Level ${index}:  ${classes.exclusiveStyles.length} Styles`] = classes.exclusiveStyles;
         axiomCount += classes.exclusiveStyles.length;
         return collection
     }, {});
 
-    const LibraryStyleMap = librariesArray.reduce((id, referLevel, index) => {
-        const classes = STYLE.CSSMULTI(referLevel)
+    const ClusterStyleMap = clustersArray.reduce((id, level, index) => {
+        const classes = STYLE.CSSLIBRARY(level, "CLUSTER")
         id[index] = classes.exclusiveStyles;
-        libraryChart[`Level ${index}:  ${classes.exclusiveStyles.length} Styles`] = classes.exclusiveStyles;
-        libraryCount += classes.exclusiveStyles.length;
+        clusterChart[`Level ${index}:  ${classes.exclusiveStyles.length} Styles`] = classes.exclusiveStyles;
+        clusterCount += classes.exclusiveStyles.length;
         return id;
     }, {});
 
-    return { referTable, AxiomStyleMap, LibraryStyleMap }
+    return { referTable, AxiomStyleMap, ClusterStyleMap }
 }
 
 function Report() {
@@ -92,8 +92,8 @@ function Report() {
         $.MOLD.primary.Section(`Axiom Styles: ${axiomCount}`,
             Object.entries(axiomChart).map(([heading, entries]) => $.MOLD.tertiary.Topic(heading, entries, $.list.text.Entries))
         ),
-        $.MOLD.primary.Section(`Library Styles: ${libraryCount}`,
-            Object.entries(libraryChart).map(([heading, entries]) => $.MOLD.tertiary.Topic(heading, entries, $.list.text.Entries))
+        $.MOLD.primary.Section(`Cluster Styles: ${clusterCount}`,
+            Object.entries(clusterChart).map(([heading, entries]) => $.MOLD.tertiary.Topic(heading, entries, $.list.text.Entries))
         )
     ].join("");
 }

@@ -8,7 +8,7 @@ function StylePartialsArray(object, vendors = LoadVendors()) {
     const result = [];
     Object.entries(object).forEach(([key, value]) => {
         if (typeof value === "object") {
-            result.push([key, value]);
+            if (Object.keys(value).length) result.push([key, value]);
         } else if (key[0] === "@") {
             Object.values(LOADPREFIX.forAtRule(key, vendors)).forEach(r => result.push([r + ';', '']));
         } else {

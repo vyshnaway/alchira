@@ -7,8 +7,8 @@ import COMPILE from "./Style/compile.js";
 import FORGE from "./forgent.js";
 import ORGANIZER from "./Worker/order-api.js";
 import { DATA, NAV } from "./data-meta.js";
-import Proxy from "./class-proxy.js";
-import Refers from "./class-refers.js";
+import Proxy from "./Script/proxy.js";
+import Refers from "./Style/library.js";
 import {
     PROXY,
     STASH,
@@ -20,10 +20,10 @@ import {
 export function UpdateLibrary() {
     ResetCache();
     Refers.UploadFiles(DATA.LIBRARY);
-    const { referTable, AxiomStyleMap, LibraryStyleMap } = Refers.Renders();
+    const { referTable, AxiomStyleMap, ClusterStyleMap } = Refers.Renders();
 
     PUBLISH.StyleMap.axiom = AxiomStyleMap;
-    PUBLISH.StyleMap.library = LibraryStyleMap;
+    PUBLISH.StyleMap.cluster = ClusterStyleMap;
     PUBLISH.StyleMap.file = referTable;
 }
 
@@ -86,7 +86,8 @@ async function Accumulate() {
         cumulated.preBinds.forEach(bind => CUMULATES.preBinds.add(bind));
         cumulated.postBinds.forEach(bind => CUMULATES.postBinds.add(bind));
     });
-
+    STASH.GlobalsStyle2Index =CUMULATES.styleGlobals;
+    
     if (DATA.WATCH) {
         STASH.FinalStack = {};
         PUBLISH.FinalMessage = CUMULATES.errors.length ? "Errors in " + CUMULATES.errors.length + " Tags." : "Zero errors.";
@@ -121,9 +122,9 @@ async function Accumulate() {
 
 const RENDER = {
     index: () => {
-        const scanned = STYLE.CSSCANNER(cleaner.uncomment.Css(DATA.CSSIndex), "xtyles", "AXIOM");
+        const scanned = STYLE.CSSCANNER(cleaner.uncomment.Css(DATA.CSSIndex), "INDEX ||");
         PUBLISH.RENDERFRAGS.INDEX
-        = COMPILE(scanned.styles, !DATA.WATCH);
+            = COMPILE(scanned.styles, !DATA.WATCH);
         PUBLISH.StyleMap.variables = Use.array.setback(scanned.variables);
         PUBLISH.Report.variables = $.MOLD.primary.Section("Root variables", PUBLISH.StyleMap.variables, $.list.text.Entries);
         return { preBinds: scanned.preBinds, postBinds: scanned.postBinds }
@@ -144,7 +145,7 @@ const RENDER = {
     appendix: () => {
         const preBinds = [], postBinds = [];
         PUBLISH.RENDERFRAGS.APPENDIX = COMPILE(Object.values(PROXY.CACHE).reduce((appendix, cache) => {
-            const scanned = STYLE.CSSCANNER(cleaner.uncomment.Css(cache.stylesheetContent), cache.targetStylesheet);
+            const scanned = STYLE.CSSCANNER(cleaner.uncomment.Css(cache.stylesheetContent), `APPENDIX : ${cache.targetStylesheet} ||`);
             appendix.push(...scanned.styles);
             preBinds.push(...scanned.preBinds);
             postBinds.push(...scanned.postBinds);

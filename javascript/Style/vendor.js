@@ -37,7 +37,7 @@ export function forAtRule(content = "", prefixes = ["webkit", "moz", "ms", "o"])
             result[group] = PREFIX.atRule[rule][group] + data;;
     }, {});
     result[""] = content;
-    
+
     return result
 }
 
@@ -100,15 +100,21 @@ function forValues(attribute, value, prefixes = ["webkit", "moz", "ms", "o"]) {
 export function LoadProps(attribute = "", value = "", prefixes = ["webkit", "moz", "ms", "o"]) {
     const results = [];
     const attributes = forAttribute(attribute, prefixes);
-    const values = PREFIX.clrprops.includes(attribute) ? LoadColorFallback(value) : forValues(attribute, value);
 
-    Object.entries(attributes).forEach(([attrVen, attr]) => {
-        Object.entries(values).forEach(([valVen, val]) => {
-            if (attrVen === valVen || valVen === '') {
-                results.push([attr, val]);
-            }
+    if (PREFIX.clrprops.includes(attribute)) {
+        const values = LoadColorFallback(value);
+        Object.values(attributes).forEach((attr) => values.forEach((val) => results.push([attr, val])))
+    } else {
+        const values = forValues(attribute, value);
+        Object.entries(attributes).forEach(([attrVen, attr]) => {
+            Object.entries(values).forEach(([valVen, val]) => {
+                if (attrVen === valVen || valVen === '') {
+                    results.push([attr, val]);
+                }
+            })
         })
-    })
-    
+    }
+
+
     return results
 }

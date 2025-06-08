@@ -37,7 +37,8 @@ function xtylemerge(classList = []) {
     return { result, preBinds, postBinds }
 };
 
-function SCANNER(content, filePath, sourceSelector) {
+function SCANNER(content, initial, sourceSelector) {
+
     const response = READS(content);
     const variables = response.variables;
     const merged = xtylemerge(response.assemble);
@@ -46,17 +47,17 @@ function SCANNER(content, filePath, sourceSelector) {
 
     const styles = Use.object.deepMerge(merged.result, {
         ...Object.entries(response.atProps).reduce((acc, [propKey, propValue]) => {
-            acc[propKey] = DATA.WATCH ? `${propValue} /* ${filePath} :: ${sourceSelector} */` : propValue;
+            acc[propKey] = DATA.WATCH ? `${propValue}/* ${initial} ${sourceSelector} */` : propValue;
             return acc;
         }, {}),
         ...Object.entries(response.properties).reduce((acc, [propKey, propValue]) => {
-            acc[propKey] = DATA.WATCH ? `${propValue} /* ${filePath} :: ${sourceSelector} */` : propValue;
+            acc[propKey] = DATA.WATCH ? `${propValue}/* ${initial} ${sourceSelector} */` : propValue;
             return acc;
         }, {})
     });
 
     for (let selector in response.allBlocks) {
-        const result = SCANNER(response.allBlocks[selector], filePath, sourceSelector + " -> " + selector)
+        const result = SCANNER(response.allBlocks[selector], initial, sourceSelector + " -> " + selector)
         variables.push(...result.variables);
         preBinds.push(...result.preBinds)
         postBinds.push(...result.postBinds)
@@ -66,14 +67,14 @@ function SCANNER(content, filePath, sourceSelector) {
     return { preBinds, postBinds, styles, variables }
 }
 
-function CSSCANNER(content, filePath, sourceSelector = '') {
+function CSSCANNER(content, initial = '') {
     const variables = [];
     const response = READS(content, true);
     const styles = response.XatProps;
     const preBinds = [], postBinds = [];
 
     response.XallBlocks.forEach(([key, value]) => {
-        const result = SCANNER(value, filePath, sourceSelector.length ? `${sourceSelector} => ${key}` : key)
+        const result = SCANNER(value, initial, key)
         variables.push(...result.variables);
         preBinds.push(...result.preBinds)
         postBinds.push(...result.postBinds)
@@ -83,7 +84,7 @@ function CSSCANNER(content, filePath, sourceSelector = '') {
     return { preBinds, postBinds, styles, variables }
 }
 
-function CSSMULTI(fileDatas = []) {
+function CSSLIBRARY(fileDatas = [], initial = '') {
     const selectors = {};
     fileDatas.forEach(source => {
         source.data.usedIndexes = new Set;
@@ -92,7 +93,7 @@ function CSSMULTI(fileDatas = []) {
         for (const selector in scannedObj) {
             const metaSelector = Use.string.normalize(selector[0] === "." ? selector.slice(1) : selector);
             const stampSelector = stamp + metaSelector;
-            const scannedStyle = SCANNER(scannedObj[selector], filePath, selector);
+            const scannedStyle = SCANNER(scannedObj[selector], initial + " : " + filePath + " ||", selector);
 
             const CLX = INDEX.DECLARE();
             source.data.usedIndexes.add(CLX.number)
@@ -119,13 +120,14 @@ function CSSMULTI(fileDatas = []) {
 }
 
 function TAGSTYLE({ isGlobal, selector, styles, rowMarker, columnMarker }, metaFront, filePath) {
-    const metaClass = (isGlobal ? "GLOBAL" : "LOCAL") + metaFront + `R${rowMarker}C${columnMarker}__` + Use.string.normalize(selector);
+    const type = !selector.length ? "ESSENTIAL" : isGlobal ? "GLOBAL" : "LOCAL"
+    const metaClass = type + metaFront + `R${rowMarker}C${columnMarker}__` + Use.string.normalize(selector);
     const compiled = {}, preBinds = [], postBinds = [], errors = [], essentials = [];
 
     for (let subSelector in styles) {
         const query = SHORTHAND.RENDER(subSelector);
         if (!query.status) errors.push(query.error)
-        const styleObj = SCANNER(styles[subSelector], filePath, subSelector === "" ? selector : `${selector.length ? selector : "ESSENTIAL"} => ${subSelector}`);
+        const styleObj = SCANNER(styles[subSelector], `${type} : ${filePath} ||`, selector + subSelector);
         postBinds.push(...styleObj.postBinds)
         preBinds.push(...styleObj.preBinds)
 
@@ -166,14 +168,13 @@ function TAGSTYLE({ isGlobal, selector, styles, rowMarker, columnMarker }, metaF
             metaClass,
             object: compiled
         }
-        // console.log(STASH.Index2StylesObject[CLX.number])
     }
     return { isEssentials: selector === "", index: INDEX.NOW, errors, essentials, preBinds, postBinds };
 }
 
 export default {
+    CSSLIBRARY,
     CSSCANNER,
-    CSSMULTI,
     TAGSTYLE,
     INDEX
 }

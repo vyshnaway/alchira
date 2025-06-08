@@ -26,7 +26,7 @@ export default function libFinder(target, source, filePath, content, prefix = fa
             targetPath,
             sourcePath,
             usedIndexes: new Set(),
-            metaFront: (prefix ? `${axiom ? "AXIOM" : "LIBRARY"}` : "") + `__${normalPath}${prefix ? "__" : "_"}`,
+            metaFront: (prefix ? `${axiom ? "AXIOM" : "CLUSTER"}` : "") + `__${normalPath}${prefix ? "__" : "_"}`,
             content: uncomment ? cleaner.uncomment.Css(content) : content,
         },
     }

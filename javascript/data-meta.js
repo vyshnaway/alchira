@@ -29,12 +29,12 @@ export const APP = {
 export const NAV = {
     scaffold: {
         setup: "/scaffold/setup",
-        refers: "/scaffold/refers"
+        refers: "/scaffold/library"
     },
     folder: {
         setup: "/xtyles",
         cache: "/xtyles/.cache",
-        refers: "/xtyles/references",
+        refers: "/xtyles/library",
     },
     css: {
         atrules: "/xtyles/#at-rules.css",

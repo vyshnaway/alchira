@@ -1,6 +1,5 @@
-import { DATA } from "./data-meta.js";
 import STYLE from "./Style/parse.js"
-import Library from "./class-refers.js";
+import Library from "./Style/library.js";
 
 export const PUBLISH = {
     DeltaPath: "",
@@ -23,14 +22,14 @@ export const PUBLISH = {
         local: {},
         global: {},
         axiom: {},
-        library: {}
+        cluster: {}
     },
     RENDERFRAGS: {
         INDEX: "",
         PREBINDS: "",
         RENDERED: "",
-        POSTBINDS: "",
         ESSENTIALS: "",
+        POSTBINDS: "",
         APPENDIX: "",
     }
 }
@@ -91,8 +90,8 @@ export function ResetCache() {
             INDEX: "",
             PREBINDS: "",
             RENDERED: "",
-            POSTBINDS: "",
             ESSENTIALS: "",
+            POSTBINDS: "",
             APPENDIX: "",
         }
     });
