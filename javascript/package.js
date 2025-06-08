@@ -144,8 +144,7 @@ async function execute(chapter) {
 
                 await new Promise((resolve) => setTimeout(resolve, 50));
         }
-    // } while (DATA.WATCH);
-    } while (false);
+    } while (DATA.WATCH);
 
     if (stopWatcher) {
         stopWatcher();

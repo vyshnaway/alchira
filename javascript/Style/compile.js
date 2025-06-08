@@ -41,18 +41,19 @@ function unNester(selector = "", object = {}, cumulates = {}) {
 }
 
 function objectCompose(object, minify, vendors = LoadVendors(), first = true) {
-    const tab = minify ? "" : "  ", space = minify ? "" : " ", br = (!minify && first) ? "\n" : "", styleSheet = [];
+    const tab = minify ? "" : "  ", space = minify ? "" : " ", styleSheet = [];
 
     StylePartialsArray(object, vendors).forEach(([key, value]) => {
         if ((typeof value) === "object") {
+            if (!minify && first) styleSheet.push('');
             if (key[0] === "@") {
                 const atPrefixes = LOADPREFIX.forAtRule;
                 Object.entries(atPrefixes(key, vendors)).forEach(([vendor, selector]) => {
-                    styleSheet.push(br + selector, "{", ...objectCompose(value, minify, LoadVendors(atPrefixes, vendor), false).map(i => tab + i), "}")
+                    styleSheet.push(selector, "{", ...objectCompose(value, minify, LoadVendors(atPrefixes, vendor), false).map(i => tab + i), "}")
                 });
             } else {
                 styleSheet.push(...LOADPREFIX.forSelector(key, vendors));
-                styleSheet.push(br + "{", ...objectCompose(value, minify, vendors, false).map(i => tab + i), "}")
+                styleSheet.push("{", ...objectCompose(value, minify, vendors, false).map(i => tab + i), "}")
             }
         }
         else if (key[0] === "@") {
@@ -67,7 +68,7 @@ function objectCompose(object, minify, vendors = LoadVendors(), first = true) {
 
 
 export default function arrayCompose(array, minify) {
-    const styleSheet = [""];
+    const styleSheet = [];
 
     array.forEach(([key, value]) => {
         const processed = typeof value === "object" ? unNester(key, value) : { [key]: value };

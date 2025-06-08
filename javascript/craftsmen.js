@@ -123,14 +123,14 @@ const RENDER = {
     index: () => {
         const scanned = STYLE.CSSCANNER(cleaner.uncomment.Css(DATA.CSSIndex), "xtyles", "AXIOM");
         PUBLISH.RENDERFRAGS.INDEX
-        // = COMPILE(scanned.styles, !DATA.WATCH);
+        = COMPILE(scanned.styles, !DATA.WATCH);
         PUBLISH.StyleMap.variables = Use.array.setback(scanned.variables);
         PUBLISH.Report.variables = $.MOLD.primary.Section("Root variables", PUBLISH.StyleMap.variables, $.list.text.Entries);
         return { preBinds: scanned.preBinds, postBinds: scanned.postBinds }
     },
     essentials: (CUMULATES) => {
         PUBLISH.RENDERFRAGS.ESSENTIALS
-        // = COMPILE(CUMULATES.essentials, !DATA.WATCH)
+            = COMPILE(CUMULATES.essentials, !DATA.WATCH)
         return { preBinds: CUMULATES.preBinds, postBinds: CUMULATES.postBinds }
     },
     rendered: () => {
@@ -138,7 +138,7 @@ const RENDER = {
 
         Object.values(PROXY.CACHE).forEach((cache) => cache.RenderFiles(preBinds, postBinds, DATA.CMD))
         PUBLISH.RENDERFRAGS.RENDERED
-        // = COMPILE(FORGE.indexMaps(STASH.FinalStack), !DATA.WATCH)
+            = COMPILE(FORGE.indexMaps(STASH.FinalStack), !DATA.WATCH)
         return { preBinds, postBinds }
     },
     appendix: () => {
@@ -158,9 +158,9 @@ const RENDER = {
             new Set(postBinds),
         );
         PUBLISH.RENDERFRAGS.PREBINDS
-        // = COMPILE(rendered.preBinds, !DATA.WATCH);
+            = COMPILE(rendered.preBinds, !DATA.WATCH);
         PUBLISH.RENDERFRAGS.POSTBINDS
-        // = COMPILE(rendered.postBinds, !DATA.WATCH);
+            = COMPILE(rendered.postBinds, !DATA.WATCH);
     },
 }
 
@@ -183,7 +183,7 @@ export async function GenerateFinal() {
             [...indexBinds.postBinds, ...essentialsBinds.postBinds, ...appendixBinds.postBinds, ...renderedBinds.postBinds]);
 
         const FinalStylesheet = Object.entries(PUBLISH.RENDERFRAGS)
-            .map(([chapter, content]) => DATA.WATCH ? `/* CHAPTER: ${chapter} */\n${content}\n\n\n` : content).join("");
+            .map(([chapter, content]) => DATA.WATCH ? `\n\n/* CHAPTER: ${chapter} */\n${content}\n` : content).join("");
         Object.values(PROXY.CACHE).forEach((cache) => cache.SummonFiles(SaveFiles, FinalStylesheet))
 
         if (PUBLISH.DeltaPath.length) {
