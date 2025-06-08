@@ -18,7 +18,6 @@ const write = (string = '', backRows = 0) => {
     }
     const rowsCreated = string.split('\n').length;
     console.log(string)
-    // process.stdout.write(Buffer.from(string, 'latin1') +"\n");
     return rowsCreated;
 };
 

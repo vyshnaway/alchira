@@ -399,5 +399,55 @@
             "-webkit-user-select-all",
             "-ms-user-select-all"
         ]
+    },
+    "position": {
+        "sticky": [
+            "-webkit-sticky",
+            "-moz-sticky",
+            "-ms-sticky"
+        ]
+    },
+    "image-rendering": {
+        "pixelated": [
+            "-webkit-optimize-contrast",
+            "-moz-crisp-edges",
+            "-o-crisp-edges"
+        ],
+        "crisp-edges": [
+            "-webkit-optimize-contrast",
+            "-moz-crisp-edges",
+            "-o-crisp-edges"
+        ]
+    },
+    "touch-action": {
+        "manipulation": [
+            "-ms-manipulation"
+        ],
+        "pan-x": [
+            "-ms-pan-x"
+        ],
+        "pan-y": [
+            "-ms-pan-y"
+        ],
+        "pinch-zoom": [
+            "-ms-pinch-zoom"
+        ],
+        "auto": [
+            "-ms-auto"
+        ],
+        "none": [
+            "-ms-none"
+        ],
+        "double-tap-zoom": [
+            "-ms-double-tap-zoom"
+        ]
+    },
+    "mask-type": {
+        "luminance": [
+            "-webkit-luminance"
+        ],
+        "alpha": [
+            "-webkit-alpha"
+        ]
     }
 }

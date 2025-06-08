@@ -23,8 +23,12 @@
   ":only-of-type": [],
   ":optional": [],
   ":out-of-range": [],
-  ":read-only": [],
-  ":read-write": [],
+  ":read-only": [
+    ":-moz-read-only"
+  ],
+  ":read-write": [
+    ":-moz-read-write"
+  ],
   ":required": [],
   ":root": [],
   ":target": [],
@@ -33,9 +37,28 @@
   ":fullscreen": [
     ":-webkit-full-screen",
     ":-moz-full-screen",
-    ":-ms-fullscreen"
+    ":-ms-fullscreen",
+    ":-o-full-screen"
   ],
-  ":selection": [
-    ":-moz-selection"
+  ":autofill": [
+    ":-webkit-autofill"
+  ],
+  ":placeholder-shown": [
+    ":-webkit-placeholder-shown",
+    ":-ms-placeholder-shown"
+  ],
+  ":dir()": [
+    ":-moz-dir()"
+  ],
+  ":is()": [
+    ":-webkit-any()",
+    ":-moz-any()"
+  ],
+  ":default": [
+    ":-moz-default"
+  ],
+  ":indeterminate": [
+    ":-webkit-indeterminate",
+    ":-moz-indeterminate"
   ]
 }

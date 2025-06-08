@@ -1,8 +1,6 @@
-import { LISTEDPREFIX } from "./Style/compile.js";
 import { DATA } from "./data-meta.js";
 import STYLE from "./Style/parse.js"
 import Library from "./class-refers.js";
-
 
 export const PUBLISH = {
     DeltaPath: "",
@@ -49,12 +47,6 @@ export const STASH = {
 export const PROXY = {
     FILES: {},
     CACHE: {}
-}
-
-export function Initialize() {
-    LISTEDPREFIX.atRule = DATA.PREFIX.atrules;
-    LISTEDPREFIX.property = DATA.PREFIX.properties;
-    LISTEDPREFIX.selector = { ...DATA.PREFIX.classes, ...DATA.PREFIX.elements }
 }
 
 export function ResetCache() {

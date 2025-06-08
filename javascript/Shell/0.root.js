@@ -1,5 +1,5 @@
 const canvas = {
-    unstyle: '\\x1b[0m',
+    unstyle: '\x1b[0m',
 
     appearance: {
         ends: 'ends',

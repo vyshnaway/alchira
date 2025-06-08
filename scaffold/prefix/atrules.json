@@ -24,6 +24,11 @@
   "supports": [],
   "viewport": [
     "@-ms-viewport",
-    "@-o-viewport"
+    "@-o-viewport",
+    "@-webkit-viewport"
+  ],
+  "region": [
+    "@-webkit-region",
+    "@-ms-region"
   ]
 }

@@ -2,7 +2,6 @@ import $ from './Shell/index.js';
 import * as COLLECT from "./collector.js";
 import * as ACTION from './actions.js';
 import * as CRAFT from './craftsmen.js';
-import * as CACHE from './data-cache.js';
 import * as worker from '../interface/worker.js';
 import { PROXY } from './data-cache.js';
 import { hasEvents, dequeueEvent } from '../interface/eventface.js';
@@ -11,11 +10,11 @@ import fileman from '../interface/fileman.js';
 
 
 function reporter(chapter, heading, report) {
-    $.POST($.MOLD.std.Block([
-        $.MOLD.title.Chapter(chapter, Object.keys(PROXY.CACHE), $.list.text.Entries),
-        $.MOLD.primary.Chapter(heading, [report]),
-        $.MOLD.failed.Footer("Press Ctrl+C to stop watching.")
-    ]))
+    // $.POST($.MOLD.std.Block([
+    //     $.MOLD.title.Chapter(chapter, Object.keys(PROXY.CACHE), $.list.text.Entries),
+    //     $.MOLD.primary.Chapter(heading, [report]),
+    //     $.MOLD.failed.Footer("Press Ctrl+C to stop watching.")
+    // ]))
 }
 
 async function execute(chapter) {
@@ -30,7 +29,7 @@ async function execute(chapter) {
         switch (step) {
             case "Initialize":
                 await ACTION.FetchPrefix();
-                CACHE.Initialize();
+                
             case "VerifySetupStruct":
                 const verifyStructResult = await COLLECT.VerifySetupStruct();
                 if (!verifyStructResult.proceed) {
@@ -104,7 +103,6 @@ async function execute(chapter) {
                 if (hasEvents()) {
                     const event = dequeueEvent();
                     $.initialize(event.consoleWidth, !DATA.WATCH);
-                    // console.log({ action: event.action, folder: event.folder, file: event.filePath, extn: event.extension });
                     if (event.folder === NAV.folder.setup) {
                         const filePath = `${event.folder}/${event.filePath}`;
                         if (event.action === "add" || event.action === "change") {
@@ -146,7 +144,8 @@ async function execute(chapter) {
 
                 await new Promise((resolve) => setTimeout(resolve, 50));
         }
-    } while (DATA.WATCH);
+    // } while (DATA.WATCH);
+    } while (false);
 
     if (stopWatcher) {
         stopWatcher();

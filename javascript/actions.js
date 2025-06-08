@@ -1,6 +1,7 @@
 import $ from './Shell/index.js';
 import fileman from '../interface/fileman.js';
-import { ROOT, NAV, APP, DATA } from './data-meta.js';
+import SavePrefix from './Style/vendor.js';
+import { ROOT, NAV, APP } from './data-meta.js';
 
 export async function FetchDocs() {
     const readmeMd = fileman.sync.file(ROOT.DOCS.readme.url, ROOT.DOCS.readme.path);
@@ -19,15 +20,20 @@ export async function FetchDocs() {
 export async function FetchPrefix() {
     $.TASK("Loading vendor-prefixes", 0);
 
-    const classes = fileman.sync.json(ROOT.PREFIX.classes.url, ROOT.PREFIX.classes.path);
-    const atrules = fileman.sync.json(ROOT.PREFIX.atrules.url, ROOT.PREFIX.atrules.path);
-    const elements = fileman.sync.json(ROOT.PREFIX.elements.url, ROOT.PREFIX.elements.path);
-    const properties = fileman.sync.json(ROOT.PREFIX.properties.url, ROOT.PREFIX.properties.path);
+    const PrefixGroup = {
+        props: {},
+        values: {},
+        atrules: {},
+        classes: {},
+        elements: {},
+        clrprops: [],
+    };
 
-    DATA.PREFIX.classes = await classes
-    DATA.PREFIX.atrules = await atrules
-    DATA.PREFIX.elements = await elements
-    DATA.PREFIX.properties = await properties
+    await Promise.all(Object.entries(ROOT.PREFIX).map(async ([group, source]) => {
+        PrefixGroup[group] = await fileman.sync.json(source.url, source.path)
+    }))
+
+    SavePrefix(PrefixGroup)
 }
 
 export async function Initialize() {

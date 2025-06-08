@@ -8,12 +8,6 @@ export const DATA = {
     SHORTHAND: {},
     PROXYMAP: {},
     LIBRARY: {},
-    PREFIX: {
-        classes: {},
-        atrules: {},
-        elements: {},
-        properties: {},
-    }
 };
 
 export const APP = {
@@ -22,8 +16,8 @@ export const APP = {
     website: '',
     command: '',
     styleTag: 'xtyle',
-    cdn: "https://xcdn.xpktr.com/xcss/version/",
-    console: "https://console.xpktr.com/",
+    cdn: "https://xcdn.xpktr.com",
+    console: "https://console.xpktr.com",
     commandList: {
         init: 'Initiate or Update & Verify setup.',
         watch: 'Live build for developer environment',
@@ -86,21 +80,29 @@ export const ROOT = {
         },
     },
     PREFIX: {
+        props: {
+            url: "/xcss/prefixes/props.json",
+            path: "/scaffold/prefix/props.json"
+        },
+        values: {
+            url: "/xcss/prefixes/values.json",
+            path: "/scaffold/prefix/values.json"
+        },
         atrules: {
-            url: "/prefixes/atrules.json",
+            url: "/xcss/prefixes/atrules.json",
             path: "/scaffold/prefix/atrules.json"
         },
         classes: {
-            url: "/prefixes/classes.json",
+            url: "/xcss/prefixes/classes.json",
             path: "/scaffold/prefix/classes.json"
         },
         elements: {
-            url: "/prefixes/elements.json",
+            url: "/xcss/prefixes/elements.json",
             path: "/scaffold/prefix/elements.json"
         },
-        properties: {
-            url: "/prefixes/properties.json",
-            path: "/scaffold/prefix/properties.json"
+        clrprops: {
+            url: "/xcss/prefixes/clrprops.json",
+            path: "/scaffold/prefix/elements.json"
         },
     },
 };

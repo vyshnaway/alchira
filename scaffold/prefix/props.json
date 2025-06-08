@@ -74,7 +74,8 @@
     "-webkit-"
   ],
   "background-clip": [
-    "-webkit-"
+    "-webkit-",
+    "-moz-"
   ],
   "background-origin": [
     "-webkit-"
@@ -202,36 +203,41 @@
     "-moz-"
   ],
   "filter": [
-    "-webkit-"
-  ],
-  "flex": [
-    "-webkit-"
-  ],
-  "flex-basis": [
-    "-webkit-"
-  ],
-  "flex-direction": [
-    "-webkit-"
-  ],
-  "flex-flow": [
-    "-webkit-"
-  ],
-  "flex-grow": [
-    "-webkit-"
-  ],
-  "flex-shrink": [
-    "-webkit-"
-  ],
-  "flex-wrap": [
-    "-webkit-"
-  ],
-  "float": [
     "-webkit-",
     "-moz-"
+  ],
+  "flex": [
+    "-webkit-",
+    "-ms-"
+  ],
+  "flex-basis": [
+    "-webkit-",
+    "-ms-"
+  ],
+  "flex-direction": [
+    "-webkit-",
+    "-ms-"
+  ],
+  "flex-flow": [
+    "-webkit-",
+    "-ms-"
+  ],
+  "flex-grow": [
+    "-webkit-",
+    "-ms-"
+  ],
+  "flex-shrink": [
+    "-webkit-",
+    "-ms-"
+  ],
+  "flex-wrap": [
+    "-webkit-",
+    "-ms-"
   ],
   "font-feature-settings": [
     "-webkit-",
-    "-moz-"
+    "-moz-",
+    "-o-"
   ],
   "font-kerning": [
     "-webkit-"
@@ -320,13 +326,10 @@
     "-moz-",
     "-ms-"
   ],
-  "image-rendering": [
+  "justify-content": [
     "-webkit-",
     "-moz-",
     "-ms-"
-  ],
-  "justify-content": [
-    "-webkit-"
   ],
   "line-break": [
     "-webkit-"
@@ -360,27 +363,29 @@
   ],
   "object-fit": [
     "-webkit-",
-    "-moz-",
     "-o-"
   ],
   "object-position": [
     "-webkit-",
-    "-moz-",
     "-o-"
   ],
   "opacity": [
     "-webkit-",
-    "-moz-"
+    "-moz-",
+    "-o-"
   ],
   "order": [
-    "-webkit-"
+    "-webkit-",
+    "-ms-"
   ],
   "outline": [
     "-webkit-",
-    "-moz-"
+    "-moz-",
+    "-o-"
   ],
   "overflow-wrap": [
     "-webkit-",
+    "-moz-",
     "-ms-"
   ],
   "perspective": [
@@ -390,15 +395,6 @@
   "perspective-origin": [
     "-webkit-",
     "-moz-"
-  ],
-  "place-content": [
-    "-webkit-"
-  ],
-  "place-items": [
-    "-webkit-"
-  ],
-  "place-self": [
-    "-webkit-"
   ],
   "pointer-events": [
     "-webkit-",
@@ -476,7 +472,9 @@
     "-webkit-"
   ],
   "text-orientation": [
-    "-webkit-"
+    "-webkit-",
+    "-moz-",
+    "-ms-"
   ],
   "text-overflow": [
     "-webkit-",
@@ -545,24 +543,19 @@
     "-moz-",
     "-ms-"
   ],
-  "vertical-align": [
-    "-webkit-",
-    "-moz-"
-  ],
-  "white-space": [
-    "-webkit-",
-    "-moz-"
-  ],
   "will-change": [
-    "-webkit-"
+    "-webkit-",
+    "-moz-"
   ],
   "word-break": [
     "-webkit-",
+    "-moz-",
     "-ms-"
   ],
   "word-spacing": [
     "-webkit-",
-    "-moz-"
+    "-moz-",
+    "-ms-"
   ],
   "word-wrap": [
     "-webkit-",
@@ -570,10 +563,7 @@
   ],
   "writing-mode": [
     "-webkit-",
-    "-ms-"
-  ],
-  "zoom": [
-    "-webkit-",
-    "-ms-"
+    "-ms-",
+    "-moz-"
   ]
 }

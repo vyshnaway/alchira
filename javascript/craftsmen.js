@@ -122,20 +122,23 @@ async function Accumulate() {
 const RENDER = {
     index: () => {
         const scanned = STYLE.CSSCANNER(cleaner.uncomment.Css(DATA.CSSIndex), "xtyles", "AXIOM");
-        PUBLISH.RENDERFRAGS.INDEX = COMPILE(scanned.styles, !DATA.WATCH);
+        PUBLISH.RENDERFRAGS.INDEX
+        // = COMPILE(scanned.styles, !DATA.WATCH);
         PUBLISH.StyleMap.variables = Use.array.setback(scanned.variables);
         PUBLISH.Report.variables = $.MOLD.primary.Section("Root variables", PUBLISH.StyleMap.variables, $.list.text.Entries);
         return { preBinds: scanned.preBinds, postBinds: scanned.postBinds }
     },
     essentials: (CUMULATES) => {
-        PUBLISH.RENDERFRAGS.ESSENTIALS = COMPILE(CUMULATES.essentials, !DATA.WATCH)
+        PUBLISH.RENDERFRAGS.ESSENTIALS
+        // = COMPILE(CUMULATES.essentials, !DATA.WATCH)
         return { preBinds: CUMULATES.preBinds, postBinds: CUMULATES.postBinds }
     },
     rendered: () => {
         const preBinds = new Set(), postBinds = new Set();
 
         Object.values(PROXY.CACHE).forEach((cache) => cache.RenderFiles(preBinds, postBinds, DATA.CMD))
-        PUBLISH.RENDERFRAGS.RENDERED = COMPILE(FORGE.indexMaps(STASH.FinalStack), !DATA.WATCH)
+        PUBLISH.RENDERFRAGS.RENDERED
+        // = COMPILE(FORGE.indexMaps(STASH.FinalStack), !DATA.WATCH)
         return { preBinds, postBinds }
     },
     appendix: () => {
@@ -154,8 +157,10 @@ const RENDER = {
             new Set(preBinds),
             new Set(postBinds),
         );
-        PUBLISH.RENDERFRAGS.PREBINDS = COMPILE(rendered.preBinds, !DATA.WATCH);
-        PUBLISH.RENDERFRAGS.POSTBINDS = COMPILE(rendered.postBinds, !DATA.WATCH);
+        PUBLISH.RENDERFRAGS.PREBINDS
+        // = COMPILE(rendered.preBinds, !DATA.WATCH);
+        PUBLISH.RENDERFRAGS.POSTBINDS
+        // = COMPILE(rendered.postBinds, !DATA.WATCH);
     },
 }
 
@@ -177,7 +182,8 @@ export async function GenerateFinal() {
         RENDER.binds([...indexBinds.preBinds, ...essentialsBinds.preBinds, ...appendixBinds.preBinds, ...renderedBinds.preBinds],
             [...indexBinds.postBinds, ...essentialsBinds.postBinds, ...appendixBinds.postBinds, ...renderedBinds.postBinds]);
 
-        const FinalStylesheet = Object.values(PUBLISH.RENDERFRAGS).filter(string => string !== '').join(DATA.WATCH ? "\n" : "");
+        const FinalStylesheet = Object.entries(PUBLISH.RENDERFRAGS)
+            .map(([chapter, content]) => DATA.WATCH ? `/* CHAPTER: ${chapter} */\n${content}\n\n\n` : content).join("");
         Object.values(PROXY.CACHE).forEach((cache) => cache.SummonFiles(SaveFiles, FinalStylesheet))
 
         if (PUBLISH.DeltaPath.length) {

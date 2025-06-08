@@ -10,21 +10,31 @@
   "::first-letter": [],
   "::first-line": [],
   "::selection": [
-    "::-moz-selection"
+    "::-moz-selection",
+    "::-webkit-selection"
   ],
   "::backdrop": [
-    ":-webkit-backdrop"
+    "::-webkit-backdrop"
   ],
   "::marker": [
-    ":-webkit-marker"
+    "::-webkit-marker"
   ],
   "::placeholder": [
-    ":-webkit-input-placeholder",
-    ":-moz-placeholder",
-    ":-ms-input-placeholder"
+    "::-webkit-input-placeholder",
+    "::-moz-placeholder",
+    "::-ms-input-placeholder"
   ],
   "::file-selector-button": [
-    ":-webkit-file-upload-button",
-    ":-ms-file-selector-button"
+    "::-webkit-file-upload-button",
+    "::-ms-file-selector-button"
+  ],
+  "::fullscreen": [
+    ":-webkit-full-screen",
+    ":-moz-full-screen",
+    ":-ms-fullscreen",
+    ":-o-full-screen"
+  ],
+  "::cue": [
+    "::-webkit-cue"
   ]
 }
