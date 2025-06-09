@@ -39,11 +39,11 @@ export default class Proxy {
     SaveFile(filePath, fileContent) {
         this._DeleteFile(filePath);
         const file = LibSetter(this.target, this.source, filePath, fileContent, false).data;
-        const response = SCRIPT(file, this.extnsProps[file.extension], "read");
+        const sciptResponse = SCRIPT(file, this.extnsProps[file.extension], "read");
 
         this.fileCache[file.filePath] = file;
         file.content = fileContent;
-        file.classGroups = response.classesList;
+        file.classGroups = sciptResponse.classesList;
 
         file.styleLocals = {};
         file.styleGlobals = {};
@@ -52,7 +52,7 @@ export default class Proxy {
         file.preBinds = [];
         file.postBinds = [];
 
-        response.stylesList.forEach(style => {
+        sciptResponse.stylesList.forEach(style => {
             const response = STYLE.TAGSTYLE(style, file.metaFront, file.filePath);
             file.preBinds.push(...response.preBinds)
             file.postBinds.push(...response.postBinds)
@@ -78,30 +78,25 @@ export default class Proxy {
     }
 
     Accumulator() {
+        let localCount = 0, globalCount = 0;
         const C = {
             report: [],
             errors: [],
             styleMap: [],
             essentials: [],
             classGroups: [],
-            classTracks: [],
             styleGlobals: {},
             preBinds: new Set(),
             postBinds: new Set()
         };
-        let localCount = 0, globalCount = 0;
-        C.styleMap.push({
-            file: { group: "stylesheet", id: `${DATA.WorkPath}/${this.targetStylesheet}` },
-            global: [],
-            local: []
-        });
-        Object.values(this.fileCache).forEach(file => {
 
+        C.styleMap.push({ file: { group: "stylesheet", id: `${DATA.WorkPath}/${this.targetStylesheet}` }, global: [], local: [] });
+
+        Object.values(this.fileCache).forEach(file => {
             C.styleMap.push(file.styleMap);
             C.errors.push(...file.errors);
             C.essentials.push(...file.essentials);
             C.classGroups.push(...file.classGroups);
-            C.classTracks.push(...this._LoadTracks(file));
             file.preBinds.forEach(bind => C.preBinds.add(bind));
             file.postBinds.forEach(bind => C.postBinds.add(bind));
             Object.assign(C.styleGlobals, file.styleGlobals);
@@ -151,18 +146,20 @@ export default class Proxy {
         Object.values(this.fileCache).forEach(filePath => this._DeleteFile(filePath));
     }
 
-    _LoadTracks(file) {
-        return file.classGroups.reduce((ACC, group) => {
-            const indexGroup = group.reduce((indexAcc, className) => {
-                const index = (STASH.LibraryStyle2Index[className] ?? 0) +
-                    (STASH.GlobalsStyle2Index[className] ?? 0) +
-                    (file.styleLocals[className] ?? 0);
-                if (index) indexAcc.push(index);
-                return indexAcc
-            }, [])
-            if (indexGroup.length) ACC.push(indexGroup)
-            return ACC
-        }, [])
+    LoadTracks() {
+        const classTracks = [];
+
+        Object.values(this.fileCache).forEach(file => {
+            file.classGroups.forEach(group => {
+                const indexGroup = group.reduce((indexAcc, className) => {
+                    const index = (STASH.LibraryStyle2Index[className] ?? 0) + (STASH.GlobalsStyle2Index[className] ?? 0) + (file.styleLocals[className] ?? 0);
+                    if (index) indexAcc.push(index);
+                    return indexAcc;
+                }, [])
+                if (indexGroup.length) classTracks.push(indexGroup)
+            })
+        })
+        return classTracks;
     }
 
     _DeleteFile(filePath) {

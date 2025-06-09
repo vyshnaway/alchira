@@ -8,16 +8,13 @@
   },
   "type": "module",
   "bin": {
-    "xcss": "./binary/xcss.wasm",
     "xdev": "./binary/xdev.js"
   },
   "scripts": {
-    "postinstall": "xcss init",
     "init": "xcss init",
     "watch": "xcss watch",
     "preview": "xcss preview",
     "publish": "xcss publish",
-    "help": "xcss help",
     "dev:test": "jest",
     "dev:lint": "eslint . --ext .ts",
     "dev:formats": "prettier --write .",

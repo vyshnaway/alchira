@@ -81,17 +81,18 @@ async function Accumulate() {
         CUMULATES.styleMap.push(...cumulated.styleMap);
         CUMULATES.essentials.push(...cumulated.essentials);
         CUMULATES.classGroups.push(...cumulated.classGroups);
-        CUMULATES.classTracks.push(...cumulated.classTracks);
         Object.assign(CUMULATES.styleGlobals, cumulated.styleGlobals);
         cumulated.preBinds.forEach(bind => CUMULATES.preBinds.add(bind));
         cumulated.postBinds.forEach(bind => CUMULATES.postBinds.add(bind));
     });
-    STASH.GlobalsStyle2Index = CUMULATES.styleGlobals;
     CUMULATES.styleMap.forEach(map => {
         PUBLISH.StyleMap.file[map.file.id] = map.file;
         PUBLISH.StyleMap.local[map.file.id] = map.local;
         PUBLISH.StyleMap.global[map.file.id] = map.global;
     })
+
+    STASH.GlobalsStyle2Index = CUMULATES.styleGlobals;
+    Object.values(PROXY.CACHE).forEach(cache => CUMULATES.classTracks.push(...cache.LoadTracks()));
 
     if (DATA.WATCH) {
         STASH.FinalStack = {};
