@@ -29,8 +29,8 @@ export const PUBLISH = {
         PREBINDS: "",
         RENDERED: "",
         ESSENTIALS: "",
-        POSTBINDS: "",
         APPENDIX: "",
+        POSTBINDS: "",
     }
 }
 
@@ -91,8 +91,8 @@ export function ResetCache() {
             PREBINDS: "",
             RENDERED: "",
             ESSENTIALS: "",
-            POSTBINDS: "",
             APPENDIX: "",
+            POSTBINDS: "",
         }
     });
 

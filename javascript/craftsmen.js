@@ -88,9 +88,9 @@ async function Accumulate() {
     });
     STASH.GlobalsStyle2Index = CUMULATES.styleGlobals;
     CUMULATES.styleMap.forEach(map => {
-        PUBLISH.StyleMap.file[DATA.WorkPath + "/" + map.file.id] = map.file;
-        PUBLISH.StyleMap.local[DATA.WorkPath + "/" + map.file.id] = map.local;
-        PUBLISH.StyleMap.global[DATA.WorkPath + "/" + map.file.id] = map.global;
+        PUBLISH.StyleMap.file[map.file.id] = map.file;
+        PUBLISH.StyleMap.local[map.file.id] = map.local;
+        PUBLISH.StyleMap.global[map.file.id] = map.global;
     })
 
     if (DATA.WATCH) {

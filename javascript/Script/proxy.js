@@ -4,6 +4,7 @@ import STYLE from "../Style/parse.js"
 import $ from "../Shell/index.js"
 import { STASH } from "../data-cache.js";
 import { xtyleTag } from "./tag.js";
+import { DATA } from "../data-meta.js";
 
 export default class Proxy {
     source = "";
@@ -70,7 +71,7 @@ export default class Proxy {
         });
 
         file.styleMap = {
-            file: { group: "target", id: `${file.targetPath}` },
+            file: { group: "target", id: `${DATA.WorkPath}/${file.targetPath}` },
             global: Object.keys(file.styleGlobals),
             local: Object.keys(file.styleLocals)
         }
@@ -89,8 +90,13 @@ export default class Proxy {
             postBinds: new Set()
         };
         let localCount = 0, globalCount = 0;
-
+        C.styleMap.push({
+            file: { group: "stylesheet", id: `${DATA.WorkPath}/${this.targetStylesheet}` },
+            global: [],
+            local: []
+        });
         Object.values(this.fileCache).forEach(file => {
+
             C.styleMap.push(file.styleMap);
             C.errors.push(...file.errors);
             C.essentials.push(...file.essentials);
