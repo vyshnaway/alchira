@@ -441,8 +441,6 @@ const regex = {
     rgb: /\brgb\(\s*(-?\d*\.?\d+)\s*,\s*(-?\d*\.?\d+)\s*,\s*(-?\d*\.?\d+)\s*\)/gi,
     hex: /\b#([0-9A-Fa-f]{3,6})\b/gi, // Note: hex supports 3 or 6 digits currently in your regex
     hsl: /\bhsl\(\s*(-?\d*\.?\d+)\s*,\s*(-?\d*\.?\d+)%\s*,\s*(-?\d*\.?\d+)%\s*\)/gi,
-    // Added optional alpha group for hwb, lab, lch, oklab, oklch.
-    // The previous regex for hwb had a typo for the percentage group `[\d*\.?\d]+` should be `(-?\d*\.?\d+)%`.
     hwb: /\bhwb\(\s*(-?\d*\.?\d+)\s+(-?\d*\.?\d+)%\s+(-?\d*\.?\d+)%(?:\s*\/\s*(-?\d*\.?\d+))?\s*\)/gi,
     lab: /\blab\(\s*(-?\d*\.?\d+)%?\s+([-?\d*\.?\d]+)\s+([-?\d*\.?\d]+)(?:\s*\/\s*(-?\d*\.?\d+))?\s*\)/gi,
     lch: /\blch\(\s*(-?\d*\.?\d+)%?\s+([\d*\.?\d]+)\s+(-?\d*\.?\d+)(?:\s*\/\s*(-?\d*\.?\d+))?\s*\)/gi,

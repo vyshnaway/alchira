@@ -84,7 +84,7 @@ export function ResetCache() {
             local: {},
             global: {},
             axiom: {},
-            library: {}
+            cluster: {}
         },
         RENDERFRAGS: {
             INDEX: "",

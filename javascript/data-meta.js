@@ -81,27 +81,27 @@ export const ROOT = {
     },
     PREFIX: {
         attributes: {
-            url: "/xcss/prefixes/attributes.json",
+            url: "/xcss/prefixes/active/attributes.json",
             path: "/scaffold/prefix/attributes.json"
         },
         values: {
-            url: "/xcss/prefixes/values.json",
+            url: "/xcss/prefixes/active/values.json",
             path: "/scaffold/prefix/values.json"
         },
         atrules: {
-            url: "/xcss/prefixes/atrules.json",
+            url: "/xcss/prefixes/active/atrules.json",
             path: "/scaffold/prefix/atrules.json"
         },
         classes: {
-            url: "/xcss/prefixes/classes.json",
+            url: "/xcss/prefixes/active/classes.json",
             path: "/scaffold/prefix/classes.json"
         },
         elements: {
-            url: "/xcss/prefixes/elements.json",
+            url: "/xcss/prefixes/active/elements.json",
             path: "/scaffold/prefix/elements.json"
         },
         clrprops: {
-            url: "/xcss/prefixes/clrprops.json",
+            url: "/xcss/prefixes/active/clrprops.json",
             path: "/scaffold/prefix/clrprops.json"
         },
     },

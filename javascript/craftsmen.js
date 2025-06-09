@@ -86,8 +86,13 @@ async function Accumulate() {
         cumulated.preBinds.forEach(bind => CUMULATES.preBinds.add(bind));
         cumulated.postBinds.forEach(bind => CUMULATES.postBinds.add(bind));
     });
-    STASH.GlobalsStyle2Index =CUMULATES.styleGlobals;
-    
+    STASH.GlobalsStyle2Index = CUMULATES.styleGlobals;
+    CUMULATES.styleMap.forEach(map => {
+        PUBLISH.StyleMap.file[DATA.WorkPath + "/" + map.file.id] = map.file;
+        PUBLISH.StyleMap.local[DATA.WorkPath + "/" + map.file.id] = map.local;
+        PUBLISH.StyleMap.global[DATA.WorkPath + "/" + map.file.id] = map.global;
+    })
+
     if (DATA.WATCH) {
         STASH.FinalStack = {};
         PUBLISH.FinalMessage = CUMULATES.errors.length ? "Errors in " + CUMULATES.errors.length + " Tags." : "Zero errors.";
