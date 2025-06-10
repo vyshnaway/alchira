@@ -26,7 +26,7 @@ function unNester(selector = "", object = {}, cumulates = {}) {
         if (typeof subContent === "object") {
             if (subSelector[0] === "&") {
                 const xelector = selector + subSelector.slice(1);
-                if (subSelector[1] === " ")
+                if (subSelector[1] === " " || subSelector[1] === ":")
                     unNester(xelector, subContent, children);
                 else
                     unNester(xelector, subContent, siblings);
