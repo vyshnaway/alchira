@@ -130,14 +130,14 @@ const RENDER = {
     index: () => {
         const scanned = STYLE.CSSCANNER(cleaner.uncomment.Css(DATA.CSSIndex), "INDEX ||");
         PUBLISH.RENDERFRAGS.INDEX
-            = COMPILE(scanned.styles, !DATA.WATCH);
+            = COMPILE.Stylesheet(scanned.styles, !DATA.WATCH);
         PUBLISH.StyleMap.variables = Use.array.setback(scanned.variables);
         PUBLISH.Report.variables = $.MOLD.primary.Section("Root variables", PUBLISH.StyleMap.variables, $.list.text.Entries);
         return { preBinds: scanned.preBinds, postBinds: scanned.postBinds }
     },
     essentials: (CUMULATES) => {
         PUBLISH.RENDERFRAGS.ESSENTIALS
-            = COMPILE(CUMULATES.essentials, !DATA.WATCH)
+            = COMPILE.Stylesheet(CUMULATES.essentials, !DATA.WATCH)
         return { preBinds: CUMULATES.preBinds, postBinds: CUMULATES.postBinds }
     },
     rendered: () => {
@@ -145,12 +145,12 @@ const RENDER = {
 
         Object.values(PROXY.CACHE).forEach((cache) => cache.RenderFiles(preBinds, postBinds, DATA.CMD))
         PUBLISH.RENDERFRAGS.RENDERED
-            = COMPILE(FORGE.indexMaps(STASH.FinalStack), !DATA.WATCH)
+            = COMPILE.Stylesheet(FORGE.indexMaps(STASH.FinalStack), !DATA.WATCH)
         return { preBinds, postBinds }
     },
     appendix: () => {
         const preBinds = [], postBinds = [];
-        PUBLISH.RENDERFRAGS.APPENDIX = COMPILE(Object.values(PROXY.CACHE).reduce((appendix, cache) => {
+        PUBLISH.RENDERFRAGS.APPENDIX = COMPILE.Stylesheet(Object.values(PROXY.CACHE).reduce((appendix, cache) => {
             const scanned = STYLE.CSSCANNER(cleaner.uncomment.Css(cache.stylesheetContent), `APPENDIX : ${cache.targetStylesheet} ||`);
             appendix.push(...scanned.styles);
             preBinds.push(...scanned.preBinds);
@@ -165,9 +165,9 @@ const RENDER = {
             new Set(postBinds),
         );
         PUBLISH.RENDERFRAGS.PREBINDS
-            = COMPILE(rendered.preBinds, !DATA.WATCH);
+            = COMPILE.Stylesheet(rendered.preBinds, !DATA.WATCH);
         PUBLISH.RENDERFRAGS.POSTBINDS
-            = COMPILE(rendered.postBinds, !DATA.WATCH);
+            = COMPILE.Stylesheet(rendered.postBinds, !DATA.WATCH);
     },
 }
 
@@ -199,8 +199,12 @@ export async function GenerateFinal() {
         }
 
         if (DATA.WATCH) {
-            SaveFiles[NAV.json.styleMap] = JSON.stringify(PUBLISH.StyleMap);
+            SaveFiles[NAV.buffer.styleMap] = JSON.stringify(PUBLISH.StyleMap);
         } else {
+            const portable = COMPILE.Portable();
+            SaveFiles[NAV.buffer.portable] = portable.portable;
+            SaveFiles[NAV.buffer.depends] = portable.depends;
+
             const memChart = {
                 Index: Use.string.stringMem(PUBLISH.RENDERFRAGS.INDEX),
                 Essentials: Use.string.stringMem(PUBLISH.RENDERFRAGS.ESSENTIALS),

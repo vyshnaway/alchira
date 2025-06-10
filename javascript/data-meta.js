@@ -33,8 +33,9 @@ export const NAV = {
     },
     folder: {
         setup: "/xtyles",
-        cache: "/xtyles/.cache",
-        refers: "/xtyles/library",
+        cache: "/xtyles/buffer",
+        library: "/xtyles/library",
+        portables: "/xtyles/potables",
     },
     css: {
         atrules: "/xtyles/#at-rules.css",
@@ -42,10 +43,14 @@ export const NAV = {
         elements: "/xtyles/#elements.css",
         extends: "/xtyles/#extends.css",
     },
-    json: {
+    jsonc: {
         proxymap: "/xtyles/proxy-map.jsonc",
         shorthand: "/xtyles/shorthands.jsonc",
-        styleMap: "/xtyles/.cache/style-map.json"
+    },
+    buffer: {
+        depends: "/xtyles/buffer/portable/depends.css",
+        portable: "/xtyles/buffer/portable/xtylesheet.xcss",
+        styleMap: "/xtyles/buffer/style-map.json"
     }
 };
 

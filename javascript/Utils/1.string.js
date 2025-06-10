@@ -1,12 +1,19 @@
-const NON_ALPHANUMERIC_AND_US = /[^a-z0-9_]/gi;
-const SPACE = /\s/g;
+const ALPHANUMERIC = /[a-z0-9]/gi;
+const SPACE = /\s+/g;
 
 const digits = "-0123456789_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 const base = digits.length;
 
 export default {
-    normalize: (string) => {
-        return string.replace(SPACE, '_').replace(NON_ALPHANUMERIC_AND_US, '-')
+    normalize: (string = '', keepChars = [], skipChars = []) => {
+        let final = "";
+        string.replace(SPACE, '_').split('').forEach(ch => {
+            if (skipChars.includes(ch)) return;
+            else final += ch === "_" ? '_' :
+                keepChars.includes(ch) ? ch :
+                    ch.match(ALPHANUMERIC) ? ch : '-';
+        });
+        return final;
     },
     minify: (string) => {
         const length = string.length;

@@ -29,7 +29,7 @@ async function execute(chapter) {
         switch (step) {
             case "Initialize":
                 await ACTION.FetchPrefix();
-                
+
             case "VerifySetupStruct":
                 const verifyStructResult = await COLLECT.VerifySetupStruct();
                 if (!verifyStructResult.proceed) {
@@ -107,7 +107,7 @@ async function execute(chapter) {
                         const filePath = `${event.folder}/${event.filePath}`;
                         if (event.action === "add" || event.action === "change") {
                             switch (filePath) {
-                                case NAV.json.proxymap:
+                                case NAV.jsonc.proxymap:
                                     stopWatcher();
                                     stopWatcher = null;
                                     step = "VerifyProxyMap"
@@ -119,7 +119,7 @@ async function execute(chapter) {
                                     await COLLECT.FetchIndexContent();
                                     step = "GenerateFinals";
                                     break;
-                                case NAV.json.shorthand:
+                                case NAV.jsonc.shorthand:
                                     step = "ReadShorthands"
                                     break;
                                 default:
@@ -150,7 +150,7 @@ async function execute(chapter) {
         stopWatcher();
         stopWatcher = null;
     } else {
-        $.POST(report);
+        // $.POST(report);
     }
 }
 

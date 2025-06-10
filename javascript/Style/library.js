@@ -58,7 +58,7 @@ function UploadFiles(FileContents = {}) {
 
 function SaveFile(filePath, fileContent) {
     if (files[filePath]) DeleteFile(filePath);
-    files[filePath] = LibSetter("", "", filePath.slice(NAV.folder.refers.length + 1), fileContent, true, true);
+    files[filePath] = LibSetter("", "", filePath.slice(NAV.folder.library.length + 1), fileContent, true, true);
 }
 
 let axiomCount = 0, clusterCount = 0, axiomChart = {}, clusterChart = {};

@@ -1,4 +1,7 @@
-import * as LOADPREFIX from "./vendor.js"
+import { STASH } from "../data-cache.js";
+import FORGE from "../forgent.js";
+import * as LOADPREFIX from "./vendor.js";
+import Use from "../Utils/index.js"
 
 function LoadVendors(collection = {}, vendor = '') {
     return vendor == '' ? ["webkit", "moz", "ms", "o"].filter(ven => !collection.hasOwnProperty(ven)) : [vendor]
@@ -40,7 +43,7 @@ function unNester(selector = "", object = {}, cumulates = {}) {
     return cumulates;
 }
 
-function objectCompose(object, minify, vendors = LoadVendors(), first = true) {
+function objectCompose(object, minify = false, vendors = LoadVendors(), first = true) {
     const tab = minify ? "" : "  ", space = minify ? "" : " ", styleSheet = [];
 
     StylePartialsArray(object, vendors).forEach(([key, value]) => {
@@ -67,7 +70,7 @@ function objectCompose(object, minify, vendors = LoadVendors(), first = true) {
 }
 
 
-export default function arrayCompose(array, minify) {
+function stylesheetCreator(array, minify) {
     const styleSheet = [];
 
     array.forEach(([key, value]) => {
@@ -76,4 +79,85 @@ export default function arrayCompose(array, minify) {
     })
 
     return styleSheet.join(minify ? "" : "\n")
+}
+
+
+function rawCompose(selectorObjectArray = [], tab = "  ") {
+    const styleSheet = [];
+
+    selectorObjectArray.forEach(([key, value]) => {
+        if ((typeof value) === "object") {
+            styleSheet.push(key, "{", ...rawCompose(Object.entries(value), tab).map(i => tab + i), "}")
+        }
+        else if (key[0] === "@") {
+            styleSheet.push(key) + ";";
+        } else {
+            styleSheet.push(key + ': ' + value + ";");
+        }
+    })
+
+    return styleSheet
+}
+
+function portableCreator(bundle = "bundle", version = "0.0.0") {
+    const tab = "    ", portable = [`# ${bundle}@${version}`, "", "> $$XCSS Portable-Xtylesheet"];
+    const preBinds = new Set(), postBinds = new Set();
+    const prefix = Use.string.normalize(bundle);
+
+    Object.entries(STASH.GlobalsStyle2Index).forEach(([selector, index]) => {
+        const pre = [], post = [], style = STASH.Index2StylesObject[index];
+
+        style.preBinds.forEach(bind => {
+            let i = STASH.LibraryStyle2Index[bind];
+            if (i) { preBinds.add(bind); pre.push(prefix + "~~" + bind) }
+        })
+        style.postBinds.forEach(bind => {
+            let i = STASH.LibraryStyle2Index[bind];
+            if (i) { postBinds.add(bind); post.push(prefix + "~~" + bind) }
+        })
+
+        // console.log(Object.entries(style.object))
+        portable.push(
+            '',
+            `## Selector: ${selector}`,
+            '',
+            "````html",
+            "<xtyle",
+            ...(Object.entries(style.object).reduce((accum, [subSelector, block]) => {
+                if (subSelector === "") {
+                    accum.push(
+                        `${prefix}~${selector}="`,
+                        tab + `@pre-binds ${post.join(" ")};`,
+                        tab + `@post-binds ${pre.join(" ")};`,
+                        ...rawCompose(Object.entries(block), tab).map(line => tab + line),
+                        '"'
+                    )
+                } else {
+                    const [rule, query] = subSelector.split(" ");
+                    const attribute = `${rule.slice(1)}@{${query}}`
+                    accum.push(
+                        `${attribute}="`,
+                        ...rawCompose(Object.entries(block), tab).map(line => tab + line),
+                        '"'
+                    )
+                }
+                return accum;
+            }, [])).map(line => tab + line),
+            "/>",
+            "````",
+        )
+    })
+    const bindObject = FORGE.bindIndex(preBinds, postBinds, true);
+    const preBindContent = rawCompose(bindObject.preBinds.map(([k, v]) => [prefix + "~~" + k, v])).join("\n");
+    const postBindContent = rawCompose(bindObject.postBinds.map(([k, v]) => [prefix + "~~" + k, v])).join("\n");
+
+    return {
+        portable: portable.join("\n"),
+        depends: preBindContent + "\n" + postBindContent
+    }
+}
+
+export default {
+    Portable: portableCreator,
+    Stylesheet: stylesheetCreator
 }

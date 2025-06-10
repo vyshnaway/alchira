@@ -24,21 +24,24 @@ function styleSwitch(object) {
 }
 
 function buildXtyles(selectorIndexObject) {
-    return Object.entries(styleSwitch(Object.entries(selectorIndexObject)
-        .reduce((A, [S, I]) => { A[S] = STASH.Index2StylesObject[I].object; return A; }, {})))
+    return Object.entries(styleSwitch(
+        Object.entries(selectorIndexObject).reduce((A, [selector, index]) => {
+        A[selector] = STASH.Index2StylesObject[index].object;
+        return A;
+    }, {})))
 }
 
 
-function loadBindObjectsFromIndex(order) {
+function loadBindObjectsFromIndex(order, useXelector) {
     return Object.entries(styleSwitch(order.reduce((A, I) => {
         if (STASH.LibraryStyle2Index[I])
-            A[STASH.Index2StylesObject[STASH.LibraryStyle2Index[I]].selector] =
+            A[useXelector ? I.replaceAll("$", "\\$") : STASH.Index2StylesObject[STASH.LibraryStyle2Index[I]].selector] =
                 STASH.Index2StylesObject[STASH.LibraryStyle2Index[I]].object;
         return A;
     }, {})))
 }
 
-function buildBinds(preBinds = new Set(), postBinds = new Set()) {
+function buildBinds(preBinds = new Set(), postBinds = new Set(), useXelector = false) {
     let preLast = preBinds.size, postLast = postBinds.size;
 
     do {
@@ -59,8 +62,8 @@ function buildBinds(preBinds = new Set(), postBinds = new Set()) {
     preBinds.forEach(element => { if (postBinds.has(element)) preBinds.delete(element) })
 
     return {
-        preBinds: loadBindObjectsFromIndex(Array.from(preBinds)),
-        postBinds: loadBindObjectsFromIndex(Array.from(postBinds))
+        preBinds: loadBindObjectsFromIndex(Array.from(preBinds), useXelector),
+        postBinds: loadBindObjectsFromIndex(Array.from(postBinds), useXelector)
     }
 }
 
