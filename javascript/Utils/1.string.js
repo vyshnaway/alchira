@@ -5,13 +5,16 @@ const digits = "-0123456789_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ
 const base = digits.length;
 
 export default {
-    normalize: (string = '', keepChars = [], skipChars = []) => {
+    normalize: (string = '', keepChars = [], skipChars = [], addBackSlashFor = []) => {
         let final = "";
         string.replace(SPACE, '_').split('').forEach(ch => {
             if (skipChars.includes(ch)) return;
-            else final += ch === "_" ? '_' :
-                keepChars.includes(ch) ? ch :
-                    ch.match(ALPHANUMERIC) ? ch : '-';
+            else if (addBackSlashFor.includes(ch)) final += '\\' + ch;
+            else {
+                final += ch === "_" ? '_' :
+                    keepChars.includes(ch) ? ch :
+                        ch.match(ALPHANUMERIC) ? ch : '-';
+            }
         });
         return final;
     },

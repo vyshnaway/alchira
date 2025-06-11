@@ -91,7 +91,7 @@ async function execute(chapter) {
 
                 if (!stopWatcher) {
                     const targetFolders = [...Object.keys(PROXY.CACHE), NAV.folder.setup];
-                    const ignoreFolders = [NAV.folder.cache];
+                    const ignoreFolders = [NAV.folder.buffer];
                     process.on('SIGINT', () => {
                         if (stopWatcher) { stopWatcher(); stopWatcher = null; $.render.write("\n", 2) }
                         process.exit();
@@ -103,11 +103,11 @@ async function execute(chapter) {
                 if (hasEvents()) {
                     const event = dequeueEvent();
                     $.initialize(event.consoleWidth, !DATA.WATCH);
-                    if (event.folder === NAV.folder.setup) {
+                    if (event.folder === NAV.folder.setup || event.folder === NAV.folder.library) {
                         const filePath = `${event.folder}/${event.filePath}`;
                         if (event.action === "add" || event.action === "change") {
                             switch (filePath) {
-                                case NAV.jsonc.proxymap:
+                                case NAV.json.proxymap:
                                     stopWatcher();
                                     stopWatcher = null;
                                     step = "VerifyProxyMap"
@@ -119,7 +119,7 @@ async function execute(chapter) {
                                     await COLLECT.FetchIndexContent();
                                     step = "GenerateFinals";
                                     break;
-                                case NAV.jsonc.shorthand:
+                                case NAV.json.shorthand:
                                     step = "ReadShorthands"
                                     break;
                                 default:
@@ -154,8 +154,21 @@ async function execute(chapter) {
     }
 }
 
-async function commander(cmd, arg, rootPath, workPath, consoleWidth, packageJson) {
-    DATA.CMD = cmd; DATA.ARG = arg; DATA.WATCH = cmd === 'watch';
+async function commander(
+    command,
+    argument,
+    rootPath,
+    workPath,
+    consoleWidth,
+    packageJson,
+    projectName,
+    projectVersion
+) {
+    DATA.CMD = command;
+    DATA.ARG = argument;
+    DATA.WATCH = command === 'watch';
+    DATA.PACKAGE = projectName;
+    DATA.VERSION = projectVersion;
     SETDATA(rootPath, workPath, packageJson);
     $.initialize(consoleWidth, !DATA.WATCH);
 

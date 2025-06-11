@@ -4,7 +4,7 @@ export default {
         array.forEach((item, index) => lastSeen.set(item, index));
         return array.filter((item, index) => lastSeen.get(item) === index);
     },
-    formNumberedObject: (obj, maxKey) => {
+    fromNumberedObject: (obj, maxKey) => {
         return Array.from({ length: maxKey + 1 }, (_, i) => obj[i] ?? []);
     },
     longestSubChain: (parent = [], child = []) => {
@@ -14,7 +14,7 @@ export default {
         let maxScore = 0,
             resultIndex = 0,
             parentInNow = 0,
-        parentInLast = 0;
+            parentInLast = 0;
 
         while (remainingChild.length) {
             parentInLast = -1;

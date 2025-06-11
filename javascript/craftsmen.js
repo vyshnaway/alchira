@@ -8,7 +8,7 @@ import FORGE from "./forgent.js";
 import ORGANIZER from "./Worker/order-api.js";
 import { DATA, NAV } from "./data-meta.js";
 import Proxy from "./Script/proxy.js";
-import Refers from "./Style/library.js";
+import Refers from "./Style/stack.js";
 import {
     PROXY,
     STASH,
@@ -19,17 +19,17 @@ import {
 // On library edit.
 export function UpdateLibrary() {
     ResetCache();
-    Refers.UploadFiles(DATA.LIBRARY);
-    const { referTable, AxiomStyleMap, ClusterStyleMap } = Refers.Renders();
+    Refers.UploadFiles(DATA.LIBRARY, DATA.PORTABLES);
+    const { libraryTable, portableTable, AxiomStyleMap, ClusterStyleMap, DependsStyleMap } = Refers.Renders();
 
-    PUBLISH.StyleMap.axiom = AxiomStyleMap;
-    PUBLISH.StyleMap.cluster = ClusterStyleMap;
-    PUBLISH.StyleMap.file = referTable;
+    PUBLISH.MANIFEST.axiom = AxiomStyleMap;
+    PUBLISH.MANIFEST.cluster = ClusterStyleMap;
+    PUBLISH.MANIFEST.file = { ...libraryTable, ...portableTable };
 }
 
 // On shorthands edit.
 export function UpdateShorthands() {
-    PUBLISH.StyleMap.shorthands = shorthandJS.UPLOAD(DATA.SHORTHAND);
+    PUBLISH.MANIFEST.shorthands = shorthandJS.UPLOAD(DATA.SHORTHAND);
 }
 
 // On target files edit.
@@ -86,9 +86,9 @@ async function Accumulate() {
         cumulated.postBinds.forEach(bind => CUMULATES.postBinds.add(bind));
     });
     CUMULATES.styleMap.forEach(map => {
-        PUBLISH.StyleMap.file[map.file.id] = map.file;
-        PUBLISH.StyleMap.local[map.file.id] = map.local;
-        PUBLISH.StyleMap.global[map.file.id] = map.global;
+        PUBLISH.MANIFEST.file[map.file.id] = map.file;
+        PUBLISH.MANIFEST.local[map.file.id] = map.local;
+        PUBLISH.MANIFEST.global[map.file.id] = map.global;
     })
 
     STASH.GlobalsStyle2Index = CUMULATES.styleGlobals;
@@ -131,8 +131,8 @@ const RENDER = {
         const scanned = STYLE.CSSCANNER(cleaner.uncomment.Css(DATA.CSSIndex), "INDEX ||");
         PUBLISH.RENDERFRAGS.INDEX
             = COMPILE.Stylesheet(scanned.styles, !DATA.WATCH);
-        PUBLISH.StyleMap.variables = Use.array.setback(scanned.variables);
-        PUBLISH.Report.variables = $.MOLD.primary.Section("Root variables", PUBLISH.StyleMap.variables, $.list.text.Entries);
+        PUBLISH.MANIFEST.variables = Use.array.setback(scanned.variables);
+        PUBLISH.Report.variables = $.MOLD.primary.Section("Root variables", PUBLISH.MANIFEST.variables, $.list.text.Entries);
         return { preBinds: scanned.preBinds, postBinds: scanned.postBinds }
     },
     essentials: (CUMULATES) => {
@@ -165,9 +165,9 @@ const RENDER = {
             new Set(postBinds),
         );
         PUBLISH.RENDERFRAGS.PREBINDS
-            = COMPILE.Stylesheet(rendered.preBinds, !DATA.WATCH);
+            = COMPILE.Stylesheet(rendered.preBindsObject, !DATA.WATCH);
         PUBLISH.RENDERFRAGS.POSTBINDS
-            = COMPILE.Stylesheet(rendered.postBinds, !DATA.WATCH);
+            = COMPILE.Stylesheet(rendered.postBindsObject, !DATA.WATCH);
     },
 }
 
@@ -199,11 +199,11 @@ export async function GenerateFinal() {
         }
 
         if (DATA.WATCH) {
-            SaveFiles[NAV.buffer.styleMap] = JSON.stringify(PUBLISH.StyleMap);
+            SaveFiles[NAV.json.manifest] = JSON.stringify(PUBLISH.MANIFEST);
         } else {
-            const portable = COMPILE.Portable();
-            SaveFiles[NAV.buffer.portable] = portable.portable;
-            SaveFiles[NAV.buffer.depends] = portable.depends;
+            const portable = COMPILE.Portable(DATA.PACKAGE, DATA.VERSION);
+            SaveFiles[NAV.folder.submodule + "/" + DATA.PACKAGE + ".css"] = portable.depends;
+            SaveFiles[NAV.folder.submodule + "/" + DATA.PACKAGE + ".xcss"] = portable.portable;
 
             const memChart = {
                 Index: Use.string.stringMem(PUBLISH.RENDERFRAGS.INDEX),

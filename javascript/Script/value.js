@@ -2,6 +2,7 @@ import Use from "../Utils/index.js";
 import STYLE from "../Style/parse.js"
 import { STASH } from "../data-cache.js";
 import { BindStack, FileCursor, StyleStack } from "./file.js"
+import Utils from "../Utils/index.js";
 
 function loadActiveIndexes(classList = []) {
     return classList.reduce((A, entry) => {
@@ -43,7 +44,7 @@ export default function classExtract(string, action, fileData) {
     }
 
     if (action !== "read") {
-        const metaFront = `L${FileCursor.rowMarker}${fileData.metaFront}__`;
+        const metaFront = `TAG${fileData.metaFront}\\:${FileCursor.rowMarker}__`;
         activeQuote = "", entry = "", scribed = "", marker = 0, inQuote = false, ch = string[marker];
         const activeIndexes = (action === "watch") ? [] :
             Use.array.longestSubChain(STASH.SortedIndexes, loadActiveIndexes(Use.array.setback(classList), fileData.filePath));
@@ -68,7 +69,7 @@ export default function classExtract(string, action, fileData) {
                             switch (action) {
                                 case "watch":
                                     const devClass = metaFront + STASH.Index2StylesObject[index].metaClass;
-                                    scribed += devClass;
+                                    scribed += Utils.string.normalize(devClass, ["/", ".", ":", "|", "$"], ["\\"]);
                                     STASH.FinalStack["." + devClass] = index;
                                     break;
                                 case "preview":

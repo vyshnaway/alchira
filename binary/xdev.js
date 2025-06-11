@@ -12,18 +12,18 @@ const rootPackagePath = fileman.path.fromRoot(packagePath);
 const command = process.argv[2];
 const argument = process.argv[3];
 const consoleWidth = process.stdout.columns;
-const packageEssential = {};
+const rootPackageEssential = {};
 
 const commandList = ["init", "watch", "preview", "publish"];
 
 const rootPackageJson = await fileman.read.json(rootPackagePath);
 if (!rootPackageJson.status) throw new Error("Bad root json file.")
 
-packageEssential.name = rootPackageJson.data.name;
-packageEssential.version = rootPackageJson.data.version;
-packageEssential.scripts = rootPackageJson.data.scripts;
-packageEssential.website = rootPackageJson.data.homepage;
-packageEssential.command = Object.keys(rootPackageJson.data.bin);
+rootPackageEssential.name = rootPackageJson.data.name;
+rootPackageEssential.version = rootPackageJson.data.version;
+rootPackageEssential.scripts = rootPackageJson.data.scripts;
+rootPackageEssential.website = rootPackageJson.data.homepage;
+rootPackageEssential.command = Object.keys(rootPackageJson.data.bin);
 
 const projectPackageJson = await fileman.read.json("./package.json");
 
@@ -40,4 +40,13 @@ if (projectPackageJson.status && commandList.includes(command)) {
     }
 }
 
-await commander(command, argument, rootPath, workPath, consoleWidth, packageEssential);
+await commander(
+    command,
+    argument,
+    rootPath,
+    workPath,
+    consoleWidth,
+    rootPackageEssential,
+    projectPackageJson.status ? projectPackageJson.data.name : "xtylesheet",
+    projectPackageJson.status ? projectPackageJson.data.version : "0.0.0",
+);

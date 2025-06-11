@@ -1,4 +1,6 @@
 export const DATA = {
+    PACKAGE: "",
+    VERSION: "",
     CMD: "",
     ARG: "",
     WATCH: false,
@@ -8,6 +10,7 @@ export const DATA = {
     SHORTHAND: {},
     PROXYMAP: {},
     LIBRARY: {},
+    PORTABLES: {},
 };
 
 export const APP = {
@@ -33,9 +36,10 @@ export const NAV = {
     },
     folder: {
         setup: "/xtyles",
-        cache: "/xtyles/buffer",
+        buffer: "/xtyles/buffer",
         library: "/xtyles/library",
-        portables: "/xtyles/potables",
+        portables: "/xtyles/portables",
+        submodule: "/xtyles/buffer/module",
     },
     css: {
         atrules: "/xtyles/#at-rules.css",
@@ -43,14 +47,10 @@ export const NAV = {
         elements: "/xtyles/#elements.css",
         extends: "/xtyles/#extends.css",
     },
-    jsonc: {
+    json: {
         proxymap: "/xtyles/proxy-map.jsonc",
         shorthand: "/xtyles/shorthands.jsonc",
-    },
-    buffer: {
-        depends: "/xtyles/buffer/portable/depends.css",
-        portable: "/xtyles/buffer/portable/xtylesheet.xcss",
-        styleMap: "/xtyles/buffer/style-map.json"
+        manifest: "/xtyles/buffer/manifest.json"
     }
 };
 

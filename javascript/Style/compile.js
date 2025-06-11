@@ -99,44 +99,39 @@ function rawCompose(selectorObjectArray = [], tab = "  ") {
     return styleSheet
 }
 
-function portableCreator(bundle = "bundle", version = "0.0.0") {
-    const tab = "    ", portable = [`# ${bundle}@${version}`, "", "> $$XCSS Portable-Xtylesheet"];
-    const preBinds = new Set(), postBinds = new Set();
-    const prefix = Use.string.normalize(bundle);
+function portableCreator(module = "module", version = "0.0.0") {
+    const bindstack = {}, dependsObject = {};
+
+    const tab = "    ", portable = [`# ${module}@${version}`, "", "> $$XCSS Portable-Xtylesheet"];
+    const prefix = Use.string.normalize(module) + "$";
 
     Object.entries(STASH.GlobalsStyle2Index).forEach(([selector, index]) => {
-        const pre = [], post = [], style = STASH.Index2StylesObject[index];
+        const style = STASH.Index2StylesObject[index];
+        bindstack[selector] = FORGE.bindIndex(new Set(style.preBinds), new Set(style.postBinds), true, prefix);
+        bindstack[selector].preBindsObject.forEach(([S, O]) => dependsObject[S] = O)
+        bindstack[selector].postBindsObject.forEach(([S, O]) => dependsObject[S] = O)
+    })
+    const dependsContent = rawCompose(Object.entries(dependsObject));
 
-        style.preBinds.forEach(bind => {
-            let i = STASH.LibraryStyle2Index[bind];
-            if (i) { preBinds.add(bind); pre.push(prefix + "~~" + bind) }
-        })
-        style.postBinds.forEach(bind => {
-            let i = STASH.LibraryStyle2Index[bind];
-            if (i) { postBinds.add(bind); post.push(prefix + "~~" + bind) }
-        })
-
-        // console.log(Object.entries(style.object))
+    Object.entries(STASH.GlobalsStyle2Index).forEach(([selector, index]) => {
         portable.push(
             '',
             `## Selector: ${selector}`,
             '',
             "````html",
             "<xtyle",
-            ...(Object.entries(style.object).reduce((accum, [subSelector, block]) => {
+            ...(Object.entries(STASH.Index2StylesObject[index].object).reduce((accum, [subSelector, block]) => {
                 if (subSelector === "") {
                     accum.push(
-                        `${prefix}~${selector}="`,
-                        tab + `@pre-binds ${post.join(" ")};`,
-                        tab + `@post-binds ${pre.join(" ")};`,
+                        `${selector}="`,
+                        tab + `@pre-binds ${bindstack[selector].preBindsList.join(" ")}; `,
+                        tab + `@post-binds ${bindstack[selector].postBindsList.join(" ")}; `,
                         ...rawCompose(Object.entries(block), tab).map(line => tab + line),
                         '"'
                     )
                 } else {
-                    const [rule, query] = subSelector.split(" ");
-                    const attribute = `${rule.slice(1)}@{${query}}`
                     accum.push(
-                        `${attribute}="`,
+                        `{${subSelector}}="`,
                         ...rawCompose(Object.entries(block), tab).map(line => tab + line),
                         '"'
                     )
@@ -147,13 +142,10 @@ function portableCreator(bundle = "bundle", version = "0.0.0") {
             "````",
         )
     })
-    const bindObject = FORGE.bindIndex(preBinds, postBinds, true);
-    const preBindContent = rawCompose(bindObject.preBinds.map(([k, v]) => [prefix + "~~" + k, v])).join("\n");
-    const postBindContent = rawCompose(bindObject.postBinds.map(([k, v]) => [prefix + "~~" + k, v])).join("\n");
 
     return {
         portable: portable.join("\n"),
-        depends: preBindContent + "\n" + postBindContent
+        depends: dependsContent.join("\n")
     }
 }
 

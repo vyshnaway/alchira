@@ -3,7 +3,7 @@ import { NAV, DATA } from "./data-meta.js";
 import fileman from "../interface/fileman.js";
 import * as worker from "../interface/worker.js";
 import { PROXY } from "./data-cache.js";
-import ClassRefers from './Style/library.js';
+import ClassRefers from './Style/stack.js';
 
 export async function VerifySetupStruct() {
     const result = { unstart: true, proceed: false, report: "" };
@@ -17,7 +17,7 @@ export async function VerifySetupStruct() {
             $.STEP("Path : " + item);
             if (!fileman.path.ifFile(item)) { errors[item] = "File not found."; }
         }
-        for (const item of Object.values(NAV.jsonc)) {
+        for (const item of Object.values(NAV.json)) {
             $.STEP("Path : " + item);
             if (!fileman.path.ifFile(item)) { errors[item] = "File not found."; }
         }
@@ -40,13 +40,13 @@ export async function VerifyProxyMap() {
     $.TASK("Initializing configs", 0);
     const errors = [], alerts = [];
 
-    $.STEP("PATH : " + NAV.jsonc.proxymap);
-    const proxyMap = await fileman.read.json(NAV.jsonc.proxymap);
+    $.STEP("PATH : " + NAV.json.proxymap);
+    const proxyMap = await fileman.read.json(NAV.json.proxymap);
     if (proxyMap.status) {
         DATA.PROXYMAP = proxyMap.data;
         const results = await worker.proxyMapDependency(proxyMap.data, NAV.folder.setup);
         errors.push(...results.warnings);
-    } else { errors.push(`${NAV.jsonc.proxymap} : Bad json file.`); }
+    } else { errors.push(`${NAV.json.proxymap} : Bad json file.`); }
 
     $.TASK("Initialization finished")
     return {
@@ -61,6 +61,7 @@ export async function UpdateLibrary() {
     ClassRefers.ClearStash();
     $.TASK("Updating Library");
     DATA.LIBRARY = await fileman.read.bulk(NAV.folder.library, ["css"]);
+    DATA.PORTABLES = await fileman.read.bulk(NAV.folder.portables, ["css", "xcss"]);
 }
 
 export async function UpdateProxies() {
@@ -80,15 +81,15 @@ export async function AnalyzeShorthands() {
     $.TASK("Updating shorthands", 0);
     const errors = [];
 
-    $.STEP("PATH : " + NAV.jsonc.shorthand);
-    const shorthand = await fileman.read.json(NAV.jsonc.shorthand);
+    $.STEP("PATH : " + NAV.json.shorthand);
+    const shorthand = await fileman.read.json(NAV.json.shorthand);
     if (shorthand.status) {
         Object.entries(shorthand.data).forEach(([key, value]) => {
             if (typeof value === "string") { DATA.SHORTHAND = shorthand.data; }
             else { errors.push(`Shorthand: ${key} does not have a value of type STRING.`) }
         })
     }
-    else { errors.push(`${NAV.jsonc.shorthand} : Bad json file.`); };
+    else { errors.push(`${NAV.json.shorthand} : Bad json file.`); };
     $.TASK("Analysis comnplete")
     return {
         status: Object.keys(errors).length === 0,

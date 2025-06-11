@@ -45,7 +45,7 @@ export async function Initialize() {
         await fileman.clone.safe(NAV.scaffold.refers, NAV.folder.library);
 
         $.POST($.MOLD.std.Section("Next Steps", [
-            'Adjust ' + $.style.bold.Orange(NAV.jsonc.proxymap) + $.canvas.unstyle + ' according to the requirements of your project.',
+            'Adjust ' + $.style.bold.Orange(NAV.json.proxymap) + $.canvas.unstyle + ' according to the requirements of your project.',
             'Execute ' + $.style.bold.Orange('"init"') + $.canvas.unstyle + ' again to generate the necessary configuration folders.',
             'During execution ' + $.style.bold.Orange('{target}') + $.canvas.unstyle + ' folder will be cloned from ' + $.style.bold.Orange('{source}') + $.canvas.unstyle + ' folder.',
             'This folder will act as proxy for ' + APP.name + '.',
@@ -56,7 +56,7 @@ export async function Initialize() {
         $.POST($.MOLD.std.Section("Publish command instructions.",
             (APP.version === "0") ? ["This command uses an internet connection."] : [
                 "Create a new project and use its access key. For action visit " + $.style.bold.Orange(ROOT.console),
-                "For personal projects, you can use the key in " + $.style.bold.Orange(NAV.jsonc.proxymap),
+                "For personal projects, you can use the key in " + $.style.bold.Orange(NAV.json.proxymap),
                 "If using in CI/CD workflow, it is suggested to use " + $.style.bold.Orange("xcss publish {key}")
             ], $.list.std.Bullets));
 

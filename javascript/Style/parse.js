@@ -84,17 +84,16 @@ function CSSCANNER(content, initial = '') {
     return { preBinds, postBinds, styles, variables }
 }
 
-function CSSLIBRARY(fileDatas = [], initial = '') {
+function CSSLIBRARY(fileDatas = [], initial = '', forPortable = false) {
     const selectors = {};
     fileDatas.forEach(source => {
         source.data.usedIndexes = new Set;
         const { stamp, filePath, metaFront, content } = source.data;
         const scannedObj = READS(content).allBlocks;
         for (const selector in scannedObj) {
-            const metaSelector = Use.string.normalize(selector[0] === "." ? selector.slice(1) : selector);
-            const stampSelector = stamp + metaSelector;
+            const stampSelector = stamp + Use.string.normalize(selector[0] === "." ? selector.slice(1) : selector);
             const scannedStyle = SCANNER(scannedObj[selector], initial + " : " + filePath + " ||", selector);
-
+            
             const CLX = INDEX.DECLARE();
             source.data.usedIndexes.add(CLX.number)
             selectors[stampSelector] = {
@@ -105,7 +104,7 @@ function CSSLIBRARY(fileDatas = [], initial = '') {
                     selector,
                     preBinds: scannedStyle.preBinds,
                     postBinds: scannedStyle.postBinds,
-                    metaClass: metaFront + metaSelector,
+                    metaClass: metaFront + "_" + Use.string.normalize(stampSelector, [], [], ["$"]),
                     object: { "": scannedStyle.styles }
                 }
             }
@@ -113,15 +112,25 @@ function CSSLIBRARY(fileDatas = [], initial = '') {
     })
     for (const selector in selectors) {
         STASH.Index2StylesObject[selectors[selector].index] = selectors[selector].data;
-        STASH.LibraryStyle2Index[selector] = selectors[selector].index;
+        if (forPortable)
+            STASH.portableStyle2Index[selector] = selectors[selector].index;
+        else
+            STASH.LibraryStyle2Index[selector] = selectors[selector].index;
     }
 
     return { tillStyles: Object.keys(STASH.LibraryStyle2Index), exclusiveStyles: Object.keys(selectors) };
 }
 
-function TAGSTYLE({ isGlobal, selector, styles, rowMarker, columnMarker }, metaFront, filePath) {
+function TAGSTYLE(
+    {
+        isGlobal,
+        selector,
+        styles,
+        rowMarker,
+        columnMarker
+    }, metaFront, filePath) {
     const type = !selector.length ? "ESSENTIAL" : isGlobal ? "GLOBAL" : "LOCAL"
-    const metaClass = type + metaFront + `R${rowMarker}C${columnMarker}__` + Use.string.normalize(selector);
+    const metaClass = type + metaFront + `\\:${rowMarker}\\:${columnMarker}_` + Use.string.normalize(selector, [], [], ["$"]);
     const compiled = {}, preBinds = [], postBinds = [], errors = [], essentials = [];
 
     for (let subSelector in styles) {
@@ -168,6 +177,7 @@ function TAGSTYLE({ isGlobal, selector, styles, rowMarker, columnMarker }, metaF
             metaClass,
             object: compiled
         }
+        // console.log(STASH.Index2StylesObject[CLX.number])
     }
     return { isEssentials: selector === "", index: INDEX.NOW, errors, essentials, preBinds, postBinds };
 }

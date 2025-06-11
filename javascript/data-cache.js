@@ -1,5 +1,5 @@
 import STYLE from "./Style/parse.js"
-import Library from "./Style/library.js";
+import Library from "./Style/stack.js";
 
 export const PUBLISH = {
     DeltaPath: "",
@@ -15,7 +15,7 @@ export const PUBLISH = {
         memChart: "",
         footer: ""
     },
-    StyleMap: {
+    MANIFEST: {
         variables: [],
         shorthands: {},
         file: {},
@@ -39,6 +39,7 @@ export const STASH = {
     SortedIndexes: [],
     LibraryStyle2Index: {},
     GlobalsStyle2Index: {},
+    portableStyle2Index: {},
     Index2StylesObject: {},
     FinalStack: {},
 }
@@ -54,14 +55,9 @@ export function ResetCache() {
         SortedIndexes: [],
         LibraryStyle2Index: {},
         GlobalsStyle2Index: {},
+        portableStyle2Index: {},
         Index2StylesObject: {},
-        FinalPreBinds: new Set(),
-        FinalPostBinds: new Set(),
-        Midway: {
-            Essentials: [],
-            Finals: {},
-            Renders: {},
-        }
+        FinalStack: {},
     });
     Object.assign(PUBLISH, {
         DeltaPath: "",

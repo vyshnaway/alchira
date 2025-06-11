@@ -1,23 +1,20 @@
+import Utils from "../Utils/index.js";
 import cleaner from "./cleaner.js";
 
-const NON_ALPHANUMERIC_EXCEPT_SLASH = /[^a-z0-9/\\]/gi;
-const LIB_CHARSET = /[^\w-]/gi;
-const SLASH = /[/\\]/g;
-
-export default function libFinder(target, source, filePath, content, prefix = false, uncomment = false) {
+export default function libSetter(target, source, filePath, content, prefix = false, uncomment = false, isPortable = false) {
     const targetPath = target.length ? (target + "/" + filePath) : filePath;
     const sourcePath = source.length ? (source + "/" + filePath) : filePath;
 
-    let [extension, fileName, level, library] = targetPath.slice(targetPath.lastIndexOf("/") + 1).split(".").reverse()
-    level = (isNaN(level) || level < 0) ? 0 : parseInt(level, 10);
+    let [extension, fileName, id, cluster] = targetPath.slice(targetPath.lastIndexOf("/") + 1).split(".").reverse()
+    id = (isNaN(id) || id < 0) ? 0 : parseInt(id, 10);
 
-    const axiom = !Boolean(library);
-    const stamp = level === 0 ? "" : (library ?? "".replace(LIB_CHARSET, '-')) + "$".repeat(level)
-    const normalPath = targetPath.replace(NON_ALPHANUMERIC_EXCEPT_SLASH, '-').replace(SLASH, '_');
-
+    const group = isPortable ? (extension === "css" ? "DEPENDS" : "PORTABLE") : (Boolean(cluster) ? "CLUSTER" : "AXIOM");
+    const stamp = isPortable ? Utils.string.normalize(fileName) + "$" : id === 0 ? "" : Utils.string.normalize(cluster) + "$".repeat(id);
+    const normalPath = Utils.string.normalize(targetPath, [], [], ["/", "."]);
+    
     return {
-        level,
-        axiom,
+        id,
+        group,
         data: {
             stamp,
             fileName,
@@ -26,7 +23,7 @@ export default function libFinder(target, source, filePath, content, prefix = fa
             targetPath,
             sourcePath,
             usedIndexes: new Set(),
-            metaFront: (prefix ? `${axiom ? "AXIOM" : "CLUSTER"}` : "") + `__${normalPath}${prefix ? "__" : "_"}`,
+            metaFront: `${prefix ? group : ""}\\|${normalPath}`,
             content: uncomment ? cleaner.uncomment.Css(content) : content,
         },
     }
