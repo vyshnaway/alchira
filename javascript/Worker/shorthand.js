@@ -88,7 +88,7 @@ function UPLOAD(shorthands) {
     return STASH.Shorthands;
 }
 
-function RENDER(string) {
+function RENDER(string, sourcePath="") {
     const extended = IMPORT(string)
     string = extended.result
     let rule = [],
@@ -138,7 +138,7 @@ function RENDER(string) {
         }
     }
     
-    return { rule: rule.join(''), subSelector: selector.join(''), status: extended.status, error: extended.error };
+    return { rule: rule.join(''), subSelector: selector.join(''), status: extended.status, error: extended.error + $.MOLD.text.Item(sourcePath) + "\n" };
 }
 
 export default {

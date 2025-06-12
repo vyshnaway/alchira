@@ -7,7 +7,7 @@ import COMPILE from "./Style/compile.js";
 import FORGE from "./forgent.js";
 import ORGANIZER from "./Worker/order-api.js";
 import { DATA, NAV } from "./data-meta.js";
-import Proxy from "./Script/proxy.js";
+import Proxy from "./Script/class.js";
 import Refers from "./Style/stash.js";
 import {
     PROXY,

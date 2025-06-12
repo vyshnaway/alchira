@@ -81,8 +81,10 @@ function _portableAccumulator() {
 
 let axiomCount = 0, clusterCount = 0, portableCount = 0, bindingCount = 0;
 let axiomChart = {}, clusterChart = {}, portableChart = {}, bindingChart = {};
+let moduleErrors = [], duplicateErrors = [];
 
 function Renders() {
+    moduleErrors = [], duplicateErrors = [];
     axiomCount = 0, clusterCount = 0, portableCount = 0, bindingCount = 0;
     axiomChart = {}, clusterChart = {}, portableChart = {}, bindingChart = {};
     Object.keys(LibraryFiles).forEach(filePath => STYLE.INDEX.DISPOSE(...LibraryFiles[filePath].usedIndexes));
@@ -93,26 +95,35 @@ function Renders() {
 
     const ModuleEssentials = [], PortableStyleMap = {};
     portablesArray.forEach((fileData) => {
+        const filePath = NAV.folder.portables + "/" + fileData.filePath;
         const tagStash = PortFile(fileData).stylesList, exclusiveStyles = [];
         fileData.usedIndexes = new Set();
 
         tagStash.forEach(style => {
-            const response = STYLE.TAGSTYLE(style, fileData.metaFront, fileData.filePath, true);
+            style.scope = "PORTABLE";
+            style.selector = style.selector === "" ? "" : fileData.stamp + style.selector;
+            const response = STYLE.TAGSTYLE(style, fileData.metaFront, fileData.filePath, fileData.targetPath, STASH.portableStyle2Index);
+            moduleErrors.push(...response.errors);
 
             if (style.selector === "") {
                 ModuleEssentials.push(...response.essentials)
-            } else {
-                const className = fileData.stamp + style.selector;
-                STASH.portableStyle2Index[className] = response.index;
+            } else if (!response.isDuplicate) {
                 fileData.usedIndexes.add(response.index);
-                exclusiveStyles.push(className)
+                exclusiveStyles.push(style.selector)
                 portableCount++;
             }
         });
-        PortableStyleMap[NAV.folder.portables + "/" + fileData.filePath] = exclusiveStyles;
+        PortableStyleMap[filePath] = exclusiveStyles;
         if (exclusiveStyles.length)
             portableChart[`Portable [${fileData.filePath}]:  ${exclusiveStyles.length} Classes`] = exclusiveStyles;
     });
+
+    Object.values(STASH.portableStyle2Index).forEach(index => {
+        const InStash = STASH.Index2StylesObject[index];
+        if (InStash.declarations.length > 1) 
+            moduleErrors.push($.MOLD.failed.List("Multiple declarations: " + InStash.selector, InStash.declarations, $.list.text.Bullets))
+    })
+
 
     const BindingStyleMap = bindingArray.reduce((collection, fileData) => {
         const classes = STYLE.CSSLIBRARY([fileData], "BINDING", true);
@@ -154,6 +165,7 @@ function Renders() {
 }
 
 function Report() {
+    const errors = [...moduleErrors, ...duplicateErrors]
     return [
         $.MOLD.primary.Section(`Axiom Styles: ${axiomCount}`,
             Object.entries(axiomChart).map(([heading, entries]) => $.MOLD.tertiary.Topic(heading, entries, $.list.text.Entries))
@@ -167,6 +179,7 @@ function Report() {
         $.MOLD.primary.Section(`Portable Styles: ${portableCount}`,
             Object.entries(portableChart).map(([heading, entries]) => $.MOLD.tertiary.Topic(heading, entries, $.list.text.Entries))
         ),
+        $.MOLD[errors.length ? "failed" : "success"].Footer(errors.length + " Errors", errors)
     ].join("");
 }
 

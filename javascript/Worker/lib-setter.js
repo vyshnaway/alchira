@@ -1,7 +1,8 @@
+import { NAV } from "../data-meta.js";
 import Utils from "../Utils/index.js";
 import cleaner from "./cleaner.js";
 
-export default function libSetter(target, source, filePath, content, isXtyle = false, isPortable = false) {
+export default function libSetter(target, source, filePath, content, isXtylesFolder = false, isPortable = false) {
     const targetPath = target.length ? (target + "/" + filePath) : filePath;
     const sourcePath = source.length ? (source + "/" + filePath) : filePath;
 
@@ -13,6 +14,7 @@ export default function libSetter(target, source, filePath, content, isXtyle = f
         id === 0 ? "" : (Utils.string.normalize(cluster) + "$".repeat(id));
     const normalPath = Utils.string.normalize(targetPath, [], [], ["/", "."]);
 
+    const folder = isPortable ? NAV.folder.portables : NAV.folder.library;
     return {
         id,
         group,
@@ -20,10 +22,10 @@ export default function libSetter(target, source, filePath, content, isXtyle = f
         fileName,
         extension,
         filePath,
-        targetPath,
+        targetPath: isXtylesFolder ? folder + "/" + targetPath : targetPath,
         sourcePath,
         usedIndexes: new Set(),
-        metaFront: `${isXtyle ? group : ""}\\|${normalPath}`,
-        content: isXtyle ? cleaner.uncomment.Css(content) : content,
+        metaFront: `${isXtylesFolder ? group : ""}\\|${normalPath}`,
+        content: isXtylesFolder && extension !== "xcss" ? cleaner.uncomment.Css(content) : content,
     }
 }

@@ -1,8 +1,9 @@
+import $ from "../Shell/index.js";
 import Use from "../Utils/index.js";
 import READS from "./block.js";
 import SHORTHAND from "../Worker/shorthand.js";
 import { STASH } from "../data-cache.js";
-import { DATA } from "../data-meta.js";
+import { DATA, NAV } from "../data-meta.js";
 
 const INDEX = {
     NOW: 0,
@@ -85,56 +86,62 @@ function CSSCANNER(content, initial = '') {
 }
 
 function CSSLIBRARY(fileDatas = [], initial = '', forPortable = false) {
-    const selectors = {};
+    const selectors = {}, errors = [], IndexMap = forPortable ? STASH.portableStyle2Index : STASH.LibraryStyle2Index;
     fileDatas.forEach(source => {
         source.usedIndexes = new Set();
         const { stamp, filePath, metaFront, content, group } = source;
-        const scannedObj = READS(content).allBlocks;
+        const scannedObj = READS(content).allBlocks, declarations = [filePath];
+
         for (const selector in scannedObj) {
             const stampSelector = stamp + Use.string.normalize(selector, forPortable ? ["$"] : [], ["\\", "."]);
             const scannedStyle = SCANNER(scannedObj[selector], initial + " : " + filePath + " ||", selector);
 
-            const CLX = INDEX.DECLARE();
+            const index = IndexMap[selector] ?? 0;
+            const InStash = STASH.Index2StylesObject[index];
+            if (index) {
+                declarations.push(...STASH.Index2StylesObject[index].declarations);
+                errors.push($.MOLD.failed.List("Multiple declarations: " + InStash.selector, declarations, $.list.text.Bullets))
+            }
+            const CLX = index ? { number: InStash.index, class: InStash.class } : INDEX.DECLARE();
+
+
             source.usedIndexes.add(CLX.number)
             selectors[stampSelector] = {
                 index: CLX.number,
                 class: CLX.class,
                 scope: group,
                 selector,
+                object: { "": scannedStyle.styles },
                 preBinds: scannedStyle.preBinds,
                 postBinds: scannedStyle.postBinds,
                 metaClass: metaFront + "_" + Use.string.normalize(stampSelector, [], [], ["$"]),
-                object: { "": scannedStyle.styles }
+                declarations,
             }
         }
     })
+
     for (const selector in selectors) {
         STASH.Index2StylesObject[selectors[selector].index] = selectors[selector];
-        if (forPortable) {
-            STASH.portableStyle2Index[selector] = selectors[selector].index;
-        } else {
-            STASH.LibraryStyle2Index[selector] = selectors[selector].index;
-        }
+        IndexMap[selector] = selectors[selector].index;
     }
 
-    return { tillStyles: Object.keys(STASH.LibraryStyle2Index), exclusiveStyles: Object.keys(selectors) };
+    return { tillStyles: Object.keys(STASH.LibraryStyle2Index), exclusiveStyles: Object.keys(selectors), errors };
 }
 
-function TAGSTYLE(
-    {
-        scope,
-        selector,
-        styles,
-        rowMarker,
-        columnMarker
-    }, metaFront, filePath, isPortable = false) {
+function TAGSTYLE({
+    scope,
+    selector,
+    styles,
+    rowMarker,
+    columnMarker
+}, metaFront, filePath, normalPath, IndexMap = {}) {
+    const declarations = [`${normalPath}:${rowMarker}:${columnMarker}`];
 
-    scope = isPortable ? "PORTABLE" : scope;
     const metaClass = scope + metaFront + `\\:${rowMarker}\\:${columnMarker}_` + Use.string.normalize(selector, [], [], ["$"]);
-    const compiled = {}, preBinds = [], postBinds = [], errors = [], essentials = [];
+    const object = {}, preBinds = [], postBinds = [], errors = [], essentials = [];
 
     for (let subSelector in styles) {
-        const query = SHORTHAND.RENDER(subSelector);
+        const query = SHORTHAND.RENDER(subSelector, declarations[0]);
         if (!query.status) errors.push(query.error)
         const styleObj = SCANNER(styles[subSelector], `${scope} : ${filePath} ||`, selector + subSelector);
 
@@ -144,43 +151,60 @@ function TAGSTYLE(
         if (Object.keys(styleObj).length) {
             if (selector === "") {
                 if (query.rule === "") {
-                    if (query.subSelector !== "") { compiled[query.subSelector] = styleObj.styles }
+                    if (query.subSelector !== "") { object[query.subSelector] = styleObj.styles }
                 } else {
                     if (query.subSelector === "") {
-                        compiled[query.rule] = styleObj.styles;
+                        object[query.rule] = styleObj.styles;
                     }
                     else {
-                        if (!compiled[query.rule]) compiled[query.rule] = {}
-                        compiled[query.rule][query.subSelector] = styleObj.styles;
+                        if (!object[query.rule]) object[query.rule] = {}
+                        object[query.rule][query.subSelector] = styleObj.styles;
                     }
                 }
             } else {
-                if (!compiled[query.rule]) compiled[query.rule] = {}
+                if (!object[query.rule]) object[query.rule] = {}
                 if (query.subSelector === "")
-                    compiled[query.rule] = { ...compiled[query.rule], ...styleObj.styles }
+                    object[query.rule] = { ...object[query.rule], ...styleObj.styles }
                 else
-                    compiled[query.rule]["&" + query.subSelector] = styleObj.styles;
+                    object[query.rule]["&" + query.subSelector] = styleObj.styles;
             }
         }
     }
+
+    let isDuplicate;
     if (selector === "") {
-        essentials.push(...Object.entries(compiled));
+        essentials.push(...Object.entries(object));
     } else {
-        const CLX = INDEX.DECLARE()
+        const index = (IndexMap[selector] ?? 0) + (STASH.LibraryStyle2Index[selector] ?? 0);
+        const InStash = STASH.Index2StylesObject[index];
+
+        const CLX = index ? {
+            number: InStash.index,
+            class: InStash.class
+        } : INDEX.DECLARE();
+
+        if (index) {
+            declarations.push(...InStash.declarations);
+            isDuplicate = true
+        } else {
+            isDuplicate = false;
+            IndexMap[selector] = CLX.number;
+        }
+
         STASH.Index2StylesObject[CLX.number] = {
             index: CLX.number,
             class: CLX.class,
             scope: scope === "GLOBAL",
             selector,
+            object,
             preBinds,
             postBinds,
             metaClass,
-            object: compiled
+            declarations,
         }
     }
 
-    // console.log({ index: INDEX.NOW, errors, essentials, preBinds, postBinds })
-    return { index: INDEX.NOW, errors, essentials, preBinds, postBinds };
+    return { index: INDEX.NOW, errors, essentials, preBinds, postBinds, isDuplicate };
 }
 
 export default {

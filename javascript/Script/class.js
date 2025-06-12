@@ -53,22 +53,18 @@ export default class Proxy {
         file.postBinds = [];
 
         sciptResponse.stylesList.forEach(style => {
-            const response = STYLE.TAGSTYLE(style, file.metaFront, file.filePath);
+            const IndexMap = style.scope === "GLOBAL" ? file.styleGlobals : style.scope === "LOCAL" ? file.styleLocals : {};
+            console.log(file)
+            const response = STYLE.TAGSTYLE(style, file.metaFront, file.filePath, DATA.WorkPath + "/" + file.targetPath, IndexMap);
 
             file.preBinds.push(...response.preBinds)
             file.postBinds.push(...response.postBinds)
-            if (style.scope === "ESSENTIAL") {
-                file.essentials.push(...response.essentials)
-            } else {
-                file.usedIndexes.add(response.index);
-                const styleMap = style.scope === "GLOBAL" ? file.styleGlobals : file.styleLocals;
-                styleMap[style.selector] = response.index;
-            }
 
-            if (response.errors.length) {
-                file.errors.push($.MOLD.tertiary.Topic(`${file.targetPath}:${style.rowMarker}:${style.columnMarker}`)
-                    + "\n" + response.errors);
-            }
+            if (style.scope === "ESSENTIAL") file.essentials.push(...response.essentials)
+            else if (!response.isDuplicate) file.usedIndexes.add(response.index);
+
+            if (response.errors.length)
+                file.errors.push(...response.errors);
         });
 
         file.styleMap = {
@@ -104,15 +100,28 @@ export default class Proxy {
 
             const fileLocalCount = Object.keys(file.styleLocals).length;
             const fileGlobalCount = Object.keys(file.styleGlobals).length;
-            localCount += fileLocalCount;
-            globalCount += fileGlobalCount;
             const calcString = `${fileLocalCount}L + ${fileGlobalCount}G = ${(fileLocalCount + fileGlobalCount)}T`
             if ((fileLocalCount + fileGlobalCount))
                 C.report.push($.MOLD.tertiary.Topic(`[ ${calcString} ] : ${file.targetPath}`, [
                     ...Object.keys(file.styleLocals).map(c => $.style.text.White(c)),
                     ...Object.keys(file.styleGlobals).map(c => $.style.text.Yellow(c))
                 ], $.list.std.Entries));
+
+            localCount += fileLocalCount;
+            globalCount += fileGlobalCount;
+
+            Object.values(file.styleLocals).forEach(index => {
+                const InStash = STASH.Index2StylesObject[index];
+                if (InStash.declarations.length > 1)
+                    C.errors.push($.MOLD.failed.List("Multiple declarations: " + InStash.selector, InStash.declarations, $.list.text.Bullets))
+            })
+            console.log(file.styleLocals, file.styleGlobals)
         });
+        Object.values(C.styleGlobals).forEach(index => {
+            const InStash = STASH.Index2StylesObject[index];
+            if (InStash.declarations.length > 1)
+                C.errors.push($.MOLD.failed.List("Multiple declarations: " + InStash.selector, InStash.declarations, $.list.text.Bullets))
+        })
 
         const calcString = `${localCount}L + ${globalCount}G = ${(localCount + globalCount)}T`
         C.report.unshift($.MOLD.primary.Section(`PROXY : [ ${calcString} ] : ${this.target} -> ${this.source}`))
