@@ -47,28 +47,30 @@ function loadBindObjectsFromIndex(order, useXelector = false, XelectorPrefix = "
     return { result, indexes }
 }
 
-function buildBinds(preBinds = new Set(), postBinds = new Set(), useXelector = false, XelectorPrefix = "") {
+function buildBinds(preBinds = new Set(), postBinds = new Set(), forPortable = false, XelectorPrefix = "") {
     let preLast = preBinds.size, postLast = postBinds.size;
 
     do {
         preBinds.forEach(element => {
             if (STASH.LibraryStyle2Index[element]) {
-                STASH.Index2StylesObject[STASH.LibraryStyle2Index[element]]
-                    .preBinds.forEach(E => { if (!preBinds.has(E)) preBinds.add(E) })
+                STASH.Index2StylesObject[STASH.LibraryStyle2Index[element]].preBinds.forEach(E => { if (!preBinds.has(E)) preBinds.add(E) })
+            } else if (STASH.portableStyle2Index[element] && !forPortable) {
+                STASH.Index2StylesObject[STASH.portableStyle2Index[element]].preBinds.forEach(E => { if (!preBinds.has(E)) preBinds.add(E) })
             }
         });
         postBinds.forEach(element => {
             if (STASH.LibraryStyle2Index[element]) {
-                STASH.Index2StylesObject[STASH.LibraryStyle2Index[element]]
-                    .postBinds.forEach(E => { if (!postBinds.has(E)) postBinds.add(E) })
+                STASH.Index2StylesObject[STASH.LibraryStyle2Index[element]].postBinds.forEach(E => { if (!postBinds.has(E)) postBinds.add(E) })
+            } else if (STASH.portableStyle2Index[element] && !forPortable) {
+                STASH.Index2StylesObject[STASH.portableStyle2Index[element]].postBinds.forEach(E => { if (!postBinds.has(E)) postBinds.add(E) })
             }
         });
     } while (!(preLast === preBinds.size) && (postLast === preBinds.size))
 
     preBinds.forEach(element => { if (postBinds.has(element)) preBinds.delete(element) })
 
-    const preBindsCollected = loadBindObjectsFromIndex(Array.from(preBinds), useXelector, XelectorPrefix);
-    const postBindsCollected = loadBindObjectsFromIndex(Array.from(postBinds), useXelector, XelectorPrefix);
+    const preBindsCollected = loadBindObjectsFromIndex(Array.from(preBinds), forPortable, XelectorPrefix);
+    const postBindsCollected = loadBindObjectsFromIndex(Array.from(postBinds), forPortable, XelectorPrefix);
     return {
         preBindsList: preBindsCollected.indexes,
         postBindsList: postBindsCollected.indexes,

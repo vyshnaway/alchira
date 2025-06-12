@@ -102,11 +102,11 @@ function rawCompose(selectorObjectArray = [], tab = "  ") {
 function portableCreator(preBinds = [], postBinds = [], essentials = [], module = "module", version = "0.0.0") {
     const bindstack = {};
     const tab = "    ", portable = [`# ${module}@${version}`], binding = [];
-    const prefix = Use.string.normalize(module) + "//";
+    const prefix = Use.string.normalize(module) + "/$/";
 
     const bindingResponse = FORGE.bindIndex(new Set(preBinds), new Set(postBinds), true, prefix);
-    binding.push("/* Pre-Binds  */", ...rawCompose(bindingResponse.preBindsObject), "")
-    binding.push("/* Post-Binds  */", ...rawCompose(bindingResponse.postBindsObject), "")
+    binding.push("/* Pre-Binds */", "", ...rawCompose(bindingResponse.preBindsObject), "")
+    binding.push("/* Post-Binds */", "", ...rawCompose(bindingResponse.postBindsObject), "")
 
     Object.entries(STASH.GlobalsStyle2Index).forEach(([selector, index]) => {
         const style = STASH.Index2StylesObject[index];
@@ -151,10 +151,10 @@ function portableCreator(preBinds = [], postBinds = [], essentials = [], module 
             "````",
         )
     })
-    
+
     portable.push(
-        "", 
-        "## Portable Essentials", 
+        "",
+        "## Portable Essentials",
         "",
         "````html",
         "<xtyle",

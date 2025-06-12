@@ -3,7 +3,7 @@ import { NAV, DATA } from "./data-meta.js";
 import fileman from "../interface/fileman.js";
 import * as worker from "../interface/worker.js";
 import { PROXY } from "./data-cache.js";
-import ClassRefers from './Style/stack.js';
+import ClassRefers from './Style/stash.js';
 
 export async function VerifySetupStruct() {
     const result = { unstart: true, proceed: false, report: "" };

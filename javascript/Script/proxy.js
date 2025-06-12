@@ -54,13 +54,12 @@ export default class Proxy {
 
         sciptResponse.stylesList.forEach(style => {
             const response = STYLE.TAGSTYLE(style, file.metaFront, file.filePath);
-            // console.log(response)
+
             file.preBinds.push(...response.preBinds)
             file.postBinds.push(...response.postBinds)
             if (style.scope === "ESSENTIAL") {
                 file.essentials.push(...response.essentials)
             } else {
-                console.log(style)
                 file.usedIndexes.add(response.index);
                 const styleMap = style.scope === "GLOBAL" ? file.styleGlobals : file.styleLocals;
                 styleMap[style.selector] = response.index;
@@ -108,10 +107,11 @@ export default class Proxy {
             localCount += fileLocalCount;
             globalCount += fileGlobalCount;
             const calcString = `${fileLocalCount}L + ${fileGlobalCount}G = ${(fileLocalCount + fileGlobalCount)}T`
-            C.report.push($.MOLD.tertiary.Topic(`[ ${calcString} ] : ${file.targetPath}`, [
-                ...Object.keys(file.styleLocals).map(c => $.style.text.White(c)),
-                ...Object.keys(file.styleGlobals).map(c => $.style.text.Yellow(c))
-            ], $.list.std.Entries));
+            if ((fileLocalCount + fileGlobalCount))
+                C.report.push($.MOLD.tertiary.Topic(`[ ${calcString} ] : ${file.targetPath}`, [
+                    ...Object.keys(file.styleLocals).map(c => $.style.text.White(c)),
+                    ...Object.keys(file.styleGlobals).map(c => $.style.text.Yellow(c))
+                ], $.list.std.Entries));
         });
 
         const calcString = `${localCount}L + ${globalCount}G = ${(localCount + globalCount)}T`

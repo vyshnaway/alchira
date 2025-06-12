@@ -10,11 +10,11 @@ import fileman from '../interface/fileman.js';
 
 
 function reporter(chapter, heading, report) {
-    // $.POST($.MOLD.std.Block([
-    //     $.MOLD.title.Chapter(chapter, Object.keys(PROXY.CACHE), $.list.text.Entries),
-    //     $.MOLD.primary.Chapter(heading, [report]),
-    //     $.MOLD.failed.Footer("Press Ctrl+C to stop watching.")
-    // ]))
+    $.POST($.MOLD.std.Block([
+        $.MOLD.title.Chapter(chapter, Object.keys(PROXY.CACHE), $.list.text.Entries),
+        $.MOLD.primary.Chapter(heading, [report]),
+        $.MOLD.failed.Footer("Press Ctrl+C to stop watching.")
+    ]))
 }
 
 async function execute(chapter) {
@@ -150,7 +150,7 @@ async function execute(chapter) {
         stopWatcher();
         stopWatcher = null;
     } else {
-        // $.POST(report);
+        $.POST(report);
     }
 }
 

@@ -8,7 +8,7 @@ import FORGE from "./forgent.js";
 import ORGANIZER from "./Worker/order-api.js";
 import { DATA, NAV } from "./data-meta.js";
 import Proxy from "./Script/proxy.js";
-import Refers from "./Style/stack.js";
+import Refers from "./Style/stash.js";
 import {
     PROXY,
     STASH,
@@ -22,8 +22,8 @@ export function UpdateLibrary() {
     Refers.UploadFiles(DATA.LIBRARY, DATA.PORTABLES);
     const {
         libraryTable,
-        portableTable,
-        portableEssentials,
+        modulesTable,
+        ModuleEssentials,
         AxiomStyleMap,
         ClusterStyleMap,
         PortableStyleMap,
@@ -34,9 +34,9 @@ export function UpdateLibrary() {
     PUBLISH.MANIFEST.cluster = ClusterStyleMap;
     PUBLISH.MANIFEST.portable = PortableStyleMap;
     PUBLISH.MANIFEST.binding = BindingStyleMap;
-
-    STASH.PortableEssentials = portableEssentials;
-    PUBLISH.MANIFEST.file = { ...libraryTable, ...portableTable };
+    
+    STASH.PortableEssentials = ModuleEssentials;
+    PUBLISH.MANIFEST.file = { ...libraryTable, ...modulesTable };
 }
 
 // On shorthands edit.

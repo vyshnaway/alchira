@@ -1,5 +1,5 @@
 import STYLE from "./Style/parse.js"
-import Library from "./Style/stack.js";
+import Library from "./Style/stash.js";
 
 export const PUBLISH = {
     DeltaPath: "",
