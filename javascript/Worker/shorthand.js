@@ -93,29 +93,26 @@ function RENDER(string) {
     string = extended.result
     let rule = [],
         selector = [],
-        $Marker = 0,
+        Marker = 0,
         length = string.length,
         deviance = 0;
 
     for (let i = 0; i < length; i++) {
         let ch = string[i];
 
-        if ("({".includes(ch)) {
-            deviance++;
-        }
-        else if (")}".includes(ch)) {
-            deviance--;
-        }
+        
+        if (")}".includes(ch)) deviance--;
 
         if (deviance) {
             rule.push(ch);
         }
         else if (ch === '$') {
-            $Marker = i + 1;
+            Marker = i + 1;
             break;
         }
         else {
             switch (ch) {
+                case '{': rule.push(''); break;
                 case '}': rule.push(''); break;
                 case ',': rule.push(', '); break;
                 case '|': rule.push(' or '); break;
@@ -127,10 +124,11 @@ function RENDER(string) {
                 default: rule.push(ch);
             }
         }
+        if ("({".includes(ch)) deviance++;
     }
 
-    if ($Marker > 0) {
-        for (let i = $Marker; i < length; i++) {
+    if (Marker > 0) {
+        for (let i = Marker; i < length; i++) {
             const ch = string[i];
             if (ch === '{') {
                 if (i + 1 < string.length && string[i + 1] !== ':') selector.push(' ');
@@ -139,7 +137,7 @@ function RENDER(string) {
             }
         }
     }
-
+    
     return { rule: rule.join(''), subSelector: selector.join(''), status: extended.status, error: extended.error };
 }
 

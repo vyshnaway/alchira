@@ -36,10 +36,10 @@ export const NAV = {
     },
     folder: {
         setup: "/xtyles",
-        buffer: "/xtyles/buffer",
+        abstract: "/xtyles/abstract",
         library: "/xtyles/library",
         portables: "/xtyles/portables",
-        submodule: "/xtyles/buffer/module",
+        submodule: "/xtyles/abstract/module",
     },
     css: {
         atrules: "/xtyles/#at-rules.css",
@@ -50,7 +50,7 @@ export const NAV = {
     json: {
         proxymap: "/xtyles/proxy-map.jsonc",
         shorthand: "/xtyles/shorthands.jsonc",
-        manifest: "/xtyles/buffer/manifest.json"
+        manifest: "/xtyles/abstract/manifest.json"
     }
 };
 

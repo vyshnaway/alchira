@@ -29,7 +29,7 @@ export default function tagScan(content, action, classProps, fileData) {
             rowMarker: FileCursor.rowMarker,
             columnMarker: FileCursor.colMarker,
             tagCount: FileCursor.tagCount,
-            isGlobal: false,
+            scope: "ESSENTIAL",
             selector: "",
             styles: {},
         },
@@ -65,11 +65,12 @@ export default function tagScan(content, action, classProps, fileData) {
             & attr !== ""
         ) {
             if (!tagObject.element) {
-                tagObject.element = attr;
+                tagObject.element = attr;;
                 if (value !== "") styleObject.styles[""] = value.slice(1, -1);
             } else if (/^[\w\-]*\$+[\w\-]+$/i.test(attr)) {
                 styleObject.selector = attr;
-                if (/\$\$/.test(attr)) styleObject.isGlobal = true
+                if (/\$\$/.test(attr)) styleObject.scope = "GLOBAL"
+                else styleObject.scope = "LOCAL"
                 if (value !== "") styleObject.styles[""] = value.slice(1, -1);
             } else if (/[\$@#]/.test(attr)) {
                 styleObject.styles[attr] = value.slice(1, -1);

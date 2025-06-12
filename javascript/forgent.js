@@ -34,13 +34,13 @@ function buildXtyles(selectorIndexObject) {
 
 function loadBindObjectsFromIndex(order, useXelector = false, XelectorPrefix = "") {
     const indexes = []
-    const result = Object.entries(styleSwitch(order.reduce((A, Id) => {
-        if (STASH.LibraryStyle2Index[Id]) {
-            const selector = STASH.Index2StylesObject[STASH.LibraryStyle2Index[Id]].selector;
-            const evaluated = useXelector ? (['@', '.'].includes(selector[0]) ? selector : Utils.string.normalize(Id)) : selector;
-            indexes.push(XelectorPrefix + Utils.string.normalize(evaluated))
-            A[['@', '.'].includes(selector[0]) ? evaluated : "." + evaluated]
-                = STASH.Index2StylesObject[STASH.LibraryStyle2Index[Id]].object;
+    const result = Object.entries(styleSwitch(order.reduce((A, xId) => {
+        if (STASH.LibraryStyle2Index[xId]) {
+            const selector = STASH.Index2StylesObject[STASH.LibraryStyle2Index[xId]].selector;
+            const evaluated = useXelector ? (selector[0] === "@" ? selector : Utils.string.normalize(xId, [], [], ["$"])) : selector;
+            indexes.push(XelectorPrefix + Utils.string.normalize(evaluated, ["$"], ["\\"]));
+            A[(['@', '.'].includes(selector[0]) ? "" : ".") + evaluated]
+                = STASH.Index2StylesObject[STASH.LibraryStyle2Index[xId]].object;
         }
         return A;
     }, {})))

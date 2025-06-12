@@ -22,7 +22,9 @@ export const PUBLISH = {
         local: {},
         global: {},
         axiom: {},
-        cluster: {}
+        cluster: {},
+        portable: {},
+        binding: {}
     },
     RENDERFRAGS: {
         INDEX: "",
@@ -37,10 +39,11 @@ export const PUBLISH = {
 export const STASH = {
     Shorthands: {},
     SortedIndexes: [],
+    PortableEssentials: [],
     LibraryStyle2Index: {},
     GlobalsStyle2Index: {},
-    portableStyle2Index: {},
     Index2StylesObject: {},
+    portableStyle2Index: {},
     FinalStack: {},
 }
 

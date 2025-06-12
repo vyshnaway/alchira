@@ -91,7 +91,7 @@ async function execute(chapter) {
 
                 if (!stopWatcher) {
                     const targetFolders = [...Object.keys(PROXY.CACHE), NAV.folder.setup];
-                    const ignoreFolders = [NAV.folder.buffer];
+                    const ignoreFolders = [NAV.folder.abstract];
                     process.on('SIGINT', () => {
                         if (stopWatcher) { stopWatcher(); stopWatcher = null; $.render.write("\n", 2) }
                         process.exit();

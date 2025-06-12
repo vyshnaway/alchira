@@ -38,8 +38,8 @@ export default class Proxy {
 
     SaveFile(filePath, fileContent) {
         this._DeleteFile(filePath);
-        const file = LibSetter(this.target, this.source, filePath, fileContent, false).data;
-        const sciptResponse = SCRIPT(file, this.extnsProps[file.extension], "read");
+        const file = LibSetter(this.target, this.source, filePath, fileContent, false);
+        const sciptResponse = SCRIPT(file, this.extnsProps[file.extension]);
 
         this.fileCache[file.filePath] = file;
         file.content = fileContent;
@@ -54,13 +54,15 @@ export default class Proxy {
 
         sciptResponse.stylesList.forEach(style => {
             const response = STYLE.TAGSTYLE(style, file.metaFront, file.filePath);
+            // console.log(response)
             file.preBinds.push(...response.preBinds)
             file.postBinds.push(...response.postBinds)
-            if (response.isEssentials) {
+            if (style.scope === "ESSENTIAL") {
                 file.essentials.push(...response.essentials)
             } else {
+                console.log(style)
                 file.usedIndexes.add(response.index);
-                const styleMap = style.isGlobal ? file.styleGlobals : file.styleLocals;
+                const styleMap = style.scope === "GLOBAL" ? file.styleGlobals : file.styleLocals;
                 styleMap[style.selector] = response.index;
             }
 

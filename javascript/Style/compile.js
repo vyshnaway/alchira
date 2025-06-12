@@ -99,24 +99,26 @@ function rawCompose(selectorObjectArray = [], tab = "  ") {
     return styleSheet
 }
 
-function portableCreator(module = "module", version = "0.0.0") {
-    const bindstack = {}, dependsObject = {};
+function portableCreator(preBinds = [], postBinds = [], essentials = [], module = "module", version = "0.0.0") {
+    const bindstack = {};
+    const tab = "    ", portable = [`# ${module}@${version}`], binding = [];
+    const prefix = Use.string.normalize(module) + "//";
 
-    const tab = "    ", portable = [`# ${module}@${version}`, "", "> $$XCSS Portable-Xtylesheet"];
-    const prefix = Use.string.normalize(module) + "$";
+    const bindingResponse = FORGE.bindIndex(new Set(preBinds), new Set(postBinds), true, prefix);
+    binding.push("/* Pre-Binds  */", ...rawCompose(bindingResponse.preBindsObject), "")
+    binding.push("/* Post-Binds  */", ...rawCompose(bindingResponse.postBindsObject), "")
 
     Object.entries(STASH.GlobalsStyle2Index).forEach(([selector, index]) => {
         const style = STASH.Index2StylesObject[index];
         bindstack[selector] = FORGE.bindIndex(new Set(style.preBinds), new Set(style.postBinds), true, prefix);
-        bindstack[selector].preBindsObject.forEach(([S, O]) => dependsObject[S] = O)
-        bindstack[selector].postBindsObject.forEach(([S, O]) => dependsObject[S] = O)
     })
-    const dependsContent = rawCompose(Object.entries(dependsObject));
 
+    const classList = Object.keys(STASH.GlobalsStyle2Index)
+    portable.push("", `## Xtyle Classes (${classList.length})`, "", ...classList.map(c => "- `" + c + "`"), "---")
     Object.entries(STASH.GlobalsStyle2Index).forEach(([selector, index]) => {
         portable.push(
             '',
-            `## Selector: ${selector}`,
+            `### Selector: \`${selector}\``,
             '',
             "````html",
             "<xtyle",
@@ -124,14 +126,21 @@ function portableCreator(module = "module", version = "0.0.0") {
                 if (subSelector === "") {
                     accum.push(
                         `${selector}="`,
-                        tab + `@pre-binds ${bindstack[selector].preBindsList.join(" ")}; `,
-                        tab + `@post-binds ${bindstack[selector].postBindsList.join(" ")}; `,
+                        tab + `@pre-bind ${bindstack[selector].preBindsList.join(" ")}; `,
+                        tab + `@post-bind ${bindstack[selector].postBindsList.join(" ")}; `,
                         ...rawCompose(Object.entries(block), tab).map(line => tab + line),
                         '"'
                     )
                 } else {
+                    if (subSelector[0] === "@") {
+                        const ind = subSelector.indexOf(" ");
+                        const rule = subSelector.slice(1, ind);
+                        const query = subSelector.slice(ind + 1);
+
+                        subSelector = `${rule}@{${query}}`
+                    }
                     accum.push(
-                        `{${subSelector}}="`,
+                        `${subSelector}="`,
                         ...rawCompose(Object.entries(block), tab).map(line => tab + line),
                         '"'
                     )
@@ -142,10 +151,34 @@ function portableCreator(module = "module", version = "0.0.0") {
             "````",
         )
     })
+    
+    portable.push(
+        "", 
+        "## Portable Essentials", 
+        "",
+        "````html",
+        "<xtyle",
+        ...(essentials.reduce((accum, [subSelector, block]) => {
+            if (subSelector[0] === "@") {
+                const ind = subSelector.indexOf(" ");
+                const rule = subSelector.slice(1, ind);
+                const query = subSelector.slice(ind + 1);
+
+                subSelector = `${rule}@{${query}}`
+            }
+            accum.push(
+                `${subSelector}="`,
+                ...rawCompose(Object.entries(block), tab).map(line => tab + line),
+                '"'
+            )
+            return accum;
+        }, [])).map(line => tab + line),
+        "/>",
+        "````",)
 
     return {
         portable: portable.join("\n"),
-        depends: dependsContent.join("\n")
+        binding: binding.join("\n")
     }
 }
 

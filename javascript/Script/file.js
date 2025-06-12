@@ -5,7 +5,7 @@ export const StyleStack = { Library: {}, Local: {}, Global: {} };
 export const BindStack = { preBinds: new Set(), postBinds: new Set() }
 
 export default function scanner(
-    fileData, classProps, action,
+    fileData, classProps = [], action = "read",
     bindStack = { preBinds: new Set(), postBinds: new Set() },
     styleStack = { Library: {}, Local: {}, Global: {} }
 ) {
@@ -41,7 +41,7 @@ export default function scanner(
             }
             FileCursor.marker++; // Skip the closing quote
         } else {
-            scribed += ch;
+            scribed += ch;  
             FileCursor.marker++;
         }
 

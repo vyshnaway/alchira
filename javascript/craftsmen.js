@@ -20,10 +20,22 @@ import {
 export function UpdateLibrary() {
     ResetCache();
     Refers.UploadFiles(DATA.LIBRARY, DATA.PORTABLES);
-    const { libraryTable, portableTable, AxiomStyleMap, ClusterStyleMap, DependsStyleMap } = Refers.Renders();
+    const {
+        libraryTable,
+        portableTable,
+        portableEssentials,
+        AxiomStyleMap,
+        ClusterStyleMap,
+        PortableStyleMap,
+        BindingStyleMap
+    } = Refers.Renders();
 
     PUBLISH.MANIFEST.axiom = AxiomStyleMap;
     PUBLISH.MANIFEST.cluster = ClusterStyleMap;
+    PUBLISH.MANIFEST.portable = PortableStyleMap;
+    PUBLISH.MANIFEST.binding = BindingStyleMap;
+
+    STASH.PortableEssentials = portableEssentials;
     PUBLISH.MANIFEST.file = { ...libraryTable, ...portableTable };
 }
 
@@ -136,16 +148,14 @@ const RENDER = {
         return { preBinds: scanned.preBinds, postBinds: scanned.postBinds }
     },
     essentials: (CUMULATES) => {
-        PUBLISH.RENDERFRAGS.ESSENTIALS
-            = COMPILE.Stylesheet(CUMULATES.essentials, !DATA.WATCH)
+        PUBLISH.RENDERFRAGS.ESSENTIALS = COMPILE.Stylesheet([...STASH.PortableEssentials, ...CUMULATES.essentials], !DATA.WATCH)
         return { preBinds: CUMULATES.preBinds, postBinds: CUMULATES.postBinds }
     },
     rendered: () => {
         const preBinds = new Set(), postBinds = new Set();
 
         Object.values(PROXY.CACHE).forEach((cache) => cache.RenderFiles(preBinds, postBinds, DATA.CMD))
-        PUBLISH.RENDERFRAGS.RENDERED
-            = COMPILE.Stylesheet(FORGE.indexMaps(STASH.FinalStack), !DATA.WATCH)
+        PUBLISH.RENDERFRAGS.RENDERED = COMPILE.Stylesheet(FORGE.indexMaps(STASH.FinalStack), !DATA.WATCH)
         return { preBinds, postBinds }
     },
     appendix: () => {
@@ -186,8 +196,9 @@ export async function GenerateFinal() {
         const renderedBinds = RENDER.rendered();
         const essentialsBinds = RENDER.essentials(Cumulates);
 
-        RENDER.binds([...indexBinds.preBinds, ...essentialsBinds.preBinds, ...appendixBinds.preBinds, ...renderedBinds.preBinds],
-            [...indexBinds.postBinds, ...essentialsBinds.postBinds, ...appendixBinds.postBinds, ...renderedBinds.postBinds]);
+        const preBinds = [...indexBinds.preBinds, ...essentialsBinds.preBinds, ...appendixBinds.preBinds, ...renderedBinds.preBinds];
+        const postBinds = [...indexBinds.postBinds, ...essentialsBinds.postBinds, ...appendixBinds.postBinds, ...renderedBinds.postBinds];
+        RENDER.binds(preBinds, postBinds);
 
         const FinalStylesheet = Object.entries(PUBLISH.RENDERFRAGS)
             .map(([chapter, content]) => DATA.WATCH ? `\n\n/* CHAPTER: ${chapter} */\n${content}\n` : content).join("");
@@ -201,8 +212,8 @@ export async function GenerateFinal() {
         if (DATA.WATCH) {
             SaveFiles[NAV.json.manifest] = JSON.stringify(PUBLISH.MANIFEST);
         } else {
-            const portable = COMPILE.Portable(DATA.PACKAGE, DATA.VERSION);
-            SaveFiles[NAV.folder.submodule + "/" + DATA.PACKAGE + ".css"] = portable.depends;
+            const portable = COMPILE.Portable(preBinds, postBinds, Cumulates.essentials, DATA.PACKAGE, DATA.VERSION);
+            SaveFiles[NAV.folder.submodule + "/" + DATA.PACKAGE + ".css"] = portable.binding;
             SaveFiles[NAV.folder.submodule + "/" + DATA.PACKAGE + ".xcss"] = portable.portable;
 
             const memChart = {
