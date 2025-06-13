@@ -12,9 +12,7 @@ export default function libSetter(target, source, filePath, content, isXtylesFol
     const group = isPortable ? (extension === "css" ? "binding" : "portable") : (Boolean(cluster) ? "cluster" : "axiom");
     const stamp = isPortable ? (Utils.string.normalize(fileName) + (group === "binding" ? "/$/" : "/")) :
         id === 0 ? "" : (Utils.string.normalize(cluster) + "$".repeat(id));
-    const normalPath = Utils.string.normalize(targetPath, [], [], ["/", "."]);
 
-    const folder = isPortable ? NAV.folder.portables : NAV.folder.library;
     return {
         id,
         group,
@@ -22,10 +20,10 @@ export default function libSetter(target, source, filePath, content, isXtylesFol
         fileName,
         extension,
         filePath,
-        targetPath: isXtylesFolder ? folder + "/" + targetPath : targetPath,
-        sourcePath,
         usedIndexes: new Set(),
-        metaFront: `${isXtylesFolder ? group.toLocaleUpperCase() : ""}\\|${normalPath}`,
+        sourcePath,
+        targetPath: isXtylesFolder ? (isPortable ? NAV.folder.portables : NAV.folder.library) + "/" + targetPath : targetPath,
+        metaFront: `${isXtylesFolder ? group.toLocaleUpperCase() : ""}\\|${Utils.string.normalize(targetPath, [], [], ["/", "."])}`,
         content: isXtylesFolder && extension !== "xcss" ? cleaner.uncomment.Css(content) : content,
     }
 }

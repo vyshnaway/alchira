@@ -1,4 +1,3 @@
-import $ from "../Shell/index.js";
 import Use from "../Utils/index.js";
 import READS from "./block.js";
 import SHORTHAND from "../Worker/shorthand.js";
@@ -90,20 +89,21 @@ function CSSLIBRARY(fileDatas = [], initial = '', forPortable = false) {
     fileDatas.forEach(source => {
         source.usedIndexes = new Set();
         const { stamp, filePath, metaFront, content, group } = source;
-        const scannedObj = READS(content).allBlocks, declarations = [(forPortable ? NAV.folder.portables : NAV.folder.library) + "/" + filePath];
+        const scannedObj = READS(content).allBlocks;
 
         for (const selector in scannedObj) {
-            const stampSelector = stamp + Use.string.normalize(selector, forPortable ? [] : [], ["$", "/", "\\", "."]);
+            const declarations = [(forPortable ? NAV.folder.portables : NAV.folder.library) + "/" + filePath];
+            const stampSelector = stamp + Use.string.normalize(selector, ["$"], ["\\", "."]);
             const scannedStyle = SCANNER(scannedObj[selector], initial + " : " + filePath + " ||", selector);
 
-            const index = (IndexMap[stampSelector] || 0) + (selectors[stampSelector]?.index || 0);
+            const index = (IndexMap[stampSelector] || 0) + (selectors[stampSelector] || 0);
             const InStash = STASH.Index2StylesObject[index];
             const CLX = index ? { number: InStash.index, class: InStash.class } : INDEX.DECLARE();
             if (index) declarations.push(...STASH.Index2StylesObject[index].declarations);
-            // if(forPortable) console.log({stampSelector, index, declarations})
 
             source.usedIndexes.add(CLX.number)
-            selectors[stampSelector] = {
+            selectors[stampSelector] = CLX.number;
+            STASH.Index2StylesObject[CLX.number] = {
                 index: CLX.number,
                 class: CLX.class,
                 scope: group,
@@ -111,15 +111,14 @@ function CSSLIBRARY(fileDatas = [], initial = '', forPortable = false) {
                 object: { "": scannedStyle.styles },
                 preBinds: scannedStyle.preBinds,
                 postBinds: scannedStyle.postBinds,
-                metaClass: metaFront + "_" + stampSelector,
+                metaClass: metaFront + "_" + Use.string.normalize(stampSelector, [], [], ["$", "/"]),
                 declarations,
             }
         }
     })
 
     for (const selector in selectors) {
-        STASH.Index2StylesObject[selectors[selector].index] = selectors[selector];
-        IndexMap[selector] = selectors[selector].index;
+        IndexMap[selector] = selectors[selector];
     }
 
     return { tillStyles: Object.keys(STASH.LibraryStyle2Index), exclusiveStyles: Object.keys(selectors) };
@@ -138,7 +137,7 @@ function TAGSTYLE({
     const object = {}, preBinds = [], postBinds = [], errors = [], essentials = [];
 
     for (let subSelector in styles) {
-        const query = SHORTHAND.RENDER(subSelector, declarations[0]);
+        const query = SHORTHAND.RENDER(subSelector, declarations[0], isPortable);
         if (!query.status) errors.push(query.error)
         const styleObj = SCANNER(styles[subSelector], `${scope} : ${filePath} ||`, selector + subSelector);
 

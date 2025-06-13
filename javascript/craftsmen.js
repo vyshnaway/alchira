@@ -8,7 +8,7 @@ import FORGE from "./forgent.js";
 import ORGANIZER from "./Worker/order-api.js";
 import { DATA, NAV } from "./data-meta.js";
 import Proxy from "./Script/class.js";
-import Refers from "./Style/stash.js";
+import XTYLES from "./Style/stash.js";
 import {
     PROXY,
     STASH,
@@ -19,7 +19,7 @@ import {
 // On library edit.
 export function UpdateLibrary() {
     ResetCache();
-    Refers.UploadFiles(DATA.LIBRARY, DATA.PORTABLES);
+    XTYLES.UploadFiles(DATA.LIBRARY, DATA.PORTABLES);
     const {
         libraryTable,
         modulesTable,
@@ -28,13 +28,13 @@ export function UpdateLibrary() {
         ClusterStyleMap,
         PortableStyleMap,
         BindingStyleMap
-    } = Refers.Renders();
+    } = XTYLES.Renders();
 
     PUBLISH.MANIFEST.axiom = AxiomStyleMap;
     PUBLISH.MANIFEST.cluster = ClusterStyleMap;
     PUBLISH.MANIFEST.portable = PortableStyleMap;
     PUBLISH.MANIFEST.binding = BindingStyleMap;
-    
+
     STASH.PortableEssentials = ModuleEssentials;
     PUBLISH.MANIFEST.file = { ...libraryTable, ...modulesTable };
 }
@@ -124,16 +124,24 @@ async function Accumulate() {
             }
         } else {
             PUBLISH.FinalMessage = CUMULATES.errors.length === 0 ? "Preview verified. Procceed to 'publish' using your key." :
-                "Errors in " + CUMULATES.errors.length + " Tags. Rectify them to proceed with 'publish' command.";
+                CUMULATES.errors.length +" Unresolved Errors. Rectify them to proceed with 'publish' command.";
             output = await ORGANIZER(CUMULATES.classTracks, DATA.CMD, DATA.ARG);
         }
 
         STASH.FinalStack = output.result.reduce((A, I) => { A["." + STASH.Index2StylesObject[I].class] = I; return A; }, {});
         STASH.SortedIndexes = output.result;
     }
+
+
     PUBLISH.ErrorCount = CUMULATES.errors.length;
-    PUBLISH.Report.errors = $.MOLD[PUBLISH.ErrorCount ? "failed" : "success"].Section(CUMULATES.errors.length + " Errors", CUMULATES.errors);
     PUBLISH.Report.targets = $.MOLD.std.Block(CUMULATES.report);
+
+    const XtylesResult = XTYLES.Report();
+    PUBLISH.Report.library = XtylesResult.report;
+    PUBLISH.WarningCount = XtylesResult.warnings.length;
+
+    PUBLISH.Report.errors = $.MOLD[PUBLISH.ErrorCount ? "failed" : "success"]
+        .Section(`${PUBLISH.ErrorCount} Errors & ${PUBLISH.WarningCount} Warnings`, [...XtylesResult.warnings, ...CUMULATES.errors,]);
 
     return CUMULATES;
 }
@@ -185,7 +193,6 @@ const RENDER = {
 export async function GenerateFinal() {
     const Cumulates = await Accumulate(), SaveFiles = {};
 
-    PUBLISH.Report.library = Refers.Report();
     PUBLISH.Report.shorthand = shorthandJS.REPORT();
 
     if (PUBLISH.DeltaContent.length) {

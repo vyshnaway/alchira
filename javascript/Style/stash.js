@@ -81,10 +81,10 @@ function _portableAccumulator() {
 
 let axiomCount = 0, clusterCount = 0, portableCount = 0, bindingCount = 0;
 let axiomChart = {}, clusterChart = {}, portableChart = {}, bindingChart = {};
-let moduleErrors = [], libraryErrors = [];
+let portableShorthandErrors = [];
 
 function Renders() {
-    moduleErrors = [], libraryErrors = [];
+    portableShorthandErrors = [];
     axiomCount = 0, clusterCount = 0, portableCount = 0, bindingCount = 0;
     axiomChart = {}, clusterChart = {}, portableChart = {}, bindingChart = {};
     Object.keys(LibraryFiles).forEach(filePath => STYLE.INDEX.DISPOSE(...LibraryFiles[filePath].usedIndexes));
@@ -103,7 +103,7 @@ function Renders() {
             style.scope = "";
             style.selector = style.selector === "" ? "" : fileData.stamp + style.selector;
             const response = STYLE.TAGSTYLE(style, fileData.metaFront, fileData.filePath, fileData.targetPath, STASH.PortableStyle2Index);
-            moduleErrors.push(...response.errors);
+            portableShorthandErrors.push(...response.errors);
 
             if (style.selector === "") {
                 ModuleEssentials.push(...response.essentials)
@@ -117,26 +117,15 @@ function Renders() {
         if (exclusiveStyles.length)
             portableChart[`Portable [${fileData.filePath}]:  ${exclusiveStyles.length} Classes`] = exclusiveStyles;
     });
-    
+
     const BindingStyleMap = bindingArray.reduce((collection, fileData) => {
         const result = STYLE.CSSLIBRARY([fileData], "BINDING", true);
-        
-        console.log(`\n# ${fileData.filePath}\n`, result)
-        
         collection[NAV.folder.portables + "/" + fileData.filePath] = result.exclusiveStyles;
         if (result.exclusiveStyles.length)
             bindingChart[`Binding [${fileData.filePath}]: ${result.exclusiveStyles.length} Classes`] = result.exclusiveStyles;
         bindingCount += result.exclusiveStyles.length;
         return collection
     }, {});
-    console.log(STASH.Index2StylesObject)
-    
-    Object.values(STASH.PortableStyle2Index).forEach(index => {
-        const InStash = STASH.Index2StylesObject[index];
-        // console.log({ declarations: InStash.declarations, Boolean: InStash.declarations.length > 1 })
-        if (InStash.declarations.length > 1)
-            moduleErrors.push($.MOLD.failed.List("Multiple declarations: " + InStash.selector, InStash.declarations, $.list.text.Bullets))
-    })
 
 
     const AxiomStyleMap = axiomsArray.reduce((collection, fileData, index) => {
@@ -157,12 +146,6 @@ function Renders() {
         return collection;
     }, {});
 
-    Object.values(STASH.LibraryStyle2Index).forEach(index => {
-        const InStash = STASH.Index2StylesObject[index];
-        if (InStash.declarations.length > 1)
-            moduleErrors.push($.MOLD.failed.List("Multiple declarations: " + InStash.selector, InStash.declarations, $.list.text.Bullets))
-    })
-
     return {
         libraryTable,
         modulesTable,
@@ -175,22 +158,36 @@ function Renders() {
 }
 
 function Report() {
-    const errors = [...moduleErrors, ...libraryErrors]
-    return [
-        $.MOLD.primary.Section(`Axiom Styles: ${axiomCount}`,
-            Object.entries(axiomChart).map(([heading, entries]) => $.MOLD.tertiary.Topic(heading, entries, $.list.text.Entries))
-        ),
-        $.MOLD.primary.Section(`Cluster Styles: ${clusterCount}`,
-            Object.entries(clusterChart).map(([heading, entries]) => $.MOLD.tertiary.Topic(heading, entries, $.list.text.Entries))
-        ),
-        $.MOLD.primary.Section(`Binding Styles: ${bindingCount}`,
-            Object.entries(bindingChart).map(([heading, entries]) => $.MOLD.tertiary.Topic(heading, entries, $.list.text.Entries))
-        ),
-        $.MOLD.primary.Section(`Portable Styles: ${portableCount}`,
-            Object.entries(portableChart).map(([heading, entries]) => $.MOLD.tertiary.Topic(heading, entries, $.list.text.Entries))
-        ),
-        $.MOLD[errors.length ? "failed" : "success"].Footer(errors.length + " Errors", errors)
-    ].join("");
+    const errors = [...portableShorthandErrors]
+
+    Object.values(STASH.PortableStyle2Index).forEach(index => {
+        const InStash = STASH.Index2StylesObject[index];
+        if (InStash.declarations.length > 1)
+            errors.push($.MOLD.warning.List("Multiple portable declarations: " + InStash.selector, InStash.declarations, $.list.text.Bullets))
+    })
+    Object.values(STASH.LibraryStyle2Index).forEach(index => {
+        const InStash = STASH.Index2StylesObject[index];
+        if (InStash.declarations.length > 1)
+            errors.push($.MOLD.warning.List("Multiple Library declarations: " + InStash.selector, InStash.declarations, $.list.text.Bullets))
+    })
+
+    return {
+        warnings: errors,
+        report: [
+            $.MOLD.primary.Section(`Axiom Styles: ${axiomCount}`,
+                Object.entries(axiomChart).map(([heading, entries]) => $.MOLD.tertiary.Topic(heading, entries, $.list.text.Entries))
+            ),
+            $.MOLD.primary.Section(`Cluster Styles: ${clusterCount}`,
+                Object.entries(clusterChart).map(([heading, entries]) => $.MOLD.tertiary.Topic(heading, entries, $.list.text.Entries))
+            ),
+            $.MOLD.primary.Section(`Binding Styles: ${bindingCount}`,
+                Object.entries(bindingChart).map(([heading, entries]) => $.MOLD.tertiary.Topic(heading, entries, $.list.text.Entries))
+            ),
+            $.MOLD.primary.Section(`Portable Styles: ${portableCount}`,
+                Object.entries(portableChart).map(([heading, entries]) => $.MOLD.tertiary.Topic(heading, entries, $.list.text.Entries))
+            ),
+        ].join("")
+    };
 }
 
 export default {

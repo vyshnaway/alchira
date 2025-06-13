@@ -13,7 +13,7 @@ function REPORT() {
     ]);
 }
 
-function IMPORT(string, watchUndef = true) {
+function IMPORT(string, watchUndef = true, ErrorisWarning = false) {
     const response = {
         status: true,
         result: "",
@@ -29,15 +29,15 @@ function IMPORT(string, watchUndef = true) {
         recursionLoop: (recursionPreview, cause) => {
             response.status = false;
             recursionPreview["ERROR BY"] = $.style.bold.Red(cause)
-            response.error = $.MOLD.std.List(source + $.style.bold.Red(" : Shorthand recursion loop."),
-                $.list.failed.Props(recursionPreview), $.list.failed.Waterfall);
+            response.error = $.MOLD[ErrorisWarning ? "warning" : "failed"].List(source + $.style.text[ErrorisWarning ? "Orange" : "Red"](" : Shorthand recursion loop."),
+                $.list.text.Props(recursionPreview), $.list.std.Waterfall);
             return response
         },
         undefinedHash: (recursionPreview, cause) => {
             response.status = false;
             recursionPreview["ERROR BY"] = $.style.bold.Red(cause)
-            response.error = $.MOLD.std.List(source + $.style.bold.Red(" : Undefined shorthand."),
-                $.list.failed.Props(recursionPreview), $.list.failed.Waterfall);
+            response.error = $.MOLD[ErrorisWarning ? "warning" : "failed"].List(source + $.style.text[ErrorisWarning ? "Orange" : "Red"](" : Undefined shorthand."),
+                $.list.text.Props(recursionPreview), $.list.std.Waterfall);
             return response
         }
     }
@@ -88,8 +88,8 @@ function UPLOAD(shorthands) {
     return STASH.Shorthands;
 }
 
-function RENDER(string, sourcePath="") {
-    const extended = IMPORT(string)
+function RENDER(string, sourcePath = "", ErrorisWarning = false) {
+    const extended = IMPORT(string, true, ErrorisWarning)
     string = extended.result
     let rule = [],
         selector = [],

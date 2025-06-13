@@ -5,12 +5,13 @@ export const PUBLISH = {
     DeltaPath: "",
     DeltaContent: "",
     FinalMessage: "",
-    ErrorCount: false,
+    ErrorCount: 0,
+    WarningCount: 0,
     Report: {
         library: "",
-        targets: "",
         variables: "",
         shorthand: "",
+        targets: "",
         errors: "",
         memChart: "",
         footer: ""
@@ -69,9 +70,9 @@ export function ResetCache() {
         ErrorCount: false,
         Report: {
             library: "",
-            targets: "",
             variables: "",
             shorthand: "",
+            targets: "",
             errors: "",
             memChart: "",
             footer: ""
