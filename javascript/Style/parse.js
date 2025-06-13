@@ -86,35 +86,32 @@ function CSSCANNER(content, initial = '') {
 }
 
 function CSSLIBRARY(fileDatas = [], initial = '', forPortable = false) {
-    const selectors = {}, errors = [], IndexMap = forPortable ? STASH.portableStyle2Index : STASH.LibraryStyle2Index;
+    const selectors = {}, IndexMap = forPortable ? STASH.PortableStyle2Index : STASH.LibraryStyle2Index;
     fileDatas.forEach(source => {
         source.usedIndexes = new Set();
         const { stamp, filePath, metaFront, content, group } = source;
-        const scannedObj = READS(content).allBlocks, declarations = [filePath];
+        const scannedObj = READS(content).allBlocks, declarations = [(forPortable ? NAV.folder.portables : NAV.folder.library) + "/" + filePath];
 
         for (const selector in scannedObj) {
-            const stampSelector = stamp + Use.string.normalize(selector, forPortable ? ["$"] : [], ["\\", "."]);
+            const stampSelector = stamp + Use.string.normalize(selector, forPortable ? [] : [], ["$", "/", "\\", "."]);
             const scannedStyle = SCANNER(scannedObj[selector], initial + " : " + filePath + " ||", selector);
 
-            const index = IndexMap[selector] ?? 0;
+            const index = (IndexMap[stampSelector] || 0) + (selectors[stampSelector]?.index || 0);
             const InStash = STASH.Index2StylesObject[index];
-            if (index) {
-                declarations.push(...STASH.Index2StylesObject[index].declarations);
-                errors.push($.MOLD.failed.List("Multiple declarations: " + InStash.selector, declarations, $.list.text.Bullets))
-            }
             const CLX = index ? { number: InStash.index, class: InStash.class } : INDEX.DECLARE();
-
+            if (index) declarations.push(...STASH.Index2StylesObject[index].declarations);
+            // if(forPortable) console.log({stampSelector, index, declarations})
 
             source.usedIndexes.add(CLX.number)
             selectors[stampSelector] = {
                 index: CLX.number,
                 class: CLX.class,
                 scope: group,
-                selector,
+                selector: stampSelector,
                 object: { "": scannedStyle.styles },
                 preBinds: scannedStyle.preBinds,
                 postBinds: scannedStyle.postBinds,
-                metaClass: metaFront + "_" + Use.string.normalize(stampSelector, [], [], ["$"]),
+                metaClass: metaFront + "_" + stampSelector,
                 declarations,
             }
         }
@@ -125,7 +122,7 @@ function CSSLIBRARY(fileDatas = [], initial = '', forPortable = false) {
         IndexMap[selector] = selectors[selector].index;
     }
 
-    return { tillStyles: Object.keys(STASH.LibraryStyle2Index), exclusiveStyles: Object.keys(selectors), errors };
+    return { tillStyles: Object.keys(STASH.LibraryStyle2Index), exclusiveStyles: Object.keys(selectors) };
 }
 
 function TAGSTYLE({
@@ -136,8 +133,8 @@ function TAGSTYLE({
     columnMarker
 }, metaFront, filePath, normalPath, IndexMap = {}) {
     const declarations = [`${normalPath}:${rowMarker}:${columnMarker}`];
-
-    const metaClass = scope + metaFront + `\\:${rowMarker}\\:${columnMarker}_` + Use.string.normalize(selector, [], [], ["$"]);
+    const isPortable = scope === "";
+    const metaClass = scope + metaFront + `\\:${rowMarker}\\:${columnMarker}_` + Use.string.normalize(selector, [], [], isPortable ? ["$", "/"] : ["$"]);
     const object = {}, preBinds = [], postBinds = [], errors = [], essentials = [];
 
     for (let subSelector in styles) {

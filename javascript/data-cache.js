@@ -43,7 +43,7 @@ export const STASH = {
     LibraryStyle2Index: {},
     GlobalsStyle2Index: {},
     Index2StylesObject: {},
-    portableStyle2Index: {},
+    PortableStyle2Index: {},
     FinalStack: {},
 }
 

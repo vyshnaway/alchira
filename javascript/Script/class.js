@@ -54,7 +54,6 @@ export default class Proxy {
 
         sciptResponse.stylesList.forEach(style => {
             const IndexMap = style.scope === "GLOBAL" ? file.styleGlobals : style.scope === "LOCAL" ? file.styleLocals : {};
-            console.log(file)
             const response = STYLE.TAGSTYLE(style, file.metaFront, file.filePath, DATA.WorkPath + "/" + file.targetPath, IndexMap);
 
             file.preBinds.push(...response.preBinds)
@@ -115,7 +114,6 @@ export default class Proxy {
                 if (InStash.declarations.length > 1)
                     C.errors.push($.MOLD.failed.List("Multiple declarations: " + InStash.selector, InStash.declarations, $.list.text.Bullets))
             })
-            console.log(file.styleLocals, file.styleGlobals)
         });
         Object.values(C.styleGlobals).forEach(index => {
             const InStash = STASH.Index2StylesObject[index];

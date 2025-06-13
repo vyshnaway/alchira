@@ -10,7 +10,7 @@ export default function libSetter(target, source, filePath, content, isXtylesFol
     id = (isNaN(id) || id < 0) ? 0 : parseInt(id, 10);
 
     const group = isPortable ? (extension === "css" ? "binding" : "portable") : (Boolean(cluster) ? "cluster" : "axiom");
-    const stamp = isPortable ? (Utils.string.normalize(fileName) + (group === "BINDING" ? "/$/" : "/")) :
+    const stamp = isPortable ? (Utils.string.normalize(fileName) + (group === "binding" ? "/$/" : "/")) :
         id === 0 ? "" : (Utils.string.normalize(cluster) + "$".repeat(id));
     const normalPath = Utils.string.normalize(targetPath, [], [], ["/", "."]);
 
@@ -25,7 +25,7 @@ export default function libSetter(target, source, filePath, content, isXtylesFol
         targetPath: isXtylesFolder ? folder + "/" + targetPath : targetPath,
         sourcePath,
         usedIndexes: new Set(),
-        metaFront: `${isXtylesFolder ? group : ""}\\|${normalPath}`,
+        metaFront: `${isXtylesFolder ? group.toLocaleUpperCase() : ""}\\|${normalPath}`,
         content: isXtylesFolder && extension !== "xcss" ? cleaner.uncomment.Css(content) : content,
     }
 }

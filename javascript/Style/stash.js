@@ -81,10 +81,10 @@ function _portableAccumulator() {
 
 let axiomCount = 0, clusterCount = 0, portableCount = 0, bindingCount = 0;
 let axiomChart = {}, clusterChart = {}, portableChart = {}, bindingChart = {};
-let moduleErrors = [], duplicateErrors = [];
+let moduleErrors = [], libraryErrors = [];
 
 function Renders() {
-    moduleErrors = [], duplicateErrors = [];
+    moduleErrors = [], libraryErrors = [];
     axiomCount = 0, clusterCount = 0, portableCount = 0, bindingCount = 0;
     axiomChart = {}, clusterChart = {}, portableChart = {}, bindingChart = {};
     Object.keys(LibraryFiles).forEach(filePath => STYLE.INDEX.DISPOSE(...LibraryFiles[filePath].usedIndexes));
@@ -100,9 +100,9 @@ function Renders() {
         fileData.usedIndexes = new Set();
 
         tagStash.forEach(style => {
-            style.scope = "PORTABLE";
+            style.scope = "";
             style.selector = style.selector === "" ? "" : fileData.stamp + style.selector;
-            const response = STYLE.TAGSTYLE(style, fileData.metaFront, fileData.filePath, fileData.targetPath, STASH.portableStyle2Index);
+            const response = STYLE.TAGSTYLE(style, fileData.metaFront, fileData.filePath, fileData.targetPath, STASH.PortableStyle2Index);
             moduleErrors.push(...response.errors);
 
             if (style.selector === "") {
@@ -117,41 +117,51 @@ function Renders() {
         if (exclusiveStyles.length)
             portableChart[`Portable [${fileData.filePath}]:  ${exclusiveStyles.length} Classes`] = exclusiveStyles;
     });
-
-    Object.values(STASH.portableStyle2Index).forEach(index => {
+    
+    const BindingStyleMap = bindingArray.reduce((collection, fileData) => {
+        const result = STYLE.CSSLIBRARY([fileData], "BINDING", true);
+        
+        console.log(`\n# ${fileData.filePath}\n`, result)
+        
+        collection[NAV.folder.portables + "/" + fileData.filePath] = result.exclusiveStyles;
+        if (result.exclusiveStyles.length)
+            bindingChart[`Binding [${fileData.filePath}]: ${result.exclusiveStyles.length} Classes`] = result.exclusiveStyles;
+        bindingCount += result.exclusiveStyles.length;
+        return collection
+    }, {});
+    console.log(STASH.Index2StylesObject)
+    
+    Object.values(STASH.PortableStyle2Index).forEach(index => {
         const InStash = STASH.Index2StylesObject[index];
-        if (InStash.declarations.length > 1) 
+        // console.log({ declarations: InStash.declarations, Boolean: InStash.declarations.length > 1 })
+        if (InStash.declarations.length > 1)
             moduleErrors.push($.MOLD.failed.List("Multiple declarations: " + InStash.selector, InStash.declarations, $.list.text.Bullets))
     })
 
 
-    const BindingStyleMap = bindingArray.reduce((collection, fileData) => {
-        const classes = STYLE.CSSLIBRARY([fileData], "BINDING", true);
-        collection[NAV.folder.portables + "/" + fileData.filePath] = classes.exclusiveStyles;
-        if (classes.exclusiveStyles.length)
-            bindingChart[`Binding [${fileData.fileName}]: ${classes.exclusiveStyles.length} Classes`] = classes.exclusiveStyles;
-        bindingCount += classes.exclusiveStyles.length;
-        return collection
-    }, {});
-
-
     const AxiomStyleMap = axiomsArray.reduce((collection, fileData, index) => {
-        const classes = STYLE.CSSLIBRARY(fileData, "AXIOM");
-        collection[index] = classes.exclusiveStyles;
-        if (classes.exclusiveStyles.length)
-            axiomChart[`Level ${index}:  ${classes.exclusiveStyles.length} Classes`] = classes.exclusiveStyles;
-        axiomCount += classes.exclusiveStyles.length;
+        const result = STYLE.CSSLIBRARY(fileData, "AXIOM");
+        collection[index] = result.exclusiveStyles;
+        if (result.exclusiveStyles.length)
+            axiomChart[`Level ${index}:  ${result.exclusiveStyles.length} Classes`] = result.exclusiveStyles;
+        axiomCount += result.exclusiveStyles.length;
         return collection
     }, {});
 
     const ClusterStyleMap = clustersArray.reduce((collection, level, index) => {
-        const classes = STYLE.CSSLIBRARY(level, "CLUSTER")
-        collection[index] = classes.exclusiveStyles;
-        if (classes.exclusiveStyles.length)
-            clusterChart[`Level ${index}:  ${classes.exclusiveStyles.length} Classes`] = classes.exclusiveStyles;
-        clusterCount += classes.exclusiveStyles.length;
+        const result = STYLE.CSSLIBRARY(level, "CLUSTER")
+        collection[index] = result.exclusiveStyles;
+        if (result.exclusiveStyles.length)
+            clusterChart[`Level ${index}:  ${result.exclusiveStyles.length} Classes`] = result.exclusiveStyles;
+        clusterCount += result.exclusiveStyles.length;
         return collection;
     }, {});
+
+    Object.values(STASH.LibraryStyle2Index).forEach(index => {
+        const InStash = STASH.Index2StylesObject[index];
+        if (InStash.declarations.length > 1)
+            moduleErrors.push($.MOLD.failed.List("Multiple declarations: " + InStash.selector, InStash.declarations, $.list.text.Bullets))
+    })
 
     return {
         libraryTable,
@@ -165,7 +175,7 @@ function Renders() {
 }
 
 function Report() {
-    const errors = [...moduleErrors, ...duplicateErrors]
+    const errors = [...moduleErrors, ...libraryErrors]
     return [
         $.MOLD.primary.Section(`Axiom Styles: ${axiomCount}`,
             Object.entries(axiomChart).map(([heading, entries]) => $.MOLD.tertiary.Topic(heading, entries, $.list.text.Entries))
