@@ -1,8 +1,7 @@
 import Use from "../Utils/index.js";
 import READS from "./block.js";
 import SHORTHAND from "../Worker/shorthand.js";
-import { STASH } from "../data-cache.js";
-import { DATA, NAV } from "../data-meta.js";
+import { DATA, NAV, CACHE } from "../data-cache.js";
 
 const INDEX = {
     NOW: 0,
@@ -14,21 +13,21 @@ const INDEX = {
     DISPOSE: (...indexes) => {
         indexes.forEach(index => {
             INDEX.BIN.push(index);
-            delete STASH.Index2StylesObject[index];
+            delete CACHE.Index2StylesObject[index];
         })
     },
     RESET: () => {
         INDEX.NOW = 0;
-        Object.keys(STASH.Index2StylesObject).forEach(key => delete STASH.Index2StylesObject(key))
+        Object.keys(CACHE.Index2StylesObject).forEach(key => delete CACHE.Index2StylesObject(key))
     }
 }
 
 function xtylemerge(classList = []) {
     let result = {}, preBinds = [], postBinds = [];
     classList.forEach((className) => {
-        const index = STASH.LibraryStyle2Index[className];
+        const index = CACHE.LibraryStyle2Index[className];
         if (index) {
-            const found = STASH.Index2StylesObject[index];
+            const found = CACHE.Index2StylesObject[index];
             preBinds.push(...found.preBinds)
             postBinds.push(...found.postBinds)
             result = Use.object.multiMerge([result, found.object[""]], true);
@@ -85,7 +84,7 @@ function CSSCANNER(content, initial = '') {
 }
 
 function CSSLIBRARY(fileDatas = [], initial = '', forPortable = false) {
-    const selectors = {}, IndexMap = forPortable ? STASH.PortableStyle2Index : STASH.LibraryStyle2Index;
+    const selectors = {}, IndexMap = forPortable ? CACHE.PortableStyle2Index : CACHE.LibraryStyle2Index;
     fileDatas.forEach(source => {
         source.usedIndexes = new Set();
         const { stamp, filePath, metaFront, content, group } = source;
@@ -97,13 +96,13 @@ function CSSLIBRARY(fileDatas = [], initial = '', forPortable = false) {
             const scannedStyle = SCANNER(scannedObj[selector], initial + " : " + filePath + " ||", selector);
 
             const index = (IndexMap[stampSelector] || 0) + (selectors[stampSelector] || 0);
-            const InStash = STASH.Index2StylesObject[index];
+            const InStash = CACHE.Index2StylesObject[index];
             const CLX = index ? { number: InStash.index, class: InStash.class } : INDEX.DECLARE();
-            if (index) declarations.push(...STASH.Index2StylesObject[index].declarations);
+            if (index) declarations.push(...CACHE.Index2StylesObject[index].declarations);
 
             source.usedIndexes.add(CLX.number)
             selectors[stampSelector] = CLX.number;
-            STASH.Index2StylesObject[CLX.number] = {
+            CACHE.Index2StylesObject[CLX.number] = {
                 index: CLX.number,
                 class: CLX.class,
                 scope: group,
@@ -121,7 +120,7 @@ function CSSLIBRARY(fileDatas = [], initial = '', forPortable = false) {
         IndexMap[selector] = selectors[selector];
     }
 
-    return { tillStyles: Object.keys(STASH.LibraryStyle2Index), exclusiveStyles: Object.keys(selectors) };
+    return { tillStyles: Object.keys(CACHE.LibraryStyle2Index), exclusiveStyles: Object.keys(selectors) };
 }
 
 function TAGSTYLE({
@@ -171,8 +170,8 @@ function TAGSTYLE({
     if (selector === "") {
         essentials.push(...Object.entries(object));
     } else {
-        const index = (IndexMap[selector] ?? 0) + (STASH.LibraryStyle2Index[selector] ?? 0);
-        const InStash = STASH.Index2StylesObject[index];
+        const index = (IndexMap[selector] ?? 0) + (CACHE.LibraryStyle2Index[selector] ?? 0);
+        const InStash = CACHE.Index2StylesObject[index];
 
         const CLX = index ? {
             number: InStash.index,
@@ -187,7 +186,7 @@ function TAGSTYLE({
             IndexMap[selector] = CLX.number;
         }
 
-        STASH.Index2StylesObject[CLX.number] = {
+        CACHE.Index2StylesObject[CLX.number] = {
             index: CLX.number,
             class: CLX.class,
             scope: scope === "GLOBAL",

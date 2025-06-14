@@ -1,6 +1,6 @@
 import Use from "../Utils/index.js";
 import STYLE from "../Style/parse.js"
-import { STASH } from "../data-cache.js";
+import { CACHE } from "../data-cache.js";
 import { BindStack, FileCursor, StyleStack } from "./file.js"
 import Utils from "../Utils/index.js";
 
@@ -14,7 +14,7 @@ function loadActiveIndexes(classList = []) {
 
 function loadActiveStyles(classList) {
     return Use.object.multiMerge(classList.reduce((A, index) => {
-        A.push(STASH.Index2StylesObject[index].object);
+        A.push(CACHE.Index2StylesObject[index].object);
         return A;
     }, []), true)
 }
@@ -47,7 +47,7 @@ export default function classExtract(string, action, fileData) {
         const metaFront = `TAG${fileData.metaFront}\\:${FileCursor.rowMarker}__`;
         activeQuote = "", entry = "", scribed = "", marker = 0, inQuote = false, ch = string[marker];
         const activeIndexes = (action === "watch") ? [] :
-            Use.array.longestSubChain(STASH.SortedIndexes, loadActiveIndexes(Use.array.setback(classList), fileData.filePath));
+            Use.array.longestSubChain(CACHE.SortedIndexes, loadActiveIndexes(Use.array.setback(classList), fileData.filePath));
         const activeStyles = loadActiveStyles(activeIndexes);
 
         while (ch !== undefined) {
@@ -68,32 +68,32 @@ export default function classExtract(string, action, fileData) {
                         if (index) {
                             switch (action) {
                                 case "watch":
-                                    const devClass = metaFront + STASH.Index2StylesObject[index].metaClass;
+                                    const devClass = metaFront + CACHE.Index2StylesObject[index].metaClass;
                                     scribed += Utils.string.normalize(devClass, ["/", ".", ":", "|", "$"], ["\\"]);
-                                    STASH.FinalStack["." + devClass] = index;
+                                    CACHE.FinalStack["." + devClass] = index;
                                     break;
                                 case "preview":
                                     if (activeIndexes.includes(index)) {
-                                        scribed += STASH.Index2StylesObject[index].class;
+                                        scribed += CACHE.Index2StylesObject[index].class;
                                     } else {
                                         const identity = STYLE.INDEX.DECLARE();
                                         fileData.usedIndexes.add(identity.number);
-                                        STASH.FinalStack["." + identity.class] = index;
+                                        CACHE.FinalStack["." + identity.class] = index;
                                         scribed += identity.class;
                                     }
                                     break;
                                 case "publish":
                                     if (activeIndexes.includes(index)) {
-                                        scribed += STASH.Index2StylesObject[index].class;
+                                        scribed += CACHE.Index2StylesObject[index].class;
                                     } else {
-                                        const deltaStyles = Use.object.onlyB(activeStyles, STASH.Index2StylesObject[index].object);
-                                        if (deltaStyles.score) scribed += STASH.Index2StylesObject[index].class;
+                                        const deltaStyles = Use.object.onlyB(activeStyles, CACHE.Index2StylesObject[index].object);
+                                        if (deltaStyles.score) scribed += CACHE.Index2StylesObject[index].class;
                                         else {
                                             const identity = STYLE.INDEX.DECLARE();
                                             fileData.usedIndexes.add(identity.number);
                                             scribed += identity.class;
-                                            STASH.Index2StylesObject[identity.number] = deltaStyles.result;
-                                            STASH.FinalStack["."+identity.class] = identity.number;
+                                            CACHE.Index2StylesObject[identity.number] = deltaStyles.result;
+                                            CACHE.FinalStack["." + identity.class] = identity.number;
                                         }
                                     }
                                     break;

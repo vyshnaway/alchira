@@ -1,6 +1,6 @@
 import classExtract from "./value.js";
 import { FileCursor } from "./file.js"
-import { APP } from "../data-meta.js";
+import { APP } from "../data-cache.js";
 
 const bracePair = {
     "{": "}",
@@ -11,8 +11,8 @@ const bracePair = {
     '"': '"',
 }, openBraces = ["[", "{", "(", "'", '"', "`"], closeBraces = ["]", "}", ")"];
 
-export const xtyleTag = `<${APP.styleTag} />`;
-const tagRegex = new RegExp(`<\\s*${APP.styleTag}\\s*/\\s*>`)
+export const xtyleTag = `<${"APP.styleTag"} />`;
+const tagRegex = new RegExp(`<\\s*${"APP.styleTag"}\\s*/\\s*>`)
 const tagCheck = (string) => tagRegex.test(string);
 
 export default function tagScan(content, action, classProps, fileData) {
@@ -92,7 +92,7 @@ export default function tagScan(content, action, classProps, fileData) {
 
     const renderedTag = `<${tagObject.element}${Object.entries(tagObject.attributes)
         .reduce((A, [P, V]) => A += " " + P + ((V === "") ? "" : "=" + V), "")}>`;
-    const replacement = (tagObject.element !== APP.styleTag) ? renderedTag :
+    const replacement = (tagObject.element !== "APP.styleTag") ? renderedTag :
         (tagCheck(content.slice(startMarker, FileCursor.marker))) ? xtyleTag : "";
 
 

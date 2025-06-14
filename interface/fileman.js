@@ -52,6 +52,19 @@ const fileman = {
             }
             return fileList;
         },
+        listFolders: async (dir, folderList = []) => {
+            if (!fs.existsSync(dir)) return folderList;
+            const files = await fs.promises.readdir(dir);
+            for (const file of files) {
+                const filePath = path.join(dir, file);
+                const stats = await fs.promises.stat(filePath);
+                if (stats.isDirectory()) {
+                    folderList.push(filePath);
+                    folderList = await fileman.path.listFolders(filePath, folderList);
+                }
+            }
+            return folderList;
+        }
     },
     clone: {
         hard: async (source, destination, ignoreFiles = []) => {
@@ -248,6 +261,29 @@ const fileman = {
         },
         bulk: async (...pathsToDelete) => {
             pathsToDelete.forEach(pathString => fileman.delete.file(pathString))
+        },
+        folder: async (folderPath, extensions=[], ignorePaths=[]) => {
+            try {
+                if (!fs.existsSync(folderPath)) {
+                    return { success: false, message: 'Folder does not exist.' };
+                }
+                const files = await fileman.path.listFiles(folderPath);
+                for (const file of files) {
+                    if (ignorePaths.includes(file)) continue;
+                    if (extensions.length === 0 || extensions.includes(path.extname(file))) {
+                        await fs.promises.unlink(file);
+                    }
+                }
+                const folders = await fileman.path.listFolders(folderPath);
+                for (const subFolder of folders) {
+                    if (ignorePaths.includes(subFolder)) continue;
+                    await fs.promises.rm(subFolder, { recursive: true, force: true });
+                }
+                return { success: true, message: 'Folder cleaned successfully.' };
+            } catch (error) {
+                console.error('Error cleaning folder:', error);
+                return { success: false, message: 'Error cleaning folder.' };
+            }
         }
     }
 };

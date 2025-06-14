@@ -1,5 +1,5 @@
 import $ from '../Shell/index.js';
-import { STASH } from '../data-cache.js';
+import { CACHE } from '../data-cache.js';
 
 const hashPattern = /\{#[a-z0-9]+\}/i;
 const preHashPattern = /(?<!\{)#\w+/g;
@@ -45,7 +45,7 @@ function IMPORT(string, watchUndef = true, ErrorisWarning = false) {
     while (hashMatch = hashPattern.exec(string)) {
         const hash = hashMatch[0];
         const key = hash.slice(2, -1);
-        const replacement = watchUndef ? STASH.Shorthands[key] : (STASH.Shorthands[key] ?? hash);
+        const replacement = watchUndef ? CACHE.Shorthands[key] : (CACHE.Shorthands[key] ?? hash);
         recursionPreview["FROM " + hash] = `GETS ${replacement}`
 
         if (replacement === undefined) {
@@ -67,7 +67,7 @@ function IMPORT(string, watchUndef = true, ErrorisWarning = false) {
 function UPLOAD(shorthands) {
     const shorthandErrors = [];
 
-    STASH.Shorthands = { ...shorthands };
+    CACHE.Shorthands = { ...shorthands };
     Object.keys(shorthands).map(key => {
         const hash = '#' + key
         const response = IMPORT(hash);
@@ -80,12 +80,12 @@ function UPLOAD(shorthands) {
             }
         }
     });
-    STASH.Shorthands = shorthands;
+    CACHE.Shorthands = shorthands;
 
     report = $.MOLD.std.Block($.list.text.Props(shorthands), $.list.std.Bullets);
     errors = shorthandErrors.join("");
 
-    return STASH.Shorthands;
+    return CACHE.Shorthands;
 }
 
 function RENDER(string, sourcePath = "", ErrorisWarning = false) {
@@ -100,7 +100,7 @@ function RENDER(string, sourcePath = "", ErrorisWarning = false) {
     for (let i = 0; i < length; i++) {
         let ch = string[i];
 
-        
+
         if (")}".includes(ch)) deviance--;
 
         if (deviance) {
@@ -137,7 +137,7 @@ function RENDER(string, sourcePath = "", ErrorisWarning = false) {
             }
         }
     }
-    
+
     return { rule: rule.join(''), subSelector: selector.join(''), status: extended.status, error: extended.error + $.MOLD.text.Item(sourcePath) + "\n" };
 }
 

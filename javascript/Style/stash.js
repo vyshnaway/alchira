@@ -2,9 +2,9 @@ import $ from "../Shell/index.js";
 import STYLE from "./parse.js";
 import Utils from "../Utils/index.js";
 import LibSetter from "../Worker/lib-setter.js";
-import { NAV } from "../data-meta.js";
+import { NAV } from "../data-cache.js";
 import PortFile from "../Script/file.js";
-import { STASH } from "../data-cache.js";
+import { CACHE } from "../data-cache.js";
 
 const LibraryFiles = {}, ModuleFiles = {};
 
@@ -76,15 +76,25 @@ function _portableAccumulator() {
     return { modulesTable, bindingArray, portablesArray }
 }
 
+function _createPortableBundle() {
+    const SaveFiles = {};
 
+    Object.values(ModuleFiles).forEach(file => {
+        const fileName = `${file.fileName}.${file.extension}`;
+        if (!SaveFiles[fileName]) SaveFiles[fileName] = file.content;
+        else SaveFiles[fileName] += "\n\n" + file.content
+    })
+
+    return SaveFiles;
+}
 
 
 let axiomCount = 0, clusterCount = 0, portableCount = 0, bindingCount = 0;
 let axiomChart = {}, clusterChart = {}, portableChart = {}, bindingChart = {};
-let portableShorthandErrors = [];
+let report = "", warnings = [], bundle = {};
 
 function Renders() {
-    portableShorthandErrors = [];
+    warnings = [];
     axiomCount = 0, clusterCount = 0, portableCount = 0, bindingCount = 0;
     axiomChart = {}, clusterChart = {}, portableChart = {}, bindingChart = {};
     Object.keys(LibraryFiles).forEach(filePath => STYLE.INDEX.DISPOSE(...LibraryFiles[filePath].usedIndexes));
@@ -92,6 +102,8 @@ function Renders() {
 
     const { libraryTable, axiomsArray, clustersArray } = _libraryAccumulator();
     const { modulesTable, bindingArray, portablesArray } = _portableAccumulator();
+
+    bundle = _createPortableBundle(bindingArray, portablesArray)
 
     const ModuleEssentials = [], PortableStyleMap = {};
     portablesArray.forEach((fileData) => {
@@ -102,8 +114,8 @@ function Renders() {
         tagStash.forEach(style => {
             style.scope = "";
             style.selector = style.selector === "" ? "" : fileData.stamp + style.selector;
-            const response = STYLE.TAGSTYLE(style, fileData.metaFront, fileData.filePath, fileData.targetPath, STASH.PortableStyle2Index);
-            portableShorthandErrors.push(...response.errors);
+            const response = STYLE.TAGSTYLE(style, fileData.metaFront, fileData.filePath, fileData.targetPath, CACHE.PortableStyle2Index);
+            warnings.push(...response.errors);
 
             if (style.selector === "") {
                 ModuleEssentials.push(...response.essentials)
@@ -117,7 +129,6 @@ function Renders() {
         if (exclusiveStyles.length)
             portableChart[`Portable [${fileData.filePath}]:  ${exclusiveStyles.length} Classes`] = exclusiveStyles;
     });
-
     const BindingStyleMap = bindingArray.reduce((collection, fileData) => {
         const result = STYLE.CSSLIBRARY([fileData], "BINDING", true);
         collection[NAV.folder.portables + "/" + fileData.filePath] = result.exclusiveStyles;
@@ -126,6 +137,7 @@ function Renders() {
         bindingCount += result.exclusiveStyles.length;
         return collection
     }, {});
+
 
 
     const AxiomStyleMap = axiomsArray.reduce((collection, fileData, index) => {
@@ -146,6 +158,34 @@ function Renders() {
         return collection;
     }, {});
 
+
+    Object.values(CACHE.PortableStyle2Index).forEach(index => {
+        const InStash = CACHE.Index2StylesObject[index];
+        if (InStash.declarations.length > 1)
+            warnings.push($.MOLD.warning.List("Multiple portable declarations: " + InStash.selector, InStash.declarations, $.list.text.Bullets))
+    })
+
+    Object.values(CACHE.LibraryStyle2Index).forEach(index => {
+        const InStash = CACHE.Index2StylesObject[index];
+        if (InStash.declarations.length > 1)
+            warnings.push($.MOLD.warning.List("Multiple Library declarations: " + InStash.selector, InStash.declarations, $.list.text.Bullets))
+    })
+
+    report = [
+        $.MOLD.primary.Section(`Axiom Styles: ${axiomCount}`,
+            Object.entries(axiomChart).map(([heading, entries]) => $.MOLD.tertiary.Topic(heading, entries, $.list.text.Entries))
+        ),
+        $.MOLD.primary.Section(`Cluster Styles: ${clusterCount}`,
+            Object.entries(clusterChart).map(([heading, entries]) => $.MOLD.tertiary.Topic(heading, entries, $.list.text.Entries))
+        ),
+        $.MOLD.primary.Section(`Binding Styles: ${bindingCount}`,
+            Object.entries(bindingChart).map(([heading, entries]) => $.MOLD.tertiary.Topic(heading, entries, $.list.text.Entries))
+        ),
+        $.MOLD.primary.Section(`Portable Styles: ${portableCount}`,
+            Object.entries(portableChart).map(([heading, entries]) => $.MOLD.tertiary.Topic(heading, entries, $.list.text.Entries))
+        ),
+    ].join("")
+
     return {
         libraryTable,
         modulesTable,
@@ -158,35 +198,10 @@ function Renders() {
 }
 
 function Report() {
-    const errors = [...portableShorthandErrors]
-
-    Object.values(STASH.PortableStyle2Index).forEach(index => {
-        const InStash = STASH.Index2StylesObject[index];
-        if (InStash.declarations.length > 1)
-            errors.push($.MOLD.warning.List("Multiple portable declarations: " + InStash.selector, InStash.declarations, $.list.text.Bullets))
-    })
-    Object.values(STASH.LibraryStyle2Index).forEach(index => {
-        const InStash = STASH.Index2StylesObject[index];
-        if (InStash.declarations.length > 1)
-            errors.push($.MOLD.warning.List("Multiple Library declarations: " + InStash.selector, InStash.declarations, $.list.text.Bullets))
-    })
-
     return {
-        warnings: errors,
-        report: [
-            $.MOLD.primary.Section(`Axiom Styles: ${axiomCount}`,
-                Object.entries(axiomChart).map(([heading, entries]) => $.MOLD.tertiary.Topic(heading, entries, $.list.text.Entries))
-            ),
-            $.MOLD.primary.Section(`Cluster Styles: ${clusterCount}`,
-                Object.entries(clusterChart).map(([heading, entries]) => $.MOLD.tertiary.Topic(heading, entries, $.list.text.Entries))
-            ),
-            $.MOLD.primary.Section(`Binding Styles: ${bindingCount}`,
-                Object.entries(bindingChart).map(([heading, entries]) => $.MOLD.tertiary.Topic(heading, entries, $.list.text.Entries))
-            ),
-            $.MOLD.primary.Section(`Portable Styles: ${portableCount}`,
-                Object.entries(portableChart).map(([heading, entries]) => $.MOLD.tertiary.Topic(heading, entries, $.list.text.Entries))
-            ),
-        ].join("")
+        bundle,
+        report,
+        warnings,
     };
 }
 

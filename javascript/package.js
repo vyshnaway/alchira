@@ -1,17 +1,17 @@
 import $ from './Shell/index.js';
-import * as COLLECT from "./collector.js";
-import * as ACTION from './actions.js';
-import * as CRAFT from './craftsmen.js';
+import * as COLLECT from "./data-fetch.js";
+import * as CRAFT from './data-smith.js';
 import * as worker from '../interface/worker.js';
 import { PROXY } from './data-cache.js';
-import { hasEvents, dequeueEvent } from '../interface/eventface.js';
-import SETDATA, { ROOT, APP, DATA, NAV } from './data-meta.js';
+import SETDATA, { ROOT, APP, DATA, NAV } from './data-cache.js';
+
 import fileman from '../interface/fileman.js';
+import { hasEvents, dequeueEvent } from '../interface/eventface.js';
 
 
 function reporter(chapter, heading, report) {
     $.POST($.MOLD.std.Block([
-        $.MOLD.title.Chapter(chapter, Object.keys(PROXY.CACHE), $.list.text.Entries),
+        $.MOLD.title.Chapter(chapter, Object.keys(PROXY.CLASS), $.list.text.Entries),
         $.MOLD.primary.Chapter(heading, [report]),
         $.MOLD.failed.Footer("Press Ctrl+C to stop watching.")
     ]))
@@ -28,7 +28,7 @@ async function execute(chapter) {
     do {
         switch (step) {
             case "Initialize":
-                await ACTION.FetchPrefix();
+                await COLLECT.FetchPrefixBase();
 
             case "VerifySetupStruct":
                 const verifyStructResult = await COLLECT.VerifySetupStruct();
@@ -70,7 +70,7 @@ async function execute(chapter) {
                 CRAFT.ProcessProxies();
 
             case "GenerateFinals":
-                const { SaveFiles, ConsoleReport } = await CRAFT.GenerateFinal();
+                const { SaveFiles, ConsoleReport } = await CRAFT.Generate();
                 report = ConsoleReport;
 
             case "Publish":
@@ -90,8 +90,8 @@ async function execute(chapter) {
                 }
 
                 if (!stopWatcher) {
-                    const targetFolders = [...Object.keys(PROXY.CACHE), NAV.folder.setup];
-                    const ignoreFolders = [NAV.folder.abstract];
+                    const targetFolders = [...Object.keys(PROXY.CLASS), NAV.folder.setup];
+                    const ignoreFolders = [NAV.folder.autogen];
                     process.on('SIGINT', () => {
                         if (stopWatcher) { stopWatcher(); stopWatcher = null; $.render.write("\n", 2) }
                         process.exit();
@@ -103,7 +103,7 @@ async function execute(chapter) {
                 if (hasEvents()) {
                     const event = dequeueEvent();
                     $.initialize(event.consoleWidth, !DATA.WATCH);
-                    if (event.folder === NAV.folder.setup || event.folder === NAV.folder.library) {
+                    if (event.folder === NAV.folder.setup) {
                         const filePath = `${event.folder}/${event.filePath}`;
                         if (event.action === "add" || event.action === "change") {
                             switch (filePath) {
@@ -123,7 +123,10 @@ async function execute(chapter) {
                                     step = "ReadShorthands"
                                     break;
                                 default:
-                                    DATA.LIBRARY[filePath] = event.fileContent;
+                                    if (event.folder === NAV.folder.library)
+                                        DATA.LIBRARY[filePath] = event.fileContent;
+                                    else if (event.folder === NAV.folder.portables)
+                                        DATA.PORTABLES[filePath] = event.fileContent;
                                     step = "ProcessLibraries"
                             }
                         } else {
@@ -177,7 +180,7 @@ async function commander(
             await $.PLAY.Title(APP.name + ' : Initialize', 500);
             const setupInit = await COLLECT.VerifySetupStruct();
             if (setupInit.unstart)
-                $.POST(await ACTION.Initialize());
+                $.POST(await COLLECT.Initialize());
             else if (setupInit.proceed) {
                 $.POST((await COLLECT.VerifyProxyMap()).report);
             } else {
@@ -194,7 +197,7 @@ async function commander(
             await execute(APP.name + ' : Final Build');
             break;
         default:
-            await ACTION.FetchDocs();
+            await COLLECT.FetchDocs();
             $.POST($.MOLD.std.Chapter(`${APP.command} @ ` + APP.version, [ROOT.DOCS.alerts.content]));
             $.POST($.MOLD.secondary.Section('Available Commands', APP.commandList, $.list.std.Props));
             $.POST($.MOLD.secondary.Section('Agreements',

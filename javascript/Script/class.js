@@ -2,9 +2,9 @@ import LibSetter from "../Worker/lib-setter.js";
 import SCRIPT from "./file.js"
 import STYLE from "../Style/parse.js"
 import $ from "../Shell/index.js"
-import { STASH } from "../data-cache.js";
+import { CACHE } from "../data-cache.js";
 import { xtyleTag } from "./tag.js";
-import { DATA } from "../data-meta.js";
+import { DATA } from "../data-cache.js";
 
 export default class Proxy {
     source = "";
@@ -110,13 +110,13 @@ export default class Proxy {
             globalCount += fileGlobalCount;
 
             Object.values(file.styleLocals).forEach(index => {
-                const InStash = STASH.Index2StylesObject[index];
+                const InStash = CACHE.Index2StylesObject[index];
                 if (InStash.declarations.length > 1)
                     C.errors.push($.MOLD.failed.List("Multiple declarations: " + InStash.selector, InStash.declarations, $.list.text.Bullets))
             })
         });
         Object.values(C.styleGlobals).forEach(index => {
-            const InStash = STASH.Index2StylesObject[index];
+            const InStash = CACHE.Index2StylesObject[index];
             if (InStash.declarations.length > 1)
                 C.errors.push($.MOLD.failed.List("Multiple declarations: " + InStash.selector, InStash.declarations, $.list.text.Bullets))
         })
@@ -130,7 +130,7 @@ export default class Proxy {
     RenderFiles(preBinds = new Set(), postBinds = new Set(), Command = "") {
         Object.values(this.fileCache).forEach(file => {
             const result = SCRIPT(file, this.extnsProps[file.extension], Command, { preBinds, postBinds },
-                { Library: STASH.LibraryStyle2Index, Local: file.styleLocals, Global: STASH.GlobalsStyle2Index })
+                { Library: CACHE.LibraryStyle2Index, Local: file.styleLocals, Global: CACHE.GlobalsStyle2Index })
             file.midway = result.scribed;
         });
     }
@@ -161,7 +161,7 @@ export default class Proxy {
         Object.values(this.fileCache).forEach(file => {
             file.classGroups.forEach(group => {
                 const indexGroup = group.reduce((indexAcc, className) => {
-                    const index = (STASH.LibraryStyle2Index[className] ?? 0) + (STASH.GlobalsStyle2Index[className] ?? 0) + (file.styleLocals[className] ?? 0);
+                    const index = (CACHE.LibraryStyle2Index[className] ?? 0) + (CACHE.GlobalsStyle2Index[className] ?? 0) + (file.styleLocals[className] ?? 0);
                     if (index) indexAcc.push(index);
                     return indexAcc;
                 }, [])

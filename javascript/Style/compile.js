@@ -1,5 +1,5 @@
-import { STASH } from "../data-cache.js";
-import FORGE from "../forgent.js";
+import { CACHE } from "../data-cache.js";
+import FORGE from "../data-forge.js";
 import * as LOADPREFIX from "./vendor.js";
 import Use from "../Utils/index.js"
 
@@ -108,21 +108,21 @@ function portableCreator(preBinds = [], postBinds = [], essentials = [], module 
     binding.push("/* Pre-Binds */", "", ...rawCompose(bindingResponse.preBindsObject), "")
     binding.push("/* Post-Binds */", "", ...rawCompose(bindingResponse.postBindsObject), "")
 
-    Object.entries(STASH.GlobalsStyle2Index).forEach(([selector, index]) => {
-        const style = STASH.Index2StylesObject[index];
+    Object.entries(CACHE.GlobalsStyle2Index).forEach(([selector, index]) => {
+        const style = CACHE.Index2StylesObject[index];
         bindstack[selector] = FORGE.bindIndex(new Set(style.preBinds), new Set(style.postBinds), true, prefix);
     })
 
-    const classList = Object.keys(STASH.GlobalsStyle2Index)
+    const classList = Object.keys(CACHE.GlobalsStyle2Index)
     portable.push("", `## Xtyle Classes (${classList.length})`, "", ...classList.map(c => "- `" + c + "`"), "---")
-    Object.entries(STASH.GlobalsStyle2Index).forEach(([selector, index]) => {
+    Object.entries(CACHE.GlobalsStyle2Index).forEach(([selector, index]) => {
         portable.push(
             '',
             `### Selector: \`${selector}\``,
             '',
             "````html",
             "<xtyle",
-            ...(Object.entries(STASH.Index2StylesObject[index].object).reduce((accum, [subSelector, block]) => {
+            ...(Object.entries(CACHE.Index2StylesObject[index].object).reduce((accum, [subSelector, block]) => {
                 if (subSelector === "") {
                     accum.push(
                         `${selector}="`,
