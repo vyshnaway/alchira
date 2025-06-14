@@ -1,7 +1,8 @@
-import { CACHE } from "../data-cache.js";
-import FORGE from "../data-forge.js";
-import * as LOADPREFIX from "./vendor.js";
+import FORGE from "./forge.js";
+import * as LOADPREFIX from "./prefix.js";
+
 import Use from "../Utils/index.js"
+import { CACHE } from "../data-cache.js";
 
 function LoadVendors(collection = {}, vendor = '') {
     return vendor == '' ? ["webkit", "moz", "ms", "o"].filter(ven => !collection.hasOwnProperty(ven)) : [vendor]

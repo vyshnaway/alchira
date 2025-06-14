@@ -1,10 +1,10 @@
-import SCRIPTPARSE from "./file.js"
-import { xtyleTag } from "./tag.js";
-
-import $ from "../Shell/index.js"
 import FILING from "../data-filing.js";
-import STYLEPARSE from "../Style/parse.js"
-import { RAW, CACHE, INDEX } from "../data-cache.js";
+import SCRIPT from "./file.js"
+import STYLE from "../Style/parse.js"
+import $ from "../Shell/index.js"
+import { CACHE } from "../data-cache.js";
+import { xtyleTag } from "./tag.js";
+import { RAW } from "../data-cache.js";
 
 export default class Proxy {
     source = "";
@@ -39,7 +39,7 @@ export default class Proxy {
     SaveFile(filePath, fileContent) {
         this._DeleteFile(filePath);
         const file = FILING(this.target, this.source, filePath, fileContent, false);
-        const sciptResponse = SCRIPTPARSE(file, this.extnsProps[file.extension]);
+        const sciptResponse = SCRIPT(file, this.extnsProps[file.extension]);
 
         this.fileCache[file.filePath] = file;
         file.content = fileContent;
@@ -54,7 +54,7 @@ export default class Proxy {
 
         sciptResponse.stylesList.forEach(style => {
             const IndexMap = style.scope === "GLOBAL" ? file.styleGlobals : style.scope === "LOCAL" ? file.styleLocals : {};
-            const response = STYLEPARSE.TAGSTYLE(style, file.metaFront, file.filePath, RAW.WorkPath + "/" + file.targetPath, IndexMap);
+            const response = STYLE.TAGSTYLE(style, file.metaFront, file.filePath, RAW.WorkPath + "/" + file.targetPath, IndexMap);
 
             file.preBinds.push(...response.preBinds)
             file.postBinds.push(...response.postBinds)
@@ -129,7 +129,7 @@ export default class Proxy {
 
     RenderFiles(preBinds = new Set(), postBinds = new Set(), Command = "") {
         Object.values(this.fileCache).forEach(file => {
-            const result = SCRIPTPARSE(file, this.extnsProps[file.extension], Command, { preBinds, postBinds },
+            const result = SCRIPT(file, this.extnsProps[file.extension], Command, { preBinds, postBinds },
                 { Library: CACHE.LibraryStyle2Index, Local: file.styleLocals, Global: CACHE.GlobalsStyle2Index })
             file.midway = result.scribed;
         });
@@ -173,7 +173,7 @@ export default class Proxy {
 
     _DeleteFile(filePath) {
         if (this.fileCache[filePath]) {
-            this.fileCache[filePath].usedIndexes.forEach(index => INDEX.DISPOSE(index))
+            this.fileCache[filePath].usedIndexes.forEach(index => STYLE.INDEX.DISPOSE(index))
             delete this.fileCache[filePath];
         }
     }

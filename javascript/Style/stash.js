@@ -1,33 +1,31 @@
-import $ from "../Shell/index.js";
-import STYLE from "./parse.js";
-import Utils from "../Utils/index.js";
-import LibSetter from "../Worker/lib-setter.js";
-import { NAV } from "../data-cache.js";
-import PortFile from "../Script/file.js";
-import { CACHE } from "../data-cache.js";
+import PARSE from "./parse.js";
 
-const LibraryFiles = {}, ModuleFiles = {};
+import $ from "../Shell/index.js";
+import Use from "../Utils/index.js";
+import FILING from "../data-filing.js";
+import SCRIPTFILE from "../Script/file.js";
+import { NAV, CACHE, STACK } from "../data-cache.js";
 
 function DeleteLibraryFile(filePath) {
-    if (LibraryFiles[filePath]) { STYLE.INDEX.DISPOSE(...LibraryFiles[filePath].usedIndexes); delete LibraryFiles[filePath]; }
+    if (STACK.LIBRARIES[filePath]) { PARSE.INDEX.DISPOSE(...STACK.LIBRARIES[filePath].usedIndexes); delete STACK.LIBRARIES[filePath]; }
 }
 function DeletePortableFile(filePath) {
-    if (ModuleFiles[filePath]) { STYLE.INDEX.DISPOSE(...ModuleFiles[filePath].usedIndexes); delete ModuleFiles[filePath]; }
+    if (STACK.PORTABLES[filePath]) { PARSE.INDEX.DISPOSE(...STACK.PORTABLES[filePath].usedIndexes); delete STACK.PORTABLES[filePath]; }
 }
 function ClearStash() {
-    Object.keys(LibraryFiles).forEach(filePath => DeleteLibraryFile(filePath));
-    Object.keys(ModuleFiles).forEach(filePath => DeleteLibraryFile(filePath));
+    Object.keys(STACK.LIBRARIES).forEach(filePath => DeleteLibraryFile(filePath));
+    Object.keys(STACK.PORTABLES).forEach(filePath => DeleteLibraryFile(filePath));
 }
 
 
 function SaveLibraryFile(filePath, fileContent) {
-    if (LibraryFiles[filePath])
+    if (STACK.LIBRARIES[filePath])
         DeleteLibraryFile(filePath);
-    LibraryFiles[filePath] = LibSetter("", "", filePath.slice(NAV.folder.library.length + 1), fileContent, true, false);
+    STACK.LIBRARIES[filePath] = FILING("", "", filePath.slice(NAV.folder.library.length + 1), fileContent, true, false);
 }
 function SavePortableFile(filePath, fileContent) {
-    if (ModuleFiles[filePath]) DeletePortableFile(filePath);
-    ModuleFiles[filePath] = LibSetter("", "", filePath.slice(NAV.folder.portables.length + 1), fileContent, true, true);
+    if (STACK.PORTABLES[filePath]) DeletePortableFile(filePath);
+    STACK.PORTABLES[filePath] = FILING("", "", filePath.slice(NAV.folder.portables.length + 1), fileContent, true, true);
 }
 function UploadFiles(Library = {}, Portable = {}) {
     ClearStash();
@@ -43,7 +41,7 @@ function UploadFiles(Library = {}, Portable = {}) {
 function _libraryAccumulator() {
     let length = 0;
     const axiom = {}, cluster = {}, libraryTable = {};
-    Object.entries(LibraryFiles).forEach(([filePath, fileData]) => {
+    Object.entries(STACK.LIBRARIES).forEach(([filePath, fileData]) => {
         const { id, group } = fileData;
         libraryTable[filePath] = { group, id };
         if (group === "axiom") {
@@ -57,15 +55,15 @@ function _libraryAccumulator() {
         if (id > length) length = id;
 
     })
-    const axiomsArray = Utils.array.fromNumberedObject(axiom, length);
-    const clustersArray = Utils.array.fromNumberedObject(cluster, length);
+    const axiomsArray = Use.array.fromNumberedObject(axiom, length);
+    const clustersArray = Use.array.fromNumberedObject(cluster, length);
     return { libraryTable, axiomsArray, clustersArray }
 }
 
 function _portableAccumulator() {
     const bindingArray = [], portablesArray = [], modulesTable = {};
 
-    Object.entries(ModuleFiles).forEach(([filePath, fileData]) => {
+    Object.entries(STACK.PORTABLES).forEach(([filePath, fileData]) => {
         fileData.id = filePath;
         const { id, group } = fileData;
         modulesTable[filePath] = { group, id }
@@ -79,7 +77,7 @@ function _portableAccumulator() {
 function _createPortableBundle() {
     const SaveFiles = {};
 
-    Object.values(ModuleFiles).forEach(file => {
+    Object.values(STACK.PORTABLES).forEach(file => {
         const fileName = `${file.fileName}.${file.extension}`;
         if (!SaveFiles[fileName]) SaveFiles[fileName] = file.content;
         else SaveFiles[fileName] += "\n\n" + file.content
@@ -97,8 +95,8 @@ function Renders() {
     warnings = [];
     axiomCount = 0, clusterCount = 0, portableCount = 0, bindingCount = 0;
     axiomChart = {}, clusterChart = {}, portableChart = {}, bindingChart = {};
-    Object.keys(LibraryFiles).forEach(filePath => STYLE.INDEX.DISPOSE(...LibraryFiles[filePath].usedIndexes));
-    Object.keys(ModuleFiles).forEach(filePath => STYLE.INDEX.DISPOSE(...ModuleFiles[filePath].usedIndexes));
+    Object.keys(STACK.LIBRARIES).forEach(filePath => PARSE.INDEX.DISPOSE(...STACK.LIBRARIES[filePath].usedIndexes));
+    Object.keys(STACK.PORTABLES).forEach(filePath => PARSE.INDEX.DISPOSE(...STACK.PORTABLES[filePath].usedIndexes));
 
     const { libraryTable, axiomsArray, clustersArray } = _libraryAccumulator();
     const { modulesTable, bindingArray, portablesArray } = _portableAccumulator();
@@ -108,13 +106,13 @@ function Renders() {
     const ModuleEssentials = [], PortableStyleMap = {};
     portablesArray.forEach((fileData) => {
         const filePath = NAV.folder.portables + "/" + fileData.filePath;
-        const tagStash = PortFile(fileData).stylesList, exclusiveStyles = [];
+        const tagStash = SCRIPTFILE(fileData).stylesList, exclusiveStyles = [];
         fileData.usedIndexes = new Set();
 
         tagStash.forEach(style => {
             style.scope = "";
             style.selector = style.selector === "" ? "" : fileData.stamp + style.selector;
-            const response = STYLE.TAGSTYLE(style, fileData.metaFront, fileData.filePath, fileData.targetPath, CACHE.PortableStyle2Index);
+            const response = PARSE.TAGSTYLE(style, fileData.metaFront, fileData.filePath, fileData.targetPath, CACHE.PortableStyle2Index);
             warnings.push(...response.errors);
 
             if (style.selector === "") {
@@ -130,7 +128,7 @@ function Renders() {
             portableChart[`Portable [${fileData.filePath}]:  ${exclusiveStyles.length} Classes`] = exclusiveStyles;
     });
     const BindingStyleMap = bindingArray.reduce((collection, fileData) => {
-        const result = STYLE.CSSLIBRARY([fileData], "BINDING", true);
+        const result = PARSE.CSSLIBRARY([fileData], "BINDING", true);
         collection[NAV.folder.portables + "/" + fileData.filePath] = result.exclusiveStyles;
         if (result.exclusiveStyles.length)
             bindingChart[`Binding [${fileData.filePath}]: ${result.exclusiveStyles.length} Classes`] = result.exclusiveStyles;
@@ -141,7 +139,7 @@ function Renders() {
 
 
     const AxiomStyleMap = axiomsArray.reduce((collection, fileData, index) => {
-        const result = STYLE.CSSLIBRARY(fileData, "AXIOM");
+        const result = PARSE.CSSLIBRARY(fileData, "AXIOM");
         collection[index] = result.exclusiveStyles;
         if (result.exclusiveStyles.length)
             axiomChart[`Level ${index}:  ${result.exclusiveStyles.length} Classes`] = result.exclusiveStyles;
@@ -150,7 +148,7 @@ function Renders() {
     }, {});
 
     const ClusterStyleMap = clustersArray.reduce((collection, level, index) => {
-        const result = STYLE.CSSLIBRARY(level, "CLUSTER")
+        const result = PARSE.CSSLIBRARY(level, "CLUSTER")
         collection[index] = result.exclusiveStyles;
         if (result.exclusiveStyles.length)
             clusterChart[`Level ${index}:  ${result.exclusiveStyles.length} Classes`] = result.exclusiveStyles;

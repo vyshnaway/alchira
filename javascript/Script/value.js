@@ -1,8 +1,7 @@
-import Use from "../Utils/index.js";
-import STYLE from "../Style/parse.js"
-import { CACHE } from "../data-cache.js";
 import { BindStack, FileCursor, StyleStack } from "./file.js"
-import Utils from "../Utils/index.js";
+
+import Use from "../Utils/index.js";
+import { CACHE, INDEX } from "../data-cache.js";
 
 function loadActiveIndexes(classList = []) {
     return classList.reduce((A, entry) => {
@@ -69,14 +68,14 @@ export default function classExtract(string, action, fileData) {
                             switch (action) {
                                 case "watch":
                                     const devClass = metaFront + CACHE.Index2StylesObject[index].metaClass;
-                                    scribed += Utils.string.normalize(devClass, ["/", ".", ":", "|", "$"], ["\\"]);
+                                    scribed += Use.string.normalize(devClass, ["/", ".", ":", "|", "$"], ["\\"]);
                                     CACHE.FinalStack["." + devClass] = index;
                                     break;
                                 case "preview":
                                     if (activeIndexes.includes(index)) {
                                         scribed += CACHE.Index2StylesObject[index].class;
                                     } else {
-                                        const identity = STYLE.INDEX.DECLARE();
+                                        const identity = INDEX.DECLARE();
                                         fileData.usedIndexes.add(identity.number);
                                         CACHE.FinalStack["." + identity.class] = index;
                                         scribed += identity.class;
@@ -89,7 +88,7 @@ export default function classExtract(string, action, fileData) {
                                         const deltaStyles = Use.object.onlyB(activeStyles, CACHE.Index2StylesObject[index].object);
                                         if (deltaStyles.score) scribed += CACHE.Index2StylesObject[index].class;
                                         else {
-                                            const identity = STYLE.INDEX.DECLARE();
+                                            const identity = INDEX.DECLARE();
                                             fileData.usedIndexes.add(identity.number);
                                             scribed += identity.class;
                                             CACHE.Index2StylesObject[identity.number] = deltaStyles.result;

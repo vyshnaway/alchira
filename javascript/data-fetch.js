@@ -1,10 +1,9 @@
+import $ from './Shell/index.js';
+import XTYLE from './Style/stash.js';
+import { NAV, STACK, ROOT, APP, RAW } from './data-cache.js';
+
 import fileman from "../interface/fileman.js";
 import * as worker from "../interface/worker.js";
-
-import $ from './Shell/index.js';
-import SavePrefix from './Style/vendor.js';
-import ClassRefers from './Style/stash.js';
-import { NAV, PROXY, ROOT, APP, DATA } from './data-cache.js';
 
 export async function FetchDocs() {
     const readmeMd = fileman.sync.file(ROOT.DOCS.readme.url, ROOT.DOCS.readme.path);
@@ -20,25 +19,13 @@ export async function FetchDocs() {
     ROOT.AGREEMENT.privacy.content = await privacy;
 }
 
-export async function FetchPrefixBase() {
+export async function FetchStatics() {
     $.TASK("Loading vendor-prefixes", 0);
 
-    const PrefixGroup = {
-        attributes: {},
-        values: {},
-        atrules: {},
-        classes: {},
-        elements: {},
-        clrprops: [],
-    };
-
-    DATA.ReadMe = (await fileman.read.file(NAV.md.guidelines)).data
-
+    RAW.ReadMe = (await fileman.read.file(NAV.md.guidelines)).data
     await Promise.all(Object.entries(ROOT.PREFIX).map(async ([group, source]) => {
-        PrefixGroup[group] = await fileman.sync.json(source.url, source.path)
+        RAW.PREFIXES[group] = await fileman.sync.json(source.url, source.path)
     }))
-
-    SavePrefix(PrefixGroup)
 }
 
 export async function Initialize() {
@@ -109,7 +96,7 @@ export async function VerifyProxyMap() {
     $.STEP("PATH : " + NAV.json.proxymap);
     const proxyMap = await fileman.read.json(NAV.json.proxymap);
     if (proxyMap.status) {
-        DATA.PROXYMAP = proxyMap.data;
+        RAW.PROXYMAP = proxyMap.data;
         const results = await worker.proxyMapDependency(proxyMap.data, NAV.folder.setup);
         errors.push(...results.warnings);
     } else { errors.push(`${NAV.json.proxymap} : Bad json file.`); }
@@ -124,38 +111,38 @@ export async function VerifyProxyMap() {
 }
 
 export async function UpdateLibrary() {
-    ClassRefers.ClearStash();
+    XTYLE.ClearStash();
     $.TASK("Updating Library");
-    DATA.LIBRARY = await fileman.read.bulk(NAV.folder.library, ["css"]);
-    DATA.PORTABLES = await fileman.read.bulk(NAV.folder.portables, ["css", "xcss", "md "]);
+    RAW.LIBRARIES = await fileman.read.bulk(NAV.folder.library, ["css"]);
+    RAW.PORTABLES = await fileman.read.bulk(NAV.folder.portables, ["css", "xcss", "md "]);
 }
 
 export async function UpdateProxies() {
     $.TASK("Syncing proxy folders", 0);
-    Object.keys(PROXY.FILES).forEach(key => delete PROXY.FILES[key])
-    const proxies = await worker.proxyMapSync(DATA.PROXYMAP);
-    proxies.forEach(proxy => PROXY.FILES[DATA.WorkPath + "/" + proxy.target] = proxy);
+    Object.keys(STACK.PROXYFILES).forEach(key => delete STACK.PROXYFILES[key])
+    const proxies = await worker.proxyMapSync(RAW.PROXYMAP);
+    proxies.forEach(proxy => STACK.PROXYFILES[RAW.WorkPath + "/" + proxy.target] = proxy);
     $.TASK("Reading target folders");
 }
 
 export async function FetchIndexContent() {
     $.TASK("Loading Axiom");
-    DATA.CSSIndex = await worker.cssImport(Object.values(NAV.css));
+    RAW.CSSIndex = await worker.cssImport(Object.values(NAV.css));
 }
 
-export async function AnalyzeShorthands() {
-    $.TASK("Updating shorthands", 0);
+export async function AnalyzeHashrules() {
+    $.TASK("Updating hashrules", 0);
     const errors = [];
 
-    $.STEP("PATH : " + NAV.json.shorthand);
-    const shorthand = await fileman.read.json(NAV.json.shorthand);
-    if (shorthand.status) {
-        Object.entries(shorthand.data).forEach(([key, value]) => {
-            if (typeof value === "string") { DATA.SHORTHAND = shorthand.data; }
-            else { errors.push(`Shorthand: ${key} does not have a value of type STRING.`) }
+    $.STEP("PATH : " + NAV.json.hashrule);
+    const hashrule = await fileman.read.json(NAV.json.hashrule);
+    if (hashrule.status) {
+        Object.entries(hashrule.data).forEach(([key, value]) => {
+            if (typeof value === "string") { RAW.HASHRULE = hashrule.data; }
+            else { errors.push(`Hashrule: ${key} does not have a value of type STRING.`) }
         })
     }
-    else { errors.push(`${NAV.json.shorthand} : Bad json file.`); };
+    else { errors.push(`${NAV.json.hashrule} : Bad json file.`); };
     $.TASK("Analysis comnplete")
     return {
         status: Object.keys(errors).length === 0,

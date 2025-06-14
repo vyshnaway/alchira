@@ -1,5 +1,6 @@
-import Use from "../Utils/index.js";
 import krypt from "./kryptic.js";
+
+import Use from "../Utils/index.js";
 
 const myHeaders = new Headers();
 myHeaders.append("Content-Type", "application/json");

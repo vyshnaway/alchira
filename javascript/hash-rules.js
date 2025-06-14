@@ -1,17 +1,8 @@
-import $ from '../Shell/index.js';
-import { CACHE } from '../data-cache.js';
+import $ from './Shell/index.js';
+import { CACHE, PUBLISH, RAW } from './data-cache.js';
 
 const hashPattern = /\{#[a-z0-9]+\}/i;
 const preHashPattern = /(?<!\{)#\w+/g;
-
-let report = "", errors = "";
-
-function REPORT() {
-    return $.MOLD.std.Block([
-        $.MOLD.primary.Section("Active Shorthands"), report,
-        ...(errors.length > 0 ? [$.MOLD.failed.Footer("Invalid Shorthands"), errors] : [])
-    ]);
-}
 
 function IMPORT(string, watchUndef = true, ErrorisWarning = false) {
     const response = {
@@ -29,14 +20,14 @@ function IMPORT(string, watchUndef = true, ErrorisWarning = false) {
         recursionLoop: (recursionPreview, cause) => {
             response.status = false;
             recursionPreview["ERROR BY"] = $.style.bold.Red(cause)
-            response.error = $.MOLD[ErrorisWarning ? "warning" : "failed"].List(source + $.style.text[ErrorisWarning ? "Orange" : "Red"](" : Shorthand recursion loop."),
+            response.error = $.MOLD[ErrorisWarning ? "warning" : "failed"].List(source + $.style.text[ErrorisWarning ? "Orange" : "Red"](" : Hashrule recursion loop."),
                 $.list.text.Props(recursionPreview), $.list.std.Waterfall);
             return response
         },
         undefinedHash: (recursionPreview, cause) => {
             response.status = false;
             recursionPreview["ERROR BY"] = $.style.bold.Red(cause)
-            response.error = $.MOLD[ErrorisWarning ? "warning" : "failed"].List(source + $.style.text[ErrorisWarning ? "Orange" : "Red"](" : Undefined shorthand."),
+            response.error = $.MOLD[ErrorisWarning ? "warning" : "failed"].List(source + $.style.text[ErrorisWarning ? "Orange" : "Red"](" : Undefined hashrule."),
                 $.list.text.Props(recursionPreview), $.list.std.Waterfall);
             return response
         }
@@ -45,7 +36,7 @@ function IMPORT(string, watchUndef = true, ErrorisWarning = false) {
     while (hashMatch = hashPattern.exec(string)) {
         const hash = hashMatch[0];
         const key = hash.slice(2, -1);
-        const replacement = watchUndef ? CACHE.Shorthands[key] : (CACHE.Shorthands[key] ?? hash);
+        const replacement = watchUndef ? CACHE.HashRule[key] : (CACHE.HashRule[key] ?? hash);
         recursionPreview["FROM " + hash] = `GETS ${replacement}`
 
         if (replacement === undefined) {
@@ -64,28 +55,32 @@ function IMPORT(string, watchUndef = true, ErrorisWarning = false) {
     return response;
 }
 
-function UPLOAD(shorthands) {
-    const shorthandErrors = [];
+function UPLOAD() {
+    const hashrule = RAW.HASHRULE;
+    const hashruleErrors = [];
 
-    CACHE.Shorthands = { ...shorthands };
-    Object.keys(shorthands).map(key => {
+    CACHE.HashRule = { ...hashrule };
+    Object.keys(hashrule).map(key => {
         const hash = '#' + key
         const response = IMPORT(hash);
-        if (typeof (shorthands[key]) === "string") {
+        if (typeof (hashrule[key]) === "string") {
             if (response.status) {
-                shorthands[key] = response.result;
+                hashrule[key] = response.result;
             } else {
-                delete shorthands[key]
-                shorthandErrors.push(response.error)
+                delete hashrule[key]
+                hashruleErrors.push(response.error)
             }
         }
     });
-    CACHE.Shorthands = shorthands;
+    CACHE.HashRule = hashrule;
 
-    report = $.MOLD.std.Block($.list.text.Props(shorthands), $.list.std.Bullets);
-    errors = shorthandErrors.join("");
+    PUBLISH.Report.hashrule = $.MOLD.std.Block([
+        $.MOLD.primary.Section("Active Hashrules"),
+        $.MOLD.std.Block($.list.text.Props(hashrule), $.list.std.Bullets),
+        ...(hashruleErrors.length > 0 ? [$.MOLD.failed.Footer("Invalid Hashrules"), hashruleErrors] : [])
+    ]);
 
-    return CACHE.Shorthands;
+    return CACHE.HashRule;
 }
 
 function RENDER(string, sourcePath = "", ErrorisWarning = false) {
@@ -144,6 +139,5 @@ function RENDER(string, sourcePath = "", ErrorisWarning = false) {
 export default {
     IMPORT,
     UPLOAD,
-    RENDER,
-    REPORT
+    RENDER
 };

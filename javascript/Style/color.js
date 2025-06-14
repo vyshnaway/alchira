@@ -469,7 +469,7 @@ const targetMethods = [
  * @param {string} string - The input string containing color values. Defaults to an empty string.
  * @returns {object} An object containing the score (number of conversions) and the modified string.
  */
-export function LoadColorFallback(string = '') {
+export default function LoadColorFallback(string = '') {
     let result = string, score = 0;
 
     // Process each specified color method.

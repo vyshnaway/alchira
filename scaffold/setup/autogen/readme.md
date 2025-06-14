@@ -8,8 +8,8 @@
     "constants": string[],
     // - array of all constants from `#constants.css`.
 
-    "shorthand": map{shorthand: value},
-    // - map active valid shorthands with assigned value.  
+    "hashrule": map{hashrule: value},
+    // - map active valid hashrules with assigned value.  
 
     "file": map{
         filePath: {

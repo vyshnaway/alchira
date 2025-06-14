@@ -1,5 +1,6 @@
 import classExtract from "./value.js";
 import { FileCursor } from "./file.js"
+
 import { APP } from "../data-cache.js";
 
 const bracePair = {
@@ -94,7 +95,9 @@ export default function tagScan(content, action, classProps, fileData) {
         .reduce((A, [P, V]) => A += " " + P + ((V === "") ? "" : "=" + V), "")}>`;
     const replacement = (tagObject.element !== "APP.styleTag") ? renderedTag :
         (tagCheck(content.slice(startMarker, FileCursor.marker))) ? xtyleTag : "";
+    const scribed = ok ? replacement : fragment;
 
+    if (xtyleTag === scribed) fileData.summon = true;
 
     return {
         ok,
@@ -102,7 +105,7 @@ export default function tagScan(content, action, classProps, fileData) {
         rowMarker: FileCursor.rowMarker,
         columnMarker: FileCursor.colMarker,
         reading: Boolean(ch),
-        content: ok ? replacement : fragment,
+        content: scribed,
         classList,
         styleObject
     }

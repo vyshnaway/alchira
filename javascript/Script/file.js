@@ -1,4 +1,4 @@
-import tagReader, { xtyleTag } from "./tag.js";
+import tagReader from "./tag.js";
 
 export const FileCursor = { marker: 0, rowMarker: 0, colMarker: 0, tagCount: 0 };
 export const StyleStack = { Library: {}, Local: {}, Global: {} };
@@ -28,7 +28,6 @@ export default function scanner(
                     stylesList.push(response.styleObject)
                 if (response.classList.length) classesList.push(response.classList)
             }
-            if (xtyleTag === response.content) fileData.summon = true;
             scribed += response.content;
             reading = response.reading
         } else if (ch === '"' || ch === "'" || ch === "`") {

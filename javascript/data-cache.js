@@ -1,18 +1,4 @@
-export const DATA = {
-    PACKAGE: "",
-    VERSION: "",
-    CMD: "",
-    ARG: "",
-    ReadMe: "",
-    WATCH: false,
-    CSSIndex: "",
-    RootPath: "",
-    WorkPath: "",
-    SHORTHAND: {},
-    PROXYMAP: {},
-    LIBRARY: {},
-    PORTABLES: {},
-};
+import Use from "./Utils/index.js"
 
 export const APP = {
     name: '',
@@ -51,7 +37,7 @@ export const NAV = {
     },
     json: {
         proxymap: "/xtyles/proxy-map.jsonc",
-        shorthand: "/xtyles/shorthands.jsonc",
+        hashrule: "/xtyles/hash-rules.jsonc",
         manifest: "/xtyles/autogen/manifest.json"
     },
     md: {
@@ -117,15 +103,120 @@ export const ROOT = {
     },
 };
 
-export default function SetData(rootPath, workPath, packageJson) {
+
+export const PUBLISH = {
+    DeltaPath: "",
+    DeltaContent: "",
+    FinalMessage: "",
+    ErrorCount: 0,
+    WarningCount: 0,
+    Report: {
+        library: "",
+        variables: "",
+        hashrule: "",
+        targets: "",
+        errors: "",
+        memChart: "",
+        footer: ""
+    },
+    MANIFEST: {
+        constants: [],
+        hashrules: {},
+        file: {},
+        local: {},
+        global: {},
+        axiom: {},
+        cluster: {},
+        portable: {},
+        binding: {}
+    }
+}
+
+export const CACHE = {
+    HashRule: {},
+    SortedIndexes: [],
+    PortableEssentials: [],
+    LibraryStyle2Index: {},
+    GlobalsStyle2Index: {},
+    Index2StylesObject: {},
+    PortableStyle2Index: {},
+    FinalStack: {},
+}
+
+export const STACK = {
+    PROXYFILES: {},
+    PROXYCACHE: {},
+    LIBRARIES: {},
+    PORTABLES: {}
+}
+
+export const INDEX = {
+    NOW: 0,
+    BIN: [],
+    DECLARE: () => {
+        const number = INDEX.BIN.length ? INDEX.BIN.pop() : ++INDEX.NOW;
+        return { number, class: "_" + Use.string.enCounter(number + 768) };
+    },
+    DISPOSE: (...indexes) => {
+        indexes.forEach(index => {
+            INDEX.BIN.push(index);
+            delete CACHE.Index2StylesObject[index];
+        })
+    },
+    RESET: () => {
+        INDEX.NOW = 0;
+        Object.keys(CACHE.Index2StylesObject).forEach(key => delete CACHE.Index2StylesObject(key))
+    }
+}
+
+export const RAW = {
+    WATCH: false,
+    PACKAGE: "",
+    VERSION: "",
+    CMD: "",
+    ARG: "",
+    ReadMe: "",
+    CSSIndex: "",
+    RootPath: "",
+    WorkPath: "",
+    PROXYMAP: {},
+    HASHRULE: {},
+    LIBRARIES: {},
+    PORTABLES: {},
+    PREFIXES: {
+        attributes: {},
+        values: {},
+        atrules: {},
+        classes: {},
+        elements: {},
+        clrprops: [],
+    },
+};
+
+export const PREFIX = {
+    clrprops: [],
+    atRule: {},
+    selector: {},
+    attributes: {},
+    values: {},
+}
+
+export default function SETENV(rootPath, workPath, packageJson) {
+
+    PREFIX.clrprops = RAW.PREFIXES.clrprops;
+    PREFIX.selector = { ...RAW.PREFIXES.classes, ...RAW.PREFIXES.elements };
+    PREFIX.attributes = RAW.PREFIXES.attributes;
+    PREFIX.atRule = RAW.PREFIXES.atrules;
+    PREFIX.values = RAW.PREFIXES.values;
+
     APP.name = packageJson.name
     APP.version = packageJson.version
     APP.website = packageJson.website
     APP.command = packageJson.command
     APP.cdn = APP.cdn + packageJson.version.split('.')[1]
 
-    DATA.RootPath = rootPath;
-    DATA.WorkPath = workPath;
+    RAW.RootPath = rootPath;
+    RAW.WorkPath = workPath;
 
     Object.entries(NAV).forEach(([groupName, groupPaths]) => {
         if (groupName === "scaffold") {
@@ -143,48 +234,4 @@ export default function SetData(rootPath, workPath, packageJson) {
         entry.url = APP.cdn + entry.url;
         entry.path = rootPath + entry.path;
     }))
-}
-
-export const PUBLISH = {
-    DeltaPath: "",
-    DeltaContent: "",
-    FinalMessage: "",
-    ErrorCount: 0,
-    WarningCount: 0,
-    Report: {
-        library: "",
-        variables: "",
-        shorthand: "",
-        targets: "",
-        errors: "",
-        memChart: "",
-        footer: ""
-    },
-    MANIFEST: {
-        constants: [],
-        shorthands: {},
-        file: {},
-        local: {},
-        global: {},
-        axiom: {},
-        cluster: {},
-        portable: {},
-        binding: {}
-    }
-}
-
-export const CACHE = {
-    Shorthands: {},
-    SortedIndexes: [],
-    PortableEssentials: [],
-    LibraryStyle2Index: {},
-    GlobalsStyle2Index: {},
-    Index2StylesObject: {},
-    PortableStyle2Index: {},
-    FinalStack: {},
-}
-
-export const PROXY = {
-    FILES: {},
-    CLASS: {}
 }

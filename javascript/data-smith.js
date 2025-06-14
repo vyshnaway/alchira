@@ -1,24 +1,23 @@
 import $ from "./Shell/index.js";
 import Use from "./Utils/index.js";
-import shorthandJS from "./Worker/shorthand.js";
-import cleaner from "./Worker/cleaner.js";
+import HASHRULE from "./hash-rules.js";
 import STYLE from "./Style/parse.js";
-import COMPILE from "./Style/compile.js";
-import FORGE from "./data-forge.js";
-import ORGANIZER from "./Worker/order-api.js";
-import Proxy from "./Script/class.js";
+import COMPILE from "./Style/render.js";
+import FORGE from "./Style/forge.js";
+import ORDER from "./Worker/order-api.js";
+import SCRIPT from "./Script/class.js";
 import XTYLES from "./Style/stash.js";
 import {
     NAV,
-    DATA,
-    PROXY,
+    RAW,
+    STACK,
     CACHE,
-    PUBLISH
+    PUBLISH,
 } from "./data-cache.js";
 
 function ResetCache() {
     Object.assign(CACHE, {
-        Shorthands: {},
+        Hashrules: {},
         SortedIndexes: [],
         LibraryStyle2Index: {},
         GlobalsStyle2Index: {},
@@ -34,7 +33,7 @@ function ResetCache() {
         Report: {
             library: "",
             variables: "",
-            shorthand: "",
+            hashrule: "",
             targets: "",
             errors: "",
             memChart: "",
@@ -42,7 +41,7 @@ function ResetCache() {
         },
         StyleMap: {
             variables: [],
-            shorthands: {},
+            hashrules: {},
             file: {},
             local: {},
             global: {},
@@ -58,9 +57,9 @@ function ResetCache() {
 
 
 // On library edit.
-export function UpdateLibrary() {
+export function UpdateXtylesFolder() {
     ResetCache();
-    XTYLES.UploadFiles(DATA.LIBRARY, DATA.PORTABLES);
+    XTYLES.UploadFiles(RAW.LIBRARIES, RAW.PORTABLES);
     const {
         libraryTable,
         modulesTable,
@@ -78,37 +77,35 @@ export function UpdateLibrary() {
 
     CACHE.PortableEssentials = ModuleEssentials;
     PUBLISH.MANIFEST.file = { ...libraryTable, ...modulesTable };
-}
-
-// On shorthands edit.
-export function UpdateShorthands() {
-    PUBLISH.MANIFEST.shorthands = shorthandJS.UPLOAD(DATA.SHORTHAND);
+    PUBLISH.MANIFEST.hashrules = HASHRULE.UPLOAD();
 }
 
 // On target files edit.
 export function ProcessProxies(action = "upload", targetFolder, filePath, fileContent, extension) {
+    HASHRULE.UPLOAD()
+
     switch (action) {
         case "add": case "change":
-            if (PROXY.CLASS[targetFolder].extensions.includes(extension)) {
-                PROXY.FILES[targetFolder][filePath] = fileContent;
-                PROXY.CLASS[targetFolder].SaveFile(filePath, fileContent);
-                PROXY.CLASS[targetFolder].UpdateCache();
-                PUBLISH.DeltaPath = `${PROXY.CLASS[targetFolder].source}/${filePath}`;
+            if (STACK.PROXYCACHE[targetFolder].extensions.includes(extension)) {
+                STACK.PROXYFILES[targetFolder][filePath] = fileContent;
+                STACK.PROXYCACHE[targetFolder].SaveFile(filePath, fileContent);
+                STACK.PROXYCACHE[targetFolder].UpdateCache();
+                PUBLISH.DeltaPath = `${STACK.PROXYCACHE[targetFolder].source}/${filePath}`;
                 PUBLISH.DeltaContent = '';
-            } else if (PROXY.CLASS[targetFolder].stylesheet === filePath) {
-                PROXY.CLASS[targetFolder].stylesheetContent = fileContent;
+            } else if (STACK.PROXYCACHE[targetFolder].stylesheet === filePath) {
+                STACK.PROXYCACHE[targetFolder].stylesheetContent = fileContent;
             } else {
-                PUBLISH.DeltaPath = `${PROXY.CLASS[targetFolder].source}/${filePath}`;
+                PUBLISH.DeltaPath = `${STACK.PROXYCACHE[targetFolder].source}/${filePath}`;
                 PUBLISH.DeltaContent = fileContent;
             }
             break;
         default:
-            Object.entries(PROXY.CLASS).forEach(([key, cache]) => {
+            Object.entries(STACK.PROXYCACHE).forEach(([key, cache]) => {
                 cache.ClearFiles();
-                delete PROXY.CLASS[key];
+                delete STACK.PROXYCACHE[key];
             });
-            Object.entries(PROXY.FILES).forEach(([key, files]) => {
-                PROXY.CLASS[key] = new Proxy(files);
+            Object.entries(STACK.PROXYFILES).forEach(([key, files]) => {
+                STACK.PROXYCACHE[key] = new SCRIPT(files);
             });
     }
 }
@@ -126,7 +123,7 @@ async function Accumulate() {
         postBinds: new Set(),
     }
 
-    Object.values(PROXY.CLASS).forEach(cache => {
+    Object.values(STACK.PROXYCACHE).forEach(cache => {
         const cumulated = cache.Accumulator();
 
         CUMULATES.report.push(...cumulated.report);
@@ -145,28 +142,28 @@ async function Accumulate() {
     })
 
     CACHE.GlobalsStyle2Index = CUMULATES.styleGlobals;
-    Object.values(PROXY.CLASS).forEach(cache => CUMULATES.classTracks.push(...cache.LoadTracks()));
+    Object.values(STACK.PROXYCACHE).forEach(cache => CUMULATES.classTracks.push(...cache.LoadTracks()));
 
-    if (DATA.WATCH) {
+    if (RAW.WATCH) {
         CACHE.FinalStack = {};
         PUBLISH.FinalMessage = CUMULATES.errors.length ? "Errors in " + CUMULATES.errors.length + " Tags." : "Zero errors.";
     } else {
         let output;
-        if ("publish" === DATA.CMD) {
+        if ("publish" === RAW.CMD) {
             if (CUMULATES.errors.length) {
-                output = await ORGANIZER(CUMULATES.classTracks, DATA.CMD, DATA.ARG);
+                output = await ORDER(CUMULATES.classTracks, RAW.CMD, RAW.ARG);
                 PUBLISH.FinalMessage = "Errors in " + CUMULATES.errors.length + " Tags. Falling back to 'preview' command.";
-                DATA.CMD = "preview";
+                RAW.CMD = "preview";
             } else {
-                output = await ORGANIZER(CUMULATES.classTracks, DATA.CMD, DATA.ARG)
+                output = await ORDER(CUMULATES.classTracks, RAW.CMD, RAW.ARG)
                 PUBLISH.FinalMessage = output.message;
-                if (output.status) DATA.CMD = "preview";
+                if (output.status) RAW.CMD = "preview";
                 else CUMULATES.errors.push(PUBLISH.FinalMessage);
             }
         } else {
             PUBLISH.FinalMessage = CUMULATES.errors.length === 0 ? "Preview verified. Procceed to 'publish' using your key." :
                 CUMULATES.errors.length + " Unresolved Errors. Rectify them to proceed with 'publish' command.";
-            output = await ORGANIZER(CUMULATES.classTracks, DATA.CMD, DATA.ARG);
+            output = await ORDER(CUMULATES.classTracks, RAW.CMD, RAW.ARG);
         }
 
         CACHE.FinalStack = output.result.reduce((A, I) => { A["." + CACHE.Index2StylesObject[I].class] = I; return A; }, {});
@@ -186,7 +183,7 @@ async function Accumulate() {
 
     return {
         CUMULATES,
-        SAVEFILES: DATA.WATCH ? {} : Object.fromEntries(Object.entries(XtylesResult.bundle).map(([fileName, fileContent]) => {
+        SAVEFILES: RAW.WATCH ? {} : Object.fromEntries(Object.entries(XtylesResult.bundle).map(([fileName, fileContent]) => {
             return [NAV.folder.portableNative + "/" + fileName, fileContent]
         }))
     };
@@ -204,32 +201,32 @@ function createStylesheet(CUMULATES) {
         POSTBINDS: "",
     }
 
-    const indexScanned = STYLE.CSSCANNER(cleaner.uncomment.Css(DATA.CSSIndex), "INDEX ||");
+    const indexScanned = STYLE.CSSCANNER(Use.code.uncomment.Css(RAW.CSSIndex), "INDEX ||");
     indexScanned.postBinds.forEach(i => POSTBINDS.add(i));
     indexScanned.preBinds.forEach(i => PREBINDS.add(i));
-    RENDERFRAGS.INDEX = COMPILE.Stylesheet(indexScanned.styles, !DATA.WATCH);
+    RENDERFRAGS.INDEX = COMPILE.Stylesheet(indexScanned.styles, !RAW.WATCH);
     PUBLISH.MANIFEST.constants = Use.array.setback(indexScanned.variables);
     PUBLISH.Report.variables = $.MOLD.primary.Section("Root variables", PUBLISH.MANIFEST.constants, $.list.text.Entries);
 
-    RENDERFRAGS.ESSENTIALS = COMPILE.Stylesheet([...CACHE.PortableEssentials, ...CUMULATES.essentials], !DATA.WATCH)
+    RENDERFRAGS.ESSENTIALS = COMPILE.Stylesheet([...CACHE.PortableEssentials, ...CUMULATES.essentials], !RAW.WATCH)
 
-    Object.values(PROXY.CLASS).forEach((cache) => cache.RenderFiles(PREBINDS, POSTBINDS, DATA.CMD))
-    RENDERFRAGS.RENDERED = COMPILE.Stylesheet(FORGE.indexMaps(CACHE.FinalStack), !DATA.WATCH)
+    Object.values(STACK.PROXYCACHE).forEach((cache) => cache.RenderFiles(PREBINDS, POSTBINDS, RAW.CMD))
+    RENDERFRAGS.RENDERED = COMPILE.Stylesheet(FORGE.indexMaps(CACHE.FinalStack), !RAW.WATCH)
 
-    RENDERFRAGS.APPENDIX = COMPILE.Stylesheet(Object.values(PROXY.CLASS).reduce((appendix, cache) => {
+    RENDERFRAGS.APPENDIX = COMPILE.Stylesheet(Object.values(STACK.PROXYCACHE).reduce((appendix, cache) => {
         const appendixScanned = STYLE.CSSCANNER(
-            cleaner.uncomment.Css(cache.stylesheetContent),
+            Use.code.uncomment.Css(cache.stylesheetContent),
             `APPENDIX : ${cache.targetStylesheet} ||`
         );
         appendix.push(...appendixScanned.styles);
         appendixScanned.postBinds.forEach(i => POSTBINDS.add(i));
         appendixScanned.preBinds.forEach(i => PREBINDS.add(i));
         return appendix;
-    }, []), !DATA.WATCH);
+    }, []), !RAW.WATCH);
 
     const rendered = FORGE.bindIndex(PREBINDS, POSTBINDS);
-    RENDERFRAGS.PREBINDS = COMPILE.Stylesheet(rendered.preBindsObject, !DATA.WATCH);
-    RENDERFRAGS.POSTBINDS = COMPILE.Stylesheet(rendered.postBindsObject, !DATA.WATCH);
+    RENDERFRAGS.PREBINDS = COMPILE.Stylesheet(rendered.preBindsObject, !RAW.WATCH);
+    RENDERFRAGS.POSTBINDS = COMPILE.Stylesheet(rendered.postBindsObject, !RAW.WATCH);
 
     return { RENDERFRAGS, PREBINDS, POSTBINDS };
 }
@@ -237,7 +234,6 @@ function createStylesheet(CUMULATES) {
 // On target stylesheet edit.
 export async function Generate() {
     const { CUMULATES, SAVEFILES } = await Accumulate();
-    PUBLISH.Report.shorthand = shorthandJS.REPORT();
 
     if (PUBLISH.DeltaContent.length) {
         SAVEFILES[PUBLISH.DeltaPath] = PUBLISH.DeltaContent
@@ -245,29 +241,29 @@ export async function Generate() {
         const { RENDERFRAGS, PREBINDS, POSTBINDS } = createStylesheet(CUMULATES)
 
         const FinalStylesheet = Object.entries(RENDERFRAGS)
-            .map(([chapter, content]) => DATA.WATCH ? `\n\n/* CHAPTER: ${chapter} */\n${content}\n` : content).join("");
-        Object.values(PROXY.CLASS).forEach((cache) => cache.SummonFiles(SAVEFILES, FinalStylesheet))
+            .map(([chapter, content]) => RAW.WATCH ? `\n\n/* CHAPTER: ${chapter} */\n${content}\n` : content).join("");
+        Object.values(STACK.PROXYCACHE).forEach((cache) => cache.SummonFiles(SAVEFILES, FinalStylesheet))
 
         if (PUBLISH.DeltaPath.length) {
             Object.keys(SAVEFILES).forEach(filePath => { if (PUBLISH.DeltaPath !== filePath) { delete SAVEFILES[filePath] } })
             PUBLISH.SaveDepenFiles = [];
         }
 
-        if (DATA.WATCH) {
+        if (RAW.WATCH) {
             SAVEFILES[NAV.json.manifest] = JSON.stringify(PUBLISH.MANIFEST);
         } else {
             const
-                portableMd = NAV.folder.portableBundle + "/" + DATA.PACKAGE + ".css",
-                portableCss = NAV.folder.portableBundle + "/" + DATA.PACKAGE + ".xcss",
-                portableXcss = NAV.folder.portableBundle + "/" + DATA.PACKAGE + ".md";
+                portableMd = NAV.folder.portableBundle + "/" + RAW.PACKAGE + ".css",
+                portableCss = NAV.folder.portableBundle + "/" + RAW.PACKAGE + ".xcss",
+                portableXcss = NAV.folder.portableBundle + "/" + RAW.PACKAGE + ".md";
 
-            const portable = COMPILE.Portable(PREBINDS, POSTBINDS, CUMULATES.essentials, DATA.PACKAGE, DATA.VERSION);
-            SAVEFILES[NAV.folder.portableNative + "/" + DATA.PACKAGE + ".css"] = portable.binding;
-            SAVEFILES[NAV.folder.portableNative + "/" + DATA.PACKAGE + ".xcss"] = portable.portable;
-            SAVEFILES[NAV.folder.portableNative + "/" + DATA.PACKAGE + ".md"] = DATA.ReadMe;
+            const portable = COMPILE.Portable(PREBINDS, POSTBINDS, CUMULATES.essentials, RAW.PACKAGE, RAW.VERSION);
+            SAVEFILES[NAV.folder.portableNative + "/" + RAW.PACKAGE + ".css"] = portable.binding;
+            SAVEFILES[NAV.folder.portableNative + "/" + RAW.PACKAGE + ".xcss"] = portable.portable;
+            SAVEFILES[NAV.folder.portableNative + "/" + RAW.PACKAGE + ".md"] = RAW.ReadMe;
 
-            if (SAVEFILES[portableMd]) SAVEFILES[portableMd] += DATA.ReadMe
-            else SAVEFILES[portableMd] = DATA.ReadMe
+            if (SAVEFILES[portableMd]) SAVEFILES[portableMd] += RAW.ReadMe
+            else SAVEFILES[portableMd] = RAW.ReadMe
             if (SAVEFILES[portableCss]) SAVEFILES[portableCss] += portable.binding
             else SAVEFILES[portableCss] = portable.binding
             if (SAVEFILES[portableXcss]) SAVEFILES[portableXcss] += portable.portable

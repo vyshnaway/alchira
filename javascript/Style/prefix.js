@@ -1,30 +1,7 @@
-import Use from "../Utils/index.js"
-import cleaner from "../Worker/cleaner.js";
-import { LoadColorFallback } from "./color.js"
+import LoadHEX from "./color.js";
 
-const PREFIX = {
-    clrprops: [],
-    atRule: {},
-    selector: {},
-    attributes: {},
-    values: {},
-}
-
-export default function SavePrefix({
-    clrprops,
-    elements,
-    atrules,
-    classes,
-    attributes,
-    values,
-}) {
-    PREFIX.clrprops = clrprops;
-    PREFIX.selector = { ...classes, ...elements };
-    PREFIX.attributes = attributes;
-    PREFIX.atRule = atrules;
-    PREFIX.values = values;
-}
-
+import Use from "../Utils/index.js";
+import { PREFIX } from "../data-cache.js";
 
 export function forAtRule(content = "", prefixes = ["webkit", "moz", "ms", "o"]) {
     let index = content.indexOf(" ");
@@ -84,7 +61,7 @@ function forAttribute(content = "", prefixes = ["webkit", "moz", "ms", "o"]) {
 }
 
 function forValues(attribute, value, prefixes = ["webkit", "moz", "ms", "o"]) {
-    const cleanValue = cleaner.uncomment.Css(value);
+    const cleanValue = Use.code.uncomment.Css(value);
     const venVals = PREFIX.values?.[attribute]?.[cleanValue];
     if (!venVals) return { "": value };
 
@@ -102,7 +79,7 @@ export function LoadProps(attribute = "", value = "", prefixes = ["webkit", "moz
     const attributes = forAttribute(attribute, prefixes);
 
     if (PREFIX.clrprops.includes(attribute)) {
-        const values = LoadColorFallback(value);
+        const values = LoadHEX(value);
         Object.values(attributes).forEach((attr) => values.forEach((val) => results.push([attr, val])))
     } else {
         const values = forValues(attribute, value);

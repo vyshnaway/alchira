@@ -1,17 +1,16 @@
 import $ from './Shell/index.js';
-import * as COLLECT from "./data-fetch.js";
-import * as CRAFT from './data-smith.js';
-import * as worker from '../interface/worker.js';
-import { PROXY } from './data-cache.js';
-import SETDATA, { ROOT, APP, DATA, NAV } from './data-cache.js';
+import * as FETCH from "./data-fetch.js";
+import * as SMITH from './data-smith.js';
+import SETENV, { ROOT, APP, RAW, NAV, STACK } from './data-cache.js';
 
+import * as worker from '../interface/worker.js';
 import fileman from '../interface/fileman.js';
 import { hasEvents, dequeueEvent } from '../interface/eventface.js';
 
 
 function reporter(chapter, heading, report) {
     $.POST($.MOLD.std.Block([
-        $.MOLD.title.Chapter(chapter, Object.keys(PROXY.CLASS), $.list.text.Entries),
+        $.MOLD.title.Chapter(chapter, Object.keys(STACK.PROXYCACHE), $.list.text.Entries),
         $.MOLD.primary.Chapter(heading, [report]),
         $.MOLD.failed.Footer("Press Ctrl+C to stop watching.")
     ]))
@@ -23,54 +22,52 @@ async function execute(chapter) {
         step = "Initialize",
         heading = "Initial Build";
 
-    if (!DATA.WATCH) $.POST($.MOLD.success.Chapter(chapter))
+    if (!RAW.WATCH) $.POST($.MOLD.success.Chapter(chapter))
 
     do {
         switch (step) {
             case "Initialize":
-                await COLLECT.FetchPrefixBase();
+                await FETCH.FetchStatics();
 
             case "VerifySetupStruct":
-                const verifyStructResult = await COLLECT.VerifySetupStruct();
+                const verifyStructResult = await FETCH.VerifySetupStruct();
                 if (!verifyStructResult.proceed) {
                     report = verifyStructResult.report
                     break;
                 };
 
             case "ReadIndex":
-                await COLLECT.FetchIndexContent();
+                await FETCH.FetchIndexContent();
 
             case "ReadLibraries":
-                await COLLECT.UpdateLibrary();
+                await FETCH.UpdateLibrary();
 
             case "VerifyProxyMap":
-                const verifyConfigsResult = await COLLECT.VerifyProxyMap();
+                const verifyConfigsResult = await FETCH.VerifyProxyMap();
                 if (!verifyConfigsResult.status) {
                     report = verifyConfigsResult.report;
                     break;
                 };
 
             case "ReadProxyFolders":
-                await COLLECT.UpdateProxies();
+                await FETCH.UpdateProxies();
 
-            case "ReadShorthands":
-                const shorthandAnalysis = await COLLECT.AnalyzeShorthands();
-                if (!shorthandAnalysis.status) {
-                    report = shorthandAnalysis.report;
+            case "ReadHashrules":
+                const hashruleAnalysis = await FETCH.AnalyzeHashrules();
+                if (!hashruleAnalysis.status) {
+                    report = hashruleAnalysis.report;
                     break;
                 }
 
-            case "ProcessLibraries":
-                CRAFT.UpdateLibrary();
+            case "ProcessXtylesFolder":
+                SMITH.UpdateXtylesFolder();
 
-            case "ProcessShorthands":
-                CRAFT.UpdateShorthands();
 
             case "ProcessProxyFolders":
-                CRAFT.ProcessProxies();
+                SMITH.ProcessProxies();
 
             case "GenerateFinals":
-                const { SaveFiles, ConsoleReport } = await CRAFT.Generate();
+                const { SaveFiles, ConsoleReport } = await SMITH.Generate();
                 report = ConsoleReport;
 
             case "Publish":
@@ -79,7 +76,7 @@ async function execute(chapter) {
 
             case "WatchFolders":
 
-                if (DATA.WATCH) {
+                if (RAW.WATCH) {
                     step = "WatchFolders";
                 } else {
                     if (stopWatcher) {
@@ -90,7 +87,7 @@ async function execute(chapter) {
                 }
 
                 if (!stopWatcher) {
-                    const targetFolders = [...Object.keys(PROXY.CLASS), NAV.folder.setup];
+                    const targetFolders = [...Object.keys(STACK.PROXYCACHE), NAV.folder.setup];
                     const ignoreFolders = [NAV.folder.autogen];
                     process.on('SIGINT', () => {
                         if (stopWatcher) { stopWatcher(); stopWatcher = null; $.render.write("\n", 2) }
@@ -102,7 +99,7 @@ async function execute(chapter) {
 
                 if (hasEvents()) {
                     const event = dequeueEvent();
-                    $.initialize(event.consoleWidth, !DATA.WATCH);
+                    $.initialize(event.consoleWidth, !RAW.WATCH);
                     if (event.folder === NAV.folder.setup) {
                         const filePath = `${event.folder}/${event.filePath}`;
                         if (event.action === "add" || event.action === "change") {
@@ -116,29 +113,27 @@ async function execute(chapter) {
                                 case NAV.css.constants:
                                 case NAV.css.elements:
                                 case NAV.css.extends:
-                                    await COLLECT.FetchIndexContent();
+                                    await FETCH.FetchIndexContent();
                                     step = "GenerateFinals";
                                     break;
-                                case NAV.json.shorthand:
-                                    step = "ReadShorthands"
+                                case NAV.json.hashrule:
+                                    step = "ReadHashrules"
                                     break;
                                 default:
                                     if (event.folder === NAV.folder.library)
-                                        DATA.LIBRARY[filePath] = event.fileContent;
+                                        RAW.LIBRARIES[filePath] = event.fileContent;
                                     else if (event.folder === NAV.folder.portables)
-                                        DATA.PORTABLES[filePath] = event.fileContent;
-                                    step = "ProcessLibraries"
+                                        RAW.PORTABLES[filePath] = event.fileContent;
+                                    step = "ProcessXtylesFolder"
                             }
                         } else {
                             step = "VerifySetupStruct"
                         }
+                    } else if (event.action === "add" || event.action === "change") {
+                        SMITH.ProcessProxies(event.action, event.folder, event.filePath, event.fileContent, event.extension);
+                        step = "GenerateFinals"
                     } else {
-                        if (event.action === "add" || event.action === "change") {
-                            CRAFT.ProcessProxies(event.action, event.folder, event.filePath, event.fileContent, event.extension);
-                            step = "GenerateFinals"
-                        } else {
-                            step = "ReadProxyFolders";
-                        }
+                        step = "ReadProxyFolders";
                     }
 
                     heading = `[${event.timeStamp}] | ${event.filePath} | [${event.action}]`;
@@ -147,7 +142,7 @@ async function execute(chapter) {
 
                 await new Promise((resolve) => setTimeout(resolve, 50));
         }
-    } while (DATA.WATCHS);
+    } while (RAW.WATCHS);
 
     if (stopWatcher) {
         stopWatcher();
@@ -167,22 +162,22 @@ async function commander(
     projectName,
     projectVersion
 ) {
-    DATA.CMD = command;
-    DATA.ARG = argument;
-    DATA.WATCH = command === 'watch';
-    DATA.PACKAGE = projectName;
-    DATA.VERSION = projectVersion;
-    SETDATA(rootPath, workPath, packageJson);
-    $.initialize(consoleWidth, !DATA.WATCH);
+    RAW.CMD = command;
+    RAW.ARG = argument;
+    RAW.WATCH = command === 'watch';
+    RAW.PACKAGE = projectName;
+    RAW.VERSION = projectVersion;
+    SETENV(rootPath, workPath, packageJson);
+    $.initialize(consoleWidth, !RAW.WATCH);
 
-    switch (DATA.CMD) {
+    switch (RAW.CMD) {
         case 'init':
             await $.PLAY.Title(APP.name + ' : Initialize', 500);
-            const setupInit = await COLLECT.VerifySetupStruct();
+            const setupInit = await FETCH.VerifySetupStruct();
             if (setupInit.unstart)
-                $.POST(await COLLECT.Initialize());
+                $.POST(await FETCH.Initialize());
             else if (setupInit.proceed) {
-                $.POST((await COLLECT.VerifyProxyMap()).report);
+                $.POST((await FETCH.VerifyProxyMap()).report);
             } else {
                 $.POST(setupInit.report);
             }
@@ -197,7 +192,7 @@ async function commander(
             await execute(APP.name + ' : Final Build');
             break;
         default:
-            await COLLECT.FetchDocs();
+            await FETCH.FetchDocs();
             $.POST($.MOLD.std.Chapter(`${APP.command} @ ` + APP.version, [ROOT.DOCS.alerts.content]));
             $.POST($.MOLD.secondary.Section('Available Commands', APP.commandList, $.list.std.Props));
             $.POST($.MOLD.secondary.Section('Agreements',

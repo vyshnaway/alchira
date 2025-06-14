@@ -1,8 +1,8 @@
-import Utils from "./Utils/index.js"
-import { CACHE } from "./data-cache.js";
+import Use from "../Utils/index.js"
+import { CACHE } from "../data-cache.js";
 
 function styleSwitch(object) {
-    const switched = Utils.object.switch(object);
+    const switched = Use.object.switch(object);
     const mins = [], maxs = [], flats = [];
     Object.keys(switched).forEach(key => {
         const min = key.indexOf("min"), max = key.indexOf("max");
@@ -37,8 +37,8 @@ function loadBindObjectsFromIndex(order, useXelector = false, XelectorPrefix = "
     const result = Object.entries(styleSwitch(order.reduce((A, xId) => {
         if (CACHE.LibraryStyle2Index[xId]) {
             const selector = CACHE.Index2StylesObject[CACHE.LibraryStyle2Index[xId]].selector;
-            const evaluated = useXelector ? (selector[0] === "@" ? selector : Utils.string.normalize(xId, [], [], ["$"])) : selector;
-            indexes.push(XelectorPrefix + Utils.string.normalize(evaluated, ["$"], ["\\"]));
+            const evaluated = useXelector ? (selector[0] === "@" ? selector : Use.string.normalize(xId, [], [], ["$"])) : selector;
+            indexes.push(XelectorPrefix + Use.string.normalize(evaluated, ["$"], ["\\"]));
             A[(['@', '.'].includes(selector[0]) ? "" : ".") + evaluated]
                 = CACHE.Index2StylesObject[CACHE.LibraryStyle2Index[xId]].object;
         }

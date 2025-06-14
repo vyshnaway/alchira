@@ -1,26 +1,8 @@
-import Use from "../Utils/index.js";
-import READS from "./block.js";
-import SHORTHAND from "../Worker/shorthand.js";
-import { DATA, NAV, CACHE } from "../data-cache.js";
+import BLOCK from "./block.js";
 
-const INDEX = {
-    NOW: 0,
-    BIN: [],
-    DECLARE: () => {
-        const number = INDEX.BIN.length ? INDEX.BIN.pop() : ++INDEX.NOW;
-        return { number, class: "_" + Use.string.enCounter(number + 768) };
-    },
-    DISPOSE: (...indexes) => {
-        indexes.forEach(index => {
-            INDEX.BIN.push(index);
-            delete CACHE.Index2StylesObject[index];
-        })
-    },
-    RESET: () => {
-        INDEX.NOW = 0;
-        Object.keys(CACHE.Index2StylesObject).forEach(key => delete CACHE.Index2StylesObject(key))
-    }
-}
+import Use from "../Utils/index.js";
+import HASHRULE from "../hash-rules.js";
+import { RAW, NAV, CACHE, INDEX } from "../data-cache.js";
 
 function xtylemerge(classList = []) {
     let result = {}, preBinds = [], postBinds = [];
@@ -38,7 +20,7 @@ function xtylemerge(classList = []) {
 
 function SCANNER(content, initial, sourceSelector) {
 
-    const response = READS(content);
+    const response = BLOCK(content);
     const variables = response.variables;
     const merged = xtylemerge(response.assemble);
     const preBinds = [...merged.preBinds, ...response.preBinds],
@@ -46,11 +28,11 @@ function SCANNER(content, initial, sourceSelector) {
 
     const styles = Use.object.deepMerge(merged.result, {
         ...Object.entries(response.atProps).reduce((acc, [propKey, propValue]) => {
-            acc[propKey] = DATA.WATCH ? `${propValue}/* ${initial} ${sourceSelector} */` : propValue;
+            acc[propKey] = RAW.WATCH ? `${propValue}/* ${initial} ${sourceSelector} */` : propValue;
             return acc;
         }, {}),
         ...Object.entries(response.properties).reduce((acc, [propKey, propValue]) => {
-            acc[propKey] = DATA.WATCH ? `${propValue}/* ${initial} ${sourceSelector} */` : propValue;
+            acc[propKey] = RAW.WATCH ? `${propValue}/* ${initial} ${sourceSelector} */` : propValue;
             return acc;
         }, {})
     });
@@ -68,7 +50,7 @@ function SCANNER(content, initial, sourceSelector) {
 
 function CSSCANNER(content, initial = '') {
     const variables = [];
-    const response = READS(content, true);
+    const response = BLOCK(content, true);
     const styles = response.XatProps;
     const preBinds = [], postBinds = [];
 
@@ -88,7 +70,7 @@ function CSSLIBRARY(fileDatas = [], initial = '', forPortable = false) {
     fileDatas.forEach(source => {
         source.usedIndexes = new Set();
         const { stamp, filePath, metaFront, content, group } = source;
-        const scannedObj = READS(content).allBlocks;
+        const scannedObj = BLOCK(content).allBlocks;
 
         for (const selector in scannedObj) {
             const declarations = [(forPortable ? NAV.folder.portables : NAV.folder.library) + "/" + filePath];
@@ -136,7 +118,7 @@ function TAGSTYLE({
     const object = {}, preBinds = [], postBinds = [], errors = [], essentials = [];
 
     for (let subSelector in styles) {
-        const query = SHORTHAND.RENDER(subSelector, declarations[0], isPortable);
+        const query = HASHRULE.RENDER(subSelector, declarations[0], isPortable);
         if (!query.status) errors.push(query.error)
         const styleObj = SCANNER(styles[subSelector], `${scope} : ${filePath} ||`, selector + subSelector);
 
