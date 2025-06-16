@@ -1,24 +1,23 @@
-import readline from 'readline';
+import readline from "readline";
 
 const backspace = (chars) => {
-    if (chars <= 0) {
-        return;
-    }
-    readline.moveCursor(process.stdout, -chars, 0);
-    readline.clearLine(process.stdout, 1);
+  if (chars <= 0) {
+    return;
+  }
+  readline.moveCursor(process.stdout, -chars, 0);
+  readline.clearLine(process.stdout, 1);
 };
 
-
-const write = (string = '', backRows = 0) => {
-    if (backRows > 0) {
-        readline.moveCursor(process.stdout, 0, -backRows);
-        readline.clearScreenDown(process.stdout);
-    } else if (backRows < 0) {
-        console.clear();
-    }
-    const rowsCreated = string.split('\n').length;
-    console.log(string)
-    return rowsCreated;
+const write = (string = "", backRows = 0) => {
+  if (backRows > 0) {
+    readline.moveCursor(process.stdout, 0, -backRows);
+    readline.clearScreenDown(process.stdout);
+  } else if (backRows < 0) {
+    console.clear();
+  }
+  const rowsCreated = string.split("\n").length;
+  console.log(string);
+  return rowsCreated;
 };
 
 /**
@@ -29,27 +28,29 @@ const write = (string = '', backRows = 0) => {
  * @returns {null}
  */
 const animate = (frames = [], duration = 1000, repeat = 0) => {
-    const interval = Math.ceil(duration / (frames.length * (repeat || 1))) || 1;
+  const interval = Math.ceil(duration / (frames.length * (repeat || 1))) || 1;
 
-    let iteration = 0, backRows = 0, frameIndex = 0;
-    return new Promise((resolve) => {
-        const intervalId = setInterval(() => {
-            if (frameIndex === frames.length) {
-                frameIndex = 0;
-                iteration++;
-            }
-            if (iteration >= repeat && frameIndex === 0) {
-                clearInterval(intervalId);
-                resolve();
-                return;
-            }
-            backRows = write(frames[frameIndex++], backRows);
-        }, interval);
-    });
+  let iteration = 0,
+    backRows = 0,
+    frameIndex = 0;
+  return new Promise((resolve) => {
+    const intervalId = setInterval(() => {
+      if (frameIndex === frames.length) {
+        frameIndex = 0;
+        iteration++;
+      }
+      if (iteration >= repeat && frameIndex === 0) {
+        clearInterval(intervalId);
+        resolve();
+        return;
+      }
+      backRows = write(frames[frameIndex++], backRows);
+    }, interval);
+  });
 };
 
 export default {
-    write,
-    animate,
-    backspace,
-}
+  write,
+  animate,
+  backspace,
+};

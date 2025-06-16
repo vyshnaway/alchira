@@ -1,0 +1,10 @@
+[
+  {
+    "source": "src",
+    "target": "xrc",
+    "stylesheet": "styles.css",
+    "extensions": {
+      "html": ["class"]
+    }
+  }
+]

@@ -1,5 +1,4 @@
-import fn from "./block.js"
-
+import fn from "./block.js";
 
 const string = `
 prop1: val1;
@@ -32,9 +31,9 @@ a b csd;
 a b csd;
 gha b csd;
 --fd: df;
-`
+`;
 
-console.log(fn(string))
+console.log(fn(string));
 
 // function testDeepMerge() {
 //     // Helper function to compare objects

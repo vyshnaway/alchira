@@ -1,6 +1,8 @@
-import scan from "./file.js"
+import scan from "./file.js";
 
-console.log(scan(`
+console.log(
+  scan(
+    `
 <script>
 import Navbar from "$lib/Navbar.svelte";
 </script>
@@ -24,4 +26,8 @@ import Navbar from "$lib/Navbar.svelte";
 	}
 </style>
 
-`, "svelte", false))
+`,
+    "svelte",
+    false,
+  ),
+);

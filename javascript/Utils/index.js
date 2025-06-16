@@ -4,8 +4,8 @@ import array from "./3.array.js";
 import code from "./4.code.js";
 
 export default {
-    string,
-    object,
-    array,
-    code
-}
+  string,
+  object,
+  array,
+  code,
+};

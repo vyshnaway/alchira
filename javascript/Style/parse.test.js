@@ -1,10 +1,12 @@
-import FN from "./style.js"
+import FN from "./style.js";
 
-console.log(FN.CSSBULK([{
-    stamp: "$",
-    filePath: "filePath",
-    metaFront: "metaFront",
-    content: `
+console.log(
+  FN.CSSBULK([
+    {
+      stamp: "$",
+      filePath: "filePath",
+      metaFront: "metaFront",
+      content: `
     .font-display { font-family: 'Display-Font'; font-weight: 700; }
     .font-heading { font-family: 'Heading-Font'; font-weight: 500; }
     .font-heading-bold { font-family: 'Heading-Font'; font-weight: 900; }
@@ -36,5 +38,7 @@ console.log(FN.CSSBULK([{
         font-style: normal;
         font-display: swap;
     }
-    `}]
-))
+    `,
+    },
+  ]),
+);

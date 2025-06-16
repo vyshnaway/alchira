@@ -1,0 +1,5 @@
+@import url("./#elements.css");
+.g {
+  size: 34px;
+  color: var(--p);
+}

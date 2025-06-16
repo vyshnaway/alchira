@@ -6,4 +6,7 @@ export declare const memory: WebAssembly.Memory;
  * @param param `~lib/string/String | null`
  * @returns `~lib/string/String`
  */
-export declare function runCommand(command: string, param: string | null): string;
+export declare function runCommand(
+  command: string,
+  param: string | null,
+): string;

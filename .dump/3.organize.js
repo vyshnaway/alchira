@@ -1,76 +1,80 @@
 export default function organizeMaps(originalArray, indexOrder) {
-    const len = originalArray.length;
+  const len = originalArray.length;
 
-    // Use TypedArray for sortedArray when possible (faster and less memory)
-    const sortedArray = originalArray.every(item => typeof item === 'number')
-        ? new Float64Array(len)
-        : new Array(len);
+  // Use TypedArray for sortedArray when possible (faster and less memory)
+  const sortedArray = originalArray.every((item) => typeof item === "number")
+    ? new Float64Array(len)
+    : new Array(len);
 
-    // Single object with minimal footprint
-    const result = { mapping: Object.create(null), sortedArray };
+  // Single object with minimal footprint
+  const result = { mapping: Object.create(null), sortedArray };
 
-    // Single pass with minimal operations
-    for (let i = 0; i < len; i++) {
-        const value = originalArray[i];
-        const index = indexOrder[i];
-        result.mapping[value] = index;
-        sortedArray[index] = value;
+  // Single pass with minimal operations
+  for (let i = 0; i < len; i++) {
+    const value = originalArray[i];
+    const index = indexOrder[i];
+    result.mapping[value] = index;
+    sortedArray[index] = value;
+  }
+
+  // Optimized sorting based on size and type
+  if (len <= 8) {
+    // Insertion sort for small arrays - minimal memory overhead
+    for (let i = 1; i < len; i++) {
+      const current = sortedArray[i];
+      let j = i - 1;
+      while (
+        j >= 0 &&
+        (sortedArray[j] === undefined ||
+          (sortedArray[j] > current && current !== undefined))
+      ) {
+        sortedArray[j + 1] = sortedArray[j];
+        j--;
+      }
+      sortedArray[j + 1] = current;
     }
+  } else {
+    // Custom quicksort for larger arrays - in-place, no extra memory
+    const quickSort = (arr, low, high) => {
+      if (low < high) {
+        let pivot = arr[high];
+        let i = low - 1;
 
-    // Optimized sorting based on size and type
-    if (len <= 8) {
-        // Insertion sort for small arrays - minimal memory overhead
-        for (let i = 1; i < len; i++) {
-            const current = sortedArray[i];
-            let j = i - 1;
-            while (j >= 0 && (sortedArray[j] === undefined ||
-                (sortedArray[j] > current && current !== undefined))) {
-                sortedArray[j + 1] = sortedArray[j];
-                j--;
-            }
-            sortedArray[j + 1] = current;
+        for (let j = low; j < high; j++) {
+          if (arr[j] === undefined) continue;
+          if (pivot === undefined || arr[j] < pivot) {
+            i++;
+            [arr[i], arr[j]] = [arr[j], arr[i]];
+          }
         }
-    } else {
-        // Custom quicksort for larger arrays - in-place, no extra memory
-        const quickSort = (arr, low, high) => {
-            if (low < high) {
-                let pivot = arr[high];
-                let i = low - 1;
 
-                for (let j = low; j < high; j++) {
-                    if (arr[j] === undefined) continue;
-                    if (pivot === undefined || arr[j] < pivot) {
-                        i++;
-                        [arr[i], arr[j]] = [arr[j], arr[i]];
-                    }
-                }
+        [arr[i + 1], arr[high]] = [arr[high], arr[i + 1]];
+        const pi = i + 1;
 
-                [arr[i + 1], arr[high]] = [arr[high], arr[i + 1]];
-                const pi = i + 1;
+        quickSort(arr, low, pi - 1);
+        quickSort(arr, pi + 1, high);
+      }
+    };
+    quickSort(sortedArray, 0, len - 1);
+  }
 
-                quickSort(arr, low, pi - 1);
-                quickSort(arr, pi + 1, high);
-            }
-        };
-        quickSort(sortedArray, 0, len - 1);
-    }
+  // Trim undefined elements in-place
+  let finalLength = len;
+  while (finalLength > 0 && sortedArray[finalLength - 1] === undefined) {
+    finalLength--;
+  }
 
-    // Trim undefined elements in-place
-    let finalLength = len;
-    while (finalLength > 0 && sortedArray[finalLength - 1] === undefined) {
-        finalLength--;
-    }
+  // Convert TypedArray to regular array only if needed
+  result.sortedArray =
+    finalLength < len
+      ? sortedArray.slice(0, finalLength) instanceof Float64Array
+        ? Array.from(sortedArray.slice(0, finalLength))
+        : sortedArray.slice(0, finalLength)
+      : sortedArray instanceof Float64Array
+        ? Array.from(sortedArray)
+        : sortedArray;
 
-    // Convert TypedArray to regular array only if needed
-    result.sortedArray = finalLength < len
-        ? sortedArray.slice(0, finalLength) instanceof Float64Array
-            ? Array.from(sortedArray.slice(0, finalLength))
-            : sortedArray.slice(0, finalLength)
-        : sortedArray instanceof Float64Array
-            ? Array.from(sortedArray)
-            : sortedArray;
-
-    return result;
+  return result;
 }
 
 // // Test Function (unchanged from previous)

@@ -2,191 +2,216 @@ import BLOCK from "./block.js";
 
 import Use from "../Utils/index.js";
 import HASHRULE from "../hash-rules.js";
-import { RAW, NAV, CACHE, INDEX } from "../data-cache.js";
+import { RAW, CACHE, INDEX } from "../data-cache.js";
 
 function xtylemerge(classList = []) {
-    let result = {}, preBinds = [], postBinds = [];
-    classList.forEach((className) => {
-        const index = CACHE.LibraryStyle2Index[className];
-        if (index) {
-            const found = CACHE.Index2StylesObject[index];
-            preBinds.push(...found.preBinds)
-            postBinds.push(...found.postBinds)
-            result = Use.object.multiMerge([result, found.object[""]], true);
-        }
-    })
-    return { result, preBinds, postBinds }
-};
+	let result = {},
+		preBinds = [],
+		postBinds = [];
+	classList.forEach((className) => {
+		const index = (CACHE.LibraryStyle2Index[className] || 0) + (CACHE.PortableStyle2Index[className] || 0);
+		if (index) {
+			const found = CACHE.Index2StylesObject[index];
+			preBinds.push(...found.preBinds);
+			postBinds.push(...found.postBinds);
+			result = Use.object.multiMerge([result, found.object[""]], true);
+		}
+	});
+	return { result, preBinds, postBinds };
+}
 
 function SCANNER(content, initial, sourceSelector) {
+	const response = BLOCK(content);
+	const variables = response.variables;
+	const merged = xtylemerge(response.assemble);
+	const preBinds = [...merged.preBinds, ...response.preBinds],
+		postBinds = [...merged.postBinds, ...response.postBinds];
 
-    const response = BLOCK(content);
-    const variables = response.variables;
-    const merged = xtylemerge(response.assemble);
-    const preBinds = [...merged.preBinds, ...response.preBinds],
-        postBinds = [...merged.postBinds, ...response.postBinds];
+	const object = Use.object.deepMerge(merged.result, {
+		...Object.entries(response.atProps).reduce((acc, [propKey, propValue]) => {
+			acc[propKey] = RAW.WATCH ? `${propValue}/* ${initial} ${sourceSelector} */` : propValue;
+			return acc;
+		}, {}),
+		...Object.entries(response.properties).reduce(
+			(acc, [propKey, propValue]) => {
+				acc[propKey] = RAW.WATCH ? `${propValue}/* ${initial} ${sourceSelector} */` : propValue;
+				return acc;
+			}, {},),
+	});
 
-    const styles = Use.object.deepMerge(merged.result, {
-        ...Object.entries(response.atProps).reduce((acc, [propKey, propValue]) => {
-            acc[propKey] = RAW.WATCH ? `${propValue}/* ${initial} ${sourceSelector} */` : propValue;
-            return acc;
-        }, {}),
-        ...Object.entries(response.properties).reduce((acc, [propKey, propValue]) => {
-            acc[propKey] = RAW.WATCH ? `${propValue}/* ${initial} ${sourceSelector} */` : propValue;
-            return acc;
-        }, {})
-    });
+	for (let selector in response.allBlocks) {
+		const result = SCANNER(
+			response.allBlocks[selector],
+			initial,
+			sourceSelector + " -> " + selector,
+		);
+		Object.assign(variables, result.variables);
+		preBinds.push(...result.preBinds);
+		postBinds.push(...result.postBinds);
+		object[selector] = result.object;
+	}
 
-    for (let selector in response.allBlocks) {
-        const result = SCANNER(response.allBlocks[selector], initial, sourceSelector + " -> " + selector)
-        variables.push(...result.variables);
-        preBinds.push(...result.preBinds)
-        postBinds.push(...result.postBinds)
-        styles[selector] = result.styles;
-    }
-
-    return { preBinds, postBinds, styles, variables }
+	return { object, preBinds, postBinds, variables };
 }
 
-function CSSCANNER(content, initial = '') {
-    const variables = [];
-    const response = BLOCK(content, true);
-    const styles = response.XatProps;
-    const preBinds = [], postBinds = [];
+function CSSCANNER(content, initial = "") {
+	const variables = {};
+	const response = BLOCK(content, true);
+	const object = response.XatProps;
+	const preBinds = [],
+		postBinds = [];
 
-    response.XallBlocks.forEach(([key, value]) => {
-        const result = SCANNER(value, initial, key)
-        variables.push(...result.variables);
-        preBinds.push(...result.preBinds)
-        postBinds.push(...result.postBinds)
-        styles.push([key, result.styles])
-    })
+	response.XallBlocks.forEach(([key, value]) => {
+		const result = SCANNER(value, initial, key);
+		Object.assign(variables, result.variables);
+		preBinds.push(...result.preBinds);
+		postBinds.push(...result.postBinds);
+		object.push([key, result.object]);
+	});
 
-    return { preBinds, postBinds, styles, variables }
+	return { object, preBinds, postBinds, variables };
 }
 
-function CSSLIBRARY(fileDatas = [], initial = '', forPortable = false) {
-    const selectors = {}, IndexMap = forPortable ? CACHE.PortableStyle2Index : CACHE.LibraryStyle2Index;
-    fileDatas.forEach(source => {
-        source.usedIndexes = new Set();
-        const { stamp, filePath, metaFront, content, group } = source;
-        const scannedObj = BLOCK(content).allBlocks;
+function CSSLIBRARY(fileDatas = [], initial = "", forPortable = false) {
+	const selectors = {}, indexSkeleton = {}, IndexMap = forPortable ? CACHE.PortableStyle2Index : CACHE.LibraryStyle2Index;
 
-        for (const selector in scannedObj) {
-            const declarations = [(forPortable ? NAV.folder.portables : NAV.folder.library) + "/" + filePath];
-            const stampSelector = stamp + Use.string.normalize(selector, ["$"], ["\\", "."]);
-            const scannedStyle = SCANNER(scannedObj[selector], initial + " : " + filePath + " ||", selector);
+	fileDatas.forEach((source) => {
+		const { stamp, filePath, metaFront, content, group } = source;
+		const scannedObjects = BLOCK(content).allBlocks;
 
-            const index = (IndexMap[stampSelector] || 0) + (selectors[stampSelector] || 0);
-            const InStash = CACHE.Index2StylesObject[index];
-            const CLX = index ? { number: InStash.index, class: InStash.class } : INDEX.DECLARE();
-            if (index) declarations.push(...CACHE.Index2StylesObject[index].declarations);
+		for (const selector in scannedObjects) {
+			const declarations = [source.sourcePath];
+			const stampSelector = stamp + Use.string.normalize(selector, ["$"], ["\\", "."]);
+			const scannedStyle = SCANNER(scannedObjects[selector], initial + " : " + filePath + " ||", selector,);
+			const preBinds = scannedStyle.preBinds, postBinds = scannedStyle.postBinds;
+			const object = { "": scannedStyle.object };
+			const skeleton = { Variables: scannedStyle.variables, PreBinds: preBinds, PostBinds: postBinds, Skeleton: Use.object.skeleton(object) };
 
-            source.usedIndexes.add(CLX.number)
-            selectors[stampSelector] = CLX.number;
-            CACHE.Index2StylesObject[CLX.number] = {
-                index: CLX.number,
-                class: CLX.class,
-                scope: group,
-                selector: stampSelector,
-                object: { "": scannedStyle.styles },
-                preBinds: scannedStyle.preBinds,
-                postBinds: scannedStyle.postBinds,
-                metaClass: metaFront + "_" + Use.string.normalize(stampSelector, [], [], ["$", "/"]),
-                declarations,
-            }
-        }
-    })
+			const index = (IndexMap[stampSelector] || 0) + (selectors[stampSelector] || 0);
+			const InStash = CACHE.Index2StylesObject[index];
+			const CLX = index ? { number: InStash.index, class: InStash.class } : INDEX.DECLARE();
+			if (index) declarations.push(...CACHE.Index2StylesObject[index].declarations);
 
-    for (const selector in selectors) {
-        IndexMap[selector] = selectors[selector];
-    }
+			source.usedIndexes.add(CLX.number);
+			indexSkeleton[stampSelector] = skeleton;
+			selectors[stampSelector] = CLX.number;
 
-    return { tillStyles: Object.keys(CACHE.LibraryStyle2Index), exclusiveStyles: Object.keys(selectors) };
+			CACHE.Index2StylesObject[CLX.number] = {
+				index: CLX.number,
+				class: CLX.class,
+				scope: group,
+				selector,
+				object,
+				skeleton,
+				preBinds: forPortable ? preBinds.map(bind => stamp + bind) : preBinds,
+				postBinds: forPortable ? postBinds.map(bind => stamp + bind) : postBinds,
+				metaClass: metaFront + "_" + Use.string.normalize(stampSelector, [], [], ["$", "/"]),
+				declarations,
+			};
+		}
+	});
+
+	for (const selector in selectors) {
+		IndexMap[selector] = selectors[selector];
+	}
+
+	return indexSkeleton;
 }
 
-function TAGSTYLE({
-    scope,
-    selector,
-    styles,
-    rowMarker,
-    columnMarker
-}, metaFront, filePath, normalPath, IndexMap = {}) {
-    const declarations = [`${normalPath}:${rowMarker}:${columnMarker}`];
-    const isPortable = scope === "";
-    const metaClass = scope + metaFront + `\\:${rowMarker}\\:${columnMarker}_` + Use.string.normalize(selector, [], [], isPortable ? ["$", "/"] : ["$"]);
-    const object = {}, preBinds = [], postBinds = [], errors = [], essentials = [];
+function TAGSTYLE(
+	{ scope, selector, comments, styles, rowMarker, columnMarker },
+	metaFront,
+	filePath,
+	normalPath,
+	IndexMap = {},
+	selectorPrefix = ""
+) {
+	const object = {}, preBinds = [], postBinds = [], errors = [], essentials = [];
 
-    for (let subSelector in styles) {
-        const query = HASHRULE.RENDER(subSelector, declarations[0], isPortable);
-        if (!query.status) errors.push(query.error)
-        const styleObj = SCANNER(styles[subSelector], `${scope} : ${filePath} ||`, selector + subSelector);
+	const forPortable = scope === "xtyling";
+	const xcope = (forPortable ? "" : scope).toUpperCase();
+	const declarations = [`${normalPath}:${rowMarker}:${columnMarker}`];
+	const metaClass = `${xcope}${metaFront}\\:${rowMarker}\\:${columnMarker}_${Use.string.normalize(selector, [], [], forPortable ? ["$", "/"] : ["$"])}`;
+	const variables = {};
 
-        postBinds.push(...styleObj.postBinds)
-        preBinds.push(...styleObj.preBinds)
+	for (let subSelector in styles) {
+		const query = HASHRULE.RENDER(subSelector, declarations[0], forPortable);
+		if (!query.status) errors.push(query.error);
+		const styleObj = SCANNER(styles[subSelector], `${scope.toUpperCase()} : ${filePath} ||`, `${selector} => ${subSelector}`);
 
-        if (Object.keys(styleObj).length) {
-            if (selector === "") {
-                if (query.rule === "") {
-                    if (query.subSelector !== "") { object[query.subSelector] = styleObj.styles }
-                } else {
-                    if (query.subSelector === "") {
-                        object[query.rule] = styleObj.styles;
-                    }
-                    else {
-                        if (!object[query.rule]) object[query.rule] = {}
-                        object[query.rule][query.subSelector] = styleObj.styles;
-                    }
-                }
-            } else {
-                if (!object[query.rule]) object[query.rule] = {}
-                if (query.subSelector === "")
-                    object[query.rule] = { ...object[query.rule], ...styleObj.styles }
-                else
-                    object[query.rule]["&" + query.subSelector] = styleObj.styles;
-            }
-        }
-    }
+		postBinds.push(...styleObj.postBinds);
+		preBinds.push(...styleObj.preBinds);
+		Object.assign(variables, styleObj.variables);
 
-    let isDuplicate;
-    if (selector === "") {
-        essentials.push(...Object.entries(object));
-    } else {
-        const index = (IndexMap[selector] ?? 0) + (CACHE.LibraryStyle2Index[selector] ?? 0);
-        const InStash = CACHE.Index2StylesObject[index];
+		if (Object.keys(styleObj).length) {
+			if (selector === "") {
+				if (query.rule === "") {
+					if (query.subSelector !== "") {
+						object[query.subSelector] = styleObj.object;
+					}
+				} else {
+					if (query.subSelector === "") {
+						object[query.rule] = styleObj.object;
+					} else {
+						if (!object[query.rule]) object[query.rule] = {};
+						object[query.rule][query.subSelector] = styleObj.object;
+					}
+				}
+			} else {
+				if (!object[query.rule]) object[query.rule] = {};
+				if (query.subSelector === "")
+					object[query.rule] = { ...object[query.rule], ...styleObj.object };
+				else object[query.rule]["&" + query.subSelector] = styleObj.object;
+			}
+		}
+	}
 
-        const CLX = index ? {
-            number: InStash.index,
-            class: InStash.class
-        } : INDEX.DECLARE();
+	let isDuplicate = false;
+	let skeleton = { Info: comments, Variables: variables, PreBinds: preBinds, PostBinds: postBinds, Skeleton: Use.object.skeleton(object) };
+	let xelector = selector === "" ? "" : selectorPrefix + selector;
+	if (selector === "") {
+		essentials.push(...Object.entries(object));
+	} else {
+		const index = (IndexMap[xelector] ?? 0) + (CACHE.LibraryStyle2Index[xelector] ?? 0);
+		const InStash = CACHE.Index2StylesObject[index];
+		const CLX = index ? { number: InStash.index, class: InStash.class, } : INDEX.DECLARE();
 
-        if (index) {
-            declarations.push(...InStash.declarations);
-            isDuplicate = true
-        } else {
-            isDuplicate = false;
-            IndexMap[selector] = CLX.number;
-        }
+		if (index) {
+			declarations.push(...InStash.declarations);
+			isDuplicate = true;
+		} else {
+			IndexMap[xelector] = CLX.number;
+		}
 
-        CACHE.Index2StylesObject[CLX.number] = {
-            index: CLX.number,
-            class: CLX.class,
-            scope: scope === "GLOBAL",
-            selector,
-            object,
-            preBinds,
-            postBinds,
-            metaClass,
-            declarations,
-        }
-    }
+		CACHE.Index2StylesObject[CLX.number] = {
+			index: CLX.number,
+			class: CLX.class,
+			scope,
+			selector,
+			object,
+			skeleton,
+			preBinds: forPortable ? preBinds.map(bind => selectorPrefix + "$/" + bind) : preBinds,
+			postBinds: forPortable ? postBinds.map(bind => selectorPrefix + "$/" + bind) : postBinds,
+			metaClass,
+			declarations,
+		};
+	}
 
-    return { index: INDEX.NOW, errors, essentials, preBinds, postBinds, isDuplicate };
+	return {
+		selector: xelector,
+		index: INDEX.NOW,
+		isDuplicate,
+		essentials,
+		postBinds,
+		preBinds,
+		skeleton,
+		errors,
+	};
 }
 
 export default {
-    CSSLIBRARY,
-    CSSCANNER,
-    TAGSTYLE,
-    INDEX
-}
+	CSSLIBRARY,
+	CSSCANNER,
+	TAGSTYLE,
+	INDEX,
+};

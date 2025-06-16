@@ -1,143 +1,180 @@
-import $ from './Shell/index.js';
-import { CACHE, PUBLISH, RAW } from './data-cache.js';
+import $ from "./Shell/index.js";
+import { CACHE, PUBLISH, RAW } from "./data-cache.js";
 
 const hashPattern = /\{#[a-z0-9]+\}/i;
 const preHashPattern = /(?<!\{)#\w+/g;
 
 function IMPORT(string, watchUndef = true, ErrorisWarning = false) {
-    const response = {
-        status: true,
-        result: "",
-        error: ""
-    }
-    let hashMatch;
-    const source = string;
-    const recursionPreview = {}
-    const recursionSequence = [];
-    string = string.replace(preHashPattern, match => '{' + match + '}')
+	const response = {
+		status: true,
+		result: "",
+		error: "",
+	};
+	let hashMatch;
+	const source = string;
+	const recursionPreview = {};
+	const recursionSequence = [];
+	string = string.replace(preHashPattern, (match) => "{" + match + "}");
 
-    const errors = {
-        recursionLoop: (recursionPreview, cause) => {
-            response.status = false;
-            recursionPreview["ERROR BY"] = $.style.bold.Red(cause)
-            response.error = $.MOLD[ErrorisWarning ? "warning" : "failed"].List(source + $.style.text[ErrorisWarning ? "Orange" : "Red"](" : Hashrule recursion loop."),
-                $.list.text.Props(recursionPreview), $.list.std.Waterfall);
-            return response
-        },
-        undefinedHash: (recursionPreview, cause) => {
-            response.status = false;
-            recursionPreview["ERROR BY"] = $.style.bold.Red(cause)
-            response.error = $.MOLD[ErrorisWarning ? "warning" : "failed"].List(source + $.style.text[ErrorisWarning ? "Orange" : "Red"](" : Undefined hashrule."),
-                $.list.text.Props(recursionPreview), $.list.std.Waterfall);
-            return response
-        }
-    }
+	const errors = {
+		recursionLoop: (recursionPreview, cause) => {
+			response.status = false;
+			recursionPreview["ERROR BY"] = $.style.bold.Red(cause);
+			response.error = $.MOLD[ErrorisWarning ? "warning" : "failed"].List(
+				source +
+				$.style.text[ErrorisWarning ? "Orange" : "Red"](
+					" : Hashrule recursion loop.",
+				),
+				$.list.text.Props(recursionPreview),
+				$.list.std.Waterfall,
+			);
+			return response;
+		},
+		undefinedHash: (recursionPreview, cause) => {
+			response.status = false;
+			recursionPreview["ERROR BY"] = $.style.bold.Red(cause);
+			response.error = $.MOLD[ErrorisWarning ? "warning" : "failed"].List(
+				source +
+				$.style.text[ErrorisWarning ? "Orange" : "Red"](
+					" : Undefined hashrule.",
+				),
+				$.list.text.Props(recursionPreview),
+				$.list.std.Waterfall,
+			);
+			return response;
+		},
+	};
 
-    while (hashMatch = hashPattern.exec(string)) {
-        const hash = hashMatch[0];
-        const key = hash.slice(2, -1);
-        const replacement = watchUndef ? CACHE.HashRule[key] : (CACHE.HashRule[key] ?? hash);
-        recursionPreview["FROM " + hash] = `GETS ${replacement}`
+	while ((hashMatch = hashPattern.exec(string))) {
+		const hash = hashMatch[0];
+		const key = hash.slice(2, -1);
+		const replacement = watchUndef
+			? CACHE.HashRule[key]
+			: (CACHE.HashRule[key] ?? hash);
+		recursionPreview["FROM " + hash] = `GETS ${replacement}`;
 
-        if (replacement === undefined) {
-            return errors.undefinedHash(recursionPreview, hash);
-        }
-        if (recursionSequence.includes(hash)) {
-            return errors.recursionLoop(recursionPreview, hash);
-        }
-        string = string.replace(hashPattern, replacement)
-            .replace(preHashPattern, match => "{" + match + "}");
+		if (replacement === undefined) {
+			return errors.undefinedHash(recursionPreview, hash);
+		}
+		if (recursionSequence.includes(hash)) {
+			return errors.recursionLoop(recursionPreview, hash);
+		}
+		string = string
+			.replace(hashPattern, replacement)
+			.replace(preHashPattern, (match) => "{" + match + "}");
 
-        recursionSequence.push(hash);
-    }
+		recursionSequence.push(hash);
+	}
 
-    response.result = string
-    return response;
+	response.result = string;
+	return response;
 }
 
 function UPLOAD() {
-    const hashrule = RAW.HASHRULE;
-    const hashruleErrors = [];
+	const hashrule = RAW.HASHRULE;
+	const hashruleErrors = [];
 
-    CACHE.HashRule = { ...hashrule };
-    Object.keys(hashrule).map(key => {
-        const hash = '#' + key
-        const response = IMPORT(hash);
-        if (typeof (hashrule[key]) === "string") {
-            if (response.status) {
-                hashrule[key] = response.result;
-            } else {
-                delete hashrule[key]
-                hashruleErrors.push(response.error)
-            }
-        }
-    });
-    CACHE.HashRule = hashrule;
+	CACHE.HashRule = { ...hashrule };
+	Object.keys(hashrule).map((key) => {
+		const hash = "#" + key;
+		const response = IMPORT(hash);
+		if (typeof hashrule[key] === "string") {
+			if (response.status) {
+				hashrule[key] = response.result;
+			} else {
+				delete hashrule[key];
+				hashruleErrors.push(response.error);
+			}
+		}
+	});
+	CACHE.HashRule = hashrule;
 
-    PUBLISH.Report.hashrule = $.MOLD.std.Block([
-        $.MOLD.primary.Section("Active Hashrules"),
-        $.MOLD.std.Block($.list.text.Props(hashrule), $.list.std.Bullets),
-        ...(hashruleErrors.length > 0 ? [$.MOLD.failed.Footer("Invalid Hashrules"), hashruleErrors] : [])
-    ]);
-
-    return CACHE.HashRule;
+	return $.MOLD.std.Block([
+		$.MOLD.primary.Section("Active Hashrules"),
+		$.MOLD.std.Block($.list.text.Props(hashrule), $.list.std.Bullets),
+		...(hashruleErrors.length > 0
+			? [$.MOLD.failed.Footer("Invalid Hashrules"), hashruleErrors]
+			: []),
+	]);
 }
 
 function RENDER(string, sourcePath = "", ErrorisWarning = false) {
-    const extended = IMPORT(string, true, ErrorisWarning)
-    string = extended.result
-    let rule = [],
-        selector = [],
-        Marker = 0,
-        length = string.length,
-        deviance = 0;
+	const extended = IMPORT(string, true, ErrorisWarning);
+	string = extended.result;
+	let rule = [],
+		selector = [],
+		Marker = 0,
+		length = string.length,
+		deviance = 0;
 
-    for (let i = 0; i < length; i++) {
-        let ch = string[i];
+	for (let i = 0; i < length; i++) {
+		let ch = string[i];
 
+		if (")}".includes(ch)) deviance--;
 
-        if (")}".includes(ch)) deviance--;
+		if (deviance) {
+			rule.push(ch);
+		} else if (ch === "$") {
+			Marker = i + 1;
+			break;
+		} else {
+			switch (ch) {
+				case "{":
+					rule.push("");
+					break;
+				case "}":
+					rule.push("");
+					break;
+				case ",":
+					rule.push(", ");
+					break;
+				case "|":
+					rule.push(" or ");
+					break;
+				case "&":
+					rule.push(" and ");
+					break;
+				case "!":
+					rule.push("not ");
+					break;
+				case "*":
+					rule.push("all ");
+					break;
+				case "^":
+					rule.push("only ");
+					break;
+				case "@":
+					rule.unshift("@");
+					rule.push(" ");
+					break;
+				default:
+					rule.push(ch);
+			}
+		}
+		if ("({".includes(ch)) deviance++;
+	}
 
-        if (deviance) {
-            rule.push(ch);
-        }
-        else if (ch === '$') {
-            Marker = i + 1;
-            break;
-        }
-        else {
-            switch (ch) {
-                case '{': rule.push(''); break;
-                case '}': rule.push(''); break;
-                case ',': rule.push(', '); break;
-                case '|': rule.push(' or '); break;
-                case '&': rule.push(' and '); break;
-                case '!': rule.push('not '); break;
-                case '*': rule.push('all '); break;
-                case '^': rule.push('only '); break;
-                case '@': rule.unshift('@'); rule.push(' '); break;
-                default: rule.push(ch);
-            }
-        }
-        if ("({".includes(ch)) deviance++;
-    }
+	if (Marker > 0) {
+		for (let i = Marker; i < length; i++) {
+			const ch = string[i];
+			if (ch === "{") {
+				if (i + 1 < string.length && string[i + 1] !== ":") selector.push(" ");
+			} else if (ch !== "}") {
+				selector.push(ch);
+			}
+		}
+	}
 
-    if (Marker > 0) {
-        for (let i = Marker; i < length; i++) {
-            const ch = string[i];
-            if (ch === '{') {
-                if (i + 1 < string.length && string[i + 1] !== ':') selector.push(' ');
-            } else if (ch !== '}') {
-                selector.push(ch);
-            }
-        }
-    }
-
-    return { rule: rule.join(''), subSelector: selector.join(''), status: extended.status, error: extended.error + $.MOLD.text.Item(sourcePath) + "\n" };
+	return {
+		rule: rule.join("").trim(),
+		subSelector: selector.join("").trim(),
+		status: extended.status,
+		error: extended.error + $.MOLD.text.Item(sourcePath) + "\n",
+	};
 }
 
 export default {
-    IMPORT,
-    UPLOAD,
-    RENDER
+	IMPORT,
+	UPLOAD,
+	RENDER,
 };

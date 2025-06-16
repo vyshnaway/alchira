@@ -1,19 +1,19 @@
-import $ from './Shell/index.js';
+import $ from "./Shell/index.js";
+import * as DATA from "./data-set.js";
 import * as FETCH from "./data-fetch.js";
-import * as SMITH from './data-smith.js';
-import SETENV, { ROOT, APP, RAW, NAV, STACK } from './data-cache.js';
+import * as SMITH from "./data-smith.js";
+import { ROOT, APP, RAW, NAV, STACK } from "./data-cache.js";
+import * as worker from "../interface/worker.js";
+import fileman from "../interface/fileman.js";
+import { hasEvents, dequeueEvent } from "../interface/eventface.js";
 
-import * as worker from '../interface/worker.js';
-import fileman from '../interface/fileman.js';
-import { hasEvents, dequeueEvent } from '../interface/eventface.js';
-
-
-function reporter(chapter, heading, report) {
-    $.POST($.MOLD.std.Block([
-        $.MOLD.title.Chapter(chapter, Object.keys(STACK.PROXYCACHE), $.list.text.Entries),
-        $.MOLD.primary.Chapter(heading, [report]),
-        $.MOLD.failed.Footer("Press Ctrl+C to stop watching.")
-    ]))
+function reporter(heading, report) {
+    $.POST(
+        $.MOLD.std.Block([
+            $.MOLD.title.Chapter(heading, [report]),
+            $.MOLD.failed.Footer("Press Ctrl+C to stop watching."),
+        ]),
+    );
 }
 
 async function execute(chapter) {
@@ -22,7 +22,7 @@ async function execute(chapter) {
         step = "Initialize",
         heading = "Initial Build";
 
-    if (!RAW.WATCH) $.POST($.MOLD.success.Chapter(chapter))
+    $.POST($.MOLD.tertiary.Chapter(chapter));
 
     do {
         switch (step) {
@@ -32,22 +32,27 @@ async function execute(chapter) {
             case "VerifySetupStruct":
                 const verifyStructResult = await FETCH.VerifySetupStruct();
                 if (!verifyStructResult.proceed) {
-                    report = verifyStructResult.report
+                    report = verifyStructResult.report;
+                    step = "WatchFolders";
                     break;
-                };
+                } else report = "";
 
             case "ReadIndex":
                 await FETCH.FetchIndexContent();
 
+            case "ResetRAW":
+                DATA.ResetRAW()
+
             case "ReadLibraries":
-                await FETCH.UpdateLibrary();
+                await FETCH.ReloadLibrary();
 
             case "VerifyProxyMap":
                 const verifyConfigsResult = await FETCH.VerifyProxyMap();
                 if (!verifyConfigsResult.status) {
                     report = verifyConfigsResult.report;
+                    step = "WatchFolders";
                     break;
-                };
+                } else report = "";
 
             case "ReadProxyFolders":
                 await FETCH.UpdateProxies();
@@ -56,12 +61,15 @@ async function execute(chapter) {
                 const hashruleAnalysis = await FETCH.AnalyzeHashrules();
                 if (!hashruleAnalysis.status) {
                     report = hashruleAnalysis.report;
+                    step = "WatchFolders";
                     break;
-                }
+                } else report = "";
+
+            case "ResetCache":
+                DATA.ResetCACHE()
 
             case "ProcessXtylesFolder":
                 SMITH.UpdateXtylesFolder();
-
 
             case "ProcessProxyFolders":
                 SMITH.ProcessProxies();
@@ -70,12 +78,10 @@ async function execute(chapter) {
                 const { SaveFiles, ConsoleReport } = await SMITH.Generate();
                 report = ConsoleReport;
 
-            case "Publish":
-                if (Object.keys(SaveFiles).length)
-                    await fileman.write.bulk(SaveFiles);
+            // case "Publish":
+            //     if (Object.keys(SaveFiles).length) await fileman.write.bulk(SaveFiles);
 
             case "WatchFolders":
-
                 if (RAW.WATCH) {
                     step = "WatchFolders";
                 } else {
@@ -87,19 +93,27 @@ async function execute(chapter) {
                 }
 
                 if (!stopWatcher) {
-                    const targetFolders = [...Object.keys(STACK.PROXYCACHE), NAV.folder.setup];
+                    const targetFolders = [
+                        ...Object.keys(STACK.PROXYCACHE),
+                        NAV.folder.setup,
+                    ];
                     const ignoreFolders = [NAV.folder.autogen];
-                    process.on('SIGINT', () => {
-                        if (stopWatcher) { stopWatcher(); stopWatcher = null; $.render.write("\n", 2) }
+                    process.on("SIGINT", () => {
+                        if (stopWatcher) {
+                            stopWatcher();
+                            stopWatcher = null;
+                            $.render.write("\n", 2);
+                        }
                         process.exit();
                     });
                     stopWatcher = worker.watchFolders(targetFolders, ignoreFolders, "");
-                    reporter(chapter, heading, report);
+                    reporter(heading, report);
                 }
 
                 if (hasEvents()) {
                     const event = dequeueEvent();
                     $.initialize(event.consoleWidth, !RAW.WATCH);
+                    console.log(event)
                     if (event.folder === NAV.folder.setup) {
                         const filePath = `${event.folder}/${event.filePath}`;
                         if (event.action === "add" || event.action === "change") {
@@ -107,7 +121,7 @@ async function execute(chapter) {
                                 case NAV.json.proxymap:
                                     stopWatcher();
                                     stopWatcher = null;
-                                    step = "VerifyProxyMap"
+                                    step = "VerifyProxyMap";
                                     break;
                                 case NAV.css.atrules:
                                 case NAV.css.constants:
@@ -117,32 +131,39 @@ async function execute(chapter) {
                                     step = "GenerateFinals";
                                     break;
                                 case NAV.json.hashrule:
-                                    step = "ReadHashrules"
+                                    step = "ReadHashrules";
                                     break;
                                 default:
-                                    if (event.folder === NAV.folder.library)
+                                    if (filePath.startsWith(NAV.folder.library) && event.extension === "css")
                                         RAW.LIBRARIES[filePath] = event.fileContent;
-                                    else if (event.folder === NAV.folder.portables)
+                                    else if (filePath.startsWith(NAV.folder.portables) && ["xcss", "css", "md"].includes(event.extension))
                                         RAW.PORTABLES[filePath] = event.fileContent;
-                                    step = "ProcessXtylesFolder"
+                                    console.log(RAW.PORTABLES)
+                                    step = "ResetCache";
                             }
                         } else {
-                            step = "VerifySetupStruct"
+                            step = "VerifySetupStruct";
                         }
                     } else if (event.action === "add" || event.action === "change") {
-                        SMITH.ProcessProxies(event.action, event.folder, event.filePath, event.fileContent, event.extension);
-                        step = "GenerateFinals"
+                        SMITH.ProcessProxies(
+                            event.action,
+                            event.folder,
+                            event.filePath,
+                            event.fileContent,
+                            event.extension,
+                        );
+                        step = "GenerateFinals";
                     } else {
                         step = "ReadProxyFolders";
                     }
 
                     heading = `[${event.timeStamp}] | ${event.filePath} | [${event.action}]`;
-                    reporter(chapter, heading, report)
+                    reporter(heading, report);
                 }
 
                 await new Promise((resolve) => setTimeout(resolve, 50));
         }
-    } while (RAW.WATCHS);
+    } while (RAW.WATCH);
 
     if (stopWatcher) {
         stopWatcher();
@@ -160,45 +181,65 @@ async function commander(
     consoleWidth,
     packageJson,
     projectName,
-    projectVersion
+    projectVersion,
 ) {
     RAW.CMD = command;
     RAW.ARG = argument;
-    RAW.WATCH = command === 'watch';
+    RAW.WATCH = command === "watch";
     RAW.PACKAGE = projectName;
     RAW.VERSION = projectVersion;
-    SETENV(rootPath, workPath, packageJson);
+    DATA.SetENV(rootPath, workPath, packageJson);
     $.initialize(consoleWidth, !RAW.WATCH);
 
     switch (RAW.CMD) {
-        case 'init':
-            await $.PLAY.Title(APP.name + ' : Initialize', 500);
+        case "init":
+            await $.PLAY.Title(APP.name + " : Initialize", 500);
             const setupInit = await FETCH.VerifySetupStruct();
-            if (setupInit.unstart)
-                $.POST(await FETCH.Initialize());
+            if (setupInit.unstart) $.POST(await FETCH.Initialize());
             else if (setupInit.proceed) {
                 $.POST((await FETCH.VerifyProxyMap()).report);
             } else {
                 $.POST(setupInit.report);
             }
             break;
-        case 'watch':
-            execute(APP.name + ' : Active Runtime');
+        case "watch":
+            execute(APP.name + " : Active Runtime");
             break;
-        case 'preview':
-            await execute(APP.name + ' : Preview Build')
+        case "preview":
+            await execute(APP.name + " : Preview Build");
             break;
-        case 'publish':
-            await execute(APP.name + ' : Final Build');
+        case "publish":
+            await execute(APP.name + " : Final Build");
             break;
         default:
             await FETCH.FetchDocs();
-            $.POST($.MOLD.std.Chapter(`${APP.command} @ ` + APP.version, [ROOT.DOCS.alerts.content]));
-            $.POST($.MOLD.secondary.Section('Available Commands', APP.commandList, $.list.std.Props));
-            $.POST($.MOLD.secondary.Section('Agreements',
-                Object.values(ROOT.AGREEMENT).reduce((acc, i) => { acc[i.title] = i.path; return acc }, {}), $.list.std.Props));
-            $.POST($.MOLD.secondary.Section("Documentation : " + ROOT.DOCS.readme.path,
-                ['For more information visit ' + $.style.bold.White(APP.website)]));
+            $.POST(
+                $.MOLD.std.Chapter(`${APP.command} @ ` + APP.version, [
+                    ROOT.DOCS.alerts.content,
+                ]),
+            );
+            $.POST(
+                $.MOLD.secondary.Section(
+                    "Available Commands",
+                    APP.commandList,
+                    $.list.std.Props,
+                ),
+            );
+            $.POST(
+                $.MOLD.secondary.Section(
+                    "Agreements",
+                    Object.values(ROOT.AGREEMENT).reduce((acc, i) => {
+                        acc[i.title] = i.path;
+                        return acc;
+                    }, {}),
+                    $.list.std.Props,
+                ),
+            );
+            $.POST(
+                $.MOLD.secondary.Section("Documentation : " + ROOT.DOCS.readme.path, [
+                    "For more information visit " + $.style.bold.White(APP.website),
+                ]),
+            );
     }
 }
 

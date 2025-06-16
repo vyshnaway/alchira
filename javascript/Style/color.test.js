@@ -1,4 +1,4 @@
-import loadColorFallback from './color.js';
+import loadColorFallback from "./color.js";
 
 // Example Usage:
 const testString = `
@@ -37,8 +37,6 @@ const convertedEdgeCases = loadColorFallback(edgeCases);
 console.log("\nEdge Cases Original:\n", edgeCases);
 console.log("\nEdge Cases Converted:\n", convertedEdgeCases.result);
 console.log("\nEdge Cases Score:", convertedEdgeCases.score);
-
-
 
 // Test with HSL
 console.log("Test HSL:");
@@ -94,5 +92,9 @@ console.log(loadColorFallback("And then #00ff00 and #1a2b3c.")); // Expected: "A
 
 // Test with multiple colors in one string
 console.log("\nTest Multiple Colors:");
-console.log(loadColorFallback("Primary: rgb(255, 0, 0), Secondary: hsl(240, 100%, 50%), Accent: #00FF00"));
+console.log(
+  loadColorFallback(
+    "Primary: rgb(255, 0, 0), Secondary: hsl(240, 100%, 50%), Accent: #00FF00",
+  ),
+);
 // Expected: "Primary: #FF0000, Secondary: #0000FF, Accent: #00FF00"

@@ -1,146 +1,148 @@
 function pad2DArrayWithZeros(array, frontPad = false, targetWidth = null) {
-    if (!Array.isArray(array) || array.length === 0) return [];
+  if (!Array.isArray(array) || array.length === 0) return [];
 
-    const maxWidth = targetWidth !== null
-        ? targetWidth
-        : Math.max(...array.map(row => Array.isArray(row) ? row.length : 0));
+  const maxWidth =
+    targetWidth !== null
+      ? targetWidth
+      : Math.max(...array.map((row) => (Array.isArray(row) ? row.length : 0)));
 
-    if (maxWidth === 0) return [];
+  if (maxWidth === 0) return [];
 
-    const paddedArray = new Array(array.length);
+  const paddedArray = new Array(array.length);
 
-    for (let i = 0; i < array.length; i++) {
-        const row = Array.isArray(array[i]) ? array[i] : [];
-        const rowLength = row.length;
-        const width = targetWidth !== null && targetWidth > rowLength ? targetWidth : maxWidth;
+  for (let i = 0; i < array.length; i++) {
+    const row = Array.isArray(array[i]) ? array[i] : [];
+    const rowLength = row.length;
+    const width =
+      targetWidth !== null && targetWidth > rowLength ? targetWidth : maxWidth;
 
-        paddedArray[i] = new Array(width);
+    paddedArray[i] = new Array(width);
 
-        if (frontPad && width > rowLength) {
-            const zerosNeeded = width - rowLength;
-            for (let j = 0; j < width; j++) {
-                paddedArray[i][j] = j < zerosNeeded ? 0 : row[j - zerosNeeded];
-            }
-        } else {
-            for (let j = 0; j < width; j++) {
-                paddedArray[i][j] = j < rowLength ? row[j] : 0;
-            }
-        }
+    if (frontPad && width > rowLength) {
+      const zerosNeeded = width - rowLength;
+      for (let j = 0; j < width; j++) {
+        paddedArray[i][j] = j < zerosNeeded ? 0 : row[j - zerosNeeded];
+      }
+    } else {
+      for (let j = 0; j < width; j++) {
+        paddedArray[i][j] = j < rowLength ? row[j] : 0;
+      }
     }
+  }
 
-    return paddedArray;
+  return paddedArray;
 }
 
 function array2DTo3D(array, padWithZero = true) {
-    if (!Array.isArray(array) || array.length === 0) return [[]];
+  if (!Array.isArray(array) || array.length === 0) return [[]];
 
-    // const numRows = array.length;
-    // const numCols = Math.max(...array.map(row => row.length || 0));
+  // const numRows = array.length;
+  // const numCols = Math.max(...array.map(row => row.length || 0));
 
-    // if (numCols === 0) return [[]];
+  // if (numCols === 0) return [[]];
 
-    // const result = new Array(numRows);
-    // for (let i = 0; i < numRows; i++) {
-    //     result[i] = new Array(numCols);
-    //     for (let j = 0; j < numCols; j++) {
-    //         const value = array[i][j];
-    //         if (value !== undefined) {
-    //             result[i][j] = [value];
-    //         } else {
-    //             result[i][j] = padWithZero ? [0] : [];
-    //         }
-    //     }
-    // }
-    const result = array.map(arr => arr.map(value => [value]))
-    return result;
+  // const result = new Array(numRows);
+  // for (let i = 0; i < numRows; i++) {
+  //     result[i] = new Array(numCols);
+  //     for (let j = 0; j < numCols; j++) {
+  //         const value = array[i][j];
+  //         if (value !== undefined) {
+  //             result[i][j] = [value];
+  //         } else {
+  //             result[i][j] = padWithZero ? [0] : [];
+  //         }
+  //     }
+  // }
+  const result = array.map((arr) => arr.map((value) => [value]));
+  return result;
 }
 // console.log(array2DTo3D([[1, 2], [3], [4, 5, 6]]))
 function array3DTo2D(array) {
-    if (!Array.isArray(array) || array.length === 0) return [];
-    if (array.length === 1 && (!Array.isArray(array[0]) || array[0].length === 0)) return [];
+  if (!Array.isArray(array) || array.length === 0) return [];
+  if (array.length === 1 && (!Array.isArray(array[0]) || array[0].length === 0))
+    return [];
 
-    // const numRows = array.length;
-    // const numCols = Math.max(...array.map(layer => Array.isArray(layer) ? layer.length : 0));
-    // if (numCols === 0) return [];
+  // const numRows = array.length;
+  // const numCols = Math.max(...array.map(layer => Array.isArray(layer) ? layer.length : 0));
+  // if (numCols === 0) return [];
 
-    // const result = new Array(numRows);
-    // for (let i = 0; i < numRows; i++) {
-    //     if (!Array.isArray(array[i])) {
-    //         result[i] = new Array(numCols).fill(0);
-    //         continue;
-    //     }
-    //     result[i] = new Array(numCols);
-    //     for (let j = 0; j < numCols; j++) {
-    //         const subArray = Array.isArray(array[i][j]) ? array[i][j] : [];
-    //         result[i][j] = subArray.length > 0 ? subArray[0] : 0;
-    //     }
-    // }
+  // const result = new Array(numRows);
+  // for (let i = 0; i < numRows; i++) {
+  //     if (!Array.isArray(array[i])) {
+  //         result[i] = new Array(numCols).fill(0);
+  //         continue;
+  //     }
+  //     result[i] = new Array(numCols);
+  //     for (let j = 0; j < numCols; j++) {
+  //         const subArray = Array.isArray(array[i][j]) ? array[i][j] : [];
+  //         result[i][j] = subArray.length > 0 ? subArray[0] : 0;
+  //     }
+  // }
 
-    const result = array.map(arr => arr.flat())
-    return result;
+  const result = array.map((arr) => arr.flat());
+  return result;
 }
 // console.log(array3DTo2D([[[1], [2], []], [[3], [], []], [[4], [5], [6]]]))
 function switchColumnsToRows(array) {
-    if (!array || array.length === 0) return [];
+  if (!array || array.length === 0) return [];
 
-    const numRows = array.length;
-    const numCols = Math.max(...array.map(row => row.length));
-    const switchedArray = new Array(numCols);
+  const numRows = array.length;
+  const numCols = Math.max(...array.map((row) => row.length));
+  const switchedArray = new Array(numCols);
 
-    // Pre-allocate rows with single assignment
+  // Pre-allocate rows with single assignment
+  for (let j = 0; j < numCols; j++) {
+    switchedArray[j] = new Array(numRows);
+  }
+
+  for (let i = 0; i < numRows; i++) {
     for (let j = 0; j < numCols; j++) {
-        switchedArray[j] = new Array(numRows);
+      switchedArray[j][i] = array[i][j] !== undefined ? array[i][j] : 0;
     }
+  }
 
-    for (let i = 0; i < numRows; i++) {
-        for (let j = 0; j < numCols; j++) {
-            switchedArray[j][i] = array[i][j] !== undefined ? array[i][j] : 0;
-        }
-    }
-
-    return switchedArray;
+  return switchedArray;
 }
 // console.log(switchColumnsToRows([[1, 2], [3], [4, 5, 6]]))
 function zeroArray(length) {
-    return Array(length).fill(0);
+  return Array(length).fill(0);
 }
 
 export default function createDependencyTable(input) {
-    let X = Math.max(...input.map(arr => arr.length));
+  let X = Math.max(...input.map((arr) => arr.length));
 
-    let table = array2DTo3D(input);
-    let padArrY = pad2DArrayWithZeros(array3DTo2D(table), true),
-        padArrX = switchColumnsToRows(padArrY);
+  let table = array2DTo3D(input);
+  let padArrY = pad2DArrayWithZeros(array3DTo2D(table), true),
+    padArrX = switchColumnsToRows(padArrY);
 
-    for (let I = 0; I < X; I++) {
-        input.forEach((A, I) => {
-            if (A.length !== 0) {
-                if (I === 0) A.shift()
-                else {
-                    const V = A.shift()
-                    padArrX.forEach((arr, J) => {
-                        arr.forEach((val, K) => {
-                            if (val[J] === V) {
-                                table[J][K].unshift(...zeroArray(I))
-                            }
-                        })
-                    })
-                }
-            }
-        }); 
-    }
-    return ((table));
+  for (let I = 0; I < X; I++) {
+    input.forEach((A, I) => {
+      if (A.length !== 0) {
+        if (I === 0) A.shift();
+        else {
+          const V = A.shift();
+          padArrX.forEach((arr, J) => {
+            arr.forEach((val, K) => {
+              if (val[J] === V) {
+                table[J][K].unshift(...zeroArray(I));
+              }
+            });
+          });
+        }
+      }
+    });
+  }
+  return table;
 }
 
-const input =
-    [
-        [1, 2, 3],
-        [1, 5, 3],
-        [7, 8,],
-        [7, 9, 1],
-        [10, 5, 1],
-        [5, 1, 10],
-    ];
+const input = [
+  [1, 2, 3],
+  [1, 5, 3],
+  [7, 8],
+  [7, 9, 1],
+  [10, 5, 1],
+  [5, 1, 10],
+];
 // const output =
 // [
 //     [[0,   0,   1], [2], [3]],
@@ -158,7 +160,7 @@ const input =
 // //     [10, 5, 1],
 // //     [5, 1, 10]
 // // ]
-console.log(createDependencyTable(input))
+console.log(createDependencyTable(input));
 
 // // Output results
 // console.log('Numeric Arrays:');
