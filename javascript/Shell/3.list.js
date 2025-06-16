@@ -80,7 +80,7 @@ const types = {
 
 export default {
   std: {
-    Props: (items = [], intent = 0) => types.props(items, colors.std, intent),
+    Props: (items = {}, intent = 0) => types.props(items, colors.std, intent),
     Blocks: (items = [], intent = 0) => types.blocks(items, colors.std, intent),
     Entries: (items = [], intent = 0) =>
       types.entries(items, colors.std, intent),
@@ -94,7 +94,7 @@ export default {
       types.waterfall(items, colors.std, intent),
   },
   title: {
-    Props: (items = [], intent = 0) => types.props(items, colors.title, intent),
+    Props: (items = {}, intent = 0) => types.props(items, colors.title, intent),
     Blocks: (items = [], intent = 0) =>
       types.blocks(items, colors.title, intent),
     Entries: (items = [], intent = 0) =>
@@ -109,7 +109,7 @@ export default {
       types.waterfall(items, colors.title, intent),
   },
   text: {
-    Props: (items = [], intent = 0) => types.props(items, colors.text, intent),
+    Props: (items = {}, intent = 0) => types.props(items, colors.text, intent),
     Blocks: (items = [], intent = 0) =>
       types.blocks(items, colors.text, intent),
     Entries: (items = [], intent = 0) =>
@@ -124,7 +124,7 @@ export default {
       types.waterfall(items, colors.text, intent),
   },
   primary: {
-    Props: (items = [], intent = 0) =>
+    Props: (items = {}, intent = 0) =>
       types.props(items, colors.primary, intent),
     Blocks: (items = [], intent = 0) =>
       types.blocks(items, colors.primary, intent),
@@ -140,7 +140,7 @@ export default {
       types.waterfall(items, colors.primary, intent),
   },
   secondary: {
-    Props: (items = [], intent = 0) =>
+    Props: (items = {}, intent = 0) =>
       types.props(items, colors.secondary, intent),
     Blocks: (items = [], intent = 0) =>
       types.blocks(items, colors.secondary, intent),
@@ -156,7 +156,7 @@ export default {
       types.waterfall(items, colors.secondary, intent),
   },
   tertiary: {
-    Props: (items = [], intent = 0) =>
+    Props: (items = {}, intent = 0) =>
       types.props(items, colors.tertiary, intent),
     Blocks: (items = [], intent = 0) =>
       types.blocks(items, colors.tertiary, intent),
@@ -172,7 +172,7 @@ export default {
       types.waterfall(items, colors.tertiary, intent),
   },
   failed: {
-    Props: (items = [], intent = 0) =>
+    Props: (items = {}, intent = 0) =>
       types.props(items, colors.failed, intent),
     Blocks: (items = [], intent = 0) =>
       types.blocks(items, colors.failed, intent),
@@ -188,7 +188,7 @@ export default {
       types.waterfall(items, colors.failed, intent),
   },
   success: {
-    Props: (items = [], intent = 0) =>
+    Props: (items = {}, intent = 0) =>
       types.props(items, colors.success, intent),
     Blocks: (items = [], intent = 0) =>
       types.blocks(items, colors.success, intent),
@@ -204,7 +204,7 @@ export default {
       types.waterfall(items, colors.success, intent),
   },
   warning: {
-    Props: (items = [], intent = 0) =>
+    Props: (items = {}, intent = 0) =>
       types.props(items, colors.warning, intent),
     Blocks: (items = [], intent = 0) =>
       types.blocks(items, colors.warning, intent),

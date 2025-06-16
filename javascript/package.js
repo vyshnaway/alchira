@@ -2,16 +2,17 @@ import $ from "./Shell/index.js";
 import * as DATA from "./data-set.js";
 import * as FETCH from "./data-fetch.js";
 import * as SMITH from "./data-smith.js";
-import { ROOT, APP, RAW, NAV, STACK } from "./data-cache.js";
+import MemoryUsage, { ROOT, APP, RAW, NAV, STACK } from "./data-cache.js";
 import * as worker from "../interface/worker.js";
 import fileman from "../interface/fileman.js";
 import { hasEvents, dequeueEvent } from "../interface/eventface.js";
 
-function reporter(heading, report) {
+function reporter(heading, targets, report) {
     $.POST(
         $.MOLD.std.Block([
-            $.MOLD.title.Chapter(heading, [report]),
-            $.MOLD.failed.Footer("Press Ctrl+C to stop watching."),
+            $.MOLD.title.Chapter(heading, targets.map(i => `Watching : ${i}`), $.list.tertiary.Bullets),
+            // report,
+            $.MOLD.failed.Footer("Press Ctrl+C to stop watching.", MemoryUsage(), $.list.tertiary.Entries),
         ]),
     );
 }
@@ -19,6 +20,7 @@ function reporter(heading, report) {
 async function execute(chapter) {
     let stopWatcher = null;
     let report = "",
+        targets = [],
         step = "Initialize",
         heading = "Initial Build";
 
@@ -40,8 +42,8 @@ async function execute(chapter) {
             case "ReadIndex":
                 await FETCH.FetchIndexContent();
 
-            case "ResetRAW":
-                DATA.ResetRAW()
+            case "ResetAll":
+                DATA.ResetALL()
 
             case "ReadLibraries":
                 await FETCH.ReloadLibrary();
@@ -78,8 +80,8 @@ async function execute(chapter) {
                 const { SaveFiles, ConsoleReport } = await SMITH.Generate();
                 report = ConsoleReport;
 
-            // case "Publish":
-            //     if (Object.keys(SaveFiles).length) await fileman.write.bulk(SaveFiles);
+            case "Publish":
+                if (Object.keys(SaveFiles).length) await fileman.write.bulk(SaveFiles);
 
             case "WatchFolders":
                 if (RAW.WATCH) {
@@ -93,11 +95,8 @@ async function execute(chapter) {
                 }
 
                 if (!stopWatcher) {
-                    const targetFolders = [
-                        ...Object.keys(STACK.PROXYCACHE),
-                        NAV.folder.setup,
-                    ];
-                    const ignoreFolders = [NAV.folder.autogen];
+                    targets = Object.keys(STACK.PROXYCACHE);
+                    const targetFolders = [...targets, NAV.folder.setup];
                     process.on("SIGINT", () => {
                         if (stopWatcher) {
                             stopWatcher();
@@ -106,59 +105,55 @@ async function execute(chapter) {
                         }
                         process.exit();
                     });
-                    stopWatcher = worker.watchFolders(targetFolders, ignoreFolders, "");
-                    reporter(heading, report);
+                    stopWatcher = worker.watchFolders(targetFolders);
+                    reporter(heading, targets, report);
                 }
 
                 if (hasEvents()) {
                     const event = dequeueEvent();
                     $.initialize(event.consoleWidth, !RAW.WATCH);
-                    console.log(event)
-                    if (event.folder === NAV.folder.setup) {
-                        const filePath = `${event.folder}/${event.filePath}`;
-                        if (event.action === "add" || event.action === "change") {
-                            switch (filePath) {
-                                case NAV.json.proxymap:
-                                    stopWatcher();
-                                    stopWatcher = null;
-                                    step = "VerifyProxyMap";
-                                    break;
-                                case NAV.css.atrules:
-                                case NAV.css.constants:
-                                case NAV.css.elements:
-                                case NAV.css.extends:
-                                    await FETCH.FetchIndexContent();
-                                    step = "GenerateFinals";
-                                    break;
-                                case NAV.json.hashrule:
-                                    step = "ReadHashrules";
-                                    break;
-                                default:
-                                    if (filePath.startsWith(NAV.folder.library) && event.extension === "css")
-                                        RAW.LIBRARIES[filePath] = event.fileContent;
-                                    else if (filePath.startsWith(NAV.folder.portables) && ["xcss", "css", "md"].includes(event.extension))
-                                        RAW.PORTABLES[filePath] = event.fileContent;
-                                    console.log(RAW.PORTABLES)
-                                    step = "ResetCache";
-                            }
-                        } else {
-                            step = "VerifySetupStruct";
-                        }
-                    } else if (event.action === "add" || event.action === "change") {
-                        SMITH.ProcessProxies(
-                            event.action,
-                            event.folder,
-                            event.filePath,
-                            event.fileContent,
-                            event.extension,
-                        );
-                        step = "GenerateFinals";
+                    const filePath = `${event.folder}/${event.filePath}`;
+                    if (filePath.startsWith(NAV.folder.autogen)) {
+                        break;
                     } else {
-                        step = "ReadProxyFolders";
-                    }
+                        if (event.folder === NAV.folder.setup) {
+                            if (event.action === "add" || event.action === "change") {
+                                switch (filePath) {
+                                    case NAV.json.proxymap:
+                                        stopWatcher();
+                                        stopWatcher = null;
+                                        step = "VerifyProxyMap";
+                                        break;
+                                    case NAV.css.atrules:
+                                    case NAV.css.constants:
+                                    case NAV.css.elements:
+                                    case NAV.css.extends:
+                                        await FETCH.FetchIndexContent();
+                                        step = "GenerateFinals";
+                                        break;
+                                    case NAV.json.hashrule:
+                                        step = "ReadHashrules";
+                                        break;
+                                    default:
+                                        if (filePath.startsWith(NAV.folder.library) && event.extension === "css")
+                                            RAW.LIBRARIES[filePath] = event.fileContent;
+                                        else if (filePath.startsWith(NAV.folder.portables) && ["xcss", "css", "md"].includes(event.extension))
+                                            RAW.PORTABLES[filePath] = event.fileContent;
+                                        step = "ResetCache";
+                                }
+                            } else {
+                                step = "VerifySetupStruct";
+                            }
+                        } else if (event.action === "add" || event.action === "change") {
+                            SMITH.ProcessProxies(event.action, event.folder, event.filePath, event.fileContent, event.extension,);
+                            step = "GenerateFinals";
+                        } else {
+                            step = "VerifyProxyMap";
+                        }
 
-                    heading = `[${event.timeStamp}] | ${event.filePath} | [${event.action}]`;
-                    reporter(heading, report);
+                        heading = `[${event.timeStamp}] | ${event.filePath} | [${event.action}]`;
+                        reporter(heading, targets, report);
+                    }
                 }
 
                 await new Promise((resolve) => setTimeout(resolve, 50));

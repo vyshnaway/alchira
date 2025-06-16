@@ -135,7 +135,7 @@ export async function proxyMapSync(proxyMap = []) {
 	return proxyMap;
 }
 
-export function watchFolders(folders = [], ignores = [], initialMessage) {
+export function watchFolders(folders = [], ignores = [], initialMessage = "") {
 	const folderMaps = folders.reduce((acc, folder) => {
 		acc[path.resolve(folder)] = folder;
 		return acc;

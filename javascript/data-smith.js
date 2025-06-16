@@ -7,7 +7,7 @@ import FORGE from "./Style/forge.js";
 import ORDER from "./Worker/order-api.js";
 import SCRIPT from "./Script/class.js";
 import XTYLES from "./Style/stash.js";
-import { NAV, RAW, STACK, CACHE, PUBLISH } from "./data-cache.js";
+import { NAV, RAW, STACK, CACHE, PUBLISH, INDEX } from "./data-cache.js";
 
 export function UpdateXtylesFolder() {
 	const {
@@ -27,6 +27,7 @@ export function UpdateXtylesFolder() {
 
 	CACHE.PortableEssentials = ModuleEssentials;
 	PUBLISH.LibFilesTemp = { ...libraryTable, ...modulesTable };
+	PUBLISH.FirstProxyIndex = INDEX.NOW;
 }
 
 export function ProcessProxies(
@@ -48,7 +49,7 @@ export function ProcessProxies(
 				STACK.PROXYCACHE[targetFolder].UpdateCache();
 				PUBLISH.DeltaPath = `${STACK.PROXYCACHE[targetFolder].source}/${filePath}`;
 				PUBLISH.DeltaContent = "";
-			} else if (STACK.PROXYCACHE[targetFolder].stylesheet === filePath) {
+			} else if (STACK.PROXYCACHE[targetFolder].stylesheetPath === filePath) {
 				STACK.PROXYCACHE[targetFolder].stylesheetContent = fileContent;
 			} else {
 				PUBLISH.DeltaPath = `${STACK.PROXYCACHE[targetFolder].source}/${filePath}`;
@@ -158,56 +159,44 @@ function createStylesheet(CUMULATES) {
 		POSTBINDS: "",
 	};
 
-	const indexScanned = STYLE.CSSCANNER(
-		Use.code.uncomment.Css(RAW.CSSIndex),
-		"INDEX ||",
-	);
+
+	const indexScanned = STYLE.CSSCANNER(Use.code.uncomment.Css(RAW.CSSIndex), "INDEX ||");
 	indexScanned.postBinds.forEach((i) => POSTBINDS.add(i));
 	indexScanned.preBinds.forEach((i) => PREBINDS.add(i));
-	RENDERFRAGS.INDEX = COMPILE.Stylesheet(indexScanned.styles, !RAW.WATCH);
-	PUBLISH.MANIFEST.constants = Use.array.setback(indexScanned.variables);
+	RENDERFRAGS.INDEX = COMPILE.Stylesheet(indexScanned.object, !RAW.WATCH);
+	PUBLISH.MANIFEST.constants = Object.keys(indexScanned.variables);
 	PUBLISH.Report.variables = $.MOLD.primary.Section(
 		"Root variables",
 		PUBLISH.MANIFEST.constants,
 		$.list.text.Entries,
 	);
 
-	RENDERFRAGS.ESSENTIALS = COMPILE.Stylesheet(
-		[...CACHE.PortableEssentials, ...CUMULATES.essentials],
-		!RAW.WATCH,
-	);
 
-	Object.values(STACK.PROXYCACHE).forEach((cache) =>
-		cache.RenderFiles(PREBINDS, POSTBINDS, RAW.CMD),
-	);
-	RENDERFRAGS.RENDERED = COMPILE.Stylesheet(
-		FORGE.indexMaps(CACHE.FinalStack),
-		!RAW.WATCH,
-	);
+	RENDERFRAGS.ESSENTIALS = COMPILE.Stylesheet([...CACHE.PortableEssentials, ...CUMULATES.essentials], !RAW.WATCH);
+	Object.values(STACK.PROXYCACHE).forEach((cache) => cache.RenderFiles(PREBINDS, POSTBINDS, RAW.CMD));
+	const renderdScanned = FORGE.indexMaps(CACHE.FinalStack);
+	renderdScanned.postBinds.forEach((i) => POSTBINDS.add(i));
+	renderdScanned.preBinds.forEach((i) => PREBINDS.add(i));
+	RENDERFRAGS.RENDERED = COMPILE.Stylesheet(renderdScanned.object, !RAW.WATCH);
+
 
 	RENDERFRAGS.APPENDIX = COMPILE.Stylesheet(
 		Object.values(STACK.PROXYCACHE).reduce((appendix, cache) => {
 			const appendixScanned = STYLE.CSSCANNER(
 				Use.code.uncomment.Css(cache.stylesheetContent),
-				`APPENDIX : ${cache.targetStylesheet} ||`,
+				`APPENDIX : ${cache.targetStylesheet} ||`
 			);
-			appendix.push(...appendixScanned.styles);
+			appendix.push(...appendixScanned.object);
 			appendixScanned.postBinds.forEach((i) => POSTBINDS.add(i));
 			appendixScanned.preBinds.forEach((i) => PREBINDS.add(i));
 			return appendix;
-		}, []),
-		!RAW.WATCH,
+		}, []), !RAW.WATCH
 	);
 
-	const rendered = FORGE.bindIndex(PREBINDS, POSTBINDS);
-	RENDERFRAGS.PREBINDS = COMPILE.Stylesheet(
-		rendered.preBindsObject,
-		!RAW.WATCH,
-	);
-	RENDERFRAGS.POSTBINDS = COMPILE.Stylesheet(
-		rendered.postBindsObject,
-		!RAW.WATCH,
-	);
+
+	const bindObjects = FORGE.bindIndex(PREBINDS, POSTBINDS);
+	RENDERFRAGS.PREBINDS = COMPILE.Stylesheet(Object.entries(bindObjects.preBindsObject), !RAW.WATCH);
+	RENDERFRAGS.POSTBINDS = COMPILE.Stylesheet(Object.entries(bindObjects.postBindsObject), !RAW.WATCH);
 
 	return { RENDERFRAGS, PREBINDS, POSTBINDS };
 }
@@ -216,97 +205,83 @@ function createStylesheet(CUMULATES) {
 export async function Generate() {
 	const SAVEFILES = {};
 	const CUMULATES = await Engine();
+	const XRESPONSE = XTYLES.Report();
 
-	const XtylesResult = XTYLES.Report();
-	PUBLISH.Report.library = XtylesResult.report;
-	PUBLISH.WarningCount = XtylesResult.warnings.length;
-
+	PUBLISH.Report.library = XRESPONSE.report;
+	PUBLISH.WarningCount = XRESPONSE.warnings.length;
 	PUBLISH.Report.errors = $.MOLD[PUBLISH.ErrorCount ? "failed" : "success"].Section(
 		`${PUBLISH.ErrorCount} Errors & ${PUBLISH.WarningCount} Warnings`,
-		[...XtylesResult.warnings, ...CUMULATES.errors]
+		[...XRESPONSE.warnings, ...CUMULATES.errors]
 	);
-	// console.log(CUMULATES)
-	// console.log(SAVEFILES)
 
-	// if (PUBLISH.DeltaContent.length) {
-	// 	SAVEFILES[PUBLISH.DeltaPath] = PUBLISH.DeltaContent;
-	// } else {
-	// 	const { RENDERFRAGS, PREBINDS, POSTBINDS } = createStylesheet(CUMULATES);
+	if (PUBLISH.DeltaContent.length) {
+		SAVEFILES[PUBLISH.DeltaPath] = PUBLISH.DeltaContent;
+	} else {
+		const { RENDERFRAGS, PREBINDS, POSTBINDS } = createStylesheet(CUMULATES);
 
-	// 	const FinalStylesheet = Object.entries(RENDERFRAGS)
-	// 		.map(([chapter, content]) =>
-	// 			RAW.WATCH ? `\n\n/* CHAPTER: ${chapter} */\n${content}\n` : content,
-	// 		)
-	// 		.join("");
-	// 	Object.values(STACK.PROXYCACHE).forEach((cache) =>
-	// 		cache.SummonFiles(SAVEFILES, FinalStylesheet),
-	// 	);
+		const FinalStylesheet = Object.entries(RENDERFRAGS).map(([chapter, content]) =>
+			RAW.WATCH ? `\n\n/* CHAPTER: ${chapter} */\n${content}\n` : content).join("");
+		Object.values(STACK.PROXYCACHE).forEach((cache) => cache.SummonFiles(SAVEFILES, FinalStylesheet));
 
-	// 	if (PUBLISH.DeltaPath.length) {
-	// 		Object.keys(SAVEFILES).forEach((filePath) => {
-	// 			if (PUBLISH.DeltaPath !== filePath) {
-	// 				delete SAVEFILES[filePath];
-	// 			}
-	// 		});
-	// 		PUBLISH.SaveDepenFiles = [];
-	// 	}
+		if (RAW.WATCH) {
+			if (PUBLISH.DeltaPath.length) {
+				Object.keys(SAVEFILES).forEach((filePath) => {
+					if (PUBLISH.DeltaPath !== filePath) delete SAVEFILES[filePath];
+				});
+			}
+			SAVEFILES[NAV.json.manifest] = JSON.stringify(PUBLISH.MANIFEST);
+		}
 
-	// 	if (RAW.WATCH) {
-	// 		SAVEFILES[NAV.json.manifest] = JSON.stringify(PUBLISH.MANIFEST);
-	// 	} else {
-	// 		const portableMd = NAV.folder.portableBundle + "/" + RAW.PACKAGE + ".css",
-	// 			portableCss = NAV.folder.portableBundle + "/" + RAW.PACKAGE + ".xcss",
-	// 			portableXcss = NAV.folder.portableBundle + "/" + RAW.PACKAGE + ".md";
+		else {
+			// 		const portableMd = NAV.folder.portableBundle + "/" + RAW.PACKAGE + ".css",
+			// 			portableCss = NAV.folder.portableBundle + "/" + RAW.PACKAGE + ".xcss",
+			// 			portableXcss = NAV.folder.portableBundle + "/" + RAW.PACKAGE + ".md";
 
-	// 		const portable = COMPILE.Portable(
-	// 			PREBINDS,
-	// 			POSTBINDS,
-	// 			CUMULATES.essentials,
-	// 			RAW.PACKAGE,
-	// 			RAW.VERSION,
-	// 		);
-	// 		SAVEFILES[NAV.folder.portableNative + "/" + RAW.PACKAGE + ".css"] =
-	// 			portable.binding;
-	// 		SAVEFILES[NAV.folder.portableNative + "/" + RAW.PACKAGE + ".xcss"] =
-	// 			portable.portable;
-	// 		SAVEFILES[NAV.folder.portableNative + "/" + RAW.PACKAGE + ".md"] =
-	// 			RAW.ReadMe;
+			// 		const portable = COMPILE.Portable(
+			// 			PREBINDS,
+			// 			POSTBINDS,
+			// 			CUMULATES.essentials,
+			// 			RAW.PACKAGE,
+			// 			RAW.VERSION,
+			// 		);
+			// 		SAVEFILES[NAV.folder.portableNative + "/" + RAW.PACKAGE + ".css"] =
+			// 			portable.binding;
+			// 		SAVEFILES[NAV.folder.portableNative + "/" + RAW.PACKAGE + ".xcss"] =
+			// 			portable.portable;
+			// 		SAVEFILES[NAV.folder.portableNative + "/" + RAW.PACKAGE + ".md"] =
+			// 			RAW.ReadMe;
 
-	// 		readmeFiles = { [`${RAW.PACKAGE}.md`]: `# ${RAW.PACKAGE}@${RAW.VERSION}` + "\n---\n" + RAW.ReadMe };
-	// 		if (SAVEFILES[portableMd]) SAVEFILES[portableMd] += RAW.ReadMe;
-	// 		else SAVEFILES[portableMd] = RAW.ReadMe;
-	// 		if (SAVEFILES[portableCss]) SAVEFILES[portableCss] += portable.binding;
-	// 		else SAVEFILES[portableCss] = portable.binding;
-	// 		if (SAVEFILES[portableXcss]) SAVEFILES[portableXcss] += portable.portable;
-	// 		else SAVEFILES[portableXcss] = portable.portable;
+			// 		readmeFiles = { [`${RAW.PACKAGE}.md`]: `# ${RAW.PACKAGE}@${RAW.VERSION}` + "\n---\n" + RAW.ReadMe };
+			// 		if (SAVEFILES[portableMd]) SAVEFILES[portableMd] += RAW.ReadMe;
+			// 		else SAVEFILES[portableMd] = RAW.ReadMe;
+			// 		if (SAVEFILES[portableCss]) SAVEFILES[portableCss] += portable.binding;
+			// 		else SAVEFILES[portableCss] = portable.binding;
+			// 		if (SAVEFILES[portableXcss]) SAVEFILES[portableXcss] += portable.portable;
+			// 		else SAVEFILES[portableXcss] = portable.portable;
 
-	// 		const memChart = {
-	// 			Index: Use.string.stringMem(RENDERFRAGS.INDEX),
-	// 			Essentials: Use.string.stringMem(RENDERFRAGS.ESSENTIALS),
-	// 			Prebinds: Use.string.stringMem(RENDERFRAGS.PREBINDS),
-	// 			Rendered: Use.string.stringMem(RENDERFRAGS.RENDERED),
-	// 			Postbinds: Use.string.stringMem(RENDERFRAGS.POSTBINDS),
-	// 			Appendix: Use.string.stringMem(RENDERFRAGS.APPENDIX),
-	// 		};
-	// 		PUBLISH.Report.memChart = $.MOLD[
-	// 			PUBLISH.ErrorCount ? "failed" : "success"
-	// 		].Section(
-	// 			PUBLISH.FinalMessage,
-	// 			Object.entries(memChart).reduce((ch, [k, v]) => {
-	// 				ch[k] = `${v} Kb`.padStart(9, " ");
-	// 				return ch;
-	// 			}, {}),
-	// 			$.list.std.Props,
-	// 		);
-	// 		PUBLISH.Report.footer = $.MOLD.std.Footer(
-	// 			"Output size :  " +
-	// 			`${Use.string.stringMem(FinalStylesheet)} Kb`.padStart(9, " "),
-	// 		);
-	// 	}
-	// }
+			const memChart = {
+				Index: Use.string.stringMem(RENDERFRAGS.INDEX),
+				Essentials: Use.string.stringMem(RENDERFRAGS.ESSENTIALS),
+				Prebinds: Use.string.stringMem(RENDERFRAGS.PREBINDS),
+				Rendered: Use.string.stringMem(RENDERFRAGS.RENDERED),
+				Postbinds: Use.string.stringMem(RENDERFRAGS.POSTBINDS),
+				Appendix: Use.string.stringMem(RENDERFRAGS.APPENDIX),
+			};
+			PUBLISH.Report.memChart = $.MOLD[PUBLISH.ErrorCount ? "failed" : "success"]
+				.Section(PUBLISH.FinalMessage,
+					Object.entries(memChart).reduce((ch, [k, v]) => {
+						ch[k] = `${v} Kb`.padStart(9, " ");
+						return ch;
+					}, {}), $.list.std.Props);
 
-	PUBLISH.DeltaPath = "";
-	PUBLISH.DeltaContent = "";
+			PUBLISH.Report.footer = $.MOLD.std.Footer(
+				"Output size :  " +
+				`${Use.string.stringMem(FinalStylesheet)} Kb`.padStart(9, " "),
+			);
+		}
+	}
+
+	PUBLISH.DeltaPath = ""; PUBLISH.DeltaContent = "";
 
 	return {
 		SaveFiles: SAVEFILES,

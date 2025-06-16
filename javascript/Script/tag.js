@@ -1,6 +1,5 @@
 import classExtract from "./value.js";
 import { FileCursor } from "./file.js";
-
 import { APP } from "../data-cache.js";
 
 const bracePair = {
@@ -14,8 +13,8 @@ const bracePair = {
 	openBraces = ["[", "{", "(", "'", '"', "`"],
 	closeBraces = ["]", "}", ")"];
 
-export const xtyleTag = `<${"APP.styleTag"} />`;
-const tagRegex = new RegExp(`<\\s*${"APP.styleTag"}\\s*/\\s*>`);
+export const xtyleTag = `<${APP.xcssTag} />`;
+const tagRegex = new RegExp(`<\\s*${APP.xcssTag}\\s*/\\s*>`);
 const tagCheck = (string) => tagRegex.test(string);
 
 export default function tagScan(content, action, classProps, fileData) {
@@ -49,7 +48,6 @@ export default function tagScan(content, action, classProps, fileData) {
 			FileCursor.rowMarker++;
 			FileCursor.colMarker = 0;
 		} else FileCursor.colMarker++;
-		// console.log({ CH: ch, cur: cursor.marker, row: cursor.rowMarker, col: cursor.columnMarker })
 
 		if (awaitBrace === ch) {
 			braceTrack.pop();
@@ -79,24 +77,24 @@ export default function tagScan(content, action, classProps, fileData) {
 			if (!tagObject.element) {
 				tagObject.element = attr;
 				if (value !== "") styleObject.styles[""] = value.slice(1, -1);
-			} 
+			}
 			else if (attr === "$") {
 				styleObject.comments.push(value.slice(1, -1).split("\n").map(l => l.trim()))
-			} 
+			}
 			else if (/^[\w\-]*\$+[\w\-]+$/i.test(attr)) {
 				styleObject.selector = attr;
 				if (/\$\$/.test(attr)) styleObject.scope = "global";
 				else styleObject.scope = "local";
 				if (value !== "") styleObject.styles[""] = value.slice(1, -1);
-			} 
+			}
 			else if (/[\$@#]/.test(attr) && !attr.endsWith("$") && !attr.startsWith("@")) {
 				styleObject.styles[attr] = value.slice(1, -1);
-			} 
+			}
 			else if (classProps.includes(attr)) {
 				const result = classExtract(value, action, fileData, FileCursor.tagCount);
 				classList.push(...result.classList);
 				tagObject.attributes[attr] = result.scribed;
-			} 
+			}
 			else tagObject.attributes[attr] = value;
 
 			isVal = false;
@@ -110,16 +108,14 @@ export default function tagScan(content, action, classProps, fileData) {
 		} else if (deviance === 0 && ch === ";") break;
 	}
 
-	const renderedTag = `<${tagObject.element}${Object.entries(
-		tagObject.attributes,
-	).reduce((A, [P, V]) => (A += " " + P + (V === "" ? "" : "=" + V)), "")}>`;
-	const replacement =
-		tagObject.element !== "APP.styleTag"
-			? renderedTag
-			: tagCheck(content.slice(startMarker, FileCursor.marker))
-				? xtyleTag
-				: "";
-	const scribed = ok ? replacement : fragment;
+	const renderedTag = `<${tagObject.element}${Object.entries(tagObject.attributes)
+		.reduce((A, [P, V]) => (A += " " + P + (V === "" ? "" : "=" + V)), "")}>`;
+	const replacement = tagObject.element !== APP.styleTag ? renderedTag :
+		tagCheck(content.slice(startMarker, FileCursor.marker)) ? xtyleTag : "";
+	const scribed = ok ?
+		tagObject.element === APP.xcssTag && Object.keys(styleObject.styles).length ?
+			"" : replacement
+		: fragment;
 
 	if (xtyleTag === scribed) fileData.summon = true;
 

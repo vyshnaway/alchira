@@ -23,14 +23,17 @@ function styleSwitch(object) {
 }
 
 function buildXtyles(selectorIndexObject) {
-	return Object.entries(
-		styleSwitch(
-			Object.entries(selectorIndexObject).reduce((A, [selector, index]) => {
-				A[selector] = CACHE.Index2StylesObject[index].object;
-				return A;
-			}, {}),
-		),
-	);
+	const preBinds = [], postBinds = [];
+	const object = Object.entries(styleSwitch(
+		Object.entries(selectorIndexObject).reduce((A, [selector, index]) => {
+			A[selector] = CACHE.Index2StylesObject[index].object;
+			preBinds.push(...CACHE.Index2StylesObject[index].preBinds)
+			postBinds.push(...CACHE.Index2StylesObject[index].postBinds)
+			return A;
+		}, {}),
+	));
+
+	return { object, preBinds, postBinds }
 }
 
 function loadBindObjectsFromIndex(
@@ -103,7 +106,7 @@ function buildBinds(
 
 	const preBindsCollected = loadBindObjectsFromIndex(Array.from(preBinds), forPortable);
 	const postBindsCollected = loadBindObjectsFromIndex(Array.from(postBinds), forPortable);
-	
+
 	return {
 		preBindsIndexMap: preBindsCollected.indexMap,
 		postBindsIndexMap: postBindsCollected.indexMap,

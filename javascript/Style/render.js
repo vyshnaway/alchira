@@ -105,8 +105,7 @@ function stylesheetCreator(array, minify) {
 	const styleSheet = [];
  
 	array.forEach(([key, value]) => {
-		const processed =
-			typeof value === "object" ? unNester(key, value) : { [key]: value };
+		const processed = typeof value === "object" ? unNester(key, value) : { [key]: value };
 		styleSheet.push(...objectCompose(processed, minify));
 	});
 

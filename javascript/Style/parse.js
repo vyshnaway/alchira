@@ -1,13 +1,11 @@
-import BLOCK from "./block.js";
+import CSSBLOCK from "./block.js";
 
 import Use from "../Utils/index.js";
 import HASHRULE from "../hash-rules.js";
 import { RAW, CACHE, INDEX } from "../data-cache.js";
 
 function xtylemerge(classList = []) {
-	let result = {},
-		preBinds = [],
-		postBinds = [];
+	let result = {}, preBinds = [], postBinds = [];
 	classList.forEach((className) => {
 		const index = (CACHE.LibraryStyle2Index[className] || 0) + (CACHE.PortableStyle2Index[className] || 0);
 		if (index) {
@@ -21,7 +19,7 @@ function xtylemerge(classList = []) {
 }
 
 function SCANNER(content, initial, sourceSelector) {
-	const response = BLOCK(content);
+	const response = CSSBLOCK(content);
 	const variables = response.variables;
 	const merged = xtylemerge(response.assemble);
 	const preBinds = [...merged.preBinds, ...response.preBinds],
@@ -40,11 +38,7 @@ function SCANNER(content, initial, sourceSelector) {
 	});
 
 	for (let selector in response.allBlocks) {
-		const result = SCANNER(
-			response.allBlocks[selector],
-			initial,
-			sourceSelector + " -> " + selector,
-		);
+		const result = SCANNER(response.allBlocks[selector], initial, sourceSelector + " -> " + selector);
 		Object.assign(variables, result.variables);
 		preBinds.push(...result.preBinds);
 		postBinds.push(...result.postBinds);
@@ -55,11 +49,9 @@ function SCANNER(content, initial, sourceSelector) {
 }
 
 function CSSCANNER(content, initial = "") {
-	const variables = {};
-	const response = BLOCK(content, true);
+	const variables = {}, preBinds = [], postBinds = [];
+	const response = CSSBLOCK(content, true);
 	const object = response.XatProps;
-	const preBinds = [],
-		postBinds = [];
 
 	response.XallBlocks.forEach(([key, value]) => {
 		const result = SCANNER(value, initial, key);
@@ -77,15 +69,15 @@ function CSSLIBRARY(fileDatas = [], initial = "", forPortable = false) {
 
 	fileDatas.forEach((source) => {
 		const { stamp, filePath, metaFront, content, group } = source;
-		const scannedObjects = BLOCK(content).allBlocks;
+		const scannedObjects = CSSBLOCK(content).allBlocks;
 
 		for (const selector in scannedObjects) {
 			const declarations = [source.sourcePath];
-			const stampSelector = stamp + Use.string.normalize(selector, ["$"], ["\\", "."]);
+			const stampSelector = stamp + Use.string.normalize(selector, [], ["\\", "."]);
 			const scannedStyle = SCANNER(scannedObjects[selector], initial + " : " + filePath + " ||", selector,);
 			const preBinds = scannedStyle.preBinds, postBinds = scannedStyle.postBinds;
 			const object = { "": scannedStyle.object };
-			const skeleton = { Variables: scannedStyle.variables, PreBinds: preBinds, PostBinds: postBinds, Skeleton: Use.object.skeleton(object) };
+			const skeleton = { Info: {}, Variables: scannedStyle.variables, PreBinds: preBinds, PostBinds: postBinds, Skeleton: Use.object.skeleton(object) };
 
 			const index = (IndexMap[stampSelector] || 0) + (selectors[stampSelector] || 0);
 			const InStash = CACHE.Index2StylesObject[index];
@@ -170,7 +162,7 @@ function TAGSTYLE(
 	let skeleton = { Info: comments, Variables: variables, PreBinds: preBinds, PostBinds: postBinds, Skeleton: Use.object.skeleton(object) };
 	let xelector = selector === "" ? "" : selectorPrefix + selector;
 	if (selector === "") {
-		essentials.push(...Object.entries(object));
+		essentials.push(...Object.entries(object).map(([k, v]) => [`${k} /* ${declarations[0]} */`, v]));
 	} else {
 		const index = (IndexMap[xelector] ?? 0) + (CACHE.LibraryStyle2Index[xelector] ?? 0);
 		const InStash = CACHE.Index2StylesObject[index];

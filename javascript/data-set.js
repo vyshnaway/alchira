@@ -1,4 +1,4 @@
-import { APP, RAW, NAV, CACHE, INDEX, ROOT, STACK} from "./data-cache.js";
+import { APP, RAW, NAV, CACHE, INDEX, ROOT, STACK } from "./data-cache.js";
 
 export function SetENV(rootPath, workPath, packageJson) {
 
@@ -32,18 +32,7 @@ export function SetENV(rootPath, workPath, packageJson) {
     });
 }
 
-export function ResetRAW() {
-    Object.assign(RAW, {
-        HASHRULE: {},
-        PROXYMAP: {},
-        LIBRARIES: {},
-        PORTABLES: {},
-        PROXYFILES: {},
-    })
-}
-
 export function ResetCACHE() {
-    INDEX.RESET();
 
     Object.assign(CACHE, {
         HashRule: {},
@@ -61,4 +50,17 @@ export function ResetCACHE() {
         LIBRARIES: {},
         PORTABLES: {},
     });
+}
+
+export function ResetALL() {
+    Object.assign(RAW, {
+        HASHRULE: {},
+        PROXYMAP: {},
+        LIBRARIES: {},
+        PORTABLES: {},
+        PROXYFILES: {},
+    })
+
+    ResetCACHE();
+    INDEX.RESET();
 }

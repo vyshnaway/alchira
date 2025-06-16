@@ -1,3 +1,4 @@
+import $ from "./Shell/index.js";
 import Use from "./Utils/index.js";
 
 export const APP = {
@@ -115,6 +116,7 @@ export const PUBLISH = {
     FinalMessage: "",
     ErrorCount: 0,
     WarningCount: 0,
+    FirstProxyIndex: 0,
     Report: {
         library: "",
         variables: "",
@@ -155,33 +157,6 @@ export const STACK = {
     PORTABLES: {},
 };
 
-export const INDEX = {
-    NOW: 0,
-    BIN: new Set(),
-    DECLARE: () => {
-        let number;
-        if (INDEX.BIN.size > 0) {
-            number = INDEX.BIN.values().next().value;
-            INDEX.BIN.delete(number);
-        } else {
-            number = ++INDEX.NOW;
-        }
-        return { number, class: "_" + Use.string.enCounter(number + 768) };
-    },
-    DISPOSE: (...indexes) => {
-        indexes.forEach((index) => {
-            INDEX.BIN.add(index);
-            delete CACHE.Index2StylesObject[index];
-        });
-    },
-    RESET: () => {
-        INDEX.NOW = 0;
-        Object.keys(CACHE.Index2StylesObject).forEach(
-            (key) => delete CACHE.Index2StylesObject[key],
-        );
-        INDEX.BIN.clear();
-    }
-};
 
 export const RAW = {
     WATCH: false,
@@ -208,3 +183,59 @@ export const PREFIX = {
     values: {},
 };
 
+
+export const INDEX = {
+    NOW: 0,
+    BIN: new Set(),
+    DECLARE: () => {
+        let number;
+        if (INDEX.BIN.size > 0) {
+            number = INDEX.BIN.values().next().value;
+            INDEX.BIN.delete(number);
+        } else {
+            number = ++INDEX.NOW;
+        }
+        return { number, class: "_" + Use.string.enCounter(number + 768) };
+    },
+    DISPOSE: (...indexes) => {
+        indexes.forEach((index) => {
+            INDEX.BIN.add(index);
+            delete CACHE.Index2StylesObject[index];
+        });
+    },
+    RESET: (from = 0) => {
+        Object.keys(CACHE.Index2StylesObject).forEach(
+            (index) => {
+                if (index >= from) {
+                    delete CACHE.Index2StylesObject[index];
+                }
+            },
+        );
+        INDEX.NOW = from;
+        INDEX.BIN.clear();
+    }
+};
+
+export default function MemoryUsage() {
+    const ProxyMem = Object.values(STACK.PROXYCACHE).reduce((t, c) => {
+        t += c.MemoryUsage();
+        return t;
+    }, 0);
+    const chart = {
+        // HashRule: Use.string.stringMem(JSON.stringify(CACHE.HashRule)),
+        // SortedIndexes: Use.string.stringMem(JSON.stringify(CACHE.SortedIndexes)),
+        // PortableEssentials: Use.string.stringMem(JSON.stringify(CACHE.PortableEssentials)),
+        Index2StylesObject: Use.string.stringMem(JSON.stringify(CACHE.Index2StylesObject)),
+        // LibraryStyle2Index: Use.string.stringMem(JSON.stringify(CACHE.LibraryStyle2Index)),
+        // GlobalsStyle2Index: Use.string.stringMem(JSON.stringify(CACHE.GlobalsStyle2Index)),
+        // PortableStyle2Index: Use.string.stringMem(JSON.stringify(CACHE.PortableStyle2Index)),
+        // FinalStack: Use.string.stringMem(JSON.stringify(CACHE.FinalStack)),
+        Files: Use.string.stringMem(JSON.stringify(RAW)),
+        Cache: Use.string.stringMem(JSON.stringify(CACHE)),
+        Stack: Use.string.stringMem(JSON.stringify(STACK)),
+        Proxy: ProxyMem,
+        Report: Use.string.stringMem(JSON.stringify(PUBLISH)),
+    }
+    chart["Total"] = Object.values(chart).reduce((a, i) => a += i, 0).toFixed(2);
+    return Object.entries(chart).map(([k, v]) => `${k} : ${v} Kb`);
+}

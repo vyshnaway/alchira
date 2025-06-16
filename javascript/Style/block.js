@@ -65,7 +65,7 @@ export default function parseBlock(content, blockArrays = false) {
 						const value = Use.string.minify(content.slice(valStart, index));
 						if (isProp) {
 							if (key.length > 0) {
-								if (key.startsWith("--")) result.variables[key];
+								if (key.startsWith("--")) result.variables[key] = value;
 								result.properties[key] = value;
 								if (blockArrays) result.Xproperties.push([key, value]);
 							} else if (value[0] === "@") {

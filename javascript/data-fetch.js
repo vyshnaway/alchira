@@ -217,7 +217,7 @@ export async function UpdateProxies() {
 	Object.keys(RAW.PROXYFILES).forEach((key) => delete RAW.PROXYFILES[key]);
 	const proxies = await worker.proxyMapSync(RAW.PROXYMAP);
 	proxies.forEach(
-		(proxy) => (RAW.PROXYFILES[RAW.WorkPath + "/" + proxy.target] = proxy),
+		(proxy) => (RAW.PROXYFILES[RAW.WorkPath + proxy.target] = proxy),
 	);
 	$.TASK("Reading target folders");
 }

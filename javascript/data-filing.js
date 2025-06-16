@@ -18,8 +18,8 @@ export default function FILING(
 	const group = isPortable ? (extension === "css" ? "binding" : extension === "xcss" ? "xtyling" : "readme") :
 		isXtylesFolder ? (Boolean(cluster) ? "cluster" : "axiom") : "proxy";
 
-	const stamp = isPortable ? `/${fileName}${group === "binding" ? "/$/" : "/"}` :
-		isXtylesFolder ? (id === 0 ? "" : Use.string.normalize(cluster) + "$".repeat(id)) : "";
+	const stamp = (isPortable ? `/${fileName}${group === "binding" ? "/$/" : "/"}` : "") +
+		((id === 0 && extension === "css") ? "" : Use.string.normalize(cluster) + "$".repeat(id));
 
 	return {
 		// Default
@@ -37,7 +37,7 @@ export default function FILING(
 		essentials: [],
 		// for Proxy Class
 		styleLocals: {},
-		
+		// for Cumulation
 		classGroups: [],
 		styleGlobals: {},
 		preBinds: [],

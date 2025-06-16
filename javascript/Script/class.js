@@ -5,17 +5,18 @@ import $ from "../Shell/index.js";
 import FILING from "../data-filing.js";
 import STYLEPARSE from "../Style/parse.js";
 import { RAW, CACHE, INDEX } from "../data-cache.js";
+import Use from "../Utils/index.js";
 
 export default class Proxy {
 	source = "";
 	target = "";
-	extensions = [];
-	extnsProps = {};
-	fileCache = {};
 	stylesheetPath = "";
 	sourceStylesheet = "";
 	targetStylesheet = "";
 	stylesheetContent = "";
+	fileCache = {};
+	extnsProps = {};
+	extensions = [];
 
 	constructor({
 		source,
@@ -51,7 +52,7 @@ export default class Proxy {
 		sciptResponse.stylesList.forEach((style) => {
 			const IndexMap = style.scope === "global" ? file.styleGlobals : style.scope === "local" ? file.styleLocals : {};
 			const skeletonMap = style.scope === "global" ? globalSkeletons : style.scope === "local" ? localSkeletons : {};
-			const response = STYLEPARSE.TAGSTYLE(style, file.metaFront, file.filePath, RAW.WorkPath + "/" + file.targetPath, IndexMap);
+			const response = STYLEPARSE.TAGSTYLE(style, file.metaFront, file.filePath, RAW.WorkPath + file.targetPath, IndexMap);
 
 			if (style.scope === "essential") {
 				file.preBinds.push(...response.preBinds);
@@ -67,7 +68,7 @@ export default class Proxy {
 		});
 
 		Object.assign(file.styleMap, {
-			file: { group: "target", id: `${RAW.WorkPath}/${file.targetPath}` },
+			file: { group: "target", id: RAW.WorkPath + file.targetPath },
 			global: globalSkeletons,
 			local: localSkeletons
 		});
@@ -89,7 +90,7 @@ export default class Proxy {
 		C.styleMap.push({
 			file: {
 				group: "stylesheet",
-				id: `${RAW.WorkPath}/${this.targetStylesheet}`,
+				id: RAW.WorkPath + this.targetStylesheet,
 			},
 			global: {},
 			local: {},
@@ -104,9 +105,10 @@ export default class Proxy {
 				C.report.push(
 					$.MOLD.tertiary.Topic(
 						`[ ${calcString} ] : ${file.targetPath}`, [
-						...Object.keys(file.styleLocals).map((c) => $.style.text.White(c)),
-						...Object.keys(file.styleGlobals).map((c) => $.style.text.Yellow(c))
-					], $.list.std.Entries)
+						...$.list.text.Entries(Object.keys(file.styleGlobals)),
+						$.canvas.divider.mid,
+						...$.list.text.Entries(Object.keys(file.styleLocals)),
+					])
 				);
 
 			C.errors.push(...file.errors);
@@ -156,7 +158,8 @@ export default class Proxy {
 	}
 
 	SummonFiles(SaveFiles = {}, stylesheet) {
-		const styleBlock = `<style>${stylesheet}</style>`;
+		const br = RAW.WATCH ? "\n" : "";
+		const styleBlock = `${br}<style>${stylesheet}${br}</style>${br}`;
 		Object.values(this.fileCache).forEach((file) => {
 			if (file.extension !== "xcss")
 				SaveFiles[file.sourcePath] = file.summon
@@ -194,6 +197,10 @@ export default class Proxy {
 		return classTracks;
 	}
 
+	MemoryUsage() {
+		return Use.string.stringMem(JSON.stringify(this))
+	}
+
 	_ClearFiles() {
 		Object.values(this.fileCache).forEach((filePath) =>
 			this._DeleteFile(filePath),
@@ -202,9 +209,9 @@ export default class Proxy {
 
 	_DeleteFile(filePath) {
 		if (this.fileCache[filePath]) {
-			this.fileCache[filePath].usedIndexes.forEach((index) =>
-				INDEX.DISPOSE(index),
-			);
+			this.fileCache[filePath].usedIndexes.forEach((index) =>{
+				INDEX.DISPOSE(index);
+			});
 			delete this.fileCache[filePath];
 		}
 	}

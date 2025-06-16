@@ -155,8 +155,9 @@ function ReRender() {
 			}
 		});
 		collection[filePath] = indexSkeleton;
-		if (indexSkeleton.length)
-			portableChart[`Portable [${fileData.filePath}]:  ${indexSkeleton.length} Classes`] = indexSkeleton;
+		const classNames = Object.keys(indexSkeleton); 
+		if (classNames.length)
+			portableChart[`Portable [${fileData.filePath}]: ${classNames.length} Classes`] = classNames;
 		return collection
 	}, {});
 
@@ -176,7 +177,7 @@ function ReRender() {
 		collection[index] = result;
 		const selectors = Object.keys(result);
 		if (selectors.length)
-			axiomChart[`Level ${index}:  ${selectors.length} Classes`] = selectors;
+			axiomChart[`Level ${index}: ${selectors.length} Classes`] = selectors;
 		axiomCount += selectors.length;
 		return collection;
 	}, {});
@@ -186,7 +187,7 @@ function ReRender() {
 		collection[index] = result;
 		const selectors = Object.keys(result);
 		if (selectors.length)
-			clusterChart[`Level ${index}:  ${selectors.length} Classes`] = selectors;
+			clusterChart[`Level ${index}: ${selectors.length} Classes`] = selectors;
 		clusterCount += selectors.length;
 		return collection;
 	}, {});
@@ -242,7 +243,6 @@ function ReRender() {
 		),
 	].join("");
 
-	Report()
 	return {
 		libraryTable,
 		modulesTable,
