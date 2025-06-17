@@ -7,5 +7,5 @@ console.log(fn.enCounter(64 * 64 * 12));
 console.log(fn.enCounter(64 * 64 * 63));
 
 console.log(
-  fn.normalize("    g   ][\f,d,3425 ghd $\\ gfhsd ghn  g", ["\\", "$"]),
+	fn.normalize("    g   ][\f,d,3425 ghd $\\ gfhsd ghn  g", ["\\", "$"]),
 );

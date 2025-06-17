@@ -103,7 +103,7 @@ function objectCompose(
 
 function stylesheetCreator(array, minify) {
 	const styleSheet = [];
- 
+
 	array.forEach(([key, value]) => {
 		const processed = typeof value === "object" ? unNester(key, value) : { [key]: value };
 		styleSheet.push(...objectCompose(processed, minify));
@@ -142,9 +142,9 @@ function portableCreator(
 ) {
 	const bindstack = {}, tab = "    ", portable = [`# ${module}@${version}`], binding = [];
 	const bindingResponse = FORGE.bindIndex(new Set(preBinds), new Set(postBinds), true);
-	
+
 	Object.entries(CACHE.GlobalsStyle2Index).forEach(([selector, index]) => {
-		const style = CACHE.Index2StylesObject[index];
+		const style = INDEX.OBJECT(index);
 		bindstack[selector] = FORGE.bindIndex(new Set(style.preBinds), new Set(style.postBinds), true);
 	});
 
@@ -154,7 +154,7 @@ function portableCreator(
 		...classList.map((c) => "- `" + c + "`"), "---",
 	);
 	[
-		...Object.entries(CACHE.GlobalsStyle2Index).map(([selector, index]) => [selector, CACHE.Index2StylesObject[index].object]),
+		...Object.entries(CACHE.GlobalsStyle2Index).map(([selector, index]) => [selector, INDEX.OBJECT(index).object]),
 		...bindingResponse.postBindsObject, ...bindingResponse.preBindsObject,
 	].forEach(([selector, object]) => {
 		portable.push(

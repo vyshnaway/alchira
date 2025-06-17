@@ -26,7 +26,9 @@ export default class Proxy {
 		fileContents,
 		stylesheetContent,
 	}) {
-		this._ClearFiles();
+		this.ClearFiles();
+		extensions["xcss"] = []
+
 		this.source = source;
 		this.target = target;
 		this.extnsProps = extensions;
@@ -115,7 +117,7 @@ export default class Proxy {
 			localCount += fileLocalCount;
 			globalCount += fileGlobalCount;
 			Object.values(file.styleLocals).forEach((index) => {
-				const InStash = CACHE.Index2StylesObject[index];
+				const InStash = INDEX.STYLE(index);
 				if (InStash.declarations.length > 1)
 					C.errors.push($.MOLD.failed.List("Multiple declarations: " + InStash.selector, InStash.declarations, $.list.text.Bullets));
 			});
@@ -129,7 +131,7 @@ export default class Proxy {
 		});
 
 		Object.values(C.styleGlobals).forEach((index) => {
-			const InStash = CACHE.Index2StylesObject[index];
+			const InStash = INDEX.STYLE(index);
 			if (InStash.declarations.length > 1)
 				C.errors.push($.MOLD.failed.List("Multiple declarations: " + InStash.selector, InStash.declarations, $.list.text.Bullets));
 		});
@@ -142,15 +144,17 @@ export default class Proxy {
 
 	RenderFiles(preBinds = new Set(), postBinds = new Set(), Command = "") {
 		Object.values(this.fileCache).forEach((file) => {
+			file.summon = false;
 			const result = SCRIPTPARSE(
 				file,
 				this.extnsProps[file.extension],
 				Command,
 				{ preBinds, postBinds },
 				{
-					Library: CACHE.LibraryStyle2Index,
 					Local: file.styleLocals,
 					Global: CACHE.GlobalsStyle2Index,
+					Library: CACHE.LibraryStyle2Index,
+					Portable: CACHE.PortableStyle2Index
 				},
 			);
 			file.midway = result.scribed;
@@ -171,8 +175,7 @@ export default class Proxy {
 
 	UpdateCache() {
 		Object.entries(this.fileCache).forEach(([file, cache]) => {
-			const fileContent = cache.content;
-			this.SaveFile(file, fileContent);
+			this.SaveFile(file, cache.content);
 		});
 	}
 
@@ -201,7 +204,7 @@ export default class Proxy {
 		return Use.string.stringMem(JSON.stringify(this))
 	}
 
-	_ClearFiles() {
+	ClearFiles() {
 		Object.values(this.fileCache).forEach((filePath) =>
 			this._DeleteFile(filePath),
 		);
@@ -209,9 +212,9 @@ export default class Proxy {
 
 	_DeleteFile(filePath) {
 		if (this.fileCache[filePath]) {
-			this.fileCache[filePath].usedIndexes.forEach((index) =>{
-				INDEX.DISPOSE(index);
-			});
+			this.fileCache[filePath].usedIndexes.forEach((index) => INDEX.DISPOSE(index));
+			console.log(this.fileCache[filePath].usedIndexes)
+			console.log(INDEX)
 			delete this.fileCache[filePath];
 		}
 	}

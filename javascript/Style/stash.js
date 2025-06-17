@@ -8,14 +8,14 @@ import { NAV, CACHE, STACK, RAW, INDEX } from "../data-cache.js";
 
 function _DeleteLibraryFile(filePath) {
 	if (STACK.LIBRARIES[filePath]) {
-		INDEX.DISPOSE(...STACK.LIBRARIES[filePath].usedIndexes);
+		STACK.LIBRARIES[filePath].usedIndexes.forEach(i => INDEX.DISPOSE(i));
 		delete STACK.LIBRARIES[filePath];
 	}
 }
 
 function _DeletePortableFile(filePath) {
 	if (STACK.PORTABLES[filePath]) {
-		INDEX.DISPOSE(...STACK.PORTABLES[filePath].usedIndexes);
+		STACK.PORTABLES[filePath].usedIndexes.forEach(i => INDEX.DISPOSE(i));
 		delete STACK.PORTABLES[filePath];
 	}
 }
@@ -155,7 +155,7 @@ function ReRender() {
 			}
 		});
 		collection[filePath] = indexSkeleton;
-		const classNames = Object.keys(indexSkeleton); 
+		const classNames = Object.keys(indexSkeleton);
 		if (classNames.length)
 			portableChart[`Portable [${fileData.filePath}]: ${classNames.length} Classes`] = classNames;
 		return collection
@@ -193,7 +193,7 @@ function ReRender() {
 	}, {});
 
 	Object.values(CACHE.PortableStyle2Index).forEach((index) => {
-		const InStash = CACHE.Index2StylesObject[index];
+		const InStash = INDEX.STYLE(index);
 		if (InStash.declarations.length > 1)
 			warnings.push(
 				$.MOLD.warning.List(
@@ -205,7 +205,7 @@ function ReRender() {
 	});
 
 	Object.values(CACHE.LibraryStyle2Index).forEach((index) => {
-		const InStash = CACHE.Index2StylesObject[index];
+		const InStash = INDEX.STYLE(index);
 		if (InStash.declarations.length > 1)
 			warnings.push(
 				$.MOLD.warning.List(

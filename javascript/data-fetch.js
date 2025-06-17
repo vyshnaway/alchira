@@ -228,10 +228,11 @@ export async function AnalyzeHashrules() {
 
 	$.STEP("PATH : " + NAV.json.hashrule);
 	const hashrule = await fileman.read.json(NAV.json.hashrule);
+	Object.keys(RAW.HASHRULE).forEach(key => delete RAW.HASHRULE[key])
 	if (hashrule.status) {
 		Object.entries(hashrule.data).forEach(([key, value]) => {
 			if (typeof value === "string") {
-				RAW.HASHRULE = hashrule.data;
+				RAW.HASHRULE[key] = value;
 			} else {
 				errors.push(`Hashrule: ${key} does not have a value of type STRING.`);
 			}

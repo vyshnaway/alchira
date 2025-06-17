@@ -10,6 +10,10 @@ import XTYLES from "./Style/stash.js";
 import { NAV, RAW, STACK, CACHE, PUBLISH, INDEX } from "./data-cache.js";
 
 export function UpdateXtylesFolder() {
+	INDEX.RESET();
+	Object.assign(CACHE, { PortableEssentials: [], LibraryStyle2Index: {}, PortableStyle2Index: {} });
+	Object.assign(STACK, { LIBRARIES: {}, PORTABLES: {} });
+
 	const {
 		libraryTable,
 		modulesTable,
@@ -27,7 +31,7 @@ export function UpdateXtylesFolder() {
 
 	CACHE.PortableEssentials = ModuleEssentials;
 	PUBLISH.LibFilesTemp = { ...libraryTable, ...modulesTable };
-	PUBLISH.FirstProxyIndex = INDEX.NOW;
+	PUBLISH.LastLibINDEX = INDEX.NOW;
 }
 
 export function ProcessProxies(
@@ -37,32 +41,34 @@ export function ProcessProxies(
 	fileContent,
 	extension,
 ) {
-	PUBLISH.Report.hashrule = HASHRULE.UPLOAD();
-	PUBLISH.MANIFEST.hashrules = CACHE.HashRule;
-
 	switch (action) {
 		case "add":
 		case "change":
-			if (STACK.PROXYCACHE[targetFolder].extensions.includes(extension)) {
+			if (STACK.PROXYCACHE[targetFolder].stylesheetPath === filePath) {
+				STACK.PROXYCACHE[targetFolder].stylesheetContent = fileContent;
+			} else if (STACK.PROXYCACHE[targetFolder].extensions.includes(extension)) {
 				RAW.PROXYFILES[targetFolder][filePath] = fileContent;
 				STACK.PROXYCACHE[targetFolder].SaveFile(filePath, fileContent);
+				INDEX.RESET(PUBLISH.LastLibINDEX)
 				STACK.PROXYCACHE[targetFolder].UpdateCache();
 				PUBLISH.DeltaPath = `${STACK.PROXYCACHE[targetFolder].source}/${filePath}`;
-				PUBLISH.DeltaContent = "";
-			} else if (STACK.PROXYCACHE[targetFolder].stylesheetPath === filePath) {
-				STACK.PROXYCACHE[targetFolder].stylesheetContent = fileContent;
 			} else {
 				PUBLISH.DeltaPath = `${STACK.PROXYCACHE[targetFolder].source}/${filePath}`;
 				PUBLISH.DeltaContent = fileContent;
 			}
 			break;
 		default:
+			INDEX.RESET(PUBLISH.LastLibINDEX)
+			PUBLISH.Report.hashrule = HASHRULE.UPLOAD();
+			PUBLISH.MANIFEST.hashrules = CACHE.HashRule;
+
 			Object.entries(STACK.PROXYCACHE).forEach(([key, cache]) => { cache.ClearFiles(); delete STACK.PROXYCACHE[key]; });
 			Object.entries(RAW.PROXYFILES).forEach(([key, files]) => { STACK.PROXYCACHE[key] = new SCRIPT(files); });
 	}
 }
 
 async function Engine() {
+
 	const CUMULATES = {
 		report: [],
 		errors: [],
@@ -106,43 +112,38 @@ async function Engine() {
 
 	if (RAW.WATCH) {
 		CACHE.FinalStack = {};
-		PUBLISH.FinalMessage = CUMULATES.errors.length
-			? "Errors in " + CUMULATES.errors.length + " Tags."
-			: "Zero errors.";
+		PUBLISH.FinalMessage = CUMULATES.errors.length ? "Errors in " + CUMULATES.errors.length + " Tags." : "Zero errors.";
 	} else {
 		let output;
 		if ("publish" === RAW.CMD) {
 			if (CUMULATES.errors.length) {
-				output = await ORDER(TRACKS, RAW.CMD, RAW.ARG);
-				PUBLISH.FinalMessage =
-					"Errors in " +
-					CUMULATES.errors.length +
-					" Tags. Falling back to 'preview' command.";
 				RAW.CMD = "preview";
+				output = await ORDER(TRACKS, RAW.CMD, RAW.ARG);
+				PUBLISH.FinalMessage = "Errors in " + CUMULATES.errors.length + " Tags. Falling back to 'preview' command.";
 			} else {
 				output = await ORDER(TRACKS, RAW.CMD, RAW.ARG);
-				PUBLISH.FinalMessage = output.message;
-				if (output.status) RAW.CMD = "preview";
-				else CUMULATES.errors.push(PUBLISH.FinalMessage);
+				if (output.status) {
+					PUBLISH.FinalMessage = "Build Success.";
+				} else {
+					RAW.CMD = "preview";
+					PUBLISH.FinalError = output.message;
+					PUBLISH.FinalMessage = "Build Atttempt Failed. Fallback with Preview.";
+				}
 			}
 		} else {
-			PUBLISH.FinalMessage =
-				CUMULATES.errors.length === 0
-					? "Preview verified. Procceed to 'publish' using your key."
-					: CUMULATES.errors.length +
-					" Unresolved Errors. Rectify them to proceed with 'publish' command.";
+			if (CUMULATES.errors.length)
+				PUBLISH.FinalMessage = CUMULATES.errors.length + " Unresolved Errors. Rectify them to proceed with 'publish' command.";
+			else
+				PUBLISH.FinalMessage = "Preview verified. Procceed to 'publish' using your key."
 			output = await ORDER(TRACKS, RAW.CMD, RAW.ARG);
 		}
 
 		CACHE.FinalStack = output.result.reduce((A, I) => {
-			A["." + CACHE.Index2StylesObject[I].class] = I;
+			A["." + INDEX.STYLE(I).class] = I;
 			return A;
 		}, {});
 		CACHE.SortedIndexes = output.result;
 	}
-
-	PUBLISH.ErrorCount = CUMULATES.errors.length;
-	PUBLISH.Report.targets = $.MOLD.std.Block(CUMULATES.report);
 
 	return CUMULATES;
 }
@@ -207,6 +208,9 @@ export async function Generate() {
 	const CUMULATES = await Engine();
 	const XRESPONSE = XTYLES.Report();
 
+	if (PUBLISH.FinalError.length) CUMULATES.errors.push($.MOLD.failed.List(PUBLISH.FinalError))
+	PUBLISH.ErrorCount = CUMULATES.errors.length;
+	PUBLISH.Report.targets = $.MOLD.std.Block(CUMULATES.report);
 	PUBLISH.Report.library = XRESPONSE.report;
 	PUBLISH.WarningCount = XRESPONSE.warnings.length;
 	PUBLISH.Report.errors = $.MOLD[PUBLISH.ErrorCount ? "failed" : "success"].Section(
@@ -230,9 +234,7 @@ export async function Generate() {
 				});
 			}
 			SAVEFILES[NAV.json.manifest] = JSON.stringify(PUBLISH.MANIFEST);
-		}
-
-		else {
+		} else {
 			// 		const portableMd = NAV.folder.portableBundle + "/" + RAW.PACKAGE + ".css",
 			// 			portableCss = NAV.folder.portableBundle + "/" + RAW.PACKAGE + ".xcss",
 			// 			portableXcss = NAV.folder.portableBundle + "/" + RAW.PACKAGE + ".md";

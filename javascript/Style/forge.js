@@ -1,5 +1,5 @@
 import Use from "../Utils/index.js";
-import { CACHE } from "../data-cache.js";
+import { CACHE, INDEX } from "../data-cache.js";
 
 function styleSwitch(object) {
 	const switched = Use.object.switch(object);
@@ -26,9 +26,9 @@ function buildXtyles(selectorIndexObject) {
 	const preBinds = [], postBinds = [];
 	const object = Object.entries(styleSwitch(
 		Object.entries(selectorIndexObject).reduce((A, [selector, index]) => {
-			A[selector] = CACHE.Index2StylesObject[index].object;
-			preBinds.push(...CACHE.Index2StylesObject[index].preBinds)
-			postBinds.push(...CACHE.Index2StylesObject[index].postBinds)
+			A[selector] = INDEX.STYLE(index).object;
+			preBinds.push(...INDEX.STYLE(index).preBinds)
+			postBinds.push(...INDEX.STYLE(index).postBinds)
 			return A;
 		}, {}),
 	));
@@ -45,13 +45,10 @@ function loadBindObjectsFromIndex(
 	order.forEach((identity) => {
 		const index = CACHE.LibraryStyle2Index[identity];
 		if (index) {
-			const selector = CACHE.Index2StylesObject[index].selector;
-			const evaluated =
-				!useXelector ? selector
-					: selector[0] === "@" ? selector
-						: Use.string.normalize(identity, [], [], ["$"]);
+			const selector = INDEX.STYLE(index).selector;
+			const evaluated = !useXelector ? selector : selector[0] === "@" ? selector : Use.string.normalize(identity, [], [], ["$"]);
 			indexMap[Use.string.normalize(evaluated, ["$"], ["\\"])] = index;
-			result[(["@", "."].includes(selector[0]) ? "" : ".") + evaluated] = CACHE.Index2StylesObject[index].object;
+			result[(["@", "."].includes(selector[0]) ? "" : ".") + evaluated] = INDEX.STYLE(index).object;
 		}
 	});
 
@@ -70,30 +67,22 @@ function buildBinds(
 	do {
 		preBinds.forEach((element) => {
 			if (CACHE.LibraryStyle2Index[element]) {
-				CACHE.Index2StylesObject[
-					CACHE.LibraryStyle2Index[element]
-				].preBinds.forEach((E) => {
+				INDEX.STYLE(CACHE.LibraryStyle2Index[element]).preBinds.forEach((E) => {
 					if (!preBinds.has(E)) preBinds.add(E);
 				});
 			} else if (CACHE.PortableStyle2Index[element] && !forPortable) {
-				CACHE.Index2StylesObject[
-					CACHE.PortableStyle2Index[element]
-				].preBinds.forEach((E) => {
+				INDEX.STYLE(CACHE.PortableStyle2Index[element]).preBinds.forEach((E) => {
 					if (!preBinds.has(E)) preBinds.add(E);
 				});
 			}
 		});
 		postBinds.forEach((element) => {
 			if (CACHE.LibraryStyle2Index[element]) {
-				CACHE.Index2StylesObject[
-					CACHE.LibraryStyle2Index[element]
-				].postBinds.forEach((E) => {
+				INDEX.STYLE(CACHE.LibraryStyle2Index[element]).postBinds.forEach((E) => {
 					if (!postBinds.has(E)) postBinds.add(E);
 				});
 			} else if (CACHE.PortableStyle2Index[element] && !forPortable) {
-				CACHE.Index2StylesObject[
-					CACHE.PortableStyle2Index[element]
-				].postBinds.forEach((E) => {
+				INDEX.STYLE(CACHE.PortableStyle2Index[element]).postBinds.forEach((E) => {
 					if (!postBinds.has(E)) postBinds.add(E);
 				});
 			}

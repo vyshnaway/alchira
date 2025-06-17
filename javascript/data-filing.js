@@ -37,6 +37,8 @@ export default function FILING(
 		essentials: [],
 		// for Proxy Class
 		styleLocals: {},
+		midway: "",
+		summon: false,
 		// for Cumulation
 		classGroups: [],
 		styleGlobals: {},

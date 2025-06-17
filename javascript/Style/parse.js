@@ -9,7 +9,7 @@ function xtylemerge(classList = []) {
 	classList.forEach((className) => {
 		const index = (CACHE.LibraryStyle2Index[className] || 0) + (CACHE.PortableStyle2Index[className] || 0);
 		if (index) {
-			const found = CACHE.Index2StylesObject[index];
+			const found = INDEX.STYLE(index);
 			preBinds.push(...found.preBinds);
 			postBinds.push(...found.postBinds);
 			result = Use.object.multiMerge([result, found.object[""]], true);
@@ -80,17 +80,9 @@ function CSSLIBRARY(fileDatas = [], initial = "", forPortable = false) {
 			const skeleton = { Info: {}, Variables: scannedStyle.variables, PreBinds: preBinds, PostBinds: postBinds, Skeleton: Use.object.skeleton(object) };
 
 			const index = (IndexMap[stampSelector] || 0) + (selectors[stampSelector] || 0);
-			const InStash = CACHE.Index2StylesObject[index];
-			const CLX = index ? { number: InStash.index, class: InStash.class } : INDEX.DECLARE();
-			if (index) declarations.push(...CACHE.Index2StylesObject[index].declarations);
-
-			source.usedIndexes.add(CLX.number);
-			indexSkeleton[stampSelector] = skeleton;
-			selectors[stampSelector] = CLX.number;
-
-			CACHE.Index2StylesObject[CLX.number] = {
-				index: CLX.number,
-				class: CLX.class,
+			const InStash = INDEX.STYLE(index);
+			if (index) declarations.push(...INDEX.STYLE(index).declarations);
+			const identity = index ? { index: InStash.index, class: InStash.class } : INDEX.DECLARE({
 				scope: group,
 				selector,
 				object,
@@ -99,7 +91,11 @@ function CSSLIBRARY(fileDatas = [], initial = "", forPortable = false) {
 				postBinds: forPortable ? postBinds.map(bind => stamp + bind) : postBinds,
 				metaClass: metaFront + "_" + Use.string.normalize(stampSelector, [], [], ["$", "/"]),
 				declarations,
-			};
+			});
+
+			source.usedIndexes.add(identity.index);
+			selectors[stampSelector] = identity.index;
+			indexSkeleton[stampSelector] = skeleton;
 		}
 	});
 
@@ -164,20 +160,13 @@ function TAGSTYLE(
 	if (selector === "") {
 		essentials.push(...Object.entries(object).map(([k, v]) => [`${k} /* ${declarations[0]} */`, v]));
 	} else {
-		const index = (IndexMap[xelector] ?? 0) + (CACHE.LibraryStyle2Index[xelector] ?? 0);
-		const InStash = CACHE.Index2StylesObject[index];
-		const CLX = index ? { number: InStash.index, class: InStash.class, } : INDEX.DECLARE();
-
+		const index = (IndexMap[xelector] || 0) + (CACHE.LibraryStyle2Index[xelector] || 0);
+		const InStash = INDEX.STYLE(index);
 		if (index) {
 			declarations.push(...InStash.declarations);
 			isDuplicate = true;
-		} else {
-			IndexMap[xelector] = CLX.number;
 		}
-
-		CACHE.Index2StylesObject[CLX.number] = {
-			index: CLX.number,
-			class: CLX.class,
+		const identity = index ? { index: InStash.index, class: InStash.class } :INDEX.DECLARE({
 			scope,
 			selector,
 			object,
@@ -186,7 +175,10 @@ function TAGSTYLE(
 			postBinds: forPortable ? postBinds.map(bind => selectorPrefix + "$/" + bind) : postBinds,
 			metaClass,
 			declarations,
-		};
+		});
+		if (!index) {
+			IndexMap[xelector] = identity.index;
+		}
 	}
 
 	return {

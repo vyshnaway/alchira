@@ -1,4 +1,3 @@
-import $ from "./Shell/index.js";
 import Use from "./Utils/index.js";
 
 export const APP = {
@@ -114,9 +113,10 @@ export const PUBLISH = {
     DeltaPath: "",
     DeltaContent: "",
     FinalMessage: "",
+    FinalError: "",
     ErrorCount: 0,
     WarningCount: 0,
-    FirstProxyIndex: 0,
+    LastLibINDEX: 0,
     Report: {
         library: "",
         variables: "",
@@ -157,7 +157,6 @@ export const STACK = {
     PORTABLES: {},
 };
 
-
 export const RAW = {
     WATCH: false,
     PACKAGE: "",
@@ -187,32 +186,41 @@ export const PREFIX = {
 export const INDEX = {
     NOW: 0,
     BIN: new Set(),
-    DECLARE: () => {
-        let number;
+    STYLE: (index = 0) => {
+        return CACHE.Index2StylesObject[index];
+    },
+    DECLARE: (object = {}) => {
         if (INDEX.BIN.size > 0) {
-            number = INDEX.BIN.values().next().value;
-            INDEX.BIN.delete(number);
+            object.index = INDEX.BIN.values().next().value;
+            INDEX.BIN.delete(object.index);
         } else {
-            number = ++INDEX.NOW;
+            object.index = ++INDEX.NOW;
         }
-        return { number, class: "_" + Use.string.enCounter(number + 768) };
+        object.class = "_" + Use.string.enCounter(object.index + 768);
+        CACHE.Index2StylesObject[object.index] = object;
+        return { index: object.index, class: object.class };
     },
     DISPOSE: (...indexes) => {
         indexes.forEach((index) => {
-            INDEX.BIN.add(index);
-            delete CACHE.Index2StylesObject[index];
+            if (index > 0) {
+                INDEX.BIN.add(index);
+                delete CACHE.Index2StylesObject[index.toString()];
+            }
         });
     },
-    RESET: (from = 0) => {
-        Object.keys(CACHE.Index2StylesObject).forEach(
-            (index) => {
-                if (index >= from) {
-                    delete CACHE.Index2StylesObject[index];
-                }
-            },
-        );
-        INDEX.NOW = from;
-        INDEX.BIN.clear();
+    RESET: (after = 0) => {
+        after = after > 0 ? after : 0;
+        let counter = 0;
+        Object.keys(CACHE.Index2StylesObject).forEach((index) => {
+            const number = Number(index);
+            if (number > after) {
+                if (INDEX.BIN.has(number)) INDEX.BIN.delete(number)
+                delete CACHE.Index2StylesObject[index];
+                counter++;
+            }
+        });
+        INDEX.NOW = after;
+        return counter;
     }
 };
 
@@ -222,14 +230,7 @@ export default function MemoryUsage() {
         return t;
     }, 0);
     const chart = {
-        // HashRule: Use.string.stringMem(JSON.stringify(CACHE.HashRule)),
-        // SortedIndexes: Use.string.stringMem(JSON.stringify(CACHE.SortedIndexes)),
-        // PortableEssentials: Use.string.stringMem(JSON.stringify(CACHE.PortableEssentials)),
         Index2StylesObject: Use.string.stringMem(JSON.stringify(CACHE.Index2StylesObject)),
-        // LibraryStyle2Index: Use.string.stringMem(JSON.stringify(CACHE.LibraryStyle2Index)),
-        // GlobalsStyle2Index: Use.string.stringMem(JSON.stringify(CACHE.GlobalsStyle2Index)),
-        // PortableStyle2Index: Use.string.stringMem(JSON.stringify(CACHE.PortableStyle2Index)),
-        // FinalStack: Use.string.stringMem(JSON.stringify(CACHE.FinalStack)),
         Files: Use.string.stringMem(JSON.stringify(RAW)),
         Cache: Use.string.stringMem(JSON.stringify(CACHE)),
         Stack: Use.string.stringMem(JSON.stringify(STACK)),

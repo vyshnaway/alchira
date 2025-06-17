@@ -6,7 +6,7 @@ export const FileCursor = {
 	colMarker: 0,
 	tagCount: 0,
 };
-export const StyleStack = { Library: {}, Local: {}, Global: {} };
+export const StyleStack = { Portable: {}, Library: {}, Local: {}, Global: {} };
 export const BindStack = { preBinds: new Set(), postBinds: new Set() };
 
 export default function scanner(
@@ -14,14 +14,14 @@ export default function scanner(
 	classProps = [],
 	action = "read",
 	bindStack = { preBinds: new Set(), postBinds: new Set() },
-	styleStack = { Library: {}, Local: {}, Global: {} },
+	styleStack = { Portable: {}, Library: {}, Local: {}, Global: {} },
 ) {
 	Object.assign(StyleStack, styleStack);
 	Object.assign(BindStack, bindStack);
-	(FileCursor.tagCount = 1),
-		(FileCursor.rowMarker = 1),
-		(FileCursor.colMarker = 1),
-		(FileCursor.marker = 0);
+	FileCursor.tagCount = 1;
+	FileCursor.rowMarker = 1;
+	FileCursor.colMarker = 1;
+	FileCursor.marker = 0;
 	const stylesList = [],
 		classesList = [];
 	let ch = fileData.content[0],

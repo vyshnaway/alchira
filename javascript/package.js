@@ -21,6 +21,7 @@ async function execute(chapter) {
     let stopWatcher = null;
     let report = "",
         targets = [],
+        reportNext = false,
         step = "Initialize",
         heading = "Initial Build";
 
@@ -41,9 +42,6 @@ async function execute(chapter) {
 
             case "ReadIndex":
                 await FETCH.FetchIndexContent();
-
-            case "ResetAll":
-                DATA.ResetALL()
 
             case "ReadLibraries":
                 await FETCH.ReloadLibrary();
@@ -67,9 +65,6 @@ async function execute(chapter) {
                     break;
                 } else report = "";
 
-            case "ResetCache":
-                DATA.ResetCACHE()
-
             case "ProcessXtylesFolder":
                 SMITH.UpdateXtylesFolder();
 
@@ -82,6 +77,7 @@ async function execute(chapter) {
 
             case "Publish":
                 if (Object.keys(SaveFiles).length) await fileman.write.bulk(SaveFiles);
+                if (reportNext) { reporter(heading, targets, report); reportNext = false };
 
             case "WatchFolders":
                 if (RAW.WATCH) {
@@ -139,7 +135,7 @@ async function execute(chapter) {
                                             RAW.LIBRARIES[filePath] = event.fileContent;
                                         else if (filePath.startsWith(NAV.folder.portables) && ["xcss", "css", "md"].includes(event.extension))
                                             RAW.PORTABLES[filePath] = event.fileContent;
-                                        step = "ResetCache";
+                                        step = "ProcessXtylesFolder";
                                 }
                             } else {
                                 step = "VerifySetupStruct";
@@ -152,7 +148,7 @@ async function execute(chapter) {
                         }
 
                         heading = `[${event.timeStamp}] | ${event.filePath} | [${event.action}]`;
-                        reporter(heading, targets, report);
+                        reportNext = true;
                     }
                 }
 
