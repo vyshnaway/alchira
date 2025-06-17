@@ -262,13 +262,12 @@ function Report() {
 			if (RAW.PACKAGE === F.fileName)
 				nameCollitions.push(F.sourcePath);
 			if (F.extension === "md") {
-				if (!readmeFiles[F.fileName]) readmeFiles[F.fileName] = F.content;
-				else readmeFiles[F.fileName] += "\n\n" + F.content;
+				if (readmeFiles[F.fileName]) readmeFiles[F.fileName].push(F.content);
+				else readmeFiles[F.fileName] = [];
 			} else if (F.extension === "xcss") {
 				if (xtylingMap[F.fileName]) F.usedIndexes.forEach(i => xtylingMap[F.fileName].push(i));
 				else xtylingMap[F.fileName] = Array.from(F.usedIndexes);
 			} else if (F.extension === "css") {
-				// const fileName = `${F.cluster}.${F.id}.${F.fileName}`
 				if (bindingMap[F.fileName]) F.usedIndexes.forEach(i => bindingMap[F.fileName].push(i));
 				else bindingMap[F.fileName] = Array.from(F.usedIndexes);
 			}

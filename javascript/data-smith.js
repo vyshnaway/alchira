@@ -32,7 +32,6 @@ export function UpdateXtylesFolder() {
 
 	CACHE.PortableEssentials = ModuleEssentials;
 	PUBLISH.LibFilesTemp = { ...libraryTable, ...modulesTable };
-	PUBLISH.LastLibINDEX = INDEX._NOW;
 }
 
 export function ProcessProxies(
@@ -66,7 +65,6 @@ export function ProcessProxies(
 			PUBLISH.MANIFEST.hashrules = CACHE.HashRule;
 	}
 	if (reCache) {
-		// INDEX.RESET(PUBLISH.LastLibINDEX)
 		Object.keys(CACHE.GlobalsStyle2Index).forEach(key => delete CACHE.GlobalsStyle2Index[key])
 		Object.entries(STACK.PROXYCACHE).forEach(([key, cache]) => { cache.ClearFiles(); delete STACK.PROXYCACHE[key]; });
 		Object.entries(RAW.PROXYFILES).forEach(([key, files]) => { STACK.PROXYCACHE[key] = new SCRIPT(files); });
@@ -74,7 +72,6 @@ export function ProcessProxies(
 }
 
 async function Engine() {
-
 	const CUMULATES = {
 		report: [],
 		errors: [],
@@ -205,16 +202,19 @@ export async function Generate() {
 	const CUMULATES = await Engine();
 	const XRESPONSE = XTYLES.Report();
 
-	if (PUBLISH.FinalError.length) CUMULATES.errors.push($.MOLD.failed.List(PUBLISH.FinalError))
-	PUBLISH.ErrorCount = CUMULATES.errors.length;
-	PUBLISH.Report.targets = $.MOLD.std.Block(CUMULATES.report);
 	PUBLISH.Report.library = XRESPONSE.report;
+	PUBLISH.Report.targets = $.MOLD.std.Block(CUMULATES.report);
+	
+	if (PUBLISH.FinalError.length)
+		 CUMULATES.errors.push($.MOLD.failed.List(PUBLISH.FinalError))
+	PUBLISH.ErrorCount = CUMULATES.errors.length;
 	PUBLISH.WarningCount = XRESPONSE.warnings.length;
 	PUBLISH.Report.errors = $.MOLD[PUBLISH.ErrorCount ? "failed" : "success"].Section(
 		`${PUBLISH.ErrorCount} Errors & ${PUBLISH.WarningCount} Warnings`,
 		[...XRESPONSE.warnings, ...CUMULATES.errors]
 	);
 
+	
 	if (PUBLISH.DeltaContent.length) {
 		SAVEFILES[PUBLISH.DeltaPath] = PUBLISH.DeltaContent;
 	} else {

@@ -9,12 +9,12 @@ const bracePair = {
 	"'": "'",
 	"`": "`",
 	'"': '"',
-},
-	openBraces = ["[", "{", "(", "'", '"', "`"],
-	closeBraces = ["]", "}", ")"];
+};
+const openBraces = ["[", "{", "(", "'", '"', "`"];
+const closeBraces = ["]", "}", ")"];
 
 export const xtyleTag = `<${APP.xcssTag} />`;
-const tagRegex = new RegExp(`<\\s*${APP.xcssTag}\\s*/\\s*>`);
+const tagRegex = new RegExp(`<\s*${APP.xcssTag}\s*/\s*>`);
 const tagCheck = (string) => tagRegex.test(string);
 
 export default function tagScan(content, action, classProps, fileData) {

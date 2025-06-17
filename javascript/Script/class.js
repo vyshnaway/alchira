@@ -90,40 +90,28 @@ export default class Proxy {
 			postBinds: new Set(),
 		}, styleGlobals = {};
 
-
-		C.styleMap.push({
-			file: {
-				group: "stylesheet",
-				id: RAW.WorkPath + this.targetStylesheet,
-			},
-			global: {},
-			local: {},
-		});
+		C.styleMap.push({ file: { group: "stylesheet", id: RAW.WorkPath + this.targetStylesheet, }, global: {}, local: {}, });
 
 		Object.values(this.fileCache).forEach((file) => {
-
 			const fileLocalCount = Object.keys(file.styleLocals).length;
-			const fileGlobalCount = Object.keys(file.styleGlobals).length;
-			const calcString = `${fileLocalCount}L + ${fileGlobalCount}G = ${fileLocalCount + fileGlobalCount}T`;
-			if (fileLocalCount + fileGlobalCount)
-				C.report.push(
-					$.MOLD.tertiary.Topic(
-						`[ ${calcString} ] : ${file.targetPath}`, [
-						...$.list.text.Entries(Object.keys(file.styleGlobals)),
-						$.canvas.divider.mid,
-						...$.list.text.Entries(Object.keys(file.styleLocals)),
-					])
-				);
-
-			C.errors.push(...file.errors);
 			localCount += fileLocalCount;
+			const fileGlobalCount = Object.keys(file.styleGlobals).length;
 			globalCount += fileGlobalCount;
+			if (fileLocalCount + fileGlobalCount) {
+				C.report.push($.MOLD.tertiary.Topic(
+					`[ ${fileLocalCount} Local + ${fileGlobalCount} Global ] : ${file.targetPath}`, [
+					...$.list.secondary.Entries(Object.keys(file.styleGlobals)),
+					$.canvas.divider.mid,
+					...$.list.text.Entries(Object.keys(file.styleLocals)),
+				]));
+			}
 			Object.values(file.styleLocals).forEach((index) => {
 				const InStash = INDEX.STYLE(index);
 				if (InStash.declarations.length > 1)
 					C.errors.push($.MOLD.failed.List("Multiple declarations: " + InStash.selector, InStash.declarations, $.list.text.Bullets));
 			});
 
+			C.errors.push(...file.errors);
 			C.styleMap.push(file.styleMap);
 			C.essentials.push(...file.essentials);
 			Object.assign(styleGlobals, file.styleGlobals);
@@ -137,8 +125,7 @@ export default class Proxy {
 				C.errors.push($.MOLD.failed.List("Multiple declarations: " + InStash.selector, InStash.declarations, $.list.text.Bullets));
 		});
 
-		const calcString = `${localCount}L + ${globalCount}G = ${localCount + globalCount}T`;
-		C.report.unshift($.MOLD.primary.Section(`PROXY : [ ${calcString} ] : ${this.target} -> ${this.source}`));
+		C.report.unshift($.MOLD.primary.Section(`PROXY : [ ${localCount} Locals + ${globalCount} Globals ] : ${this.target} -> ${this.source}`));
 
 		return C;
 	}
@@ -146,10 +133,7 @@ export default class Proxy {
 	RenderFiles(preBinds = new Set(), postBinds = new Set(), Command = "") {
 		Object.values(this.fileCache).forEach((file) => {
 			file.summon = false;
-			const result = SCRIPTPARSE(
-				file,
-				this.extnsProps[file.extension],
-				Command,
+			file.midway = SCRIPTPARSE(file, this.extnsProps[file.extension], Command,
 				{ preBinds, postBinds },
 				{
 					Local: file.styleLocals,
@@ -157,8 +141,7 @@ export default class Proxy {
 					Library: CACHE.LibraryStyle2Index,
 					Portable: CACHE.PortableStyle2Index
 				},
-			);
-			file.midway = result.scribed;
+			).scribed;
 		});
 	}
 

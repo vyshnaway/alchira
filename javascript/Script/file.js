@@ -54,13 +54,13 @@ export default function scanner(
 			const quote = ch;
 			FileCursor.marker++;
 			ch = fileData.content[FileCursor.marker];
-			while (
-				FileCursor.marker < fileData.content.length &&
-				(ch !== quote || fileData.content[FileCursor.marker - 1] === "\\")
-			) {
+			scribed += ch;
+			while (FileCursor.marker < fileData.content.length && (ch !== quote || fileData.content[FileCursor.marker - 1] === "\\")) {
+				scribed += ch;
 				FileCursor.marker++;
 				ch = fileData.content[FileCursor.marker];
 			}
+			scribed += ch;
 			FileCursor.marker++; // Skip the closing quote
 		} else {
 			scribed += ch;

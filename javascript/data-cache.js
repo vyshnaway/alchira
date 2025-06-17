@@ -116,7 +116,6 @@ export const PUBLISH = {
     FinalError: "",
     ErrorCount: 0,
     WarningCount: 0,
-    LastLibINDEX: 0,
     Report: {
         library: "",
         variables: "",
