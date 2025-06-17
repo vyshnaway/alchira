@@ -1,7 +1,8 @@
 import { BindStack, FileCursor, StyleStack } from "./file.js";
 
 import Use from "../Utils/index.js";
-import { CACHE, INDEX } from "../data-cache.js";
+import { CACHE } from "../data-cache.js";
+import { INDEX } from "../data-set.js";
 
 function loadActiveIndexes(classList = []) {
 	return classList.reduce((A, entry) => {

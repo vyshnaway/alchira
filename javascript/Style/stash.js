@@ -4,7 +4,8 @@ import $ from "../Shell/index.js";
 import Use from "../Utils/index.js";
 import FILING from "../data-filing.js";
 import SCRIPTFILE from "../Script/file.js";
-import { NAV, CACHE, STACK, RAW, INDEX } from "../data-cache.js";
+import { INDEX } from "../data-set.js";
+import { NAV, CACHE, STACK, RAW } from "../data-cache.js";
 
 function _DeleteLibraryFile(filePath) {
 	if (STACK.LIBRARIES[filePath]) {
@@ -133,7 +134,6 @@ function ReRender() {
 		const filePath = NAV.folder.portables + "/" + fileData.filePath;
 		const tagStash = SCRIPTFILE(fileData).stylesList, indexSkeleton = {};
 		fileData.usedIndexes = new Set();
-
 		tagStash.forEach((style) => {
 			style.scope = "xtyling";
 			const response = PARSE.TAGSTYLE(
@@ -142,13 +142,13 @@ function ReRender() {
 				fileData.filePath,
 				fileData.sourcePath,
 				CACHE.PortableStyle2Index,
-				fileData.stamp
+				fileData.stamp,
 			);
 			warnings.push(...response.errors);
 
 			if (response.selector === "") {
 				RAW.WATCH ? ModuleEssentials.push(...response.essentials) : fileData.essentials.push(...response.essentials);
-			} else if (!response.isDuplicate) {
+			} else if (response.isOriginal) {
 				fileData.usedIndexes.add(response.index);
 				indexSkeleton[response.selector] = response.skeleton;
 				portableCount++;
@@ -156,8 +156,7 @@ function ReRender() {
 		});
 		collection[filePath] = indexSkeleton;
 		const classNames = Object.keys(indexSkeleton);
-		if (classNames.length)
-			portableChart[`Portable [${fileData.filePath}]: ${classNames.length} Classes`] = classNames;
+		if (classNames.length) portableChart[`Portable [${fileData.filePath}]: ${classNames.length} Classes`] = classNames;
 		return collection
 	}, {});
 
@@ -269,13 +268,14 @@ function Report() {
 				if (xtylingMap[F.fileName]) F.usedIndexes.forEach(i => xtylingMap[F.fileName].push(i));
 				else xtylingMap[F.fileName] = Array.from(F.usedIndexes);
 			} else if (F.extension === "css") {
+				// const fileName = `${F.cluster}.${F.id}.${F.fileName}`
 				if (bindingMap[F.fileName]) F.usedIndexes.forEach(i => bindingMap[F.fileName].push(i));
 				else bindingMap[F.fileName] = Array.from(F.usedIndexes);
 			}
 		});
 
 		if (nameCollitions.length)
-			warnings.push($.MOLD.warning.List(`Package-name collitions: ${RAW.PACKAGE}`, nameCollitions, $.list.tertiary.Bullets))
+			warnings.push($.MOLD.warning.List(`Package-name collitions: ${RAW.PACKAGE}`, nameCollitions, $.list.failed.Bullets))
 	}
 
 	return {

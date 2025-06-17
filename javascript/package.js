@@ -2,16 +2,17 @@ import $ from "./Shell/index.js";
 import * as DATA from "./data-set.js";
 import * as FETCH from "./data-fetch.js";
 import * as SMITH from "./data-smith.js";
-import MemoryUsage, { ROOT, APP, RAW, NAV, STACK } from "./data-cache.js";
 import * as worker from "../interface/worker.js";
 import fileman from "../interface/fileman.js";
+import { MemoryUsage } from "./data-set.js";
+import { ROOT, APP, RAW, NAV, STACK } from "./data-cache.js";
 import { hasEvents, dequeueEvent } from "../interface/eventface.js";
 
 function reporter(heading, targets, report) {
     $.POST(
         $.MOLD.std.Block([
             $.MOLD.title.Chapter(heading, targets.map(i => `Watching : ${i}`), $.list.tertiary.Bullets),
-            // report,
+            report,
             $.MOLD.failed.Footer("Press Ctrl+C to stop watching.", MemoryUsage(), $.list.tertiary.Entries),
         ]),
     );
@@ -140,12 +141,10 @@ async function execute(chapter) {
                             } else {
                                 step = "VerifySetupStruct";
                             }
-                        } else if (event.action === "add" || event.action === "change") {
+                        } else if (event.action === "add" || event.action === "change" || event.action === "unlink") {
                             SMITH.ProcessProxies(event.action, event.folder, event.filePath, event.fileContent, event.extension,);
                             step = "GenerateFinals";
-                        } else {
-                            step = "VerifyProxyMap";
-                        }
+                        } else step = "VerifyProxyMap";
 
                         heading = `[${event.timeStamp}] | ${event.filePath} | [${event.action}]`;
                         reportNext = true;

@@ -26,6 +26,7 @@ export default function FILING(
 		id,
 		group,
 		stamp,
+		cluster,
 		filePath,
 		fileName,
 		extension,

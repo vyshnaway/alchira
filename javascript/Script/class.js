@@ -4,8 +4,8 @@ import { xtyleTag } from "./tag.js";
 import $ from "../Shell/index.js";
 import FILING from "../data-filing.js";
 import STYLEPARSE from "../Style/parse.js";
-import { RAW, CACHE, INDEX } from "../data-cache.js";
-import Use from "../Utils/index.js";
+import { INDEX } from "../data-set.js";
+import { RAW, CACHE } from "../data-cache.js";
 
 export default class Proxy {
 	source = "";
@@ -26,7 +26,6 @@ export default class Proxy {
 		fileContents,
 		stylesheetContent,
 	}) {
-		this.ClearFiles();
 		extensions["xcss"] = []
 
 		this.source = source;
@@ -43,7 +42,11 @@ export default class Proxy {
 	}
 
 	SaveFile(filePath, fileContent) {
-		this._DeleteFile(filePath);
+		if (this.fileCache[filePath]) {
+			this.fileCache[filePath].usedIndexes.forEach((index) => INDEX.DISPOSE(index));
+			Object.keys(this.fileCache[filePath].styleGlobals).forEach(key => delete CACHE.GlobalsStyle2Index[key])
+			delete this.fileCache[filePath];
+		}
 		const file = FILING(this.target, this.source, filePath, fileContent, false);
 		const globalSkeletons = {}, localSkeletons = {};
 		this.fileCache[file.filePath] = file;
@@ -60,15 +63,15 @@ export default class Proxy {
 				file.preBinds.push(...response.preBinds);
 				file.postBinds.push(...response.postBinds);
 				file.essentials.push(...response.essentials)
-			}
-			else if (!response.isDuplicate) {
+			} else if (response.isOriginal) {
 				skeletonMap[response.selector] = response.skeleton;
 				file.usedIndexes.add(response.index);
 			}
 
 			if (response.errors.length) file.errors.push(...response.errors);
 		});
-
+		Object.assign(CACHE.GlobalsStyle2Index, file.styleGlobals);
+		// console.log({ filePath, used: file.usedIndexes, local: Object.values(file.styleLocals), global: Object.values(file.styleGlobals) })
 		Object.assign(file.styleMap, {
 			file: { group: "target", id: RAW.WorkPath + file.targetPath },
 			global: globalSkeletons,
@@ -83,11 +86,10 @@ export default class Proxy {
 			errors: [],
 			styleMap: [],
 			essentials: [],
-			classGroups: [],
-			styleGlobals: {},
 			preBinds: new Set(),
 			postBinds: new Set(),
-		};
+		}, styleGlobals = {};
+
 
 		C.styleMap.push({
 			file: {
@@ -124,13 +126,12 @@ export default class Proxy {
 
 			C.styleMap.push(file.styleMap);
 			C.essentials.push(...file.essentials);
-			C.classGroups.push(...file.classGroups);
-			Object.assign(C.styleGlobals, file.styleGlobals);
+			Object.assign(styleGlobals, file.styleGlobals);
 			file.preBinds.forEach((bind) => C.preBinds.add(bind));
 			file.postBinds.forEach((bind) => C.postBinds.add(bind));
 		});
 
-		Object.values(C.styleGlobals).forEach((index) => {
+		Object.values(styleGlobals).forEach((index) => {
 			const InStash = INDEX.STYLE(index);
 			if (InStash.declarations.length > 1)
 				C.errors.push($.MOLD.failed.List("Multiple declarations: " + InStash.selector, InStash.declarations, $.list.text.Bullets));
@@ -200,22 +201,10 @@ export default class Proxy {
 		return classTracks;
 	}
 
-	MemoryUsage() {
-		return Use.string.stringMem(JSON.stringify(this))
-	}
-
 	ClearFiles() {
-		Object.values(this.fileCache).forEach((filePath) =>
-			this._DeleteFile(filePath),
-		);
-	}
-
-	_DeleteFile(filePath) {
-		if (this.fileCache[filePath]) {
-			this.fileCache[filePath].usedIndexes.forEach((index) => INDEX.DISPOSE(index));
-			console.log(this.fileCache[filePath].usedIndexes)
-			console.log(INDEX)
+		Object.entries(this.fileCache).forEach(([filePath, fileCache]) => {
+			fileCache.usedIndexes.forEach((index) => INDEX.DISPOSE(index));
 			delete this.fileCache[filePath];
-		}
+		});
 	}
 }

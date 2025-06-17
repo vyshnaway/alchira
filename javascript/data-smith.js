@@ -7,7 +7,8 @@ import FORGE from "./Style/forge.js";
 import ORDER from "./Worker/order-api.js";
 import SCRIPT from "./Script/class.js";
 import XTYLES from "./Style/stash.js";
-import { NAV, RAW, STACK, CACHE, PUBLISH, INDEX } from "./data-cache.js";
+import { NAV, RAW, STACK, CACHE, PUBLISH } from "./data-cache.js";
+import { INDEX } from "./data-set.js";
 
 export function UpdateXtylesFolder() {
 	INDEX.RESET();
@@ -31,7 +32,7 @@ export function UpdateXtylesFolder() {
 
 	CACHE.PortableEssentials = ModuleEssentials;
 	PUBLISH.LibFilesTemp = { ...libraryTable, ...modulesTable };
-	PUBLISH.LastLibINDEX = INDEX.NOW;
+	PUBLISH.LastLibINDEX = INDEX._NOW;
 }
 
 export function ProcessProxies(
@@ -41,29 +42,34 @@ export function ProcessProxies(
 	fileContent,
 	extension,
 ) {
+	let reCache = true;
 	switch (action) {
-		case "add":
-		case "change":
+		case "add": case "change":
 			if (STACK.PROXYCACHE[targetFolder].stylesheetPath === filePath) {
+				RAW.PROXYFILES[targetFolder].stylesheetContent = fileContent;
 				STACK.PROXYCACHE[targetFolder].stylesheetContent = fileContent;
+				reCache = false;
 			} else if (STACK.PROXYCACHE[targetFolder].extensions.includes(extension)) {
-				RAW.PROXYFILES[targetFolder][filePath] = fileContent;
-				STACK.PROXYCACHE[targetFolder].SaveFile(filePath, fileContent);
-				INDEX.RESET(PUBLISH.LastLibINDEX)
-				STACK.PROXYCACHE[targetFolder].UpdateCache();
+				RAW.PROXYFILES[targetFolder].fileContents[filePath] = fileContent;
 				PUBLISH.DeltaPath = `${STACK.PROXYCACHE[targetFolder].source}/${filePath}`;
 			} else {
 				PUBLISH.DeltaPath = `${STACK.PROXYCACHE[targetFolder].source}/${filePath}`;
 				PUBLISH.DeltaContent = fileContent;
+				reCache = false;
 			}
 			break;
+		case "unlink":
+			if (RAW.PROXYFILES[targetFolder]) delete RAW.PROXYFILES[targetFolder].fileContents[filePath];
+			break;
 		default:
-			INDEX.RESET(PUBLISH.LastLibINDEX)
 			PUBLISH.Report.hashrule = HASHRULE.UPLOAD();
 			PUBLISH.MANIFEST.hashrules = CACHE.HashRule;
-
-			Object.entries(STACK.PROXYCACHE).forEach(([key, cache]) => { cache.ClearFiles(); delete STACK.PROXYCACHE[key]; });
-			Object.entries(RAW.PROXYFILES).forEach(([key, files]) => { STACK.PROXYCACHE[key] = new SCRIPT(files); });
+	}
+	if (reCache) {
+		// INDEX.RESET(PUBLISH.LastLibINDEX)
+		Object.keys(CACHE.GlobalsStyle2Index).forEach(key => delete CACHE.GlobalsStyle2Index[key])
+		Object.entries(STACK.PROXYCACHE).forEach(([key, cache]) => { cache.ClearFiles(); delete STACK.PROXYCACHE[key]; });
+		Object.entries(RAW.PROXYFILES).forEach(([key, files]) => { STACK.PROXYCACHE[key] = new SCRIPT(files); });
 	}
 }
 
@@ -74,8 +80,6 @@ async function Engine() {
 		errors: [],
 		styleMap: [],
 		essentials: [],
-		classGroups: [],
-		styleGlobals: {},
 		preBinds: new Set(),
 		postBinds: new Set(),
 	};
@@ -87,8 +91,6 @@ async function Engine() {
 		CUMULATES.errors.push(...cumulated.errors);
 		CUMULATES.styleMap.push(...cumulated.styleMap);
 		CUMULATES.essentials.push(...cumulated.essentials);
-		CUMULATES.classGroups.push(...cumulated.classGroups);
-		Object.assign(CUMULATES.styleGlobals, cumulated.styleGlobals);
 		cumulated.preBinds.forEach((bind) => CUMULATES.preBinds.add(bind));
 		cumulated.postBinds.forEach((bind) => CUMULATES.postBinds.add(bind));
 	});
@@ -104,12 +106,7 @@ async function Engine() {
 
 
 	const TRACKS = []
-
-	CACHE.GlobalsStyle2Index = CUMULATES.styleGlobals;
-	Object.values(STACK.PROXYCACHE).forEach((cache) =>
-		TRACKS.push(...cache.LoadTracks()),
-	);
-
+	Object.values(STACK.PROXYCACHE).forEach((cache) => TRACKS.push(...cache.LoadTracks()));
 	if (RAW.WATCH) {
 		CACHE.FinalStack = {};
 		PUBLISH.FinalMessage = CUMULATES.errors.length ? "Errors in " + CUMULATES.errors.length + " Tags." : "Zero errors.";

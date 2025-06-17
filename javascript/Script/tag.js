@@ -79,7 +79,7 @@ export default function tagScan(content, action, classProps, fileData) {
 				if (value !== "") styleObject.styles[""] = value.slice(1, -1);
 			}
 			else if (attr === "$") {
-				styleObject.comments.push(value.slice(1, -1).split("\n").map(l => l.trim()))
+				styleObject.comments.push(...value.slice(1, -1).split("\n").map(l => l.trim()))
 			}
 			else if (/^[\w\-]*\$+[\w\-]+$/i.test(attr)) {
 				styleObject.selector = attr;

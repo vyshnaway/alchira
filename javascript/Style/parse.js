@@ -2,12 +2,13 @@ import CSSBLOCK from "./block.js";
 
 import Use from "../Utils/index.js";
 import HASHRULE from "../hash-rules.js";
-import { RAW, CACHE, INDEX } from "../data-cache.js";
+import { RAW, CACHE } from "../data-cache.js";
+import { INDEX } from "../data-set.js";
 
 function xtylemerge(classList = []) {
 	let result = {}, preBinds = [], postBinds = [];
 	classList.forEach((className) => {
-		const index = (CACHE.LibraryStyle2Index[className] || 0) + (CACHE.PortableStyle2Index[className] || 0);
+		const index = (CACHE.LibraryStyle2Index[className] || 0);
 		if (index) {
 			const found = INDEX.STYLE(index);
 			preBinds.push(...found.preBinds);
@@ -69,36 +70,36 @@ function CSSLIBRARY(fileDatas = [], initial = "", forPortable = false) {
 
 	fileDatas.forEach((source) => {
 		const { stamp, filePath, metaFront, content, group } = source;
-		const scannedObjects = CSSBLOCK(content).allBlocks;
 
-		for (const selector in scannedObjects) {
-			const declarations = [source.sourcePath];
+		CSSBLOCK(content, true).XallBlocks.forEach(([selector, OBJECT]) => {
+			const declaration = source.sourcePath;
 			const stampSelector = stamp + Use.string.normalize(selector, [], ["\\", "."]);
-			const scannedStyle = SCANNER(scannedObjects[selector], initial + " : " + filePath + " ||", selector,);
+			const scannedStyle = SCANNER(OBJECT, initial + " : " + filePath + " ||", selector,);
 			const preBinds = scannedStyle.preBinds, postBinds = scannedStyle.postBinds;
 			const object = { "": scannedStyle.object };
 			const skeleton = { Info: {}, Variables: scannedStyle.variables, PreBinds: preBinds, PostBinds: postBinds, Skeleton: Use.object.skeleton(object) };
 
 			const index = (IndexMap[stampSelector] || 0) + (selectors[stampSelector] || 0);
-			const InStash = INDEX.STYLE(index);
-			if (index) declarations.push(...INDEX.STYLE(index).declarations);
-			const identity = index ? { index: InStash.index, class: InStash.class } : INDEX.DECLARE({
-				scope: group,
-				selector,
-				object,
-				skeleton,
-				preBinds: forPortable ? preBinds.map(bind => stamp + bind) : preBinds,
-				postBinds: forPortable ? postBinds.map(bind => stamp + bind) : postBinds,
-				metaClass: metaFront + "_" + Use.string.normalize(stampSelector, [], [], ["$", "/"]),
-				declarations,
-			});
-
-			source.usedIndexes.add(identity.index);
-			selectors[stampSelector] = identity.index;
-			indexSkeleton[stampSelector] = skeleton;
-		}
+			if (index) {
+				const InStash = INDEX.STYLE(index);
+				InStash.declarations.push(declaration);
+			} else {
+				const identity = INDEX.DECLARE({
+					scope: group,
+					selector,
+					object,
+					skeleton,
+					preBinds: forPortable ? preBinds.map(bind => stamp + bind) : preBinds,
+					postBinds: forPortable ? postBinds.map(bind => stamp + bind) : postBinds,
+					metaClass: metaFront + "_" + Use.string.normalize(stampSelector, [], [], ["$", "/"]),
+					declarations: [declaration],
+				});
+				source.usedIndexes.add(identity.index);
+				selectors[stampSelector] = identity.index;
+				indexSkeleton[stampSelector] = skeleton;
+			}
+		})
 	});
-
 	for (const selector in selectors) {
 		IndexMap[selector] = selectors[selector];
 	}
@@ -112,18 +113,18 @@ function TAGSTYLE(
 	filePath,
 	normalPath,
 	IndexMap = {},
-	selectorPrefix = ""
+	selectorPrefix = "",
 ) {
 	const object = {}, preBinds = [], postBinds = [], errors = [], essentials = [];
 
 	const forPortable = scope === "xtyling";
 	const xcope = (forPortable ? "" : scope).toUpperCase();
-	const declarations = [`${normalPath}:${rowMarker}:${columnMarker}`];
+	const declaration = `${normalPath}:${rowMarker}:${columnMarker}`;
 	const metaClass = `${xcope}${metaFront}\\:${rowMarker}\\:${columnMarker}_${Use.string.normalize(selector, [], [], forPortable ? ["$", "/"] : ["$"])}`;
 	const variables = {};
 
 	for (let subSelector in styles) {
-		const query = HASHRULE.RENDER(subSelector, declarations[0], forPortable);
+		const query = HASHRULE.RENDER(subSelector, declaration, forPortable);
 		if (!query.status) errors.push(query.error);
 		const styleObj = SCANNER(styles[subSelector], `${scope.toUpperCase()} : ${filePath} ||`, `${selector} => ${subSelector}`);
 
@@ -154,37 +155,38 @@ function TAGSTYLE(
 		}
 	}
 
-	let isDuplicate = false;
+	let isOriginal;
+	let identity = { index: 0, class: '' };
 	let skeleton = { Info: comments, Variables: variables, PreBinds: preBinds, PostBinds: postBinds, Skeleton: Use.object.skeleton(object) };
 	let xelector = selector === "" ? "" : selectorPrefix + selector;
 	if (selector === "") {
-		essentials.push(...Object.entries(object).map(([k, v]) => [`${k} /* ${declarations[0]} */`, v]));
+		essentials.push(...Object.entries(object).map(([k, v]) => [`${k} /* ${declaration} */`, v]));
 	} else {
-		const index = (IndexMap[xelector] || 0) + (CACHE.LibraryStyle2Index[xelector] || 0);
-		const InStash = INDEX.STYLE(index);
+		const index = (IndexMap[xelector] || 0) + (CACHE.LibraryStyle2Index[xelector] || 0) + (CACHE.GlobalsStyle2Index[xelector] || 0);
 		if (index) {
-			declarations.push(...InStash.declarations);
-			isDuplicate = true;
-		}
-		const identity = index ? { index: InStash.index, class: InStash.class } :INDEX.DECLARE({
-			scope,
-			selector,
-			object,
-			skeleton,
-			preBinds: forPortable ? preBinds.map(bind => selectorPrefix + "$/" + bind) : preBinds,
-			postBinds: forPortable ? postBinds.map(bind => selectorPrefix + "$/" + bind) : postBinds,
-			metaClass,
-			declarations,
-		});
-		if (!index) {
+			const InStash = INDEX.STYLE(index);
+			InStash.declarations.push(declaration);
+			isOriginal = false;
+		} else {
+			isOriginal = true;
+			identity = INDEX.DECLARE({
+				scope,
+				selector,
+				object,
+				skeleton,
+				preBinds: forPortable ? preBinds.map(bind => selectorPrefix + "$/" + bind) : preBinds,
+				postBinds: forPortable ? postBinds.map(bind => selectorPrefix + "$/" + bind) : postBinds,
+				metaClass,
+				declarations: [declaration]
+			});
 			IndexMap[xelector] = identity.index;
 		}
 	}
 
 	return {
 		selector: xelector,
-		index: INDEX.NOW,
-		isDuplicate,
+		index: identity.index,
+		isOriginal,
 		essentials,
 		postBinds,
 		preBinds,

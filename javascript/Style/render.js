@@ -3,6 +3,7 @@ import * as LOADPREFIX from "./prefix.js";
 
 import Use from "../Utils/index.js";
 import { CACHE } from "../data-cache.js";
+import { INDEX } from "../data-set.js";
 
 function LoadVendors(collection = {}, vendor = "") {
 	return vendor == ""

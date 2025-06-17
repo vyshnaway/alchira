@@ -191,6 +191,19 @@ export function watchFolders(folders = [], ignores = [], initialMessage = "") {
 	watcher
 		.on("all", (event, filePath) => handleEventInternal(event, filePath))
 		.on("error", (error) => console.error(`Watcher error: ${error.message}`));
+	// .on('change', (filePath) => handleEventInternal('change', filePath))
+	// .on('add', (filePath) => handleEventInternal('add', filePath))
+	// .on('unlink', (filePath) => handleEventInternal('unlink', filePath))
+	// .on('unlinkDir', (filePath) => handleEventInternal('unlinkDir', filePath))
+	// .on('addDir', (filePath) => handleEventInternal('addDir', filePath))
+	// .on('ready', () => {
+	//     if (initialMessage) {
+	//         console.log(initialMessage)
+	//     } else {
+	//         console.log(`Watching folders: ${resolvedFolders.join(', ')}`);
+	//         console.log(`Ignoring changes in: ${resolvedIgnores.join(', ')}`);
+	//     }
+	// })
 
 	return () => {
 		watcher.close();
