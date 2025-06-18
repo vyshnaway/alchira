@@ -133,7 +133,7 @@ export const PUBLISH = {
         global: {},
         axiom: {},
         cluster: {},
-        portable: {},
+        xtyling: {},
         binding: {},
     },
     LibFilesTemp: {},

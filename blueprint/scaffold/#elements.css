@@ -1,4 +1,5 @@
 @import url("./#constants.css");
+
 /* Default tag styles */
 html {
   background-color: var(--background-body);
@@ -15,6 +16,7 @@ html {
   margin: 0;
   padding: 0;
 }
+
 *,
 *:before,
 *:after,
@@ -44,11 +46,11 @@ header,
 article,
 footer {
   background-color: var(--background-alt);
-  border: 0.25rem solid var(--border);
+  border: 0.0625rem solid var(--border);
 }
 
 footer {
-  border-top: 0.25rem solid var(--border);
+  border-top: 0.0625rem solid var(--border);
   color: var(--text-muted);
   font-size: var(--font-size-h5);
 }
@@ -140,7 +142,7 @@ a:hover {
 }
 
 a:focus {
-  outline: 0.5rem solid var(--focus);
+  outline: 0.125rem solid var(--focus);
 }
 
 /* Lists */
@@ -157,7 +159,7 @@ li {
 img {
   max-width: 100%;
   height: auto;
-  border: 0.25rem solid var(--border);
+  border: 0.0625rem solid var(--border);
 }
 
 figure {
@@ -191,7 +193,7 @@ button:hover {
 }
 
 button:focus {
-  outline: 0.5rem solid var(--focus);
+  outline: 0.125rem solid var(--focus);
 }
 
 button:active {
@@ -211,7 +213,7 @@ textarea,
 select {
   background-color: var(--background);
   color: var (--form-text);
-  border: 0.25rem solid var(--border);
+  border: 0.0625rem solid var(--border);
   border-radius: var(--delta-box);
   padding: var(--delta-box);
   font-size: var(--font-size-p);
@@ -227,7 +229,7 @@ textarea::placeholder {
 input:focus,
 textarea:focus,
 select:focus {
-  outline: 0.5rem solid var(--focus);
+  outline: 0.125rem solid var(--focus);
   border-color: var(--links);
 }
 
@@ -241,7 +243,7 @@ label {
 code {
   background-color: var(--background-alt);
   color: var(--code);
-  padding: 0.5rem 1rem;
+  padding: 0.125rem 0.25rem;
   font-size: var(--font-size-h5);
   font-family: var(--font-monospace);
   font-weight: 400;
@@ -261,7 +263,7 @@ pre code {
 
 /* Blockquote */
 blockquote {
-  border-left: 1rem solid var(--highlight);
+  border-left: 0.25rem solid var(--highlight);
   padding-left: var(--delta-block);
   margin: 0 0 var(--delta-block) var(--delta-inline);
   color: var(--text-muted);
@@ -272,7 +274,7 @@ blockquote {
 /* Horizontal rule */
 hr {
   border: none;
-  border-top: 0.25rem solid var(--border);
+  border-top: 0.0625rem solid var(--border);
   margin: var(--delta-block) 0;
 }
 
@@ -287,7 +289,7 @@ table {
 th,
 td {
   padding: var(--delta-box);
-  border: 0.25rem solid var(--border);
+  border: 0.0625rem solid var(--border);
 }
 
 th {

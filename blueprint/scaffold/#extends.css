@@ -1,5 +1,3 @@
+@import url("./#at-rules.css");
+@import url("./#constants.css");
 @import url("./#elements.css");
-.g {
-  size: 34px;
-  color: var(--p);
-}

@@ -57,7 +57,11 @@ export default class Proxy {
 		sciptResponse.stylesList.forEach((style) => {
 			const IndexMap = style.scope === "global" ? file.styleGlobals : style.scope === "local" ? file.styleLocals : {};
 			const skeletonMap = style.scope === "global" ? globalSkeletons : style.scope === "local" ? localSkeletons : {};
-			const response = STYLEPARSE.TAGSTYLE(style, file.metaFront, file.filePath, RAW.WorkPath + file.targetPath, IndexMap);
+			const response = STYLEPARSE.TAGSTYLE(style, {
+				metaFront: file.metaFront,
+				normalPath: file.filePath,
+				filePath: RAW.WorkPath + file.targetPath
+			}, IndexMap);
 
 			if (style.scope === "essential") {
 				file.preBinds.push(...response.preBinds);
@@ -171,10 +175,10 @@ export default class Proxy {
 			file.classGroups.forEach((group) => {
 				const indexGroup = group.reduce((indexAcc, className) => {
 					const index =
-						(CACHE.PortableStyle2Index[className] ?? 0) +
-						(CACHE.LibraryStyle2Index[className] ?? 0) +
-						(CACHE.GlobalsStyle2Index[className] ?? 0) +
-						(file.styleLocals[className] ?? 0);
+						(CACHE.PortableStyle2Index[className] || 0) +
+						(CACHE.LibraryStyle2Index[className] || 0) +
+						(CACHE.GlobalsStyle2Index[className] || 0) +
+						(file.styleLocals[className] || 0);
 					if (index) indexAcc.push(index);
 					return indexAcc;
 				}, []);

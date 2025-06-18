@@ -9,6 +9,7 @@ import SCRIPT from "./Script/class.js";
 import XTYLES from "./Style/stash.js";
 import { NAV, RAW, STACK, CACHE, PUBLISH } from "./data-cache.js";
 import { INDEX } from "./data-set.js";
+import GeneratePortable from "./portable.js";
 
 export function UpdateXtylesFolder() {
 	INDEX.RESET();
@@ -18,19 +19,19 @@ export function UpdateXtylesFolder() {
 	const {
 		libraryTable,
 		modulesTable,
-		ModuleEssentials,
+		PortableEssentials,
 		AxiomStyleSkeleton,
 		ClusterStyleSkeleton,
-		PortableStyleSkeleton,
+		XtylingStyleSkeleton,
 		BindingStyleSkeleton,
 	} = XTYLES.ReRender();
 
 	PUBLISH.MANIFEST.axiom = AxiomStyleSkeleton;
 	PUBLISH.MANIFEST.cluster = ClusterStyleSkeleton;
-	PUBLISH.MANIFEST.portable = PortableStyleSkeleton;
+	PUBLISH.MANIFEST.xtyling = XtylingStyleSkeleton;
 	PUBLISH.MANIFEST.binding = BindingStyleSkeleton;
 
-	CACHE.PortableEssentials = ModuleEssentials;
+	CACHE.PortableEssentials = PortableEssentials;
 	PUBLISH.LibFilesTemp = { ...libraryTable, ...modulesTable };
 }
 
@@ -102,12 +103,12 @@ async function Engine() {
 	});
 
 
-	const TRACKS = []
-	Object.values(STACK.PROXYCACHE).forEach((cache) => TRACKS.push(...cache.LoadTracks()));
 	if (RAW.WATCH) {
 		CACHE.FinalStack = {};
 		PUBLISH.FinalMessage = CUMULATES.errors.length ? "Errors in " + CUMULATES.errors.length + " Tags." : "Zero errors.";
 	} else {
+		const TRACKS = []
+		Object.values(STACK.PROXYCACHE).forEach((cache) => TRACKS.push(...cache.LoadTracks()));
 		let output;
 		if ("publish" === RAW.CMD) {
 			if (CUMULATES.errors.length) {
@@ -142,7 +143,7 @@ async function Engine() {
 	return CUMULATES;
 }
 
-function createStylesheet(CUMULATES) {
+function createStylesheet(CUMULATES, ESSENTIALS = []) {
 	const PREBINDS = new Set(CUMULATES.preBinds);
 	const POSTBINDS = new Set(CUMULATES.postBinds);
 	const RENDERFRAGS = {
@@ -158,7 +159,7 @@ function createStylesheet(CUMULATES) {
 	const indexScanned = STYLE.CSSCANNER(Use.code.uncomment.Css(RAW.CSSIndex), "INDEX ||");
 	indexScanned.postBinds.forEach((i) => POSTBINDS.add(i));
 	indexScanned.preBinds.forEach((i) => PREBINDS.add(i));
-	RENDERFRAGS.INDEX = COMPILE.Stylesheet(indexScanned.object, !RAW.WATCH);
+	RENDERFRAGS.INDEX = COMPILE.withVendor(indexScanned.object, !RAW.WATCH);
 	PUBLISH.MANIFEST.constants = Object.keys(indexScanned.variables);
 	PUBLISH.Report.variables = $.MOLD.primary.Section(
 		"Root variables",
@@ -167,15 +168,15 @@ function createStylesheet(CUMULATES) {
 	);
 
 
-	RENDERFRAGS.ESSENTIALS = COMPILE.Stylesheet([...CACHE.PortableEssentials, ...CUMULATES.essentials], !RAW.WATCH);
+	RENDERFRAGS.ESSENTIALS = COMPILE.withVendor([...(RAW.CMD === "publish" ? ESSENTIALS : CACHE.PortableEssentials), ...CUMULATES.essentials], !RAW.WATCH);
 	Object.values(STACK.PROXYCACHE).forEach((cache) => cache.RenderFiles(PREBINDS, POSTBINDS, RAW.CMD));
 	const renderdScanned = FORGE.indexMaps(CACHE.FinalStack);
 	renderdScanned.postBinds.forEach((i) => POSTBINDS.add(i));
 	renderdScanned.preBinds.forEach((i) => PREBINDS.add(i));
-	RENDERFRAGS.RENDERED = COMPILE.Stylesheet(renderdScanned.object, !RAW.WATCH);
+	RENDERFRAGS.RENDERED = COMPILE.withVendor(renderdScanned.object, !RAW.WATCH);
 
 
-	RENDERFRAGS.APPENDIX = COMPILE.Stylesheet(
+	RENDERFRAGS.APPENDIX = COMPILE.withVendor(
 		Object.values(STACK.PROXYCACHE).reduce((appendix, cache) => {
 			const appendixScanned = STYLE.CSSCANNER(
 				Use.code.uncomment.Css(cache.stylesheetContent),
@@ -190,8 +191,8 @@ function createStylesheet(CUMULATES) {
 
 
 	const bindObjects = FORGE.bindIndex(PREBINDS, POSTBINDS);
-	RENDERFRAGS.PREBINDS = COMPILE.Stylesheet(Object.entries(bindObjects.preBindsObject), !RAW.WATCH);
-	RENDERFRAGS.POSTBINDS = COMPILE.Stylesheet(Object.entries(bindObjects.postBindsObject), !RAW.WATCH);
+	RENDERFRAGS.PREBINDS = COMPILE.withVendor(Object.entries(bindObjects.preBindsObject), !RAW.WATCH);
+	RENDERFRAGS.POSTBINDS = COMPILE.withVendor(Object.entries(bindObjects.postBindsObject), !RAW.WATCH);
 
 	return { RENDERFRAGS, PREBINDS, POSTBINDS };
 }
@@ -200,13 +201,13 @@ function createStylesheet(CUMULATES) {
 export async function Generate() {
 	const SAVEFILES = {};
 	const CUMULATES = await Engine();
-	const XRESPONSE = XTYLES.Report();
+	const XRESPONSE = XTYLES.Appendix(CACHE.SortedIndexes);
 
 	PUBLISH.Report.library = XRESPONSE.report;
 	PUBLISH.Report.targets = $.MOLD.std.Block(CUMULATES.report);
-	
+
 	if (PUBLISH.FinalError.length)
-		 CUMULATES.errors.push($.MOLD.failed.List(PUBLISH.FinalError))
+		CUMULATES.errors.push($.MOLD.failed.List(PUBLISH.FinalError))
 	PUBLISH.ErrorCount = CUMULATES.errors.length;
 	PUBLISH.WarningCount = XRESPONSE.warnings.length;
 	PUBLISH.Report.errors = $.MOLD[PUBLISH.ErrorCount ? "failed" : "success"].Section(
@@ -214,11 +215,11 @@ export async function Generate() {
 		[...XRESPONSE.warnings, ...CUMULATES.errors]
 	);
 
-	
+
 	if (PUBLISH.DeltaContent.length) {
 		SAVEFILES[PUBLISH.DeltaPath] = PUBLISH.DeltaContent;
 	} else {
-		const { RENDERFRAGS, PREBINDS, POSTBINDS } = createStylesheet(CUMULATES);
+		const { RENDERFRAGS, PREBINDS, POSTBINDS } = createStylesheet(CUMULATES, XRESPONSE.essentials);
 
 		const FinalStylesheet = Object.entries(RENDERFRAGS).map(([chapter, content]) =>
 			RAW.WATCH ? `\n\n/* CHAPTER: ${chapter} */\n${content}\n` : content).join("");
@@ -230,33 +231,11 @@ export async function Generate() {
 					if (PUBLISH.DeltaPath !== filePath) delete SAVEFILES[filePath];
 				});
 			}
+
 			SAVEFILES[NAV.json.manifest] = JSON.stringify(PUBLISH.MANIFEST);
 		} else {
-			// 		const portableMd = NAV.folder.portableBundle + "/" + RAW.PACKAGE + ".css",
-			// 			portableCss = NAV.folder.portableBundle + "/" + RAW.PACKAGE + ".xcss",
-			// 			portableXcss = NAV.folder.portableBundle + "/" + RAW.PACKAGE + ".md";
-
-			// 		const portable = COMPILE.Portable(
-			// 			PREBINDS,
-			// 			POSTBINDS,
-			// 			CUMULATES.essentials,
-			// 			RAW.PACKAGE,
-			// 			RAW.VERSION,
-			// 		);
-			// 		SAVEFILES[NAV.folder.portableNative + "/" + RAW.PACKAGE + ".css"] =
-			// 			portable.binding;
-			// 		SAVEFILES[NAV.folder.portableNative + "/" + RAW.PACKAGE + ".xcss"] =
-			// 			portable.portable;
-			// 		SAVEFILES[NAV.folder.portableNative + "/" + RAW.PACKAGE + ".md"] =
-			// 			RAW.ReadMe;
-
-			// 		readmeFiles = { [`${RAW.PACKAGE}.md`]: `# ${RAW.PACKAGE}@${RAW.VERSION}` + "\n---\n" + RAW.ReadMe };
-			// 		if (SAVEFILES[portableMd]) SAVEFILES[portableMd] += RAW.ReadMe;
-			// 		else SAVEFILES[portableMd] = RAW.ReadMe;
-			// 		if (SAVEFILES[portableCss]) SAVEFILES[portableCss] += portable.binding;
-			// 		else SAVEFILES[portableCss] = portable.binding;
-			// 		if (SAVEFILES[portableXcss]) SAVEFILES[portableXcss] += portable.portable;
-			// 		else SAVEFILES[portableXcss] = portable.portable;
+			if (RAW.CMD === "publish")
+				GeneratePortable(SAVEFILES, PREBINDS, POSTBINDS, XRESPONSE.bindingMap)
 
 			const memChart = {
 				Index: Use.string.stringMem(RENDERFRAGS.INDEX),

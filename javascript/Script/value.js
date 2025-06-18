@@ -113,13 +113,23 @@ export default function classExtract(string, action, fileData) {
 										scribed += INDEX.STYLE(index).class;
 									} else {
 										const deltaStyles = Use.object.onlyB(activeStyles, INDEX.STYLE(index).object);
-										if (deltaStyles.score)
-											scribed += INDEX.STYLE(index).class;
-										else {
-											const identity = INDEX.DECLARE(deltaStyles.result);
+										if (deltaStyles.score) {
+											const identity = INDEX.DECLARE({
+												portable: "",
+												scope: "",
+												selector: "",
+												object: deltaStyles.result,
+												metadata: "",
+												preBinds: [],
+												postBinds: [],
+												metaClass: "",
+												declarations: [],
+											});
 											CACHE.FinalStack["." + identity.class] = identity.index;
 											scribed += identity.class;
 											fileData.usedIndexes.add(identity.index);
+										} else {
+											scribed += INDEX.STYLE(index).class;
 										}
 									}
 									break;

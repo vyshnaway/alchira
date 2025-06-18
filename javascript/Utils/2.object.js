@@ -119,7 +119,8 @@ function BminusA(A = {}, B = {}) {
 			case "object":
 				if (typeof A[Bkey] === "object") {
 					const subobj = BminusA(A[Bkey], Bvalue);
-					result[Bkey] = subobj.result;
+					if (subobj.score)
+						result[Bkey] = subobj.result;
 					score += subobj.score;
 				} else result[Bkey] = Bvalue;
 				break;

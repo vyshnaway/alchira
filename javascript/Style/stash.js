@@ -80,17 +80,17 @@ function _StackLibraryFiles() {
 }
 
 function _StackPortableFiles() {
-	const bindingArray = [], xtylingArray = [], modulesTable = {};
+	const bindingArray = [], xtylingArray = [], portableTable = {};
 
 	Object.entries(STACK.PORTABLES).forEach(([filePath, fileData]) => {
 		fileData.id = filePath;
 		const { id, group } = fileData;
-		modulesTable[filePath] = { group, id };
+		portableTable[filePath] = { group, id };
 		if (group === "binding") bindingArray.push(fileData);
 		else if (group === "xtyling") xtylingArray.push(fileData);
 	});
 
-	return { modulesTable, bindingArray, portablesArray: xtylingArray };
+	return { portableTable, bindingArray, xtylingArray };
 }
 
 
@@ -127,27 +127,31 @@ function ReRender() {
 	(axiomChart = {}), (clusterChart = {}), (portableChart = {}), (bindingChart = {});
 
 	const { libraryTable, axiomsArray, clustersArray } = _StackLibraryFiles();
-	const { modulesTable, bindingArray, portablesArray } = _StackPortableFiles();
+	const { portableTable: modulesTable, bindingArray, xtylingArray: portablesArray } = _StackPortableFiles();
 
-	const ModuleEssentials = [];
-	const PortableStyleSkeleton = portablesArray.reduce((collection, fileData) => {
+	const PortableEssentials = [];
+	const XtylingStyleSkeleton = portablesArray.reduce((collection, fileData) => {
 		const filePath = NAV.folder.portables + "/" + fileData.filePath;
 		const tagStash = SCRIPTFILE(fileData).stylesList, indexSkeleton = {};
 		fileData.usedIndexes = new Set();
 		tagStash.forEach((style) => {
 			style.scope = "xtyling";
 			const response = PARSE.TAGSTYLE(
-				style,
-				fileData.metaFront,
-				fileData.filePath,
-				fileData.sourcePath,
-				CACHE.PortableStyle2Index,
-				fileData.stamp,
-			);
+				style, {
+				id: fileData.id,
+				cluster: fileData.cluster,
+				metaFront: fileData.metaFront,
+				filePath: fileData.filePath,
+				normalPath: fileData.sourcePath,
+				prefix: fileData.stamp,
+				fileName: fileData.fileName
+			}, CACHE.PortableStyle2Index,);
+
 			warnings.push(...response.errors);
 
 			if (response.selector === "") {
-				RAW.WATCH ? ModuleEssentials.push(...response.essentials) : fileData.essentials.push(...response.essentials);
+				PortableEssentials.push(...response.essentials)
+				if (!RAW.WATCH) fileData.essentials.push(...response.essentials);
 			} else if (response.isOriginal) {
 				fileData.usedIndexes.add(response.index);
 				indexSkeleton[response.selector] = response.skeleton;
@@ -235,7 +239,7 @@ function ReRender() {
 			),
 		),
 		$.MOLD.primary.Section(
-			`Portable Styles: ${portableCount}`,
+			`Xtyling Styles: ${portableCount}`,
 			Object.entries(portableChart).map(([heading, entries]) =>
 				$.MOLD.tertiary.Topic(heading, entries, $.list.text.Entries),
 			),
@@ -245,19 +249,22 @@ function ReRender() {
 	return {
 		libraryTable,
 		modulesTable,
-		ModuleEssentials,
+		PortableEssentials,
 		AxiomStyleSkeleton,
 		ClusterStyleSkeleton,
 		BindingStyleSkeleton,
-		PortableStyleSkeleton,
+		XtylingStyleSkeleton,
 	};
 }
 
 
-function Report() {
+function Appendix(indexes = []) {
 	const readmeFiles = {}, xtylingMap = {}, bindingMap = {}, nameCollitions = [], essentials = [];
 
 	if (!RAW.WATCH) {
+		const usedPortables = Object.values(CACHE.PortableStyle2Index).filter(i => indexes.includes(i))
+			.reduce((a, c) => { a.add(INDEX.STYLE(c).portable); return a; }, new Set())
+
 		Object.values(STACK.PORTABLES).forEach((F) => {
 			if (RAW.PACKAGE === F.fileName)
 				nameCollitions.push(F.sourcePath);
@@ -271,6 +278,7 @@ function Report() {
 				if (bindingMap[F.fileName]) F.usedIndexes.forEach(i => bindingMap[F.fileName].push(i));
 				else bindingMap[F.fileName] = Array.from(F.usedIndexes);
 			}
+			if (usedPortables.has(F.fileName)) essentials.push(...F.essentials)
 		});
 
 		if (nameCollitions.length)
@@ -289,5 +297,5 @@ function Report() {
 
 export default {
 	ReRender,
-	Report,
+	Appendix,
 };

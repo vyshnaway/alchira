@@ -37,15 +37,14 @@ export default function FILING(
 		usedIndexes: new Set(),
 		essentials: [],
 		// for Proxy Class
-		styleLocals: {},
-		midway: "",
-		summon: false,
-		// for Cumulation
-		classGroups: [],
 		styleGlobals: {},
-		preBinds: [],
-		postBinds: [],
+		styleLocals: {},
 		styleMap: {},
+		classGroups: [],
+		postBinds: [],
+		preBinds: [],
 		errors: [],
+		summon: false,
+		midway: "",
 	};
 }

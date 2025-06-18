@@ -163,35 +163,34 @@
 
 /* Dimentions */
 :root {
-  --rem-override: 4px;
-  --page-width: 360rem;
+  --page-width: 90rem;
 
-  --rounded-sm: 0.5rem;
-  --rounded-md: 2rem;
-  --rounded-lg: 8rem;
+  --rounded-sm: 0.125rem;
+  --rounded-md: 0.5rem;
+  --rounded-lg: 2rem;
 
   /* For typical margin and padding */
-  --delta-box-sm: 2rem;
-  --delta-box-md: 4rem;
-  --delta-box-lg: 8rem;
-  --delta-block-sm: 4rem;
-  --delta-block-md: 8rem;
-  --delta-block-lg: 16rem;
-  --delta-inline-sm: 6rem;
-  --delta-inline-md: 12rem;
-  --delta-inline-lg: 18rem;
+  --delta-box-sm: 0.5rem;
+  --delta-box-md: 1rem;
+  --delta-box-lg: 2rem;
+  --delta-block-sm: 1rem;
+  --delta-block-md: 2rem;
+  --delta-block-lg: 4rem;
+  --delta-inline-sm: 1.5rem;
+  --delta-inline-md: 3rem;
+  --delta-inline-lg: 4.5rem;
 
-  --font-size-h1: 8rem;
-  --font-size-h2: 6rem;
-  --font-size-h3: 5rem;
-  --font-size-h4: 4rem;
-  --font-size-h5: 3.5rem;
-  --font-size-h6: 3rem;
-  --font-size-p: 4rem;
-  --margin-bottom-large: 6rem;
-  --margin-bottom-medium: 4rem;
-  --margin-bottom-small: 3rem;
-  --margin-bottom-xsmall: 2rem;
+  --font-size-h1: 2rem;
+  --font-size-h2: 1.5rem;
+  --font-size-h3: 1.25rem;
+  --font-size-h4: 1rem;
+  --font-size-h5: 0.875rem;
+  --font-size-h6: 0.75rem;
+  --font-size-p: 1rem;
+  --margin-bottom-large: 1.5rem;
+  --margin-bottom-medium: 1rem;
+  --margin-bottom-small: 0.75rem;
+  --margin-bottom-xsmall: 0.5rem;
 
   --font-display:
     "Display-Font", "system-ui", "-apple-system", "Segoe UI", "Roboto",

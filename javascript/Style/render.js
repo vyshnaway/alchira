@@ -1,9 +1,4 @@
-import FORGE from "./forge.js";
 import * as LOADPREFIX from "./prefix.js";
-
-import Use from "../Utils/index.js";
-import { CACHE } from "../data-cache.js";
-import { INDEX } from "../data-set.js";
 
 function LoadVendors(collection = {}, vendor = "") {
 	return vendor == ""
@@ -134,102 +129,7 @@ function rawCompose(selectorObjectArray = [], tab = "  ") {
 	return styleSheet;
 }
 
-function portableCreator(
-	preBinds = [],
-	postBinds = [],
-	essentials = [],
-	module = "module",
-	version = "0.0.0",
-) {
-	const bindstack = {}, tab = "    ", portable = [`# ${module}@${version}`], binding = [];
-	const bindingResponse = FORGE.bindIndex(new Set(preBinds), new Set(postBinds), true);
-
-	Object.entries(CACHE.GlobalsStyle2Index).forEach(([selector, index]) => {
-		const style = INDEX.OBJECT(index);
-		bindstack[selector] = FORGE.bindIndex(new Set(style.preBinds), new Set(style.postBinds), true);
-	});
-
-	const classList = Object.keys(CACHE.GlobalsStyle2Index);
-	portable.push(
-		"", `## Xtyle Classes (${classList.length})`, "",
-		...classList.map((c) => "- `" + c + "`"), "---",
-	);
-	[
-		...Object.entries(CACHE.GlobalsStyle2Index).map(([selector, index]) => [selector, INDEX.OBJECT(index).object]),
-		...bindingResponse.postBindsObject, ...bindingResponse.preBindsObject,
-	].forEach(([selector, object]) => {
-		portable.push(
-			"", `### Selector: \`${selector}\``, "",
-			"````html",
-			"<xtyle",
-			...Object.entries(object).reduce((accum, [subSelector, block]) => {
-				if (subSelector === "") {
-					accum.push(
-						`${selector}="`,
-						tab + `@pre-bind ${bindstack[selector].preBindsList.join(" ")}; `,
-						tab + `@post-bind ${bindstack[selector].postBindsList.join(" ")}; `,
-						...rawCompose(Object.entries(block), tab).map(
-							(line) => tab + line,
-						),
-						'"',
-					);
-				} else {
-					if (subSelector[0] === "@") {
-						const ind = subSelector.indexOf(" ");
-						const rule = subSelector.slice(1, ind);
-						const query = subSelector.slice(ind + 1);
-
-						subSelector = `${rule}@{${query}}`;
-					}
-					accum.push(
-						`${subSelector}="`,
-						...rawCompose(Object.entries(block), tab).map(
-							(line) => tab + line,
-						),
-						'"',
-					);
-				}
-				return accum;
-			}, []).map((line) => tab + line),
-			"/>",
-			"````",
-		);
-	});
-
-	portable.push(
-		"",
-		"## Portable Essentials",
-		"",
-		"````html",
-		"<xtyle",
-		...essentials
-			.reduce((accum, [subSelector, block]) => {
-				if (subSelector[0] === "@") {
-					const ind = subSelector.indexOf(" ");
-					const rule = subSelector.slice(1, ind);
-					const query = subSelector.slice(ind + 1);
-
-					subSelector = `${rule}@{${query}}`;
-				}
-				accum.push(
-					`${subSelector}="`,
-					...rawCompose(Object.entries(block), tab).map((line) => tab + line),
-					'"',
-				);
-				return accum;
-			}, [])
-			.map((line) => tab + line),
-		"/>",
-		"````",
-	);
-
-	return {
-		portable: portable.join("\n"),
-		binding: binding.join("\n"),
-	};
-}
-
 export default {
-	Portable: portableCreator,
-	Stylesheet: stylesheetCreator,
+	forPortable: rawCompose,
+	withVendor: stylesheetCreator,
 };
