@@ -76,6 +76,7 @@ async function Engine() {
 	const CUMULATES = {
 		report: [],
 		errors: [],
+		indexes: [],
 		styleMap: [],
 		essentials: [],
 		preBinds: new Set(),
@@ -87,6 +88,7 @@ async function Engine() {
 
 		CUMULATES.report.push(...cumulated.report);
 		CUMULATES.errors.push(...cumulated.errors);
+		CUMULATES.indexes.push(...cumulated.indexes);
 		CUMULATES.styleMap.push(...cumulated.styleMap);
 		CUMULATES.essentials.push(...cumulated.essentials);
 		cumulated.preBinds.forEach((bind) => CUMULATES.preBinds.add(bind));
@@ -109,14 +111,15 @@ async function Engine() {
 	} else {
 		const TRACKS = []
 		Object.values(STACK.PROXYCACHE).forEach((cache) => TRACKS.push(...cache.LoadTracks()));
+		const FALLBACK = CUMULATES.indexes;
 		let output;
 		if ("publish" === RAW.CMD) {
 			if (CUMULATES.errors.length) {
 				RAW.CMD = "preview";
-				output = await ORDER(TRACKS, RAW.CMD, RAW.ARG);
+				output = await ORDER(RAW.CMD, RAW.ARG, TRACKS, FALLBACK);
 				PUBLISH.FinalMessage = "Errors in " + CUMULATES.errors.length + " Tags. Falling back to 'preview' command.";
 			} else {
-				output = await ORDER(TRACKS, RAW.CMD, RAW.ARG);
+				output = await ORDER(RAW.CMD, RAW.ARG, TRACKS, FALLBACK);
 				if (output.status) {
 					PUBLISH.FinalMessage = "Build Success.";
 				} else {
@@ -130,9 +133,9 @@ async function Engine() {
 				PUBLISH.FinalMessage = CUMULATES.errors.length + " Unresolved Errors. Rectify them to proceed with 'publish' command.";
 			else
 				PUBLISH.FinalMessage = "Preview verified. Procceed to 'publish' using your key."
-			output = await ORDER(TRACKS, RAW.CMD, RAW.ARG);
+			output = await ORDER(RAW.CMD, RAW.ARG, TRACKS, FALLBACK);
 		}
-
+		console.log(output.result)
 		CACHE.FinalStack = output.result.reduce((A, I) => {
 			A["." + INDEX.STYLE(I).class] = I;
 			return A;
@@ -166,7 +169,7 @@ function createStylesheet(CUMULATES, ESSENTIALS = []) {
 		PUBLISH.MANIFEST.constants,
 		$.list.text.Entries,
 	);
-
+	console.log({ ESSENTIALS, CACHE: CACHE.PortableEssentials })
 
 	RENDERFRAGS.ESSENTIALS = COMPILE.withVendor([...(RAW.CMD === "publish" ? ESSENTIALS : CACHE.PortableEssentials), ...CUMULATES.essentials], !RAW.WATCH);
 	Object.values(STACK.PROXYCACHE).forEach((cache) => cache.RenderFiles(PREBINDS, POSTBINDS, RAW.CMD));

@@ -88,6 +88,7 @@ export default class Proxy {
 		const C = {
 			report: [],
 			errors: [],
+			indexes: [],
 			styleMap: [],
 			essentials: [],
 			preBinds: new Set(),
@@ -97,6 +98,8 @@ export default class Proxy {
 		C.styleMap.push({ file: { group: "stylesheet", id: RAW.WorkPath + this.targetStylesheet, }, global: {}, local: {}, });
 
 		Object.values(this.fileCache).forEach((file) => {
+			C.indexes.push(...Object.values(file.styleLocals))
+			C.indexes.push(...Object.values(file.styleGlobals))
 			const fileLocalCount = Object.keys(file.styleLocals).length;
 			localCount += fileLocalCount;
 			const fileGlobalCount = Object.keys(file.styleGlobals).length;
