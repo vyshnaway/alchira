@@ -60,7 +60,8 @@ export default class Proxy {
 			const response = STYLEPARSE.TAGSTYLE(style, {
 				metaFront: file.metaFront,
 				normalPath: file.filePath,
-				filePath: RAW.WorkPath + file.targetPath
+				filePath: file.targetPath,
+				fullPath: RAW.WorkPath + file.targetPath
 			}, IndexMap);
 
 			if (style.scope === "essential") {

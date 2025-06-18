@@ -111,7 +111,7 @@ async function Engine() {
 	} else {
 		const TRACKS = []
 		Object.values(STACK.PROXYCACHE).forEach((cache) => TRACKS.push(...cache.LoadTracks()));
-		const FALLBACK = CUMULATES.indexes;
+		const FALLBACK = [...CUMULATES.indexes, ...Object.values(CACHE.PortableStyle2Index)];
 		let output;
 		if ("publish" === RAW.CMD) {
 			if (CUMULATES.errors.length) {
@@ -135,7 +135,7 @@ async function Engine() {
 				PUBLISH.FinalMessage = "Preview verified. Procceed to 'publish' using your key."
 			output = await ORDER(RAW.CMD, RAW.ARG, TRACKS, FALLBACK);
 		}
-		console.log(output.result)
+		
 		CACHE.FinalStack = output.result.reduce((A, I) => {
 			A["." + INDEX.STYLE(I).class] = I;
 			return A;
@@ -158,7 +158,6 @@ function createStylesheet(CUMULATES, ESSENTIALS = []) {
 		POSTBINDS: "",
 	};
 
-
 	const indexScanned = STYLE.CSSCANNER(Use.code.uncomment.Css(RAW.CSSIndex), "INDEX ||");
 	indexScanned.postBinds.forEach((i) => POSTBINDS.add(i));
 	indexScanned.preBinds.forEach((i) => PREBINDS.add(i));
@@ -169,7 +168,6 @@ function createStylesheet(CUMULATES, ESSENTIALS = []) {
 		PUBLISH.MANIFEST.constants,
 		$.list.text.Entries,
 	);
-	console.log({ ESSENTIALS, CACHE: CACHE.PortableEssentials })
 
 	RENDERFRAGS.ESSENTIALS = COMPILE.withVendor([...(RAW.CMD === "publish" ? ESSENTIALS : CACHE.PortableEssentials), ...CUMULATES.essentials], !RAW.WATCH);
 	Object.values(STACK.PROXYCACHE).forEach((cache) => cache.RenderFiles(PREBINDS, POSTBINDS, RAW.CMD));

@@ -110,14 +110,14 @@ function CSSLIBRARY(fileDatas = [], initial = "", forPortable = false) {
 
 function TAGSTYLE(
 	{ scope, selector, comments, styles, rowMarker, columnMarker },
-	{ metaFront = "", fileName = "", filePath = "", normalPath = "", prefix = "" },
+	{ metaFront = "", fileName = "", fullPath = "", filePath = "", prefix = "" },
 	IndexMap = {},
 ) {
 	const object = {}, preBinds = [], postBinds = [], errors = [], essentials = [];
 
 	const forPortable = scope === "xtyling";
 	const xcope = (forPortable ? "" : scope).toUpperCase();
-	const declaration = `${normalPath}:${rowMarker}:${columnMarker}`;
+	const declaration = `${fullPath}:${rowMarker}:${columnMarker}`;
 	const metaClass = `${xcope}${metaFront}\\:${rowMarker}\\:${columnMarker}_${Use.string.normalize(selector, [], [], forPortable ? ["$", "/"] : ["$"])}`;
 	const variables = {};
 

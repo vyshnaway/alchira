@@ -44,7 +44,10 @@ export default function tagScan(content, action, classProps, fileData) {
 
 	while (ch !== undefined) {
 		ch = content[FileCursor.marker++];
-		if (ch === "\n") {
+		if (deviance === 0 && ch === "<") {
+			FileCursor.marker--;
+			break;
+		} else if (ch === "\n") {
 			FileCursor.rowMarker++;
 			FileCursor.colMarker = 0;
 		} else FileCursor.colMarker++;
@@ -101,21 +104,20 @@ export default function tagScan(content, action, classProps, fileData) {
 			attr = "";
 			value = "";
 		}
-
 		if (deviance === 0 && ch === ">") {
 			ok = true;
 			break;
-		} else if (deviance === 0 && ch === ";") break;
+		} else if (deviance === 0 && ch === ";") {
+			break;
+		} 
 	}
 
 	const renderedTag = `<${tagObject.element}${Object.entries(tagObject.attributes)
 		.reduce((A, [P, V]) => (A += " " + P + (V === "" ? "" : "=" + V)), "")}>`;
 	const replacement = tagObject.element !== APP.styleTag ? renderedTag :
 		tagCheck(content.slice(startMarker, FileCursor.marker)) ? xtyleTag : "";
-	const scribed = ok ?
-		tagObject.element === APP.xcssTag && Object.keys(styleObject.styles).length ?
-			"" : replacement
-		: fragment;
+	const scribed = ok ? tagObject.element === APP.xcssTag && Object.keys(styleObject.styles).length ?
+		"" : replacement : content.slice(startMarker, FileCursor.marker);
 
 	if (xtyleTag === scribed) fileData.summon = true;
 

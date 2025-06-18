@@ -142,7 +142,7 @@ function ReRender() {
 				cluster: fileData.cluster,
 				metaFront: fileData.metaFront,
 				filePath: fileData.filePath,
-				normalPath: fileData.sourcePath,
+				fullPath: fileData.sourcePath,
 				prefix: fileData.stamp,
 				fileName: fileData.fileName
 			}, CACHE.PortableStyle2Index,);
