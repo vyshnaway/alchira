@@ -35,7 +35,7 @@ export async function FetchDocs() {
 
 export async function FetchStatics() {
 	$.TASK("Saving guidelines.", 0);
-	RAW.ReadMe = (await fileman.read.file(NAV.md.guidelines)).data;
+	RAW.ReadMe = (await fileman.read.file(NAV.md.instructions)).data;
 
 
 	$.TASK("Loading vendor-prefixes");
@@ -74,7 +74,7 @@ export async function Initialize() {
 				"Next Steps",
 				[
 					"Adjust " +
-					$.style.bold.Orange(NAV.json.proxymap) +
+					$.style.bold.Orange(NAV.json.configure) +
 					$.canvas.unstyle +
 					" according to the requirements of your project.",
 					"Execute " +
@@ -117,7 +117,7 @@ export async function Initialize() {
 						"Create a new project and use its access key. For action visit " +
 						$.style.bold.Orange(ROOT.console),
 						"For personal projects, you can use the key in " +
-						$.style.bold.Orange(NAV.json.proxymap),
+						$.style.bold.Orange(NAV.json.configure),
 						"If using in CI/CD workflow, it is suggested to use " +
 						$.style.bold.Orange("xcss publish {key}"),
 					],
@@ -174,22 +174,19 @@ export async function VerifySetupStruct() {
 	return result;
 }
 
-export async function VerifyProxyMap() {
+export async function VerifyConfigure() {
 	$.TASK("Initializing configs", 0);
 	const errors = [],
 		alerts = [];
 
-	$.STEP("PATH : " + NAV.json.proxymap);
-	const proxyMap = await fileman.read.json(NAV.json.proxymap);
+	$.STEP("PATH : " + NAV.json.configure);
+	const proxyMap = await fileman.read.json(NAV.json.configure);
 	if (proxyMap.status) {
-		RAW.PROXYMAP = proxyMap.data;
-		const results = await worker.proxyMapDependency(
-			proxyMap.data,
-			NAV.folder.setup,
-		);
+		RAW.PROXYMAP = proxyMap.data["proxy-map"];
+		const results = await worker.proxyMapDependency(RAW.PROXYMAP, NAV.folder.setup);
 		errors.push(...results.warnings);
 	} else {
-		errors.push(`${NAV.json.proxymap} : Bad json file.`);
+		errors.push(`${NAV.json.configure} : Bad json file.`);
 	}
 
 	$.TASK("Initialization finished");
@@ -197,11 +194,7 @@ export async function VerifyProxyMap() {
 		status: Object.keys(errors).length === 0,
 		report:
 			Object.keys(errors).length === 0
-				? $.MOLD.success.Footer(
-					"Configs Healthy",
-					alerts,
-					$.list.success.Bullets,
-				)
+				? $.MOLD.success.Footer("Configs Healthy", alerts, $.list.success.Bullets,)
 				: $.MOLD.failed.Footer("Error Paths", errors, $.list.failed.Bullets),
 	};
 }
@@ -226,8 +219,8 @@ export async function AnalyzeHashrules() {
 	$.TASK("Updating Hashrules", 0);
 	const errors = [];
 
-	$.STEP("PATH : " + NAV.json.hashrule);
-	const hashrule = await fileman.read.json(NAV.json.hashrule);
+	$.STEP("PATH : " + NAV.json.hashrules);
+	const hashrule = await fileman.read.json(NAV.json.hashrules);
 	Object.keys(RAW.HASHRULE).forEach(key => delete RAW.HASHRULE[key])
 	if (hashrule.status) {
 		Object.entries(hashrule.data).forEach(([key, value]) => {
@@ -238,7 +231,7 @@ export async function AnalyzeHashrules() {
 			}
 		});
 	} else {
-		errors.push(`${NAV.json.hashrule} : Bad json file.`);
+		errors.push(`${NAV.json.hashrules} : Bad json file.`);
 	}
 	$.TASK("Analysis comnplete");
 	return {

@@ -135,7 +135,7 @@ async function Engine() {
 				PUBLISH.FinalMessage = "Preview verified. Procceed to 'publish' using your key."
 			output = await ORDER(RAW.CMD, RAW.ARG, TRACKS, FALLBACK);
 		}
-		
+
 		CACHE.FinalStack = output.result.reduce((A, I) => {
 			A["." + INDEX.STYLE(I).class] = I;
 			return A;
@@ -209,6 +209,7 @@ export async function Generate() {
 
 	if (PUBLISH.FinalError.length)
 		CUMULATES.errors.push($.MOLD.failed.List(PUBLISH.FinalError))
+
 	PUBLISH.ErrorCount = CUMULATES.errors.length;
 	PUBLISH.WarningCount = XRESPONSE.warnings.length;
 	PUBLISH.Report.errors = $.MOLD[PUBLISH.ErrorCount ? "failed" : "success"].Section(
@@ -224,12 +225,15 @@ export async function Generate() {
 
 		const FinalStylesheet = Object.entries(RENDERFRAGS).map(([chapter, content]) =>
 			RAW.WATCH ? `\n\n/* CHAPTER: ${chapter} */\n${content}\n` : content).join("");
-		Object.values(STACK.PROXYCACHE).forEach((cache) => cache.SummonFiles(SAVEFILES, FinalStylesheet));
+		const summons = Object.values(STACK.PROXYCACHE).reduce((sum, cache) => {
+			sum.push(...cache.SummonFiles(SAVEFILES, FinalStylesheet));
+			return sum
+		}, [PUBLISH.DeltaPath]);
 
 		if (RAW.WATCH) {
 			if (PUBLISH.DeltaPath.length) {
 				Object.keys(SAVEFILES).forEach((filePath) => {
-					if (PUBLISH.DeltaPath !== filePath) delete SAVEFILES[filePath];
+					if (!summons.includes(filePath)) delete SAVEFILES[filePath];
 				});
 			}
 

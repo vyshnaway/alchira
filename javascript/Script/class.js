@@ -76,7 +76,7 @@ export default class Proxy {
 			if (response.errors.length) file.errors.push(...response.errors);
 		});
 		Object.assign(CACHE.GlobalsStyle2Index, file.styleGlobals);
-		// console.log({ filePath, used: file.usedIndexes, local: Object.values(file.styleLocals), global: Object.values(file.styleGlobals) })
+
 		Object.assign(file.styleMap, {
 			file: { group: "target", id: RAW.WorkPath + file.targetPath },
 			global: globalSkeletons,
@@ -154,15 +154,20 @@ export default class Proxy {
 	}
 
 	SummonFiles(SaveFiles = {}, stylesheet) {
-		const br = RAW.WATCH ? "\n" : "";
+		const br = RAW.WATCH ? "\n" : "", summons = [this.sourceStylesheet];
 		const styleBlock = `${br}<style>${stylesheet}${br}</style>${br}`;
 		Object.values(this.fileCache).forEach((file) => {
-			if (file.extension !== "xcss")
-				SaveFiles[file.sourcePath] = file.summon
-					? file.midway.replace(xtyleTag, styleBlock)
-					: file.midway;
+			if (file.extension !== "xcss") {
+				if (file.summon) {
+					summons.push(file.sourcePath);
+					SaveFiles[file.sourcePath] = file.midway.replace(xtyleTag, styleBlock);
+				} else {
+					SaveFiles[file.sourcePath] = file.midway;
+				}
+			}
 		});
 		SaveFiles[this.sourceStylesheet] = stylesheet;
+		return summons;
 	}
 
 	UpdateCache() {

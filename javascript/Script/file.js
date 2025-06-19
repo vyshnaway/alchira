@@ -50,6 +50,19 @@ export default function scanner(
 			}
 			scribed += response.content;
 			reading = response.reading;
+			// if (ch === '"' || ch === "'" || ch === "`") {
+			// 	const quote = ch;
+			// 	FileCursor.marker++;
+			// 	ch = fileData.content[FileCursor.marker];
+			// 	scribed += ch;
+			// 	while (FileCursor.marker < fileData.content.length && (ch !== quote || fileData.content[FileCursor.marker - 1] === "\\")) {
+			// 		scribed += ch;
+			// 		FileCursor.marker++;
+			// 		ch = fileData.content[FileCursor.marker];
+			// 	}
+			// 	scribed += ch;
+			// 	FileCursor.marker++; // Skip the closing quote
+			// }
 		// } else if (ch === '"' || ch === "'" || ch === "`") {
 		// 	const quote = ch;
 		// 	FileCursor.marker++;

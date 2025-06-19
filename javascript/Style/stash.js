@@ -259,7 +259,7 @@ function ReRender() {
 
 
 function Appendix(indexes = []) {
-	const readmeFiles = {}, xtylingMap = {}, bindingMap = {}, nameCollitions = [], essentials = [];
+	const readmeFiles = {}, xtylingMap = {}, bindingMap = {}, stash = {}, nameCollitions = [], essentials = [];
 
 	if (!RAW.WATCH) {
 		const usedPortables = Object.values(CACHE.PortableStyle2Index).filter(i => indexes.includes(i))
@@ -268,16 +268,18 @@ function Appendix(indexes = []) {
 		Object.values(STACK.PORTABLES).forEach((F) => {
 			if (RAW.PACKAGE === F.fileName)
 				nameCollitions.push(F.sourcePath);
+
 			if (F.extension === "md") {
-				if (readmeFiles[F.fileName]) readmeFiles[F.fileName].push(F.content);
-				else readmeFiles[F.fileName] = [];
+				if (stash[F.fileName]) readmeFiles[F.fileName].push(F.content);
+				else stash[F.fileName] = { readme: [F.content] , binding: [], xtyling: [] };
 			} else if (F.extension === "xcss") {
-				if (xtylingMap[F.fileName]) F.usedIndexes.forEach(i => xtylingMap[F.fileName].push(i));
-				else xtylingMap[F.fileName] = Array.from(F.usedIndexes);
+				if (stash[F.fileName]) F.usedIndexes.forEach(i => stash[F.fileName].xtyling.push(i));
+				else stash[F.fileName] = { readme: [], binding: [], xtyling: Array.from(F.usedIndexes) };
 			} else if (F.extension === "css") {
-				if (bindingMap[F.fileName]) F.usedIndexes.forEach(i => bindingMap[F.fileName].push(i));
-				else bindingMap[F.fileName] = Array.from(F.usedIndexes);
+				if (stash[F.fileName]) F.usedIndexes.forEach(i => stash[F.fileName].binding.push(i));
+				else stash[F.fileName] = { readme: [], binding: Array.from(F.usedIndexes), xtyling: [] };
 			}
+
 			if (usedPortables.has(F.fileName)) essentials.push(...F.essentials)
 		});
 

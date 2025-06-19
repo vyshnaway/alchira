@@ -37,12 +37,13 @@ export const NAV = {
         extends: "xtyles/#extends.css",
     },
     json: {
-        proxymap: "xtyles/proxy-map.jsonc",
-        hashrule: "xtyles/hash-rules.jsonc",
+        configure: "xtyles/configure.jsonc",
+        hashrules: "xtyles/hashrules.jsonc",
         manifest: "xtyles/autogen/manifest.json",
     },
     md: {
-        guidelines: "xtyles/guidelines.md",
+        instructions: "xtyles/instructions.md",
+        portable: "xtyles/portable.md",
     },
 };
 

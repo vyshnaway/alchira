@@ -100,7 +100,7 @@
 // }
 
 
-export default function GeneratePortable() {
+export default function GeneratePortable(STASH, preBinds, postBinds, bindingMap, xtylingMap) {
 
     // 		const portableMd = NAV.folder.portableBundle + "/" + RAW.PACKAGE + ".css",
     // 			portableCss = NAV.folder.portableBundle + "/" + RAW.PACKAGE + ".xcss",

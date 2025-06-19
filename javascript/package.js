@@ -48,7 +48,7 @@ async function execute(chapter) {
                 await FETCH.ReloadLibrary();
 
             case "VerifyProxyMap":
-                const verifyConfigsResult = await FETCH.VerifyProxyMap();
+                const verifyConfigsResult = await FETCH.VerifyConfigure();
                 if (!verifyConfigsResult.status) {
                     report = verifyConfigsResult.report;
                     step = "WatchFolders";
@@ -128,7 +128,7 @@ async function execute(chapter) {
                                         await FETCH.FetchIndexContent();
                                         step = "GenerateFinals";
                                         break;
-                                    case NAV.json.hashrule:
+                                    case NAV.json.hashrules:
                                         step = "ReadHashrules";
                                         break;
                                     default:
@@ -187,7 +187,7 @@ async function commander(
             const setupInit = await FETCH.VerifySetupStruct();
             if (setupInit.unstart) $.POST(await FETCH.Initialize());
             else if (setupInit.proceed) {
-                $.POST((await FETCH.VerifyProxyMap()).report);
+                $.POST((await FETCH.VerifyConfigure()).report);
             } else {
                 $.POST(setupInit.report);
             }
