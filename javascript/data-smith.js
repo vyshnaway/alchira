@@ -207,7 +207,6 @@ function createStylesheet(CUMULATES, ESSENTIALS = []) {
 // On target stylesheet edit.
 export async function Generate() {
 	const { SAVEFILES, CUMULATES } = await Engine();
-	console.log(CACHE.FinalStack)
 	const XRESPONSE = XTYLES.Appendix(CACHE.SortedIndexes);
 
 	PUBLISH.Report.library = XRESPONSE.report;
@@ -228,7 +227,6 @@ export async function Generate() {
 		SAVEFILES[PUBLISH.DeltaPath] = PUBLISH.DeltaContent;
 	} else {
 		const { RENDERFRAGS } = createStylesheet(CUMULATES, XRESPONSE.essentials);
-		console.log(CACHE.FinalStack)
 
 		const FinalStylesheet = Object.entries(RENDERFRAGS).map(([chapter, content]) =>
 			RAW.WATCH ? `\n\n/* CHAPTER: ${chapter} */\n${content}\n` : content).join("");

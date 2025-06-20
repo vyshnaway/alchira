@@ -52,6 +52,16 @@ export const INDEX = {
     STYLE: (index = 0) => {
         return CACHE.Index2StylesObject[index];
     },
+    CLONE: (index = 0) => {
+        if (INDEX._BIN.size > 0) {
+            object.index = INDEX._BIN.values().next().value;
+            INDEX._BIN.delete(object.index);
+        } else { object.index = ++INDEX._NOW; }
+
+        object.class = "_" + Use.string.enCounter(object.index + 768);
+        CACHE.Index2StylesObject[object.index] = CACHE.Index2StylesObject[index];
+        return { index: object.index, class: object.class };
+    },
     DECLARE: (object = {}) => {
         if (INDEX._BIN.size > 0) {
             object.index = INDEX._BIN.values().next().value;

@@ -1,11 +1,13 @@
 import SCRIPTPARSE from "./file.js";
 import { xtyleTag } from "./tag.js";
+import FORGE from "../Style/forge.js";
 
 import $ from "../Shell/index.js";
 import FILING from "../data-filing.js";
 import STYLEPARSE from "../Style/parse.js";
 import { INDEX } from "../data-set.js";
 import { RAW, CACHE } from "../data-cache.js";
+import { generateXtyleBlock as GenerateXtyleBlock } from "../portable.js";
 
 export default class Proxy {
 	source = "";
@@ -36,9 +38,7 @@ export default class Proxy {
 		this.stylesheetContent = stylesheetContent;
 		this.sourceStylesheet = source + "/" + stylesheet;
 		this.targetStylesheet = target + "/" + stylesheet;
-		Object.entries(fileContents).forEach(([filePath, fileContent]) =>
-			this.SaveFile(filePath, fileContent),
-		);
+		Object.entries(fileContents).forEach(([filePath, fileContent]) => this.SaveFile(filePath, fileContent));
 	}
 
 	SaveFile(filePath, fileContent) {
@@ -134,7 +134,6 @@ export default class Proxy {
 		});
 
 		C.report.unshift($.MOLD.primary.Section(`PROXY : [ ${localCount} Locals + ${globalCount} Globals ] : ${this.target} -> ${this.source}`));
-
 		return C;
 	}
 
@@ -157,6 +156,7 @@ export default class Proxy {
 	SummonFiles(SaveFiles = {}, stylesheet) {
 		const br = RAW.WATCH ? "\n" : "", summons = [this.sourceStylesheet];
 		const styleBlock = `${br}<style>${stylesheet}${br}</style>${br}`;
+
 		Object.values(this.fileCache).forEach((file) => {
 			if (file.extension !== "xcss") {
 				if (file.summon) {
@@ -167,8 +167,35 @@ export default class Proxy {
 				}
 			}
 		});
+
 		SaveFiles[this.sourceStylesheet] = stylesheet;
 		return summons;
+	}
+
+	ComponentSpilt() {
+		const SaveFiles = {};
+
+		Object.values(this.fileCache).forEach((file) => {
+			if (file.extension === "xcss") {
+				if (Object.keys(SaveFiles).includes(file.targetPath)) SaveFiles[file.targetPath] += "\n\n" + file.content;
+			} else {
+				const response = SCRIPTPARSE(file, this.extnsProps[file.extension], "split", {
+					Global: CACHE.GlobalsStyle2Index,
+					Library: CACHE.LibraryStyle2Index,
+				});
+
+				SaveFiles[file.sourcePath] = response.scribed;
+				SaveFiles[file.targetPath + ".xcss"] += Object.entries(file.styleGlobals).reduce((A, [selector, index]) => {
+					const inStash = INDEX.STYLE(index);
+					const object = inStash.object;
+					const bindStack = FORGE.bindIndex(new Set(inStash.preBinds), new Set(inStash.postBinds));
+					A.push(...GenerateXtyleBlock(selector, object, bindStack.preBindsList, bindStack.postBindsList));
+					return A;
+				}, []).join("\n");
+			}
+		});
+
+		return SaveFiles
 	}
 
 	UpdateCache() {

@@ -1,7 +1,7 @@
 import { BindStack, FileCursor, StyleStack } from "./file.js";
 
 import Use from "../Utils/index.js";
-import { CACHE } from "../data-cache.js";
+import { CACHE, RAW } from "../data-cache.js";
 import { INDEX } from "../data-set.js";
 
 function loadActiveIndexes(classList = []) {
@@ -58,13 +58,8 @@ export default function classExtract(string, action, fileData) {
 
 	if (action !== "read") {
 		const metaFront = `TAG${fileData.metaFront}\\:${FileCursor.rowMarker}\\:${FileCursor.colMarker}__`;
-		(activeQuote = ""),
-			(entry = ""),
-			(scribed = ""),
-			(marker = 0),
-			(inQuote = false),
-			(ch = string[marker]);
-			
+		(activeQuote = ""), (entry = ""), (scribed = ""), (marker = 0), (inQuote = false), (ch = string[marker]);
+
 		const activeIndexes = action === "watch" ? [] :
 			Use.array.longestSubChain(CACHE.SortedIndexes, Use.array.setback(loadActiveIndexes(classList)));
 		const activeStyles = loadActiveStyles(activeIndexes);
@@ -91,6 +86,13 @@ export default function classExtract(string, action, fileData) {
 							(StyleStack.Local[entry] || 0);
 						if (index) {
 							switch (action) {
+								case "split":
+									const isGlobal = (StyleStack.Global[entry] || 0);
+									const isLibrary = (StyleStack.Global[entry] || 0);
+									const className = isGlobal ? `/${RAW.PACKAGE}/${entry}`
+										: isLibrary ? `/${RAW.PACKAGE}/$/${entry}` : entry;
+									scribed += className;
+									break;
 								case "watch":
 									const devClass = metaFront + INDEX.STYLE(index).metaClass;
 									scribed += Use.string.normalize(devClass, ["/", ".", ":", "|", "$"], ["\\"]);
@@ -113,24 +115,24 @@ export default function classExtract(string, action, fileData) {
 										const deltaStyles = Use.object.onlyB(activeStyles, INDEX.STYLE(index).object);
 										if (deltaStyles.score) {
 
-											// const identity = INDEX.DECLARE({
-											// 	portable: "",
-											// 	scope: "",
-											// 	selector: "",
-											// 	object: deltaStyles.result,
-											// 	metadata: "",
-											// 	preBinds: [],
-											// 	postBinds: [],
-											// 	metaClass: "",
-											// 	declarations: [],
-											// });
-											// CACHE.FinalStack["." + identity.class] = identity.index;
-											// fileData.usedIndexes.add(identity.index);
-											// scribed += identity.class;
-											
-											const className = "._" + INDEX.STYLE(index).class;
-											CACHE.FinalStack[className] = index;
-											scribed += className;
+											const identity = INDEX.DECLARE({
+												portable: "",
+												scope: "",
+												selector: "",
+												object: deltaStyles.result,
+												metadata: "",
+												preBinds: [],
+												postBinds: [],
+												metaClass: "",
+												declarations: [],
+											});
+											CACHE.FinalStack["." + identity.class] = identity.index;
+											fileData.usedIndexes.add(identity.index);
+											scribed += identity.class;
+
+											// const className = "_" + INDEX.STYLE(index).class;
+											// CACHE.FinalStack["." + className] = index;
+											// scribed += className;
 
 										} else {
 											scribed += INDEX.STYLE(index).class;

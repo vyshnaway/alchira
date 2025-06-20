@@ -3,7 +3,6 @@ import { NAV, ROOT, APP, RAW, PREFIX } from "./data-cache.js";
 
 import fileman from "../interface/fileman.js";
 import * as worker from "../interface/worker.js";
-import kryptic from "./Worker/kryptic.js";
 
 export async function FetchDocs() {
 	const readmeMd = fileman.sync.file(

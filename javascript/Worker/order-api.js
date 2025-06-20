@@ -10,7 +10,6 @@ const apiUrl = "https://workers.xpktr.com/api/xcss-build-request";
 export default async function order(CMD = "", KEY = "", sequences = [], fallback = [], portable = { name: "", version: "", jsonContent: "" }) {
 	const previewSequence = [...sequences, fallback];
 	const previewResult = Use.array.setback(previewSequence.flat());
-	console.log(previewResult.length)
 
 	if (CMD === "publish") {
 		if (KEY.length < 25) {

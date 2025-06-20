@@ -7,7 +7,7 @@ import fileman from "../interface/fileman.js";
 import { MemoryUsage } from "./data-set.js";
 import { ROOT, APP, RAW, NAV, STACK } from "./data-cache.js";
 import { hasEvents, dequeueEvent } from "../interface/eventface.js";
-import { FetchPortables } from "./portable.js";
+import { FetchPortables, SplitGlobalForComponents } from "./portable.js";
 
 function reporter(heading, targets, report) {
     $.POST(
@@ -74,7 +74,10 @@ async function execute(chapter) {
                 SMITH.ProcessProxies();
 
             case "GenerateFinals":
-                const { SaveFiles, ConsoleReport } = await SMITH.Generate();
+                const {
+                    SaveFiles,
+                    ConsoleReport
+                } = RAW.CMD === "split" ? SplitGlobalForComponents() : await SMITH.Generate();
                 report = ConsoleReport;
 
             case "Publish":
@@ -194,13 +197,16 @@ async function commander(
             }
             break;
         case "watch":
-            execute(APP.name + " : Active Runtime");
+            execute(RAW.PACKAGE + " : Active Runtime");
             break;
         case "preview":
-            await execute(APP.name + " : Preview Build");
+            await execute(RAW.PACKAGE + " : Preview Build");
             break;
         case "publish":
-            await execute(APP.name + " : Final Build");
+            await execute(RAW.PACKAGE + " : Final Build");
+            break;
+        case "split":
+            await execute(RAW.PACKAGE + " : Split for Components");
             break;
         case "install":
             $.POST("\n" + $.MOLD.secondary.Section("Installing Portables"));
@@ -209,7 +215,7 @@ async function commander(
             if (verifyStructResult.proceed) {
                 const verifyConfigsResult = await FETCH.VerifyConfigure();
                 if (verifyConfigsResult.status) {
-                    const fetchResult = await FetchPortables();
+                    const fetchResult = await FetchPortables(argument);
                     await fileman.write.bulk(fetchResult.SaveFiles);
                     $.POST($.MOLD.secondary.Footer("Installation status", fetchResult.Status, $.list.std.Props))
                 } else $.POST(verifyConfigsResult.report)

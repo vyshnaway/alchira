@@ -8,7 +8,9 @@ import { INDEX } from "../data-set.js";
 function xtylemerge(classList = []) {
 	let result = {}, preBinds = [], postBinds = [];
 	classList.forEach((className) => {
-		const index = (CACHE.LibraryStyle2Index[className] || 0);
+		const index = (CACHE.LibraryStyle2Index[className] || 0) +
+			(CACHE.PortableStyle2Index[className] || 0) +
+			(CACHE.NativeStyle2Index[className] || 0);
 		if (index) {
 			const found = INDEX.STYLE(index);
 			preBinds.push(...found.preBinds);
@@ -81,8 +83,6 @@ function CSSLIBRARY(fileDatas = [], initial = "", forPortable = false) {
 			const metadata = {
 				Info: {},
 				Variables: scannedStyle.variables,
-				// PreBinds: preBinds, 
-				// PostBinds: postBinds, 
 				Skeleton: Use.object.skeleton(object)
 			};
 
@@ -167,8 +167,6 @@ function TAGSTYLE(
 	let metadata = {
 		Info: comments,
 		Variables: variables,
-		// PreBinds: preBinds, 
-		// PostBinds: postBinds, 
 		Skeleton: Use.object.skeleton(object)
 	};
 	let xelector = selector === "" ? "" : prefix + selector;

@@ -1,5 +1,3 @@
-import Use from "./Utils/index.js";
-
 export const APP = {
     name: "",
     version: "",

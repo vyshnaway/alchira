@@ -109,18 +109,32 @@ export default function tagScan(content, action, classProps, fileData) {
 			break;
 		} else if (deviance === 0 && ch === ";") {
 			break;
-		} 
+		}
 	}
 
-	const renderedTag = `<${tagObject.element}${Object.entries(tagObject.attributes)
-		.reduce((A, [P, V]) => (A += " " + P + (V === "" ? "" : "=" + V)), "")}>`;
+	let renderedTag = "";
+	if (action === "split" && styleObject.scope === "local") {
+		const StyleObject = Object.entries(styleObject.styles).reduce((A, [k, v]) => {
+			if (k === "") A[styleObject.selector] = v;
+			else A[k] = v;
+			return A;
+		}, {});
+		Object.assign(StyleObject, tagObject.attributes)
+
+		renderedTag = `<${tagObject.element}${Object.entries(StyleObject)
+			.reduce((A, [P, V]) => (A += " " + P + (V === "" ? "" : "=" + V)), "")}>`;
+	} else {
+		renderedTag = `<${tagObject.element}${Object.entries(tagObject.attributes)
+			.reduce((A, [P, V]) => (A += " " + P + (V === "" ? "" : "=" + V)), "")}>`;
+	}
+
 	const replacement = tagObject.element !== APP.styleTag ? renderedTag :
 		tagCheck(content.slice(startMarker, FileCursor.marker)) ? xtyleTag : "";
-	const scribed = ok ? tagObject.element === APP.xcssTag && Object.keys(styleObject.styles).length ?
+	let scribed = ok ? tagObject.element === APP.xcssTag && Object.keys(styleObject.styles).length ?
 		"" : replacement : content.slice(startMarker, FileCursor.marker);
 
 	if (xtyleTag === scribed) fileData.summon = true;
-
+	if(action === "split") scribed = renderedTag;
 	return {
 		ok,
 		marker: FileCursor.marker,
