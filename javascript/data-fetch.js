@@ -3,6 +3,7 @@ import { NAV, ROOT, APP, RAW, PREFIX } from "./data-cache.js";
 
 import fileman from "../interface/fileman.js";
 import * as worker from "../interface/worker.js";
+import kryptic from "./Worker/kryptic.js";
 
 export async function FetchDocs() {
 	const readmeMd = fileman.sync.file(
@@ -37,6 +38,9 @@ export async function FetchStatics() {
 	$.TASK("Saving guidelines.", 0);
 	RAW.ReadMe = (await fileman.read.file(NAV.md.instructions)).data;
 
+	const manifestIgnore = (await fileman.read.file(NAV.file.manifestIgnore)).data.split("\n")
+	if (!(manifestIgnore).includes("manifest.json")) manifestIgnore.push("manifest.json")
+	await fileman.write.file(NAV.file.manifestIgnore, manifestIgnore.join("\n"))
 
 	$.TASK("Loading vendor-prefixes");
 	const PrefixRead = {
@@ -182,7 +186,19 @@ export async function VerifyConfigure() {
 	$.STEP("PATH : " + NAV.json.configure);
 	const proxyMap = await fileman.read.json(NAV.json.configure);
 	if (proxyMap.status) {
-		RAW.PROXYMAP = proxyMap.data["proxy-map"];
+		RAW.PROXYMAP = (typeof proxyMap.data["proxy-map"] === "object") ? proxyMap.data["proxy-map"] : [];
+		const dependencies = (typeof proxyMap.data["portables"] === "object") ? proxyMap.data["portables"] : {};
+
+		delete proxyMap.data["proxy-map"];
+		delete proxyMap.data["portables"];
+		Object.assign(RAW.PORTABLEFRAME, proxyMap.data);
+		RAW.PORTABLEFRAME.name = RAW.PACKAGE = RAW.PORTABLEFRAME.name || RAW.PACKAGE || "xtyle";
+		RAW.PORTABLEFRAME.versionn = RAW.VERSION = RAW.PORTABLEFRAME.version || RAW.VERSION || '0.0.0';
+
+		RAW.DEPENDENCIES = Object.entries(dependencies).reduce((a, [k, v]) => {
+			if (typeof v === "string") a[k] = v;
+			return a;
+		}, {})
 		const results = await worker.proxyMapDependency(RAW.PROXYMAP, NAV.folder.setup);
 		errors.push(...results.warnings);
 	} else {
@@ -192,10 +208,9 @@ export async function VerifyConfigure() {
 	$.TASK("Initialization finished");
 	return {
 		status: Object.keys(errors).length === 0,
-		report:
-			Object.keys(errors).length === 0
-				? $.MOLD.success.Footer("Configs Healthy", alerts, $.list.success.Bullets,)
-				: $.MOLD.failed.Footer("Error Paths", errors, $.list.failed.Bullets),
+		report: Object.keys(errors).length === 0
+			? $.MOLD.success.Footer("Configs Healthy", alerts, $.list.success.Bullets,)
+			: $.MOLD.failed.Footer("Error Paths", errors, $.list.failed.Bullets),
 	};
 }
 

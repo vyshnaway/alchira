@@ -6,7 +6,7 @@ export const FileCursor = {
 	colMarker: 0,
 	tagCount: 0,
 };
-export const StyleStack = { Portable: {}, Library: {}, Local: {}, Global: {} };
+export const StyleStack = { Portable: {}, Library: {}, Native: {}, Local: {}, Global: {} };
 export const BindStack = { preBinds: new Set(), postBinds: new Set() };
 
 export default function scanner(
@@ -14,7 +14,7 @@ export default function scanner(
 	classProps = [],
 	action = "read",
 	bindStack = { preBinds: new Set(), postBinds: new Set() },
-	styleStack = { Portable: {}, Library: {}, Local: {}, Global: {} },
+	styleStack = { Portable: {}, Library: {}, Native: {}, Local: {}, Global: {} },
 ) {
 	Object.assign(StyleStack, styleStack);
 	Object.assign(BindStack, bindStack);
@@ -26,6 +26,8 @@ export default function scanner(
 		classesList = [];
 	let ch = fileData.content[0],
 		reading = true,
+		inQuote = false,
+		quote = "",
 		scribed = "";
 
 	fileData.summon = false;
@@ -35,7 +37,7 @@ export default function scanner(
 			FileCursor.colMarker = 0;
 		} else FileCursor.colMarker++;
 
-		if (ch === "<") {
+		if (fileData.content[FileCursor.marker - 1] !== "\\" && ch === "<") {
 			FileCursor.tagCount++;
 			const response = tagReader(
 				fileData.content,
@@ -50,31 +52,6 @@ export default function scanner(
 			}
 			scribed += response.content;
 			reading = response.reading;
-			// if (ch === '"' || ch === "'" || ch === "`") {
-			// 	const quote = ch;
-			// 	FileCursor.marker++;
-			// 	ch = fileData.content[FileCursor.marker];
-			// 	scribed += ch;
-			// 	while (FileCursor.marker < fileData.content.length && (ch !== quote || fileData.content[FileCursor.marker - 1] === "\\")) {
-			// 		scribed += ch;
-			// 		FileCursor.marker++;
-			// 		ch = fileData.content[FileCursor.marker];
-			// 	}
-			// 	scribed += ch;
-			// 	FileCursor.marker++; // Skip the closing quote
-			// }
-		// } else if (ch === '"' || ch === "'" || ch === "`") {
-		// 	const quote = ch;
-		// 	FileCursor.marker++;
-		// 	ch = fileData.content[FileCursor.marker];
-		// 	scribed += ch;
-		// 	while (FileCursor.marker < fileData.content.length && (ch !== quote || fileData.content[FileCursor.marker - 1] === "\\")) {
-		// 		scribed += ch;
-		// 		FileCursor.marker++;
-		// 		ch = fileData.content[FileCursor.marker];
-		// 	}
-		// 	scribed += ch;
-		// 	FileCursor.marker++; // Skip the closing quote
 		} else {
 			scribed += ch;
 			FileCursor.marker++;

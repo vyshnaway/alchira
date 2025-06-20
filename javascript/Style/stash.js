@@ -154,7 +154,7 @@ function ReRender() {
 				if (!RAW.WATCH) fileData.essentials.push(...response.essentials);
 			} else if (response.isOriginal) {
 				fileData.usedIndexes.add(response.index);
-				indexSkeleton[response.selector] = response.skeleton;
+				indexSkeleton[response.selector] = response.metadata;
 				portableCount++;
 			}
 		});
@@ -166,32 +166,29 @@ function ReRender() {
 
 	const BindingStyleSkeleton = bindingArray.reduce((collection, fileData) => {
 		const result = PARSE.CSSLIBRARY([fileData], "BINDING", true);
-		collection[NAV.folder.portables + "/" + fileData.filePath] = result;
-		const selectors = Object.keys(result);
-		if (selectors.length)
-			bindingChart[`Binding [${fileData.filePath}]: ${selectors.length} Classes`] = selectors;
-		bindingCount += selectors.length;
+		collection[NAV.folder.portables + "/" + fileData.filePath] = result.indexSkeleton;
+		if (result.selectorList.length)
+			bindingChart[`Binding [${fileData.filePath}]: ${result.selectorList.length} Classes`] = result.selectorList;
+		bindingCount += result.selectorList.length;
 		return collection;
 	}, {});
 
 
 	const AxiomStyleSkeleton = axiomsArray.reduce((collection, fileData, index) => {
 		const result = PARSE.CSSLIBRARY(fileData, "AXIOM");
-		collection[index] = result;
-		const selectors = Object.keys(result);
-		if (selectors.length)
-			axiomChart[`Level ${index}: ${selectors.length} Classes`] = selectors;
-		axiomCount += selectors.length;
+		collection[index] = result.indexSkeleton;
+		if (result.selectorList.length)
+			axiomChart[`Level ${index}: ${result.selectorList.length} Classes`] = result.selectorList;
+		axiomCount += result.selectorList.length;
 		return collection;
 	}, {});
 
 	const ClusterStyleSkeleton = clustersArray.reduce((collection, level, index) => {
 		const result = PARSE.CSSLIBRARY(level, "CLUSTER");
-		collection[index] = result;
-		const selectors = Object.keys(result);
-		if (selectors.length)
-			clusterChart[`Level ${index}: ${selectors.length} Classes`] = selectors;
-		clusterCount += selectors.length;
+		collection[index] = result.indexSkeleton;
+		if (result.selectorList.length)
+			clusterChart[`Level ${index}: ${result.selectorList.length} Classes`] = result.selectorList;
+		clusterCount += result.selectorList.length;
 		return collection;
 	}, {});
 
@@ -221,34 +218,42 @@ function ReRender() {
 
 	report = [
 		$.MOLD.primary.Section(
-			`Axiom Styles: ${axiomCount}`,
+			`Axioms: ${axiomCount}`,
 			Object.entries(axiomChart).map(([heading, entries]) =>
 				$.MOLD.tertiary.Topic(heading, entries, $.list.text.Entries),
 			),
 		),
 		$.MOLD.primary.Section(
-			`Cluster Styles: ${clusterCount}`,
+			`Clusters: ${clusterCount}`,
 			Object.entries(clusterChart).map(([heading, entries]) =>
 				$.MOLD.tertiary.Topic(heading, entries, $.list.text.Entries),
 			),
 		),
 		$.MOLD.primary.Section(
-			`Binding Styles: ${bindingCount}`,
+			`Bindings: ${bindingCount}`,
 			Object.entries(bindingChart).map(([heading, entries]) =>
 				$.MOLD.tertiary.Topic(heading, entries, $.list.text.Entries),
 			),
 		),
 		$.MOLD.primary.Section(
-			`Xtyling Styles: ${portableCount}`,
+			`Xtylings: ${portableCount}`,
 			Object.entries(portableChart).map(([heading, entries]) =>
 				$.MOLD.tertiary.Topic(heading, entries, $.list.text.Entries),
 			),
 		),
 	].join("");
 
+	const nameCollitions = []
+	Object.values(STACK.PORTABLES).forEach((F) => {
+		if (RAW.PACKAGE === F.fileName) nameCollitions.push(F.sourcePath);
+	});
+	if (nameCollitions.length)
+		warnings.push($.MOLD.warning.List(`Package-name collitions: ${RAW.PACKAGE}`, nameCollitions, $.list.failed.Bullets))
+
 	return {
 		libraryTable,
 		modulesTable,
+		nameCollitions,
 		PortableEssentials,
 		AxiomStyleSkeleton,
 		ClusterStyleSkeleton,
@@ -259,41 +264,34 @@ function ReRender() {
 
 
 function Appendix(indexes = []) {
-	const readmeFiles = {}, xtylingMap = {}, bindingMap = {}, stash = {}, nameCollitions = [], essentials = [];
+	const stash = {}, essentials = [];
 
 	if (!RAW.WATCH) {
 		const usedPortables = Object.values(CACHE.PortableStyle2Index).filter(i => indexes.includes(i))
 			.reduce((a, c) => { a.add(INDEX.STYLE(c).portable); return a; }, new Set())
 
 		Object.values(STACK.PORTABLES).forEach((F) => {
-			if (RAW.PACKAGE === F.fileName)
-				nameCollitions.push(F.sourcePath);
-
-			if (F.extension === "md") {
-				if (stash[F.fileName]) readmeFiles[F.fileName].push(F.content);
-				else stash[F.fileName] = { readme: [F.content] , binding: [], xtyling: [] };
-			} else if (F.extension === "xcss") {
-				if (stash[F.fileName]) F.usedIndexes.forEach(i => stash[F.fileName].xtyling.push(i));
-				else stash[F.fileName] = { readme: [], binding: [], xtyling: Array.from(F.usedIndexes) };
-			} else if (F.extension === "css") {
-				if (stash[F.fileName]) F.usedIndexes.forEach(i => stash[F.fileName].binding.push(i));
-				else stash[F.fileName] = { readme: [], binding: Array.from(F.usedIndexes), xtyling: [] };
+			if (usedPortables.has(F.fileName)) {
+				if (F.extension === "md") {
+					if (stash[F.fileName]) stash[F.fileName].readme.push(F.content);
+					else stash[F.fileName] = { readme: [F.content], binding: [], xtyling: [] };
+				} else if (F.extension === "xcss") {
+					if (stash[F.fileName]) F.usedIndexes.forEach(i => stash[F.fileName].xtyling.push(i));
+					else stash[F.fileName] = { readme: [], binding: [], xtyling: Array.from(F.usedIndexes) };
+				} else if (F.extension === "css") {
+					if (stash[F.fileName]) F.usedIndexes.forEach(i => stash[F.fileName].binding.push(i));
+					else stash[F.fileName] = { readme: [], binding: Array.from(F.usedIndexes), xtyling: [] };
+				}
+				essentials.push(...F.essentials)
 			}
-
-			if (usedPortables.has(F.fileName)) essentials.push(...F.essentials)
 		});
-
-		if (nameCollitions.length)
-			warnings.push($.MOLD.warning.List(`Package-name collitions: ${RAW.PACKAGE}`, nameCollitions, $.list.failed.Bullets))
 	}
 
 	return {
-		readmeFiles,
-		xtylingMap,
-		bindingMap,
 		essentials,
 		warnings,
 		report,
+		stash
 	};
 }
 

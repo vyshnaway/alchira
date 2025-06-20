@@ -69,7 +69,7 @@ export default class Proxy {
 				file.postBinds.push(...response.postBinds);
 				file.essentials.push(...response.essentials)
 			} else if (response.isOriginal) {
-				skeletonMap[response.selector] = response.skeleton;
+				skeletonMap[response.selector] = response.metadata;
 				file.usedIndexes.add(response.index);
 			}
 
@@ -146,6 +146,7 @@ export default class Proxy {
 				{
 					Local: file.styleLocals,
 					Global: CACHE.GlobalsStyle2Index,
+					Native: CACHE.NativeStyle2Index,
 					Library: CACHE.LibraryStyle2Index,
 					Portable: CACHE.PortableStyle2Index
 				},

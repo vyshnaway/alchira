@@ -1,130 +1,137 @@
+import fileman from "../interface/fileman.js";
+import { CACHE, NAV, RAW } from "./data-cache.js";
+import { INDEX } from "./data-set.js";
+import $ from "./Shell/index.js";
+import FORGE from "./Style/forge.js";
+import RENDER from "./Style/render.js";
 
-// import Use from "../Utils/index.js";
-// import FORGE from "./forge.js";
-// import { CACHE } from "../data-cache.js";
-// import { INDEX } from "../data-set.js";
+function portableCreator(essentials = [], portableName = `${RAW.PACKAGE}@${RAW.VERSION}`) {
+    const preBinds = new Set(), postBinds = new Set();
+    const tab = "    ", portable = [`# ${portableName}`], binding = [];
 
-// function portableCreator(
-//     preBinds = [],
-//     postBinds = [],
-//     essentials = [],
-//     module = "module",
-//     version = "0.0.0",
-// ) {
-//     const bindstack = {}, tab = "    ", portable = [`# ${module}@${version}`], binding = [];
-//     const bindingResponse = FORGE.bindIndex(new Set(preBinds), new Set(postBinds), true);
+    const classList = Object.keys(CACHE.GlobalsStyle2Index);
+    portable.push("", `## Xtyle Classes (${classList.length})`, "", ...classList.map((c) => "- `" + c + "`"), "---");
 
-//     Object.entries(CACHE.GlobalsStyle2Index).forEach(([selector, index]) => {
-//         const style = INDEX.OBJECT(index);
-//         bindstack[selector] = FORGE.bindIndex(new Set(style.preBinds), new Set(style.postBinds), true);
-//     });
+    Object.entries(CACHE.GlobalsStyle2Index).forEach(([selector, index]) => {
+        const inStash = INDEX.STYLE(index);
+        const object = inStash.object;
+        const bindstack = FORGE.bindIndex(new Set(inStash.preBinds), new Set(inStash.postBinds));
+        inStash.preBinds.forEach(bind => preBinds.add(bind))
+        inStash.postBinds.forEach(bind => postBinds.add(bind))
 
-//     const classList = Object.keys(CACHE.GlobalsStyle2Index);
-//     portable.push(
-//         "", `## Xtyle Classes (${classList.length})`, "",
-//         ...classList.map((c) => "- `" + c + "`"), "---",
-//     );
-//     [
-//         ...Object.entries(CACHE.GlobalsStyle2Index).map(([selector, index]) => [selector, INDEX.OBJECT(index).object]),
-//         ...bindingResponse.postBindsObject, ...bindingResponse.preBindsObject,
-//     ].forEach(([selector, object]) => {
-//         portable.push(
-//             "", `### Selector: \`${selector}\``, "",
-//             "````html",
-//             "<xtyle",
-//             ...Object.entries(object).reduce((accum, [subSelector, block]) => {
-//                 if (subSelector === "") {
-//                     accum.push(
-//                         `${selector}="`,
-//                         tab + `@pre-bind ${bindstack[selector].preBindsList.join(" ")}; `,
-//                         tab + `@post-bind ${bindstack[selector].postBindsList.join(" ")}; `,
-//                         ...rawCompose(Object.entries(block), tab).map(
-//                             (line) => tab + line,
-//                         ),
-//                         '"',
-//                     );
-//                 } else {
-//                     if (subSelector[0] === "@") {
-//                         const ind = subSelector.indexOf(" ");
-//                         const rule = subSelector.slice(1, ind);
-//                         const query = subSelector.slice(ind + 1);
+        portable.push(
+            "", `### Selector: \`${selector}\``, "",
+            "````html",
+            "<xtyle",
+            ...Object.entries(object).reduce((accum, [subSelector, block]) => {
+                if (subSelector === "") {
+                    accum.push(
+                        `${selector}="`,
+                        tab + `@pre-bind ${bindstack.preBindsList.join(" ")}; `,
+                        tab + `@post-bind ${bindstack.postBindsList.join(" ")}; `,
+                        ...RENDER.forPortable(Object.entries(block), tab).map((line) => tab + line),
+                        '"',
+                    );
+                } else {
+                    if (subSelector[0] === "@") {
+                        const ind = subSelector.indexOf(" ");
+                        const rule = subSelector.slice(1, ind);
+                        const query = subSelector.slice(ind + 1);
 
-//                         subSelector = `${rule}@{${query}}`;
-//                     }
-//                     accum.push(
-//                         `${subSelector}="`,
-//                         ...rawCompose(Object.entries(block), tab).map(
-//                             (line) => tab + line,
-//                         ),
-//                         '"',
-//                     );
-//                 }
-//                 return accum;
-//             }, []).map((line) => tab + line),
-//             "/>",
-//             "````",
-//         );
-//     });
+                        subSelector = `${rule}@{${query}}`;
+                    }
+                    accum.push(
+                        `${subSelector}="`,
+                        ...RENDER.forPortable(Object.entries(block), tab).map(
+                            (line) => tab + line,
+                        ),
+                        '"',
+                    );
+                }
+                return accum;
+            }, []).map((line) => tab + line),
+            "/>",
+            "````",
+        );
+    });
 
-//     portable.push(
-//         "",
-//         "## Portable Essentials",
-//         "",
-//         "````html",
-//         "<xtyle",
-//         ...essentials
-//             .reduce((accum, [subSelector, block]) => {
-//                 if (subSelector[0] === "@") {
-//                     const ind = subSelector.indexOf(" ");
-//                     const rule = subSelector.slice(1, ind);
-//                     const query = subSelector.slice(ind + 1);
+    // Essentials
+    portable.push(
+        "",
+        "## Portable Essentials",
+        "",
+        "````html",
+        "<xtyle",
+        ...essentials
+            .reduce((accum, [subSelector, block]) => {
+                if (subSelector[0] === "@") {
+                    const ind = subSelector.indexOf(" ");
+                    const rule = subSelector.slice(1, ind);
+                    const query = subSelector.slice(ind + 1);
 
-//                     subSelector = `${rule}@{${query}}`;
-//                 }
-//                 accum.push(
-//                     `${subSelector}="`,
-//                     ...rawCompose(Object.entries(block), tab).map((line) => tab + line),
-//                     '"',
-//                 );
-//                 return accum;
-//             }, [])
-//             .map((line) => tab + line),
-//         "/>",
-//         "````",
-//     );
+                    subSelector = `${rule}@{${query}}`;
+                }
+                accum.push(
+                    `${subSelector}="`,
+                    ...RENDER.forPortable(Object.entries(block), tab).map((line) => tab + line),
+                    '"',
+                );
+                return accum;
+            }, [])
+            .map((line) => tab + line),
+        "/>",
+        "````",
+    );
 
-//     return {
-//         portable: portable.join("\n"),
-//         binding: binding.join("\n"),
-//     };
-// }
+    const bindingResponse = FORGE.bindIndex(preBinds, postBinds);
+    // console.log({ bindingResponse, preBinds, postBinds })
+
+    return {
+        portable: portable.join("\n"),
+        binding: binding.join("\n"),
+    };
+}
 
 
-export default function GeneratePortable(STASH, preBinds, postBinds, bindingMap, xtylingMap) {
+export function GeneratePortable(essentials = []) {
+    const portableName = `${RAW.PACKAGE}@${RAW.VERSION}`;
+    const content = portableCreator(essentials, portableName)
+    const json = { ...RAW.PORTABLEFRAME, readme: RAW.ReadMe, xtyling: content.portable, bindings: content.binding };
+    const jsonPath = NAV.folder.portableNative + "/" + portableName + ".json";
 
-    // 		const portableMd = NAV.folder.portableBundle + "/" + RAW.PACKAGE + ".css",
-    // 			portableCss = NAV.folder.portableBundle + "/" + RAW.PACKAGE + ".xcss",
-    // 			portableXcss = NAV.folder.portableBundle + "/" + RAW.PACKAGE + ".md";
+    return { name: RAW.PACKAGE, version: RAW.VERSION, jsonPath: jsonPath, jsonContent: JSON.stringify(json) };
+}
 
-    // 		const portable = COMPILE.Portable(
-    // 			PREBINDS,
-    // 			POSTBINDS,
-    // 			CUMULATES.essentials,
-    // 			RAW.PACKAGE,
-    // 			RAW.VERSION,
-    // 		);
-    // 		SAVEFILES[NAV.folder.portableNative + "/" + RAW.PACKAGE + ".css"] =
-    // 			portable.binding;
-    // 		SAVEFILES[NAV.folder.portableNative + "/" + RAW.PACKAGE + ".xcss"] =
-    // 			portable.portable;
-    // 		SAVEFILES[NAV.folder.portableNative + "/" + RAW.PACKAGE + ".md"] =
-    // 			RAW.ReadMe;
+export async function FetchPortables() {
+    const SaveFiles = {}, Status = [];
 
-    // 		readmeFiles = { [`${RAW.PACKAGE}.md`]: `# ${RAW.PACKAGE}@${RAW.VERSION}` + "\n---\n" + RAW.ReadMe };
-    // 		if (SAVEFILES[portableMd]) SAVEFILES[portableMd] += RAW.ReadMe;
-    // 		else SAVEFILES[portableMd] = RAW.ReadMe;
-    // 		if (SAVEFILES[portableCss]) SAVEFILES[portableCss] += portable.binding;
-    // 		else SAVEFILES[portableCss] = portable.binding;
-    // 		if (SAVEFILES[portableXcss]) SAVEFILES[portableXcss] += portable.portable;
-    // 		else SAVEFILES[portableXcss] = portable.portable;
-} 
+    await Promise.all(
+        Object.entries(RAW.DEPENDENCIES).map(async ([Name, Link]) => {
+            const response = fileman.read.json(Link, true);
+            if ((await response).status) {
+                const data = (await response).data;
+                if (typeof data.readme === "string") {
+                    SaveFiles[`${NAV.folder.portables}/${Name}/${Name}.md`] = data.readme;
+                    delete data.readme;
+                }
+                if (typeof data.portable === "string") {
+                    SaveFiles[`${NAV.folder.portables}/${Name}/${Name}.json`] = data.portable;
+                    delete data.portable;
+                }
+                if (typeof data.bindings === "object") {
+                    Object.entries(data.bindings).forEach(([prefix, content]) => {
+                        if (typeof content === "string")
+                            SaveFiles[`${NAV.folder.portables}/${Name}/${prefix}.${Name}.json`] = data.portable;
+                    })
+                    delete data.bindings;
+                }
+                SaveFiles[`${NAV.folder.portables}/${Name}/${Name}.json`] = JSON.stringify(data, " ", 2);
+                Status[Name] = $.MOLD.success.Text("Fetch successfull.")
+            } else {
+                Status[Name] = $.MOLD.failed.Text("Fetch failed.")
+            }
+        })
+    );
+    
+    return { Status, SaveFiles };
+}

@@ -13,6 +13,7 @@
   "scripts": {
     "init": "xcss init",
     "watch": "xcss watch",
+    "install": "xcss install",
     "preview": "xcss preview",
     "publish": "xcss publish",
     "dev:test": "jest",

@@ -1,4 +1,6 @@
 {
+  "name": "",
+  "version": "",
   "proxies": [
     {
       "source": "src",
@@ -12,9 +14,6 @@
     }
   ],
   "portables": {
-    "portable-name": {
-      "versions": [],
-      "source": "src"
-    }
+    "portable-name": "source-link"
   }
 }

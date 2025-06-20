@@ -7,6 +7,7 @@ import fileman from "../interface/fileman.js";
 import { MemoryUsage } from "./data-set.js";
 import { ROOT, APP, RAW, NAV, STACK } from "./data-cache.js";
 import { hasEvents, dequeueEvent } from "../interface/eventface.js";
+import { FetchPortables } from "./portable.js";
 
 function reporter(heading, targets, report) {
     $.POST(
@@ -47,7 +48,7 @@ async function execute(chapter) {
             case "ReadLibraries":
                 await FETCH.ReloadLibrary();
 
-            case "VerifyProxyMap":
+            case "VerifyConfigure":
                 const verifyConfigsResult = await FETCH.VerifyConfigure();
                 if (!verifyConfigsResult.status) {
                     report = verifyConfigsResult.report;
@@ -116,10 +117,10 @@ async function execute(chapter) {
                         if (event.folder === NAV.folder.setup) {
                             if (event.action === "add" || event.action === "change") {
                                 switch (filePath) {
-                                    case NAV.json.proxymap:
+                                    case NAV.json.configure:
                                         stopWatcher();
                                         stopWatcher = null;
-                                        step = "VerifyProxyMap";
+                                        step = "VerifyConfigure";
                                         break;
                                     case NAV.css.atrules:
                                     case NAV.css.constants:
@@ -142,9 +143,9 @@ async function execute(chapter) {
                                 step = "VerifySetupStruct";
                             }
                         } else if (event.action === "add" || event.action === "change" || event.action === "unlink") {
-                            SMITH.ProcessProxies(event.action, event.folder, event.filePath, event.fileContent, event.extension,);
+                            SMITH.ProcessProxies(event.action, event.folder, event.filePath, event.fileContent, event.extension);
                             step = "GenerateFinals";
-                        } else step = "VerifyProxyMap";
+                        } else step = "VerifyConfigure";
 
                         heading = `[${event.timeStamp}] | ${event.filePath} | [${event.action}]`;
                         reportNext = true;
@@ -200,6 +201,19 @@ async function commander(
             break;
         case "publish":
             await execute(APP.name + " : Final Build");
+            break;
+        case "install":
+            $.POST($.MOLD.secondary.Section("Installing Portables"));
+
+            const verifyStructResult = await FETCH.VerifySetupStruct();
+            if (verifyStructResult.proceed) {
+                const verifyConfigsResult = await FETCH.VerifyConfigure();
+                if (verifyConfigsResult.status) {
+                    const fetchResult = await FetchPortables();
+                    await fileman.write.bulk(fetchResult.SaveFiles);
+                    $.POST($.MOLD.secondary.Footer("Installation status", fetchResult.Status,$.list.std.Props))
+                } else $.POST(verifyConfigsResult.report)
+            } else $.POST(verifyStructResult.report)
             break;
         default:
             await FETCH.FetchDocs();

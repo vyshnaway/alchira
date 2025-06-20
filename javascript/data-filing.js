@@ -33,7 +33,7 @@ export default function FILING(
 		sourcePath,
 		targetPath,
 		metaFront: `${isXtylesFolder ? group.toLocaleUpperCase() : ""}\\|${Use.string.normalize(targetPath, [], [], ["/", "."])}`,
-		content: isXtylesFolder && extension !== "xcss" ? Use.code.uncomment.Css(content) : content,
+		content: isXtylesFolder && extension === "css" ? Use.code.uncomment.Css(content) : content,
 		usedIndexes: new Set(),
 		essentials: [],
 		// for Proxy Class

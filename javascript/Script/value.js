@@ -9,6 +9,7 @@ function loadActiveIndexes(classList = []) {
 		const index =
 			(StyleStack.Portable[entry] || 0) +
 			(StyleStack.Library[entry] || 0) +
+			(StyleStack.Native[entry] || 0) +
 			(StyleStack.Global[entry] || 0) +
 			(StyleStack.Local[entry] || 0);
 		if (index) A.push(index);
@@ -56,20 +57,16 @@ export default function classExtract(string, action, fileData) {
 	}
 
 	if (action !== "read") {
-		const metaFront = `TAG${fileData.metaFront}\\:${FileCursor.rowMarker}__`;
+		const metaFront = `TAG${fileData.metaFront}\\:${FileCursor.rowMarker}\\:${FileCursor.colMarker}__`;
 		(activeQuote = ""),
 			(entry = ""),
 			(scribed = ""),
 			(marker = 0),
 			(inQuote = false),
 			(ch = string[marker]);
-		const activeIndexes =
-			action === "watch"
-				? []
-				: Use.array.longestSubChain(
-					CACHE.SortedIndexes,
-					loadActiveIndexes(Use.array.setback(classList), fileData.filePath),
-				);
+			
+		const activeIndexes = action === "watch" ? [] :
+			Use.array.longestSubChain(CACHE.SortedIndexes, Use.array.setback(loadActiveIndexes(classList)));
 		const activeStyles = loadActiveStyles(activeIndexes);
 
 		while (ch !== undefined) {
@@ -89,6 +86,7 @@ export default function classExtract(string, action, fileData) {
 						const index =
 							(StyleStack.Portable[entry] || 0) +
 							(StyleStack.Library[entry] || 0) +
+							(StyleStack.Native[entry] || 0) +
 							(StyleStack.Global[entry] || 0) +
 							(StyleStack.Local[entry] || 0);
 						if (index) {

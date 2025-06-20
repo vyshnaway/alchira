@@ -9,7 +9,7 @@ import SCRIPT from "./Script/class.js";
 import XTYLES from "./Style/stash.js";
 import { NAV, RAW, STACK, CACHE, PUBLISH } from "./data-cache.js";
 import { INDEX } from "./data-set.js";
-import GeneratePortable from "./portable.js";
+import { GeneratePortable } from "./portable.js";
 
 export function UpdateXtylesFolder() {
 	INDEX.RESET();
@@ -69,6 +69,10 @@ export function ProcessProxies(
 		Object.keys(CACHE.GlobalsStyle2Index).forEach(key => delete CACHE.GlobalsStyle2Index[key])
 		Object.entries(STACK.PROXYCACHE).forEach(([key, cache]) => { cache.ClearFiles(); delete STACK.PROXYCACHE[key]; });
 		Object.entries(RAW.PROXYFILES).forEach(([key, files]) => { STACK.PROXYCACHE[key] = new SCRIPT(files); });
+		CACHE.NativeStyle2Index = {
+			...Object.fromEntries(Object.entries(CACHE.LibraryStyle2Index).map(([s, i]) => [`/${RAW.PACKAGE}/$/${s}`, i])),
+			...Object.fromEntries(Object.entries(CACHE.GlobalsStyle2Index).map(([s, i]) => [`/${RAW.PACKAGE}/${s}`, i]))
+		}
 	}
 }
 
@@ -81,7 +85,7 @@ async function Engine() {
 		essentials: [],
 		preBinds: new Set(),
 		postBinds: new Set(),
-	};
+	}, SAVEFILES = {};
 
 	Object.values(STACK.PROXYCACHE).forEach((cache) => {
 		const cumulated = cache.Accumulator();
@@ -119,7 +123,10 @@ async function Engine() {
 				output = await ORDER(RAW.CMD, RAW.ARG, TRACKS, FALLBACK);
 				PUBLISH.FinalMessage = "Errors in " + CUMULATES.errors.length + " Tags. Falling back to 'preview' command.";
 			} else {
-				output = await ORDER(RAW.CMD, RAW.ARG, TRACKS, FALLBACK);
+				const json = GeneratePortable(CUMULATES.essentials);
+				SAVEFILES[json.jsonPath] = json.jsonContent;
+
+				output = await ORDER(RAW.CMD, RAW.ARG, TRACKS, FALLBACK, json);
 				if (output.status) {
 					PUBLISH.FinalMessage = "Build Success.";
 				} else {
@@ -143,7 +150,7 @@ async function Engine() {
 		CACHE.SortedIndexes = output.result;
 	}
 
-	return CUMULATES;
+	return { CUMULATES, SAVEFILES };
 }
 
 function createStylesheet(CUMULATES, ESSENTIALS = []) {
@@ -161,7 +168,7 @@ function createStylesheet(CUMULATES, ESSENTIALS = []) {
 	const indexScanned = STYLE.CSSCANNER(Use.code.uncomment.Css(RAW.CSSIndex), "INDEX ||");
 	indexScanned.postBinds.forEach((i) => POSTBINDS.add(i));
 	indexScanned.preBinds.forEach((i) => PREBINDS.add(i));
-	RENDERFRAGS.INDEX = COMPILE.withVendor(indexScanned.object, !RAW.WATCH);
+	RENDERFRAGS.INDEX = COMPILE.forPublish(indexScanned.object, !RAW.WATCH);
 	PUBLISH.MANIFEST.constants = Object.keys(indexScanned.variables);
 	PUBLISH.Report.variables = $.MOLD.primary.Section(
 		"Root variables",
@@ -169,15 +176,15 @@ function createStylesheet(CUMULATES, ESSENTIALS = []) {
 		$.list.text.Entries,
 	);
 
-	RENDERFRAGS.ESSENTIALS = COMPILE.withVendor([...(RAW.CMD === "publish" ? ESSENTIALS : CACHE.PortableEssentials), ...CUMULATES.essentials], !RAW.WATCH);
+	RENDERFRAGS.ESSENTIALS = COMPILE.forPublish([...(RAW.CMD === "publish" ? ESSENTIALS : CACHE.PortableEssentials), ...CUMULATES.essentials], !RAW.WATCH);
 	Object.values(STACK.PROXYCACHE).forEach((cache) => cache.RenderFiles(PREBINDS, POSTBINDS, RAW.CMD));
 	const renderdScanned = FORGE.indexMaps(CACHE.FinalStack);
 	renderdScanned.postBinds.forEach((i) => POSTBINDS.add(i));
 	renderdScanned.preBinds.forEach((i) => PREBINDS.add(i));
-	RENDERFRAGS.RENDERED = COMPILE.withVendor(renderdScanned.object, !RAW.WATCH);
+	RENDERFRAGS.RENDERED = COMPILE.forPublish(renderdScanned.object, !RAW.WATCH);
 
 
-	RENDERFRAGS.APPENDIX = COMPILE.withVendor(
+	RENDERFRAGS.APPENDIX = COMPILE.forPublish(
 		Object.values(STACK.PROXYCACHE).reduce((appendix, cache) => {
 			const appendixScanned = STYLE.CSSCANNER(
 				Use.code.uncomment.Css(cache.stylesheetContent),
@@ -192,16 +199,15 @@ function createStylesheet(CUMULATES, ESSENTIALS = []) {
 
 
 	const bindObjects = FORGE.bindIndex(PREBINDS, POSTBINDS);
-	RENDERFRAGS.PREBINDS = COMPILE.withVendor(Object.entries(bindObjects.preBindsObject), !RAW.WATCH);
-	RENDERFRAGS.POSTBINDS = COMPILE.withVendor(Object.entries(bindObjects.postBindsObject), !RAW.WATCH);
+	RENDERFRAGS.PREBINDS = COMPILE.forPublish(Object.entries(bindObjects.preBindsObject), !RAW.WATCH);
+	RENDERFRAGS.POSTBINDS = COMPILE.forPublish(Object.entries(bindObjects.postBindsObject), !RAW.WATCH);
 
 	return { RENDERFRAGS, PREBINDS, POSTBINDS };
 }
 
 // On target stylesheet edit.
 export async function Generate() {
-	const SAVEFILES = {};
-	const CUMULATES = await Engine();
+	const { SAVEFILES, CUMULATES } = await Engine();
 	const XRESPONSE = XTYLES.Appendix(CACHE.SortedIndexes);
 
 	PUBLISH.Report.library = XRESPONSE.report;
@@ -221,7 +227,7 @@ export async function Generate() {
 	if (PUBLISH.DeltaContent.length) {
 		SAVEFILES[PUBLISH.DeltaPath] = PUBLISH.DeltaContent;
 	} else {
-		const { RENDERFRAGS, PREBINDS, POSTBINDS } = createStylesheet(CUMULATES, XRESPONSE.essentials);
+		const { RENDERFRAGS } = createStylesheet(CUMULATES, XRESPONSE.essentials);
 
 		const FinalStylesheet = Object.entries(RENDERFRAGS).map(([chapter, content]) =>
 			RAW.WATCH ? `\n\n/* CHAPTER: ${chapter} */\n${content}\n` : content).join("");
@@ -239,8 +245,6 @@ export async function Generate() {
 
 			SAVEFILES[NAV.json.manifest] = JSON.stringify(PUBLISH.MANIFEST);
 		} else {
-			if (RAW.CMD === "publish")
-				GeneratePortable(SAVEFILES, PREBINDS, POSTBINDS, XRESPONSE.bindingMap)
 
 			const memChart = {
 				Index: Use.string.stringMem(RENDERFRAGS.INDEX),

@@ -66,7 +66,8 @@ function CSSCANNER(content, initial = "") {
 }
 
 function CSSLIBRARY(fileDatas = [], initial = "", forPortable = false) {
-	const selectors = {}, indexSkeleton = {}, IndexMap = forPortable ? CACHE.PortableStyle2Index : CACHE.LibraryStyle2Index;
+	const selectorList = [], selectors = {}, indexSkeleton = {};
+	const IndexMap = forPortable ? CACHE.PortableStyle2Index : CACHE.LibraryStyle2Index;
 
 	fileDatas.forEach((source) => {
 		const { stamp, filePath, metaFront, content, group } = source;
@@ -77,7 +78,13 @@ function CSSLIBRARY(fileDatas = [], initial = "", forPortable = false) {
 			const scannedStyle = SCANNER(OBJECT, initial + " : " + filePath + " ||", selector,);
 			const preBinds = scannedStyle.preBinds, postBinds = scannedStyle.postBinds;
 			const object = { "": scannedStyle.object };
-			const metadata = { Info: {}, Variables: scannedStyle.variables, PreBinds: preBinds, PostBinds: postBinds, Skeleton: Use.object.skeleton(object) };
+			const metadata = {
+				Info: {},
+				Variables: scannedStyle.variables,
+				// PreBinds: preBinds, 
+				// PostBinds: postBinds, 
+				Skeleton: Use.object.skeleton(object)
+			};
 
 			const index = (IndexMap[stampSelector] || 0) + (selectors[stampSelector] || 0);
 			if (index) {
@@ -98,6 +105,8 @@ function CSSLIBRARY(fileDatas = [], initial = "", forPortable = false) {
 				source.usedIndexes.add(identity.index);
 				selectors[stampSelector] = identity.index;
 				indexSkeleton[stampSelector] = metadata;
+				selectorList.push(stampSelector)
+				if (!forPortable) indexSkeleton[`/${RAW.PACKAGE}/${stampSelector}`] = metadata;
 			}
 		})
 	});
@@ -105,7 +114,7 @@ function CSSLIBRARY(fileDatas = [], initial = "", forPortable = false) {
 		IndexMap[selector] = selectors[selector];
 	}
 
-	return indexSkeleton;
+	return { indexSkeleton, selectorList };
 }
 
 function TAGSTYLE(
@@ -155,7 +164,13 @@ function TAGSTYLE(
 
 	let isOriginal;
 	let identity = { index: 0, class: '' };
-	let metadata = { Info: comments, Variables: variables, PreBinds: preBinds, PostBinds: postBinds, Skeleton: Use.object.skeleton(object) };
+	let metadata = {
+		Info: comments,
+		Variables: variables,
+		// PreBinds: preBinds, 
+		// PostBinds: postBinds, 
+		Skeleton: Use.object.skeleton(object)
+	};
 	let xelector = selector === "" ? "" : prefix + selector;
 	if (selector === "") {
 		essentials.push(...Object.entries(object).map(([k, v]) => [RAW.WATCH ? `${k} /* ${declaration} */` : k, v]));
@@ -189,7 +204,7 @@ function TAGSTYLE(
 		essentials,
 		postBinds,
 		preBinds,
-		skeleton: metadata,
+		metadata,
 		errors,
 	};
 }
@@ -197,6 +212,5 @@ function TAGSTYLE(
 export default {
 	CSSLIBRARY,
 	CSSCANNER,
-	TAGSTYLE,
-	INDEX,
+	TAGSTYLE
 };

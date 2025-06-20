@@ -14,7 +14,7 @@ const argument = process.argv[3];
 const consoleWidth = process.stdout.columns;
 const rootPackageEssential = {};
 
-const commandList = ["init", "watch", "preview", "publish"];
+const commandList = ["init", "watch", "preview", "publish", "install"];
 
 const rootPackageJson = await fileman.read.json(rootPackagePath);
 if (!rootPackageJson.status) throw new Error("Bad root json file.");
@@ -35,7 +35,7 @@ if (projectPackageJson.status && commandList.includes(command)) {
       !projectPackageJson.data.scripts[cmd]
     ) {
       addedCommands++;
-      projectPackageJson.data.scripts[`${rootPackageJson.data.name}:${cmd}`] =
+      projectPackageJson.data.scripts[`${"xcss"||rootPackageJson.data.name}:${cmd}`] =
         rootPackageJson.data.scripts[cmd];
     }
   }

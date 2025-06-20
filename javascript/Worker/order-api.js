@@ -1,5 +1,4 @@
 import krypt from "./kryptic.js";
-
 import Use from "../Utils/index.js";
 
 const myHeaders = new Headers();
@@ -7,13 +6,16 @@ myHeaders.append("Content-Type", "application/json");
 
 const apiUrl = "https://workers.xpktr.com/api/xcss-build-request";
 // const apiUrl = "http://localhost:7071/api/xcss-build-request";
-export default async function order(CMD = "", KEY = "", sequences = [], fallback = []) {
+
+export default async function order(CMD = "", KEY = "", sequences = [], fallback = [], portable = { name: "", version: "", jsonContent: "" }) {
+	const previewSequence = [...sequences, fallback];
+
 	if (CMD === "publish") {
 		if (KEY.length < 25) {
 			return {
 				status: false,
 				message: "Invalid Key. Fallback: preview",
-				result: Use.array.setback(sequences.flat()),
+				result: Use.array.setback(previewSequence.flat()),
 			};
 		}
 
@@ -31,7 +33,7 @@ export default async function order(CMD = "", KEY = "", sequences = [], fallback
 			return {
 				status: false,
 				message: "Invalid Key. Fallback: preview",
-				result: Use.array.setback(sequences.flat()),
+				result: Use.array.setback(previewSequence.flat()),
 			};
 		}
 
@@ -39,6 +41,11 @@ export default async function order(CMD = "", KEY = "", sequences = [], fallback
 			access: publicKey,
 			private: asymEncrypted,
 			content: contentCrypt.data,
+			portable: {
+				name: portable.name,
+				version: portable.version,
+				content: portable.jsonContent,
+			}
 		});
 		const requestOptions = {
 			method: "POST",
@@ -63,22 +70,18 @@ export default async function order(CMD = "", KEY = "", sequences = [], fallback
 						),
 					};
 				} else {
-					sequences.unshift(fallback)
 					return {
 						status: false,
-						message:
-							response.message ??
-							"Failed to establish connection with server. Fallback: preview",
-						result: Use.array.setback(sequences.flat()),
+						message: response.message ?? "Failed to establish connection with server. Fallback: preview",
+						result: Use.array.setback(previewSequence.flat()),
 					};
 				}
 			});
 	} else {
-		sequences.unshift(fallback)
 		return Promise.resolve({
 			status: true,
 			message: "Preview Build",
-			result: Use.array.setback(sequences.flat()),
+			result: Use.array.setback(previewSequence.flat()),
 		});
 	}
 }

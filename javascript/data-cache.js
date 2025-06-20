@@ -27,8 +27,7 @@ export const NAV = {
         autogen: "xtyles/autogen",
         library: "xtyles/library",
         portables: "xtyles/portables",
-        portableNative: "xtyles/autogen/portable-native",
-        portableBundle: "xtyles/autogen/portable-bundle",
+        portableNative: "xtyles/autogen/portable",
     },
     css: {
         atrules: "xtyles/#at-rules.css",
@@ -43,8 +42,11 @@ export const NAV = {
     },
     md: {
         instructions: "xtyles/instructions.md",
-        portable: "xtyles/portable.md",
+        instructions: "xtyles/readme.md",
     },
+    file: {
+        manifestIgnore: "xtyles/autogen/.gitignore"
+    }
 };
 
 export const ROOT = {
@@ -145,6 +147,7 @@ export const CACHE = {
     SortedIndexes: [],
     PortableEssentials: [],
     Index2StylesObject: {},
+    NativeStyle2Index: {},
     LibraryStyle2Index: {},
     GlobalsStyle2Index: {},
     PortableStyle2Index: {},
@@ -172,6 +175,8 @@ export const RAW = {
     LIBRARIES: {},
     PORTABLES: {},
     PROXYFILES: {},
+    PORTABLEFRAME: {},
+    DEPENDENCIES: {},
 };
 
 export const PREFIX = {

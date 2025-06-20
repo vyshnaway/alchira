@@ -131,5 +131,5 @@ function rawCompose(selectorObjectArray = [], tab = "  ") {
 
 export default {
 	forPortable: rawCompose,
-	withVendor: stylesheetCreator,
+	forPublish: stylesheetCreator,
 };
