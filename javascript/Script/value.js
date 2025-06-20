@@ -112,20 +112,26 @@ export default function classExtract(string, action, fileData) {
 									} else {
 										const deltaStyles = Use.object.onlyB(activeStyles, INDEX.STYLE(index).object);
 										if (deltaStyles.score) {
-											const identity = INDEX.DECLARE({
-												portable: "",
-												scope: "",
-												selector: "",
-												object: deltaStyles.result,
-												metadata: "",
-												preBinds: [],
-												postBinds: [],
-												metaClass: "",
-												declarations: [],
-											});
-											CACHE.FinalStack["." + identity.class] = identity.index;
-											scribed += identity.class;
-											fileData.usedIndexes.add(identity.index);
+
+											// const identity = INDEX.DECLARE({
+											// 	portable: "",
+											// 	scope: "",
+											// 	selector: "",
+											// 	object: deltaStyles.result,
+											// 	metadata: "",
+											// 	preBinds: [],
+											// 	postBinds: [],
+											// 	metaClass: "",
+											// 	declarations: [],
+											// });
+											// CACHE.FinalStack["." + identity.class] = identity.index;
+											// fileData.usedIndexes.add(identity.index);
+											// scribed += identity.class;
+											
+											const className = "._" + INDEX.STYLE(index).class;
+											CACHE.FinalStack[className] = index;
+											scribed += className;
+
 										} else {
 											scribed += INDEX.STYLE(index).class;
 										}

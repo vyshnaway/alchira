@@ -9,13 +9,15 @@ const apiUrl = "https://workers.xpktr.com/api/xcss-build-request";
 
 export default async function order(CMD = "", KEY = "", sequences = [], fallback = [], portable = { name: "", version: "", jsonContent: "" }) {
 	const previewSequence = [...sequences, fallback];
+	const previewResult = Use.array.setback(previewSequence.flat());
+	console.log(previewResult.length)
 
 	if (CMD === "publish") {
 		if (KEY.length < 25) {
 			return {
 				status: false,
 				message: "Invalid Key. Fallback: preview",
-				result: Use.array.setback(previewSequence.flat()),
+				result: previewResult
 			};
 		}
 
@@ -33,7 +35,7 @@ export default async function order(CMD = "", KEY = "", sequences = [], fallback
 			return {
 				status: false,
 				message: "Invalid Key. Fallback: preview",
-				result: Use.array.setback(previewSequence.flat()),
+				result: previewResult
 			};
 		}
 
@@ -73,7 +75,7 @@ export default async function order(CMD = "", KEY = "", sequences = [], fallback
 					return {
 						status: false,
 						message: response.message ?? "Failed to establish connection with server. Fallback: preview",
-						result: Use.array.setback(previewSequence.flat()),
+						result: previewResult
 					};
 				}
 			});
@@ -81,7 +83,7 @@ export default async function order(CMD = "", KEY = "", sequences = [], fallback
 		return Promise.resolve({
 			status: true,
 			message: "Preview Build",
-			result: Use.array.setback(previewSequence.flat()),
+			result: previewResult
 		});
 	}
 }

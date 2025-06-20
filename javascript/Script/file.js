@@ -26,8 +26,6 @@ export default function scanner(
 		classesList = [];
 	let ch = fileData.content[0],
 		reading = true,
-		inQuote = false,
-		quote = "",
 		scribed = "";
 
 	fileData.summon = false;

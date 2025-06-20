@@ -115,7 +115,7 @@ async function Engine() {
 	} else {
 		const TRACKS = []
 		Object.values(STACK.PROXYCACHE).forEach((cache) => TRACKS.push(...cache.LoadTracks()));
-		const FALLBACK = [...CUMULATES.indexes, ...Object.values(CACHE.PortableStyle2Index)];
+		const FALLBACK = [...Object.values(CACHE.PortableStyle2Index), ...Object.values(CACHE.GlobalsStyle2Index)];
 		let output;
 		if ("publish" === RAW.CMD) {
 			if (CUMULATES.errors.length) {
@@ -197,7 +197,6 @@ function createStylesheet(CUMULATES, ESSENTIALS = []) {
 		}, []), !RAW.WATCH
 	);
 
-
 	const bindObjects = FORGE.bindIndex(PREBINDS, POSTBINDS);
 	RENDERFRAGS.PREBINDS = COMPILE.forPublish(Object.entries(bindObjects.preBindsObject), !RAW.WATCH);
 	RENDERFRAGS.POSTBINDS = COMPILE.forPublish(Object.entries(bindObjects.postBindsObject), !RAW.WATCH);
@@ -208,6 +207,7 @@ function createStylesheet(CUMULATES, ESSENTIALS = []) {
 // On target stylesheet edit.
 export async function Generate() {
 	const { SAVEFILES, CUMULATES } = await Engine();
+	console.log(CACHE.FinalStack)
 	const XRESPONSE = XTYLES.Appendix(CACHE.SortedIndexes);
 
 	PUBLISH.Report.library = XRESPONSE.report;
@@ -228,6 +228,7 @@ export async function Generate() {
 		SAVEFILES[PUBLISH.DeltaPath] = PUBLISH.DeltaContent;
 	} else {
 		const { RENDERFRAGS } = createStylesheet(CUMULATES, XRESPONSE.essentials);
+		console.log(CACHE.FinalStack)
 
 		const FinalStylesheet = Object.entries(RENDERFRAGS).map(([chapter, content]) =>
 			RAW.WATCH ? `\n\n/* CHAPTER: ${chapter} */\n${content}\n` : content).join("");

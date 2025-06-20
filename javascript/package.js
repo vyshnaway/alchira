@@ -203,7 +203,7 @@ async function commander(
             await execute(APP.name + " : Final Build");
             break;
         case "install":
-            $.POST($.MOLD.secondary.Section("Installing Portables"));
+            $.POST("\n" + $.MOLD.secondary.Section("Installing Portables"));
 
             const verifyStructResult = await FETCH.VerifySetupStruct();
             if (verifyStructResult.proceed) {
@@ -211,7 +211,7 @@ async function commander(
                 if (verifyConfigsResult.status) {
                     const fetchResult = await FetchPortables();
                     await fileman.write.bulk(fetchResult.SaveFiles);
-                    $.POST($.MOLD.secondary.Footer("Installation status", fetchResult.Status,$.list.std.Props))
+                    $.POST($.MOLD.secondary.Footer("Installation status", fetchResult.Status, $.list.std.Props))
                 } else $.POST(verifyConfigsResult.report)
             } else $.POST(verifyStructResult.report)
             break;

@@ -198,7 +198,6 @@ const fileman = {
 		},
 		json: async (url, path) => {
 			const latest = await fileman.read.json(url, true);
-			console.log(latest)
 			if (latest.status) {
 				await fileman.write.json(path, latest.data);
 				return latest.data;
