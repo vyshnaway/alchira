@@ -192,3 +192,66 @@ function testMergeObjects() {
 
 // Run the tests
 // testMergeObjects();
+
+
+function testObjectDelta() {
+
+	// Test 1: Simple string properties
+	const A1 = { a: "foo", b: "bar" };
+	const B1 = { a: "foo", b: "baz", c: "new" };
+	const result1 = object.onlyB(A1, B1);
+	console.log("Test 1 - Simple string properties:");
+	console.log(result1);
+	// Expected: result: { b: "baz", c: "new" }, score: 2
+
+	// Test 2: Nested objects with string properties
+	const A2 = { a: { x: "1", y: "2" }, b: "bar" };
+	const B2 = { a: { x: "1", y: "3", z: "4" }, b: "baz" };
+	const result2 = object.onlyB(A2, B2);
+	console.log("\nTest 2 - Nested objects with string properties:");
+	console.log(result2);
+	// Expected: result: { a: { y: "3", z: "4" }, b: "baz" }, score: 3
+
+	// Test 3: Deeply nested objects
+	const A3 = { a: { b: { c: "foo" } } };
+	const B3 = { a: { b: { c: "foo", d: "bar" } } };
+	const result3 = object.onlyB(A3, B3);
+	console.log("\nTest 3 - Deeply nested objects:");
+	console.log(result3);
+	// Expected: result: { a: { b: { d: "bar" } } }, score: 1
+
+	// Test 4: B has properties not in A
+	const A4 = { a: "foo" };
+	const B4 = { a: "foo", b: { c: "bar" } };
+	const result4 = object.onlyB(A4, B4);
+	console.log("\nTest 4 - B has properties not in A:");
+	console.log(result4);
+	// Expected: result: { b: { c: "bar" } }, score: 1
+
+	// Test 5: Empty objects
+	const A5 = {};
+	const B5 = {};
+	const result5 = object.onlyB(A5, B5);
+	console.log("\nTest 5 - Empty objects:");
+	console.log(result5);
+	// Expected: result: {}, score: 0
+
+	// Test 6: B has only nested objects, A is empty
+	const A6 = {};
+	const B6 = { a: { b: { c: "foo" } } };
+	const result6 = object.onlyB(A6, B6);
+	console.log("\nTest 6 - B has only nested objects, A is empty:");
+	console.log(result6);
+	// Expected: result: { a: { b: { c: "foo" } } }, score: 1
+
+	// Test 7: B has non-string values (should skip)
+	const A7 = { a: 1, d: "undefined" };
+	const B7 = { d: "undefineds", e: "str" };
+	const result7 = object.onlyB(A7, B7);
+	console.log("\nTest 7 - B has non-string values:");
+	console.log(result7);
+	// Expected: result: { e: "str" }, score: 1
+}
+
+// Run the tests
+testObjectDelta();

@@ -107,18 +107,20 @@ function skeleton(object = {}) {
 	}, {})
 }
 
-function BminusA(A = {}, B = {}) {
+function ObjectDelta(A = {}, B = {}) {
 	let score = 0,
 		result = {};
 	Object.entries(B).forEach(([Bkey, Bvalue]) => {
 		switch (typeof Bvalue) {
 			case "string":
-				score++;
-				result[Bkey] = Bvalue;
+				if (A[Bkey] !== Bvalue) {
+					score++;
+					result[Bkey] = Bvalue;
+				}
 				break;
 			case "object":
 				if (typeof A[Bkey] === "object") {
-					const subobj = BminusA(A[Bkey], Bvalue);
+					const subobj = ObjectDelta(A[Bkey], Bvalue);
 					if (subobj.score)
 						result[Bkey] = subobj.result;
 					score += subobj.score;
@@ -131,7 +133,7 @@ function BminusA(A = {}, B = {}) {
 
 export default {
 	skeleton,
-	onlyB: BminusA,
+	onlyB: ObjectDelta,
 	switch: objectSwitch,
 	deepMerge: deepMerge,
 	multiMerge: bulkMerge,

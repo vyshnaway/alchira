@@ -63,21 +63,36 @@ export default function classExtract(string, action, fileData) {
 
 		const effectiveIndexes = action === "watch" ? [] : Use.array.setback(loadActiveIndexes(classList));
 		const activeIndexes = action === "watch" ? [] : Use.array.longestSubChain(CACHE.SortedIndexes, effectiveIndexes);
-		const deltaIndexes = action === "watch" ? [] : effectiveIndexes.filter(index => !activeIndexes.includes(index))
-
-		const effectiveStyles = action === "publish" ? loadActiveStyles(effectiveIndexes) : {};
 		const activeStyles = action === "publish" ? loadActiveStyles(activeIndexes) : {};
-		const deltaStyles = action === "publish" ? Use.object.onlyB(activeStyles, effectiveStyles) : {};
+		let contributors = [];
 
-		console.log({
-			effectiveIndexes,
-			activeIndexes,
-			deltaIndexes,
-			effectiveStyles,
-			activeStyles,
-			deltaStylesResult: deltaStyles.result,
-			deltaStylesScore: deltaStyles.score
-		})
+		if (action === "publish") {
+			const effectiveStyles = loadActiveStyles(effectiveIndexes);
+
+			const deltaIndexes = effectiveIndexes.filter(index => !activeIndexes.includes(index))
+			const deltaStyles = Use.object.onlyB(activeStyles, effectiveStyles);
+			let deltaStylesObject = deltaStyles.result;
+			let deltaStylesScore = deltaStyles.score;
+
+			effectiveIndexes.reverse().filter(i => {
+				const R = Use.object.onlyB(INDEX.STYLE(i).object,    );
+				if (R.score !== deltaStylesScore) contributors.push(i);
+				deltaStylesObject = R.result;
+				deltaStylesScore = R.score;
+			});
+
+			console.log({
+				effectiveIndexes,
+				activeIndexes,
+				deltaIndexes,
+				contributors,
+				effectiveStyles,
+				activeStyles,
+				deltaStylesResult: deltaStyles.result,
+				deltaStylesScore: deltaStyles.score
+			})
+		}
+
 
 		while (ch !== undefined) {
 			if (inQuote) {
