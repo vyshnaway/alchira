@@ -3,6 +3,7 @@ export const APP = {
     version: "",
     website: "",
     command: "",
+    PortablesCdn: "",
     cdn: "https://xcdn.xpktr.com/xcss/",
     console: "https://console.xpktr.com/",
     commandList: {

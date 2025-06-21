@@ -1,5 +1,5 @@
 import fileman from "../interface/fileman.js";
-import { CACHE, NAV, RAW, STACK } from "./data-cache.js";
+import { APP, CACHE, NAV, RAW, STACK } from "./data-cache.js";
 import { INDEX } from "./data-set.js";
 import $ from "./Shell/index.js";
 import FORGE from "./Style/forge.js";
@@ -130,10 +130,12 @@ export function GeneratePortable(essentials = []) {
     return { name: RAW.PACKAGE, version: RAW.VERSION, jsonPath: jsonPath, jsonContent: JSON.stringify(json) };
 }
 
-export async function FetchPortables(portableName = "") {
+export async function FetchPortables(portable = "") {
     const SaveFiles = {}, Status = [];
 
-    const portableLink = "";
+    let [portableName, portableVersion] = typeof portable === "string" ? portable.split("@") : ["", ""];
+    portableVersion = portableVersion || "latest";
+    const portableLink = `${APP.PortablesCdn}/${portableName}/${portableVersion}`;
     const references = portableName.length ? { [portableName]: portableLink } : RAW.DEPENDENCIES;
 
     await Promise.all(
@@ -174,7 +176,7 @@ export async function FetchPortables(portableName = "") {
 export function SplitGlobalForComponents() {
     const t = new Date();
     const timeStamp = `${t.getFullYear()}-${(t.getMonth() + 1).toString().padStart(2, "0")}-${t.getDate().toString().padStart(2, "0")} ${t.getHours().toString().padStart(2, "0")}:${t.getMinutes().toString().padStart(2, "0")}:${t.getSeconds().toString().padStart(2, "0")}`;
-    
+
     const SaveFiles = {}, Report = [];
     Object.values(STACK.PROXYCACHE).forEach((proxy) => {
         Object.assign(SaveFiles, proxy.ComponentSpilt(timeStamp))
@@ -184,7 +186,7 @@ export function SplitGlobalForComponents() {
         $.MOLD.std.Block(filePaths, $.list.std.Bullets),
         $.MOLD.std.Footer(`${filePaths.length} files were created.`),
     )
-    
+
 
     return { SaveFiles, ConsoleReport: $.MOLD.std.Block(Report) }
 }
