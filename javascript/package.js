@@ -183,7 +183,7 @@ async function commander(
     RAW.PACKAGE = projectName;
     RAW.VERSION = projectVersion;
     DATA.SetENV(rootPath, workPath, packageJson);
-    $.initialize(consoleWidth, !RAW.WATCH);
+    $.initialize(consoleWidth, command !== "watch" && command !== "split");
 
     switch (RAW.CMD) {
         case "init":

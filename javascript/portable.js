@@ -105,7 +105,6 @@ function portableCreator(essentials = [], portableName = `${RAW.PACKAGE}@${RAW.V
         A[key] = RENDER.forPortable(Object.entries(FORGE.bindIndex(value).preBindsObject)).join("\n");
         return A;
     }, {})
-    console.log(bindings);
 
     return { portable: portable.join("\n"), bindings };
 }
@@ -173,9 +172,12 @@ export async function FetchPortables(portableName = "") {
 }
 
 export function SplitGlobalForComponents() {
+    const t = new Date();
+    const timeStamp = `${t.getFullYear()}-${(t.getMonth() + 1).toString().padStart(2, "0")}-${t.getDate().toString().padStart(2, "0")} ${t.getHours().toString().padStart(2, "0")}:${t.getMinutes().toString().padStart(2, "0")}:${t.getSeconds().toString().padStart(2, "0")}`;
+    
     const SaveFiles = {}, Report = [];
     Object.values(STACK.PROXYCACHE).forEach((proxy) => {
-        Object.assign(SaveFiles, proxy.ComponentSpilt())
+        Object.assign(SaveFiles, proxy.ComponentSpilt(timeStamp))
     })
     const filePaths = Object.keys(SaveFiles);
     Report.push(
@@ -183,5 +185,6 @@ export function SplitGlobalForComponents() {
         $.MOLD.std.Footer(`${filePaths.length} files were created.`),
     )
     
-    return { SaveFiles: SaveFiles, ConsoleReport: $.MOLD.std.Block(Report) }
+
+    return { SaveFiles, ConsoleReport: $.MOLD.std.Block(Report) }
 }

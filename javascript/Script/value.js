@@ -60,9 +60,24 @@ export default function classExtract(string, action, fileData) {
 		const metaFront = `TAG${fileData.metaFront}\\:${FileCursor.rowMarker}\\:${FileCursor.colMarker}__`;
 		(activeQuote = ""), (entry = ""), (scribed = ""), (marker = 0), (inQuote = false), (ch = string[marker]);
 
-		const activeIndexes = action === "watch" ? [] :
-			Use.array.longestSubChain(CACHE.SortedIndexes, Use.array.setback(loadActiveIndexes(classList)));
-		const activeStyles = loadActiveStyles(activeIndexes);
+
+		const effectiveIndexes = action === "watch" ? [] : Use.array.setback(loadActiveIndexes(classList));
+		const activeIndexes = action === "watch" ? [] : Use.array.longestSubChain(CACHE.SortedIndexes, effectiveIndexes);
+		const deltaIndexes = action === "watch" ? [] : effectiveIndexes.filter(index => !activeIndexes.includes(index))
+
+		const effectiveStyles = action === "publish" ? loadActiveStyles(effectiveIndexes) : {};
+		const activeStyles = action === "publish" ? loadActiveStyles(activeIndexes) : {};
+		const deltaStyles = action === "publish" ? Use.object.onlyB(activeStyles, effectiveStyles) : {};
+
+		console.log({
+			effectiveIndexes,
+			activeIndexes,
+			deltaIndexes,
+			effectiveStyles,
+			activeStyles,
+			deltaStylesResult: deltaStyles.result,
+			deltaStylesScore: deltaStyles.score
+		})
 
 		while (ch !== undefined) {
 			if (inQuote) {
@@ -112,14 +127,15 @@ export default function classExtract(string, action, fileData) {
 									if (activeIndexes.includes(index)) {
 										scribed += INDEX.STYLE(index).class;
 									} else {
-										const deltaStyles = Use.object.onlyB(activeStyles, INDEX.STYLE(index).object);
-										if (deltaStyles.score) {
+										const deltaSnippet = Use.object.onlyB(activeStyles, INDEX.STYLE(index).object);
+										// console.log({ activeStyles, indexStyles: INDEX.STYLE(index).object, deltaSnippet })
+										if (deltaSnippet.score) {
 
 											const identity = INDEX.DECLARE({
 												portable: "",
 												scope: "",
 												selector: "",
-												object: deltaStyles.result,
+												object: deltaSnippet.result,
 												metadata: "",
 												preBinds: [],
 												postBinds: [],

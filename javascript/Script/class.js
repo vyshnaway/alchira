@@ -172,7 +172,7 @@ export default class Proxy {
 		return summons;
 	}
 
-	ComponentSpilt() {
+	ComponentSpilt(timeStamp) {
 		const SaveFiles = {};
 
 		Object.values(this.fileCache).forEach((file) => {
@@ -184,14 +184,16 @@ export default class Proxy {
 					Library: CACHE.LibraryStyle2Index,
 				});
 
-				SaveFiles[file.sourcePath] = response.scribed;
-				SaveFiles[file.targetPath + ".xcss"] += Object.entries(file.styleGlobals).reduce((A, [selector, index]) => {
+				
+				SaveFiles[file.targetPath] = response.scribed;
+				if (Object.keys(Object.entries(file.styleGlobals).length))
+				SaveFiles[file.targetPath + ".xcss"] = Object.entries(file.styleGlobals).reduce((A, [selector, index]) => {
 					const inStash = INDEX.STYLE(index);
 					const object = inStash.object;
 					const bindStack = FORGE.bindIndex(new Set(inStash.preBinds), new Set(inStash.postBinds));
 					A.push(...GenerateXtyleBlock(selector, object, bindStack.preBindsList, bindStack.postBindsList));
 					return A;
-				}, []).join("\n");
+				}, [ `## ${timeStamp}`]).join("\n");
 			}
 		});
 

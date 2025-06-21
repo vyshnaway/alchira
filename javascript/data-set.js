@@ -58,7 +58,8 @@ export const INDEX = {
             INDEX._BIN.delete(object.index);
         } else { object.index = ++INDEX._NOW; }
 
-        object.class = "_" + Use.string.enCounter(object.index + 768);
+        const encounted = Use.string.enCounter(object.index + 768);
+        object.class = "_" + encounted;
         CACHE.Index2StylesObject[object.index] = CACHE.Index2StylesObject[index];
         return { index: object.index, class: object.class };
     },
@@ -68,9 +69,11 @@ export const INDEX = {
             INDEX._BIN.delete(object.index);
         } else { object.index = ++INDEX._NOW; }
 
-        object.class = "_" + Use.string.enCounter(object.index + 768);
+        const encounted = Use.string.enCounter(object.index + 768);
+        object.class = "_" + encounted;
+        object.spare = "-" + encounted;
         CACHE.Index2StylesObject[object.index] = object;
-        return { index: object.index, class: object.class };
+        return { index: object.index, class: object.class, spare: object.spare };
     },
     DISPOSE: (...indexes) => {
         indexes.forEach((index) => {
