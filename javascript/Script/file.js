@@ -25,7 +25,6 @@ export default function scanner(
 	const stylesList = [],
 		classesList = [];
 	let ch = fileData.content[0],
-		reading = true,
 		scribed = "";
 
 	fileData.summon = false;
@@ -49,7 +48,6 @@ export default function scanner(
 				if (response.classList.length) classesList.push(response.classList);
 			}
 			scribed += response.content;
-			reading = response.reading;
 		} else {
 			scribed += ch;
 			FileCursor.marker++;

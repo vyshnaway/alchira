@@ -81,7 +81,7 @@ function CSSLIBRARY(fileDatas = [], initial = "", forPortable = false) {
 			const preBinds = scannedStyle.preBinds, postBinds = scannedStyle.postBinds;
 			const object = { "": scannedStyle.object };
 			const metadata = {
-				Info: {},
+				Info: [],
 				Variables: scannedStyle.variables,
 				Skeleton: Use.object.skeleton(object)
 			};

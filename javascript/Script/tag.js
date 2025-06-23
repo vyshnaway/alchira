@@ -75,7 +75,7 @@ export default function tagScan(content, action, classProps, fileData) {
 
 		if (
 			deviance === 0 &&
-			[" ", "\n", "\r", ">", "\t"].includes(ch) & (attr !== "")
+			[" ", "\n", "\r", ">", "\t"].includes(ch) && (attr !== "")
 		) {
 			if (!tagObject.element) {
 				tagObject.element = attr;
