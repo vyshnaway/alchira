@@ -81,9 +81,10 @@ function CSSLIBRARY(fileDatas = [], initial = "", forPortable = false) {
 			const preBinds = scannedStyle.preBinds, postBinds = scannedStyle.postBinds;
 			const object = { "": scannedStyle.object };
 			const metadata = {
-				Info: [],
-				Variables: scannedStyle.variables,
-				Skeleton: Use.object.skeleton(object)
+				info: [],
+				variables: scannedStyle.variables,
+				skeleton: Use.object.skeleton(object),
+				declaration: declaration
 			};
 
 			const index = (IndexMap[stampSelector] || 0) + (selectors[stampSelector] || 0);
@@ -106,7 +107,6 @@ function CSSLIBRARY(fileDatas = [], initial = "", forPortable = false) {
 				selectors[stampSelector] = identity.index;
 				indexSkeleton[stampSelector] = metadata;
 				selectorList.push(stampSelector)
-				if (!forPortable) indexSkeleton[`/${RAW.PACKAGE}/${stampSelector}`] = metadata;
 			}
 		})
 	});
@@ -165,9 +165,10 @@ function TAGSTYLE(
 	let isOriginal;
 	let identity = { index: 0, class: '' };
 	let metadata = {
-		Info: comments,
-		Variables: variables,
-		Skeleton: Use.object.skeleton(object)
+		info: comments,
+		variables: variables,
+		skeleton: Use.object.skeleton(object),
+		declaration: declaration
 	};
 	let xelector = selector === "" ? "" : prefix + selector;
 	if (selector === "") {

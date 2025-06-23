@@ -128,6 +128,7 @@ export const PUBLISH = {
         footer: "",
     },
     MANIFEST: {
+        prefix: "",
         constants: [],
         hashrules: {},
         file: {},

@@ -51,7 +51,7 @@ function IMPORT(string, watchUndef = true, ErrorisWarning = false) {
 		const replacement = watchUndef
 			? CACHE.HashRule[key]
 			: (CACHE.HashRule[key] ?? hash);
-		recursionPreview["FROM " + hash] = `GETS ${replacement}`;
+		recursionPreview["FROM " + hash] = `GETS ${replacement} FROM ${string}`;
 
 		if (replacement === undefined) {
 			return errors.undefinedHash(recursionPreview, hash);

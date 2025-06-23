@@ -185,10 +185,10 @@ export async function VerifyConfigure() {
 	$.STEP("PATH : " + NAV.json.configure);
 	const proxyMap = await fileman.read.json(NAV.json.configure);
 	if (proxyMap.status) {
-		RAW.PROXYMAP = (typeof proxyMap.data["proxy-map"] === "object") ? proxyMap.data["proxy-map"] : [];
+		RAW.PROXYMAP = (typeof proxyMap.data.proxy === "object") ? proxyMap.data.proxy : [];
 		const dependencies = (typeof proxyMap.data["portables"] === "object") ? proxyMap.data["portables"] : {};
 
-		delete proxyMap.data["proxy-map"];
+		delete proxyMap.data.proxy;
 		delete proxyMap.data["portables"];
 		Object.assign(RAW.PORTABLEFRAME, proxyMap.data);
 		RAW.PORTABLEFRAME.name = RAW.PACKAGE = RAW.PORTABLEFRAME.name || RAW.PACKAGE || "xtyle";
