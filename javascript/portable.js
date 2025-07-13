@@ -1,11 +1,23 @@
 import fileman from "../interface/fileman.js";
 import { APP, CACHE, NAV, RAW, STACK } from "./data-cache.js";
-import { INDEX } from "./data-set.js";
+import { INDEX } from "./data-init.js";
 import $ from "./Shell/index.js";
 import FORGE from "./Style/forge.js";
 import RENDER from "./Style/render.js";
 
 const tab = "    ";
+
+function getLibPrifix(string = '') {
+    let id = 0, lib = '';
+    const chars = string.split("");
+    for (let i = 0; i < chars.length; i++) {
+        const ch = chars[i];
+        if (ch === "$") id++;
+        else if (!id) lib += ch;
+        else break;
+    }
+    return lib.length ? `${lib}.${id}` : `${id}`;
+}
 
 export function generateXtyleBlock(selector, object, preBindsList, postBindsList) {
     return [
@@ -109,18 +121,6 @@ function portableCreator(essentials = [], portableName = `${RAW.PACKAGE}@${RAW.V
     return { portable: portable.join("\n"), bindings };
 }
 
-function getLibPrifix(string = '') {
-    let id = 0, lib = '';
-    const chars = string.split("");
-    for (let i = 0; i < chars.length; i++) {
-        const ch = chars[i];
-        if (ch === "$") id++;
-        else if (!id) lib += ch;
-        else break;
-    }
-    return lib.length ? `${lib}.${id}` : `${id}`;
-}
-
 export function GeneratePortable(essentials = []) {
     const portableName = `${RAW.PACKAGE}@${RAW.VERSION}`;
     const content = portableCreator(essentials, portableName)
@@ -128,6 +128,25 @@ export function GeneratePortable(essentials = []) {
     const jsonPath = NAV.folder.portableNative + "/" + portableName + ".json";
 
     return { name: RAW.PACKAGE, version: RAW.VERSION, jsonPath: jsonPath, jsonContent: JSON.stringify(json) };
+}
+
+export function SplitGlobalForComponents() {
+    const t = new Date();
+    const date = `${t.getFullYear()}-${(t.getMonth() + 1).toString().padStart(2, "0")}-${t.getDate().toString().padStart(2, "0")}`;
+    const time = `${t.getHours().toString().padStart(2, "0")}:${t.getMinutes().toString().padStart(2, "0")}:${t.getSeconds().toString().padStart(2, "0")}`;
+    const session = `${date} ${time}`;
+
+    const SaveFiles = {}, Report = [];
+    Object.values(STACK.PROXYCACHE).forEach((proxy) => {
+        Object.assign(SaveFiles, proxy.ComponentSpilt(session))
+    })
+    const filePaths = Object.keys(SaveFiles);
+    Report.push(
+        $.MOLD.std.Block(filePaths, $.list.std.Bullets),
+        $.MOLD.std.Footer(`${filePaths.length} files were generated.`),
+    )
+
+    return { SaveFiles, ConsoleReport: $.MOLD.std.Block(Report) }
 }
 
 export async function FetchPortables(portable = "") {
@@ -171,22 +190,4 @@ export async function FetchPortables(portable = "") {
     );
 
     return { Status, SaveFiles };
-}
-
-export function SplitGlobalForComponents() {
-    const t = new Date();
-    const timeStamp = `${t.getFullYear()}-${(t.getMonth() + 1).toString().padStart(2, "0")}-${t.getDate().toString().padStart(2, "0")} ${t.getHours().toString().padStart(2, "0")}:${t.getMinutes().toString().padStart(2, "0")}:${t.getSeconds().toString().padStart(2, "0")}`;
-
-    const SaveFiles = {}, Report = [];
-    Object.values(STACK.PROXYCACHE).forEach((proxy) => {
-        Object.assign(SaveFiles, proxy.ComponentSpilt(timeStamp))
-    })
-    const filePaths = Object.keys(SaveFiles);
-    Report.push(
-        $.MOLD.std.Block(filePaths, $.list.std.Bullets),
-        $.MOLD.std.Footer(`${filePaths.length} files were created.`),
-    )
-
-
-    return { SaveFiles, ConsoleReport: $.MOLD.std.Block(Report) }
 }

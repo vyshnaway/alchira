@@ -1,7 +1,7 @@
 {
   "name": "xcss-init",
-  "description": "A lazy way to write luxurious CSS.",
-  "version": "0.0.0",
+  "description": "A future-proof CSS-DSL abtration layer with native AI-support.",
+  "version": "0.1.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/yshell-dev/xcss-online"
@@ -10,14 +10,17 @@
   "bin": {
     "xdev": "./binary/xdev.js"
   },
+  "funding": {
+    "type": "individual",
+    "url": "https://paulmillr.com/funding/"
+  },
   "scripts": {
     "init": "xcss init",
     "watch": "xcss watch",
     "install": "xcss install",
     "preview": "xcss preview",
     "publish": "xcss publish",
-    "dev:test": "jest",
-    "dev:publish": "node publish.js"
+    "dev:publish": "node publisher/publish.js"
   },
   "bugs": {
     "url": "https://github.com/yshell-dev/xcss-online/issues"
@@ -32,9 +35,6 @@
   ],
   "engines": {
     "node": ">=16.0.0"
-  },
-  "devDependencies": {
-    "jest": "^29.7.0"
   },
   "dependencies": {
     "chokidar": "^4.0.3"

@@ -5,7 +5,7 @@ import FORGE from "../Style/forge.js";
 import $ from "../Shell/index.js";
 import FILING from "../data-filing.js";
 import STYLEPARSE from "../Style/parse.js";
-import { INDEX } from "../data-set.js";
+import { INDEX } from "../data-init.js";
 import { RAW, CACHE } from "../data-cache.js";
 import { generateXtyleBlock as GenerateXtyleBlock } from "../portable.js";
 
@@ -178,22 +178,15 @@ export default class Proxy {
 		Object.values(this.fileCache).forEach((file) => {
 			if (file.extension === "xcss") {
 				if (Object.keys(SaveFiles).includes(file.targetPath)) SaveFiles[file.targetPath] += "\n\n" + file.content;
-			} else {
-				const response = SCRIPTPARSE(file, this.extnsProps[file.extension], "split", {
-					Global: CACHE.GlobalsStyle2Index,
-					Library: CACHE.LibraryStyle2Index,
-				});
-
-				
-				SaveFiles[file.targetPath] = response.scribed;
-				if (Object.keys(Object.entries(file.styleGlobals).length))
+			} else if (Object.keys(file.styleGlobals).length) {
+				SaveFiles[file.targetPath] = SCRIPTPARSE(file, this.extnsProps[file.extension], "split").scribed;
 				SaveFiles[file.targetPath + ".xcss"] = Object.entries(file.styleGlobals).reduce((A, [selector, index]) => {
 					const inStash = INDEX.STYLE(index);
 					const object = inStash.object;
 					const bindStack = FORGE.bindIndex(new Set(inStash.preBinds), new Set(inStash.postBinds));
 					A.push(...GenerateXtyleBlock(selector, object, bindStack.preBindsList, bindStack.postBindsList));
 					return A;
-				}, [ `## ${timeStamp}`]).join("\n");
+				}, [`## ${timeStamp}`]).join("\n");
 			}
 		});
 

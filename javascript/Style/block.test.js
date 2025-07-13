@@ -8,14 +8,16 @@ prop3: val3;
     props4 : hinokins4;
 }
 @applay hg;
+    &.22f 2% {
+    }
+    &.22f 2% {
+        prop4 : hinokin;
+        props4 : hinokins4;
+    }
 &:media gh {
     prop4 : 'hinokin';
     prop43 : 'hinokin';
     @applay hg;
-.22f 2% {
-    prop4 : hinokin;
-    props4 : hinokins4;
-}
 };
 @adds asd;
 @bind asd;

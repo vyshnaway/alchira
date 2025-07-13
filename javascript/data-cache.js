@@ -5,6 +5,7 @@ export const APP = {
     command: "",
     PortablesCdn: "",
     cdn: "https://xcdn.xpktr.com/xcss/",
+    worker: "https://workers.xpktr.com/api/xcss-build-request",
     console: "https://console.xpktr.com/",
     commandList: {
         init: "Initiate or Update & Verify setup.",
@@ -12,6 +13,7 @@ export const APP = {
         preview: 'Test build. Pass test for "publish" command.',
         publish: "Optimized build, uses web-api.",
     },
+    vendors: [],
     xcssTag: "xtyle",
 };
 
@@ -85,29 +87,25 @@ export const ROOT = {
     },
     PREFIX: {
         attributes: {
-            url: "prefixes/active/attributes.json",
+            url: "attributes.json",
             path: "blueprint/prefixes/attributes.json",
         },
         values: {
-            url: "prefixes/active/values.json",
+            url: "values.json",
             path: "blueprint/prefixes/values.json",
         },
         atrules: {
-            url: "prefixes/active/atrules.json",
+            url: "atrules.json",
             path: "blueprint/prefixes/atrules.json",
         },
         classes: {
-            url: "prefixes/active/classes.json",
+            url: "classes.json",
             path: "blueprint/prefixes/classes.json",
         },
         elements: {
-            url: "prefixes/active/elements.json",
+            url: "elements.json",
             path: "blueprint/prefixes/elements.json",
-        },
-        clrprops: {
-            url: "prefixes/active/clrprops.json",
-            path: "blueprint/prefixes/clrprops.json",
-        },
+        }
     },
 };
 
@@ -180,9 +178,8 @@ export const RAW = {
 };
 
 export const PREFIX = {
-    clrprops: [],
     atRule: {},
-    selector: {},
+    pseudos: {},
     attributes: {},
     values: {},
 };

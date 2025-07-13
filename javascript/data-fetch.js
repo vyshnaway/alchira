@@ -3,6 +3,7 @@ import { NAV, ROOT, APP, RAW, PREFIX } from "./data-cache.js";
 
 import fileman from "../interface/fileman.js";
 import * as worker from "../interface/worker.js";
+import { setVENDORS } from "./data-init.js";
 
 export async function FetchDocs() {
 	const readmeMd = fileman.sync.file(
@@ -33,12 +34,13 @@ export async function FetchDocs() {
 	ROOT.AGREEMENT.privacy.content = await privacy;
 }
 
-export async function FetchStatics() {
+export async function FetchStatics(vendorGroup) {
 	$.TASK("Saving guidelines.", 0);
 	RAW.ReadMe = (await fileman.read.file(NAV.md.instructions)).data;
 
+	setVENDORS(vendorGroup);
 	const manifestIgnore = (await fileman.read.file(NAV.file.manifestIgnore)).data.split("\n")
-	if (!(manifestIgnore).includes("manifest.json")) manifestIgnore.push("manifest.json")
+	if (!manifestIgnore.includes("manifest.json")) manifestIgnore.push("manifest.json")
 	await fileman.write.file(NAV.file.manifestIgnore, manifestIgnore.join("\n"))
 
 	$.TASK("Loading vendor-prefixes");
@@ -47,18 +49,17 @@ export async function FetchStatics() {
 		values: {},
 		atrules: {},
 		classes: {},
-		elements: {},
-		clrprops: [],
+		elements: {}
 	};
 
 	await Promise.all(
 		Object.entries(ROOT.PREFIX).map(async ([group, source]) => {
+			console.log(source)
 			PrefixRead[group] = await fileman.sync.json(source.url, source.path);
 		}),
 	);
-
-	PREFIX.clrprops = PrefixRead.clrprops;
-	PREFIX.selector = { ...PrefixRead.classes, ...PrefixRead.elements };
+	
+	PREFIX.pseudos = { ...PrefixRead.classes, ...PrefixRead.elements };
 	PREFIX.attributes = PrefixRead.attributes;
 	PREFIX.atRule = PrefixRead.atrules;
 	PREFIX.values = PrefixRead.values;
@@ -177,20 +178,21 @@ export async function VerifySetupStruct() {
 	return result;
 }
 
-export async function VerifyConfigure() {
+export async function VerifyConfigure(loadStatics) {
 	$.TASK("Initializing configs", 0);
 	const errors = [],
 		alerts = [];
 
 	$.STEP("PATH : " + NAV.json.configure);
-	const proxyMap = await fileman.read.json(NAV.json.configure);
-	if (proxyMap.status) {
-		RAW.PROXYMAP = (typeof proxyMap.data.proxy === "object") ? proxyMap.data.proxy : [];
-		const dependencies = (typeof proxyMap.data["portables"] === "object") ? proxyMap.data["portables"] : {};
+	const configure = await fileman.read.json(NAV.json.configure);
+	if (configure.status) {
+		if (loadStatics) FetchStatics(configure.data["vendors"]);
+		RAW.PROXYMAP = (typeof configure.data.proxy === "object") ? configure.data.proxy : [];
+		const dependencies = (typeof configure.data["portables"] === "object") ? configure.data["portables"] : {};
 
-		delete proxyMap.data.proxy;
-		delete proxyMap.data["portables"];
-		Object.assign(RAW.PORTABLEFRAME, proxyMap.data);
+		delete configure.data.proxy;
+		delete configure.data["portables"];
+		Object.assign(RAW.PORTABLEFRAME, configure.data);
 		RAW.PORTABLEFRAME.name = RAW.PACKAGE = RAW.PORTABLEFRAME.name || RAW.PACKAGE || "xtyle";
 		RAW.PORTABLEFRAME.versionn = RAW.VERSION = RAW.PORTABLEFRAME.version || RAW.VERSION || '0.0.0';
 

@@ -3,7 +3,7 @@ import CSSBLOCK from "./block.js";
 import Use from "../Utils/index.js";
 import HASHRULE from "../hash-rules.js";
 import { RAW, CACHE } from "../data-cache.js";
-import { INDEX } from "../data-set.js";
+import { INDEX } from "../data-init.js";
 
 function xtylemerge(classList = []) {
 	let result = {}, preBinds = [], postBinds = [];
@@ -84,7 +84,7 @@ function CSSLIBRARY(fileDatas = [], initial = "", forPortable = false) {
 				info: [],
 				variables: scannedStyle.variables,
 				skeleton: Use.object.skeleton(object),
-				declaration: declaration
+				declarations: [declaration]
 			};
 
 			const index = (IndexMap[stampSelector] || 0) + (selectors[stampSelector] || 0);
@@ -168,7 +168,7 @@ function TAGSTYLE(
 		info: comments,
 		variables: variables,
 		skeleton: Use.object.skeleton(object),
-		declaration: declaration
+		declarations: [declaration]
 	};
 	let xelector = selector === "" ? "" : prefix + selector;
 	if (selector === "") {

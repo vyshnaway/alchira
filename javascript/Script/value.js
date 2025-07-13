@@ -2,7 +2,7 @@ import { BindStack, FileCursor, StyleStack } from "./file.js";
 
 import Use from "../Utils/index.js";
 import { CACHE, RAW } from "../data-cache.js";
-import { INDEX } from "../data-set.js";
+import { INDEX } from "../data-init.js";
 
 function loadActiveIndexes(classList = []) {
 	return classList.reduce((A, entry) => {
@@ -75,7 +75,7 @@ export default function classExtract(string, action, fileData) {
 			let deltaStylesScore = deltaStyles.score;
 
 			effectiveIndexes.reverse().filter(i => {
-				const R = Use.object.onlyB(INDEX.STYLE(i).object,    );
+				const R = Use.object.onlyB(INDEX.STYLE(i).object,);
 				if (R.score !== deltaStylesScore) contributors.push(i);
 				deltaStylesObject = R.result;
 				deltaStylesScore = R.score;

@@ -5,7 +5,7 @@ const CLOSE_CHARS = ["}", "]", ")"];
 const QUOTE_CHARS = ["`", "'", '"'];
 
 export default function parseBlock(content, blockArrays = false) {
-	content += ";";
+	content += ";";  
 	let keyStart = 0,
 		valStart = 0,
 		deviance = 0,

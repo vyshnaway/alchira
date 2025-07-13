@@ -1,11 +1,9 @@
 import krypt from "./kryptic.js";
 import Use from "../Utils/index.js";
+import { APP } from "../data-cache.js";
 
 const myHeaders = new Headers();
 myHeaders.append("Content-Type", "application/json");
-
-const apiUrl = "https://workers.xpktr.com/api/xcss-build-request";
-// const apiUrl = "http://localhost:7071/api/xcss-build-request";
 
 export default async function order(CMD = "", KEY = "", sequences = [], fallback = [], portable = { name: "", version: "", jsonContent: "" }) {
 	const previewSequence = [...sequences, fallback];
@@ -55,7 +53,7 @@ export default async function order(CMD = "", KEY = "", sequences = [], fallback
 			redirect: "follow",
 		};
 
-		return fetch(apiUrl, requestOptions)
+		return fetch(APP.worker, requestOptions)
 			.then((response) => response.json())
 			.then(async (response) => {
 				if (response.status) {

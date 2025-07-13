@@ -1,6 +1,24 @@
 import Use from "./Utils/index.js";
-import { APP, RAW, NAV, ROOT, CACHE, STACK, PUBLISH } from "./data-cache.js";
+import { APP, RAW, NAV, ROOT, CACHE, STACK, PUBLISH, PREFIX } from "./data-cache.js";
 
+function collectVendors() {
+    const vendors = new Set();
+    Object.values(PREFIX.atRule).forEach(value => {
+        Object.keys(value).forEach(ven => vendors.add(ven));
+    });
+    Object.values(PREFIX.attributes).forEach(value => {
+        Object.keys(value).forEach(ven => vendors.add(ven));
+    });
+    Object.values(PREFIX.pseudos).forEach(value => {
+        Object.keys(value).forEach(ven => vendors.add(ven));
+    });
+    Object.values(PREFIX.values).forEach(value => {
+        Object.values(value).forEach(val =>
+            Object.keys(val).forEach(ven => vendors.add(ven))
+        );
+    });
+    return Array.from(vendors);
+}
 
 export function SetENV(rootPath, workPath, packageJson) {
 
@@ -8,6 +26,7 @@ export function SetENV(rootPath, workPath, packageJson) {
     APP.version = packageJson.version;
     APP.website = packageJson.website;
     APP.command = packageJson.command;
+    APP.vendors = collectVendors();
 
     RAW.RootPath = rootPath + "/";
     RAW.WorkPath = workPath + "/";
@@ -24,14 +43,23 @@ export function SetENV(rootPath, workPath, packageJson) {
         }
     });
 
-    const VersionSpecificCDN = APP.cdn + "version/" + packageJson.version.split(".")[1] + "/";
+    const CDN = APP.cdn + "versions/" + APP.version.split(".")[1] + "/";
     Object.entries(ROOT).forEach(([group, object]) => {
-        const CDN = group === "PREFIX" ? APP.cdn : VersionSpecificCDN;
-        Object.values(object).forEach((entry) => {
-            entry.url = CDN + entry.url;
-            entry.path = RAW.RootPath + entry.path;
-        })
+        if (group !== "PREFIX") {
+            Object.values(object).forEach((entry) => {
+                entry.url = CDN + entry.url;
+                entry.path = RAW.RootPath + entry.path;
+            })
+        }
     });
+}
+
+export function setVENDORS(vendorGroup) {
+    const CDN = APP.cdn + "prefixes/" + (((typeof vendorGroup === "string") && vendorGroup.length) ? vendorGroup : "zero") + "/";
+    Object.values(ROOT.PREFIX || {}).forEach((entry) => {
+        entry.url = CDN + entry.url;
+        entry.path = RAW.RootPath + entry.path;
+    })
 }
 
 export function MemoryUsage() {
@@ -45,6 +73,7 @@ export function MemoryUsage() {
     chart["Total"] = Object.values(chart).reduce((a, i) => a += i, 0).toFixed(2);
     return Object.entries(chart).map(([k, v]) => `${k} : ${v} Kb`);
 }
+
 
 export const INDEX = {
     _NOW: 0,

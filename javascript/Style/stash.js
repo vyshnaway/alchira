@@ -4,7 +4,7 @@ import $ from "../Shell/index.js";
 import Use from "../Utils/index.js";
 import FILING from "../data-filing.js";
 import SCRIPTFILE from "../Script/file.js";
-import { INDEX } from "../data-set.js";
+import { INDEX } from "../data-init.js";
 import { NAV, CACHE, STACK, RAW } from "../data-cache.js";
 
 function _DeleteLibraryFile(filePath) {

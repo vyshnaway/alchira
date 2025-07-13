@@ -1,10 +1,10 @@
 import $ from "./Shell/index.js";
-import * as DATA from "./data-set.js";
+import * as DATA from "./data-init.js";
 import * as FETCH from "./data-fetch.js";
 import * as SMITH from "./data-smith.js";
 import * as worker from "../interface/worker.js";
 import fileman from "../interface/fileman.js";
-import { MemoryUsage } from "./data-set.js";
+import { MemoryUsage } from "./data-init.js";
 import { ROOT, APP, RAW, NAV, STACK } from "./data-cache.js";
 import { hasEvents, dequeueEvent } from "../interface/eventface.js";
 import { FetchPortables, SplitGlobalForComponents } from "./portable.js";
@@ -25,6 +25,7 @@ async function execute(chapter) {
         targets = [],
         reportNext = false,
         step = "Initialize",
+        staticsFetched = false,
         heading = "Initial Build";
 
     $.POST($.MOLD.tertiary.Chapter(chapter));
@@ -32,7 +33,6 @@ async function execute(chapter) {
     do {
         switch (step) {
             case "Initialize":
-                await FETCH.FetchStatics();
 
             case "VerifySetupStruct":
                 const verifyStructResult = await FETCH.VerifySetupStruct();
@@ -49,12 +49,15 @@ async function execute(chapter) {
                 await FETCH.ReloadLibrary();
 
             case "VerifyConfigure":
-                const verifyConfigsResult = await FETCH.VerifyConfigure();
+                const verifyConfigsResult = await FETCH.VerifyConfigure(!staticsFetched);
                 if (!verifyConfigsResult.status) {
                     report = verifyConfigsResult.report;
                     step = "WatchFolders";
                     break;
-                } else report = "";
+                } else {
+                    staticsFetched = true;
+                    report = "";
+                }
 
             case "ReadProxyFolders":
                 await FETCH.UpdateProxies();
@@ -176,13 +179,14 @@ async function commander(
     packageJson,
     projectName,
     projectVersion,
+    vendorGroup,
 ) {
-    RAW.CMD = command;
+    RAW.CMD = ["watch", "preview", "publish"].includes(command) ? "watch" : command;
     RAW.ARG = argument;
     RAW.WATCH = command === "watch";
     RAW.PACKAGE = projectName;
     RAW.VERSION = projectVersion;
-    DATA.SetENV(rootPath, workPath, packageJson);
+    DATA.SetENV(rootPath, workPath, packageJson, vendorGroup);
     $.initialize(consoleWidth, command !== "watch" && command !== "split");
 
     switch (RAW.CMD) {

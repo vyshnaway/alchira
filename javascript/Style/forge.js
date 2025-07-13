@@ -1,6 +1,6 @@
 import Use from "../Utils/index.js";
 import { CACHE } from "../data-cache.js";
-import { INDEX } from "../data-set.js";
+import { INDEX } from "../data-init.js";
 
 function _styleSwitch(object) {
 	const switched = Use.object.switch(object);

@@ -19,7 +19,12 @@ const tagCheck = (string) => tagRegex.test(string);
 
 export default function tagScan(content, action, classProps, fileData) {
 	const startMarker = FileCursor.marker++;
-	let deviance = 0,
+	let attr = "",
+		value = "",
+		ok = false,
+		isVal = false,
+		awaitBrace,
+		deviance = 0,
 		ch = content[FileCursor.marker],
 		classList = [],
 		braceTrack = [],
@@ -35,35 +40,25 @@ export default function tagScan(content, action, classProps, fileData) {
 			selector: "",
 			comments: [],
 			styles: {},
-		},
-		attr = "",
-		value = "",
-		ok = false,
-		isVal = false,
-		awaitBrace;
+		};
 
-	while (ch !== undefined) {
+	do {
 		ch = content[FileCursor.marker++];
-		if (deviance === 0 && ch === "<") {
-			FileCursor.marker--;
-			break;
-		} else if (ch === "\n") {
-			FileCursor.rowMarker++;
-			FileCursor.colMarker = 0;
-		} else FileCursor.colMarker++;
+		if (deviance === 0 && ch === "<") { break; }
+		else if (ch === "\n") { FileCursor.rowMarker++; FileCursor.colMarker = 0; }
+		else { FileCursor.colMarker++; }
 
 		if (awaitBrace === ch) {
 			braceTrack.pop();
 			deviance = braceTrack.length;
 			awaitBrace = bracePair[braceTrack[deviance - 1]];
-		} else if (
-			openBraces.includes(ch) &&
-			!["'", '"', "`"].includes(awaitBrace)
-		) {
+		} else if (openBraces.includes(ch) && !["'", '"', "`"].includes(awaitBrace)) {
 			braceTrack.push(ch);
 			deviance = braceTrack.length;
 			awaitBrace = bracePair[ch];
-		} else if (deviance === 0 && closeBraces.includes(ch)) break;
+		} else if (deviance === 0 && closeBraces.includes(ch)) {
+			break;
+		}
 
 		if (
 			(deviance === 0 && ![" ", "=", "\n", "\r", "\t", ">"].includes(ch)) ||
@@ -73,13 +68,10 @@ export default function tagScan(content, action, classProps, fileData) {
 			else attr += ch;
 		} else if (ch === "=") isVal = true;
 
-		if (
-			deviance === 0 &&
-			[" ", "\n", "\r", ">", "\t"].includes(ch) && (attr !== "")
-		) {
+		if (deviance === 0 && [" ", "\n", "\r", ">", "\t"].includes(ch) && (attr !== "")) {
 			if (!tagObject.element) {
 				tagObject.element = attr;
-				if (value !== "") styleObject.styles[""] = value.slice(1, -1);
+				if (value !== "") styleObject.styles[""] = value;
 			}
 			else if (attr === "$") {
 				styleObject.comments.push(...value.slice(1, -1).split("\n").map(l => l.trim()))
@@ -88,10 +80,10 @@ export default function tagScan(content, action, classProps, fileData) {
 				styleObject.selector = attr;
 				if (/\$\$/.test(attr)) styleObject.scope = "global";
 				else styleObject.scope = "local";
-				if (value !== "") styleObject.styles[""] = value.slice(1, -1);
+				if (value !== "") styleObject.styles[""] = value;
 			}
 			else if (/[\$@#]/.test(attr) && !attr.endsWith("$") && !attr.startsWith("@")) {
-				styleObject.styles[attr] = value.slice(1, -1);
+				styleObject.styles[attr] = value;
 			}
 			else if (classProps.includes(attr)) {
 				const result = classExtract(value, action, fileData, FileCursor.tagCount);
@@ -104,37 +96,23 @@ export default function tagScan(content, action, classProps, fileData) {
 			attr = "";
 			value = "";
 		}
-		if (deviance === 0 && ch === ">") {
-			ok = true;
-			break;
-		} else if (deviance === 0 && ch === ";") {
-			break;
-		}
-	}
 
-	let renderedTag = "";
-	if (action === "split" && styleObject.scope === "local") {
-		const StyleObject = Object.entries(styleObject.styles).reduce((A, [k, v]) => {
-			if (k === "") A[styleObject.selector] = v;
-			else A[k] = v;
-			return A;
-		}, {});
-		Object.assign(StyleObject, tagObject.attributes)
+		if (deviance === 0 && ch === ">") { ok = true; break; }
+		else if (deviance === 0 && ch === ";") { break; }
+	} while (ch !== undefined)
 
-		renderedTag = `<${tagObject.element}${Object.entries(StyleObject)
-			.reduce((A, [P, V]) => (A += " " + P + (V === "" ? "" : "=" + V)), "")}>`;
-	} else {
-		renderedTag = `<${tagObject.element}${Object.entries(tagObject.attributes)
-			.reduce((A, [P, V]) => (A += " " + P + (V === "" ? "" : "=" + V)), "")}>`;
-	}
+	let renderedTag = (action === "split" && styleObject.scope === "local") ? content.slice(startMarker, FileCursor.marker) :
+		`<${tagObject.element}${Object.entries(tagObject.attributes).reduce((A, [P, V]) => (A += " " + P + (V === "" ? "" : "=" + V)), "")}>`;
 
 	const replacement = tagObject.element !== APP.styleTag ? renderedTag :
 		tagCheck(content.slice(startMarker, FileCursor.marker)) ? xtyleTag : "";
 	let scribed = ok ? tagObject.element === APP.xcssTag && Object.keys(styleObject.styles).length ?
 		"" : replacement : content.slice(startMarker, FileCursor.marker);
 
+	Object.entries(styleObject.styles).forEach(([k, v]) => styleObject.styles[k] = v.slice(1, -1));
+
 	if (xtyleTag === scribed) fileData.summon = true;
-	if(action === "split") scribed = renderedTag;
+	if (action === "split") scribed = renderedTag;
 	return {
 		ok,
 		marker: FileCursor.marker,

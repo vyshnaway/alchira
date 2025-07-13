@@ -1,8 +1,9 @@
+import { APP } from "../data-cache.js";
 import * as LOADPREFIX from "./prefix.js";
 
 function LoadVendors(collection = {}, vendor = "") {
 	return vendor == ""
-		? ["webkit", "moz", "ms", "o"].filter(
+		? APP.vendors.filter(
 			(ven) => !collection.hasOwnProperty(ven),
 		)
 		: [vendor];

@@ -1,6 +1,7 @@
 {
   "name": "",
   "version": "",
+  "vendors": "web-6",
   "proxy": [
     {
       "source": "src",
@@ -11,7 +12,7 @@
           "class"
         ]
       }
-    }
+    } 
   ],
   "portables": {
     "portable-name": "source-link"
