@@ -1,5 +1,5 @@
-import $ from "./Shell/index.js";
-import Use from "./Utils/index.js";
+import $ from "./Shell/main.js";
+import Use from "./Utils/main.js";
 import HASHRULE from "./hash-rules.js";
 import STYLE from "./Style/parse.js";
 import COMPILE from "./Style/render.js";
@@ -67,6 +67,7 @@ export function ProcessProxies(
 			PUBLISH.MANIFEST.hashrules = CACHE.HashRule;
 	}
 	if (reCache) {
+		XTYLES.ReDeclare();
 		Object.keys(CACHE.GlobalsStyle2Index).forEach(key => delete CACHE.GlobalsStyle2Index[key])
 		Object.entries(STACK.PROXYCACHE).forEach(([key, cache]) => { cache.ClearFiles(); delete STACK.PROXYCACHE[key]; });
 		Object.entries(RAW.PROXYFILES).forEach(([key, files]) => { STACK.PROXYCACHE[key] = new SCRIPT(files); });

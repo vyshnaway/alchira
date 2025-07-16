@@ -4,23 +4,26 @@
   "version": "0.1.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/yshell-dev/xcss-online"
+    "url": "https://github.com/yshell-dev/xcss"
   },
   "type": "module",
   "bin": {
-    "xdev": "./binary/xdev.js"
+    "xdev": "./execute/xdev.js",
+    "xcss": "./execute/xcss.js"
   },
   "funding": {
     "type": "individual",
-    "url": "https://paulmillr.com/funding/"
+    "url": "https://yshell.dev/xcss/funding/"
   },
   "scripts": {
-    "init": "xcss init",
+    "init": "chmod +x ./execute/bash/chmod.sh && ./execute/bash/chmod.sh && xcss init",
+    "split": "xcss split",
     "watch": "xcss watch",
     "install": "xcss install",
     "preview": "xcss preview",
     "publish": "xcss publish",
-    "dev:publish": "node publisher/publish.js"
+    "dev:package": "chmod +x ./execute/bash/build.sh && ./execute/bash/build.sh",
+    "dev:publish": "node export-submod.js"
   },
   "bugs": {
     "url": "https://github.com/yshell-dev/xcss-online/issues"

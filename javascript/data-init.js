@@ -1,4 +1,4 @@
-import Use from "./Utils/index.js";
+import Use from "./Utils/main.js";
 import { APP, RAW, NAV, ROOT, CACHE, STACK, PUBLISH, PREFIX } from "./data-cache.js";
 
 function collectVendors() {
@@ -56,9 +56,9 @@ export function SetENV(rootPath, workPath, packageJson) {
 
 export function setVENDORS(vendorGroup) {
     const CDN = APP.cdn + "prefixes/" + (((typeof vendorGroup === "string") && vendorGroup.length) ? vendorGroup : "zero") + "/";
-    Object.values(ROOT.PREFIX || {}).forEach((entry) => {
+    Object.values(ROOT.VENDOR || {}).forEach((entry) => {
         entry.url = CDN + entry.url;
-        entry.path = RAW.RootPath + entry.path;
+        entry.path = NAV.blueprint.vendors + "/" + entry.path;
     })
 }
 

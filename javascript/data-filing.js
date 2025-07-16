@@ -1,4 +1,4 @@
-import Use from "./Utils/index.js";
+import Use from "./Utils/main.js";
 
 export default function FILING(
 	target,
@@ -12,7 +12,7 @@ export default function FILING(
 	const sourcePath = source.length ? source + "/" + filePath : filePath;
 
 	let [extension, fileName, id, cluster] = targetPath.slice(targetPath.lastIndexOf("/") + 1).split(".").reverse();
-	id = isNaN(id) || id < 0 ? 0 : parseInt(id, 10);
+	id = (isNaN(id) || id < 0) ? 0 : parseInt(id, 10);
 	fileName = Use.string.normalize(fileName);
 
 	const group = isPortable ? (extension === "css" ? "binding" : extension === "xcss" ? "xtyling" : "readme") :

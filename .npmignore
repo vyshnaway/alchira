@@ -1,3 +1,7 @@
 .git
+.gitignore
 .npmignore
-node_module
+
+gosource/
+javascript/
+node_module/

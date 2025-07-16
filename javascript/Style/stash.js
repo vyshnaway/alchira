@@ -1,7 +1,7 @@
 import PARSE from "./parse.js";
 
-import $ from "../Shell/index.js";
-import Use from "../Utils/index.js";
+import $ from "../Shell/main.js";
+import Use from "../Utils/main.js";
 import FILING from "../data-filing.js";
 import SCRIPTFILE from "../Script/file.js";
 import { INDEX } from "../data-init.js";
@@ -194,7 +194,7 @@ function ReRender() {
 
 	Object.values(CACHE.PortableStyle2Index).forEach((index) => {
 		const InStash = INDEX.STYLE(index);
-		if (InStash.declarations.length > 1)
+		if (InStash.metadata.declarations.length > 1)
 			warnings.push(
 				$.MOLD.warning.List(
 					"Multiple portable declarations: " + InStash.selector,
@@ -262,6 +262,12 @@ function ReRender() {
 	};
 }
 
+function ReDeclare() {
+	Object.values(CACHE.LibraryStyle2Index).forEach((val) => {
+		const value = CACHE.Index2StylesObject[val]
+		value.metadata.declarations = [...value.declarations]
+	})
+}
 
 function Appendix(indexes = []) {
 	const stash = {}, essentials = [];
@@ -297,5 +303,6 @@ function Appendix(indexes = []) {
 
 export default {
 	ReRender,
+	ReDeclare,
 	Appendix,
 };

@@ -1,8 +1,8 @@
-import $ from "./Shell/index.js";
+import $ from "./Shell/main.js";
 import { NAV, ROOT, APP, RAW, PREFIX } from "./data-cache.js";
 
-import fileman from "../interface/fileman.js";
-import * as worker from "../interface/worker.js";
+import fileman from "./fileman.js";
+import * as worker from "./worker.js";
 import { setVENDORS } from "./data-init.js";
 
 export async function FetchDocs() {
@@ -53,12 +53,11 @@ export async function FetchStatics(vendorGroup) {
 	};
 
 	await Promise.all(
-		Object.entries(ROOT.PREFIX).map(async ([group, source]) => {
-			console.log(source)
+		Object.entries(ROOT.VENDOR).map(async ([group, source]) => {
 			PrefixRead[group] = await fileman.sync.json(source.url, source.path);
 		}),
 	);
-	
+
 	PREFIX.pseudos = { ...PrefixRead.classes, ...PrefixRead.elements };
 	PREFIX.attributes = PrefixRead.attributes;
 	PREFIX.atRule = PrefixRead.atrules;

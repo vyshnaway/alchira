@@ -1,6 +1,6 @@
 import { BindStack, FileCursor, StyleStack } from "./file.js";
 
-import Use from "../Utils/index.js";
+import Use from "../Utils/main.js";
 import { CACHE, RAW } from "../data-cache.js";
 import { INDEX } from "../data-init.js";
 
@@ -81,16 +81,16 @@ export default function classExtract(string, action, fileData) {
 				deltaStylesScore = R.score;
 			});
 
-			console.log({
-				effectiveIndexes,
-				activeIndexes,
-				deltaIndexes,
-				contributors,
-				effectiveStyles,
-				activeStyles,
-				deltaStylesResult: deltaStyles.result,
-				deltaStylesScore: deltaStyles.score
-			})
+			// console.log({
+			// 	effectiveIndexes,
+			// 	activeIndexes,
+			// 	deltaIndexes,
+			// 	contributors,
+			// 	effectiveStyles,
+			// 	activeStyles,
+			// 	deltaStylesResult: deltaStyles.result,
+			// 	deltaStylesScore: deltaStyles.score
+			// })
 		}
 
 

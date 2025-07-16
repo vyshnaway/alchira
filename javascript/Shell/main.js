@@ -5,7 +5,7 @@ import list from "./3.list.js";
 import write from "./4.write.js";
 
 import play from "./frames/index.js";
-import render from "../../interface/console.js";
+import render from "./5.post.js";
 
 const task = (string, rowshift = -1) => {
   if (canvas.settings.taskActive && canvas.settings.postActive)

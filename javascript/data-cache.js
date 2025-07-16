@@ -21,14 +21,14 @@ export const NAV = {
     blueprint: {
         scaffold: "blueprint/scaffold",
         libraries: "blueprint/libraries",
-        portables: "blueprint/portables",
+        vendors: "blueprint/vendors",
     },
     folder: {
         setup: "xtyles",
         autogen: "xtyles/autogen",
         library: "xtyles/library",
         portables: "xtyles/portables",
-        portableNative: "xtyles/autogen/portable",
+        mybundles: "xtyles/autogen/portable",
     },
     css: {
         atrules: "xtyles/#at-rules.css",
@@ -85,26 +85,26 @@ export const ROOT = {
             path: "agreements/privacy.txt",
         },
     },
-    PREFIX: {
+    VENDOR: {
         attributes: {
             url: "attributes.json",
-            path: "blueprint/prefixes/attributes.json",
+            path: "attributes.json",
         },
         values: {
             url: "values.json",
-            path: "blueprint/prefixes/values.json",
+            path: "values.json",
         },
         atrules: {
             url: "atrules.json",
-            path: "blueprint/prefixes/atrules.json",
+            path: "atrules.json",
         },
         classes: {
             url: "classes.json",
-            path: "blueprint/prefixes/classes.json",
+            path: "classes.json",
         },
         elements: {
             url: "elements.json",
-            path: "blueprint/prefixes/elements.json",
+            path: "elements.json",
         }
     },
 };

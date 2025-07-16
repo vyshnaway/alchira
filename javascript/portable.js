@@ -1,7 +1,7 @@
-import fileman from "../interface/fileman.js";
+import fileman from "./fileman.js";
 import { APP, CACHE, NAV, RAW, STACK } from "./data-cache.js";
 import { INDEX } from "./data-init.js";
-import $ from "./Shell/index.js";
+import $ from "./Shell/main.js";
 import FORGE from "./Style/forge.js";
 import RENDER from "./Style/render.js";
 
@@ -125,7 +125,7 @@ export function GeneratePortable(essentials = []) {
     const portableName = `${RAW.PACKAGE}@${RAW.VERSION}`;
     const content = portableCreator(essentials, portableName)
     const json = { ...RAW.PORTABLEFRAME, readme: RAW.ReadMe, xtyling: content.portable, bindings: content.bindings };
-    const jsonPath = NAV.folder.portableNative + "/" + portableName + ".json";
+    const jsonPath = NAV.folder.mybundles + "/" + portableName + ".json";
 
     return { name: RAW.PACKAGE, version: RAW.VERSION, jsonPath: jsonPath, jsonContent: JSON.stringify(json) };
 }

@@ -1,4 +1,4 @@
-import $ from "./Shell/index.js";
+import $ from "./Shell/main.js";
 import { CACHE, RAW } from "./data-cache.js";
 
 const hashPattern = /\{#[a-z0-9]+\}/i;

@@ -1,6 +1,7 @@
 import CSSBLOCK from "./block.js";
 
-import Use from "../Utils/index.js";
+import $ from "../Shell/main.js";
+import Use from "../Utils/main.js";
 import HASHRULE from "../hash-rules.js";
 import { RAW, CACHE } from "../data-cache.js";
 import { INDEX } from "../data-init.js";
@@ -24,7 +25,7 @@ function xtylemerge(classList = []) {
 function SCANNER(content, initial, sourceSelector) {
 	const scanned = CSSBLOCK(content);
 	const variables = scanned.variables;
-	const merged = xtylemerge(scanned.assemble);
+	const merged = xtylemerge(scanned.compose);
 	const preBinds = [...merged.preBinds, ...scanned.preBinds.filter(bind => bind[0] !== "/")],
 		postBinds = [...merged.postBinds, ...scanned.postBinds.filter(bind => bind[0] !== "/")];
 
@@ -80,18 +81,18 @@ function CSSLIBRARY(fileDatas = [], initial = "", forPortable = false) {
 			const scannedStyle = SCANNER(OBJECT, initial + " : " + filePath + " ||", selector,);
 			const preBinds = scannedStyle.preBinds, postBinds = scannedStyle.postBinds;
 			const object = { "": scannedStyle.object };
-			const metadata = {
-				info: [],
-				variables: scannedStyle.variables,
-				skeleton: Use.object.skeleton(object),
-				declarations: [declaration]
-			};
 
 			const index = (IndexMap[stampSelector] || 0) + (selectors[stampSelector] || 0);
 			if (index) {
 				const InStash = INDEX.STYLE(index);
 				InStash.declarations.push(declaration);
 			} else {
+				const metadata = {
+					info: [],
+					variables: scannedStyle.variables,
+					skeleton: Use.object.skeleton(object),
+					declarations: [] // manifest and cross-check declarations assigned later from parse.js
+				};
 				const identity = INDEX.DECLARE({
 					portable: forPortable ? source.fileName : "",
 					scope: group,
@@ -101,7 +102,7 @@ function CSSLIBRARY(fileDatas = [], initial = "", forPortable = false) {
 					preBinds: forPortable ? preBinds.map(bind => stamp + bind) : preBinds,
 					postBinds: forPortable ? postBinds.map(bind => stamp + bind) : postBinds,
 					metaClass: metaFront + "_" + Use.string.normalize(stampSelector, [], [], ["$", "/"]),
-					declarations: [declaration],
+					declarations: [declaration] // only library declarations
 				});
 				source.usedIndexes.add(identity.index);
 				selectors[stampSelector] = identity.index;
@@ -164,12 +165,7 @@ function TAGSTYLE(
 
 	let isOriginal;
 	let identity = { index: 0, class: '' };
-	let metadata = {
-		info: comments,
-		variables: variables,
-		skeleton: Use.object.skeleton(object),
-		declarations: [declaration]
-	};
+	let metadata = {};
 	let xelector = selector === "" ? "" : prefix + selector;
 	if (selector === "") {
 		essentials.push(...Object.entries(object).map(([k, v]) => [RAW.WATCH ? `${k} /* ${declaration} */` : k, v]));
@@ -177,10 +173,19 @@ function TAGSTYLE(
 		const index = (IndexMap[xelector] || 0) + (CACHE.LibraryStyle2Index[xelector] || 0) + (CACHE.GlobalsStyle2Index[xelector] || 0);
 		if (index) {
 			const InStash = INDEX.STYLE(index);
-			InStash.declarations.push(declaration);
+			metadata = InStash.metadata;
+			InStash.metadata.declarations.push(declaration);
 			isOriginal = false;
+			if (CACHE.LibraryStyle2Index[xelector] || 0)
+				errors.push($.MOLD.failed.List("Multiple declarations: " + InStash.selector, InStash.metadata.declarations, $.list.text.Bullets))
 		} else {
 			isOriginal = true;
+			metadata = {
+				info: comments,
+				variables: variables,
+				skeleton: Use.object.skeleton(object),
+				declarations: [declaration]
+			};
 			identity = INDEX.DECLARE({
 				portable: forPortable ? fileName : "",
 				scope,
@@ -190,7 +195,7 @@ function TAGSTYLE(
 				preBinds: forPortable ? preBinds.map(bind => prefix + "$/" + bind) : preBinds,
 				postBinds: forPortable ? postBinds.map(bind => prefix + "$/" + bind) : postBinds,
 				metaClass,
-				declarations: [declaration]
+				declarations: metadata.declarations
 			});
 			IndexMap[xelector] = identity.index;
 		}

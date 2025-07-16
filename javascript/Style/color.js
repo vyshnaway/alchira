@@ -1,4 +1,4 @@
-import Utils from "../Utils/index.js";
+import Utils from "../Utils/main.js";
 
 const bracePair = {
     "{": "}",
@@ -50,7 +50,7 @@ function paletteScanner(
 
     while (ch !== undefined) {
         ch = content[++marker];
-        substring+=ch;
+        substring += ch;
 
         if (deviance === 0 && (ch === ")" || ch === "," || ch === " " || ch === '/')) {
             const trimmed = value.trim();

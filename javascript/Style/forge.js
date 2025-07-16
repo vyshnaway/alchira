@@ -1,4 +1,4 @@
-import Use from "../Utils/index.js";
+import Use from "../Utils/main.js";
 import { CACHE } from "../data-cache.js";
 import { INDEX } from "../data-init.js";
 

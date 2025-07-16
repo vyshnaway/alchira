@@ -1,6 +1,6 @@
 import palletes from "./color.js";
 
-import Use from "../Utils/index.js";
+import Use from "../Utils/main.js";
 import { APP, PREFIX } from "../data-cache.js";
 
 const VENDORS = APP.vendors;

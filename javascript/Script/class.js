@@ -2,7 +2,7 @@ import SCRIPTPARSE from "./file.js";
 import { xtyleTag } from "./tag.js";
 import FORGE from "../Style/forge.js";
 
-import $ from "../Shell/index.js";
+import $ from "../Shell/main.js";
 import FILING from "../data-filing.js";
 import STYLEPARSE from "../Style/parse.js";
 import { INDEX } from "../data-init.js";

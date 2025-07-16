@@ -1,12 +1,11 @@
-import $ from "./Shell/index.js";
+import $ from "./Shell/main.js";
 import * as DATA from "./data-init.js";
 import * as FETCH from "./data-fetch.js";
 import * as SMITH from "./data-smith.js";
-import * as worker from "../interface/worker.js";
-import fileman from "../interface/fileman.js";
+import * as worker from "./worker.js";
+import fileman from "./fileman.js";
 import { MemoryUsage } from "./data-init.js";
 import { ROOT, APP, RAW, NAV, STACK } from "./data-cache.js";
-import { hasEvents, dequeueEvent } from "../interface/eventface.js";
 import { FetchPortables, SplitGlobalForComponents } from "./portable.js";
 
 function reporter(heading, targets, report) {
@@ -113,8 +112,8 @@ async function execute(chapter) {
                     reporter(heading, targets, report);
                 }
 
-                if (hasEvents()) {
-                    const event = dequeueEvent();
+                if (worker.hasEvents()) {
+                    const event = worker.dequeueEvent();
                     $.initialize(event.consoleWidth, !RAW.WATCH);
                     const filePath = `${event.folder}/${event.filePath}`;
                     if (filePath.startsWith(NAV.folder.autogen)) {

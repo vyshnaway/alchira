@@ -1,11 +1,11 @@
-import Use from "../Utils/index.js";
+import Use from "../Utils/main.js";
 
 const OPEN_CHARS = ["{", "[", "("];
 const CLOSE_CHARS = ["}", "]", ")"];
 const QUOTE_CHARS = ["`", "'", '"'];
 
 export default function parseBlock(content, blockArrays = false) {
-	content += ";";  
+	content += ";";
 	let keyStart = 0,
 		valStart = 0,
 		deviance = 0,
@@ -15,7 +15,7 @@ export default function parseBlock(content, blockArrays = false) {
 		length = content.length;
 
 	let result = {
-		assemble: [],
+		compose: [],
 		preBinds: [],
 		postBinds: [],
 		variables: {},
@@ -75,18 +75,18 @@ export default function parseBlock(content, blockArrays = false) {
 								const directive = value.slice(0, spaceIndex);
 
 								switch (directive) {
-									case "@pre-bind":
+									case "@--pre-bind":
 										result.preBinds.push(
 											...Use.string.zeroBreaks(value.slice(spaceIndex)),
 										);
 										break;
-									case "@post-bind":
+									case "@--post-bind":
 										result.postBinds.push(
 											...Use.string.zeroBreaks(value.slice(spaceIndex)),
 										);
 										break;
-									case "@assemble":
-										result.assemble.push(
+									case "@--compose":
+										result.compose.push(
 											...Use.string.zeroBreaks(value.slice(spaceIndex)),
 										);
 										break;
@@ -107,7 +107,7 @@ export default function parseBlock(content, blockArrays = false) {
 										break;
 									case "+":
 										breaks.shift();
-										result.assemble.push(...breaks);
+										result.compose.push(...breaks);
 										break;
 								}
 							}

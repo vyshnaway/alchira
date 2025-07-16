@@ -1,5 +1,5 @@
 import krypt from "./kryptic.js";
-import Use from "../Utils/index.js";
+import Use from "../Utils/main.js";
 import { APP } from "../data-cache.js";
 
 const myHeaders = new Headers();
