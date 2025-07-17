@@ -1,6 +1,6 @@
 import path from "path";
 import chokidar from "chokidar";
-import fileman from "./fileman.js";
+import fileman from "../fileman.js";
 
 export async function cssImport(filePathArray = []) {
 	const processedFiles = new Set(

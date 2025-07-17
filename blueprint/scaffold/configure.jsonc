@@ -1,7 +1,7 @@
 {
   "name": "",
   "version": "",
-  "vendors": "web-6",
+  "vendors": "zero",
   "proxy": [
     {
       "source": "src",

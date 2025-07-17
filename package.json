@@ -8,7 +8,7 @@
   },
   "type": "module",
   "bin": {
-    "xdev": "./execute/xdev.js",
+    "xdev": "./javascript/package.js",
     "xcss": "./execute/xcss.js"
   },
   "funding": {
@@ -16,12 +16,18 @@
     "url": "https://yshell.dev/xcss/funding/"
   },
   "scripts": {
-    "init": "chmod +x ./execute/bash/chmod.sh && ./execute/bash/chmod.sh && xcss init",
-    "split": "xcss split",
-    "watch": "xcss watch",
-    "install": "xcss install",
-    "preview": "xcss preview",
-    "publish": "xcss publish",
+    "xcss:init": "chmod +x ./execute/bash/chmod.sh && ./execute/bash/chmod.sh && xcss init",
+    "xcss:split": "xcss split",
+    "xcss:watch": "xcss watch",
+    "xcss:install": "xcss install",
+    "xcss:preview": "xcss preview",
+    "xcss:publish": "xcss publish",
+    "xdev:init": "chmod +x ./execute/bash/chmod.sh && ./execute/bash/chmod.sh && xdev init",
+    "xdev:split": "xdev split",
+    "xdev:watch": "xdev watch",
+    "xdev:install": "xdev install",
+    "xdev:preview": "xdev preview",
+    "xdev:publish": "xdev publish",
     "dev:package": "chmod +x ./execute/bash/build.sh && ./execute/bash/build.sh",
     "dev:publish": "node export-submod.js"
   },

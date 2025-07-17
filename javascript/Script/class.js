@@ -7,7 +7,7 @@ import FILING from "../data-filing.js";
 import STYLEPARSE from "../Style/parse.js";
 import { INDEX } from "../data-init.js";
 import { RAW, CACHE } from "../data-cache.js";
-import { generateXtyleBlock as GenerateXtyleBlock } from "../portable.js";
+import { generateXtyleBlock as GenerateXtyleBlock } from "../Worker/portable.js";
 
 export default class Proxy {
 	source = "";

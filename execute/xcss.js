@@ -1,13 +1,16 @@
 #!/usr/bin/env node
 
+import path from "path";
+import { fileURLToPath } from "url";
 import { execFileSync } from 'child_process';
-
-let binPath = '';
-let archSuffix = '';
-let fileExtension = '';
 
 const os = process.platform;
 const arch = process.arch;
+const root = path.resolve(fileURLToPath(import.meta.url), "../..");
+
+let archSuffix = '';
+let fileExtension = '';
+let binPath = path.join(root, 'execute/bin/');
 
 switch (os) {
     case 'win32':
@@ -21,7 +24,7 @@ switch (os) {
             console.error(`Unsupported Windows Architecture: ${arch}`);
             process.exit(1);
         }
-        binPath = `execute/bin/windows-${archSuffix}${fileExtension}`;
+        binPath += `windows-${archSuffix}${fileExtension}`;
         break;
 
     case 'linux':
@@ -39,7 +42,7 @@ switch (os) {
             console.error(`Unsupported Linux Architecture: ${arch}`);
             process.exit(1);
         }
-        binPath = `execute/bin/linux-${archSuffix}${fileExtension}`;
+        binPath += `linux-${archSuffix}${fileExtension}`;
         break;
 
     case 'darwin':
@@ -53,7 +56,7 @@ switch (os) {
             console.error(`Unsupported macOS Architecture: ${arch}`);
             process.exit(1);
         }
-        binPath = `execute/bin/darwin-${archSuffix}${fileExtension}`;
+        binPath += `darwin-${archSuffix}${fileExtension}`;
         break;
 
     default:

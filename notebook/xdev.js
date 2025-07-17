@@ -2,7 +2,7 @@
 
 import fs from "fs";
 import fileman from "../interface/fileman.js";
-import commander from "../javascript/package.js";
+import commander from "../javascript/command.js";
 
 const rootPath = fileman.path.fromRoot(".");
 const workPath = fileman.path.resolves(".");
