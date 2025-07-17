@@ -62,31 +62,39 @@ function objectCompose(
 
 	StylePartialsArray(object, vendors).forEach(([key, value]) => {
 		if (typeof value === "object") {
-			if (!minify && first) styleSheet.push("");
-			if (key[0] === "@") {
-				const atPrefixes = LOADPREFIX.forAtRule;
-				Object.entries(atPrefixes(key, vendors)).forEach(
-					([vendor, selector]) => {
-						styleSheet.push(
-							selector,
-							"{",
-							...objectCompose(
+			if (Object.keys(value).length) {
+				if (!minify && first) styleSheet.push("");
+				if (key[0] === "@") {
+					const atPrefixes = LOADPREFIX.forAtRule;
+					Object.entries(atPrefixes(key, vendors)).forEach(
+						([vendor, selector]) => {
+							const composedObject = objectCompose(
 								value,
 								minify,
 								LoadVendors(atPrefixes, vendor),
 								false,
-							).map((i) => tab + i),
+							);
+							if (composedObject.length) {
+								styleSheet.push(
+									selector,
+									"{",
+									...composedObject.map((i) => tab + i),
+									"}",
+								);
+							}
+						},
+					);
+				} else {
+					const composedObject = objectCompose(value, minify, vendors, false);
+					if (Object.keys(composedObject).length) {
+						styleSheet.push(...LOADPREFIX.forSelector(key, vendors));
+						styleSheet.push(
+							"{",
+							...composedObject.map((i) => tab + i),
 							"}",
 						);
-					},
-				);
-			} else {
-				styleSheet.push(...LOADPREFIX.forSelector(key, vendors));
-				styleSheet.push(
-					"{",
-					...objectCompose(value, minify, vendors, false).map((i) => tab + i),
-					"}",
-				);
+					}
+				}
 			}
 		} else if (key[0] === "@") {
 			styleSheet.push(key);
@@ -102,8 +110,14 @@ function stylesheetCreator(array, minify) {
 	const styleSheet = [];
 
 	array.forEach(([key, value]) => {
-		const processed = typeof value === "object" ? unNester(key, value) : { [key]: value };
-		styleSheet.push(...objectCompose(processed, minify));
+		if (typeof value === "object") {
+			const unNested = unNester(key, value);
+			if (Object.keys(unNested).length) {
+				styleSheet.push(...objectCompose(unNested, minify));
+			}
+		} else {
+			styleSheet.push(...objectCompose({ [key]: value }, minify));
+		}
 	});
 
 	return styleSheet.join(minify ? "" : "\n");
@@ -114,12 +128,14 @@ function rawCompose(selectorObjectArray = [], tab = "  ") {
 
 	selectorObjectArray.forEach(([key, value]) => {
 		if (typeof value === "object") {
-			styleSheet.push(
-				key,
-				"{",
-				...rawCompose(Object.entries(value), tab).map((i) => tab + i),
-				"}",
-			);
+			if (Object.keys(value).length) {
+				styleSheet.push(
+					key,
+					"{",
+					...rawCompose(Object.entries(value), tab).map((i) => tab + i),
+					"}",
+				);
+			}
 		} else if (key[0] === "@") {
 			styleSheet.push(key) + ";";
 		} else {

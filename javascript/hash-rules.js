@@ -1,5 +1,5 @@
 import $ from "./Shell/main.js";
-import { CACHE, RAW } from "./data-cache.js";
+import { CACHE, RAW, TWEAKS } from "./data-cache.js";
 
 const hashPattern = /\{#[a-z0-9]+\}/i;
 const preHashPattern = /(?<!\{)#\w+/g;
@@ -126,22 +126,22 @@ function RENDER(string, sourcePath = "", ErrorisWarning = false) {
 					rule.push("");
 					break;
 				case ",":
-					rule.push(", ");
+					rule.push(TWEAKS.shorthands ? ", " : ",");
 					break;
 				case "|":
-					rule.push(" or ");
+					rule.push(TWEAKS.shorthands ? " or " : "|");
 					break;
 				case "&":
-					rule.push(" and ");
+					rule.push(TWEAKS.shorthands ? " and " : "&");
 					break;
 				case "!":
-					rule.push("not ");
+					rule.push(TWEAKS.shorthands ? "not " : "!");
 					break;
 				case "*":
-					rule.push("all ");
+					rule.push(TWEAKS.shorthands ? "all " : "*");
 					break;
 				case "^":
-					rule.push("only ");
+					rule.push(TWEAKS.shorthands ? "only " : "^");
 					break;
 				case "@":
 					rule.unshift("@");

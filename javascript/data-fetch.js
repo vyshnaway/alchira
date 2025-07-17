@@ -3,7 +3,7 @@ import { NAV, ROOT, APP, RAW, PREFIX } from "./data-cache.js";
 
 import fileman from "./fileman.js";
 import * as worker from "./Worker/worker.js";
-import { setVENDORS } from "./data-init.js";
+import { setTWEAKS, setVENDORS } from "./data-init.js";
 
 export async function FetchDocs() {
 	const readmeMd = fileman.sync.file(
@@ -186,6 +186,7 @@ export async function VerifyConfigure(loadStatics) {
 	const configure = await fileman.read.json(NAV.json.configure);
 	if (configure.status) {
 		if (loadStatics) FetchStatics(configure.data["vendors"]);
+		setTWEAKS(configure.data.tweaks);
 		RAW.PROXYMAP = (typeof configure.data.proxy === "object") ? configure.data.proxy : [];
 		const dependencies = (typeof configure.data["portables"] === "object") ? configure.data["portables"] : {};
 
@@ -193,7 +194,7 @@ export async function VerifyConfigure(loadStatics) {
 		delete configure.data["portables"];
 		Object.assign(RAW.PORTABLEFRAME, configure.data);
 		RAW.PORTABLEFRAME.name = RAW.PACKAGE = RAW.PORTABLEFRAME.name || RAW.PACKAGE || "xtyle";
-		RAW.PORTABLEFRAME.versionn = RAW.VERSION = RAW.PORTABLEFRAME.version || RAW.VERSION || '0.0.0';
+		RAW.PORTABLEFRAME.version = RAW.VERSION = RAW.PORTABLEFRAME.version || RAW.VERSION || '0.0.0';
 
 		RAW.DEPENDENCIES = Object.entries(dependencies).reduce((a, [k, v]) => {
 			if (typeof v === "string") a[k] = v;

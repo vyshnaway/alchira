@@ -1,5 +1,5 @@
 import Use from "./Utils/main.js";
-import { APP, RAW, NAV, ROOT, CACHE, STACK, PUBLISH, PREFIX } from "./data-cache.js";
+import { APP, RAW, NAV, ROOT, CACHE, STACK, PUBLISH, PREFIX, TWEAKS } from "./data-cache.js";
 
 function collectVendors() {
     const vendors = new Set();
@@ -52,6 +52,17 @@ export function SetENV(rootPath, workPath, packageJson) {
             })
         }
     });
+}
+
+export function setTWEAKS(tweaks) {
+    Object.assign(TWEAKS, APP.defaultTweaks);
+    if(typeof tweaks === "object"){
+        Object.keys(TWEAKS).forEach(key => {
+            if (typeof TWEAKS[key] === typeof tweaks[key]) {
+                TWEAKS[key] = tweaks[key];
+            }
+        })
+    }
 }
 
 export function setVENDORS(vendorGroup) {

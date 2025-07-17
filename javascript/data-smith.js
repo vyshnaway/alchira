@@ -13,7 +13,7 @@ import { GeneratePortable } from "./Worker/portable.js";
 
 export function UpdateXtylesFolder() {
 	INDEX.RESET();
-	PUBLISH.MANIFEST.prefix = `/${RAW.PACKAGE}/`
+	PUBLISH.MANIFEST.prefix = RAW.PACKAGE;
 	Object.assign(CACHE, { PortableEssentials: [], LibraryStyle2Index: {}, PortableStyle2Index: {} });
 	Object.assign(STACK, { LIBRARIES: {}, PORTABLES: {} });
 

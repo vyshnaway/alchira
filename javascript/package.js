@@ -14,7 +14,7 @@ const argument = process.argv[3];
 const consoleWidth = process.stdout.columns;
 const rootPackageEssential = {};
 
-const commandList = ["init", "watch", "split", "preview", "publish", "install"];
+const commandList = ["init", "split", "watch", "preview", "publish", "install"];
 
 const rootPackageJson = await fileman.read.json(rootPackagePath);
 if (!rootPackageJson.status) throw new Error("Bad root json file.");

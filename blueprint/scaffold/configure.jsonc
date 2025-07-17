@@ -16,5 +16,10 @@
   ],
   "portables": {
     "portable-name": "source-link"
+  },
+  "tweaks": {
+    "openXtyles": true,
+    "rapidSense": true,
+    "shorthands": true
   }
 }

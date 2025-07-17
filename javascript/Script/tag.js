@@ -1,6 +1,6 @@
 import classExtract from "./value.js";
 import { FileCursor } from "./file.js";
-import { APP } from "../data-cache.js";
+import { APP, TWEAKS } from "../data-cache.js";
 
 const bracePair = {
 	"{": "}",
@@ -16,6 +16,10 @@ const closeBraces = ["]", "}", ")"];
 export const xtyleTag = `<${APP.xcssTag} />`;
 const tagRegex = new RegExp(`<\s*${APP.xcssTag}\s*/\s*>`);
 const tagCheck = (string) => tagRegex.test(string);
+const zeroXtyleRegex = /^[\w\-]*\$+[\w\-]*$/i;
+const openlibXtyleRegex = /^[\w\-]*\$+[\w\-]+$/i;
+const onlylibXtyleRegex = /^[\w\-]+\$+[\w\-]+$/i;
+const subXtyleRegex = /[\$@#]/;
 
 export default function tagScan(content, action, classProps, fileData) {
 	const startMarker = FileCursor.marker++;
@@ -76,13 +80,13 @@ export default function tagScan(content, action, classProps, fileData) {
 			else if (attr === "$") {
 				styleObject.comments.push(...value.slice(1, -1).split("\n").map(l => l.trim()))
 			}
-			else if (/^[\w\-]*\$+[\w\-]+$/i.test(attr)) {
+			else if ((TWEAKS.openXtyles && openlibXtyleRegex.test(attr)) || (!TWEAKS.openXtyles && onlylibXtyleRegex.test(attr))) {
 				styleObject.selector = attr;
-				if (/\$\$/.test(attr)) styleObject.scope = "global";
+				if (attr.includes("$$")) styleObject.scope = "global";
 				else styleObject.scope = "local";
 				if (value !== "") styleObject.styles[""] = value;
 			}
-			else if (/[\$@#]/.test(attr) && !attr.endsWith("$") && !attr.startsWith("@")) {
+			else if (!zeroXtyleRegex.test(attr) && subXtyleRegex.test(attr) && !attr.endsWith("$") && !attr.startsWith("@")) {
 				styleObject.styles[attr] = value;
 			}
 			else if (classProps.includes(attr)) {
@@ -90,7 +94,9 @@ export default function tagScan(content, action, classProps, fileData) {
 				classList.push(...result.classList);
 				tagObject.attributes[attr] = result.scribed;
 			}
-			else tagObject.attributes[attr] = value;
+			else {
+				tagObject.attributes[attr] = value;
+			}
 
 			isVal = false;
 			attr = "";

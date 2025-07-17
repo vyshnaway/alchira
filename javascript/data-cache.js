@@ -1,3 +1,4 @@
+
 export const APP = {
     name: "",
     version: "",
@@ -13,9 +14,16 @@ export const APP = {
         preview: 'Test build. Pass test for "publish" command.',
         publish: "Optimized build, uses web-api.",
     },
+    defaultTweaks: {
+        openXtyles: true,
+        rapidSense: true,
+        shorthands: true
+    },
     vendors: [],
     xcssTag: "xtyle",
 };
+
+export const TWEAKS = { ...APP.defaultTweaks };
 
 export const NAV = {
     blueprint: {
