@@ -2,7 +2,7 @@ import $ from "./Shell/main.js";
 import { NAV, ROOT, APP, RAW, PREFIX } from "./data-cache.js";
 
 import fileman from "./fileman.js";
-import * as worker from "./Worker/worker.js";
+import * as worker from "./Worker/watchman.js";
 import { setTWEAKS, setVENDORS } from "./data-init.js";
 
 export async function FetchDocs() {

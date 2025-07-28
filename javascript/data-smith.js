@@ -163,6 +163,7 @@ function createStylesheet(CUMULATES, ESSENTIALS = []) {
 		PREBINDS: "",
 		RENDERED: "",
 		ESSENTIALS: "",
+		BOUNDSTYLES: "",
 		APPENDIX: "",
 		POSTBINDS: "",
 	};
@@ -203,7 +204,16 @@ function createStylesheet(CUMULATES, ESSENTIALS = []) {
 	RENDERFRAGS.PREBINDS = COMPILE.forPublish(Object.entries(bindObjects.preBindsObject), !RAW.WATCH);
 	RENDERFRAGS.POSTBINDS = COMPILE.forPublish(Object.entries(bindObjects.postBindsObject), !RAW.WATCH);
 
-	return { RENDERFRAGS, PREBINDS, POSTBINDS };
+	(RAW.WATCH
+		? Object.values(CACHE.Index2StylesObject)
+		: CACHE.SortedIndexes.map(index => CACHE.Index2StylesObject[index])
+	).reduce((a, obj) => {
+		if (obj.boundSnippet.length) a.boundsnippets.push(obj.boundSnippet);
+		if (obj.boundStyles.length) a.boundStyles.push(obj.boundStyles);
+		return a;
+	}, { boundsnippets: [], boundStyles: [] })
+
+	return { RENDERFRAGS, PREBINDS, POSTBINDS, SNIPPETSHEET };
 }
 
 // On target stylesheet edit.
@@ -228,12 +238,16 @@ export async function Generate() {
 	if (PUBLISH.DeltaContent.length) {
 		SAVEFILES[PUBLISH.DeltaPath] = PUBLISH.DeltaContent;
 	} else {
-		const { RENDERFRAGS } = createStylesheet(CUMULATES, XRESPONSE.essentials);
+		const { RENDERFRAGS, SNIPPETSHEET } = createStylesheet(CUMULATES, XRESPONSE.essentials);
 
 		const FinalStylesheet = Object.entries(RENDERFRAGS).map(([chapter, content]) =>
 			RAW.WATCH ? `\n\n/* CHAPTER: ${chapter} */\n${content}\n` : content).join("");
+
+		const br = RAW.WATCH ? "\n" : "";
+		const stylesheetBlock = `${br}<style>${FinalStylesheet}${br}</style>${br}`;
+		const styleBlock = stylesheetBlock + SNIPPETSHEET;
 		const summons = Object.values(STACK.PROXYCACHE).reduce((sum, cache) => {
-			sum.push(...cache.SummonFiles(SAVEFILES, FinalStylesheet));
+			sum.push(...cache.SummonFiles(SAVEFILES, FinalStylesheet, styleBlock, stylesheetBlock, SNIPPETSHEET));
 			return sum
 		}, [PUBLISH.DeltaPath]);
 

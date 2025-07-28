@@ -45,6 +45,9 @@ export default function FILING(
 		preBinds: [],
 		errors: [],
 		summon: false,
+		hasStyleTag: false,
+		hasStylesheetTag: false,
+		hasSnippetTag: false,
 		midway: "",
 	};
 }

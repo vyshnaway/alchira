@@ -20,7 +20,11 @@ export const APP = {
         shorthands: true
     },
     vendors: [],
-    xcssTag: "xtyle",
+    customTag: {
+        style: "xtyle",
+        stylesheet: "xtylesheet",
+        snippet: "xnippet",
+    }
 };
 
 export const TWEAKS = { ...APP.defaultTweaks };
@@ -51,10 +55,10 @@ export const NAV = {
     },
     md: {
         instructions: "xtyles/instructions.md",
-        instructions: "xtyles/readme.md",
+        readme: "xtyles/readme.md",
     },
     file: {
-        manifestIgnore: "xtyles/autogen/.gitignore"
+        autogenIgnore: "xtyles/autogen/.gitignore"
     }
 };
 
@@ -95,22 +99,27 @@ export const ROOT = {
     },
     VENDOR: {
         attributes: {
+            title: "ATTRIBUTE PREFIXES",
             url: "attributes.json",
             path: "attributes.json",
         },
         values: {
+            title: "VALUE PREFIXES",
             url: "values.json",
             path: "values.json",
         },
         atrules: {
+            title: "ATRULE PREFIXES",
             url: "atrules.json",
             path: "atrules.json",
         },
         classes: {
+            title: "CLASS PREFIXES",
             url: "classes.json",
             path: "classes.json",
         },
         elements: {
+            title: "ELEMENT PREFIXES",
             url: "elements.json",
             path: "elements.json",
         }

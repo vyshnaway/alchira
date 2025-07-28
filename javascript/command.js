@@ -2,7 +2,7 @@ import $ from "./Shell/main.js";
 import * as DATA from "./data-init.js";
 import * as FETCH from "./data-fetch.js";
 import * as SMITH from "./data-smith.js";
-import * as worker from "./Worker/worker.js";
+import * as worker from "./Worker/watchman.js";
 import fileman from "./fileman.js";
 import { MemoryUsage } from "./data-init.js";
 import { ROOT, APP, RAW, NAV, STACK } from "./data-cache.js";
@@ -180,7 +180,8 @@ async function commander(
     projectVersion,
     vendorGroup,
 ) {
-    RAW.CMD = ["watch", "preview", "publish"].includes(command) ? "watch" : command;
+    // RAW.CMD = ["watch", "preview", "publish"].includes(command) ? "watch" : command;
+    RAW.CMD = command;
     RAW.ARG = argument;
     RAW.WATCH = command === "watch";
     RAW.PACKAGE = projectName;

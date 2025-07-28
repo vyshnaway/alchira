@@ -102,6 +102,8 @@ function CSSLIBRARY(fileDatas = [], initial = "", forPortable = false) {
 					preBinds: forPortable ? preBinds.map(bind => stamp + bind) : preBinds,
 					postBinds: forPortable ? postBinds.map(bind => stamp + bind) : postBinds,
 					metaClass: metaFront + "_" + Use.string.normalize(stampSelector, [], [], ["$", "/"]),
+					boundSnippet: "",
+					boundStyles: "",
 					declarations: [declaration] // only library declarations
 				});
 				source.usedIndexes.add(identity.index);
@@ -119,7 +121,7 @@ function CSSLIBRARY(fileDatas = [], initial = "", forPortable = false) {
 }
 
 function TAGSTYLE(
-	{ scope, selector, comments, styles, rowMarker, columnMarker },
+	{ scope, selector, comments, styles, rowMarker, columnMarker, boundSnippet, boundStylesheet },
 	{ metaFront = "", fileName = "", fullPath = "", filePath = "", prefix = "" },
 	IndexMap = {},
 ) {
@@ -192,6 +194,8 @@ function TAGSTYLE(
 				selector,
 				object,
 				metadata,
+				boundSnippet,
+				boundStyles,
 				preBinds: forPortable ? preBinds.map(bind => prefix + "$/" + bind) : preBinds,
 				postBinds: forPortable ? postBinds.map(bind => prefix + "$/" + bind) : postBinds,
 				metaClass,

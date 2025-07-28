@@ -13,9 +13,18 @@ const bracePair = {
 const openBraces = ["[", "{", "(", "'", '"', "`"];
 const closeBraces = ["]", "}", ")"];
 
-export const xtyleTag = `<${APP.xcssTag} />`;
-const tagRegex = new RegExp(`<\s*${APP.xcssTag}\s*/\s*>`);
-const tagCheck = (string) => tagRegex.test(string);
+export const styleTag = `<${APP.customTag.style} />`;
+export const stylesheetTag = `<${APP.customTag.stylesheet} />`;
+export const snippetTag = `<${APP.customTag.snippet} />`;
+
+const styleTagRegex = new RegExp(`<\s*${APP.customTag.style}\s*/\s*>`);
+const stylesheetTagRegex = new RegExp(`<\s*${APP.customTag.stylesheet}\s*/\s*>`);
+const snippetTagRegex = new RegExp(`<\s*${APP.customTag.snippet}\s*/\s*>`);
+
+const styleTagCheck = (string) => styleTagRegex.test(string);
+const stylesheetTagCheck = (string) => stylesheetTagRegex.test(string);
+const snippetTagCheck = (string) => snippetTagRegex.test(string);
+
 const zeroXtyleRegex = /^[\w\-]*\$+[\w\-]*$/i;
 const openlibXtyleRegex = /^[\w\-]*\$+[\w\-]+$/i;
 const onlylibXtyleRegex = /^[\w\-]+\$+[\w\-]+$/i;
@@ -48,7 +57,7 @@ export default function tagScan(content, action, classProps, fileData) {
 
 	do {
 		ch = content[FileCursor.marker++];
-		if (deviance === 0 && ch === "<") { break; }
+		if (deviance === 0 && ch === "<") { FileCursor.marker--; break; }
 		else if (ch === "\n") { FileCursor.rowMarker++; FileCursor.colMarker = 0; }
 		else { FileCursor.colMarker++; }
 
@@ -111,13 +120,13 @@ export default function tagScan(content, action, classProps, fileData) {
 		`<${tagObject.element}${Object.entries(tagObject.attributes).reduce((A, [P, V]) => (A += " " + P + (V === "" ? "" : "=" + V)), "")}>`;
 
 	const replacement = tagObject.element !== APP.styleTag ? renderedTag :
-		tagCheck(content.slice(startMarker, FileCursor.marker)) ? xtyleTag : "";
-	let scribed = ok ? tagObject.element === APP.xcssTag && Object.keys(styleObject.styles).length ?
+		styleTagCheck(content.slice(startMarker, FileCursor.marker)) ? styleTag : "";
+	let scribed = ok ? tagObject.element === APP.customTag && Object.keys(styleObject.styles).length ?
 		"" : replacement : content.slice(startMarker, FileCursor.marker);
 
 	Object.entries(styleObject.styles).forEach(([k, v]) => styleObject.styles[k] = v.slice(1, -1));
 
-	if (xtyleTag === scribed) fileData.summon = true;
+	if (styleTag === scribed) fileData.summon = true;
 	if (action === "split") scribed = renderedTag;
 	return {
 		ok,

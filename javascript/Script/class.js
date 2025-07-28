@@ -1,5 +1,5 @@
 import SCRIPTPARSE from "./file.js";
-import { xtyleTag } from "./tag.js";
+import { styleTag, snippetTag, stylesheetTag } from "./tag.js";
 import FORGE from "../Style/forge.js";
 
 import $ from "../Shell/main.js";
@@ -139,7 +139,6 @@ export default class Proxy {
 
 	RenderFiles(preBinds = new Set(), postBinds = new Set(), Command = "") {
 		Object.values(this.fileCache).forEach((file) => {
-			file.summon = false;
 			file.midway = SCRIPTPARSE(file, this.extnsProps[file.extension], Command,
 				{ preBinds, postBinds },
 				{
@@ -153,23 +152,24 @@ export default class Proxy {
 		});
 	}
 
-	SummonFiles(SaveFiles = {}, stylesheet) {
-		const br = RAW.WATCH ? "\n" : "", summons = [this.sourceStylesheet];
-		const styleBlock = `${br}<style>${stylesheet}${br}</style>${br}`;
+	SummonFiles(SaveFiles = {}, stylesheet, styleBlock, stylesheetBlock, snippetBlock) {
+		const tagSummons = [this.sourceStylesheet];
 
 		Object.values(this.fileCache).forEach((file) => {
 			if (file.extension !== "xcss") {
+				let fileContent = file.midway;
 				if (file.summon) {
-					summons.push(file.sourcePath);
-					SaveFiles[file.sourcePath] = file.midway.replace(xtyleTag, styleBlock);
-				} else {
-					SaveFiles[file.sourcePath] = file.midway;
+					if(file.hasStyleTag) fileContent = fileContent.replace(styleTag, styleBlock)
+					if(file.hasStylesheetTag) fileContent = fileContent.replace(stylesheetTag, stylesheetBlock)
+					if(file.hasSnippetTag) fileContent = fileContent.replace(snippetTag, snippetBlock)
+					tagSummons.push(file.sourcePath);
 				}
+				SaveFiles[file.sourcePath] = fileContent;
 			}
 		});
 
 		SaveFiles[this.sourceStylesheet] = stylesheet;
-		return summons;
+		return tagSummons;
 	}
 
 	ComponentSpilt(timeStamp) {
