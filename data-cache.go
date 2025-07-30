@@ -1,4 +1,4 @@
-package main
+package cache
 
 // AppCommandList defines the structure for commandList in APP.
 type AppCommandList struct {

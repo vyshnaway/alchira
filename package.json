@@ -1,5 +1,5 @@
 {
-  "name": "xcss-init",
+  "name": "xcss-engine",
   "description": "A future-proof CSS-DSL abtration layer with native AI-support.",
   "version": "0.1.0",
   "repository": {
@@ -17,23 +17,27 @@
   },
   "scripts": {
     "init": "chmod +x ./execute/bash/chmod.sh && ./execute/bash/chmod.sh && xjs init",
-    "split": "xjs split",
-    "watch": "xjs watch",
-    "install": "xjs install",
-    "preview": "xjs preview",
-    "publish": "xjs publish",
+
+    "split": "xcss split",
+    "watch": "xcss watch",
+    "install": "xcss install",
+    "preview": "xcss preview",
+    "publish": "xcss publish",
+
     "xgo:split": "xgo split",
     "xgo:watch": "xgo watch",
     "xgo:install": "xgo install",
     "xgo:preview": "xgo preview",
     "xgo:publish": "xgo publish",
+
     "xjs:split": "xjs split",
     "xjs:watch": "xjs watch",
     "xjs:install": "xjs install",
     "xjs:preview": "xjs preview",
     "xjs:publish": "xjs publish",
+
     "dev:package": "chmod +x ./execute/bash/build.sh && ./execute/bash/build.sh",
-    "dev:publish": "node export-submod.js"
+    "dev:publish": "node build.js"
   },
   "bugs": {
     "url": "https://github.com/yshell-dev/xcss-online/issues"

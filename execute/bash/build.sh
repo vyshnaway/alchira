@@ -31,6 +31,10 @@ echo "Building for Windows (AMD64)..."
 # Build for Windows AMD64, stripping debug information
 GOOS=windows GOARCH=amd64 go build -ldflags='-s -w' -o ../execute/bin/win-amd64.exe
 
+# echo "Building for Windows (ARM64)..."
+# # Build for Windows AMD64, stripping debug information
+# GOOS=windows GOARCH=arm64 go build -ldflags='-s -w' -o ../execute/bin/win-arm64.exe
+
 echo "Building for Windows (386)..."
 # Build for Windows 386, stripping debug information
 GOOS=windows GOARCH=386 go build -ldflags='-s -w' -o ../execute/bin/win-386.exe

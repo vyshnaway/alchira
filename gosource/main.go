@@ -5,10 +5,9 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"golang.org/x/term" // For getting console width
-	"your_module_path/fileman" // IMPORTANT: Replace with your actual Go module path, e.g., "github.com/youruser/yourrepo/fileman"
+	"fileman" // IMPORTANT: Replace with your actual Go module path, e.g., "github.com/youruser/yourrepo/fileman"
 )
 
 // PackageJson represents the structure of a package.json file
