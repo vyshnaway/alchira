@@ -19,7 +19,37 @@
   },
   "tweaks": {
     "openXtyles": true,
+    // - Support for ungroup-declaration:[like `$class="+++"`], in target files.
+    // - For frameworks with occupied funcitonality use false, [eg: svelte].
+    // ---
     "rapidSense": true,
-    "shorthands": true
+    // - Trigger intellisense suggestion in valid rages after space or line-break.
+    // - Enforces intellisense to trigger after "$" or "/".
+    // - If causes override conflicts with your current stack in any manner, use false. 
+    // ---
+    "shorthands": true,
+    // - A few symbols can be used for some keyworks to write queries/at-rules inline.
+    // - Alternatively you can define rule in ***@{***}.
+    // - Optionally you can toggle this feature.
+    // - Available tokens.
+    //   - "|" : "or" 
+    //   - "&" : "and" 
+    //   - "!" : "not" 
+    //   - "*" : "all" 
+    //   - "^" : "only" 
+    //   - ("width>=") : "min-width:" 
+    //   - ("width<=") : "max-width:" 
+    //   - ("height>=") : "min-height:" 
+    //   - ("height<=") : "max-height:" 
+    // -  eg:  
+    //    @media only screen and (min-width: 600px), not screen and (max-width: 400px) { $class {} }    
+    //    ===  
+    //    <div $class media@{only screen and (min-width: 600px), not screen and (max-width: 400px)}="" >
+    //    ===  
+    //    <div $class media@^screen&(width>=600px),!screen&(width<=400px)="" >
+    // ---
+    "forceLocal": false
+    // - All local styles are forcefully made "!important".
+    // ---
   }
 }

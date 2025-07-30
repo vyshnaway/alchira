@@ -135,13 +135,13 @@ function RENDER(string, sourcePath = "", ErrorisWarning = false) {
 					rule.push(TWEAKS.shorthands ? " and " : "&");
 					break;
 				case "!":
-					rule.push(TWEAKS.shorthands ? "not " : "!");
+					rule.push(TWEAKS.shorthands ? " not " : "!");
 					break;
 				case "*":
-					rule.push(TWEAKS.shorthands ? "all " : "*");
+					rule.push(TWEAKS.shorthands ? " all " : "*");
 					break;
 				case "^":
-					rule.push(TWEAKS.shorthands ? "only " : "^");
+					rule.push(TWEAKS.shorthands ? " only " : "^");
 					break;
 				case "@":
 					rule.unshift("@");
@@ -165,8 +165,15 @@ function RENDER(string, sourcePath = "", ErrorisWarning = false) {
 		}
 	}
 
+	const finalRule = rule.join("").trim()
+		.replaceAll(/width\s*>=/, "min-width:")
+		.replaceAll(/width\s*<=/, "max-width:")
+		.replaceAll(/height\s*>=/, "min-height:")
+		.replaceAll(/height\s*<=/, "max-height:")
+		.replaceAll(/\s+/, " ");
+
 	return {
-		rule: rule.join("").trim(),
+		rule: finalRule,
 		subSelector: selector.join("").trim(),
 		status: extended.status,
 		error: extended.error + $.MOLD.text.Item(sourcePath) + "\n",
