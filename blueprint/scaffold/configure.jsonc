@@ -29,8 +29,7 @@
     // ---
     "shorthands": true,
     // - A few symbols can be used for some keyworks to write queries/at-rules inline.
-    // - Alternatively you can define rule in ***@{***}.
-    // - Optionally you can toggle this feature.
+    // - Alternatively you can define rule in ***@{***}, anyways.
     // - Available tokens.
     //   - "|" : "or" 
     //   - "&" : "and" 
@@ -41,12 +40,12 @@
     //   - ("width<=") : "max-width:" 
     //   - ("height>=") : "min-height:" 
     //   - ("height<=") : "max-height:" 
-    // -  eg:  
-    //    @media only screen and (min-width: 600px), not screen and (max-width: 400px) { $class {} }    
-    //    ===  
-    //    <div $class media@{only screen and (min-width: 600px), not screen and (max-width: 400px)}="" >
-    //    ===  
-    //    <div $class media@^screen&(width>=600px),!screen&(width<=400px)="" >
+    // - Example:  
+    //   <div $class media@^screen&(width>=600px),!screen&(width<=400px)="" >
+    //   =>
+    //   <div $class media@{only screen and (min-width: 600px), not screen and (max-width: 400px)}="" >
+    //   =>
+    //   @media only screen and (min-width: 600px), not screen and (max-width: 400px) { $class {} }    
     // ---
     "forceLocal": false
     // - All local styles are forcefully made "!important".
