@@ -28,7 +28,7 @@ switch (os) {
             console.error(`Unsupported Windows Architecture: ${arch}`);
             process.exit(1);
         }
-        binPath = `run/bin/windows-${archSuffix}${fileExtension}`;
+        binPath = `binaries/windows-${archSuffix}${fileExtension}`;
         break;
 
     case 'linux':
@@ -46,7 +46,7 @@ switch (os) {
             console.error(`Unsupported Linux Architecture: ${arch}`);
             process.exit(1);
         }
-        binPath = `run/bin/linux-${archSuffix}${fileExtension}`;
+        binPath = `binaries/linux-${archSuffix}${fileExtension}`;
         break;
 
     case 'darwin':
@@ -60,7 +60,7 @@ switch (os) {
             console.error(`Unsupported macOS Architecture: ${arch}`);
             process.exit(1);
         }
-        binPath = `run/bin/darwin-${archSuffix}${fileExtension}`;
+        binPath = `binaries/darwin-${archSuffix}${fileExtension}`;
         break;
 
     default:

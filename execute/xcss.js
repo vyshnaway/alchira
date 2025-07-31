@@ -10,13 +10,15 @@ const root = path.resolve(fileURLToPath(import.meta.url), "../..");
 
 let archSuffix = '';
 let fileExtension = '';
-let binPath = path.join(root, 'execute/bin/');
+let binPath = path.join(root, 'binaries/');
 
 switch (os) {
 
     case 'win32':
         fileExtension = '.exe'; if (arch === 'x64') {
             archSuffix = 'amd64';
+        } else if (arch === 'arm64') {
+            archSuffix = 'arm64';
         } else if (arch === 'ia32') {
             archSuffix = '386';
         } else {

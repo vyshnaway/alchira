@@ -12,7 +12,7 @@
           "class"
         ]
       }
-    } 
+    }
   ],
   "portables": {
     "portable-name": "source-link"
@@ -47,8 +47,14 @@
     //   =>
     //   @media only screen and (min-width: 600px), not screen and (max-width: 400px) { $class {} }    
     // ---
-    "forceLocal": false
+    "forceLocal": false,
     // - All local styles are forcefully made "!important".
     // ---
+    "intelGroup": "browser"
+    // - Select intellisense group for css suggestions.
+    // - Available options
+    //   - "browser"
+    //   - "none"
+    // - Fallback and default value in can of undefined or unavilable selection: "browser".
   }
 }

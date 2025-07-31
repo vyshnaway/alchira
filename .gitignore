@@ -92,4 +92,4 @@ web_modules/
 
 *.tgz
 
-execute/bin/**
+binaries/**
