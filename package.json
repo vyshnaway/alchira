@@ -18,19 +18,19 @@
   "scripts": {
     "init": "chmod +x ./execute/bash/chmod.sh && ./execute/bash/chmod.sh && xjs init",
 
-    "split": "xcss split",
+    "stash": "xcss stash",
     "watch": "xcss watch",
     "install": "xcss install",
     "preview": "xcss preview",
     "publish": "xcss publish",
 
-    "xgo:split": "xgo split",
+    "xgo:stash": "xgo stash",
     "xgo:watch": "xgo watch",
     "xgo:install": "xgo install",
     "xgo:preview": "xgo preview",
     "xgo:publish": "xgo publish",
 
-    "xjs:split": "xjs split",
+    "xjs:stash": "xjs stash",
     "xjs:watch": "xjs watch",
     "xjs:install": "xjs install",
     "xjs:preview": "xjs preview",

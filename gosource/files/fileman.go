@@ -1,4 +1,4 @@
-package main
+package fileman
 
 import (
 	"encoding/json"
