@@ -131,5 +131,4 @@ func POST(s string, customStyleFunc func(string) string, customTagFunc func(stri
 // Exported variables and functions, mirroring the JavaScript module's exports.
 // var (
 // 	Render  = Write        // Reference to the Write function from the post package
-// 	Mold    = Write        // Another reference to the Write function from the post package
 // )

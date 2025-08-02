@@ -6,9 +6,8 @@
     "type": "git",
     "url": "https://github.com/yshell-dev/xcss"
   },
-  "type": "module",
   "bin": {
-    "xjs": "./javascript/package.js",
+    "xjs": "./execute/javascript/index.js",
     "xcss": "./execute/xcss.js"
   },
   "funding": {
@@ -16,7 +15,7 @@
     "url": "https://yshell.dev/xcss/funding/"
   },
   "scripts": {
-    "init": "chmod +x ./execute/bash/chmod.sh && ./execute/bash/chmod.sh && xjs init",
+    "init": "chmod +x ./execute/script/chmod.sh && ./execute/script/chmod.sh && xjs init",
 
     "stash": "xcss stash",
     "watch": "xcss watch",
@@ -35,9 +34,11 @@
     "xjs:install": "xjs install",
     "xjs:preview": "xjs preview",
     "xjs:publish": "xjs publish",
-
-    "dev:package": "chmod +x ./execute/bash/build.sh && ./execute/bash/build.sh",
-    "dev:publish": "node build.js"
+    
+    "dev:compile": "tsc -p ./typescript",
+    "dev:esbuild": "node ./execute/script/esbuild.js",
+    "dev:package": "chmod +x ./execute/script/build.sh && ./execute/script/build.sh",
+    "dev:publish": "node ./execute/script/publish.js"
   },
   "bugs": {
     "url": "https://github.com/yshell-dev/xcss-online/issues"
@@ -55,5 +56,14 @@
   },
   "dependencies": {
     "chokidar": "^4.0.3"
-  }
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.13.0",
+    "@stylistic/eslint-plugin": "^2.9.0",
+    "@types/node": "^22.16.3",
+    "esbuild": "^0.25.8",
+    "typescript": "^5.8.3",
+    "typescript-eslint": "^8.26.0"
+  },
+  "type": "commonjs"
 }

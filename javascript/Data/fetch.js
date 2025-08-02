@@ -1,5 +1,5 @@
 import $ from "../Shell/main.js";
-import { NAV, ROOT, APP, RAW, PREFIX } from "./data-cache.js";
+import { NAV, ROOT, APP, RAW, PREFIX } from "./cache.js";
 
 import fileman from "../fileman.js";
 import * as worker from "../Worker/watchman.js";

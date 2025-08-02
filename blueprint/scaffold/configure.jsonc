@@ -18,16 +18,16 @@
     "portable-name": "source-link"
   },
   "tweaks": {
-    "openXtyles": true,
+    "OpenXtyles": true,
     // - Support for ungroup-declaration:[like `$class="+++"`], in target files.
     // - For frameworks with occupied funcitonality use false, [eg: svelte].
     // ---
-    "rapidSense": true,
+    "RapidSense": true,
     // - Trigger intellisense suggestion in valid rages after space or line-break.
     // - Enforces intellisense to trigger after "$" or "/".
     // - If causes override conflicts with your current stack in any manner, use false. 
     // ---
-    "shorthands": true,
+    "Shorthands": true,
     // - A few symbols can be used for some keyworks to write queries/at-rules inline.
     // - Alternatively you can define rule in ***@{***}, anyways.
     // - Available tokens.
@@ -47,14 +47,13 @@
     //   =>
     //   @media only screen and (min-width: 600px), not screen and (max-width: 400px) { $class {} }    
     // ---
-    "forceLocal": false,
-    // - All local styles are forcefully made "!important".
+    "ForceLocal": false,
+    // - All local styles are enforced with most priority.
+    // - All valued will have a essential "!important" at the end.
     // ---
-    "intelGroup": "browser"
+    "IntelGroup": "browser"
     // - Select intellisense group for css suggestions.
-    // - Available options
-    //   - "browser"
-    //   - "none"
-    // - Fallback and default value in can of undefined or unavilable selection: "browser".
+    // - Available options: ["browser", "none"]
+    // - Fallback/default: "browser".
   }
 }

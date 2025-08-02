@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
 import fs from "fs";
-import fileman from "./fileman.js";
-import commander from "./command.js";
+import fileman from "./fileman";
+import commander from "./command";
 
 const rootPath = fileman.path.fromRoot(".");
 const workPath = fileman.path.resolves(".");

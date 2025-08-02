@@ -10,7 +10,7 @@ const root = path.resolve(fileURLToPath(import.meta.url), "../..");
 
 let archSuffix = '';
 let fileExtension = '';
-let binPath = path.join(root, 'binaries/');
+let binPath = path.join(root, 'execute/binaries/');
 
 switch (os) {
 

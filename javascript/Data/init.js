@@ -1,5 +1,5 @@
 import Use from "../Utils/main.js";
-import { APP, RAW, NAV, ROOT, CACHE, STACK, PUBLISH, PREFIX, TWEAKS } from "./data-cache.js";
+import { APP, RAW, NAV, ROOT, CACHE, STACK, PUBLISH, PREFIX, TWEAKS } from "./cache.js";
 
 function collectVendors() {
     const vendors = new Set();
@@ -43,7 +43,7 @@ export function SetENV(rootPath, workPath, packageJson) {
         }
     });
 
-    const CDN = APP.cdn + "versions/" + APP.version.split(".")[1] + "/";
+    const CDN = APP.Cdn + "version/" + APP.version.split(".")[0] + "/";
     Object.entries(ROOT).forEach(([group, object]) => {
         if (group !== "PREFIX") {
             Object.values(object).forEach((entry) => {
@@ -65,8 +65,8 @@ export function setTWEAKS(tweaks) {
     }
 }
 
-export function setVENDORS(vendorGroup) {
-    const CDN = APP.cdn + "prefixes/" + (((typeof vendorGroup === "string") && vendorGroup.length) ? vendorGroup : "zero") + "/";
+export function setVENDORS(source) {
+    const CDN = APP.cdn + "prefixes/" + (((typeof source === "string") && source.length) ? source : "zero") + "/";
     Object.values(ROOT.VENDOR || {}).forEach((entry) => {
         entry.url = CDN + entry.url;
         entry.path = NAV.blueprint.vendors + "/" + entry.path;
