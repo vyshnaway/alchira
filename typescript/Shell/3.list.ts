@@ -2,7 +2,9 @@ import canvas from "./0.root.js";
 import style from "./1.style.js";
 import tag from "./2.tag.js";
 
-const colors = {
+type t_color_fn = (item: string) => string;
+
+const colors: Record<string, t_color_fn> = {
   std: (item) => canvas.unstyle + item,
   title: (item) => style.text[canvas.settings.title](item),
   text: (item) => style.text[canvas.settings.text](item),
@@ -15,7 +17,7 @@ const colors = {
 };
 
 const types = {
-  props: (items, color, intent) => {
+  props: (items: Record<string, string>, color: t_color_fn, intent: number) => {
     const keyLength = Object.keys(items).reduce(
       (max, key) => (key.length > max ? key.length : max),
       0,
@@ -29,17 +31,17 @@ const types = {
       );
     });
   },
-  entries: (items, color, intent) => {
+  entries: (items: string[], color: t_color_fn, intent: number) => {
     const size =
       items.reduce((length, item) => {
-        if (item.length > length) length = item.length;
+        if (item.length > length) { length = item.length; }
         return length;
       }, 0) +
       intent +
       canvas.tab.length;
     const cols = Math.floor(canvas.settings.width / (size + 3));
-    let result = [],
-      subResult = "";
+    const result: string[] = [];
+    let subResult = "";
     items.forEach((item, index) => {
       if ((index + 1) % cols) {
         subResult += tag.Li(color(item.padEnd(size)));
@@ -49,31 +51,31 @@ const types = {
         subResult = "";
       }
     });
-    if (subResult.length) result.push(subResult);
+    if (subResult.length) { result.push(subResult); }
     return result;
   },
-  blocks: (items, color, intent) =>
+  blocks: (items: string[], color: t_color_fn, intent: number) =>
     items.map((item) => canvas.tab.repeat(intent) + tag.Div(color(item))),
-  bullets: (items, color, intent) =>
+  bullets: (items: string[], color: t_color_fn, intent: number) =>
     items.map((item) => canvas.tab.repeat(intent) + tag.Li(color(item))),
-  numbers: (items, color, intent) =>
+  numbers: (items: string[], color: t_color_fn, intent: number) =>
     items.map(
       (item, index) =>
         canvas.tab.repeat(intent) +
-        style.bold[canvas.settings.secondary](index + 1) +
-        canvas.tab.repeat() +
+        style.bold[canvas.settings.secondary](String(index + 1)) +
+        canvas.tab.repeat(intent) +
         tag.Div(color(item)),
     ),
-  paragraphs: (items, color, intent) =>
+  paragraphs: (items: string[], color: t_color_fn, intent: number) =>
     items.map((item) => "\n".repeat(intent - 1) + tag.P(color(item))),
-  waterfall: (items, color, intent) =>
+  waterfall: (items: string[], color: t_color_fn, intent: number) =>
     items.map((item, key) => {
       return (
         canvas.tab.repeat(intent) +
         style.bold[canvas.settings.secondary](
           key === items.length - 1 ? "└─>" : "├─>",
         ) +
-        color(canvas.tab.repeat() + item)
+        color(canvas.tab.repeat(intent) + item)
       );
     }),
 };

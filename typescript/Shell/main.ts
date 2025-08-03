@@ -7,8 +7,8 @@ import write from "./4.write.js";
 import play from "./frames/index.js";
 import render from "./5.post.js";
 
-const task = (string, rowshift = -1) => {
-  if (canvas.settings.taskActive && canvas.settings.postActive)
+const task = (string: string, rowshift = -1) => {
+  if (canvas.settings.taskActive && canvas.settings.postActive){
     render.write(
       [
         rowshift >= 0 ? tag.Br(rowshift) : "",
@@ -18,11 +18,11 @@ const task = (string, rowshift = -1) => {
         tag.Br(1),
       ].join(""),
       rowshift < 0 ? -rowshift : rowshift,
-    );
+    );}
 };
 
-const step = (string, rowshift = -1) => {
-  if (canvas.settings.taskActive && canvas.settings.postActive)
+const step = (string: string, rowshift = -1) => {
+  if (canvas.settings.taskActive && canvas.settings.postActive){
     render.write(
       [
         rowshift >= 0 ? tag.Br(rowshift) : "",
@@ -31,7 +31,7 @@ const step = (string, rowshift = -1) => {
         tag.Div(style.italic[canvas.settings.tertiary](string + " ...")),
       ].join(""),
       rowshift < 0 ? -rowshift : rowshift,
-    );
+    );}
 };
 
 const post = (
@@ -45,7 +45,7 @@ const post = (
 };
 
 function initialize(
-  canvasWidth,
+  canvasWidth = 48,
   taskActive = true,
   postActive = true,
   tabWidth = 2,

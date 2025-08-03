@@ -1,16 +1,14 @@
-import canvas from "./0.root.js";
-import style from "./1.style.js";
+import canvas from "./0.root";
+import style from "./1.style";
 
 const textFormatter = {
-  // Changed to named export
-  H1: (heading) => {
+  H1: (content: string) => {
     const minWidth = 10;
     const width = Math.max(canvas.settings.width, minWidth);
     const lines = [];
     let currentLine = "";
-    const words = heading.split(" ");
-    for (let i = 0; i < words.length; i++) {
-      const word = words[i];
+    const words = content.split(" ");
+    for (const word of words) {
       if (currentLine.length + word.length + 1 <= width - 6) {
         currentLine += (currentLine ? " " : "") + word;
       } else {
@@ -21,8 +19,7 @@ const textFormatter = {
 
     lines.push(currentLine);
     const paddedLines = [];
-    for (let i = 0; i < lines.length; i++) {
-      const line = lines[i];
+    for (const line of lines) {
       const padding = width - 6 - line.length;
       const leftPad = " ".repeat(Math.max(0, Math.floor(padding / 2)));
       const rightPad = " ".repeat(Math.max(0, Math.ceil(padding / 2)));
@@ -36,37 +33,37 @@ const textFormatter = {
     );
   },
 
-  H2: (heading) => {
+  H2: (content: string) => {
     return (
-      [canvas.divider.mid, heading, canvas.divider.mid, ""].join("\n") +
+      [canvas.divider.mid, content, canvas.divider.mid, ""].join("\n") +
       canvas.unstyle
     );
   },
 
-  H3: (heading) => {
-    return [canvas.divider.mid, heading, ""].join("\n") + canvas.unstyle;
+  H3: (content: string) => {
+    return [canvas.divider.mid, content, ""].join("\n") + canvas.unstyle;
   },
 
-  H4: (heading) => {
-    return [heading, canvas.divider.mid].join("\n") + canvas.unstyle;
+  H4: (content: string) => {
+    return [content, canvas.divider.mid].join("\n") + canvas.unstyle;
   },
 
-  H5: (heading) => {
-    return [heading, ""].join("\n") + canvas.unstyle;
+  H5: (content: string) => {
+    return [content, ""].join("\n") + canvas.unstyle;
   },
 
-  H6: (heading) => {
-    return [heading].join("\n") + canvas.unstyle;
+  H6: (content: string) => {
+    return [content].join("\n") + canvas.unstyle;
   },
 
-  P: (content) => canvas.tab + content + canvas.unstyle + "\n",
+  P: (content: string) => canvas.tab + content + canvas.unstyle + "\n",
 
   Li: (
-    str, // Changed parameter name to str
+    content: string, // Changed parameter name to str
   ) =>
     style.bold[canvas.settings.tertiary](">") +
     canvas.tab +
-    str +
+    content +
     canvas.unstyle,
 
   Br: (repeat = 1) => "\n".repeat(repeat) + canvas.unstyle,
@@ -76,7 +73,7 @@ const textFormatter = {
 
   Tab: (count = 1) => canvas.tab.repeat(count) + canvas.unstyle,
 
-  Div: (content) => content + canvas.unstyle,
+  Div: (content: string) => content + canvas.unstyle,
 };
 
 export default textFormatter;

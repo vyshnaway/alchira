@@ -8,9 +8,9 @@ const base = digits.length;
 export default {
 	normalize: (
 		string = "",
-		keepChars = [],
-		skipChars = [],
-		addBackSlashFor = [],
+		keepChars: string[] = [],
+		skipChars: string[] = [],
+		addBackSlashFor: string[] = [],
 	) => {
 		let final = "";
 		string

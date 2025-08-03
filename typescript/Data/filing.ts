@@ -1,27 +1,28 @@
+import { t_Data_Filing as t_Data_FILING } from "../types.js";
 import Use from "../Utils/main.js";
 
 export default function FILING(
-	target,
-	source,
-	filePath,
-	content,
+	target: string,
+	source: string,
+	filePath: string,
+	content: string,
 	isXtylesFolder = false,
 	isPortable = false,
 ) {
 	const targetPath = target.length ? target + "/" + filePath : filePath;
 	const sourcePath = source.length ? source + "/" + filePath : filePath;
 
-	let [extension, fileName, id, cluster] = targetPath.slice(targetPath.lastIndexOf("/") + 1).split(".").reverse();
-	id = (isNaN(id) || id < 0) ? 0 : parseInt(id, 10);
-	fileName = Use.string.normalize(fileName);
+	const [extension, fileName, id, cluster]: string[] = targetPath.slice(targetPath.lastIndexOf("/") + 1).split(".").reverse();
+	const idn = ((typeof id === "number") || Number(id) < 0) ? 0 : parseInt(id, 10);
+	const normalFileName = Use.string.normalize(fileName);
 
 	const group = isPortable ? (extension === "css" ? "binding" : extension === "xcss" ? "xtyling" : "readme") :
-		isXtylesFolder ? (Boolean(cluster) ? "cluster" : "axiom") : "proxy";
+		isXtylesFolder ? (cluster ? "cluster" : "axiom") : "proxy";
 
-	const stamp = (isPortable ? `/${fileName}${group === "binding" ? "/$/" : "/"}` : "") +
-		((id === 0 && extension === "css") ? "" : Use.string.normalize(cluster) + "$".repeat(id));
+	const stamp = (isPortable ? `/${normalFileName}${group === "binding" ? "/$/" : "/"}` : "") +
+		((idn === 0 && extension === "css") ? "" : Use.string.normalize(cluster) + "$".repeat(idn));
 
-	return {
+	const result: t_Data_FILING = {
 		// Default
 		id,
 		group,
@@ -44,10 +45,11 @@ export default function FILING(
 		postBinds: [],
 		preBinds: [],
 		errors: [],
-		summon: false,
 		hasStyleTag: false,
 		hasStylesheetTag: false,
 		hasSnippetTag: false,
 		midway: "",
 	};
+
+	return result;
 }

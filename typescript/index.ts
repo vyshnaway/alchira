@@ -3,67 +3,81 @@
 import fs from "fs";
 import fileman from "./fileman";
 import commander from "./command";
+import { T_PackageEssential, T_PackageJson } from "./types";
 
-const rootPath = fileman.path.fromRoot(".");
-const workPath = fileman.path.resolves(".");
+const commandList = [
+    "init",
+    "watch",
+    "preview",
+    "publish",
+    "archive",
+    "install"
+];
 const packagePath = "package.json";
-const rootPackagePath = fileman.path.fromRoot(packagePath);
 
-const command = process.argv[2];
-const argument = process.argv[3];
-const consoleWidth = process.stdout.columns;
-const rootPackageEssential = {};
 
-const commandList = ["init", "watch", "preview", "publish", "stash", "install"];
+async function main() {
+    const command = process.argv[2];
+    const argument = process.argv[3];
+    if (!commandList.includes(command)) {
+        console.error(`Unknown command: ${command}`);
+        process.exit(1);
+    }
 
-const rootPackageJson = await fileman.read.json(rootPackagePath);
-if (!rootPackageJson.status) throw new Error("Bad root json file.");
+    const workPath = fileman.path.resolves(".");
+    const rootPath = fileman.path.fromOrigin(".");
+    const originPackagePath = fileman.path.fromOrigin(packagePath);
 
-rootPackageEssential.name = rootPackageJson.data.name;
-rootPackageEssential.version = rootPackageJson.data.version;
-rootPackageEssential.scripts = rootPackageJson.data.scripts;
-rootPackageEssential.website = rootPackageJson.data.homepage;
-rootPackageEssential.command = Object.keys(rootPackageJson.data.bin);
+    const [
+        originPackageJson,
+        projectPackageJson,
+    ] = await Promise.all([
+        await fileman.read.json<T_PackageJson>(originPackagePath),
+        await fileman.read.json<T_PackageJson>("./package.json"),
+    ]);
 
-const projectPackageJson = await fileman.read.json("./package.json");
+    if (!originPackageJson.status) {
+        console.error("Bad root json file.");
+        process.exit(1);
+    }
+    const originPackageEssential: T_PackageEssential = {
+        bins: Object.keys(originPackageJson.data.bin ?? {}),
+        name: originPackageJson.data.name ?? "xcss",
+        version: originPackageJson.data.version ?? "0.0.0",
+        website: originPackageJson.data.homepage ?? "xcss.io",
+        scripts: originPackageJson.data.scripts ?? {},
+    };
 
-if (projectPackageJson.status && commandList.includes(command)) {
-    let addedCommands = 0;
-    for (const cmd of commandList) {
-        if (
-            rootPackageJson.data.scripts[cmd] &&
-            !projectPackageJson.data.scripts[cmd]
-        ) {
-            addedCommands++;
-            projectPackageJson.data.scripts[`${"xcss" || rootPackageJson.data.name}:${cmd}`] =
-                rootPackageJson.data.scripts[cmd];
+    if (projectPackageJson.status && commandList.includes(command)) {
+        let addedCommands = 0;
+        for (const cmd of commandList) {
+            if (
+                originPackageJson.data.scripts?.[cmd] &&
+                projectPackageJson.data.scripts?.[cmd]
+            ) {
+                addedCommands++;
+                projectPackageJson.data.scripts[`${originPackageEssential.name}:${cmd}`] =
+                    originPackageJson.data.scripts[cmd];
+            }
+
+        }
+
+        if (addedCommands) {
+            fs.writeFileSync(
+                packagePath,
+                JSON.stringify(projectPackageJson.data, null, 2),
+                "utf8"
+            );
         }
     }
-    if (addedCommands) {
-        fs.writeFileSync(
-            packagePath,
-            JSON.stringify(projectPackageJson.data, null, 2),
-            "utf8",
-        );
-    }
+
+    await commander({
+        command,
+        argument,
+        rootPath,
+        workPath,
+        originPackageEssential,
+    });
 }
 
-await commander(
-    command,
-    argument,
-    rootPath,
-    workPath,
-    consoleWidth,
-    rootPackageEssential,
-    projectPackageJson.status ? projectPackageJson.data.name : "xtylesheet",
-    projectPackageJson.status ? projectPackageJson.data.version : "0.0.0",
-);
-const a = {
-    b: {
-        c: {
-            d: function () {
-                this.e = this.d;
-            }
-        }
-    }
-};
+main();

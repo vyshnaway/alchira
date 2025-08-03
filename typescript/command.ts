@@ -1,12 +1,13 @@
 import $ from "./Shell/main";
-import * as DATA from "./data/init";
-import * as FETCH from "./data/fetch";
+import * as DATA from "./Data/init";
+import * as FETCH from "./Data/fetch";
 import * as SMITH from "./data-smith";
 import * as worker from "./Worker/watchman";
 import fileman from "./fileman";
 import { MemoryUsage } from "./data/init";
 import { ROOT, APP, RAW, NAV, STACK } from "./data/cache";
 import { FetchPortables, SplitGlobalForComponents } from "./Worker/portable";
+import { T_PackageEssential } from "./types";
 
 function reporter(heading, targets, report) {
     $.POST(
@@ -19,7 +20,7 @@ function reporter(heading, targets, report) {
 }
 
 async function execute(chapter) {
-    let stopWatcher = null;
+    let stopWatcher = null | NodeJs.Timeout;
     let report = "",
         targets = [],
         reportNext = false,
@@ -169,24 +170,26 @@ async function execute(chapter) {
     }
 }
 
-async function commander(
+async function commander({
     command,
     argument,
     rootPath,
     workPath,
-    consoleWidth,
-    packageJson,
-    projectName,
-    projectVersion,
-    vendorGroup,
-) {
+    originPackageEssential
+}: {
+    command: string,
+    argument: string,
+    rootPath: string,
+    workPath: string,
+    originPackageEssential: T_PackageEssential
+}) {
     // RAW.CMD = ["watch", "preview", "publish"].includes(command) ? "watch" : command;
     RAW.CMD = command;
     RAW.ARG = argument;
     RAW.WATCH = command === "watch";
-    RAW.PACKAGE = projectName;
-    RAW.VERSION = projectVersion;
-    DATA.SetENV(rootPath, workPath, packageJson, vendorGroup);
+    RAW.PACKAGE = originPackageEssential.name;
+    RAW.VERSION = originPackageEssential.version;
+    DATA.SetENV(rootPath, workPath, originPackageEssential, vendorGroup);
     $.initialize(consoleWidth, command !== "watch" && command !== "split");
 
     switch (RAW.CMD) {
@@ -222,8 +225,8 @@ async function commander(
                     const fetchResult = await FetchPortables(argument);
                     await fileman.write.bulk(fetchResult.SaveFiles);
                     $.POST($.MOLD.secondary.Footer("Installation status", fetchResult.Status, $.list.std.Props))
-                } else $.POST(verifyConfigsResult.report)
-            } else $.POST(verifyStructResult.report)
+                } else { $.POST(verifyConfigsResult.report); };
+            } else { $.POST(verifyStructResult.report); };
             break;
         default:
             await FETCH.FetchDocs();

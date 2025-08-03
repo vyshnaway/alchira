@@ -1,9 +1,10 @@
+import { t_Data_TWEAKS, T_PackageEssential } from "../types.js";
 import Use from "../Utils/main.js";
 import { APP, RAW, NAV, ROOT, CACHE, STACK, PUBLISH, PREFIX, TWEAKS } from "./cache.js";
 
-function collectVendors() {
-    const vendors = new Set();
-    Object.values(PREFIX.atRule).forEach(value => {
+function collectVendors(): string[] {
+    const vendors = new Set<string>();
+    Object.values(PREFIX.atrules).forEach(value => {
         Object.keys(value).forEach(ven => vendors.add(ven));
     });
     Object.values(PREFIX.attributes).forEach(value => {
@@ -20,12 +21,23 @@ function collectVendors() {
     return Array.from(vendors);
 }
 
-export function SetENV(rootPath, workPath, packageJson) {
+export function setTWEAKS(tweaks: t_Data_TWEAKS) {
+    Object.assign(TWEAKS, APP.defaultTweaks);
+    if (typeof tweaks === "object") {
+        Object.keys(TWEAKS).forEach(key => {
+            if (typeof TWEAKS[key] === typeof tweaks[key]) {
+                TWEAKS[key] = tweaks[key];
+            }
+        });
+    };
+}
 
-    APP.name = packageJson.name;
-    APP.version = packageJson.version;
-    APP.website = packageJson.website;
-    APP.command = packageJson.command;
+export function SetENV(rootPath: string, workPath: string, packageEssential: T_PackageEssential) {
+
+    APP.name = packageEssential.name;
+    APP.version = packageEssential.version;
+    APP.website = packageEssential.website;
+    APP.bins = packageEssential.bins;
     APP.vendors = collectVendors();
 
     RAW.RootPath = rootPath + "/";
@@ -49,20 +61,9 @@ export function SetENV(rootPath, workPath, packageJson) {
             Object.values(object).forEach((entry) => {
                 entry.url = CDN + entry.url;
                 entry.path = RAW.RootPath + entry.path;
-            })
+            });
         }
     });
-}
-
-export function setTWEAKS(tweaks) {
-    Object.assign(TWEAKS, APP.defaultTweaks);
-    if (typeof tweaks === "object") {
-        Object.keys(TWEAKS).forEach(key => {
-            if (typeof TWEAKS[key] === typeof tweaks[key]) {
-                TWEAKS[key] = tweaks[key];
-            }
-        })
-    }
 }
 
 export function setVENDORS(source) {
@@ -70,7 +71,7 @@ export function setVENDORS(source) {
     Object.values(ROOT.VENDOR || {}).forEach((entry) => {
         entry.url = CDN + entry.url;
         entry.path = NAV.blueprint.vendors + "/" + entry.path;
-    })
+    });
 }
 
 export function MemoryUsage() {
@@ -80,7 +81,7 @@ export function MemoryUsage() {
         Stack: Use.string.stringMem(JSON.stringify(STACK)),
         Report: Use.string.stringMem(JSON.stringify(PUBLISH)),
         Proxy: Object.values(STACK.PROXYCACHE).reduce((t, c) => t += Use.string.stringMem(JSON.stringify(c)), 0),
-    }
+    };
     chart["Total"] = Object.values(chart).reduce((a, i) => a += i, 0).toFixed(2);
     return Object.entries(chart).map(([k, v]) => `${k} : ${v} Kb`);
 }
@@ -129,7 +130,7 @@ export const INDEX = {
         Object.keys(CACHE.Index2StylesObject).forEach((index) => {
             const number = Number(index);
             if (number > after) {
-                if (INDEX._BIN.has(number)) INDEX._BIN.delete(number)
+                if (INDEX._BIN.has(number)) {INDEX._BIN.delete(number);}
                 delete CACHE.Index2StylesObject[index];
                 removed++;
             }

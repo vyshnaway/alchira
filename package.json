@@ -17,23 +17,23 @@
   "scripts": {
     "init": "chmod +x ./execute/script/chmod.sh && ./execute/script/chmod.sh && xjs init",
 
-    "stash": "xcss stash",
     "watch": "xcss watch",
     "install": "xcss install",
     "preview": "xcss preview",
     "publish": "xcss publish",
+    "archive": "xcss archive",
 
-    "xgo:stash": "xgo stash",
     "xgo:watch": "xgo watch",
     "xgo:install": "xgo install",
     "xgo:preview": "xgo preview",
     "xgo:publish": "xgo publish",
+    "xgo:archive": "xgo archive",
 
-    "xjs:stash": "xjs stash",
     "xjs:watch": "xjs watch",
     "xjs:install": "xjs install",
     "xjs:preview": "xjs preview",
     "xjs:publish": "xjs publish",
+    "xjs:archive": "xjs archive",
     
     "dev:compile": "tsc -p ./typescript",
     "dev:esbuild": "node ./execute/script/esbuild.js",

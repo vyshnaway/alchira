@@ -1,6 +1,11 @@
 import readline from "readline";
 
-const backspace = (chars) => {
+/**
+ * Backspace characters in terminal.
+ * @param {Array} chars About of characters to backspace
+ * @returns {null}
+ */
+const backspace = (chars: number) => {
   if (chars <= 0) {
     return;
   }
@@ -27,7 +32,7 @@ const write = (string = "", backRows = 0) => {
  * @param {number} repeat = 0 => infinite loop
  * @returns {null}
  */
-const animate = (frames = [], duration = 1000, repeat = 0) => {
+const animate = (frames: string[] = [], duration = 1000, repeat = 0) => {
   const interval = Math.ceil(duration / (frames.length * (repeat || 1))) || 1;
 
   let iteration = 0,
@@ -41,7 +46,7 @@ const animate = (frames = [], duration = 1000, repeat = 0) => {
       }
       if (iteration >= repeat && frameIndex === 0) {
         clearInterval(intervalId);
-        resolve();
+        resolve(null);
         return;
       }
       backRows = write(frames[frameIndex++], backRows);

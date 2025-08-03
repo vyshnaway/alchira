@@ -3,7 +3,7 @@ import { NAV, ROOT, APP, RAW, PREFIX } from "./cache.js";
 
 import fileman from "../fileman.js";
 import * as worker from "../Worker/watchman.js";
-import { setTWEAKS, setVENDORS } from "./data-init.js";
+import { setTWEAKS, setVENDORS } from "./data/init.js";
 
 export async function FetchDocs() {
 	const readmeMd = fileman.sync.file(
