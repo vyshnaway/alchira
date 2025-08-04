@@ -16,26 +16,17 @@
   },
   "scripts": {
     "init": "chmod +x ./execute/script/chmod.sh && ./execute/script/chmod.sh && xjs init",
-
-    "watch": "xcss watch",
-    "install": "xcss install",
-    "preview": "xcss preview",
-    "publish": "xcss publish",
-    "archive": "xcss archive",
-
     "xgo:watch": "xgo watch",
     "xgo:install": "xgo install",
     "xgo:preview": "xgo preview",
     "xgo:publish": "xgo publish",
     "xgo:archive": "xgo archive",
-
     "xjs:watch": "xjs watch",
     "xjs:install": "xjs install",
     "xjs:preview": "xjs preview",
     "xjs:publish": "xjs publish",
     "xjs:archive": "xjs archive",
-    
-    "dev:compile": "tsc -p ./typescript",
+    "dev:tsbuild": "tsc -p ./typescript",
     "dev:esbuild": "node ./execute/script/esbuild.js",
     "dev:package": "chmod +x ./execute/script/build.sh && ./execute/script/build.sh",
     "dev:publish": "node ./execute/script/publish.js"
@@ -65,5 +56,5 @@
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.26.0"
   },
-  "type": "commonjs"
+  "type": "module"
 }

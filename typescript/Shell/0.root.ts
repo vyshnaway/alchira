@@ -1,4 +1,28 @@
-const canvas = {
+const canvas: {
+  unstyle: string,
+  appearance: Record<string, string>,
+  color: Record<string, string>,
+  tab: string,
+  settings: {
+    title: string,
+    text: string,
+    primary: string,
+    secondary: string,
+    tertiary: string,
+    success: string,
+    failed: string,
+    warning: string,
+    taskActive: boolean,
+    postActive: boolean,
+    width: number,
+    tabSpace: number,
+  },
+  divider: {
+    top: string,
+    mid: string,
+    low: string,
+  }
+} = {
   unstyle: "\x1b[0m",
 
   appearance: {

@@ -2,7 +2,7 @@ import $ from "./Shell/main";
 import * as DATA from "./Data/init";
 import * as FETCH from "./Data/fetch";
 import * as SMITH from "./data-smith";
-import * as worker from "./Worker/watchman";
+import * as worker from "./Data/watch";
 import fileman from "./fileman";
 import { MemoryUsage } from "./data/init";
 import { ROOT, APP, RAW, NAV, STACK } from "./data/cache";

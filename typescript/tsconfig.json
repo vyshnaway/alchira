@@ -1,9 +1,10 @@
 {
-    "compilerOptions": { 
-        "target": "es2022",
-        "module": "es2022",
+    "compilerOptions": {
+        "module": "esnext",
+        "target": "es2020",
         "lib": [
-            "ES2020"
+            "ES2020",
+            "DOM"
         ],
         "types": [
             "node"
@@ -16,6 +17,13 @@
         "noUnusedParameters": true,
         "noUnusedLocals": true,
         "esModuleInterop": true,
+
+        // "forceConsistentCasingInFileNames": true, // Good practice
+        // "skipLibCheck": true, // Skips type checking of declaration files, can speed up compilation
+        // "allowJs": true, // Allow JavaScript files to be compiled
+        // "checkJs": true, // Type-check .js files
+        // "resolveJsonModule": true, // Allows importing .json files
+        // "noEmitOnError": true, //
     },
     "include": [
         "**/*"

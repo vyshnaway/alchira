@@ -30,8 +30,7 @@ export interface T_PackageJson {
     bin?: Record<string, string>;
 }
 
-export type t_Data_TWEAKS = Record<string, boolean | string>;
-
+export type t_Data_TWEAKS = Record<string, string | boolean>;
 
 export interface t_Data_APP {
     name: string,
@@ -159,17 +158,38 @@ export interface t_Event {
     extension: string,
 }
 
-// export const CACHE = {
-//     HashRule: {},
-//     SortedIndexes: [],
-//     PortableEssentials: [],
-//     Index2StylesObject: {},
-//     NativeStyle2Index: {},
-//     LibraryStyle2Index: {},
-//     GlobalsStyle2Index: {},
-//     PortableStyle2Index: {},
-//     FinalStack: {},
-// };
+interface t_Config_Archive_Intersection {
+    name: string,
+    version: string,
+}
+
+export interface t_Config extends t_Config_Archive_Intersection {
+    vendors: string,
+    proxy: t_ProxyMap[],
+    portables: Record<string, string>,
+    tweaks: t_Data_TWEAKS
+}
+
+export interface t_Archive extends t_Config_Archive_Intersection {
+    vendors?: string,
+    proxy?: t_ProxyMap[],
+    portables?: Record<string, string>,
+    tweaks?: t_Data_TWEAKS
+}
+
+
+export interface t_CACHE {
+    HashRule: {},
+    SortedIndexes: [],
+    PortableEssentials: [],
+    Index2StylesObject: {},
+    NativeStyle2Index: {},
+    LibraryStyle2Index: {},
+    GlobalsStyle2Index: {},
+    PortableStyle2Index: {},
+    FinalStack: {},
+    Archive: t_Archive,
+};
 
 // export const STACK = {
 //     PROXYCACHE: {},
@@ -177,21 +197,24 @@ export interface t_Event {
 //     PORTABLES: {},
 // };
 
+export interface t_Proxy {
+
+}
+
 export interface t_RAW {
-    WATCH: boolean,
-    PACKAGE: string,
-    VERSION: string,
     CMD: string,
     ARG: string,
     ReadMe: string,
+    WATCH: boolean,
+    PACKAGE: string,
+    VERSION: string,
     CSSIndex: string,
     RootPath: string,
     WorkPath: string,
+    PROXYMAP: t_ProxyMap[],
     HASHRULE: Record<string, string>,
-    PROXYMAP: Record<string, t_ProxyMap>,
-    LIBRARIES: {},
-    PORTABLES: {},
-    PROXYFILES: {},
-    PORTABLEFRAME: {},
-    DEPENDENCIES: {},
+    LIBRARIES: Record<string, string>,
+    PORTABLES: Record<string, string>,
+    DEPENDENTS: Record<string, string>,
+    PROXYFILES: Record<string, Record<string, t_Proxy>>,
 }

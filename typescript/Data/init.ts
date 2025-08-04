@@ -1,7 +1,7 @@
 import fileman from "../fileman.js";
 import { t_Data_TWEAKS, T_PackageEssential } from "../types.js";
 import Use from "../Utils/main.js";
-import { APP, RAW, NAV, SYNC, CACHE, STACK, PUBLISH, PREFIX, TWEAKS, AUTOGEN } from "./cache.js";
+import { APP, RAW, NAV, SYNC, CACHE, STACK, PUBLISH, PREFIX, TWEAKS } from "./cache.js";
 
 function collectTypeStringKeys(object: object) {
     return Object.entries(object).reduce((A, [K, V]) => {
@@ -36,12 +36,8 @@ export function SetENV(rootPath: string, workPath: string, packageEssential: T_P
     RAW.RootPath = rootPath;
     RAW.WorkPath = workPath;
 
-    Object.values(AUTOGEN).forEach((source) => {
-        source.path = fileman.path.join(RAW.RootPath, ...source.frags);
-    });
-
     Object.entries(NAV).forEach(([groupName, groupPaths]) => {
-        if (groupName === "blueprint") {
+        if (groupName === "blueprint" || groupName === "autogen") {
             Object.values(groupPaths).forEach((source) => {
                 source.path = fileman.path.join(RAW.RootPath, ...source.frags);
             });

@@ -1,10 +1,10 @@
-import $ from "../Shell/main.js";
+import $ from "../Shell/main";
 
-import fileman from "../fileman.js";
-import * as worker from "../Worker/watchman.js";
-import { collectVendors } from "./init.js";
-import { t_Data_PREFIX } from "../types.js";
-import { NAV, SYNC, APP, RAW, PREFIX, AUTOGEN } from "./cache.js";
+import fileman from "../fileman";
+import * as worker from "./watch";
+import { collectTWEAKS, collectVendors } from "./init";
+import { t_Config, t_Data_PREFIX } from "../types";
+import { NAV, SYNC, APP, RAW, PREFIX, CACHE } from "./cache";
 
 export async function FetchDocs() {
 	await Promise.all(Object.values(SYNC).map(sync => {
@@ -23,15 +23,15 @@ export async function FetchStatics(vendorSource: string) {
 	RAW.ReadMe = (await fileman.read.file(NAV.md.instructions.path)).data;
 
 
-	const manifestIgnores = (await fileman.read.file(AUTOGEN.ignore.path)).data.split("\n");
-	const modPts = (AUTOGEN.ignore.content || "").split("\n").reduce((modPts: number, ign) => {
+	const manifestIgnores = (await fileman.read.file(NAV.autogen.ignore.path)).data.split("\n");
+	const modPts = (NAV.autogen.ignore.content || "").split("\n").reduce((modPts: number, ign) => {
 		if (!manifestIgnores.includes(ign)) {
 			manifestIgnores.push(ign);
 			modPts++;
 		}
 		return modPts;
 	}, 0);
-	if (modPts) { await fileman.write.file(AUTOGEN.ignore.path, manifestIgnores.join("\n")); }
+	if (modPts) { await fileman.write.file(NAV.autogen.ignore.path, manifestIgnores.join("\n")); }
 
 
 	$.TASK("Loading vendor-prefixes");
@@ -109,11 +109,12 @@ export async function Initialize() {
 			),
 		);
 
+		const commandList = Object.entries(APP.commandList).map(([k, v]) => $.list.std.Level([k]) + `: ${v}`);
 		$.POST(
 			$.MOLD.std.Section(
 				"Available Commands",
-				APP.commandList,
-				$.list.std.Props,
+				commandList,
+				$.list.std.Bullets,
 			),
 		);
 		$.POST(
@@ -137,7 +138,7 @@ export async function Initialize() {
 	} catch (err) {
 		return $.MOLD.failed.Footer(
 			"Initialization failed.",
-			err instanceof Error ? [err.message] : {},
+			err instanceof Error ? [err.message] : [],
 			$.list.failed.Bullets,
 		);
 	}
@@ -172,7 +173,10 @@ export async function VerifySetupStruct() {
 		result.report =
 			Object.keys(errors).length === 0
 				? $.MOLD.success.Footer("Setup Healthy")
-				: $.MOLD.failed.Footer("Error Paths", errors, $.list.failed.Props);
+				: $.MOLD.failed.Footer("Error Paths",
+					errors,
+					$.list.failed.Bullets
+				);
 	} else {
 		result.report = $.MOLD.warning.Footer(
 			"XCSS is not yet initialized in directory.",
@@ -189,24 +193,28 @@ export async function VerifyConfigure(loadStatics: boolean) {
 	const errors: string[] = [], alerts: string[] = [];
 
 	$.STEP("PATH : " + NAV.json.configure);
-	const configure = await fileman.read.json(NAV.json.configure.path);
-	if (configure.status) {
-		if (loadStatics) { FetchStatics(configure.data["vendors"]); }
-		setTWEAKS(configure.data.tweaks);
-		RAW.PROXYMAP = (typeof configure.data.proxy === "object") ? configure.data.proxy : [];
-		const dependencies = (typeof configure.data["portables"] === "object") ? configure.data["portables"] : {};
+	const config = await fileman.read.json(NAV.json.configure.path);
+	if (config.status) {
+		const data = config.data as t_Config;
+		if (loadStatics) { FetchStatics(data["vendors"]); }
 
-		delete configure.data.proxy;
-		delete configure.data["portables"];
-		Object.assign(RAW.PORTABLEFRAME, configure.data);
-		RAW.PORTABLEFRAME.name = RAW.PACKAGE = RAW.PORTABLEFRAME.name || RAW.PACKAGE || "xtyle";
-		RAW.PORTABLEFRAME.version = RAW.VERSION = RAW.PORTABLEFRAME.version || RAW.VERSION || '0.0.0';
+		collectTWEAKS(data.tweaks);
+		RAW.PROXYMAP = (Array.isArray(data.proxy)) ? data.proxy : [];
 
-		RAW.DEPENDENCIES = Object.entries(dependencies).reduce((a, [k, v]) => {
-			if (typeof v === "string") a[k] = v;
-			return a;
-		}, {})
-		const results = await worker.proxyMapDependency(RAW.PROXYMAP, NAV.folder.setup);
+		Object.assign(CACHE.Archive, config.data);
+		delete CACHE.Archive.proxy;
+		delete CACHE.Archive.portables;
+		delete CACHE.Archive.vendors;
+		delete CACHE.Archive.tweaks;
+		CACHE.Archive.name = RAW.PACKAGE = CACHE.Archive.name || RAW.PACKAGE || "xcss-archive";
+		CACHE.Archive.version = RAW.VERSION = CACHE.Archive.version || RAW.VERSION || '0.0.0';
+
+		RAW.DEPENDENTS = Object.entries((typeof data.portables === "object") ? data.portables : {})
+			.reduce((a: Record<string, string>, [k, v]) => {
+				if ((typeof v === "string") && (typeof k === "string")) { a[k] = v; }
+				return a;
+			}, {});
+		const results = await worker.proxyMapDependency(RAW.PROXYMAP, NAV.folder.setup.path);
 		errors.push(...results.warnings);
 	} else {
 		errors.push(`${NAV.json.configure} : Bad json file.`);
@@ -230,10 +238,7 @@ export async function ReloadLibrary() {
 export async function UpdateProxies() {
 	$.TASK("Syncing proxy folders", 0);
 	Object.keys(RAW.PROXYFILES).forEach((key) => delete RAW.PROXYFILES[key]);
-	const proxies = await worker.proxyMapSync(RAW.PROXYMAP);
-	proxies.forEach(
-		(proxy) => (RAW.PROXYFILES[RAW.WorkPath + proxy.target] = proxy),
-	);
+	await worker.proxyMapSync(RAW.PROXYMAP);
 	$.TASK("Reading target folders");
 }
 
@@ -243,7 +248,7 @@ export async function AnalyzeHashrules() {
 
 	$.STEP("PATH : " + NAV.json.hashrules);
 	const hashrule = await fileman.read.json(NAV.json.hashrules.path);
-	Object.keys(RAW.HASHRULE).forEach(key => delete RAW.HASHRULE[key])
+	Object.keys(RAW.HASHRULE).forEach(key => delete RAW.HASHRULE[key]);
 	if (hashrule.status) {
 		Object.entries(hashrule.data).forEach(([key, value]) => {
 			if (typeof value === "string") {

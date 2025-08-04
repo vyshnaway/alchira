@@ -1,6 +1,6 @@
-const fs = require('fs');
-const path = require('path');
-const esbuild = require('esbuild');
+import fs from 'fs';
+import path from 'path';
+import esbuild from 'esbuild';
 
 function clearFolder(folderPath) {
     if (!fs.existsSync(folderPath)) {

@@ -130,7 +130,6 @@ export async function proxyMapSync(proxyMap: t_ProxyMap[] = []) {
 			}
 		}),
 	);
-	return proxyMap;
 }
 
 

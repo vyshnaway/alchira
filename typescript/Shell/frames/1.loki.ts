@@ -1,6 +1,6 @@
 import style from "../1.style.js";
 
-export default (string, frames = 1) => {
+export default (string: string  , frames = 1) => {
   const characters = Math.floor(Math.random() * string.length);
   const styles = Object.keys(style);
   const colors = Object.keys(style.bold);
