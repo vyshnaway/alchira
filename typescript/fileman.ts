@@ -31,8 +31,8 @@ const fileman = {
 		 * @param pathString2 The second path segment.
 		 * @returns The joined path string.
 		 */
-		join: (pathString1: string, pathString2: string): string => {
-			return path.join(pathString1, pathString2);
+		join: (...pathFrags: string[]): string => {
+			return path.join(...pathFrags);
 		},
 
 		/**

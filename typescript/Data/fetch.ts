@@ -1,67 +1,72 @@
 import $ from "../Shell/main.js";
-import { NAV, ROOT, APP, RAW, PREFIX } from "./cache.js";
 
 import fileman from "../fileman.js";
 import * as worker from "../Worker/watchman.js";
-import { setTWEAKS, setVENDORS } from "./data/init.js";
+import { collectVendors } from "./init.js";
+import { t_Data_PREFIX } from "../types.js";
+import { NAV, SYNC, APP, RAW, PREFIX, AUTOGEN } from "./cache.js";
 
 export async function FetchDocs() {
-	const readmeMd = fileman.sync.file(
-		ROOT.DOCS.readme.url,
-		ROOT.DOCS.readme.path,
-	);
-	const alertsMd = fileman.sync.file(
-		ROOT.DOCS.alerts.url,
-		ROOT.DOCS.alerts.path,
-	);
-	const license = fileman.sync.file(
-		ROOT.AGREEMENT.license.url,
-		ROOT.AGREEMENT.license.path,
-	);
-	const terms = fileman.sync.file(
-		ROOT.AGREEMENT.terms.url,
-		ROOT.AGREEMENT.terms.path,
-	);
-	const privacy = fileman.sync.file(
-		ROOT.AGREEMENT.privacy.url,
-		ROOT.AGREEMENT.privacy.path,
-	);
-
-	ROOT.DOCS.readme.content = await readmeMd;
-	ROOT.DOCS.alerts.content = await alertsMd;
-	ROOT.AGREEMENT.license.content = await license;
-	ROOT.AGREEMENT.terms.content = await terms;
-	ROOT.AGREEMENT.privacy.content = await privacy;
+	await Promise.all(Object.values(SYNC).map(sync => {
+		Object.values(sync).map(async s => {
+			if (s.url && s.path) {
+				s.content = await fileman.sync.file(s.url, s.path,);
+			}
+		});
+	}));
 }
 
-export async function FetchStatics(vendorGroup) {
-	$.TASK("Saving guidelines.", 0);
-	RAW.ReadMe = (await fileman.read.file(NAV.md.instructions)).data;
 
-	setVENDORS(vendorGroup);
-	const manifestIgnore = (await fileman.read.file(NAV.file.manifestIgnore)).data.split("\n")
-	if (!manifestIgnore.includes("manifest.json")) manifestIgnore.push("manifest.json")
-	await fileman.write.file(NAV.file.manifestIgnore, manifestIgnore.join("\n"))
+
+export async function FetchStatics(vendorSource: string) {
+	$.TASK("Saving guidelines.", 0);
+	RAW.ReadMe = (await fileman.read.file(NAV.md.instructions.path)).data;
+
+
+	const manifestIgnores = (await fileman.read.file(AUTOGEN.ignore.path)).data.split("\n");
+	const modPts = (AUTOGEN.ignore.content || "").split("\n").reduce((modPts: number, ign) => {
+		if (!manifestIgnores.includes(ign)) {
+			manifestIgnores.push(ign);
+			modPts++;
+		}
+		return modPts;
+	}, 0);
+	if (modPts) { await fileman.write.file(AUTOGEN.ignore.path, manifestIgnores.join("\n")); }
+
 
 	$.TASK("Loading vendor-prefixes");
-	const PrefixRead = {
+
+	const PrefixObtained = await (async function () {
+		const result1 = await fileman.read.json(vendorSource, true);
+		if (result1.status) { return result1.data; };
+
+		const result2 = await fileman.read.json(APP.URL.PrefixCdn + vendorSource, true);
+		if (result2.status) { return result2.data; };
+
+		const result3 = await fileman.read.json(NAV.blueprint.prefixes.path, false);
+		if (result3.status) { return result3.data; };
+
+		return {};
+	})() as t_Data_PREFIX;
+	await fileman.write.json(NAV.blueprint.vendors.path, PrefixObtained);
+
+
+	const PrefixRead: t_Data_PREFIX = {
 		attributes: {},
+		pseudos: {},
 		values: {},
 		atrules: {},
 		classes: {},
 		elements: {}
 	};
-
-	await Promise.all(
-		Object.entries(ROOT.VENDOR).map(async ([group, source]) => {
-			PrefixRead[group] = await fileman.sync.json(source.url, source.path);
-		}),
-	);
-
-	PREFIX.pseudos = { ...PrefixRead.classes, ...PrefixRead.elements };
-	PREFIX.attributes = PrefixRead.attributes;
-	PREFIX.atRule = PrefixRead.atrules;
-	PREFIX.values = PrefixRead.values;
+	Object.keys(PrefixRead).forEach(key => {
+		if (typeof PrefixObtained[key] === "object") { PrefixRead[key] = PrefixObtained[key]; }
+	});
+	PREFIX.pseudos = { ...PrefixRead.classes, ...PrefixRead.elements, ...PrefixRead.pseudos };
+	PREFIX.attributes = { ...PrefixRead.attributes };
+	PREFIX.atrules = { ...PrefixRead.atrules };
+	PREFIX.values = { ...PrefixRead.values };
+	collectVendors();
 }
 
 export async function Initialize() {
@@ -69,15 +74,15 @@ export async function Initialize() {
 		$.TASK("Initializing XCSS setup.", 0);
 		$.TASK("Cloning scaffold to Project");
 
-		await fileman.clone.safe(NAV.blueprint.scaffold, NAV.folder.setup);
-		await fileman.clone.safe(NAV.blueprint.libraries, NAV.folder.library);
+		await fileman.clone.safe(NAV.blueprint.scaffold.path, NAV.folder.setup.path);
+		await fileman.clone.safe(NAV.blueprint.libraries.path, NAV.folder.library.path);
 
 		$.POST(
 			$.MOLD.std.Section(
 				"Next Steps",
 				[
 					"Adjust " +
-					$.style.bold.Orange(NAV.json.configure) +
+					$.style.bold.Orange(NAV.json.configure.path) +
 					$.canvas.unstyle +
 					" according to the requirements of your project.",
 					"Execute " +
@@ -118,9 +123,9 @@ export async function Initialize() {
 					? ["This command uses an internet connection."]
 					: [
 						"Create a new project and use its access key. For action visit " +
-						$.style.bold.Orange(ROOT.console),
+						$.style.bold.Orange(APP.URL.Console),
 						"For personal projects, you can use the key in " +
-						$.style.bold.Orange(NAV.json.configure),
+						$.style.bold.Orange(NAV.json.configure.path),
 						"If using in CI/CD workflow, it is suggested to use " +
 						$.style.bold.Orange("xcss publish {key}"),
 					],
@@ -132,7 +137,7 @@ export async function Initialize() {
 	} catch (err) {
 		return $.MOLD.failed.Footer(
 			"Initialization failed.",
-			[err.message],
+			err instanceof Error ? [err.message] : {},
 			$.list.failed.Bullets,
 		);
 	}
@@ -141,21 +146,23 @@ export async function Initialize() {
 export async function VerifySetupStruct() {
 	const result = { unstart: true, proceed: false, report: "" };
 
-	if (fileman.path.ifFolder(NAV.folder.setup)) {
-		const errors = {};
-		await fileman.clone.safe(NAV.blueprint.scaffold, NAV.folder.setup);
+	if (fileman.path.ifFolder(NAV.folder.setup.path)) {
+		const errors: Record<string, string> = {};
+		await fileman.clone.safe(NAV.blueprint.scaffold.path, NAV.folder.setup.path);
 
 		$.TASK("Verifying directory status", 0);
 		for (const item of Object.values(NAV.css)) {
-			$.STEP("Path : " + item);
-			if (!fileman.path.ifFile(item)) {
-				errors[item] = "File not found.";
+			const path = item.path;
+			$.STEP("Path : " + path);
+			if (!fileman.path.ifFile(path)) {
+				errors[path] = "File not found.";
 			}
 		}
 		for (const item of Object.values(NAV.json)) {
-			$.STEP("Path : " + item);
-			if (!fileman.path.ifFile(item)) {
-				errors[item] = "File not found.";
+			const path = item.path;
+			$.STEP("Path : " + path);
+			if (!fileman.path.ifFile(path)) {
+				errors[path] = "File not found.";
 			}
 		}
 		$.TASK("Verification finished");
@@ -177,15 +184,14 @@ export async function VerifySetupStruct() {
 	return result;
 }
 
-export async function VerifyConfigure(loadStatics) {
+export async function VerifyConfigure(loadStatics: boolean) {
 	$.TASK("Initializing configs", 0);
-	const errors = [],
-		alerts = [];
+	const errors: string[] = [], alerts: string[] = [];
 
 	$.STEP("PATH : " + NAV.json.configure);
-	const configure = await fileman.read.json(NAV.json.configure);
+	const configure = await fileman.read.json(NAV.json.configure.path);
 	if (configure.status) {
-		if (loadStatics) FetchStatics(configure.data["vendors"]);
+		if (loadStatics) { FetchStatics(configure.data["vendors"]); }
 		setTWEAKS(configure.data.tweaks);
 		RAW.PROXYMAP = (typeof configure.data.proxy === "object") ? configure.data.proxy : [];
 		const dependencies = (typeof configure.data["portables"] === "object") ? configure.data["portables"] : {};
@@ -217,8 +223,8 @@ export async function VerifyConfigure(loadStatics) {
 
 export async function ReloadLibrary() {
 	$.TASK("Updating Library");
-	RAW.LIBRARIES = await fileman.read.bulk(NAV.folder.library, ["css"]);
-	RAW.PORTABLES = await fileman.read.bulk(NAV.folder.portables, ["css", "xcss", "md"]);
+	RAW.LIBRARIES = await fileman.read.bulk(NAV.folder.library.path, ["css"]);
+	RAW.PORTABLES = await fileman.read.bulk(NAV.folder.portables.path, ["css", "xcss", "md"]);
 }
 
 export async function UpdateProxies() {
@@ -236,7 +242,7 @@ export async function AnalyzeHashrules() {
 	const errors = [];
 
 	$.STEP("PATH : " + NAV.json.hashrules);
-	const hashrule = await fileman.read.json(NAV.json.hashrules);
+	const hashrule = await fileman.read.json(NAV.json.hashrules.path);
 	Object.keys(RAW.HASHRULE).forEach(key => delete RAW.HASHRULE[key])
 	if (hashrule.status) {
 		Object.entries(hashrule.data).forEach(([key, value]) => {
@@ -258,5 +264,5 @@ export async function AnalyzeHashrules() {
 
 export async function FetchIndexContent() {
 	$.TASK("Updating Index");
-	RAW.CSSIndex = await worker.cssImport(Object.values(NAV.css));
+	RAW.CSSIndex = await worker.cssImport(Object.values(NAV.css).map(N => N.path));
 }

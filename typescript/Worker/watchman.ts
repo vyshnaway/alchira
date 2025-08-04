@@ -1,15 +1,16 @@
 import path from "path";
 import chokidar from "chokidar";
 import fileman from "../fileman.js";
+import { t_Event, t_ProxyMap } from "../types.js";
 
-export async function cssImport(filePathArray = []) {
+export async function cssImport(filePathArray: string[] = []) {
 	const processedFiles = new Set(
 		filePathArray
 			.reverse()
 			.map((filePath) => path.resolve(filePath))
 			.reverse(),
 	);
-	async function process(pathString) {
+	async function process(pathString: string) {
 		const directory = path.dirname(pathString);
 		let result = (await fileman.read.file(pathString)).data;
 		for (const [match, filePath] of result.matchAll(
@@ -29,9 +30,9 @@ export async function cssImport(filePathArray = []) {
 	return result.join("");
 }
 
-export async function proxyMapDependency(proxyMap = [], xtylesDirectory) {
-	const warnings = [];
-	const notifications = [];
+export async function proxyMapDependency(proxyMap: t_ProxyMap[] = [], xtylesDirectory: string) {
+	const warnings: string[] = [];
+	const notifications: string[] = [];
 
 	await Promise.all(
 		proxyMap.map(async (map, index) => {
@@ -112,7 +113,7 @@ export async function proxyMapDependency(proxyMap = [], xtylesDirectory) {
 	return { warnings, notifications };
 }
 
-export async function proxyMapSync(proxyMap = []) {
+export async function proxyMapSync(proxyMap: t_ProxyMap[] = []) {
 	await Promise.all(
 		proxyMap.map(async (map) => {
 			map.extensions.xcss = [];
@@ -125,9 +126,7 @@ export async function proxyMapSync(proxyMap = []) {
 			);
 			if (syncResult.status) {
 				map.fileContents = syncResult.fileContents;
-				map.stylesheetContent = (
-					await fileman.read.file(fileman.path.join(map.target, map.stylesheet))
-				).data;
+				map.stylesheetContent = (await fileman.read.file(fileman.path.join(map.target, map.stylesheet))).data;
 			}
 		}),
 	);
@@ -137,69 +136,72 @@ export async function proxyMapSync(proxyMap = []) {
 
 
 
-// Shared event queue
-let eventQueue = [];
 
-// Function to handle events (called by watchFolders)
-export function queueEvent(event) {
-	eventQueue.push(event);
-}
-// Function to check if there are events (useful for polling  in execute)
-export function hasEvents() {
-	return eventQueue.length > 0;
-}
-// Function to clear the queue (optional, for cleanup)
-export function clearQueue() {
-	eventQueue = [];
-}
+// Shared event queue module
+export const EventQueue = (() => {
+	let queue: t_Event[] = [];
 
-// Function to dequeue events (called by execute, including future AssemblyScript version)
-export function dequeueEvent() {
-	if (eventQueue.length > 0) {
-		const event = eventQueue.shift();
-		return event;
+	function addEvent(event: t_Event): void {
+		queue.push(event);
 	}
-	return null; // Return null if no events
-}
+
+	function hasEvents(): boolean {
+		return queue.length > 0;
+	}
+
+	function clear(): void {
+		queue = [];
+	}
+
+	function dequeue(): t_Event | null {
+		return queue.length > 0 ? queue.shift()! : null;
+	}
+
+	return {
+		addEvent,
+		hasEvents,
+		clear,
+		dequeue,
+	};
+})();
 
 
-export function watchFolders(folders = [], ignores = [], initialMessage = "") {
-	const folderMaps = folders.reduce((acc, folder) => {
+
+export function watchFolders(folders: string[] = [], ignores: string[] = []) {
+	const folderMaps = folders.reduce((acc: Record<string, string>, folder) => {
 		acc[path.resolve(folder)] = folder;
 		return acc;
-	}, {});
+	}, { '': '' });
 	const resolvedFolders = Object.keys(folderMaps);
 	const resolvedIgnores = ignores.map((p) => path.join(path.resolve(p), "**"));
 
-	const handleEventInternal = async (action, filePath) => {
-		const result = {
-			timeStamp: null,
-			action: null,
-			folder: null,
-			filePath: null,
-			fileContent: null,
-			consoleWidth: process.stdout.columns,
+	const handleEventInternal = async (action: string, filePath: string) => {
+		const event: t_Event = {
+			timeStamp: '',
+			action: '',
+			folder: '',
+			filePath: '',
+			fileContent: '',
 			extension: path.extname(filePath)?.slice(1),
 		};
 
 		const t = new Date();
-		result.timeStamp = `${t.getHours().toString().padStart(2, "0")}:${t.getMinutes().toString().padStart(2, "0")}:${t.getSeconds().toString().padStart(2, "0")}`;
+		event.timeStamp = t.getHours().toString().padStart(2, "0") + `:` +
+			t.getMinutes().toString().padStart(2, "0") + `:` +
+			t.getSeconds().toString().padStart(2, "0");
 
-		result.action = action;
-		result.folder =
-			folderMaps[
-			resolvedFolders.find((folder) => filePath.startsWith(folder))
-			] || null;
-		result.filePath = path.relative(result.folder, filePath);
+		event.action = action;
+		event.folder = folderMaps[resolvedFolders.find((folder) => filePath.startsWith(folder)) || ''];
+		event.filePath = path.relative(event.folder, filePath);
 
 		if (action === "add" || action === "change") {
 			const content = await fileman.read.file(filePath);
 			if (content.status) {
-				result.fileContent = content.data;
+				event.fileContent = content.data;
 			}
 		}
 
-		queueEvent(result);
+		EventQueue.addEvent(event);
 	};
 
 	const watcher = chokidar.watch(resolvedFolders, {
@@ -210,7 +212,7 @@ export function watchFolders(folders = [], ignores = [], initialMessage = "") {
 			stabilityThreshold: 200,
 			pollInterval: 100,
 		},
-		ignored: [/(^|[\/\\])\../, "**/node_modules/**", ...resolvedIgnores],
+		ignored: [/(^|[/\\])\../, "**/node_modules/**", ...resolvedIgnores],
 		usePolling: true,
 		interval: 100,
 		binaryInterval: 300,
@@ -218,20 +220,11 @@ export function watchFolders(folders = [], ignores = [], initialMessage = "") {
 
 	watcher
 		.on("all", (event, filePath) => handleEventInternal(event, filePath))
-		.on("error", (error) => console.error(`Watcher error: ${error.message}`));
-	// .on('change', (filePath) => handleEventInternal('change', filePath))
-	// .on('add', (filePath) => handleEventInternal('add', filePath))
-	// .on('unlink', (filePath) => handleEventInternal('unlink', filePath))
-	// .on('unlinkDir', (filePath) => handleEventInternal('unlinkDir', filePath))
-	// .on('addDir', (filePath) => handleEventInternal('addDir', filePath))
-	// .on('ready', () => {
-	//     if (initialMessage) {
-	//         console.log(initialMessage)
-	//     } else {
-	//         console.log(`Watching folders: ${resolvedFolders.join(', ')}`);
-	//         console.log(`Ignoring changes in: ${resolvedIgnores.join(', ')}`);
-	//     }
-	// })
+		.on("error", (error: unknown) => {
+			if (error instanceof Error) {
+				console.error(`Watcher error: ${error.message}`);
+			}
+		});
 
 	return () => {
 		watcher.close();

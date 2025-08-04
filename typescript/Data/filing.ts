@@ -1,4 +1,4 @@
-import { t_Data_Filing as t_Data_FILING } from "../types.js";
+import { t_Data_FILING } from "../types.js";
 import Use from "../Utils/main.js";
 
 export default function FILING(
@@ -23,7 +23,6 @@ export default function FILING(
 		((idn === 0 && extension === "css") ? "" : Use.string.normalize(cluster) + "$".repeat(idn));
 
 	const result: t_Data_FILING = {
-		// Default
 		id,
 		group,
 		stamp,
@@ -35,20 +34,21 @@ export default function FILING(
 		targetPath,
 		metaFront: `${isXtylesFolder ? group.toLocaleUpperCase() : ""}\\|${Use.string.normalize(targetPath, [], [], ["/", "."])}`,
 		content: isXtylesFolder && extension === "css" ? Use.code.uncomment.Css(content) : content,
-		usedIndexes: new Set(),
-		essentials: [],
-		// for Proxy Class
-		styleGlobals: {},
-		styleLocals: {},
-		styleMap: {},
-		classGroups: [],
-		postBinds: [],
-		preBinds: [],
-		errors: [],
-		hasStyleTag: false,
-		hasStylesheetTag: false,
-		hasSnippetTag: false,
 		midway: "",
+		styleData: {
+			usedIndexes: new Set(),
+			essentials: [],
+			styleGlobals: {},
+			styleLocals: {},
+			styleMap: {},
+			classGroups: [],
+			postBinds: [],
+			preBinds: [],
+			errors: [],
+			hasStyleTag: false,
+			hasStylesheetTag: false,
+			hasSnippetTag: false,
+		}
 	};
 
 	return result;

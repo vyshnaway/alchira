@@ -1,9 +1,10 @@
 import {
     t_Data_APP,
-    t_Data_AUTOGEN,
-    t_Data_NAV,
     t_Data_PREFIX,
-    t_Data_ROOT
+    t_Data_Source,
+    t_Data_TWEAKS,
+    t_PUBLISH,
+    t_RAW
 } from "../types";
 
 const domain = "xcss.io";
@@ -14,7 +15,7 @@ export const APP: t_Data_APP = {
     website: "",
     bins: [],
     vendors: [],
-    url: {
+    URL: {
         Cdn: `https://cdn.${domain}/`,
         Worker: `https://worker.${domain}/`,
         Console: `https://console.${domain}/`,
@@ -42,43 +43,50 @@ export const APP: t_Data_APP = {
     }
 };
 
-export const AUTOGEN: t_Data_AUTOGEN = {
+export const AUTOGEN: Record<string, t_Data_Source> = {
     index: {
-        path: "xtyles/autogen/watch/index.css",
-        default: ``
+        path: "",
+        frags: ["xtyles", "autogen", "watch", "index.css"],
+        content: ``
     },
     styles: {
-        path: "xtyles/autogen/watch/styles.css",
-        default: ``
+        path: "",
+        frags: ["xtyles", "autogen", "watch", "styles.css"],
+        content: ``
     },
     ignore: {
-        path: "xtyles/autogen/.gitignore",
-        default: `watch/**\nmanifest.json`
+        path: "",
+        frags: ["xtyles", "autogen", ".gitignore"],
+        content: `watch/**\nmanifest.json`
     },
     manifest: {
-        path: "xtyles/autogen/manifest.json",
-        default: `{}`
+        path: "",
+        frags: ["xtyles", "autogen", "manifest.json"],
+        content: `{}`
     },
 };
 
-export const ROOT: t_Data_ROOT = {
+export const SYNC: Record<string, Record<string, t_Data_Source>> = {
     DOCS: {
         readme: {
             title: "README",
             url: "readme.md",
-            path: "readme.md",
+            path: "",
+            frags: ["readme.md"],
             content: "",
         },
         alerts: {
             title: "ALERTS",
             url: "alerts.md",
-            path: "alerts.md",
+            path: "",
+            frags: ["alerts.md"],
             content: "",
         },
         changelog: {
             title: "CHANGELOG",
             url: "changelog.md",
-            path: "changelog.md",
+            path: "",
+            frags: ["changelog.md"],
             content: "",
         },
     },
@@ -86,56 +94,104 @@ export const ROOT: t_Data_ROOT = {
         license: {
             title: "LICENSE",
             url: "agreements-txt/license.txt",
-            path: "agreements/license.txt",
+            path: "",
+            frags: ["agreements", "license.txt"],
             content: "",
         },
         terms: {
             title: "TERMS & CONDITIONS",
             url: "agreements-txt/terms.txt",
-            path: "agreements/terms.txt",
+            path: "",
+            frags: ["agreements", "terms.txt"],
             content: "",
         },
         privacy: {
             title: "PRIVACY POLICY",
             url: "agreements-txt/privacy.txt",
             path: "agreements/privacy.txt",
+            frags: ["agreements", "privacy.txt"],
             content: "",
         },
     }
 };
 
-export const TWEAKS: Record<string, string | boolean> = {
-    ...APP.defaultTweaks
-};
-
-export const NAV: t_Data_NAV = {
+export const NAV: Record<string, Record<string, t_Data_Source>> = {
     blueprint: {
-        scaffold: "blueprint/scaffold",
-        libraries: "blueprint/libraries",
+        scaffold: {
+            frags: ["blueprint", "scaffold"],
+            path: "",
+        },
+        libraries: {
+            frags: ["blueprint", "libraries"],
+            path: "",
+        },
+        prefixes: {
+            frags: ["blueprint", "prefixes.json"],
+            path: "",
+        },
     },
     folder: {
-        setup: "xtyles",
-        autogen: "xtyles/autogen",
-        library: "xtyles/library",
-        packages: "xtyles/packages",
-        archives: "xtyles/autogen/archive",
+        setup: {
+            frags: ["xtyles"],
+            path: "",
+        },
+        autogen: {
+            frags: ["xtyles", "autogen"],
+            path: "",
+        },
+        library: {
+            frags: ["xtyles", "library"],
+            path: "",
+        },
+        packages: {
+            frags: ["xtyles", "packages"],
+            path: "",
+        },
+        archives: {
+            frags: ["xtyles", "autogen", "archives"],
+            path: "",
+        },
     },
     css: {
-        atrules: "xtyles/#at-rules.css",
-        constants: "xtyles/#constants.css",
-        elements: "xtyles/#elements.css",
-        extends: "xtyles/#extends.css",
+        atrules: {
+            frags: ["xtyles", "#at-rules.css"],
+            path: "",
+        },
+        constants: {
+            frags: ["xtyles", "#constants.css"],
+            path: "",
+        },
+        elements: {
+            frags: ["xtyles", "#elements.css"],
+            path: "",
+        },
+        extends: {
+            frags: ["xtyles", "#extends.css"],
+            path: "",
+        },
     },
     json: {
-        vendors: "blueprint/vendors.json",
-        configure: "xtyles/configure.jsonc",
-        hashrules: "xtyles/hashrules.jsonc",
+        configure: {
+            frags: ["xtyles", "configure.jsonc"],
+            path: "",
+        },
+        hashrules: {
+            frags: ["xtyles", "/hashrules.jsonc"],
+            path: "",
+        },
     },
     md: {
-        instructions: "xtyles/instructions.md",
-        readme: "xtyles/readme.md",
+        instructions: {
+            frags: ["xtyles", "instructions.md"],
+            path: "",
+        },
+        readme: {
+            frags: ["xtyles", "readme.md"],
+            path: "",
+        },
     },
 };
+
 export const PREFIX: t_Data_PREFIX = {
     atrules: {},
     pseudos: {},
@@ -143,8 +199,12 @@ export const PREFIX: t_Data_PREFIX = {
     values: {},
 };
 
+export const TWEAKS: t_Data_TWEAKS = {
+    ...APP.defaultTweaks
+};
 
-export const PUBLISH = {
+
+export const PUBLISH: t_PUBLISH = {
     DeltaPath: "",
     DeltaContent: "",
     FinalMessage: "",
@@ -193,7 +253,7 @@ export const STACK = {
     PORTABLES: {},
 };
 
-export const RAW = {
+export const RAW: t_RAW = {
     WATCH: false,
     PACKAGE: "",
     VERSION: "",

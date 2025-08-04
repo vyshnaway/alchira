@@ -4,7 +4,7 @@ export interface T_PackageEssential {
     website: string;
     scripts: Record<string, string>;
     bins: string[];
-};
+}
 
 export interface T_PackageJson {
     name?: string;
@@ -32,42 +32,38 @@ export interface T_PackageJson {
 
 export type t_Data_TWEAKS = Record<string, boolean | string>;
 
+
 export interface t_Data_APP {
     name: string,
     version: string,
     website: string,
     bins: string[],
     vendors: string[],
-    url: Record<string, string>,
     commandList: Record<string, string>,
     defaultTweaks: t_Data_TWEAKS,
     customTag: Record<string, string>,
+    URL: Record<string, string>,
 }
 
-export type t_Data_AUTOGEN = Record<string, {
-    path: string;
-    default: string;
-}>;
-
-export type t_Data_ROOT = Record<string,
-    Record<string, {
-        title: string,
-        url: string,
-        path: string,
-        content: string,
-    }>
->;
+export interface t_Data_Source {
+    path: string,
+    frags: string[],
+    content?: string,
+    title?: string,
+    url?: string,
+}
 
 export interface t_Data_PREFIX {
-    atrules: Record<string, Record<string, string>>
-    attributes: Record<string, Record<string, string>>
-    pseudos: Record<string, Record<string, string>>
-    values: Record<string, Record<string, Record<string, string>>>
-};
+    [key: string]: unknown,
+    atrules?: Record<string, Record<string, string>>,
+    attributes?: Record<string, Record<string, string>>,
+    pseudos?: Record<string, Record<string, string>>,
+    classes?: Record<string, Record<string, string>>,
+    elements?: Record<string, Record<string, string>>,
+    values?: Record<string, Record<string, Record<string, string>>>,
+}
 
-export type t_Data_NAV = Record<string, Record<string, string>>;
-
-export interface t_Data_Filing {
+export interface t_Data_FILING {
     id: string,
     group: string,
     stamp: string,
@@ -80,21 +76,23 @@ export interface t_Data_Filing {
     metaFront: string,
     content: string,
     midway: string,
-    usedIndexes: Set<string>,
-    essentials: string[],
-    styleGlobals: Record<string, object>,
-    styleLocals: Record<string, object>,
-    styleMap: Record<string, t_Xtyle>,
-    classGroups: string[][],
-    postBinds: string[],
-    preBinds: number[],
-    errors: string[],
-    hasStyleTag: boolean,
-    hasSnippetTag: boolean,
-    hasStylesheetTag: boolean,
+    styleData: {
+        usedIndexes: Set<string>,
+        essentials: string[],
+        styleGlobals: Record<string, object>,
+        styleLocals: Record<string, object>,
+        styleMap: Record<string, t_XtyleData>,
+        classGroups: string[][],
+        postBinds: string[],
+        preBinds: number[],
+        errors: string[],
+        hasStyleTag: boolean,
+        hasSnippetTag: boolean,
+        hasStylesheetTag: boolean,
+    }
 }
 
-export interface t_Xtyle {
+export interface t_XtyleData {
     info: string[],
     variables: Record<string, string>,
     skeleton: Record<string, unknown>,
@@ -104,4 +102,96 @@ export interface t_Xtyle {
     snippet?: string,
     structure?: string,
     markdown?: string
+}
+
+
+export interface t_FileMap {
+    group: "xtyling" | "binding" | "stylesheet" | "axiom" | "cluster" | "local" | "global";
+    id: string;
+}
+
+export interface t_PUBLISH {
+    DeltaPath: string,
+    DeltaContent: string,
+    FinalError: string,
+    FinalMessage: string,
+    ErrorCount: number,
+    WarningCount: number,
+    Report: {
+        library: string,
+        variables: string,
+        hashrule: string,
+        targets: string,
+        errors: string,
+        memChart: string,
+        footer: string,
+    },
+    MANIFEST: {
+        prefix: string,
+        constants: string[],
+        hashrules: Record<string, string>,
+        file: Record<string, t_FileMap>;
+        axiom: Record<string, Record<string, t_XtyleData>>;
+        cluster: Record<string, Record<string, t_XtyleData>>;
+        local: Record<string, Record<string, t_XtyleData>>;
+        global: Record<string, Record<string, t_XtyleData>>;
+        xtyling: Record<string, Record<string, t_XtyleData>>;
+        binding: Record<string, Record<string, t_XtyleData>>;
+    },
+    LibFilesTemp: Record<string, string>,
+}
+
+export interface t_ProxyMap {
+    source: string,
+    target: string,
+    stylesheet: '',
+    extensions: Record<string, string[]>,
+    fileContents?: Record<string, string>,
+    stylesheetContent?: string
+}
+
+export interface t_Event {
+    timeStamp: string,
+    action: string,
+    folder: string,
+    filePath: string,
+    fileContent: string,
+    extension: string,
+}
+
+// export const CACHE = {
+//     HashRule: {},
+//     SortedIndexes: [],
+//     PortableEssentials: [],
+//     Index2StylesObject: {},
+//     NativeStyle2Index: {},
+//     LibraryStyle2Index: {},
+//     GlobalsStyle2Index: {},
+//     PortableStyle2Index: {},
+//     FinalStack: {},
+// };
+
+// export const STACK = {
+//     PROXYCACHE: {},
+//     LIBRARIES: {},
+//     PORTABLES: {},
+// };
+
+export interface t_RAW {
+    WATCH: boolean,
+    PACKAGE: string,
+    VERSION: string,
+    CMD: string,
+    ARG: string,
+    ReadMe: string,
+    CSSIndex: string,
+    RootPath: string,
+    WorkPath: string,
+    HASHRULE: Record<string, string>,
+    PROXYMAP: Record<string, t_ProxyMap>,
+    LIBRARIES: {},
+    PORTABLES: {},
+    PROXYFILES: {},
+    PORTABLEFRAME: {},
+    DEPENDENCIES: {},
 }

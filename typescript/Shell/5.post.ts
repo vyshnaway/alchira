@@ -2,7 +2,7 @@ import readline from "readline";
 
 /**
  * Backspace characters in terminal.
- * @param {Array} chars About of characters to backspace
+ * @param {number} chars About of characters to backspace
  * @returns {null}
  */
 const backspace = (chars: number) => {

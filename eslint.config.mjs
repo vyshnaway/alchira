@@ -13,7 +13,8 @@ export default tseslint.config(
 		ignores: [
 			'.vscode-test',
 			'execute',
-			'notebook'
+			'notebook',
+			'javascript'
 		]
 	},
 	js.configs.recommended,
