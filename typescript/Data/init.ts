@@ -73,55 +73,55 @@ export function MemoryUsage() {
 }
 
 
-// export const INDEX = {
-//     _NOW: 0,
-//     _BIN: new Set(),
-//     STYLE: (index = 0) => {
-//         return CACHE.Index2StylesObject[index];
-//     },
-//     CLONE: (index = 0) => {
-//         if (INDEX._BIN.size > 0) {
-//             object.index = INDEX._BIN.values().next().value;
-//             INDEX._BIN.delete(object.index);
-//         } else { object.index = ++INDEX._NOW; }
+export const INDEX = {
+    _NOW: 0,
+    _BIN: new Set(),
+    STYLE: (index = 0) => {
+        return CACHE.Index2StylesObject[index];
+    },
+    CLONE: (index = 0) => {
+        if (INDEX._BIN.size > 0) {
+            object.index = INDEX._BIN.values().next().value;
+            INDEX._BIN.delete(object.index);
+        } else { object.index = ++INDEX._NOW; }
 
-//         const encounted = Use.string.enCounter(object.index + 768);
-//         object.class = "_" + encounted;
-//         CACHE.Index2StylesObject[object.index] = CACHE.Index2StylesObject[index];
-//         return { index: object.index, class: object.class };
-//     },
-//     DECLARE: (object = {}) => {
-//         if (INDEX._BIN.size > 0) {
-//             object.index = INDEX._BIN.values().next().value;
-//             INDEX._BIN.delete(object.index);
-//         } else { object.index = ++INDEX._NOW; }
+        const encounted = Use.string.enCounter(object.index + 768);
+        object.class = "_" + encounted;
+        CACHE.Index2StylesObject[object.index] = CACHE.Index2StylesObject[index];
+        return { index: object.index, class: object.class };
+    },
+    DECLARE: (object = {}) => {
+        if (INDEX._BIN.size > 0) {
+            object.index = INDEX._BIN.values().next().value;
+            INDEX._BIN.delete(object.index);
+        } else { object.index = ++INDEX._NOW; }
 
-//         const encounted = Use.string.enCounter(object.index + 768);
-//         object.class = "_" + encounted;
-//         object.spare = "-" + encounted;
-//         CACHE.Index2StylesObject[object.index] = object;
-//         return { index: object.index, class: object.class, spare: object.spare };
-//     },
-//     DISPOSE: (...indexes) => {
-//         indexes.forEach((index) => {
-//             if (index > 0) {
-//                 INDEX._BIN.add(index);
-//                 delete CACHE.Index2StylesObject[index.toString()];
-//             }
-//         });
-//     },
-//     RESET: (after = 0) => {
-//         after = after > 0 ? after : 0;
-//         let removed = 0;
-//         Object.keys(CACHE.Index2StylesObject).forEach((index) => {
-//             const number = Number(index);
-//             if (number > after) {
-//                 if (INDEX._BIN.has(number)) { INDEX._BIN.delete(number); }
-//                 delete CACHE.Index2StylesObject[index];
-//                 removed++;
-//             }
-//         });
-//         INDEX._NOW = after;
-//         return removed;
-//     }
-// };
+        const encounted = Use.string.enCounter(object.index + 768);
+        object.class = "_" + encounted;
+        object.spare = "-" + encounted;
+        CACHE.Index2StylesObject[object.index] = object;
+        return { index: object.index, class: object.class, spare: object.spare };
+    },
+    DISPOSE: (...indexes) => {
+        indexes.forEach((index) => {
+            if (index > 0) {
+                INDEX._BIN.add(index);
+                delete CACHE.Index2StylesObject[index.toString()];
+            }
+        });
+    },
+    RESET: (after = 0) => {
+        after = after > 0 ? after : 0;
+        let removed = 0;
+        Object.keys(CACHE.Index2StylesObject).forEach((index) => {
+            const number = Number(index);
+            if (number > after) {
+                if (INDEX._BIN.has(number)) { INDEX._BIN.delete(number); }
+                delete CACHE.Index2StylesObject[index];
+                removed++;
+            }
+        });
+        INDEX._NOW = after;
+        return removed;
+    }
+};

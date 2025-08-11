@@ -4,17 +4,39 @@ const OPEN_CHARS = ["{", "[", "("];
 const CLOSE_CHARS = ["}", "]", ")"];
 const QUOTE_CHARS = ["`", "'", '"'];
 
-export default function parseBlock(content, blockArrays = false) {
+interface t_Result {
+	compose: string[],
+	preBinds: string[],
+	postBinds: string[],
+	variables: Record<string, string>,
+	XatProps: [string, string][],
+	atProps: Record<string,string>,
+	Xproperties: [string, string][],
+	properties: Record<string,string>,
+	XatRules: [string, string][],
+	atRules: Record<string,string>,
+	Xnested: [string, string][],
+	nested: Record<string, string>,
+	Xclasses: [string, string][],
+	classes: Record<string, string>,
+	Xflats: [string, string][],
+	flats: Record<string,string>,
+	XallBlocks: [string, string][],
+	allBlocks: Record<string,string>,
+}
+
+export default function parseBlock(content: string, blockArrays = false) {
 	content += ";";
+	const length = content.length;
+
 	let keyStart = 0,
 		valStart = 0,
 		deviance = 0,
 		quote = "",
 		key = "",
-		isProp = true,
-		length = content.length;
+		isProp = true;
 
-	let result = {
+	const result: t_Result = {
 		compose: [],
 		preBinds: [],
 		postBinds: [],
@@ -50,24 +72,27 @@ export default function parseBlock(content, blockArrays = false) {
 		}
 
 		if (quote === "") {
-			if (CLOSE_CHARS.includes(ch)) deviance--;
+			if (CLOSE_CHARS.includes(ch)) { deviance--; }
 
 			if (deviance === 0) {
 				switch (ch) {
 					case "{":
 						isProp = false;
+						key = Use.string.minify(content.slice(keyStart, index));
+						valStart = index + 1;
+						break;
 					case ":":
 						key = Use.string.minify(content.slice(keyStart, index));
 						valStart = index + 1;
 						break;
 					case "}":
-					case ";":
+					case ";": {
 						const value = Use.string.minify(content.slice(valStart, index));
 						if (isProp) {
 							if (key.length > 0) {
-								if (key.startsWith("--")) result.variables[key] = value;
+								if (key.startsWith("--")) {result.variables[key] = value;}
 								result.properties[key] = value;
-								if (blockArrays) result.Xproperties.push([key, value]);
+								if (blockArrays) {result.Xproperties.push([key, value]);}
 							} else if (value[0] === "@") {
 								const firstSpaceIndex = value.indexOf(" ");
 								const spaceIndex =
@@ -92,7 +117,7 @@ export default function parseBlock(content, blockArrays = false) {
 										break;
 									default:
 										result.atProps[value] = "";
-										if (blockArrays) result.XatProps.push([value, ""]);
+										if (blockArrays) {result.XatProps.push([value, ""]);}
 								}
 							} else {
 								const breaks = Use.string.zeroBreaks(value);
@@ -115,31 +140,32 @@ export default function parseBlock(content, blockArrays = false) {
 							switch (key[0]) {
 								case "@":
 									result.atRules[key] = value;
-									if (blockArrays) result.XatRules.push([key, value]);
+									if (blockArrays) {result.XatRules.push([key, value]);}
 									break;
 								case "&":
 									result.nested[key] = value;
-									if (blockArrays) result.Xnested.push([key, value]);
+									if (blockArrays) {result.Xnested.push([key, value]);}
 									break;
 								case ".":
 									result.classes[key] = value;
-									if (blockArrays) result.Xclasses.push([key, value]);
+									if (blockArrays) {result.Xclasses.push([key, value]);}
 									break;
 								default:
 									result.flats[key] = value;
-									if (blockArrays) result.Xflats.push([key, value]);
+									if (blockArrays) { result.Xflats.push([key, value]); }
 							}
 							result.allBlocks[key] = value;
-							if (blockArrays) result.XallBlocks.push([key, value]);
+							if (blockArrays) { result.XallBlocks.push([key, value]); }
 						}
 						keyStart = index + 1;
 						valStart = index + 1;
 						key = "";
 						isProp = true;
+					}
 				}
 			}
 
-			if (OPEN_CHARS.includes(ch)) deviance++;
+			if (OPEN_CHARS.includes(ch)) { deviance++; }
 		}
 	}
 

@@ -1,14 +1,14 @@
 export function hslToRgb(
-	h,
-	s,
-	l,
+	h: number,
+	s: number,
+	l: number,
 	alpha = 1
-) {
+): { r: number, g: number, b: number, alpha: number, converted: string } {
 	s /= 100;
 	l /= 100;
-	const k = (n) => (n + h / 30) % 12;
+	const k = (n: number): number => (n + h / 30) % 12;
 	const _a = s * Math.min(l, 1 - l);
-	const f = (n) => l - _a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)));
+	const f = (n: number): number => l - _a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)));
 	const r = Math.max(0, Math.min(255, Math.round(f(0) * 255)));
 	const g = Math.max(0, Math.min(255, Math.round(f(8) * 255)));
 	const b = Math.max(0, Math.min(255, Math.round(f(4) * 255)));
@@ -22,17 +22,17 @@ export function hslToRgb(
 	};
 }
 export function rgbToHsl(
-	r,
-	g,
-	b,
+	r: number,
+	g: number,
+	b: number,
 	alpha = 1
-) {
+): { h: number, s: number, l: number, alpha: number, converted: string } {
 	r /= 255;
 	g /= 255;
 	b /= 255;
 	const max = Math.max(r, g, b);
 	const min = Math.min(r, g, b);
-	let h, s;
+	let h: number, s: number;
 	let l = (max + min) / 2;
 	if (max === min) {
 		h = s = 0;
@@ -61,18 +61,18 @@ export function rgbToHsl(
 
 
 export function labToRgb(
-	L,
-	a,
-	b,
+	L: number,
+	a: number,
+	b: number,
 	alpha = 1
-) {
+): { r: number, g: number, b: number, alpha: number, converted: string } {
 	const D65_Xn = 95.047;
 	const D65_Yn = 100.0;
 	const D65_Zn = 108.883;
 	const f_y = (L + 16) / 116;
 	const f_x = a / 500 + f_y;
 	const f_z = f_y - b / 200;
-	const inverse_f = (t) => t ** 3 > 0.008856 ? t ** 3 : (t - 16 / 116) / 7.787;
+	const inverse_f = (t: number): number => t ** 3 > 0.008856 ? t ** 3 : (t - 16 / 116) / 7.787;
 	const X = inverse_f(f_x) * D65_Xn;
 	const Y = inverse_f(f_y) * D65_Yn;
 	const Z = inverse_f(f_z) * D65_Zn;
@@ -82,7 +82,7 @@ export function labToRgb(
 	const r_linear = X_norm * 3.2406 + Y_norm * -1.5372 + Z_norm * -0.4986;
 	const g_linear = X_norm * -0.9689 + Y_norm * 1.8758 + Z_norm * 0.0415;
 	const b_linear = X_norm * 0.0557 + Y_norm * -0.2040 + Z_norm * 1.0570;
-	const gammaCorrectAndClamp = (v) => {
+	const gammaCorrectAndClamp = (v: number): number => {
 		v = v <= 0.0031308 ? 12.92 * v : 1.055 * Math.pow(v, 1 / 2.4) - 0.055;
 		return Math.max(0, Math.min(255, Math.round(v * 255)));
 	};
@@ -101,15 +101,15 @@ export function labToRgb(
 	};
 }
 export function rgbToLab(
-	r,
-	g,
-	b,
+	r: number,
+	g: number,
+	b: number,
 	alpha = 1
-) {
+): { L: number, a: number, b: number, alpha: number, converted: string } {
 	r /= 255;
 	g /= 255;
 	b /= 255;
-	const gammaCorrected = (v) => {
+	const gammaCorrected = (v: number): number => {
 		return v > 0.04045 ? Math.pow((v + 0.055) / 1.055, 2.4) : v / 12.92;
 	};
 	r = gammaCorrected(r);
@@ -118,7 +118,7 @@ export function rgbToLab(
 	const X = (r * 0.4124 + g * 0.3576 + b * 0.1805) / 0.95047;
 	const Y = (r * 0.2126 + g * 0.7152 + b * 0.0722) / 1.00000;
 	const Z = (r * 0.0193 + g * 0.1192 + b * 0.9505) / 1.08883;
-	const f = (v) => v > 0.008856 ? Math.cbrt(v) : (7.787 * v) + 16 / 116;
+	const f = (v: number): number => v > 0.008856 ? Math.cbrt(v) : (7.787 * v) + 16 / 116;
 	const fX = f(X);
 	const fY = f(Y);
 	const fZ = f(Z);
@@ -139,11 +139,11 @@ export function rgbToLab(
 
 
 export function lchToRgb(
-	L,
-	C,
-	H,
+	L: number,
+	C: number,
+	H: number,
 	alpha = 1
-) {
+): { r: number, g: number, b: number, alpha: number, converted: string } {
 	const hRad = H * Math.PI / 180;
 	const _a = C * Math.cos(hRad);
 	const _b = C * Math.sin(hRad);
@@ -160,11 +160,11 @@ export function lchToRgb(
 	};
 }
 export function rgbToLch(
-	r,
-	g,
-	b,
+	r: number,
+	g: number,
+	b: number,
 	alpha = 1
-) {
+): { L: number, C: number, H: number, alpha: number, converted: string } {
 	const lab = rgbToLab(r, g, b, alpha);
 	const L = lab.L;
 	const _a = lab.a;
@@ -186,11 +186,11 @@ export function rgbToLch(
 
 
 export function hwbToRgb(
-	h,
-	w,
-	bl,
+	h: number,
+	w: number,
+	bl: number,
 	alpha = 1
-) {
+): { r: number, g: number, b: number, alpha: number, converted: string } {
 	h = h % 360;
 	w /= 100;
 	bl /= 100;
@@ -216,11 +216,11 @@ export function hwbToRgb(
 	};
 }
 export function rgbToHwb(
-	r,
-	g,
-	b,
+	r: number,
+	g: number,
+	b: number,
 	alpha = 1
-) {
+): { h: number, w: number, b: number, alpha: number, converted: string } {
 	r /= 255;
 	g /= 255;
 	b /= 255;
@@ -252,12 +252,12 @@ export function rgbToHwb(
 
 
 export function rgbToHex(
-	r,
-	g,
-	b,
+	r: number,
+	g: number,
+	b: number,
 	alpha = 1
-) {
-	const toHex = (c) => {
+): string {
+	const toHex = (c: number): string => {
 		const hex = Math.round(c).toString(16);
 		return hex.length === 1 ? "0" + hex : hex;
 	};
@@ -266,8 +266,8 @@ export function rgbToHex(
 	return `#${toHex(r)}${toHex(g)}${toHex(b)}${alphaHex !== 255 ? toHex(alphaHex) : ""}`;
 }
 export function hexToRgb(
-	hex
-) {
+	hex: string
+): { r: number, g: number, b: number, alpha: number, converted: string } {
 	const cleanHex = hex.startsWith("#") ? hex.slice(1) : hex;
 	let r = 0, g = 0, b = 0, alpha = 1;
 	if (cleanHex.length === 8) {
@@ -308,11 +308,11 @@ export function hexToRgb(
 
 
 // export function oklabToRgb(
-//     L,
-//     a,
-//     b,
+//     L: number,
+//     a: number,
+//     b: number,
 //     alpha = 1
-// ){
+// ): { r: number, g: number, b: number, alpha: number, converted: string } {
 //     const l_prime = L + a * 0.3963377774 + b * 0.2158037573;
 //     const m_prime = L - a * 0.1055613458 - b * 0.0638541728;
 //     const s_prime = L - a * 0.0894841775 - b * 1.2914855480;
@@ -322,7 +322,7 @@ export function hexToRgb(
 //     const r_linear = +4.0767416621 * l_linear - 3.3077115913 * m_linear + 0.2309699292 * s_linear;
 //     const g_linear = -1.2684380046 * l_linear + 2.6097574011 * m_linear - 0.3413193965 * s_linear;
 //     const b_linear = -0.0041960863 * l_linear - 0.7034186147 * m_linear + 1.707614701 * s_linear;
-//     const srgbOetf = (val) => {
+//     const srgbOetf = (val: number): number => {
 //         val = Math.max(0, Math.min(1, val));
 //         return val <= 0.0031308
 //             ? 12.92 * val
@@ -343,11 +343,11 @@ export function hexToRgb(
 //     };
 // }
 // export function rgbToOklab(
-//     r,
-//     g,
-//     b,
+//     r: number,
+//     g: number,
+//     b: number,
 //     alpha = 1
-// ): { L, a, b, alpha, converted } {
+// ): { L: number, a: number, b: number, alpha: number, converted: string } {
 //     r /= 255;
 //     g /= 255;
 //     b /= 255;
@@ -377,11 +377,11 @@ export function hexToRgb(
 // gamut mapping (e.g., perceptual mapping to sRGB) may be required.
 
 export function oklabToRgb(
-	L,
-	a,
-	b,
+	L: number,
+	a: number,
+	b: number,
 	alpha = 1
-) {
+): { r: number, g: number, b: number, alpha: number, converted: string } {
 	const l_prime = L + a * 0.3963377774 + b * 0.2158037573;
 	const m_prime = L - a * 0.1055613458 - b * 0.0638541728;
 	const s_prime = L - a * 0.0894841775 - b * 1.2914855480;
@@ -394,7 +394,7 @@ export function oklabToRgb(
 	const g_linear = -1.2684380046 * l_linear + 2.6097574011 * m_linear - 0.3413193965 * s_linear;
 	const b_linear = -0.0041960863 * l_linear - 0.7034186147 * m_linear + 1.707614701 * s_linear;
 
-	const srgbOetf = (val) => {
+	const srgbOetf = (val: number): number => {
 		val = Math.max(0, Math.min(1, val));
 		return val <= 0.0031308
 			? 12.92 * val
@@ -418,13 +418,13 @@ export function oklabToRgb(
 }
 
 export function rgbToOklab(
-	r,
-	g,
-	b,
+	r: number,
+	g: number,
+	b: number,
 	alpha = 1
-) {
+): { L: number, a: number, b: number, alpha: number, converted: string } {
 	// Apply inverse sRGB OETF to convert non-linear sRGB to linear RGB
-	const srgbInverseOetf = (val) => {
+	const srgbInverseOetf = (val: number): number => {
 		val = val / 255;
 		return val <= 0.04045 ? val / 12.92 : Math.pow((val + 0.055) / 1.055, 2.4);
 	};
@@ -460,11 +460,11 @@ export function rgbToOklab(
 
 
 export function oklchToRgb(
-	L,
-	C,
-	H,
+	L: number,
+	C: number,
+	H: number,
 	alpha = 1
-) {
+): { r: number, g: number, b: number, alpha: number, converted: string } {
 	const hRad = H * Math.PI / 180;
 	const _a = C * Math.cos(hRad);
 	const _b = C * Math.sin(hRad);
@@ -481,11 +481,11 @@ export function oklchToRgb(
 	};
 }
 export function rgbToOklch(
-	r,
-	g,
-	b,
+	r: number,
+	g: number,
+	b: number,
 	alpha = 1
-) {
+): { L: number, C: number, H: number, alpha: number, converted: string } {
 	const oklab = rgbToOklab(r, g, b, alpha);
 	const L = oklab.L;
 	const _a = oklab.a;
@@ -506,7 +506,7 @@ export function rgbToOklch(
 }
 
 
-const SwitchRGB = {
+export const SwitchRGB = {
 	from: {
 		lch: lchToRgb,
 		lab: labToRgb,
@@ -526,4 +526,4 @@ const SwitchRGB = {
 	LoadHex: rgbToHex,
 };
 
-export default SwitchRGB;	
+export default SwitchRGB;

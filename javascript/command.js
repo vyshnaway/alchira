@@ -5,7 +5,7 @@ import * as SMITH from "./data-smith.js";
 import * as worker from "./Worker/watchman.js";
 import fileman from "./fileman.js";
 import { MemoryUsage } from "./data-init.js";
-import { ROOT, APP, RAW, NAV, STACK } from "./data-cache.js";
+import { ROOT, APP, RAW, NAV, STACK } from "./Data/cache.js";
 import { FetchPortables, SplitGlobalForComponents } from "./Worker/portable.js";
 
 function reporter(heading, targets, report) {

@@ -26,8 +26,8 @@
     "xjs:preview": "xjs preview",
     "xjs:publish": "xjs publish",
     "xjs:archive": "xjs archive",
-    "dev:tsbuild": "tsc -p ./typescript",
-    "dev:esbuild": "node ./execute/script/esbuild.js",
+    "dev:tscompile": "tsc -p ./typescript",
+    "dev:escompile": "node ./execute/script/esbuild.js",
     "dev:package": "chmod +x ./execute/script/build.sh && ./execute/script/build.sh",
     "dev:publish": "node ./execute/script/publish.js"
   },

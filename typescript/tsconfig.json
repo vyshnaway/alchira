@@ -9,6 +9,14 @@
         "types": [
             "node"
         ],
+        "compilerOptions": {
+            "moduleResolution": "nodenext",
+            "paths": {
+                "chokidar": [
+                    "../node_modules/chokidar"
+                ]
+            }
+        },
         "outDir": "../execute/javascript",
         "sourceMap": true,
         "strict": true,
@@ -17,7 +25,6 @@
         "noUnusedParameters": true,
         "noUnusedLocals": true,
         "esModuleInterop": true,
-
         // "forceConsistentCasingInFileNames": true, // Good practice
         // "skipLibCheck": true, // Skips type checking of declaration files, can speed up compilation
         // "allowJs": true, // Allow JavaScript files to be compiled
@@ -26,9 +33,9 @@
         // "noEmitOnError": true, //
     },
     "include": [
-        "**/*"
+        "**/*.ts"
     ],
     "exclude": [
-        "**/*.test.ts"
+        // "**/*.test.ts"
     ]
 }

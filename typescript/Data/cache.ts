@@ -5,8 +5,9 @@ import {
     t_Data_Source,
     t_Data_TWEAKS,
     t_PUBLISH,
-    t_RAW
-} from "../types";
+    t_RAW,
+    t_Stack
+} from "../types.js";
 
 const domain = "xcss.io";
 
@@ -210,8 +211,10 @@ export const NAV: Record<string, Record<string, t_Data_Source>> = {
 
 export const PREFIX: t_Data_PREFIX = {
     atrules: {},
-    pseudos: {},
     attributes: {},
+    pseudos: {},
+    classes: {},
+    elements: {},
     values: {},
 };
 
@@ -238,17 +241,24 @@ export const PUBLISH: t_PUBLISH = {
     },
     MANIFEST: {
         prefix: "",
+        elements: Object.values(APP.customTag),
         constants: [],
         hashrules: {},
         file: {},
-        local: {},
-        global: {},
         axiom: {},
         cluster: {},
+        local: {},
+        global: {},
         xtyling: {},
         binding: {},
     },
     LibFilesTemp: {},
+};
+
+export const STACK: t_Stack = {
+    PROXYCACHE: {},
+    LIBRARIES: {},
+    PORTABLES: {},
 };
 
 export const CACHE: t_CACHE = {
@@ -267,12 +277,6 @@ export const CACHE: t_CACHE = {
     }
 };
 
-export const STACK = {
-    PROXYCACHE: {},
-    LIBRARIES: {},
-    PORTABLES: {},
-};
-
 export const RAW: t_RAW = {
     WATCH: false,
     PACKAGE: "",
@@ -283,8 +287,8 @@ export const RAW: t_RAW = {
     CSSIndex: "",
     RootPath: "",
     WorkPath: "",
+    PROXYMAP: [],
     HASHRULE: {},
-    PROXYMAP: {},
     LIBRARIES: {},
     PORTABLES: {},
     PROXYFILES: {},

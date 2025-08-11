@@ -1,6 +1,6 @@
 import Use from "../Utils/main.js";
-import { CACHE } from "../data-cache.js";
-import { INDEX } from "../data-init.js";
+import { CACHE } from "../Data/cache.js";
+import { INDEX } from "../Data/init.js";
 
 function _styleSwitch(object) {
 	const switched = Use.object.switch(object);
@@ -38,7 +38,7 @@ function BuildFromIndexMap(selectorIndexObject) {
 }
 
 function _loadBindObjectsFromIndex(
-	order = [],
+	order: string[] = [],
 ) {
 	const indexMap = {}, result = {};
 
@@ -57,30 +57,30 @@ function _loadBindObjectsFromIndex(
 }
 
 function buildBinds(
-	preBinds = new Set(),
-	postBinds = new Set()
+	preBinds = new Set<string>(),
+	postBinds = new Set<string>()
 ) {
-	let preLast = preBinds.size, postLast = postBinds.size;
+	const preLast: number = preBinds.size, postLast: number = postBinds.size;
 
 	do {
 		preBinds.forEach((element) => {
 			if (CACHE.LibraryStyle2Index[element]) {
-				INDEX.STYLE(CACHE.LibraryStyle2Index[element]).preBinds.forEach((E) => {
-					if (!preBinds.has(E)) preBinds.add(E);
+				INDEX.STYLE(CACHE.LibraryStyle2Index[element]).preBinds.forEach((E: string) => {
+					if (!preBinds.has(E)) { preBinds.add(E); }
 				});
 			}
 		});
 		postBinds.forEach((element) => {
 			if (CACHE.LibraryStyle2Index[element]) {
-				INDEX.STYLE(CACHE.LibraryStyle2Index[element]).postBinds.forEach((E) => {
-					if (!postBinds.has(E)) postBinds.add(E);
+				INDEX.STYLE(CACHE.LibraryStyle2Index[element]).postBinds.forEach((E: string) => {
+					if (!postBinds.has(E)) { postBinds.add(E); }
 				});
 			}
 		});
 	} while (!(preLast === preBinds.size) && postLast === preBinds.size);
 
 	preBinds.forEach((element) => {
-		if (postBinds.has(element)) preBinds.delete(element);
+		if (postBinds.has(element)) { preBinds.delete(element); }
 	});
 
 	const preBindsCollected = _loadBindObjectsFromIndex(Array.from(preBinds));

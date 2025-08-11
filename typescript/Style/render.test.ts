@@ -1,4 +1,4 @@
-import compose from "./compose.js";
+import compose from "./compose";
 
 const style1 = `.my-button{background-color:#007bff;color:white;media(max-width:738px){font-size: 14px;&:hover{background-color:#0056b3;}}&:hover{background-color:#0056b3;}}.my-button:active{background-color:#003f8e;}@fontface dfk;@media(max-width: 768px){.my-button{font-size:14px;padding:8px 16px;&:hover{background-color:#0056b3;}}@supports(display: grid){.my-button-container{display:grid;grid-template-columns:1fr 1fr;gap:10px;}}}@supports(display:grid){.my-button-container{display:grid;grid-template-columns:1fr 1fr;gap:10px;}}`;
 const style2 = `

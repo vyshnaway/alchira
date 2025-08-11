@@ -17,8 +17,8 @@ export default {
 			.replace(SPACE, "_")
 			.split("")
 			.forEach((ch) => {
-				if (skipChars.includes(ch)) return;
-				else if (addBackSlashFor.includes(ch)) final += "\\" + ch;
+				if (skipChars.includes(ch)) {return;}
+				else if (addBackSlashFor.includes(ch)) {final += "\\" + ch;}
 				else {
 					final +=
 						ch === "_"
@@ -32,7 +32,7 @@ export default {
 			});
 		return final;
 	},
-	minify: (string) => {
+	minify: (string: string) => {
 		const length = string.length;
 		const result = [];
 		let lastCh = " ";
@@ -55,7 +55,7 @@ export default {
 		}
 		return result.join("");
 	},
-	zeroBreaks: (string, conditions = [" ", "\n", ","]) => {
+	zeroBreaks: (string: string, conditions = [" ", "\n", ","]) => {
 		const length = string.length;
 		const result = [];
 		let start = 0;
@@ -77,7 +77,7 @@ export default {
 
 		return result;
 	},
-	enCounter: (number) => {
+	enCounter: (number: number) => {
 		let result = "",
 			reminder = 0;
 
@@ -88,5 +88,5 @@ export default {
 		}
 		return result;
 	},
-	stringMem: (string) => Number((string.length / 1024).toFixed(2)),
+	stringMem: (string:string) => Number((string.length / 1024).toFixed(2)),
 };

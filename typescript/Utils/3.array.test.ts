@@ -1,4 +1,4 @@
-import Fn from "./3.array.js";
+import Fn from "./3.array";
 
 console.log(Fn.longestSubChain([1, 2, 3, 4, 5], [2, 3, 4]));
 console.log(Fn.longestSubChain([1, 3, 2, 4, 5, 6], [3, 1, 4, 2, 5]));

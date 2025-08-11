@@ -21,7 +21,7 @@ const asymKeyPair = async () => {
 	};
 };
 
-const asymEncrypt = async (data, publicKey) => {
+const asymEncrypt = async (data:string, publicKey:string) => {
 	const importedKey = await subtle.importKey(
 		"spki",
 		Buffer.from(publicKey, "base64"),
@@ -45,7 +45,7 @@ const asymEncrypt = async (data, publicKey) => {
 	return Buffer.from(encrypted).toString("base64");
 };
 
-const asymDecrypt = async (encryptedData, privateKey) => {
+const asymDecrypt = async (encryptedData:string, privateKey:string) => {
 	const importedKey = await subtle.importKey(
 		"pkcs8",
 		Buffer.from(privateKey, "base64"),
@@ -69,7 +69,7 @@ const asymDecrypt = async (encryptedData, privateKey) => {
 	return new TextDecoder().decode(decrypted);
 };
 
-function symGencrypt(data) {
+function symGencrypt(data:string) {
 	const key = subtle.generateKey(
 		{
 			name: "AES-GCM",
@@ -106,7 +106,7 @@ function symGencrypt(data) {
 	return encryptedData;
 }
 
-async function symEncrypt(data, base64Key, base64Iv) {
+async function symEncrypt(data: string, base64Key: string, base64Iv: string) {
 	const keyBuffer = Buffer.from(base64Key, "base64");
 	const iv = Buffer.from(base64Iv, "base64");
 	const encodedData = new TextEncoder().encode(data);
@@ -137,7 +137,7 @@ async function symEncrypt(data, base64Key, base64Iv) {
 	};
 }
 
-function symDecrypt(encryptedData, base64Key, base64Iv) {
+function symDecrypt(encryptedData: string, base64Key: string, base64Iv: string) {
 	// Decrypt data using AES-GCM
 	const keyBuffer = Buffer.from(base64Key, "base64");
 	const iv = Buffer.from(base64Iv, "base64");

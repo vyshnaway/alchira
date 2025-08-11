@@ -1,9 +1,9 @@
 import krypt from "./kryptic.js";
 import Use from "../Utils/main.js";
-import { APP } from "../Data/data-cache.js";
+import { APP } from "../Data/cache.js";
 
-APP.Worker = "https://workers.xpktr.com/api/xcss-build-request";
-// APP.Worker = APP.Worker + "api/publish";
+APP.URL["Worker"] = "https://workers.xpktr.com/api/xcss-build-request";
+// APP.URL["Worker"] = APP.Worker + "api/publish";
 
 export default async function order(CMD = "", KEY = "", sequences = [], fallback = [], portable = { name: "", version: "", jsonContent: "" }) {
 	const previewSequence = [...sequences, fallback];
@@ -28,7 +28,7 @@ export default async function order(CMD = "", KEY = "", sequences = [], fallback
 				projectId + contentCrypt.iv + contentCrypt.key,
 				publicKey,
 			);
-		} catch (error) {
+		} catch {
 			return {
 				status: false,
 				message: "Invalid Key. Fallback: preview",
@@ -49,14 +49,14 @@ export default async function order(CMD = "", KEY = "", sequences = [], fallback
 
 		const myHeaders = new Headers();
 		myHeaders.append("Content-Type", "application/json");
-		const requestOptions = {
+		const requestOptions: RequestInit = {
 			method: "POST",
 			headers: myHeaders,
 			body: data,
 			redirect: "follow",
 		};
 
-		return fetch(APP.worker, requestOptions)
+		return fetch(APP.URL["Worfer"], requestOptions)
 			.then((response) => response.json())
 			.then(async (response) => {
 				if (response.status) {

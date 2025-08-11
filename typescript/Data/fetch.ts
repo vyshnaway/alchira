@@ -1,10 +1,10 @@
-import $ from "../Shell/main";
+import $ from "../Shell/main.js";
 
-import fileman from "../fileman";
-import * as worker from "./watch";
-import { collectTWEAKS, collectVendors } from "./init";
-import { t_Config, t_Data_PREFIX } from "../types";
-import { NAV, SYNC, APP, RAW, PREFIX, CACHE } from "./cache";
+import fileman from "../fileman.js";
+import * as worker from "./watch.js";
+import { collectTWEAKS, collectVendors } from "./init.js";
+import { t_Config, t_Data_PREFIX } from "../types.js";
+import { NAV, SYNC, APP, RAW, PREFIX, CACHE } from "./cache.js";
 
 export async function FetchDocs() {
 	await Promise.all(Object.values(SYNC).map(sync => {
@@ -15,8 +15,6 @@ export async function FetchDocs() {
 		});
 	}));
 }
-
-
 
 export async function FetchStatics(vendorSource: string) {
 	$.TASK("Saving guidelines.", 0);
@@ -92,7 +90,7 @@ export async function Initialize() {
 					"During execution " +
 					$.style.bold.Orange("{target}") +
 					$.canvas.unstyle +
-					" folder will be cloned from " +
+					" folder will be cloned from ".js +
 					$.style.bold.Orange("{source}") +
 					$.canvas.unstyle +
 					" folder.",
@@ -100,7 +98,7 @@ export async function Initialize() {
 					"In the " +
 					$.style.bold.Orange("{target}/{stylesheet}") +
 					$.canvas.unstyle +
-					", content from " +
+					", content from ".js +
 					$.style.bold.Orange("{target}/{stylesheet}") +
 					$.canvas.unstyle +
 					" will be appended.",
@@ -168,15 +166,14 @@ export async function VerifySetupStruct() {
 		}
 		$.TASK("Verification finished");
 
+		const errSrcs = $.list.failed.Level(Object.keys(errors));
+		const errList = Object.values(errors).map((err, ind) => `${errSrcs[ind]}: ${err}`);
 		result.unstart = false;
-		result.proceed = Object.keys(errors).length === 0;
+		result.proceed = errSrcs.length === 0;
 		result.report =
 			Object.keys(errors).length === 0
 				? $.MOLD.success.Footer("Setup Healthy")
-				: $.MOLD.failed.Footer("Error Paths",
-					errors,
-					$.list.failed.Bullets
-				);
+				: $.MOLD.failed.Footer("Error Paths", errList, $.list.failed.Bullets);
 	} else {
 		result.report = $.MOLD.warning.Footer(
 			"XCSS is not yet initialized in directory.",

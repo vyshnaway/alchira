@@ -1,4 +1,4 @@
-import FN from "./style.js";
+import FN from "./parse";
 
 console.log(
   FN.CSSBULK([

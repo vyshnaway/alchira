@@ -1,18 +1,28 @@
-function objectSwitch(srcObject) {
+type PlainObject<T = unknown> = Record<string, T>;
+
+/**
+ * Transposes a nested object structure so inner keys become outer keys.
+ *
+ * Example:
+ * { a: { x: 1, y: 2 }, b: { x: 3 } }
+ * => { x: { a: 1, b: 3 }, y: { a: 2 } }
+ */
+function objectSwitch<T extends PlainObject<PlainObject>>(srcObject: T): PlainObject<PlainObject> {
 	if (!srcObject || typeof srcObject !== "object") {
 		return {};
 	}
 
-	const output = {};
+	const output: PlainObject<PlainObject> = {};
 
 	for (const outerKey in srcObject) {
-		if (srcObject.hasOwnProperty(outerKey) && outerKey[0] !== "+") {
+		if (Object.prototype.hasOwnProperty.call(srcObject, outerKey) && outerKey[0] !== "+") {
 			const innerObject = srcObject[outerKey];
-
 			if (typeof innerObject === "object" && innerObject !== null) {
 				for (const innerKey in innerObject) {
-					if (innerObject.hasOwnProperty(innerKey)) {
-						output[innerKey] = output[innerKey] || {};
+					if (Object.prototype.hasOwnProperty.call(innerObject, innerKey)) {
+						if (!output[innerKey]) {
+							output[innerKey] = {};
+						}
 						output[innerKey][outerKey] = innerObject[innerKey];
 					}
 				}
@@ -23,14 +33,17 @@ function objectSwitch(srcObject) {
 	return output;
 }
 
-function deepMerge(target, source) {
-	if (!source || typeof source !== "object") return target;
+/**
+ * Deep merges `source` into `target` (recursively for plain objects).
+ */
+function deepMerge<T extends PlainObject, S extends PlainObject>(target: T, source: S): T & S {
+	if (!source || typeof source !== "object") { return target as T & S; }
 
 	for (const key in source) {
-		const sourceValue = source[key];
-		if (sourceValue === undefined) continue;
+		const sourceValue = source[key as keyof S];
+		if (sourceValue === undefined) { continue; }
 
-		const targetValue = target[key];
+		const targetValue = target[key as keyof T];
 
 		if (
 			targetValue &&
@@ -39,55 +52,58 @@ function deepMerge(target, source) {
 			typeof sourceValue === "object" &&
 			!Array.isArray(targetValue)
 		) {
-			target[key] = deepMerge(targetValue, sourceValue);
+			target[key as keyof T] = deepMerge(
+				targetValue as PlainObject,
+				sourceValue as PlainObject
+			) as any;
 		} else {
-			target[key] = sourceValue;
+			target[key] = sourceValue as (T & S)[typeof key];
 		}
 	}
 
-	return target;
+	return target as T & S;
 }
 
-function bulkMerge(objectArray = [], aggressive = false, arrayMerge = false) {
-	// Input validation: return empty object if input is invalid or empty
-	if (!objectArray || !Array.isArray(objectArray) || objectArray.length === 0) {
+/**
+ * Merges multiple objects with optional aggressive or array concatenation modes.
+ */
+function bulkMerge<T extends PlainObject>(
+	objectArray: T[] = [],
+	aggressive = false,
+	arrayMerge = false
+): PlainObject {
+	if (!Array.isArray(objectArray) || objectArray.length === 0) {
 		return {};
 	}
 
-	// Helper function to merge source into target in place
-	function deepMerge(target, source) {
+	function innerMerge(target: PlainObject, source: PlainObject): PlainObject {
 		for (const key in source) {
-			if (source.hasOwnProperty(key)) {
-				// Handle nested objects (non-arrays)
+			if (Object.prototype.hasOwnProperty.call(source, key)) {
+				const srcVal = source[key];
+				const tgtVal = target[key];
+
 				if (
-					typeof source[key] === "object" &&
-					source[key] !== null &&
-					!Array.isArray(source[key])
+					typeof srcVal === "object" &&
+					srcVal !== null &&
+					!Array.isArray(srcVal)
 				) {
 					if (
-						typeof target[key] === "object" &&
-						target[key] !== null &&
-						!Array.isArray(target[key])
+						typeof tgtVal === "object" &&
+						tgtVal !== null &&
+						!Array.isArray(tgtVal)
 					) {
-						// Recursively merge into existing object
-						deepMerge(target[key], source[key]);
+						innerMerge(tgtVal as PlainObject, srcVal as PlainObject);
 					} else {
-						// Create a shallow copy if target[key] isn’t an object
-						target[key] = { ...source[key] };
+						target[key] = { ...(srcVal as PlainObject) };
 					}
-				}
-				// Handle arrays when arrayMerge is true
-				else if (
-					Array.isArray(source[key]) &&
-					Array.isArray(target[key]) &&
+				} else if (
+					Array.isArray(srcVal) &&
+					Array.isArray(tgtVal) &&
 					arrayMerge
 				) {
-					// Append elements to existing array
-					target[key].push(...source[key]);
-				}
-				// Handle primitives and arrays when arrayMerge is false
-				else if (aggressive || !(key in target)) {
-					target[key] = source[key];
+					(tgtVal as unknown[]).push(...srcVal);
+				} else if (aggressive || !(key in target)) {
+					target[key] = srcVal;
 				}
 			}
 		}
@@ -95,46 +111,73 @@ function bulkMerge(objectArray = [], aggressive = false, arrayMerge = false) {
 	}
 
 	return objectArray.reduce(
-		(result, obj) => deepMerge(structuredClone(result), obj),
-		{},
+		(result, obj) => innerMerge(structuredClone(result), obj),
+		{} as PlainObject
 	);
 }
 
-function skeleton(object = {}) {
-	return Object.entries(object).reduce((result, [k, o]) => {
-		if (typeof o === "object") result[k] = skeleton(o);
+/**
+ * Creates an object retaining only the structure of the input, with
+ * nested objects preserved as empty shells.
+ */
+function skeleton<T extends PlainObject>(object: T = {} as T): PlainObject {
+	return Object.entries(object).reduce<PlainObject>((result, [k, o]) => {
+		if (typeof o === "object" && o !== null) {
+			result[k] = skeleton(o as PlainObject);
+		}
 		return result;
-	}, {})
+	}, {});
 }
 
-function ObjectDelta(A = {}, B = {}) {
-	let score = 0,
-		result = {};
+/**
+ * Computes the delta from object A to object B.
+ */
+function ObjectDelta<T extends PlainObject>(
+	A: T = {} as T,
+	B: T = {} as T
+): { result: Partial<T>; score: number } {
+	let score = 0;
+	const result: Partial<T> = {};
+
 	Object.entries(B).forEach(([Bkey, Bvalue]) => {
-		switch (typeof Bvalue) {
-			case "string":
-				if (A[Bkey] !== Bvalue) {
-					score++;
-					result[Bkey] = Bvalue;
+		if (typeof Bvalue === "string" || typeof Bvalue === "number" || typeof Bvalue === "boolean" || Bvalue === null) {
+			if (A[Bkey] !== Bvalue) {
+				score++;
+				result[Bkey as keyof T] = Bvalue as T[keyof T];
+			}
+		} else if (typeof Bvalue === "object" && Bvalue !== null) {
+			if (typeof A[Bkey] === "object" && A[Bkey] !== null) {
+				const subobj = ObjectDelta(
+					A[Bkey] as PlainObject,
+					Bvalue as PlainObject
+				);
+				if (subobj.score) {
+					result[Bkey as keyof T] = subobj.result as T[keyof T];
 				}
-				break;
-			case "object":
-				if (typeof A[Bkey] === "object") {
-					const subobj = ObjectDelta(A[Bkey], Bvalue);
-					if (subobj.score)
-						result[Bkey] = subobj.result;
-					score += subobj.score;
-				} else result[Bkey] = Bvalue;
-				break;
+				score += subobj.score;
+			} else {
+				result[Bkey as keyof T] = Bvalue as T[keyof T];
+			}
 		}
 	});
+
 	return { result, score };
 }
 
-export default {
+export interface ObjectUtils {
+	skeleton: typeof skeleton;
+	onlyB: typeof ObjectDelta;
+	switch: typeof objectSwitch;
+	deepMerge: typeof deepMerge;
+	multiMerge: typeof bulkMerge;
+}
+
+const utils: ObjectUtils = {
 	skeleton,
 	onlyB: ObjectDelta,
 	switch: objectSwitch,
-	deepMerge: deepMerge,
+	deepMerge,
 	multiMerge: bulkMerge,
 };
+
+export default utils;

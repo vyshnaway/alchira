@@ -53,13 +53,12 @@ export interface t_Data_Source {
 }
 
 export interface t_Data_PREFIX {
-    [key: string]: unknown,
-    atrules?: Record<string, Record<string, string>>,
-    attributes?: Record<string, Record<string, string>>,
-    pseudos?: Record<string, Record<string, string>>,
-    classes?: Record<string, Record<string, string>>,
-    elements?: Record<string, Record<string, string>>,
-    values?: Record<string, Record<string, Record<string, string>>>,
+    atrules: Record<string, Record<string, string>>,
+    attributes: Record<string, Record<string, string>>,
+    pseudos: Record<string, Record<string, string>>,
+    classes: Record<string, Record<string, string>>,
+    elements: Record<string, Record<string, string>>,
+    values: Record<string, Record<string, Record<string, string>>>,
 }
 
 export interface t_Data_FILING {
@@ -127,6 +126,7 @@ export interface t_PUBLISH {
     },
     MANIFEST: {
         prefix: string,
+        elements: string[],
         constants: string[],
         hashrules: Record<string, string>,
         file: Record<string, t_FileMap>;
@@ -177,28 +177,49 @@ export interface t_Archive extends t_Config_Archive_Intersection {
     tweaks?: t_Data_TWEAKS
 }
 
+export interface t_SelectorMeta {
+    info: string[],
+    variables: Record<string, string>,
+    skeleton: object,
+    declarations: string[]
+}
+
+export interface t_SelectorData {
+    portable: string,
+    scope: string,
+    selector: string,
+    object: object,
+    metadata: t_SelectorMeta,
+    preBinds: string[],
+    postBinds: string[],
+    metaClass: string,
+    boundSnippet: string,
+    boundStyles: string,
+    declarations: string[]
+}
+
+export interface t_Stack {
+    PROXYCACHE: Record<string, t_Data_FILING>,
+    LIBRARIES: Record<string, t_Data_FILING>,
+    PORTABLES: Record<string, t_Data_FILING>,
+}
 
 export interface t_CACHE {
-    HashRule: {},
-    SortedIndexes: [],
-    PortableEssentials: [],
-    Index2StylesObject: {},
-    NativeStyle2Index: {},
-    LibraryStyle2Index: {},
-    GlobalsStyle2Index: {},
-    PortableStyle2Index: {},
-    FinalStack: {},
+    HashRule: Record<string, string>,
+    SortedIndexes: number[],
+    PortableEssentials: [string, string][],
+    Index2StylesObject: Record<number, t_SelectorData>,
+    NativeStyle2Index: Record<string, number>,
+    LibraryStyle2Index: Record<string, number>,
+    GlobalsStyle2Index: Record<string, number>,
+    PortableStyle2Index: Record<string, number>,
+    FinalStack: Record<string, number>,
     Archive: t_Archive,
 };
 
-// export const STACK = {
-//     PROXYCACHE: {},
-//     LIBRARIES: {},
-//     PORTABLES: {},
-// };
+
 
 export interface t_Proxy {
-
 }
 
 export interface t_RAW {

@@ -3,11 +3,11 @@ import CSSBLOCK from "./block.js";
 import $ from "../Shell/main.js";
 import Use from "../Utils/main.js";
 import HASHRULE from "../hash-rules.js";
-import { RAW, CACHE } from "../data-cache.js";
-import { INDEX } from "../data-init.js";
+import { RAW, CACHE } from "../Data/cache.js";
+import { INDEX } from "../Data/init.js";
 
-function xtylemerge(classList = []) {
-	let result = {}, preBinds = [], postBinds = [];
+function xtylemerge(classList: string[] = []) {
+	const result: object = {}, preBinds: string[] = [], postBinds: string[] = [];
 	classList.forEach((className) => {
 		const index = (CACHE.LibraryStyle2Index[className] || 0) +
 			(CACHE.PortableStyle2Index[className] || 0) +
@@ -22,7 +22,7 @@ function xtylemerge(classList = []) {
 	return { result, preBinds, postBinds };
 }
 
-function SCANNER(content, initial, sourceSelector) {
+function SCANNER(content: string, initial: string, sourceSelector: string) {
 	const scanned = CSSBLOCK(content);
 	const variables = scanned.variables;
 	const merged = xtylemerge(scanned.compose);

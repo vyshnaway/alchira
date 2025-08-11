@@ -1,4 +1,4 @@
-function isInString(input, index) {
+function isInString(input: string, index: number): boolean {
 	let inSingleQuote = false;
 	let inDoubleQuote = false;
 	let inTemplateLiteral = false;
@@ -29,13 +29,14 @@ function isInString(input, index) {
 	return inSingleQuote || inDoubleQuote || inTemplateLiteral;
 }
 
-function stripComments(content) {
-	const result = [];
+function stripComments(content: string): string {
+	const result: string[] = [];
 	let i = 0;
+
 	while (i < content.length) {
 		const char = content[i];
 
-		// Handle single-line comments (//)
+		// Single-line comments (//)
 		if (
 			char === "/" &&
 			i + 1 < content.length &&
@@ -49,7 +50,7 @@ function stripComments(content) {
 			continue;
 		}
 
-		// Handle multi-line comments (/* */)
+		// Multi-line comments (/* */)
 		if (
 			char === "/" &&
 			i + 1 < content.length &&
@@ -63,11 +64,11 @@ function stripComments(content) {
 			) {
 				i++;
 			}
-			i += 2; // Skip '*/'
+			i += 2;
 			continue;
 		}
 
-		// Handle HTML comments (<!-- -->)
+		// HTML comments (<!-- -->)
 		if (
 			char === "<" &&
 			i + 3 < content.length &&
@@ -75,33 +76,32 @@ function stripComments(content) {
 			!isInString(content, i)
 		) {
 			i += 4;
-			while (i + 2 < content.length && content.substring(i, 3) !== "-->") {
+			while (
+				i + 2 < content.length &&
+				content.substring(i, i + 3) !== "-->"
+			) {
 				i++;
 			}
-			i += 3; // Skip '-->'
+			i += 3;
 			continue;
 		}
 
-		// Add character to result and move forward
 		result.push(char);
 		i++;
 	}
+
 	return result.join("");
 }
 
 const REGEX_PATTERNS = {
-	// Strip CSS comments /* */
 	comments: /\/\*[\s\S]*?\*\//gm,
-	// Combined spacing: symbols, selectors, values, !important
 	spacing: /\s*([{}:;,])\s*|\s+([{}])|(:)\s*([^;}]*)\s*([;}])|\s*!important/g,
-	// Value optimizations: hex, zeros, combined units
 	valueOptimizations:
 		/#([0-9a-f])\1([0-9a-f])\2([0-9a-f])\3|(\d+)(px|em|rem|%|vw|vh)\s+(\d+)\5|0(px|em|rem|%|vw|vh)/gi,
-	// RGB to hex (simplified)
 	rgbToHex: /rgb\((\d+),\s*(\d+),\s*(\d+)\)/g,
-};
+} as const;
 
-function stripCssComments(content) {
+function stripCssComments(content: string): string {
 	return content
 		.replace(REGEX_PATTERNS.comments, "")
 		.replace(/(\s*\r\n)+/g, "\n")
@@ -109,32 +109,35 @@ function stripCssComments(content) {
 		.trim();
 }
 
-function minifyCssAggressive(content) {
+function minifyCssAggressive(content: string): string {
 	return (
 		content
-			// Step 1: Optimize spacing in one pass
+			// Step 1: Optimize spacing
 			.replace(
 				REGEX_PATTERNS.spacing,
-				(match, sym1, sym2, colon, value, end) => {
-					if (sym1) return sym1; // { } : ; ,
-					if (sym2) return sym2; // { }
-					if (colon) return `${colon}${value}${end}`; // : value ;
-					return "!important"; // !important
+				(_, sym1, sym2, colon, value, end) => {
+					if (sym1) { return sym1; }
+					if (sym2) { return sym2; }
+					if (colon) { return `${colon}${value}${end}`; }
+					return "!important";
 				},
 			)
-			// Step 2: Optimize values (hex, units)
+			// Step 2: Optimize values
 			.replace(
 				REGEX_PATTERNS.valueOptimizations,
-				(match, h1, h2, h3, num1, unit, num2) => {
-					if (h1) return `#${h1}${h2}${h3}`; // Hex shortening
-					if (num1) return `${num1} ${num2}${unit}`; // Same unit combine
-					return "0"; // Zero units
+				(_, h1, h2, h3, num1, unit, num2) => {
+					if (h1) { return `#${h1}${h2}${h3}`; }
+					if (num1) { return `${num1} ${num2}${unit}`; }
+					return "0";
 				},
 			)
 			// Step 3: RGB to hex
 			.replace(REGEX_PATTERNS.rgbToHex, (_, r, g, b) => {
-				const toHex = (n) =>
-					Math.min(255, Math.max(0, +n)).toString(16).padStart(2, "0");
+				const toHex = (n: string) =>
+					Math.min(255, Math.max(0, +n))
+						.toString(16)
+						.padStart(2, "0");
+
 				return `#${toHex(r)}${toHex(g)}${toHex(b)}`.replace(
 					REGEX_PATTERNS.valueOptimizations,
 					"#$1$2$3",
@@ -144,34 +147,48 @@ function minifyCssAggressive(content) {
 	);
 }
 
-function minifyCssLite(content) {
+function minifyCssLite(content: string): string {
 	return (
 		content
-			// Step 1: Optimize spacing in one pass
 			.replace(
 				REGEX_PATTERNS.spacing,
-				(match, sym1, sym2, colon, value, end) => {
-					if (sym1) return sym1; // { } : ; ,
-					if (sym2) return sym2; // { }
-					if (colon) return `${colon}${value}${end}`; // : value ;
-					return "!important"; // !important
+				(_, sym1, sym2, colon, value, end) => {
+					if (sym1) { return sym1; }
+					if (sym2) { return sym2; }
+					if (colon) { return `${colon}${value}${end}`; }
+					return "!important";
 				},
 			)
 			.trim()
 	);
 }
 
+export interface JSONCHandler {
+	parse: (string: string) => string;
+	build: (object: unknown) => string;
+}
+
+export interface UncommentHandler {
+	Script: (content: string) => string;
+	Css: (content: string) => string;
+}
+
+export interface MinifyHandler {
+	Strict: (content: string) => string;
+	Lite: (content: string) => string;
+}
+
 export default {
 	jsonc: {
-		parse: (string) => JSON.parse(stripComments(string)),
-		build: (object) => JSON.stringify(object, null, 4),
-	},
+		parse: (string: string) => JSON.parse(stripComments(string)),
+		build: (object: unknown) => JSON.stringify(object, null, 4),
+	} as JSONCHandler,
 	uncomment: {
 		Script: stripComments,
 		Css: stripCssComments,
-	},
+	} as UncommentHandler,
 	minify: {
 		Strict: minifyCssAggressive,
 		Lite: minifyCssLite,
-	},
+	} as MinifyHandler,
 };

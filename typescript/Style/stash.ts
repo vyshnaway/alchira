@@ -2,56 +2,56 @@ import PARSE from "./parse.js";
 
 import $ from "../Shell/main.js";
 import Use from "../Utils/main.js";
-import FILING from "../data-filing.js";
+import FILING from "../Data/filing.js";
 import SCRIPTFILE from "../Script/file.js";
-import { INDEX } from "../data-init.js";
-import { NAV, CACHE, STACK, RAW } from "../data-cache.js";
+import { INDEX } from "../Data/init.js";
+import { NAV, CACHE, STACK, RAW } from "../Data/cache.js";
 
-function _DeleteLibraryFile(filePath) {
+function _DeleteLibraryFile(filePath: string) {
 	if (STACK.LIBRARIES[filePath]) {
-		STACK.LIBRARIES[filePath].usedIndexes.forEach(i => INDEX.DISPOSE(i));
+		STACK.LIBRARIES[filePath].styleData.usedIndexes.forEach(i => INDEX.DISPOSE(i));
 		delete STACK.LIBRARIES[filePath];
 	}
 }
 
-function _DeletePortableFile(filePath) {
+function _DeletePortableFile(filePath: string) {
 	if (STACK.PORTABLES[filePath]) {
-		STACK.PORTABLES[filePath].usedIndexes.forEach(i => INDEX.DISPOSE(i));
+		STACK.PORTABLES[filePath].styleData.usedIndexes.forEach(i => INDEX.DISPOSE(i));
 		delete STACK.PORTABLES[filePath];
 	}
 }
 
 function _ClearStash() {
 	Object.entries(CACHE.LibraryStyle2Index).forEach(([selector, index]) => {
-		DISPOSE(index);
+		INDEX.DISPOSE(index);
 		delete CACHE.LibraryStyle2Index[selector]
-	})
+	});
 	Object.entries(CACHE.PortableStyle2Index).forEach(([selector, index]) => {
-		DISPOSE(index);
+		INDEX.DISPOSE(index);
 		delete CACHE.PortableStyle2Index[selector]
-	})
+	});
 	CACHE.PortableEssentials = []
 
 	Object.keys(STACK.LIBRARIES).forEach((filePath) => _DeleteLibraryFile(filePath));
 	Object.keys(STACK.PORTABLES).forEach((filePath) => _DeletePortableFile(filePath));
 }
 
-function _SaveLibraryFile(filePath, fileContent) {
-	if (STACK.LIBRARIES[filePath]) _DeleteLibraryFile(filePath);
+function _SaveLibraryFile(filePath: string, fileContent: string) {
+	if (STACK.LIBRARIES[filePath]) { _DeleteLibraryFile(filePath); }
 	STACK.LIBRARIES[filePath] = FILING(
 		"",
-		NAV.folder.library,
-		filePath.slice(NAV.folder.library.length + 1),
+		NAV.folder.library.path,
+		filePath.slice(NAV.folder.library.path.length + 1),
 		fileContent, true, false
 	);
 }
 
-function _SavePortableFile(filePath, fileContent) {
-	if (STACK.PORTABLES[filePath]) _DeletePortableFile(filePath);
+function _SavePortableFile(filePath: string, fileContent: string) {
+	if (STACK.PORTABLES[filePath]) { _DeletePortableFile(filePath); }
 	STACK.PORTABLES[filePath] = FILING(
 		"",
-		NAV.folder.portables,
-		filePath.slice(NAV.folder.portables.length + 1),
+		NAV.folder.portables.path,
+		filePath.slice(NAV.folder.portables.path.length + 1),
 		fileContent, true, true
 	);
 }
