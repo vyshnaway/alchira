@@ -6,6 +6,7 @@ import FILING from "../Data/filing.js";
 import SCRIPTFILE from "../Script/file.js";
 import { INDEX } from "../Data/init.js";
 import { NAV, CACHE, STACK, RAW } from "../Data/cache.js";
+import { t_Data_FILING, t_SelectorMeta } from "../types.js";
 
 function _DeleteLibraryFile(filePath: string) {
 	if (STACK.LIBRARIES[filePath]) {
@@ -24,13 +25,13 @@ function _DeletePortableFile(filePath: string) {
 function _ClearStash() {
 	Object.entries(CACHE.LibraryStyle2Index).forEach(([selector, index]) => {
 		INDEX.DISPOSE(index);
-		delete CACHE.LibraryStyle2Index[selector]
+		delete CACHE.LibraryStyle2Index[selector];
 	});
 	Object.entries(CACHE.PortableStyle2Index).forEach(([selector, index]) => {
 		INDEX.DISPOSE(index);
-		delete CACHE.PortableStyle2Index[selector]
+		delete CACHE.PortableStyle2Index[selector];
 	});
-	CACHE.PortableEssentials = []
+	CACHE.PortableEssentials = [];
 
 	Object.keys(STACK.LIBRARIES).forEach((filePath) => _DeleteLibraryFile(filePath));
 	Object.keys(STACK.PORTABLES).forEach((filePath) => _DeletePortableFile(filePath));
@@ -61,18 +62,21 @@ function _SavePortableFile(filePath: string, fileContent: string) {
 
 function _StackLibraryFiles() {
 	let length = 0;
-	const axiom = {}, cluster = {}, libraryTable = {};
+	const
+		axiom: Record<string, t_Data_FILING[]> = {},
+		cluster: Record<string, t_Data_FILING[]> = {},
+		libraryTable: Record<string, { group: string, id: string }> = {};
 	Object.entries(STACK.LIBRARIES).forEach(([filePath, fileData]) => {
 		const { id, group } = fileData;
 		libraryTable[filePath] = { group, id };
 		if (group === "axiom") {
-			if (!axiom[id]) axiom[id] = [];
+			if (!axiom[id]) { axiom[id] = []; }
 			axiom[id].push(fileData);
 		} else if (group === "cluster") {
-			if (!cluster[id]) cluster[id] = [];
+			if (!cluster[id]) { cluster[id] = []; }
 			cluster[id].push(fileData);
 		}
-		if (id > length) length = id;
+		if (Number(id) > length) { length = Number(id); }
 	});
 	const axiomsArray = Use.array.fromNumberedObject(axiom, length);
 	const clustersArray = Use.array.fromNumberedObject(cluster, length);
@@ -80,14 +84,17 @@ function _StackLibraryFiles() {
 }
 
 function _StackPortableFiles() {
-	const bindingArray = [], xtylingArray = [], portableTable = {};
+	const
+		bindingArray: t_Data_FILING[] = [],
+		xtylingArray: t_Data_FILING[] = [],
+		portableTable: Record<string, { group: string, id: string }> = {};
 
 	Object.entries(STACK.PORTABLES).forEach(([filePath, fileData]) => {
 		fileData.id = filePath;
 		const { id, group } = fileData;
 		portableTable[filePath] = { group, id };
-		if (group === "binding") bindingArray.push(fileData);
-		else if (group === "xtyling") xtylingArray.push(fileData);
+		if (group === "binding") { bindingArray.push(fileData); }
+		else if (group === "xtyling") { xtylingArray.push(fileData); }
 	});
 
 	return { portableTable, bindingArray, xtylingArray };
@@ -97,16 +104,18 @@ function _StackPortableFiles() {
 /////////////////////////////////////////////////////////////////////////////
 
 
-let axiomCount = 0,
-	clusterCount = 0,
-	portableCount = 0,
-	bindingCount = 0;
-let axiomChart = {},
-	clusterChart = {},
-	portableChart = {},
-	bindingChart = {};
-let report = "",
-	warnings = [];
+let report = "";
+
+let axiomCount = 0;
+let clusterCount = 0;
+let bindingCount = 0;
+let portableCount = 0;
+
+let warnings: string[] = [];
+let axiomChart: Record<string, string[]> = {};
+let clusterChart: Record<string, string[]> = {};
+let bindingChart: Record<string, string[]> = {};
+let portableChart: Record<string, string[]> = {};
 
 function _UpdateFiles() {
 	_ClearStash();
@@ -122,18 +131,24 @@ function _UpdateFiles() {
 function ReRender() {
 	_UpdateFiles();
 
-	report = "", warnings = [];
-	(axiomCount = 0), (clusterCount = 0), (portableCount = 0), (bindingCount = 0);
-	(axiomChart = {}), (clusterChart = {}), (portableChart = {}), (bindingChart = {});
+	report = "";
+	axiomCount = 0;
+	clusterCount = 0;
+	portableCount = 0;
+	bindingCount = 0;
+	warnings = [];
+	axiomChart = {};
+	clusterChart = {};
+	bindingChart = {};
+	portableChart = {};
 
 	const { libraryTable, axiomsArray, clustersArray } = _StackLibraryFiles();
 	const { portableTable: modulesTable, bindingArray, xtylingArray: portablesArray } = _StackPortableFiles();
 
-	const PortableEssentials = [];
-	const XtylingStyleSkeleton = portablesArray.reduce((collection, fileData) => {
+	const PortableEssentials: unknown[][] = [];
+	const XtylingStyleSkeleton = portablesArray.reduce((collection: Record<string, Record<string, t_SelectorMeta>>, fileData) => {
 		const filePath = NAV.folder.portables + "/" + fileData.filePath;
-		const tagStash = SCRIPTFILE(fileData).stylesList, indexSkeleton = {};
-		fileData.usedIndexes = new Set();
+		const tagStash = SCRIPTFILE(fileData).stylesList, indexMetaCollection: Record<string, t_SelectorMeta> = {};
 		tagStash.forEach((style) => {
 			style.scope = "xtyling";
 			const response = PARSE.TAGSTYLE(
@@ -150,51 +165,48 @@ function ReRender() {
 			warnings.push(...response.errors);
 
 			if (response.selector === "") {
-				PortableEssentials.push(...response.essentials)
-				if (!RAW.WATCH) fileData.essentials.push(...response.essentials);
+				PortableEssentials.push(...response.essentials);
+				if (!RAW.WATCH) { fileData.essentials.push(...response.essentials); }
 			} else if (response.isOriginal) {
-				fileData.usedIndexes.add(response.index);
-				indexSkeleton[response.selector] = response.metadata;
+				fileData.styleData.usedIndexes.add(response.index);
+				indexMetaCollection[response.selector] = response.metadata;
 				portableCount++;
 			}
 		});
-		collection[filePath] = indexSkeleton;
-		const classNames = Object.keys(indexSkeleton);
-		if (classNames.length) portableChart[`Portable [${fileData.filePath}]: ${classNames.length} Classes`] = classNames;
-		return collection
+		collection[filePath] = indexMetaCollection;
+		const classNames = Object.keys(indexMetaCollection);
+		if (classNames.length) { portableChart[`Portable [${fileData.filePath}]: ${classNames.length} Classes`] = classNames; }
+		return collection;
 	}, {});
 
-	const BindingStyleSkeleton = bindingArray.reduce((collection, fileData) => {
+	const BindingStyleSkeleton = bindingArray.reduce((collection: Record<string, Record<string, t_SelectorMeta>>, fileData) => {
 		const result = PARSE.CSSLIBRARY([fileData], "BINDING", true);
-		collection[NAV.folder.portables + "/" + fileData.filePath] = result.indexSkeleton;
-		if (result.selectorList.length)
-			bindingChart[`Binding [${fileData.filePath}]: ${result.selectorList.length} Classes`] = result.selectorList;
+		collection[NAV.folder.portables + "/" + fileData.filePath] = result.indexMetaCollection;
+		if (result.selectorList.length) { bindingChart[`Binding [${fileData.filePath}]: ${result.selectorList.length} Classes`] = result.selectorList; }
 		bindingCount += result.selectorList.length;
 		return collection;
 	}, {});
 
 
-	const AxiomStyleSkeleton = axiomsArray.reduce((collection, fileData, index) => {
+	const AxiomStyleSkeleton = axiomsArray.reduce((collection: Record<string, Record<string, t_SelectorMeta>>, fileData, index) => {
 		const result = PARSE.CSSLIBRARY(fileData, "AXIOM");
-		collection[index] = result.indexSkeleton;
-		if (result.selectorList.length)
-			axiomChart[`Level ${index}: ${result.selectorList.length} Classes`] = result.selectorList;
+		collection[index] = result.indexMetaCollection;
+		if (result.selectorList.length) { axiomChart[`Level ${index}: ${result.selectorList.length} Classes`] = result.selectorList; }
 		axiomCount += result.selectorList.length;
 		return collection;
 	}, {});
 
-	const ClusterStyleSkeleton = clustersArray.reduce((collection, level, index) => {
+	const ClusterStyleSkeleton = clustersArray.reduce((collection: Record<string, Record<string, t_SelectorMeta>>, level, index) => {
 		const result = PARSE.CSSLIBRARY(level, "CLUSTER");
-		collection[index] = result.indexSkeleton;
-		if (result.selectorList.length)
-			clusterChart[`Level ${index}: ${result.selectorList.length} Classes`] = result.selectorList;
+		collection[index] = result.indexMetaCollection;
+		if (result.selectorList.length) { clusterChart[`Level ${index}: ${result.selectorList.length} Classes`] = result.selectorList; }
 		clusterCount += result.selectorList.length;
 		return collection;
 	}, {});
 
 	Object.values(CACHE.PortableStyle2Index).forEach((index) => {
-		const InStash = INDEX.STYLE(index);
-		if (InStash.metadata.declarations.length > 1)
+		const InStash = INDEX.IMPORT(index);
+		if (InStash.metadata.declarations.length > 1) {
 			warnings.push(
 				$.MOLD.warning.List(
 					"Multiple portable declarations: " + InStash.selector,
@@ -202,11 +214,12 @@ function ReRender() {
 					$.list.text.Bullets,
 				),
 			);
+		}
 	});
 
 	Object.values(CACHE.LibraryStyle2Index).forEach((index) => {
-		const InStash = INDEX.STYLE(index);
-		if (InStash.declarations.length > 1)
+		const InStash = INDEX.IMPORT(index);
+		if (InStash.declarations.length > 1) {
 			warnings.push(
 				$.MOLD.warning.List(
 					"Multiple Library declarations: " + InStash.selector,
@@ -214,6 +227,7 @@ function ReRender() {
 					$.list.text.Bullets,
 				),
 			);
+		}
 	});
 
 	report = [
@@ -243,12 +257,11 @@ function ReRender() {
 		),
 	].join("");
 
-	const nameCollitions = []
+	const nameCollitions: string[] | undefined = [];
 	Object.values(STACK.PORTABLES).forEach((F) => {
-		if (RAW.PACKAGE === F.fileName) nameCollitions.push(F.sourcePath);
+		if (RAW.PACKAGE === F.fileName) { nameCollitions.push(F.sourcePath); }
 	});
-	if (nameCollitions.length)
-		warnings.push($.MOLD.warning.List(`Package-name collitions: ${RAW.PACKAGE}`, nameCollitions, $.list.failed.Bullets))
+	if (nameCollitions.length) { warnings.push($.MOLD.warning.List(`Package-name collitions: ${RAW.PACKAGE}`, nameCollitions, $.list.failed.Bullets)); }
 
 	return {
 		libraryTable,
@@ -264,31 +277,31 @@ function ReRender() {
 
 function ReDeclare() {
 	Object.values(CACHE.LibraryStyle2Index).forEach((val) => {
-		const value = CACHE.Index2StylesObject[val]
-		value.metadata.declarations = [...value.declarations]
-	})
+		const value = CACHE.Index2StylesObject[val];
+		value.metadata.declarations = [...value.declarations];
+	});
 }
 
-function Appendix(indexes = []) {
-	const stash = {}, essentials = [];
+function Appendix(indexes: number[] = []) {
+	const stash: Record<string, { readme: string[], binding: number[], xtyling: number[] }> = {}, essentials: [string, string][] = [];
 
 	if (!RAW.WATCH) {
 		const usedPortables = Object.values(CACHE.PortableStyle2Index).filter(i => indexes.includes(i))
-			.reduce((a, c) => { a.add(INDEX.STYLE(c).portable); return a; }, new Set())
+			.reduce((a, c) => { a.add(INDEX.IMPORT(c).portable); return a; }, new Set());
 
 		Object.values(STACK.PORTABLES).forEach((F) => {
 			if (usedPortables.has(F.fileName)) {
 				if (F.extension === "md") {
-					if (stash[F.fileName]) stash[F.fileName].readme.push(F.content);
-					else stash[F.fileName] = { readme: [F.content], binding: [], xtyling: [] };
+					if (stash[F.fileName]) { stash[F.fileName].readme.push(F.content); }
+					else { stash[F.fileName] = { readme: [F.content], binding: [], xtyling: [] }; }
 				} else if (F.extension === "xcss") {
-					if (stash[F.fileName]) F.usedIndexes.forEach(i => stash[F.fileName].xtyling.push(i));
-					else stash[F.fileName] = { readme: [], binding: [], xtyling: Array.from(F.usedIndexes) };
+					if (stash[F.fileName]) { F.styleData.usedIndexes.forEach((i: number) => stash[F.fileName].xtyling.push(i)); }
+					else { stash[F.fileName] = { readme: [], binding: [], xtyling: Array.from(F.styleData.usedIndexes) }; }
 				} else if (F.extension === "css") {
-					if (stash[F.fileName]) F.usedIndexes.forEach(i => stash[F.fileName].binding.push(i));
-					else stash[F.fileName] = { readme: [], binding: Array.from(F.usedIndexes), xtyling: [] };
+					if (stash[F.fileName]) { F.styleData.usedIndexes.forEach((i: number) => stash[F.fileName].binding.push(i)); }
+					else { stash[F.fileName] = { readme: [], binding: Array.from(F.styleData.usedIndexes), xtyling: [] }; }
 				}
-				essentials.push(...F.essentials)
+				essentials.push(...F.essentials);
 			}
 		});
 	}

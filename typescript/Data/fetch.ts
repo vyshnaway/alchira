@@ -1,10 +1,10 @@
-import $ from "../Shell/main.js";
+import $ from "../Shell/main";
 
-import fileman from "../fileman.js";
-import * as worker from "./watch.js";
-import { collectTWEAKS, collectVendors } from "./init.js";
-import { t_Config, t_Data_PREFIX } from "../types.js";
-import { NAV, SYNC, APP, RAW, PREFIX, CACHE } from "./cache.js";
+import fileman from "../fileman";
+import * as worker from "./watch";
+import { collectTWEAKS, collectVendors } from "./init";
+import { t_Config, t_Data_PREFIX } from "../types";
+import { NAV, SYNC, APP, RAW, PREFIX, CACHE } from "./cache";
 
 export async function FetchDocs() {
 	await Promise.all(Object.values(SYNC).map(sync => {
@@ -17,6 +17,7 @@ export async function FetchDocs() {
 }
 
 export async function FetchStatics(vendorSource: string) {
+
 	$.TASK("Saving guidelines.", 0);
 	RAW.ReadMe = (await fileman.read.file(NAV.md.instructions.path)).data;
 
@@ -57,9 +58,16 @@ export async function FetchStatics(vendorSource: string) {
 		classes: {},
 		elements: {}
 	};
-	Object.keys(PrefixRead).forEach(key => {
-		if (typeof PrefixObtained[key] === "object") { PrefixRead[key] = PrefixObtained[key]; }
-	});
+
+	for (const key in PrefixRead) {
+		const typedKey = key as keyof t_Data_PREFIX;
+		const valueFromObtained = PrefixObtained[typedKey];
+		if (typedKey === 'values') {
+			PrefixRead[typedKey] = valueFromObtained as Record<string, Record<string, Record<string, string>>>;
+		} else {
+			PrefixRead[typedKey] = valueFromObtained as Record<string, Record<string, string>>;
+		}
+	}
 	PREFIX.pseudos = { ...PrefixRead.classes, ...PrefixRead.elements, ...PrefixRead.pseudos };
 	PREFIX.attributes = { ...PrefixRead.attributes };
 	PREFIX.atrules = { ...PrefixRead.atrules };
@@ -90,7 +98,7 @@ export async function Initialize() {
 					"During execution " +
 					$.style.bold.Orange("{target}") +
 					$.canvas.unstyle +
-					" folder will be cloned from ".js +
+					" folder will be cloned from " +
 					$.style.bold.Orange("{source}") +
 					$.canvas.unstyle +
 					" folder.",
@@ -98,7 +106,7 @@ export async function Initialize() {
 					"In the " +
 					$.style.bold.Orange("{target}/{stylesheet}") +
 					$.canvas.unstyle +
-					", content from ".js +
+					", content from " +
 					$.style.bold.Orange("{target}/{stylesheet}") +
 					$.canvas.unstyle +
 					" will be appended.",

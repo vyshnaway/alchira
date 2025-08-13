@@ -1,35 +1,41 @@
-import { BindStack, FileCursor, StyleStack } from "./file.js";
-
 import Use from "../Utils/main.js";
-import { CACHE, RAW } from "../data-cache.js";
-import { INDEX } from "../data-init.js";
+import { CACHE, RAW } from "../Data/cache.js";
+import { INDEX } from "../Data/init.js";
+import { t_BindStack, t_FileCursor, t_StyleStack } from "./file.js";
+import { t_Data_FILING } from "../types.js";
 
-function loadActiveIndexes(classList = []) {
-	return classList.reduce((A, entry) => {
+export type t_Actions = 'read' | 'archive' | 'watch' | 'preview' | 'publish';
+
+function loadActiveIndexes(classList: string[], StyleStack: t_StyleStack) {
+	return classList.reduce((A: number[], entry) => {
 		const index =
 			(StyleStack.Portable[entry] || 0) +
 			(StyleStack.Library[entry] || 0) +
 			(StyleStack.Native[entry] || 0) +
 			(StyleStack.Global[entry] || 0) +
 			(StyleStack.Local[entry] || 0);
-		if (index) A.push(index);
+		if (index) { A.push(index); }
 		return A;
 	}, []);
 }
 
-function loadActiveStyles(classList) {
+function loadActiveStyleSheet(classList: number[]) {
 	return Use.object.multiMerge(
-		classList.reduce((A, index) => {
-			A.push(INDEX.STYLE(index).object);
-			return A;
-		}, []),
+		classList.map((index) => INDEX.IMPORT(index) ? INDEX.IMPORT(index).object : {}),
 		true,
 	);
 }
 
-export default function classExtract(string, action, fileData) {
-	const classList = [],
-		quotes = ["'", "`", '"'];
+export default function classExtract(
+	string: string,
+	action: t_Actions,
+	fileData: t_Data_FILING,
+	BindStack: t_BindStack,
+	StyleStack: t_StyleStack,
+	FileCursor: t_FileCursor,
+	OrderedClassList: Record<string, string[]> = {}
+) {
+	const classList: string[] = [], quotes = ["'", "`", '"'];
 	let activeQuote = "",
 		entry = "",
 		scribed = string,
@@ -43,7 +49,7 @@ export default function classExtract(string, action, fileData) {
 			if (ch === " " || ch === activeQuote) {
 				classList.push(entry);
 				entry = "";
-			} else entry += ch;
+			} else { entry += ch; }
 			if (ch === activeQuote) {
 				inQuote = false;
 				activeQuote = "";
@@ -58,41 +64,17 @@ export default function classExtract(string, action, fileData) {
 
 	if (action !== "read") {
 		const metaFront = `TAG${fileData.metaFront}\\:${FileCursor.rowMarker}\\:${FileCursor.colMarker}__`;
-		(activeQuote = ""), (entry = ""), (scribed = ""), (marker = 0), (inQuote = false), (ch = string[marker]);
+		activeQuote = "";
+		entry = "";
+		scribed = "";
+		marker = 0;
+		inQuote = false;
+		ch = string[marker];
 
 
-		const effectiveIndexes = action === "watch" ? [] : Use.array.setback(loadActiveIndexes(classList));
-		const activeIndexes = action === "watch" ? [] : Use.array.longestSubChain(CACHE.SortedIndexes, effectiveIndexes);
-		const activeStyles = action === "publish" ? loadActiveStyles(activeIndexes) : {};
-		let contributors = [];
-
-		if (action === "publish") {
-			const effectiveStyles = loadActiveStyles(effectiveIndexes);
-
-			const deltaIndexes = effectiveIndexes.filter(index => !activeIndexes.includes(index))
-			const deltaStyles = Use.object.onlyB(activeStyles, effectiveStyles);
-			let deltaStylesObject = deltaStyles.result;
-			let deltaStylesScore = deltaStyles.score;
-
-			effectiveIndexes.reverse().filter(i => {
-				const R = Use.object.onlyB(INDEX.STYLE(i).object,);
-				if (R.score !== deltaStylesScore) contributors.push(i);
-				deltaStylesObject = R.result;
-				deltaStylesScore = R.score;
-			});
-
-			// console.log({
-			// 	effectiveIndexes,
-			// 	activeIndexes,
-			// 	deltaIndexes,
-			// 	contributors,
-			// 	effectiveStyles,
-			// 	activeStyles,
-			// 	deltaStylesResult: deltaStyles.result,
-			// 	deltaStylesScore: deltaStyles.score
-			// })
-		}
-
+		const availableIndexes = action === "watch" ? [] : Use.array.setback(loadActiveIndexes(classList, StyleStack));
+		const activeIndexes = action === "watch" ? [] : Use.array.longestSubChain(CACHE.SortedIndexes, availableIndexes);
+		const activeStyles = action === "publish" ? loadActiveStyleSheet(activeIndexes) : {};
 
 		while (ch !== undefined) {
 			if (inQuote) {
@@ -108,26 +90,29 @@ export default function classExtract(string, action, fileData) {
 								break;
 						}
 					} else {
-						const index =
+						const index = (
 							(StyleStack.Portable[entry] || 0) +
 							(StyleStack.Library[entry] || 0) +
 							(StyleStack.Native[entry] || 0) +
 							(StyleStack.Global[entry] || 0) +
-							(StyleStack.Local[entry] || 0);
+							(StyleStack.Local[entry] || 0)
+						);
 						if (index) {
 							switch (action) {
-								case "split":
-									const isGlobal = (StyleStack.Global[entry] || 0);
+								case "archive": {
+									const isGlobal_or_Public = (StyleStack.Global[entry] || 0);
 									const isLibrary = (StyleStack.Global[entry] || 0);
-									const className = isGlobal ? `/${RAW.PACKAGE}/${entry}`
+									const className = isGlobal_or_Public ? `/${RAW.PACKAGE}/${entry}`
 										: isLibrary ? `/${RAW.PACKAGE}/$/${entry}` : entry;
 									scribed += className;
 									break;
-								case "watch":
+								}
+								case "watch": {
 									const devClass = metaFront + INDEX.STYLE(index).metaClass;
 									scribed += Use.string.normalize(devClass, ["/", ".", ":", "|", "$"], ["\\"]);
 									CACHE.FinalStack["." + devClass] = index;
 									break;
+								}
 								case "preview":
 									if (activeIndexes.includes(index)) {
 										scribed += INDEX.STYLE(index).class;
@@ -171,11 +156,11 @@ export default function classExtract(string, action, fileData) {
 									}
 									break;
 							}
-						} else scribed += entry;
+						} else { scribed += entry; }
 					}
 					scribed += ch;
 					entry = "";
-				} else entry += ch;
+				} else { entry += ch; }
 				if (ch === activeQuote) {
 					inQuote = false;
 					activeQuote = "";

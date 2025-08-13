@@ -75,7 +75,7 @@ export interface t_Data_FILING {
     content: string,
     midway: string,
     styleData: {
-        usedIndexes: Set<string>,
+        usedIndexes: Set<number>,
         essentials: string[],
         styleGlobals: Record<string, object>,
         styleLocals: Record<string, object>,
@@ -84,9 +84,10 @@ export interface t_Data_FILING {
         postBinds: string[],
         preBinds: number[],
         errors: string[],
+        hasMainTag: boolean,
         hasStyleTag: boolean,
-        hasSnippetTag: boolean,
-        hasStylesheetTag: boolean,
+        hasAttachTag: boolean,
+        hasStencilTag: boolean,
     }
 }
 
@@ -181,14 +182,20 @@ export interface t_SelectorMeta {
     info: string[],
     variables: Record<string, string>,
     skeleton: object,
-    declarations: string[]
+    declarations: string[],
+    element?: string,
+    metaclass?: string,
+    snippet?: string,
+    structure?: string
 }
 
 export interface t_SelectorData {
+    index?: number,
+    miniClass?: string,
     portable: string,
     scope: string,
     selector: string,
-    object: object,
+    object: Record<string, object>,
     metadata: t_SelectorMeta,
     preBinds: string[],
     postBinds: string[],
@@ -198,17 +205,11 @@ export interface t_SelectorData {
     declarations: string[]
 }
 
-export interface t_Stack {
-    PROXYCACHE: Record<string, t_Data_FILING>,
-    LIBRARIES: Record<string, t_Data_FILING>,
-    PORTABLES: Record<string, t_Data_FILING>,
-}
-
 export interface t_CACHE {
     HashRule: Record<string, string>,
     SortedIndexes: number[],
     PortableEssentials: [string, string][],
-    Index2StylesObject: Record<number, t_SelectorData>,
+    Index2StylesObject: Record<string, t_SelectorData>,
     NativeStyle2Index: Record<string, number>,
     LibraryStyle2Index: Record<string, number>,
     GlobalsStyle2Index: Record<string, number>,
@@ -216,11 +217,6 @@ export interface t_CACHE {
     FinalStack: Record<string, number>,
     Archive: t_Archive,
 };
-
-
-
-export interface t_Proxy {
-}
 
 export interface t_RAW {
     CMD: string,
@@ -237,5 +233,28 @@ export interface t_RAW {
     LIBRARIES: Record<string, string>,
     PORTABLES: Record<string, string>,
     DEPENDENTS: Record<string, string>,
-    PROXYFILES: Record<string, Record<string, t_Proxy>>,
+    PROXYFILES: Record<string, Record<string, string>>,
+}
+
+
+
+
+// export interface t_Proxy {
+// }
+
+export interface t_Stack {
+    PROXYCACHE: Record<string, t_Data_FILING>,
+    LIBRARIES: Record<string, t_Data_FILING>,
+    PORTABLES: Record<string, t_Data_FILING>,
+}
+
+export interface t_TagRawStyle {
+    scope: 'xtyling' | 'local' | 'global' | 'public',
+    selector: string,
+    comments: string[],
+    rowMarker: number,
+    columnMarker: number,
+    styles: Record<string, object>,
+    boundSnippet: string,
+    boundStylesheet: string
 }

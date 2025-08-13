@@ -5,24 +5,27 @@ import Use from "../Utils/main.js";
 import HASHRULE from "../hash-rules.js";
 import { RAW, CACHE } from "../Data/cache.js";
 import { INDEX } from "../Data/init.js";
+import { t_Data_FILING, t_SelectorData, t_SelectorMeta, t_TagRawStyle } from "../types.js";
 
 function xtylemerge(classList: string[] = []) {
-	const result: object = {}, preBinds: string[] = [], postBinds: string[] = [];
-	classList.forEach((className) => {
-		const index = (CACHE.LibraryStyle2Index[className] || 0) +
+	const result: Record<string, object> = {}, preBinds: string[] = [], postBinds: string[] = [];
+	classList.reduce((res, className) => {
+		const index =
 			(CACHE.PortableStyle2Index[className] || 0) +
+			(CACHE.LibraryStyle2Index[className] || 0) +
 			(CACHE.NativeStyle2Index[className] || 0);
 		if (index) {
-			const found = INDEX.STYLE(index);
+			const found = INDEX.IMPORT(index);
 			preBinds.push(...found.preBinds);
 			postBinds.push(...found.postBinds);
-			result = Use.object.multiMerge([result, found.object[""]], true);
+			res = Use.object.multiMerge([result, found.object], true);
 		}
-	});
+		return res;
+	}, {});
 	return { result, preBinds, postBinds };
 }
 
-function SCANNER(content: string, initial: string, sourceSelector: string) {
+function SCANNER(content: string, initial: string, sourceSelector: string, forceImportant = false) {
 	const scanned = CSSBLOCK(content);
 	const variables = scanned.variables;
 	const merged = xtylemerge(scanned.compose);
@@ -30,18 +33,18 @@ function SCANNER(content: string, initial: string, sourceSelector: string) {
 		postBinds = [...merged.postBinds, ...scanned.postBinds.filter(bind => bind[0] !== "/")];
 
 	const object = Use.object.deepMerge(merged.result, {
-		...Object.entries(scanned.atProps).reduce((acc, [propKey, propValue]) => {
-			acc[propKey] = RAW.WATCH ? `${propValue}/* ${initial} ${sourceSelector} */` : propValue;
-			return acc;
-		}, {}),
-		...Object.entries(scanned.properties).reduce(
-			(acc, [propKey, propValue]) => {
-				acc[propKey] = RAW.WATCH ? `${propValue}/* ${initial} ${sourceSelector} */` : propValue;
-				return acc;
-			}, {},),
+		...Object.entries(scanned.atProps).map(([propKey, propValue]) => {
+			return [propKey, RAW.WATCH ? `${propValue}/* ${initial} ${sourceSelector} */` : propValue];
+		}),
+		...Object.entries(scanned.properties).map(([propKey, propValue]) => {
+			return [propKey, (
+				(RAW.WATCH ? `${propValue}/* ${initial} ${sourceSelector} */` : propValue) +
+				(forceImportant ? ' !important' : '')
+			)];
+		}),
 	});
 
-	for (let selector in scanned.allBlocks) {
+	for (const selector in scanned.allBlocks) {
 		const result = SCANNER(scanned.allBlocks[selector], initial, sourceSelector + " -> " + selector);
 		Object.assign(variables, result.variables);
 		preBinds.push(...result.preBinds);
@@ -52,10 +55,10 @@ function SCANNER(content: string, initial: string, sourceSelector: string) {
 	return { object, preBinds, postBinds, variables };
 }
 
-function CSSCANNER(content, initial = "") {
-	const variables = {}, preBinds = [], postBinds = [];
+function CSSCANNER(content: string, initial = "") {
+	const variables: Record<string, string> = {}, preBinds: string[] = [], postBinds: string[] = [];
 	const scanned = CSSBLOCK(content, true);
-	const object = scanned.XatProps;
+	const object: [string, string | object][] = scanned.XatProps;
 
 	scanned.XallBlocks.forEach(([key, value]) => {
 		const result = SCANNER(value, initial, key);
@@ -68,8 +71,10 @@ function CSSCANNER(content, initial = "") {
 	return { object, preBinds, postBinds, variables };
 }
 
-function CSSLIBRARY(fileDatas = [], initial = "", forPortable = false) {
-	const selectorList = [], selectors = {}, indexSkeleton = {};
+function CSSLIBRARY(fileDatas: t_Data_FILING[] = [], initial = "", forPortable = false) {
+	const selectorList: string[] = [],
+		selectors: Record<string, number> = {},
+		indexSkeleton: Record<string, t_SelectorMeta> = {};
 	const IndexMap = forPortable ? CACHE.PortableStyle2Index : CACHE.LibraryStyle2Index;
 
 	fileDatas.forEach((source) => {
@@ -84,10 +89,10 @@ function CSSLIBRARY(fileDatas = [], initial = "", forPortable = false) {
 
 			const index = (IndexMap[stampSelector] || 0) + (selectors[stampSelector] || 0);
 			if (index) {
-				const InStash = INDEX.STYLE(index);
+				const InStash = INDEX.IMPORT(index);
 				InStash.declarations.push(declaration);
 			} else {
-				const metadata = {
+				const metadata: t_SelectorMeta = {
 					info: [],
 					variables: scannedStyle.variables,
 					skeleton: Use.object.skeleton(object),
@@ -105,27 +110,37 @@ function CSSLIBRARY(fileDatas = [], initial = "", forPortable = false) {
 					boundSnippet: "",
 					boundStyles: "",
 					declarations: [declaration] // only library declarations
-				});
-				source.usedIndexes.add(identity.index);
+				} as t_SelectorData);
+
+				source.styleData.usedIndexes.add(identity.index);
 				selectors[stampSelector] = identity.index;
 				indexSkeleton[stampSelector] = metadata;
-				selectorList.push(stampSelector)
+				selectorList.push(stampSelector);
 			}
-		})
+		});
 	});
 	for (const selector in selectors) {
 		IndexMap[selector] = selectors[selector];
 	}
 
-	return { indexSkeleton, selectorList };
+	return { indexMetaCollection: indexSkeleton, selectorList };
 }
 
 function TAGSTYLE(
-	{ scope, selector, comments, styles, rowMarker, columnMarker, boundSnippet, boundStylesheet },
+	{
+		scope,
+		selector,
+		comments,
+		styles,
+		rowMarker,
+		columnMarker,
+		boundSnippet,
+		boundStylesheet
+	}: t_TagRawStyle,
 	{ metaFront = "", fileName = "", fullPath = "", filePath = "", prefix = "" },
 	IndexMap = {},
 ) {
-	const object = {}, preBinds = [], postBinds = [], errors = [], essentials = [];
+	const object: object = {}, preBinds: string[] = [], postBinds: string[] = [], errors: string[] = [], essentials: [string, string | object][] = [];
 
 	const forPortable = scope === "xtyling";
 	const xcope = (forPortable ? "" : scope).toUpperCase();
@@ -167,14 +182,14 @@ function TAGSTYLE(
 
 	let isOriginal;
 	let identity = { index: 0, class: '' };
-	let metadata = {};
+	let metadata: t_SelectorMeta = {};
 	let xelector = selector === "" ? "" : prefix + selector;
 	if (selector === "") {
 		essentials.push(...Object.entries(object).map(([k, v]) => [RAW.WATCH ? `${k} /* ${declaration} */` : k, v]));
 	} else {
 		const index = (IndexMap[xelector] || 0) + (CACHE.LibraryStyle2Index[xelector] || 0) + (CACHE.GlobalsStyle2Index[xelector] || 0);
 		if (index) {
-			const InStash = INDEX.STYLE(index);
+			const InStash = INDEX.IMPORT(index);
 			metadata = InStash.metadata;
 			InStash.metadata.declarations.push(declaration);
 			isOriginal = false;

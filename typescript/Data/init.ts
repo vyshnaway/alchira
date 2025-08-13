@@ -1,5 +1,5 @@
 import fileman from "../fileman.js";
-import { t_Data_TWEAKS, T_PackageEssential } from "../types.js";
+import { t_Data_TWEAKS, T_PackageEssential, t_SelectorData } from "../types.js";
 import Use from "../Utils/main.js";
 import { APP, RAW, NAV, SYNC, CACHE, STACK, PUBLISH, PREFIX, TWEAKS } from "./cache.js";
 
@@ -75,34 +75,35 @@ export function MemoryUsage() {
 
 export const INDEX = {
     _NOW: 0,
-    _BIN: new Set(),
-    STYLE: (index = 0) => {
+    _BIN: new Set<number>(),
+    IMPORT: (index = 0) => {
         return CACHE.Index2StylesObject[index];
     },
-    CLONE: (index = 0) => {
-        if (INDEX._BIN.size > 0) {
-            object.index = INDEX._BIN.values().next().value;
-            INDEX._BIN.delete(object.index);
-        } else { object.index = ++INDEX._NOW; }
+    // CLONE: (index = 0) => {
+    //     const object = structuredClone(CACHE.Index2StylesObject[index]);
+    //     if (INDEX._BIN.size > 0) {
+    //         object.index = INDEX._BIN.values().next().value;
+    //         if (object.index && INDEX._BIN.has(object.index)) {
+    //             INDEX._BIN.delete(object.index);
+    //         }
+    //     } else { object.index = ++INDEX._NOW; }
+
+    //     if (!object.index) { return; }
+    //     const encounted = Use.string.enCounter(object.index + 768);
+    //     object.miniClass = "_" + encounted;
+    //     CACHE.Index2StylesObject[object.index] = CACHE.Index2StylesObject[index];
+    //     return { index: object.index, class: object.miniClass };
+    // },
+    DECLARE: (object: t_SelectorData) => {
+        object.index = INDEX._BIN.values().next().value || ++INDEX._NOW;
+        if (INDEX._BIN.has(object.index)) { INDEX._BIN.delete(object.index); }
 
         const encounted = Use.string.enCounter(object.index + 768);
-        object.class = "_" + encounted;
-        CACHE.Index2StylesObject[object.index] = CACHE.Index2StylesObject[index];
-        return { index: object.index, class: object.class };
-    },
-    DECLARE: (object = {}) => {
-        if (INDEX._BIN.size > 0) {
-            object.index = INDEX._BIN.values().next().value;
-            INDEX._BIN.delete(object.index);
-        } else { object.index = ++INDEX._NOW; }
-
-        const encounted = Use.string.enCounter(object.index + 768);
-        object.class = "_" + encounted;
-        object.spare = "-" + encounted;
+        object.miniClass = "_" + encounted;
         CACHE.Index2StylesObject[object.index] = object;
-        return { index: object.index, class: object.class, spare: object.spare };
+        return { index: object.index, class: object.miniClass };
     },
-    DISPOSE: (...indexes) => {
+    DISPOSE: (...indexes: number[]) => {
         indexes.forEach((index) => {
             if (index > 0) {
                 INDEX._BIN.add(index);
@@ -117,7 +118,7 @@ export const INDEX = {
             const number = Number(index);
             if (number > after) {
                 if (INDEX._BIN.has(number)) { INDEX._BIN.delete(number); }
-                delete CACHE.Index2StylesObject[index];
+                delete CACHE.Index2StylesObject[number];
                 removed++;
             }
         });

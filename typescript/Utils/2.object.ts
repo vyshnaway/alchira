@@ -174,9 +174,9 @@ export interface ObjectUtils {
 
 const utils: ObjectUtils = {
 	skeleton,
+	deepMerge,
 	onlyB: ObjectDelta,
 	switch: objectSwitch,
-	deepMerge,
 	multiMerge: bulkMerge,
 };
 

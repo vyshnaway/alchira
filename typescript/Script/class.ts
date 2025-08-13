@@ -1,13 +1,15 @@
 import SCRIPTPARSE from "./file.js";
 import { styleTag, snippetTag, stylesheetTag } from "./tag.js";
 import FORGE from "../Style/forge.js";
+import fileman from "../fileman.js";
 
 import $ from "../Shell/main.js";
-import FILING from "../data-filing.js";
+import FILING from "../Data/filing.js";
 import STYLEPARSE from "../Style/parse.js";
-import { INDEX } from "../data-init.js";
-import { RAW, CACHE } from "../data-cache.js";
+import { INDEX } from "../Data/init.js";
+import { RAW, CACHE } from "../Data/cache.js";
 import { generateXtyleBlock as GenerateXtyleBlock } from "../Worker/portable.js";
+import { t_Data_FILING, t_ProxyMap } from "../types.js";
 
 export default class Proxy {
 	source = "";
@@ -16,9 +18,10 @@ export default class Proxy {
 	sourceStylesheet = "";
 	targetStylesheet = "";
 	stylesheetContent = "";
-	fileCache = {};
-	extnsProps = {};
-	extensions = [];
+
+	extensions: string[] = [];
+	extnsProps: Record<string, string[]> = {};
+	fileCache: Record<string, t_Data_FILING> = {};
 
 	constructor({
 		source,
@@ -27,35 +30,39 @@ export default class Proxy {
 		extensions,
 		fileContents,
 		stylesheetContent,
-	}) {
-		extensions["xcss"] = []
+	}: t_ProxyMap) {
+		extensions["xcss"] = [];
 
 		this.source = source;
 		this.target = target;
+		this.stylesheetPath = stylesheet;
+		this.sourceStylesheet = fileman.path.join(source, stylesheet);
+		this.targetStylesheet = fileman.path.join(target, stylesheet);
+
 		this.extnsProps = extensions;
-		this.stylesheet = stylesheet;
 		this.extensions = Object.keys(extensions);
-		this.stylesheetContent = stylesheetContent;
-		this.sourceStylesheet = source + "/" + stylesheet;
-		this.targetStylesheet = target + "/" + stylesheet;
-		Object.entries(fileContents).forEach(([filePath, fileContent]) => this.SaveFile(filePath, fileContent));
+		this.stylesheetContent = stylesheetContent || '';
+		Object.entries(fileContents || {}).forEach(([filePath, fileContent]) => this.SaveFile(filePath, fileContent));
 	}
 
-	SaveFile(filePath, fileContent) {
+	SaveFile(filePath: string, fileContent: string) {
+
 		if (this.fileCache[filePath]) {
-			this.fileCache[filePath].usedIndexes.forEach((index) => INDEX.DISPOSE(index));
-			Object.keys(this.fileCache[filePath].styleGlobals).forEach(key => delete CACHE.GlobalsStyle2Index[key])
+			this.fileCache[filePath].styleData.usedIndexes.forEach((index) => INDEX.DISPOSE(index));
+			Object.keys(this.fileCache[filePath].styleData.styleGlobals).forEach(key => INDEX.DISPOSE(Number(key)));
 			delete this.fileCache[filePath];
 		}
-		const file = FILING(this.target, this.source, filePath, fileContent, false);
+
 		const globalSkeletons = {}, localSkeletons = {};
+		const file = FILING(this.target, this.source, filePath, fileContent, false);
+		const fileStyle = file.styleData;
 		this.fileCache[file.filePath] = file;
 
 		const sciptResponse = SCRIPTPARSE(file, this.extnsProps[file.extension]);
-		file.classGroups.push(...sciptResponse.classesList)
+		fileStyle.classGroups.push(...sciptResponse.classesList);
 
 		sciptResponse.stylesList.forEach((style) => {
-			const IndexMap = style.scope === "global" ? file.styleGlobals : style.scope === "local" ? file.styleLocals : {};
+			const IndexMap = style.scope === "global" ? fileStyle.styleGlobals : style.scope === "local" ? fileStyle.styleLocals : {};
 			const skeletonMap = style.scope === "global" ? globalSkeletons : style.scope === "local" ? localSkeletons : {};
 			const response = STYLEPARSE.TAGSTYLE(style, {
 				metaFront: file.metaFront,
@@ -159,9 +166,9 @@ export default class Proxy {
 			if (file.extension !== "xcss") {
 				let fileContent = file.midway;
 				if (file.summon) {
-					if(file.hasStyleTag) fileContent = fileContent.replace(styleTag, styleBlock)
-					if(file.hasStylesheetTag) fileContent = fileContent.replace(stylesheetTag, stylesheetBlock)
-					if(file.hasSnippetTag) fileContent = fileContent.replace(snippetTag, snippetBlock)
+					if (file.hasStyleTag) fileContent = fileContent.replace(styleTag, styleBlock)
+					if (file.hasStylesheetTag) fileContent = fileContent.replace(stylesheetTag, stylesheetBlock)
+					if (file.hasSnippetTag) fileContent = fileContent.replace(snippetTag, snippetBlock)
 					tagSummons.push(file.sourcePath);
 				}
 				SaveFiles[file.sourcePath] = fileContent;

@@ -45,9 +45,10 @@ export default function FILING(
 			postBinds: [],
 			preBinds: [],
 			errors: [],
+			hasMainTag: false,
 			hasStyleTag: false,
-			hasStylesheetTag: false,
-			hasSnippetTag: false,
+			hasAttachTag: false,
+			hasStencilTag: false,
 		}
 	};
 
