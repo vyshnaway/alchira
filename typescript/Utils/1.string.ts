@@ -1,9 +1,7 @@
 const ALPHANUMERIC = /[a-z0-9]/gi;
 const SPACE = /\s+/g;
 
-const digits =
-	"-0123456789_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-const base = digits.length;
+
 
 export default {
 	normalize: (
@@ -17,8 +15,8 @@ export default {
 			.replace(SPACE, "_")
 			.split("")
 			.forEach((ch) => {
-				if (skipChars.includes(ch)) {return;}
-				else if (addBackSlashFor.includes(ch)) {final += "\\" + ch;}
+				if (skipChars.includes(ch)) { return; }
+				else if (addBackSlashFor.includes(ch)) { final += "\\" + ch; }
 				else {
 					final +=
 						ch === "_"
@@ -78,6 +76,8 @@ export default {
 		return result;
 	},
 	enCounter: (number: number) => {
+		const digits = "0123456789_abcdefghijklmnopqrstuvwxyz-ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+		const base = digits.length;
 		let result = "",
 			reminder = 0;
 
@@ -88,5 +88,5 @@ export default {
 		}
 		return result;
 	},
-	stringMem: (string:string) => Number((string.length / 1024).toFixed(2)),
+	stringMem: (string: string) => Number((string.length / 1024).toFixed(2)),
 };

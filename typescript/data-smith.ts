@@ -9,7 +9,7 @@ import SCRIPT from "./Script/class.js";
 import XTYLES from "./Style/stash.js";
 import { NAV, RAW, STACK, CACHE, PUBLISH } from "./data-cache.js";
 import { INDEX } from "./data-init.js";
-import { GeneratePortable } from "./Worker/portable.js";
+import { GeneratePortable } from "./portable.js";
 
 export function UpdateXtylesFolder() {
 	INDEX.RESET();

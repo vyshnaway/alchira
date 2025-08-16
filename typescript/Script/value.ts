@@ -1,10 +1,30 @@
 import Use from "../Utils/main.js";
 import { CACHE, RAW } from "../Data/cache.js";
 import { INDEX } from "../Data/init.js";
-import { t_BindStack, t_FileCursor, t_StyleStack } from "./file.js";
 import { t_Data_FILING } from "../types.js";
 
 export type t_Actions = 'read' | 'archive' | 'watch' | 'preview' | 'publish';
+
+export interface t_StyleStack {
+	Portable: Record<string, number>,
+	Library: Record<string, number>,
+	Native: Record<string, number>,
+	Local: Record<string, number>,
+	Global: Record<string, number>
+}
+
+export interface t_FileCursor {
+	marker: number,
+	rowMarker: number,
+	colMarker: number,
+	tagCount: number
+}
+
+export interface t_BindStack {
+	preBinds: Set<string>,
+	postBinds: Set<string>,
+}
+
 
 function loadActiveIndexes(classList: string[], StyleStack: t_StyleStack) {
 	return classList.reduce((A: number[], entry) => {
@@ -19,13 +39,6 @@ function loadActiveIndexes(classList: string[], StyleStack: t_StyleStack) {
 	}, []);
 }
 
-function loadActiveStyleSheet(classList: number[]) {
-	return Use.object.multiMerge(
-		classList.map((index) => INDEX.IMPORT(index) ? INDEX.IMPORT(index).object : {}),
-		true,
-	);
-}
-
 export default function classExtract(
 	string: string,
 	action: t_Actions,
@@ -33,7 +46,7 @@ export default function classExtract(
 	BindStack: t_BindStack,
 	StyleStack: t_StyleStack,
 	FileCursor: t_FileCursor,
-	OrderedClassList: Record<string, string[]> = {}
+	OrderedClassList: Record<string, Record<number, string>> = {}
 ) {
 	const classList: string[] = [], quotes = ["'", "`", '"'];
 	let activeQuote = "",
@@ -71,10 +84,8 @@ export default function classExtract(
 		inQuote = false;
 		ch = string[marker];
 
-
-		const availableIndexes = action === "watch" ? [] : Use.array.setback(loadActiveIndexes(classList, StyleStack));
-		const activeIndexes = action === "watch" ? [] : Use.array.longestSubChain(CACHE.SortedIndexes, availableIndexes);
-		const activeStyles = action === "publish" ? loadActiveStyleSheet(activeIndexes) : {};
+		const availableIndexes = (action === 'preview' || action === "publish") ? Use.array.setback(loadActiveIndexes(classList, StyleStack)) : [];
+		const index_to_classNames = (action === 'preview' || action === "publish") ? OrderedClassList[JSON.stringify(availableIndexes)] : [];
 
 		while (ch !== undefined) {
 			if (inQuote) {
@@ -100,61 +111,24 @@ export default function classExtract(
 						if (index) {
 							switch (action) {
 								case "archive": {
-									const isGlobal_or_Public = (StyleStack.Global[entry] || 0);
+									const isGlobal = (StyleStack.Global[entry] || 0);
 									const isLibrary = (StyleStack.Global[entry] || 0);
-									const className = isGlobal_or_Public ? `/${RAW.PACKAGE}/${entry}`
+									const className = isGlobal ? `/${RAW.PACKAGE}/${entry}`
 										: isLibrary ? `/${RAW.PACKAGE}/$/${entry}` : entry;
 									scribed += className;
 									break;
 								}
 								case "watch": {
-									const devClass = metaFront + INDEX.STYLE(index).metaClass;
+									const devClass = metaFront + INDEX.IMPORT(index).metaClass;
 									scribed += Use.string.normalize(devClass, ["/", ".", ":", "|", "$"], ["\\"]);
 									CACHE.FinalStack["." + devClass] = index;
 									break;
 								}
 								case "preview":
-									if (activeIndexes.includes(index)) {
-										scribed += INDEX.STYLE(index).class;
-									} else {
-										const identity = INDEX.DECLARE();
-										CACHE.FinalStack["." + identity.class] = index;
-										scribed += identity.class;
-										fileData.usedIndexes.add(identity.index);
-									}
+								case "publish": {
+									if (availableIndexes.includes(index)) { scribed += index_to_classNames[index]; }
 									break;
-								case "publish":
-									if (activeIndexes.includes(index)) {
-										scribed += INDEX.STYLE(index).class;
-									} else {
-										const deltaSnippet = Use.object.onlyB(activeStyles, INDEX.STYLE(index).object);
-										// console.log({ activeStyles, indexStyles: INDEX.STYLE(index).object, deltaSnippet })
-										if (deltaSnippet.score) {
-
-											const identity = INDEX.DECLARE({
-												portable: "",
-												scope: "",
-												selector: "",
-												object: deltaSnippet.result,
-												metadata: "",
-												preBinds: [],
-												postBinds: [],
-												metaClass: "",
-												declarations: [],
-											});
-											CACHE.FinalStack["." + identity.class] = identity.index;
-											fileData.usedIndexes.add(identity.index);
-											scribed += identity.class;
-
-											// const className = "_" + INDEX.STYLE(index).class;
-											// CACHE.FinalStack["." + className] = index;
-											// scribed += className;
-
-										} else {
-											scribed += INDEX.STYLE(index).class;
-										}
-									}
-									break;
+								}
 							}
 						} else { scribed += entry; }
 					}

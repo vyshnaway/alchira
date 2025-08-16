@@ -1,9 +1,9 @@
-import fileman from "../fileman.js";
+import fileman from "./fileman.js";
 import { APP, CACHE, NAV, RAW, STACK } from "../data-cache.js";
 import { INDEX } from "../data-init.js";
-import $ from "../Shell/main.js";
-import FORGE from "../Style/forge.js";
-import RENDER from "../Style/render.js";
+import $ from "./Shell/main.js";
+import FORGE from "./Style/forge.js";
+import RENDER from "./Style/render.js";
 
 const tab = "    ";
 

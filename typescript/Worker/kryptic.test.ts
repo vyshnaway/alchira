@@ -1,4 +1,4 @@
-import krypt from "./krypt.js";
+import krypt from "./kryptic.js";
 
 // const symKey = await krypt.sym.generateKey()
 // console.log(symKey)

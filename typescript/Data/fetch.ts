@@ -1,10 +1,9 @@
-import $ from "../Shell/main";
-
-import fileman from "../fileman";
-import * as worker from "./watch";
-import { collectTWEAKS, collectVendors } from "./init";
-import { t_Config, t_Data_PREFIX } from "../types";
-import { NAV, SYNC, APP, RAW, PREFIX, CACHE } from "./cache";
+import $ from "../Shell/main.js";
+import fileman from "../fileman.js";
+import * as worker from "./watch.js";
+import { collectTWEAKS, collectVendors } from "./init.js";
+import { t_Config, t_Data_PREFIX } from "../types.js";
+import { NAV, SYNC, APP, RAW, PREFIX, CACHE } from "./cache.js";
 
 export async function FetchDocs() {
 	await Promise.all(Object.values(SYNC).map(sync => {

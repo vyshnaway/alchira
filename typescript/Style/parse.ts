@@ -107,9 +107,13 @@ function CSSLIBRARY(fileDatas: t_Data_FILING[] = [], initial = "", forPortable =
 					preBinds: forPortable ? preBinds.map(bind => stamp + bind) : preBinds,
 					postBinds: forPortable ? postBinds.map(bind => stamp + bind) : postBinds,
 					metaClass: metaFront + "_" + Use.string.normalize(stampSelector, [], [], ["$", "/"]),
-					boundSnippet: "",
-					boundStyles: "",
-					declarations: [declaration] // only library declarations
+					declarations: [declaration], // only library declarations
+					snippets: {
+						Main: '',
+						Style: '',
+						Attach: '',
+						Stencil: '',
+					}
 				} as t_SelectorData);
 
 				source.styleData.usedIndexes.add(identity.index);
@@ -127,38 +131,35 @@ function CSSLIBRARY(fileDatas: t_Data_FILING[] = [], initial = "", forPortable =
 }
 
 function TAGSTYLE(
-	{
-		scope,
-		selector,
-		comments,
-		styles,
-		rowMarker,
-		columnMarker,
-		boundSnippet,
-		boundStylesheet
-	}: t_TagRawStyle,
-	{ metaFront = "", fileName = "", fullPath = "", filePath = "", prefix = "" },
-	IndexMap = {},
+	raw: t_TagRawStyle,
+	file: t_Data_FILING,
+	IndexMap: Record<string, number> = {},
 ) {
-	const object: object = {}, preBinds: string[] = [], postBinds: string[] = [], errors: string[] = [], essentials: [string, string | object][] = [];
+	const
+		object: Record<string, Record<string, object>> = {},
+		preBinds: string[] = [],
+		postBinds: string[] = [],
+		errors: string[] = [],
+		essentials: [string, string | object][] = [];
 
-	const forPortable = scope === "xtyling";
-	const xcope = (forPortable ? "" : scope).toUpperCase();
-	const declaration = `${fullPath}:${rowMarker}:${columnMarker}`;
-	const metaClass = `${xcope}${metaFront}\\:${rowMarker}\\:${columnMarker}_${Use.string.normalize(selector, [], [], forPortable ? ["$", "/"] : ["$"])}`;
+	const forPortable = file.group === "xtyling";
+	const xcope = (forPortable ? "" : raw.scope).toUpperCase();
+	const xelector = raw.selector === "" ? "" : file.stamp + raw.selector;
+	const declaration = `${file.filePath}:${raw.rowMarker}:${raw.columnMarker}`;
+	const metaClass = `${xcope}${file.metaFront}\\:${raw.rowMarker}\\:${raw.columnMarker}_${Use.string.normalize(raw.selector, [], [], forPortable ? ["$", "/"] : ["$"])}`;
 	const variables = {};
 
-	for (let subSelector in styles) {
+	for (const subSelector in raw.styles) {
 		const query = HASHRULE.RENDER(subSelector, declaration, forPortable);
-		if (!query.status) errors.push(query.error);
-		const styleObj = SCANNER(styles[subSelector], `${scope.toUpperCase()} : ${filePath} ||`, `${selector} => ${subSelector}`);
+		if (!query.status) { errors.push(query.error); }
+		const styleObj = SCANNER(raw.styles[subSelector], `${raw.scope.toUpperCase()} : ${file.filePath} ||`, `${raw.selector} => ${subSelector}`);
 
 		postBinds.push(...styleObj.postBinds);
 		preBinds.push(...styleObj.preBinds);
 		Object.assign(variables, styleObj.variables);
 
 		if (Object.keys(styleObj).length) {
-			if (selector === "") {
+			if (raw.selector === "") {
 				if (query.rule === "") {
 					if (query.subSelector !== "") {
 						object[query.subSelector] = styleObj.object;
@@ -167,54 +168,56 @@ function TAGSTYLE(
 					if (query.subSelector === "") {
 						object[query.rule] = styleObj.object;
 					} else {
-						if (!object[query.rule]) object[query.rule] = {};
+						if (!object[query.rule]) { object[query.rule] = {}; }
 						object[query.rule][query.subSelector] = styleObj.object;
 					}
 				}
 			} else {
-				if (!object[query.rule]) object[query.rule] = {};
-				if (query.subSelector === "")
-					object[query.rule] = { ...object[query.rule], ...styleObj.object };
-				else object[query.rule]["&" + query.subSelector] = styleObj.object;
+				if (!object[query.rule]) { object[query.rule] = {}; }
+				if (query.subSelector === "") { object[query.rule] = { ...object[query.rule], ...styleObj.object }; }
+				else { object[query.rule]["&" + query.subSelector] = styleObj.object; }
 			}
 		}
 	}
 
-	let isOriginal;
+	let isOriginal = false;
 	let identity = { index: 0, class: '' };
-	let metadata: t_SelectorMeta = {};
-	let xelector = selector === "" ? "" : prefix + selector;
-	if (selector === "") {
-		essentials.push(...Object.entries(object).map(([k, v]) => [RAW.WATCH ? `${k} /* ${declaration} */` : k, v]));
+	if (raw.selector === "") {
+		essentials.push(...Object.entries(object).map(([k, v]) => [
+			RAW.WATCH ? `${k} /* ${declaration} */` : k,v
+		]) as [string, string | object][]);
 	} else {
 		const index = (IndexMap[xelector] || 0) + (CACHE.LibraryStyle2Index[xelector] || 0) + (CACHE.GlobalsStyle2Index[xelector] || 0);
 		if (index) {
 			const InStash = INDEX.IMPORT(index);
-			metadata = InStash.metadata;
 			InStash.metadata.declarations.push(declaration);
-			isOriginal = false;
-			if (CACHE.LibraryStyle2Index[xelector] || 0)
-				errors.push($.MOLD.failed.List("Multiple declarations: " + InStash.selector, InStash.metadata.declarations, $.list.text.Bullets))
+			if (CACHE.LibraryStyle2Index[xelector] || 0) {
+				errors.push($.MOLD.failed.List("Multiple declarations: " + InStash.selector, InStash.metadata.declarations, $.list.text.Bullets));
+			}
 		} else {
+			const declarations = [declaration];
 			isOriginal = true;
-			metadata = {
-				info: comments,
-				variables: variables,
-				skeleton: Use.object.skeleton(object),
-				declarations: [declaration]
-			};
 			identity = INDEX.DECLARE({
-				portable: forPortable ? fileName : "",
-				scope,
-				selector,
+				portable: forPortable ? file.fileName : "",
+				scope: raw.scope,
+				selector: raw.selector,
 				object,
-				metadata,
-				boundSnippet,
-				boundStyles,
-				preBinds: forPortable ? preBinds.map(bind => prefix + "$/" + bind) : preBinds,
-				postBinds: forPortable ? postBinds.map(bind => prefix + "$/" + bind) : postBinds,
+				metadata: {
+					info: raw.comments,
+					variables: variables,
+					skeleton: Use.object.skeleton(object),
+					declarations
+				},
+				preBinds: forPortable ? preBinds.map(bind => file.stamp + "$/" + bind) : preBinds,
+				postBinds: forPortable ? postBinds.map(bind => file.stamp + "$/" + bind) : postBinds,
 				metaClass,
-				declarations: metadata.declarations
+				declarations,
+				snippets: {
+					Main: '',
+					Style: '',
+					Attach: '',
+					Stencil: '',
+				}
 			});
 			IndexMap[xelector] = identity.index;
 		}
@@ -227,7 +230,7 @@ function TAGSTYLE(
 		essentials,
 		postBinds,
 		preBinds,
-		metadata,
+		metadata: INDEX.IMPORT(identity.index).metadata,
 		errors,
 	};
 }

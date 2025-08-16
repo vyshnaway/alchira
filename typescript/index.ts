@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 
 import fs from "fs";
-import fileman from "./fileman";
-import commander from "./command";
-import { T_PackageEssential, T_PackageJson } from "./types";
+import fileman from "./fileman.js";
+import commander from "./command.js";
+import { T_PackageEssential, T_PackageJson } from "./types.js";
 
 const commandList = [
     "init",

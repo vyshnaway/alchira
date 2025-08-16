@@ -4,6 +4,7 @@ import $ from "../Shell/main.js";
 import Use from "../Utils/main.js";
 import FILING from "../Data/filing.js";
 import SCRIPTFILE from "../Script/file.js";
+
 import { INDEX } from "../Data/init.js";
 import { NAV, CACHE, STACK, RAW } from "../Data/cache.js";
 import { t_Data_FILING, t_SelectorMeta } from "../types.js";
@@ -151,22 +152,13 @@ function ReRender() {
 		const tagStash = SCRIPTFILE(fileData).stylesList, indexMetaCollection: Record<string, t_SelectorMeta> = {};
 		tagStash.forEach((style) => {
 			style.scope = "xtyling";
-			const response = PARSE.TAGSTYLE(
-				style, {
-				id: fileData.id,
-				cluster: fileData.cluster,
-				metaFront: fileData.metaFront,
-				filePath: fileData.filePath,
-				fullPath: fileData.sourcePath,
-				prefix: fileData.stamp,
-				fileName: fileData.fileName
-			}, CACHE.PortableStyle2Index,);
+			const response = PARSE.TAGSTYLE(style, fileData, CACHE.PortableStyle2Index,);
 
 			warnings.push(...response.errors);
 
 			if (response.selector === "") {
 				PortableEssentials.push(...response.essentials);
-				if (!RAW.WATCH) { fileData.essentials.push(...response.essentials); }
+				if (!RAW.WATCH) { fileData.styleData.essentials.push(...response.essentials); }
 			} else if (response.isOriginal) {
 				fileData.styleData.usedIndexes.add(response.index);
 				indexMetaCollection[response.selector] = response.metadata;
@@ -283,7 +275,7 @@ function ReDeclare() {
 }
 
 function Appendix(indexes: number[] = []) {
-	const stash: Record<string, { readme: string[], binding: number[], xtyling: number[] }> = {}, essentials: [string, string][] = [];
+	const stash: Record<string, { readme: string[], binding: number[], xtyling: number[] }> = {}, essentials: [string, string|object][] = [];
 
 	if (!RAW.WATCH) {
 		const usedPortables = Object.values(CACHE.PortableStyle2Index).filter(i => indexes.includes(i))
@@ -301,7 +293,7 @@ function Appendix(indexes: number[] = []) {
 					if (stash[F.fileName]) { F.styleData.usedIndexes.forEach((i: number) => stash[F.fileName].binding.push(i)); }
 					else { stash[F.fileName] = { readme: [], binding: Array.from(F.styleData.usedIndexes), xtyling: [] }; }
 				}
-				essentials.push(...F.essentials);
+				essentials.push(...F.styleData.essentials);
 			}
 		});
 	}

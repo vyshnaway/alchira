@@ -1,3 +1,59 @@
-// export default function fn(ParentArr = [[]]) {
+import utils from "../Utils/main.js";
 
-// }
+export default function previewOrganize(arrarr: number[][], merge = true) {
+    let maxLen = 0;
+
+    const lenmap_arrarr = arrarr.reduce((acc: Record<number, number[][]>, arr) => {
+        if (acc[arr.length]) {
+            acc[arr.length].push(arr);
+        } else {
+            acc[arr.length] = [arr];
+        }
+        if (maxLen < arr.length) {
+            maxLen = arr.length;
+        }
+        return acc;
+    }, {});
+
+    const sorted_arrarr = (() => {
+        const sorted = [];
+        do {
+            if (lenmap_arrarr[maxLen]) {
+                sorted.push(...lenmap_arrarr[maxLen]);
+            }
+        } while (--maxLen);
+        return sorted;
+    })();
+
+    const shorted_arrarr = sorted_arrarr.reduce((acc: Record<string, number[][]>, arr) => {
+        const superParent = merge ? utils.array.findArrSuperParent(arr, sorted_arrarr) : arr;
+        const superParentString = JSON.stringify(superParent);
+        if (acc[superParentString]) {
+            acc[superParentString].push(arr);
+        } else {
+            acc[superParentString] = [arr];
+        }
+        return acc;
+    }, {});
+
+    let counter = 4096;
+    const indexMap: Record<string, number> = {};
+    const referenceMap = Object.entries(shorted_arrarr).reduce((acc, [key, arrarr]) => {
+        const templateArray = JSON.parse(key) as number[];
+
+        const indexMapFragment = templateArray.reduce((map, item) => {
+            map[item] = '_' + utils.string.enCounter(counter++);
+            indexMap[map[item]] = Number(item);
+            return map;
+        }, {} as Record<number, string>);
+
+        arrarr.forEach(arr => {
+            acc[JSON.stringify(arr)] = indexMapFragment;
+        });
+
+        return acc;
+    }, {} as Record<string, Record<number, string>>);
+
+    return { referenceMap, indexMap, classes: counter - 768 };
+}
+ 

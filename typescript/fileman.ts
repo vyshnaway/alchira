@@ -5,7 +5,7 @@ import { fileURLToPath } from "url";
 // Determine the root directory of the project.
 // This assumes the utility file is within a 'utils' or similar directory
 // one level down from the project root. Adjust "../.." if your structure differs.
-const root = path.resolve(fileURLToPath(import.meta.url), "../..");
+const root = path.resolve(fileURLToPath(import.meta.url), "..", "..", "..");
 
 /**
  * Represents the structure of the return object from `fileman.path.available`.

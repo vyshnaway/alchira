@@ -1,6 +1,6 @@
 {
     "compilerOptions": {
-        "module": "esnext",
+        "module": "nodenext",
         "target": "es2020",
         "lib": [
             "ES2020",
@@ -9,13 +9,11 @@
         "types": [
             "node"
         ],
-        "compilerOptions": {
-            "moduleResolution": "nodenext",
-            "paths": {
-                "chokidar": [
-                    "../node_modules/chokidar"
-                ]
-            }
+        "moduleResolution": "nodenext",
+        "paths": {
+            "chokidar": [
+                "../node_modules/chokidar"
+            ]
         },
         "outDir": "../execute/javascript",
         "sourceMap": true,

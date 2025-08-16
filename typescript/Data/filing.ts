@@ -35,6 +35,14 @@ export default function FILING(
 		metaFront: `${isXtylesFolder ? group.toLocaleUpperCase() : ""}\\|${Use.string.normalize(targetPath, [], [], ["/", "."])}`,
 		content: isXtylesFolder && extension === "css" ? Use.code.uncomment.Css(content) : content,
 		midway: "",
+		manifest: {
+			file: {
+				group: '',
+				id: ''
+			},
+			global: {},
+			local: {}
+		},
 		styleData: {
 			usedIndexes: new Set(),
 			essentials: [],

@@ -1,13 +1,15 @@
-import $ from "./Shell/main";
-import * as DATA from "./Data/init";
-import * as FETCH from "./Data/fetch";
-import * as SMITH from "./data-smith";
-import * as worker from "./Data/watch";
-import fileman from "./fileman";
-import { MemoryUsage } from "./data/init";
-import { ROOT, APP, RAW, NAV, STACK } from "./data/cache";
-import { FetchPortables, SplitGlobalForComponents } from "./Worker/portable";
-import { T_PackageEssential } from "./types";
+/* eslint-disable no-fallthrough */
+import $ from "./Shell/main.js";
+import * as DATA from "./Data/init.js";
+import * as FETCH from "./Data/fetch.js";
+import * as SMITH from "./data-smith.js";
+import * as worker from "./Data/watch.js";
+
+import fileman from "./fileman.js";
+import { MemoryUsage } from "./Data/init.js";
+import { SYNC, APP, RAW, NAV, STACK } from "./Data/cache.js";
+import { FetchPortables, SplitGlobalForComponents } from "./portable.js";
+import { T_PackageEssential } from "./types.js";
 
 function reporter(heading, targets, report) {
     $.POST(
@@ -33,22 +35,21 @@ async function execute(chapter) {
     do {
         switch (step) {
             case "Initialize":
-
-            case "VerifySetupStruct":
+            case "VerifySetupStruct": {
                 const verifyStructResult = await FETCH.VerifySetupStruct();
                 if (!verifyStructResult.proceed) {
                     report = verifyStructResult.report;
                     step = "WatchFolders";
                     break;
-                } else report = "";
-
-            case "ReadIndex":
+                } else { report = ""; }
+            }
+            case "ReadIndex": {
                 await FETCH.FetchIndexContent();
-
-            case "ReadLibraries":
+            }
+            case "ReadLibraries": {
                 await FETCH.ReloadLibrary();
-
-            case "VerifyConfigure":
+            }
+            case "VerifyConfigure": {
                 const verifyConfigsResult = await FETCH.VerifyConfigure(!staticsFetched);
                 if (!verifyConfigsResult.status) {
                     report = verifyConfigsResult.report;
@@ -58,33 +59,35 @@ async function execute(chapter) {
                     staticsFetched = true;
                     report = "";
                 }
-
-            case "ReadProxyFolders":
+            }
+            case "ReadProxyFolders": {
                 await FETCH.UpdateProxies();
-
-            case "ReadHashrules":
+            }
+            case "ReadHashrules": {
                 const hashruleAnalysis = await FETCH.AnalyzeHashrules();
                 if (!hashruleAnalysis.status) {
                     report = hashruleAnalysis.report;
                     step = "WatchFolders";
                     break;
-                } else report = "";
-
-            case "ProcessXtylesFolder":
+                } else { report = ""; }
+            }
+            case "ProcessXtylesFolder": {
                 SMITH.UpdateXtylesFolder();
-
-            case "ProcessProxyFolders":
+            }
+            case "ProcessProxyFolders": {
                 SMITH.ProcessProxies();
-
+            }
             case "GenerateFinals":
-                const {
-                    SaveFiles,
-                    ConsoleReport
-                } = RAW.CMD === "split" ? SplitGlobalForComponents() : await SMITH.Generate();
-                report = ConsoleReport;
+                {
+                    const {
+                        SaveFiles,
+                        ConsoleReport
+                    } = RAW.CMD === "split" ? SplitGlobalForComponents() : await SMITH.Generate();
+                    report = ConsoleReport;
+                }
 
             case "Publish":
-                if (Object.keys(SaveFiles).length) await fileman.write.bulk(SaveFiles);
+                if (Object.keys(SaveFiles).length) { await fileman.write.bulk(SaveFiles); }
                 if (reportNext) { reporter(heading, targets, report); reportNext = false };
 
             case "WatchFolders":
@@ -123,15 +126,15 @@ async function execute(chapter) {
                         if (event.folder === NAV.folder.setup) {
                             if (event.action === "add" || event.action === "change") {
                                 switch (filePath) {
-                                    case NAV.json.configure:
+                                    case NAV.json.configure.path:
                                         stopWatcher();
                                         stopWatcher = null;
                                         step = "VerifyConfigure";
                                         break;
-                                    case NAV.css.atrules:
-                                    case NAV.css.constants:
-                                    case NAV.css.elements:
-                                    case NAV.css.extends:
+                                    case NAV.css.atrules.path:
+                                    case NAV.css.constants.path:
+                                    case NAV.css.elements.path:
+                                    case NAV.css.extends.path:
                                         await FETCH.FetchIndexContent();
                                         step = "GenerateFinals";
                                         break;
@@ -139,10 +142,8 @@ async function execute(chapter) {
                                         step = "ReadHashrules";
                                         break;
                                     default:
-                                        if (filePath.startsWith(NAV.folder.library) && event.extension === "css")
-                                            RAW.LIBRARIES[filePath] = event.fileContent;
-                                        else if (filePath.startsWith(NAV.folder.portables) && ["xcss", "css", "md"].includes(event.extension))
-                                            RAW.PORTABLES[filePath] = event.fileContent;
+                                        if (filePath.startsWith(NAV.folder.library) && event.extension === "css") { RAW.LIBRARIES[filePath] = event.fileContent; }
+                                        else if (filePath.startsWith(NAV.folder.portables) && ["xcss", "css", "md"].includes(event.extension)) { RAW.PORTABLES[filePath] = event.fileContent; }
                                         step = "ProcessXtylesFolder";
                                 }
                             } else {
@@ -151,7 +152,7 @@ async function execute(chapter) {
                         } else if (event.action === "add" || event.action === "change" || event.action === "unlink") {
                             SMITH.ProcessProxies(event.action, event.folder, event.filePath, event.fileContent, event.extension);
                             step = "GenerateFinals";
-                        } else step = "VerifyConfigure";
+                        } else { step = "VerifyConfigure"; }
 
                         heading = `[${event.timeStamp}] | ${event.filePath} | [${event.action}]`;
                         reportNext = true;
@@ -196,7 +197,7 @@ async function commander({
         case "init":
             await $.PLAY.Title(APP.name + " : Initialize", 500);
             const setupInit = await FETCH.VerifySetupStruct();
-            if (setupInit.unstart) $.POST(await FETCH.Initialize());
+            if (setupInit.unstart) { $.POST(await FETCH.Initialize()); }
             else if (setupInit.proceed) {
                 $.POST((await FETCH.VerifyConfigure()).report);
             } else {
@@ -232,7 +233,7 @@ async function commander({
             await FETCH.FetchDocs();
             $.POST(
                 $.MOLD.std.Chapter(`${APP.command} @ ` + APP.version, [
-                    ROOT.DOCS.alerts.content,
+                    SYNC.DOCS.alerts.content,
                 ]),
             );
             $.POST(
@@ -245,7 +246,7 @@ async function commander({
             $.POST(
                 $.MOLD.secondary.Section(
                     "Agreements",
-                    Object.values(ROOT.AGREEMENT).reduce((acc, i) => {
+                    Object.values(SYNC.AGREEMENT).reduce((acc, i) => {
                         acc[i.title] = i.path;
                         return acc;
                     }, {}),
@@ -253,7 +254,7 @@ async function commander({
                 ),
             );
             $.POST(
-                $.MOLD.secondary.Section("Documentation : " + ROOT.DOCS.readme.path, [
+                $.MOLD.secondary.Section("Documentation : " + SYNC.DOCS.readme.path, [
                     "For more information visit " + $.style.bold.White(APP.website),
                 ]),
             );

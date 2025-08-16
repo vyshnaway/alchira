@@ -1,13 +1,17 @@
 import krypt from "./kryptic.js";
-import Use from "../Utils/main.js";
 import { APP } from "../Data/cache.js";
+import previewOrganize from "./organize.js";
+import { t_organizedResultDictionary } from "../types.js";
+
 
 APP.URL["Worker"] = "https://workers.xpktr.com/api/xcss-build-request";
 // APP.URL["Worker"] = APP.Worker + "api/publish";
 
+
+
 export default async function order(CMD = "", KEY = "", sequences = [], fallback = [], portable = { name: "", version: "", jsonContent: "" }) {
-	const previewSequence = [...sequences, fallback];
-	const previewResult = Use.array.setback(previewSequence.flat());
+	const previewSequences = [...sequences, fallback];
+	const previewResult = previewOrganize(previewSequences);
 
 	if (CMD === "publish") {
 		if (KEY.length < 25) {
@@ -69,7 +73,7 @@ export default async function order(CMD = "", KEY = "", sequences = [], fallback
 								contentCrypt.key,
 								contentCrypt.iv,
 							),
-						),
+						) as t_organizedResultDictionary,
 					};
 				} else {
 					return {

@@ -61,6 +61,17 @@ export interface t_Data_PREFIX {
     values: Record<string, Record<string, Record<string, string>>>,
 }
 
+export interface t_FileMap {
+    id: string;
+    group: "" | "xtyling" | "binding" | "stylesheet" | "axiom" | "cluster" | "local" | "global";
+}
+
+export interface t_FileManifest {
+    file: t_FileMap,
+    global: Record<string, t_SelectorMeta>,
+    local: Record<string, t_SelectorMeta>
+}
+
 export interface t_Data_FILING {
     id: string,
     group: string,
@@ -74,15 +85,16 @@ export interface t_Data_FILING {
     metaFront: string,
     content: string,
     midway: string,
+    manifest: t_FileManifest,
     styleData: {
         usedIndexes: Set<number>,
-        essentials: string[],
-        styleGlobals: Record<string, object>,
-        styleLocals: Record<string, object>,
+        essentials: [string, string | object][],
+        styleGlobals: Record<string, number>,
+        styleLocals: Record<string, number>,
         styleMap: Record<string, t_XtyleData>,
         classGroups: string[][],
         postBinds: string[],
-        preBinds: number[],
+        preBinds: string[],
         errors: string[],
         hasMainTag: boolean,
         hasStyleTag: boolean,
@@ -103,11 +115,22 @@ export interface t_XtyleData {
     markdown?: string
 }
 
-
-export interface t_FileMap {
-    group: "xtyling" | "binding" | "stylesheet" | "axiom" | "cluster" | "local" | "global";
-    id: string;
+export interface t_TagRawStyle {
+    element: string,
+    elvalue: string,
+    tagCount: number,
+    rowMarker: number,
+    columnMarker: number,
+    selector: string,
+    scope: 'xtyling' | 'essential' | 'local' | 'global' | 'public',
+    comments: string[],
+    styles: Record<string, string>
+    snippet_Main: string,
+    snippet_Style: string,
+    snippet_Attach: string,
+    snippet_Stencil: string,
 }
+
 
 export interface t_PUBLISH {
     DeltaPath: string,
@@ -195,14 +218,18 @@ export interface t_SelectorData {
     portable: string,
     scope: string,
     selector: string,
+    metaClass: string,
     object: Record<string, object>,
     metadata: t_SelectorMeta,
     preBinds: string[],
     postBinds: string[],
-    metaClass: string,
-    boundSnippet: string,
-    boundStyles: string,
-    declarations: string[]
+    declarations: string[],
+    snippets: {
+        Main: string,
+        Style: string,
+        Attach: string,
+        Stencil: string,
+    }
 }
 
 export interface t_CACHE {
@@ -248,13 +275,10 @@ export interface t_Stack {
     PORTABLES: Record<string, t_Data_FILING>,
 }
 
-export interface t_TagRawStyle {
-    scope: 'xtyling' | 'local' | 'global' | 'public',
-    selector: string,
-    comments: string[],
-    rowMarker: number,
-    columnMarker: number,
-    styles: Record<string, object>,
-    boundSnippet: string,
-    boundStylesheet: string
-}
+export type t_organizedResultDictionary = Record<string, Record<number, string>>;
+
+export interface t_organizedResult {
+    referenceMap: t_organizedResultDictionary;
+    indexMap: Record<string, number>;
+    classes: number;
+};
