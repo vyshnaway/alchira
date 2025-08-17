@@ -25,9 +25,7 @@ const textFormatter = {
       paddedLines.push(`>>>${leftPad}${line}${rightPad}<<<`);
     }
 
-    return format(
-      ["", canvas.divider.mid, ...paddedLines, canvas.divider.mid, ""].join("\n")
-    );
+    return format(["", canvas.divider.mid, ...paddedLines, canvas.divider.mid, ""].join("\n"));
   },
 
   H2: (content: string) => format([canvas.divider.mid, content, canvas.divider.mid, ""].join("\n")),

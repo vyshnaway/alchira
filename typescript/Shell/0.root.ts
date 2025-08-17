@@ -95,7 +95,7 @@ export const canvas: {
   },
 
   tab: " ",
-  width: () => process.stdout.columns,
+  width: () => typeof process.stdout.columns === 'number' ? process.stdout.columns : 48
 };
 
 Object.assign(canvas.config,

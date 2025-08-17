@@ -87,27 +87,21 @@ export async function Initialize() {
 				"Next Steps",
 				[
 					"Adjust " +
-					$.style.bold.Orange(NAV.json.configure.path) +
-					$.canvas.unstyle +
+					$.POST(NAV.json.configure.path, $.style.TS_Bold, ...$.canvas.config.primary) +
 					" according to the requirements of your project.",
 					"Execute " +
-					$.style.bold.Orange('"init"') +
-					$.canvas.unstyle +
+					$.POST('"init"', $.style.TS_Bold, ...$.canvas.config.primary) +
 					" again to generate the necessary configuration folders.",
 					"During execution " +
-					$.style.bold.Orange("{target}") +
-					$.canvas.unstyle +
+					$.POST("{target}", $.style.TS_Bold, ...$.canvas.config.primary) +
 					" folder will be cloned from " +
-					$.style.bold.Orange("{source}") +
-					$.canvas.unstyle +
+					$.POST("{source}", $.style.TS_Bold, ...$.canvas.config.primary) +
 					" folder.",
 					"This folder will act as proxy for " + APP.name + ".",
 					"In the " +
-					$.style.bold.Orange("{target}/{stylesheet}") +
-					$.canvas.unstyle +
+					$.POST("{target}/{stylesheet}", $.style.TS_Bold, ...$.canvas.config.primary) +
 					", content from " +
-					$.style.bold.Orange("{target}/{stylesheet}") +
-					$.canvas.unstyle +
+					$.POST("{target}/{stylesheet}", $.style.TS_Bold, ...$.canvas.config.primary) +
 					" will be appended.",
 				],
 				$.list.std.Bullets,
@@ -129,11 +123,11 @@ export async function Initialize() {
 					? ["This command uses an internet connection."]
 					: [
 						"Create a new project and use its access key. For action visit " +
-						$.style.bold.Orange(APP.URL.Console),
+						$.POST(APP.URL.Console, $.style.TS_Bold, ...$.canvas.config.primary),
 						"For personal projects, you can use the key in " +
-						$.style.bold.Orange(NAV.json.configure.path),
+						$.POST(NAV.json.configure.path, $.style.TS_Bold, ...$.canvas.config.primary),
 						"If using in CI/CD workflow, it is suggested to use " +
-						$.style.bold.Orange("xcss publish {key}"),
+						$.POST("xcss publish {key}, [$.style.TS_Bold, ...$.canvas.config.primary]"),
 					],
 				$.list.std.Bullets,
 			),

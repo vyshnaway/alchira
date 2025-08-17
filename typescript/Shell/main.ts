@@ -6,6 +6,21 @@ import write from "./3.write.js";
 import play from "./frames/index.js";
 import render from "./4.post.js";
 
+function initialize(
+  taskActive = true,
+  postActive = true,
+  tabWidth = 2,
+) {
+  const width = canvas.width();
+
+  canvas.tab = canvas.tab[0].repeat(tabWidth);
+  canvas.config.taskActive = taskActive;
+  canvas.config.postActive = postActive;
+  canvas.divider.low = canvas.divider.low[0].repeat(width);
+  canvas.divider.mid = canvas.divider.mid[0].repeat(width);
+  canvas.divider.top = canvas.divider.top[0].repeat(width);
+}
+
 const task = (string: string, rowshift = -1) => {
   if (canvas.config.taskActive && canvas.config.postActive) {
     render.write(
@@ -35,31 +50,6 @@ const step = (string: string, rowshift = -1) => {
   }
 };
 
-const post = (
-  string = "",
-  customStyle: (typeof style)[keyof typeof style][] = [],
-  customTag = tag.Div,
-) => {
-  if (canvas.config.postActive) {
-    render.write(format(customTag(string), ...customStyle));
-  }
-};
-
-function initialize(
-  taskActive = true,
-  postActive = true,
-  tabWidth = 2,
-) {
-  const width = canvas.width();
-
-  canvas.tab = canvas.tab[0].repeat(tabWidth);
-  canvas.config.taskActive = taskActive;
-  canvas.config.postActive = postActive;
-  canvas.divider.low = canvas.divider.low[0].repeat(width);
-  canvas.divider.mid = canvas.divider.mid[0].repeat(width);
-  canvas.divider.top = canvas.divider.top[0].repeat(width);
-}
-
 export default {
   tag,
   list,
@@ -69,7 +59,7 @@ export default {
   initialize,
   TASK: task,
   STEP: step,
-  POST: post,
   PLAY: play,
   MOLD: write,
+  POST: format,
 };
