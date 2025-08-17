@@ -34,6 +34,7 @@ export const APP: t_Data_APP = {
         OpenXtyles: true,
         RapidSense: true,
         Shorthands: true,
+        WatchDebug: true,
         ForceLocal: false,
         IntelGroup: "browser"
     },
@@ -281,8 +282,8 @@ export const RAW: t_RAW = {
     WATCH: false,
     PACKAGE: "",
     VERSION: "",
-    CMD: "",
-    ARG: "",
+    COMMAND: "",
+    ARGUMENT: "",
     ReadMe: "",
     CSSIndex: "",
     RootPath: "",

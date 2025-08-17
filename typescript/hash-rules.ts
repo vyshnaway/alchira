@@ -1,10 +1,10 @@
 import $ from "./Shell/main.js";
-import { CACHE, RAW, TWEAKS } from "./Data/data-cache.js";
+import { CACHE, RAW, TWEAKS } from "./Data/cache.js";
+import * as $$ from "./shell.js";
 
-const hashPattern = /\{#[a-z0-9]+\}/i;
-const preHashPattern = /(?<!\{)#\w+/g;
+const hashPattern = /#\{[a-z0-9]+\}/i;
 
-function IMPORT(string, watchUndef = true, ErrorisWarning = false) {
+function IMPORT(string: string, watchUndef = true, ErrorisWarning = false) {
 	const response = {
 		status: true,
 		result: "",
@@ -12,12 +12,11 @@ function IMPORT(string, watchUndef = true, ErrorisWarning = false) {
 	};
 	let hashMatch;
 	const source = string;
-	const recursionPreview = {};
-	const recursionSequence = [];
-	string = string.replace(preHashPattern, (match) => "{" + match + "}");
+	const recursionPreview: Record<string, string> = {};
+	const recursionSequence: string[] = [];
 
 	const errors = {
-		recursionLoop: (recursionPreview, cause) => {
+		recursionLoop: (recursionPreview: Record<string, string>, cause: string) => {
 			response.status = false;
 			recursionPreview["ERROR BY"] = $.style.bold.Red(cause);
 			response.error = $.MOLD[ErrorisWarning ? "warning" : "failed"].List(
@@ -25,12 +24,12 @@ function IMPORT(string, watchUndef = true, ErrorisWarning = false) {
 				$.style.text[ErrorisWarning ? "Orange" : "Red"](
 					" : Hashrule recursion loop.",
 				),
-				$.list.text.Props(recursionPreview),
+				$$.Props.text(recursionPreview),
 				$.list.std.Waterfall,
 			);
 			return response;
 		},
-		undefinedHash: (recursionPreview, cause) => {
+		undefinedHash: (recursionPreview: Record<string, string>, cause: string) => {
 			response.status = false;
 			recursionPreview["ERROR BY"] = $.style.bold.Red(cause);
 			response.error = $.MOLD[ErrorisWarning ? "warning" : "failed"].List(
@@ -38,7 +37,7 @@ function IMPORT(string, watchUndef = true, ErrorisWarning = false) {
 				$.style.text[ErrorisWarning ? "Orange" : "Red"](
 					" : Undefined hashrule.",
 				),
-				$.list.text.Props(recursionPreview),
+				$$.Props.text(recursionPreview),
 				$.list.std.Waterfall,
 			);
 			return response;
@@ -59,9 +58,7 @@ function IMPORT(string, watchUndef = true, ErrorisWarning = false) {
 		if (recursionSequence.includes(hash)) {
 			return errors.recursionLoop(recursionPreview, hash);
 		}
-		string = string
-			.replace(hashPattern, replacement)
-			.replace(preHashPattern, (match) => "{" + match + "}");
+		string = string.replace(hashPattern, replacement);
 
 		recursionSequence.push(hash);
 	}
@@ -72,7 +69,7 @@ function IMPORT(string, watchUndef = true, ErrorisWarning = false) {
 
 function UPLOAD() {
 	const hashrule = RAW.HASHRULE;
-	const hashruleErrors = [];
+	const hashruleErrors: string[] = [];
 
 	CACHE.HashRule = { ...hashrule };
 	Object.keys(hashrule).map((key) => {
@@ -91,90 +88,85 @@ function UPLOAD() {
 
 	return $.MOLD.std.Block([
 		$.MOLD.primary.Section("Active Hashrules"),
-		$.MOLD.std.Block($.list.text.Props(hashrule), $.list.std.Bullets),
-		...(hashruleErrors.length > 0
-			? [$.MOLD.failed.Footer("Invalid Hashrules"), hashruleErrors]
-			: []),
+		$.MOLD.std.Block($$.Props.std(hashrule), $.list.std.Bullets),
+		...(hashruleErrors.length ? [$.MOLD.failed.Footer("Invalid Hashrules", hashruleErrors)] : []),
 	]);
 }
 
-function RENDER(string, sourcePath = "", ErrorisWarning = false) {
+function RENDER(string: string, sourcePath = "", ErrorisWarning = false) {
 	const extended = IMPORT(string, true, ErrorisWarning);
 	string = extended.result;
-	let rule = [],
-		selector = [],
-		Marker = 0,
-		length = string.length,
-		deviance = 0;
+	const length = string.length;
+	let rule = '', selector = '', Marker = 0, deviance = 0;
 
 	for (let i = 0; i < length; i++) {
-		let ch = string[i];
+		const ch = string[i];
 
-		if (")}".includes(ch)) deviance--;
+		if (")}".includes(ch)) { deviance--; }
 
 		if (deviance) {
-			rule.push(ch);
+			rule += ch;
 		} else if (ch === "$") {
 			Marker = i + 1;
 			break;
 		} else {
 			switch (ch) {
 				case "{":
-					rule.push("");
+					rule += "";
 					break;
 				case "}":
-					rule.push("");
+					rule += "";
 					break;
 				case ",":
-					rule.push(TWEAKS.shorthands ? ", " : ",");
+					rule += TWEAKS.shorthands ? ", " : ",";
 					break;
 				case "|":
-					rule.push(TWEAKS.shorthands ? " or " : "|");
+					rule += TWEAKS.shorthands ? " or " : "|";
 					break;
 				case "&":
-					rule.push(TWEAKS.shorthands ? " and " : "&");
+					rule += TWEAKS.shorthands ? " and " : "&";
 					break;
 				case "!":
-					rule.push(TWEAKS.shorthands ? " not " : "!");
+					rule += TWEAKS.shorthands ? " not " : "!";
 					break;
 				case "*":
-					rule.push(TWEAKS.shorthands ? " all " : "*");
+					rule += TWEAKS.shorthands ? " all " : "*";
 					break;
 				case "^":
-					rule.push(TWEAKS.shorthands ? " only " : "^");
+					rule += TWEAKS.shorthands ? " only " : "^";
 					break;
 				case "@":
-					rule.unshift("@");
-					rule.push(" ");
+					rule = "@" + rule;
+					rule += " ";
 					break;
 				default:
-					rule.push(ch);
+					rule += ch;
 			}
 		}
-		if ("({".includes(ch)) deviance++;
+		if ("({".includes(ch)) { deviance++; }
 	}
 
 	if (Marker > 0) {
 		for (let i = Marker; i < length; i++) {
 			const ch = string[i];
 			if (ch === "{") {
-				if (i + 1 < string.length && string[i + 1] !== ":") selector.push(" ");
+				if (i + 1 < string.length && string[i + 1] !== ":") { selector += " "; }
 			} else if (ch !== "}") {
-				selector.push(ch);
+				selector += ch;
 			}
 		}
 	}
 
-	const finalRule = rule.join("").trim()
-		.replaceAll(/width\s*>=/, "min-width:")
-		.replaceAll(/width\s*<=/, "max-width:")
-		.replaceAll(/height\s*>=/, "min-height:")
-		.replaceAll(/height\s*<=/, "max-height:")
-		.replaceAll(/\s+/, " ");
+	const finalRule = rule.trim()
+		.replace(/width\s*>=/g, "min-width:")
+		.replace(/width\s*<=/g, "max-width:")
+		.replace(/height\s*>=/g, "min-height:")
+		.replace(/height\s*<=/g, "max-height:")
+		.replace(/\s+/g, " ");
 
 	return {
 		rule: finalRule,
-		subSelector: selector.join("").trim(),
+		subSelector: selector.trim(),
 		status: extended.status,
 		error: extended.error + $.MOLD.text.Item(sourcePath) + "\n",
 	};

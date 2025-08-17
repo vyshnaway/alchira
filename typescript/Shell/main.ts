@@ -1,62 +1,63 @@
-import canvas from "./0.root.js";
-import style from "./1.style.js";
-import tag from "./2.tag.js";
-import list from "./3.list.js";
-import write from "./4.write.js";
+import { canvas, style, format } from "./0.root.js";
+import tag from "./1.tag.js";
+import list from "./2.list.js";
+import write from "./3.write.js";
 
 import play from "./frames/index.js";
-import render from "./5.post.js";
+import render from "./4.post.js";
 
 const task = (string: string, rowshift = -1) => {
-  if (canvas.settings.taskActive && canvas.settings.postActive){
+  if (canvas.config.taskActive && canvas.config.postActive) {
     render.write(
       [
         rowshift >= 0 ? tag.Br(rowshift) : "",
-        tag.Div(style.boldDim[canvas.settings.primary](">>>")),
+        tag.Div(format(">>>", ...canvas.config.primary, style.TS_Rare)),
         canvas.tab,
-        tag.Div(style.boldItalic[canvas.settings.tertiary](string + ".")),
+        tag.Div(format(string + ".", style.TS_Bold, style.TS_Italic, ...canvas.config.tertiary)),
         tag.Br(1),
       ].join(""),
       rowshift < 0 ? -rowshift : rowshift,
-    );}
+    );
+  }
 };
 
 const step = (string: string, rowshift = -1) => {
-  if (canvas.settings.taskActive && canvas.settings.postActive){
+  if (canvas.config.taskActive && canvas.config.postActive) {
     render.write(
       [
         rowshift >= 0 ? tag.Br(rowshift) : "",
-        tag.Div(style.boldDim[canvas.settings.primary](">>>")),
+        tag.Div(format(">>>", style.TS_Rare, style.TS_Bold, ...canvas.config.primary)),
         canvas.tab,
-        tag.Div(style.italic[canvas.settings.tertiary](string + " ...")),
+        tag.Div(format(string + " ...", style.TS_Italic, ...canvas.config.tertiary)),
       ].join(""),
       rowshift < 0 ? -rowshift : rowshift,
-    );}
+    );
+  }
 };
 
 const post = (
   string = "",
-  customStyle = style.dim[canvas.settings.text],
+  customStyle: (typeof style)[keyof typeof style][] = [],
   customTag = tag.Div,
 ) => {
-  if (canvas.settings.postActive) {
-    render.write(customStyle(customTag(string)));
+  if (canvas.config.postActive) {
+    render.write(format(customTag(string), ...customStyle));
   }
 };
 
 function initialize(
-  canvasWidth = 48,
   taskActive = true,
   postActive = true,
   tabWidth = 2,
 ) {
+  const width = canvas.width();
+
   canvas.tab = canvas.tab[0].repeat(tabWidth);
-  canvas.settings.taskActive = taskActive;
-  canvas.settings.postActive = postActive;
-  canvas.settings.width = canvasWidth;
-  canvas.divider.low = canvas.divider.low[0].repeat(canvas.settings.width);
-  canvas.divider.mid = canvas.divider.mid[0].repeat(canvas.settings.width);
-  canvas.divider.top = canvas.divider.top[0].repeat(canvas.settings.width);
+  canvas.config.taskActive = taskActive;
+  canvas.config.postActive = postActive;
+  canvas.divider.low = canvas.divider.low[0].repeat(width);
+  canvas.divider.mid = canvas.divider.mid[0].repeat(width);
+  canvas.divider.top = canvas.divider.top[0].repeat(width);
 }
 
 export default {

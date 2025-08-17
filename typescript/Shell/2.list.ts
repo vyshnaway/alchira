@@ -1,23 +1,22 @@
-import canvas from "./0.root.js";
-import style from "./1.style.js";
-import tag from "./2.tag.js";
+import { canvas, style, format } from "./0.root.js";
+import tag from "./1.tag.js";
 
 type t_color_fn = (item: string) => string;
 
 const colors: Record<string, t_color_fn> = {
-	std: (item) => canvas.unstyle + item,
-	title: (item) => style.text[canvas.settings.title](item),
-	text: (item) => style.text[canvas.settings.text](item),
-	primary: (item) => style.text[canvas.settings.primary](item),
-	secondary: (item) => style.text[canvas.settings.secondary](item),
-	tertiary: (item) => style.text[canvas.settings.tertiary](item),
-	warning: (item) => style.text[canvas.settings.warning](item),
-	failed: (item) => style.text[canvas.settings.failed](item),
-	success: (item) => style.text[canvas.settings.success](item),
+	std: (item) => format(item),
+	title: (item) => format(item, ...canvas.config.title),
+	text: (item) => format(item, ...canvas.config.text),
+	primary: (item) => format(item, ...canvas.config.primary),
+	secondary: (item) => format(item, ...canvas.config.secondary),
+	tertiary: (item) => format(item, ...canvas.config.tertiary),
+	warning: (item) => format(item, ...canvas.config.warning),
+	failed: (item) => format(item, ...canvas.config.failed),
+	success: (item) => format(item, ...canvas.config.success),
 };
 
 const createListFormatters = (colorTheme: t_color_fn) => ({
-	Level: (items: string[], intent = 0) => {
+	Level: (items: string[] = [], intent = 0) => {
 		const keyLength = items.reduce((max, key) => (key.length > max ? key.length : max), 0);
 		return items.map((key) => (canvas.tab.repeat(intent) + colorTheme(key.padEnd(keyLength) + canvas.tab)));
 	},
@@ -30,7 +29,7 @@ const createListFormatters = (colorTheme: t_color_fn) => ({
 			}, 0) +
 			intent +
 			canvas.tab.length;
-		const cols = Math.floor(canvas.settings.width / (size + 3));
+		const cols = Math.floor(canvas.width() / (size + 3));
 		const result: string[] = [];
 		let subResult = "";
 		items.forEach((item, index) => {
@@ -55,7 +54,7 @@ const createListFormatters = (colorTheme: t_color_fn) => ({
 		return items.map(
 			(item, index) =>
 				canvas.tab.repeat(intent) +
-				style.bold[canvas.settings.secondary](String(index + 1)) +
+				format(String(index + 1), ...canvas.config.secondary, ...style.TS_Bold) +
 				canvas.tab.repeat(intent) +
 				tag.Div(colorTheme(item)),
 		);
@@ -67,9 +66,7 @@ const createListFormatters = (colorTheme: t_color_fn) => ({
 		return items.map((item, key) => {
 			return (
 				canvas.tab.repeat(intent) +
-				style.bold[canvas.settings.secondary](
-					key === items.length - 1 ? "└─>" : "├─>",
-				) +
+				format(key === items.length - 1 ? "└─>" : "├─>", style.TS_Bold, ...canvas.config.secondary) +
 				colorTheme(canvas.tab.repeat(intent) + item)
 			);
 		});

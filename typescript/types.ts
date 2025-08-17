@@ -246,8 +246,8 @@ export interface t_CACHE {
 };
 
 export interface t_RAW {
-    CMD: string,
-    ARG: string,
+    COMMAND: string,
+    ARGUMENT: string,
     ReadMe: string,
     WATCH: boolean,
     PACKAGE: string,
@@ -275,10 +275,13 @@ export interface t_Stack {
     PORTABLES: Record<string, t_Data_FILING>,
 }
 
-export type t_organizedResultDictionary = Record<string, Record<number, string>>;
+export type t_OrganizedResultDictionary = Record<string, Record<number, string>>;
 
-export interface t_organizedResult {
-    referenceMap: t_organizedResultDictionary;
+export interface t_OrganizedResult {
+    referenceMap: t_OrganizedResultDictionary;
     indexMap: Record<string, number>;
     classes: number;
+    shortlistedArrays: number[][]
 };
+
+export type t_COMMAND = "init" | "watch" | "preview" | "publish" | "archive" | "install";

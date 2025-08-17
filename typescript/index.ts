@@ -11,7 +11,7 @@ const commandList = [
     "preview",
     "publish",
     "archive",
-    "install"
+    "install",
 ];
 const packagePath = "package.json";
 
@@ -19,10 +19,6 @@ const packagePath = "package.json";
 async function main() {
     const command = process.argv[2];
     const argument = process.argv[3];
-    if (!commandList.includes(command)) {
-        console.error(`Unknown command: ${command}`);
-        process.exit(1);
-    }
 
     const workPath = fileman.path.resolves(".");
     const rootPath = fileman.path.fromOrigin(".");

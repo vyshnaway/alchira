@@ -1,9 +1,8 @@
-import style from "../1.style.js";
+import { style, format } from "../0.root.js";
 
-export default (string: string  , frames = 1) => {
+export default (string: string, frames = 1) => {
   const characters = Math.floor(Math.random() * string.length);
   const styles = Object.keys(style);
-  const colors = Object.keys(style.bold);
   const renders = [];
 
   if (characters > string.length) {
@@ -22,10 +21,7 @@ export default (string: string  , frames = 1) => {
       styledIndices.add(randomIndex);
 
       const randomStyle = styles[Math.floor(Math.random() * styles.length)];
-      const randomColor = colors[Math.floor(Math.random() * colors.length)];
-      const styledCharacter = style[randomStyle][randomColor](
-        string[randomIndex],
-      );
+      const styledCharacter = format(string[randomIndex], randomStyle);
 
       styledString =
         styledString.substring(0, randomIndex) +

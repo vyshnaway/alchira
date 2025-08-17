@@ -1,5 +1,6 @@
 /* eslint-disable no-fallthrough */
 import $ from "./Shell/main.js";
+import * as $$ from "./shell.js";
 import * as DATA from "./Data/init.js";
 import * as FETCH from "./Data/fetch.js";
 import * as SMITH from "./data-smith.js";
@@ -82,7 +83,7 @@ async function execute(chapter) {
                     const {
                         SaveFiles,
                         ConsoleReport
-                    } = RAW.CMD === "split" ? SplitGlobalForComponents() : await SMITH.Generate();
+                    } = RAW.COMMAND === "split" ? SplitGlobalForComponents() : await SMITH.Generate();
                     report = ConsoleReport;
                 }
 
@@ -185,15 +186,15 @@ async function commander({
     originPackageEssential: T_PackageEssential
 }) {
     // RAW.CMD = ["watch", "preview", "publish"].includes(command) ? "watch" : command;
-    RAW.CMD = command;
-    RAW.ARG = argument;
+    RAW.COMMAND = command;
+    RAW.ARGUMENT = argument;
     RAW.WATCH = command === "watch";
     RAW.PACKAGE = originPackageEssential.name;
     RAW.VERSION = originPackageEssential.version;
-    DATA.SetENV(rootPath, workPath, originPackageEssential, vendorGroup);
-    $.initialize(consoleWidth, command !== "watch" && command !== "split");
+    DATA.SetENV(rootPath, workPath, originPackageEssential);
+    $.initialize(consoleWidth, command !== "watch" && command !== "archive");
 
-    switch (RAW.CMD) {
+    switch (RAW.COMMAND) {
         case "init":
             await $.PLAY.Title(APP.name + " : Initialize", 500);
             const setupInit = await FETCH.VerifySetupStruct();
@@ -225,32 +226,27 @@ async function commander({
                 if (verifyConfigsResult.status) {
                     const fetchResult = await FetchPortables(argument);
                     await fileman.write.bulk(fetchResult.SaveFiles);
-                    $.POST($.MOLD.secondary.Footer("Installation status", fetchResult.Status, $.list.std.Props))
+                    $.POST($.MOLD.secondary.Footer("Installation status", fetchResult.Status));
                 } else { $.POST(verifyConfigsResult.report); };
             } else { $.POST(verifyStructResult.report); };
             break;
         default:
             await FETCH.FetchDocs();
             $.POST(
-                $.MOLD.std.Chapter(`${APP.command} @ ` + APP.version, [
-                    SYNC.DOCS.alerts.content,
+                $.MOLD.std.Chapter(`${RAW.COMMAND} @ ` + APP.version, [
+                    SYNC.DOCS.alerts.content || '',
                 ]),
             );
             $.POST(
                 $.MOLD.secondary.Section(
                     "Available Commands",
-                    APP.commandList,
-                    $.list.std.Props,
+                    $$.Props.std(APP.commandList),
                 ),
             );
             $.POST(
                 $.MOLD.secondary.Section(
                     "Agreements",
-                    Object.values(SYNC.AGREEMENT).reduce((acc, i) => {
-                        acc[i.title] = i.path;
-                        return acc;
-                    }, {}),
-                    $.list.std.Props,
+                    $$.Props.std(Object.fromEntries(Object.values(SYNC.AGREEMENT).map((i) => [i.title, i.path])))
                 ),
             );
             $.POST(

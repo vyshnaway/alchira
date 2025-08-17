@@ -1,7 +1,7 @@
 import krypt from "./kryptic.js";
 import { APP } from "../Data/cache.js";
 import previewOrganize from "./organize.js";
-import { t_organizedResultDictionary } from "../types.js";
+import { t_OrganizedResultDictionary } from "../types.js";
 
 
 APP.URL["Worker"] = "https://workers.xpktr.com/api/xcss-build-request";
@@ -9,9 +9,16 @@ APP.URL["Worker"] = "https://workers.xpktr.com/api/xcss-build-request";
 
 
 
-export default async function order(CMD = "", KEY = "", sequences = [], fallback = [], portable = { name: "", version: "", jsonContent: "" }) {
-	const previewSequences = [...sequences, fallback];
-	const previewResult = previewOrganize(previewSequences);
+export default async function order(
+	sequences: number[][],
+	CMD: "preview" | "publish",
+	KEY = "",
+	portable = {
+		name: '',
+		version: '',
+		jsonContent: ''
+	}) {
+	const previewResult = previewOrganize(sequences);
 
 	if (CMD === "publish") {
 		if (KEY.length < 25) {
@@ -24,7 +31,7 @@ export default async function order(CMD = "", KEY = "", sequences = [], fallback
 
 		const projectId = KEY.slice(0, 24);
 		const publicKey = KEY.slice(25);
-		const contentCrypt = await krypt.sym.gencrypt(JSON.stringify(sequences));
+		const contentCrypt = await krypt.sym.gencrypt(JSON.stringify(previewResult.shortlistedArrays));
 
 		let asymEncrypted;
 		try {
@@ -73,7 +80,7 @@ export default async function order(CMD = "", KEY = "", sequences = [], fallback
 								contentCrypt.key,
 								contentCrypt.iv,
 							),
-						) as t_organizedResultDictionary,
+						) as t_OrganizedResultDictionary,
 					};
 				} else {
 					return {

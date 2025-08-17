@@ -1,7 +1,10 @@
+import {  t_OrganizedResult } from "../types.js";
 import utils from "../Utils/main.js";
 
-export default function previewOrganize(arrarr: number[][], merge = true) {
+export default function previewOrganize(arrarr: number[][], merge = true): t_OrganizedResult {
+
     let maxLen = 0;
+
 
     const lenmap_arrarr = arrarr.reduce((acc: Record<number, number[][]>, arr) => {
         if (acc[arr.length]) {
@@ -15,6 +18,7 @@ export default function previewOrganize(arrarr: number[][], merge = true) {
         return acc;
     }, {});
 
+
     const sorted_arrarr = (() => {
         const sorted = [];
         do {
@@ -24,6 +28,7 @@ export default function previewOrganize(arrarr: number[][], merge = true) {
         } while (--maxLen);
         return sorted;
     })();
+
 
     const shorted_arrarr = sorted_arrarr.reduce((acc: Record<string, number[][]>, arr) => {
         const superParent = merge ? utils.array.findArrSuperParent(arr, sorted_arrarr) : arr;
@@ -35,6 +40,9 @@ export default function previewOrganize(arrarr: number[][], merge = true) {
         }
         return acc;
     }, {});
+
+    const onlyParrentArrays = Object.keys(shorted_arrarr).map(i => JSON.parse(i) as number[]);
+
 
     let counter = 4096;
     const indexMap: Record<string, number> = {};
@@ -54,6 +62,11 @@ export default function previewOrganize(arrarr: number[][], merge = true) {
         return acc;
     }, {} as Record<string, Record<number, string>>);
 
-    return { referenceMap, indexMap, classes: counter - 768 };
+
+    return {
+        referenceMap,
+        indexMap,
+        classes: counter - 768,
+        shortlistedArrays: onlyParrentArrays
+    };
 }
- 

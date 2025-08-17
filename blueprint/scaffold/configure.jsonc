@@ -47,6 +47,11 @@
     //   =>
     //   @media only screen and (min-width: 600px), not screen and (max-width: 400px) { $class {} }    
     // ---
+    "WatchDebug": true,
+    // - Use explicit classnames for origin tracking.
+    // - Slightly slower render cycle.
+    // - Bigger generated file sizes.
+    // ---
     "ForceLocal": false,
     // - All local styles are enforced with most priority.
     // - All valued will have a essential "!important" at the end.

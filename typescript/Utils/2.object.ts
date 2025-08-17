@@ -1,4 +1,4 @@
-type PlainObject<T = unknown> = Record<string, T>;
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 /**
  * Transposes a nested object structure so inner keys become outer keys.
@@ -7,12 +7,12 @@ type PlainObject<T = unknown> = Record<string, T>;
  * { a: { x: 1, y: 2 }, b: { x: 3 } }
  * => { x: { a: 1, b: 3 }, y: { a: 2 } }
  */
-function objectSwitch<T extends PlainObject<PlainObject>>(srcObject: T): PlainObject<PlainObject> {
+function objectSwitch(srcObject: Record<string, any>): Record<string, any> {
 	if (!srcObject || typeof srcObject !== "object") {
 		return {};
 	}
 
-	const output: PlainObject<PlainObject> = {};
+	const output: Record<string, any> = {};
 
 	for (const outerKey in srcObject) {
 		if (Object.prototype.hasOwnProperty.call(srcObject, outerKey) && outerKey[0] !== "+") {
@@ -36,14 +36,14 @@ function objectSwitch<T extends PlainObject<PlainObject>>(srcObject: T): PlainOb
 /**
  * Deep merges `source` into `target` (recursively for plain objects).
  */
-function deepMerge<T extends PlainObject, S extends PlainObject>(target: T, source: S): T & S {
-	if (!source || typeof source !== "object") { return target as T & S; }
+function deepMerge(target: Record<string, any>, source: Record<string, any>): Record<string, any> {
+	if (!source || typeof source !== "object") { return target; }
 
 	for (const key in source) {
-		const sourceValue = source[key as keyof S];
+		const sourceValue = source[key];
 		if (sourceValue === undefined) { continue; }
 
-		const targetValue = target[key as keyof T];
+		const targetValue = target[key];
 
 		if (
 			targetValue &&
@@ -52,31 +52,28 @@ function deepMerge<T extends PlainObject, S extends PlainObject>(target: T, sour
 			typeof sourceValue === "object" &&
 			!Array.isArray(targetValue)
 		) {
-			target[key as keyof T] = deepMerge(
-				targetValue as PlainObject,
-				sourceValue as PlainObject
-			) as any;
+			target[key] = deepMerge(targetValue, sourceValue);
 		} else {
-			target[key] = sourceValue as (T & S)[typeof key];
+			target[key] = sourceValue;
 		}
 	}
 
-	return target as T & S;
+	return target;
 }
 
 /**
  * Merges multiple objects with optional aggressive or array concatenation modes.
  */
-function bulkMerge<T extends PlainObject>(
-	objectArray: T[] = [],
+function bulkMerge(
+	objectArray: Record<string, any>[] = [],
 	aggressive = false,
 	arrayMerge = false
-): PlainObject {
+): Record<string, any> {
 	if (!Array.isArray(objectArray) || objectArray.length === 0) {
 		return {};
 	}
 
-	function innerMerge(target: PlainObject, source: PlainObject): PlainObject {
+	function innerMerge(target: Record<string, any>, source: Record<string, any>): Record<string, any> {
 		for (const key in source) {
 			if (Object.prototype.hasOwnProperty.call(source, key)) {
 				const srcVal = source[key];
@@ -92,16 +89,16 @@ function bulkMerge<T extends PlainObject>(
 						tgtVal !== null &&
 						!Array.isArray(tgtVal)
 					) {
-						innerMerge(tgtVal as PlainObject, srcVal as PlainObject);
+						innerMerge(tgtVal, srcVal);
 					} else {
-						target[key] = { ...(srcVal as PlainObject) };
+						target[key] = { ...srcVal };
 					}
 				} else if (
 					Array.isArray(srcVal) &&
 					Array.isArray(tgtVal) &&
 					arrayMerge
 				) {
-					(tgtVal as unknown[]).push(...srcVal);
+					tgtVal.push(...srcVal);
 				} else if (aggressive || !(key in target)) {
 					target[key] = srcVal;
 				}
@@ -112,7 +109,7 @@ function bulkMerge<T extends PlainObject>(
 
 	return objectArray.reduce(
 		(result, obj) => innerMerge(structuredClone(result), obj),
-		{} as PlainObject
+		{}
 	);
 }
 
@@ -120,10 +117,10 @@ function bulkMerge<T extends PlainObject>(
  * Creates an object retaining only the structure of the input, with
  * nested objects preserved as empty shells.
  */
-function skeleton<T extends PlainObject>(object: T = {} as T): PlainObject {
-	return Object.entries(object).reduce<PlainObject>((result, [k, o]) => {
+function skeleton(object: Record<string, any> = {}): Record<string, any> {
+	return Object.entries(object).reduce<Record<string, any>>((result, [k, o]) => {
 		if (typeof o === "object" && o !== null) {
-			result[k] = skeleton(o as PlainObject);
+			result[k] = skeleton(o);
 		}
 		return result;
 	}, {});
@@ -132,31 +129,31 @@ function skeleton<T extends PlainObject>(object: T = {} as T): PlainObject {
 /**
  * Computes the delta from object A to object B.
  */
-function ObjectDelta<T extends PlainObject>(
-	A: T = {} as T,
-	B: T = {} as T
-): { result: Partial<T>; score: number } {
+function ObjectDelta(
+	A: Record<string, any> = {},
+	B: Record<string, any> = {}
+): { result: Partial<Record<string, any>>; score: number } {
 	let score = 0;
-	const result: Partial<T> = {};
+	const result: Partial<Record<string, any>> = {};
 
 	Object.entries(B).forEach(([Bkey, Bvalue]) => {
 		if (typeof Bvalue === "string" || typeof Bvalue === "number" || typeof Bvalue === "boolean" || Bvalue === null) {
 			if (A[Bkey] !== Bvalue) {
 				score++;
-				result[Bkey as keyof T] = Bvalue as T[keyof T];
+				result[Bkey] = Bvalue;
 			}
 		} else if (typeof Bvalue === "object" && Bvalue !== null) {
 			if (typeof A[Bkey] === "object" && A[Bkey] !== null) {
 				const subobj = ObjectDelta(
-					A[Bkey] as PlainObject,
-					Bvalue as PlainObject
+					A[Bkey],
+					Bvalue
 				);
 				if (subobj.score) {
-					result[Bkey as keyof T] = subobj.result as T[keyof T];
+					result[Bkey] = subobj.result;
 				}
 				score += subobj.score;
 			} else {
-				result[Bkey as keyof T] = Bvalue as T[keyof T];
+				result[Bkey] = Bvalue;
 			}
 		}
 	});
