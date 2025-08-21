@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/naming-convention */
+import C_Proxy from "./Script/class.js";
+
 export interface T_PackageEssential {
     name: string;
     version: string;
@@ -91,10 +94,9 @@ export interface t_Data_FILING {
         essentials: [string, string | object][],
         styleGlobals: Record<string, number>,
         styleLocals: Record<string, number>,
-        styleMap: Record<string, t_XtyleData>,
+        styleMap: Record<string, t_SelectorMeta>,
         classGroups: string[][],
-        postBinds: string[],
-        preBinds: string[],
+        attachments: string[],
         errors: string[],
         hasMainTag: boolean,
         hasStyleTag: boolean,
@@ -103,29 +105,29 @@ export interface t_Data_FILING {
     }
 }
 
-export interface t_XtyleData {
+export interface t_SelectorMeta {
     info: string[],
     variables: Record<string, string>,
-    skeleton: Record<string, unknown>,
+    skeleton: object,
     declarations: string[],
     element?: string,
     metaclass?: string,
     snippet?: string,
-    structure?: string,
-    markdown?: string
+    structure?: string
 }
 
 export interface t_TagRawStyle {
     element: string,
     elvalue: string,
     tagCount: number,
-    rowMarker: number,
-    columnMarker: number,
+    rowIndex: number,
+    colIndex: number,
+    contentStart: number,
+    intrimEnding: number,
     selector: string,
-    scope: 'xtyling' | 'essential' | 'local' | 'global' | 'public',
+    scope: 'package' | 'essential' | 'local' | 'global' | 'public',
     comments: string[],
     styles: Record<string, string>
-    snippet_Main: string,
     snippet_Style: string,
     snippet_Attach: string,
     snippet_Stencil: string,
@@ -154,14 +156,14 @@ export interface t_PUBLISH {
         constants: string[],
         hashrules: Record<string, string>,
         file: Record<string, t_FileMap>;
-        axiom: Record<string, Record<string, t_XtyleData>>;
-        cluster: Record<string, Record<string, t_XtyleData>>;
-        local: Record<string, Record<string, t_XtyleData>>;
-        global: Record<string, Record<string, t_XtyleData>>;
-        xtyling: Record<string, Record<string, t_XtyleData>>;
-        binding: Record<string, Record<string, t_XtyleData>>;
+        axiom: Record<string, Record<string, t_SelectorMeta>>;
+        cluster: Record<string, Record<string, t_SelectorMeta>>;
+        local: Record<string, Record<string, t_SelectorMeta>>;
+        global: Record<string, Record<string, t_SelectorMeta>>;
+        xtyling: Record<string, Record<string, t_SelectorMeta>>;
+        binding: Record<string, Record<string, t_SelectorMeta>>;
     },
-    LibFilesTemp: Record<string, string>,
+    LibFilesTemp: Record<string, t_FileMap>,
 }
 
 export interface t_ProxyMap {
@@ -201,16 +203,6 @@ export interface t_Archive extends t_Config_Archive_Intersection {
     tweaks?: t_Data_TWEAKS
 }
 
-export interface t_SelectorMeta {
-    info: string[],
-    variables: Record<string, string>,
-    skeleton: object,
-    declarations: string[],
-    element?: string,
-    metaclass?: string,
-    snippet?: string,
-    structure?: string
-}
 
 export interface t_SelectorData {
     index?: number,
@@ -221,8 +213,7 @@ export interface t_SelectorData {
     metaClass: string,
     object: Record<string, object>,
     metadata: t_SelectorMeta,
-    preBinds: string[],
-    postBinds: string[],
+    attachments: string[]
     declarations: string[],
     snippets: {
         Main: string,
@@ -235,7 +226,7 @@ export interface t_SelectorData {
 export interface t_CACHE {
     HashRule: Record<string, string>,
     SortedIndexes: number[],
-    PortableEssentials: [string, string][],
+    PortableEssentials: [string, string | object][],
     Index2StylesObject: Record<string, t_SelectorData>,
     NativeStyle2Index: Record<string, number>,
     LibraryStyle2Index: Record<string, number>,
@@ -264,13 +255,8 @@ export interface t_RAW {
 }
 
 
-
-
-// export interface t_Proxy {
-// }
-
 export interface t_Stack {
-    PROXYCACHE: Record<string, t_Data_FILING>,
+    PROXYCACHE: Record<string, C_Proxy>,
     LIBRARIES: Record<string, t_Data_FILING>,
     PORTABLES: Record<string, t_Data_FILING>,
 }

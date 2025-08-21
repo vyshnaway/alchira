@@ -146,12 +146,12 @@ function ReRender() {
 	const { libraryTable, axiomsArray, clustersArray } = _StackLibraryFiles();
 	const { portableTable: modulesTable, bindingArray, xtylingArray: portablesArray } = _StackPortableFiles();
 
-	const PortableEssentials: unknown[][] = [];
+	const PortableEssentials: [string, string | object][] = [];
 	const XtylingStyleSkeleton = portablesArray.reduce((collection: Record<string, Record<string, t_SelectorMeta>>, fileData) => {
 		const filePath = NAV.folder.portables + "/" + fileData.filePath;
 		const tagStash = SCRIPTFILE(fileData).stylesList, indexMetaCollection: Record<string, t_SelectorMeta> = {};
 		tagStash.forEach((style) => {
-			style.scope = "xtyling";
+			style.scope = "package";
 			const response = PARSE.TAGSTYLE(style, fileData, CACHE.PortableStyle2Index,);
 
 			warnings.push(...response.errors);
@@ -275,7 +275,7 @@ function ReDeclare() {
 }
 
 function Appendix(indexes: number[] = []) {
-	const stash: Record<string, { readme: string[], binding: number[], xtyling: number[] }> = {}, essentials: [string, string|object][] = [];
+	const stash: Record<string, { readme: string[], binding: number[], xtyling: number[] }> = {}, essentials: [string, string | object][] = [];
 
 	if (!RAW.WATCH) {
 		const usedPortables = Object.values(CACHE.PortableStyle2Index).filter(i => indexes.includes(i))

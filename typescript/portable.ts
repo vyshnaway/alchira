@@ -66,11 +66,11 @@ function portableCreator(essentials = [], portableName = `${RAW.PACKAGE}@${RAW.V
     Object.entries(CACHE.GlobalsStyle2Index).forEach(([selector, index]) => {
         const inStash = INDEX.STYLE(index);
         const object = inStash.object;
-        const bindStack = FORGE.bindIndex(new Set(inStash.preBinds), new Set(inStash.postBinds));
+        const bindStack = FORGE.attachIndex(new Set(inStash.preBinds), new Set(inStash.postBinds));
         inStash.preBinds.forEach(bind => preBinds.add(bind))
         inStash.postBinds.forEach(bind => postBinds.add(bind))
 
-        portable.push(...generateXtyleBlock(selector, object, bindStack.preBindsList, bindStack.postBindsList));
+        portable.push(...generateXtyleBlock(selector, object, bindStack.list, bindStack.postBindsList));
     });
 
     // Essentials
@@ -114,7 +114,7 @@ function portableCreator(essentials = [], portableName = `${RAW.PACKAGE}@${RAW.V
     })
 
     const bindings = Object.entries(bindingStack).reduce((A, [key, value]) => {
-        A[key] = RENDER.forPortable(Object.entries(FORGE.bindIndex(value).preBindsObject)).join("\n");
+        A[key] = RENDER.forPortable(Object.entries(FORGE.attachIndex(value).object)).join("\n");
         return A;
     }, {})
 

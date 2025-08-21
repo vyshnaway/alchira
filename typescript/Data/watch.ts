@@ -225,7 +225,5 @@ export function watchFolders(folders: string[] = [], ignores: string[] = []) {
 			}
 		});
 
-	return () => {
-		watcher.close();
-	};
+	return () => { watcher.close(); };
 }

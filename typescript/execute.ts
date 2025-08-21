@@ -7,8 +7,8 @@ import FORGE from "./Style/forge.js";
 import ORDER from "./Worker/order-api.js";
 import SCRIPT from "./Script/class.js";
 import XTYLES from "./Style/stash.js";
-import { NAV, RAW, STACK, CACHE, PUBLISH } from "./data-cache.js";
-import { INDEX } from "./data-init.js";
+import { NAV, RAW, STACK, CACHE, PUBLISH } from "./Data/cache.js";
+import { INDEX } from "./Data/init.js";
 import { GeneratePortable } from "./portable.js";
 
 export function UpdateXtylesFolder() {
@@ -33,15 +33,18 @@ export function UpdateXtylesFolder() {
 	PUBLISH.MANIFEST.binding = BindingStyleSkeleton;
 
 	CACHE.PortableEssentials = PortableEssentials;
-	PUBLISH.LibFilesTemp = { ...libraryTable, ...modulesTable };
+	PUBLISH.LibFilesTemp = { ...libraryTable, ...modulesTable } as Record<string, {
+		group: string;
+		id: string;
+	}>;
 }
 
 export function ProcessProxies(
 	action = "upload",
-	targetFolder,
-	filePath,
-	fileContent,
-	extension,
+	targetFolder = '',
+	filePath = '',
+	fileContent = '',
+	extension = '',
 ) {
 	let reCache = true;
 	switch (action) {
@@ -117,12 +120,11 @@ async function Engine() {
 	} else {
 		const TRACKS = []
 		Object.values(STACK.PROXYCACHE).forEach((cache) => TRACKS.push(...cache.LoadTracks()));
-		const FALLBACK = [...Object.values(CACHE.PortableStyle2Index), ...Object.values(CACHE.GlobalsStyle2Index)];
 		let output;
 		if ("publish" === RAW.CMD) {
 			if (CUMULATES.errors.length) {
 				RAW.CMD = "preview";
-				output = await ORDER(RAW.CMD, RAW.ARG, TRACKS, FALLBACK);
+				output = await ORDER(TRACKS, RAW.CMD, RAW.ARG, FALLBACK);
 				PUBLISH.FinalMessage = "Errors in " + CUMULATES.errors.length + " Tags. Falling back to 'preview' command.";
 			} else {
 				const json = GeneratePortable(CUMULATES.essentials);
@@ -200,8 +202,8 @@ function createStylesheet(CUMULATES, ESSENTIALS = []) {
 		}, []), !RAW.WATCH
 	);
 
-	const bindObjects = FORGE.bindIndex(PREBINDS, POSTBINDS);
-	RENDERFRAGS.PREBINDS = COMPILE.forPublish(Object.entries(bindObjects.preBindsObject), !RAW.WATCH);
+	const bindObjects = FORGE.attachIndex(PREBINDS, POSTBINDS);
+	RENDERFRAGS.PREBINDS = COMPILE.forPublish(Object.entries(bindObjects.object), !RAW.WATCH);
 	RENDERFRAGS.POSTBINDS = COMPILE.forPublish(Object.entries(bindObjects.postBindsObject), !RAW.WATCH);
 
 	(RAW.WATCH
@@ -258,7 +260,7 @@ export async function Generate() {
 				});
 			}
 
-			SAVEFILES[NAV.json.manifest] = JSON.stringify(PUBLISH.MANIFEST);
+			SAVEFILES[NAV.json.manifest.path] = JSON.stringify(PUBLISH.MANIFEST);
 		} else {
 
 			const memChart = {

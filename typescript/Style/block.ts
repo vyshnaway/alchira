@@ -5,24 +5,23 @@ const CLOSE_CHARS = ["}", "]", ")"];
 const QUOTE_CHARS = ["`", "'", '"'];
 
 interface t_Result {
-	compose: string[],
-	preBinds: string[],
-	postBinds: string[],
+	assemble: string[],
+	attachment: string[],
 	variables: Record<string, string>,
 	XatProps: [string, string][],
-	atProps: Record<string,string>,
+	atProps: Record<string, string>,
 	Xproperties: [string, string][],
-	properties: Record<string,string>,
+	properties: Record<string, string>,
 	XatRules: [string, string][],
-	atRules: Record<string,string>,
+	atRules: Record<string, string>,
 	Xnested: [string, string][],
 	nested: Record<string, string>,
 	Xclasses: [string, string][],
 	classes: Record<string, string>,
 	Xflats: [string, string][],
-	flats: Record<string,string>,
+	flats: Record<string, string>,
 	XallBlocks: [string, string][],
-	allBlocks: Record<string,string>,
+	allBlocks: Record<string, string>,
 }
 
 export default function parseBlock(content: string, blockArrays = false) {
@@ -37,9 +36,8 @@ export default function parseBlock(content: string, blockArrays = false) {
 		isProp = true;
 
 	const result: t_Result = {
-		compose: [],
-		preBinds: [],
-		postBinds: [],
+		assemble: [],
+		attachment: [],
 		variables: {},
 		XatProps: [],
 		atProps: {},
@@ -90,9 +88,9 @@ export default function parseBlock(content: string, blockArrays = false) {
 						const value = Use.string.minify(content.slice(valStart, index));
 						if (isProp) {
 							if (key.length > 0) {
-								if (key.startsWith("--")) {result.variables[key] = value;}
+								if (key.startsWith("--")) { result.variables[key] = value; }
 								result.properties[key] = value;
-								if (blockArrays) {result.Xproperties.push([key, value]);}
+								if (blockArrays) { result.Xproperties.push([key, value]); }
 							} else if (value[0] === "@") {
 								const firstSpaceIndex = value.indexOf(" ");
 								const spaceIndex =
@@ -100,39 +98,30 @@ export default function parseBlock(content: string, blockArrays = false) {
 								const directive = value.slice(0, spaceIndex);
 
 								switch (directive) {
-									case "@--pre-bind":
-										result.preBinds.push(
+									case "@--attach":
+										result.attachment.push(
 											...Use.string.zeroBreaks(value.slice(spaceIndex)),
 										);
 										break;
-									case "@--post-bind":
-										result.postBinds.push(
-											...Use.string.zeroBreaks(value.slice(spaceIndex)),
-										);
-										break;
-									case "@--compose":
-										result.compose.push(
+									case "@--assemble":
+										result.assemble.push(
 											...Use.string.zeroBreaks(value.slice(spaceIndex)),
 										);
 										break;
 									default:
 										result.atProps[value] = "";
-										if (blockArrays) {result.XatProps.push([value, ""]);}
+										if (blockArrays) { result.XatProps.push([value, ""]); }
 								}
 							} else {
 								const breaks = Use.string.zeroBreaks(value);
 								switch (breaks[0]) {
-									case "<":
+									case "*":
 										breaks.shift();
-										result.preBinds.push(...breaks);
-										break;
-									case ">":
-										breaks.shift();
-										result.postBinds.push(...breaks);
+										result.attachment.push(...breaks);
 										break;
 									case "+":
 										breaks.shift();
-										result.compose.push(...breaks);
+										result.assemble.push(...breaks);
 										break;
 								}
 							}
@@ -140,15 +129,15 @@ export default function parseBlock(content: string, blockArrays = false) {
 							switch (key[0]) {
 								case "@":
 									result.atRules[key] = value;
-									if (blockArrays) {result.XatRules.push([key, value]);}
+									if (blockArrays) { result.XatRules.push([key, value]); }
 									break;
 								case "&":
 									result.nested[key] = value;
-									if (blockArrays) {result.Xnested.push([key, value]);}
+									if (blockArrays) { result.Xnested.push([key, value]); }
 									break;
 								case ".":
 									result.classes[key] = value;
-									if (blockArrays) {result.Xclasses.push([key, value]);}
+									if (blockArrays) { result.Xclasses.push([key, value]); }
 									break;
 								default:
 									result.flats[key] = value;

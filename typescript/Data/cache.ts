@@ -39,7 +39,6 @@ export const APP: t_Data_APP = {
         IntelGroup: "browser"
     },
     customTag: {
-        main: "xcss",
         style: "xtyle",
         attach: "xtaple",
         stencil: "xtencil",

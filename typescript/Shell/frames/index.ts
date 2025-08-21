@@ -4,16 +4,16 @@ import renderTitle from "./0.title.js";
 import renderLoki from "./1.loki.js";
 
 export default {
-  Title: (string, duration, repeat = 1) => {
-    return new Promise(async (resolve) => {
+  Title: (string: string, duration: number, repeat = 1) => {
+    return new Promise((resolve) => {
       const frames = renderTitle(string);
-      resolve(await render.animate(frames, duration, repeat));
+      resolve(render.animate(frames, duration, repeat));
     });
   },
-  Loki: (string, varients = 50, duration) => {
-    return new Promise(async (resolve) => {
+  Loki: (string: string, varients = 50, duration: number) => {
+    return new Promise((resolve) => {
       const frames = renderLoki(string, varients);
-      resolve(await render.animate(frames, duration, 0));
+      resolve(render.animate(frames, duration, 0));
     });
   },
 };

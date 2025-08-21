@@ -3,11 +3,13 @@ import object from "./2.object.js";
 import array from "./3.array.js";
 import code from "./4.code.js";
 import color from "./5.color.js";
+import cursor from "./6.cursor.js";
 
 export default {
 	string,
 	object,
 	array,
 	code,
-	color
+	color,
+	cursor
 };

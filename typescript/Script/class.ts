@@ -1,9 +1,10 @@
-import SCRIPTPARSE, {
+import SCRIPTPARSE from "./file.js";
+import {
 	TagFn_ReplaceMain,
 	TagFn_ReplaceStyle,
 	TagFn_ReplaceAttach,
 	TagFn_ReplaceStencil,
-} from "./file.js";
+} from "./tag.js";
 import fileman from "../fileman.js";
 
 import $ from "../Shell/main.js";
@@ -14,7 +15,7 @@ import { RAW, CACHE } from "../Data/cache.js";
 import { t_Data_FILING, t_FileManifest, t_ProxyMap } from "../types.js";
 import { t_Actions } from "./value.js";
 
-export default class Proxy {
+export default class C_Proxy {
 	source = "";
 	target = "";
 	stylesheetPath = "";
@@ -69,8 +70,7 @@ export default class Proxy {
 			const response = STYLEPARSE.TAGSTYLE(style, file, IndexMap);
 
 			if (style.scope === "essential") {
-				file.styleData.preBinds.push(...response.preBinds);
-				file.styleData.postBinds.push(...response.postBinds);
+				file.styleData.attachments.push(...response.attachments);
 				file.styleData.essentials.push(...response.essentials);
 			} else if (response.isOriginal) {
 				skeletonMap[response.selector] = response.metadata;
@@ -92,16 +92,14 @@ export default class Proxy {
 			indexes: number[],
 			styleMap: t_FileManifest[],
 			essentials: [string, string | object][],
-			preBinds: Set<string>,
-			postBinds: Set<string>,
+			attachments: Set<string>,
 		} = {
 			report: [],
 			errors: [],
 			indexes: [],
 			styleMap: [],
 			essentials: [],
-			preBinds: new Set(),
-			postBinds: new Set(),
+			attachments: new Set(),
 		}, styleGlobals: Record<string, number> = {};
 
 		C.styleMap.push({ file: { group: "stylesheet", id: RAW.WorkPath + this.targetStylesheet, }, global: {}, local: {}, });
@@ -132,8 +130,7 @@ export default class Proxy {
 			C.errors.push(...file.styleData.errors);
 			C.essentials.push(...file.styleData.essentials);
 			Object.assign(styleGlobals, file.styleData.styleGlobals);
-			file.styleData.preBinds.forEach((bind) => C.preBinds.add(bind));
-			file.styleData.postBinds.forEach((bind) => C.postBinds.add(bind));
+			file.styleData.attachments.forEach((bind) => C.attachments.add(bind));
 		});
 
 		Object.values(styleGlobals).forEach((index) => {
@@ -148,13 +145,13 @@ export default class Proxy {
 	}
 
 
-	RenderFiles(preBinds = new Set<string>(), postBinds = new Set<string>(), Command: t_Actions, OrderedClassList: Record<string, Record<number, string>> = {}) {
+	RenderFiles(attachments = new Set<string>(), Command: t_Actions, OrderedClassList: Record<string, Record<number, string>> = {}) {
 		Object.values(this.fileCache).forEach((file) => {
 			file.midway = SCRIPTPARSE(
 				file,
 				this.extnsProps[file.extension],
 				Command,
-				{ preBinds, postBinds },
+				attachments,
 				{
 					Local: file.styleData.styleLocals,
 					Global: CACHE.GlobalsStyle2Index,

@@ -7,8 +7,8 @@ export function _styleSwitch(object: Record<string, Record<string, object | stri
 	const mins: string[] = [], maxs: string[] = [], inits: string[] = [], flats: string[] = [];
 
 	Object.keys(switched).forEach((key) => {
-		const min = key.indexOf("min"),
-			max = key.indexOf("max");
+		const min = key.indexOf("min");
+		const max = key.indexOf("max");
 		if (key !== "") {
 			if (min === -1 && max === -1) { inits.push(key); }
 			if (min < max) { mins.push(key); }
@@ -20,29 +20,27 @@ export function _styleSwitch(object: Record<string, Record<string, object | stri
 	const result: Record<string, object> = {};
 	inits.forEach(key => result[key] = switched[key]);
 	Object.assign(result, switched[""]);
-	[...flats.sort(), ...mins.sort().reverse(), ...maxs.sort()]
-		.forEach((key) => (result[key] = switched[key]));
+	[...flats.sort(), ...mins.sort().reverse(), ...maxs.sort()].forEach((key) => (result[key] = switched[key]));
 	return result;
 }
 
 
 function BuildFromIndexMap(selectorIndexObject: Record<string, number>) {
-	const preBinds: string[] = [], postBinds: string[] = [];
+	const attachments: string[] = [];
 	const object = Object.entries(_styleSwitch(
 		Object.entries(selectorIndexObject).reduce((A: Record<string, Record<string, object>>, [selector, index]) => {
 			const imported = INDEX.IMPORT(index);
 			A[selector] = imported.object;
-			preBinds.push(...imported.preBinds);
-			postBinds.push(...imported.postBinds);
+			attachments.push(...imported.attachments);
 			return A;
 		}, {}),
 	));
 
-	return { object, preBinds, postBinds };
+	return { object, attachments };
 }
 
 
-function _loadBindObjectsFromIndex(
+function _loadAttachObjectsFromIndex(
 	order: string[] = [],
 ) {
 	const indexMap: Record<string, number> = {}, result: Record<string, Record<string, object>> = {};
@@ -61,47 +59,33 @@ function _loadBindObjectsFromIndex(
 	return { object, indexMap };
 }
 
-function buildBinds(
-	preBinds = new Set<string>(),
-	postBinds = new Set<string>()
-) {
-	const preLast: number = preBinds.size, postLast: number = postBinds.size;
+function buildAttachments(attachments = new Set<string>()) {
+	const attachmentLast: number = attachments.size;
 
 	do {
-		preBinds.forEach((element) => {
+		attachments.forEach((element) => {
 			if (CACHE.LibraryStyle2Index[element]) {
-				INDEX.IMPORT(CACHE.LibraryStyle2Index[element]).preBinds.forEach((E: string) => {
-					if (!preBinds.has(E)) { preBinds.add(E); }
+				INDEX.IMPORT(CACHE.LibraryStyle2Index[element]).attachments.forEach((E: string) => {
+					if (!attachments.has(E)) { attachments.add(E); }
 				});
 			}
 		});
-		postBinds.forEach((element) => {
-			if (CACHE.LibraryStyle2Index[element]) {
-				INDEX.IMPORT(CACHE.LibraryStyle2Index[element]).postBinds.forEach((E: string) => {
-					if (!postBinds.has(E)) { postBinds.add(E); }
-				});
-			}
-		});
-	} while (!(preLast === preBinds.size) && postLast === preBinds.size);
+	} while (!(attachmentLast === attachments.size) && attachmentLast === attachments.size);
 
-	preBinds.forEach((element) => {
-		if (postBinds.has(element)) { preBinds.delete(element); }
+	attachments.forEach((element) => {
+		if (attachments.has(element)) { attachments.delete(element); }
 	});
 
-	const preBindsCollected = _loadBindObjectsFromIndex(Array.from(preBinds));
-	const postBindsCollected = _loadBindObjectsFromIndex(Array.from(postBinds));
+	const attachmentCollected = _loadAttachObjectsFromIndex(Array.from(attachments));
 
 	return {
-		preBindsIndexMap: preBindsCollected.indexMap,
-		postBindsIndexMap: postBindsCollected.indexMap,
-		postBindsObject: postBindsCollected.object,
-		preBindsObject: preBindsCollected.object,
-		postBindsList: Array.from(postBinds),
-		preBindsList: Array.from(preBinds),
+		indexMap: attachmentCollected.indexMap,
+		object: attachmentCollected.object,
+		list: Array.from(attachments),
 	};
 }
 
 export default {
-	bindIndex: buildBinds,
+	attachIndex: buildAttachments,
 	indexMaps: BuildFromIndexMap,
 };

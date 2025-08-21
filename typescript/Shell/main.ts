@@ -6,7 +6,7 @@ import write from "./3.write.js";
 import play from "./frames/index.js";
 import render from "./4.post.js";
 
-function initialize(
+function init(
   taskActive = true,
   postActive = true,
   tabWidth = 2,
@@ -50,16 +50,22 @@ const step = (string: string, rowshift = -1) => {
   }
 };
 
+
+const post = (string?: string, ...styles: string[]) => {
+  render.write(format(string, ...styles));
+}
+
 export default {
   tag,
   list,
   style,
   canvas,
   render,
-  initialize,
+  INIT: init,
   TASK: task,
   STEP: step,
+  POST: post,
   PLAY: play,
   MOLD: write,
-  POST: format,
+  MAKE: format,
 };

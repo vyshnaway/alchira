@@ -3,16 +3,16 @@ import $ from "./Shell/main.js";
 import * as $$ from "./shell.js";
 import * as DATA from "./Data/init.js";
 import * as FETCH from "./Data/fetch.js";
-import * as SMITH from "./data-smith.js";
+import * as SMITH from "./execute.js";
 import * as worker from "./Data/watch.js";
 
 import fileman from "./fileman.js";
 import { MemoryUsage } from "./Data/init.js";
+import { T_PackageEssential } from "./types.js";
 import { SYNC, APP, RAW, NAV, STACK } from "./Data/cache.js";
 import { FetchPortables, SplitGlobalForComponents } from "./portable.js";
-import { T_PackageEssential } from "./types.js";
 
-function reporter(heading, targets, report) {
+function reporter(heading: string, targets: string[], report: string) {
     $.POST(
         $.MOLD.std.Block([
             $.MOLD.title.Chapter(heading, targets.map(i => `Watching : ${i}`), $.list.tertiary.Bullets),
@@ -22,10 +22,10 @@ function reporter(heading, targets, report) {
     );
 }
 
-async function execute(chapter) {
-    let stopWatcher = null | NodeJs.Timeout;
+async function execute(chapter: string) {
+    let stopWatcher: null | (() => void) = null;
     let report = "",
-        targets = [],
+        targets: string[] = [],
         reportNext = false,
         step = "Initialize",
         staticsFetched = false,
@@ -34,6 +34,8 @@ async function execute(chapter) {
     $.POST($.MOLD.tertiary.Chapter(chapter));
 
     do {
+        const SaveFiles: Record<string, string> = {};
+
         switch (step) {
             case "Initialize":
             case "VerifySetupStruct": {
@@ -78,20 +80,16 @@ async function execute(chapter) {
             case "ProcessProxyFolders": {
                 SMITH.ProcessProxies();
             }
-            case "GenerateFinals":
-                {
-                    const {
-                        SaveFiles,
-                        ConsoleReport
-                    } = RAW.COMMAND === "split" ? SplitGlobalForComponents() : await SMITH.Generate();
-                    report = ConsoleReport;
-                }
-
-            case "Publish":
+            case "GenerateFinals": {
+                const response = RAW.COMMAND === "split" ? SplitGlobalForComponents() : await SMITH.Generate();
+                Object.assign(SaveFiles, response.SaveFiles);
+                report = response.ConsoleReport;
+            }
+            case "Publish": {
                 if (Object.keys(SaveFiles).length) { await fileman.write.bulk(SaveFiles); }
-                if (reportNext) { reporter(heading, targets, report); reportNext = false };
-
-            case "WatchFolders":
+                if (reportNext) { reporter(heading, targets, report); reportNext = false; };
+            }
+            case "WatchFolders": {
                 if (RAW.WATCH) {
                     step = "WatchFolders";
                 } else {
@@ -104,7 +102,7 @@ async function execute(chapter) {
 
                 if (!stopWatcher) {
                     targets = Object.keys(STACK.PROXYCACHE);
-                    const targetFolders = [...targets, NAV.folder.setup];
+                    const targetFolders = [...targets, NAV.folder.setup.path];
                     process.on("SIGINT", () => {
                         if (stopWatcher) {
                             stopWatcher();
@@ -117,14 +115,14 @@ async function execute(chapter) {
                     reporter(heading, targets, report);
                 }
 
-                if (worker.hasEvents()) {
-                    const event = worker.dequeueEvent();
-                    $.initialize(event.consoleWidth, !RAW.WATCH);
+                if (worker.EventQueue.hasEvents()) {
+                    const event = worker.EventQueue.dequeue();
+                    if (!event) { break; }
                     const filePath = `${event.folder}/${event.filePath}`;
-                    if (filePath.startsWith(NAV.folder.autogen)) {
+                    if (filePath.startsWith(NAV.folder.autogen.path)) {
                         break;
                     } else {
-                        if (event.folder === NAV.folder.setup) {
+                        if (event.folder === NAV.folder.setup.path) {
                             if (event.action === "add" || event.action === "change") {
                                 switch (filePath) {
                                     case NAV.json.configure.path:
@@ -139,12 +137,12 @@ async function execute(chapter) {
                                         await FETCH.FetchIndexContent();
                                         step = "GenerateFinals";
                                         break;
-                                    case NAV.json.hashrules:
+                                    case NAV.json.hashrules.path:
                                         step = "ReadHashrules";
                                         break;
                                     default:
-                                        if (filePath.startsWith(NAV.folder.library) && event.extension === "css") { RAW.LIBRARIES[filePath] = event.fileContent; }
-                                        else if (filePath.startsWith(NAV.folder.portables) && ["xcss", "css", "md"].includes(event.extension)) { RAW.PORTABLES[filePath] = event.fileContent; }
+                                        if (filePath.startsWith(NAV.folder.library.path) && event.extension === "css") { RAW.LIBRARIES[filePath] = event.fileContent; }
+                                        else if (filePath.startsWith(NAV.folder.portables.path) && ["xcss", "css", "md"].includes(event.extension)) { RAW.PORTABLES[filePath] = event.fileContent; }
                                         step = "ProcessXtylesFolder";
                                 }
                             } else {
@@ -161,6 +159,7 @@ async function execute(chapter) {
                 }
 
                 await new Promise((resolve) => setTimeout(resolve, 50));
+            }
         }
     } while (RAW.WATCH);
 
@@ -185,44 +184,48 @@ async function commander({
     workPath: string,
     originPackageEssential: T_PackageEssential
 }) {
-    // RAW.CMD = ["watch", "preview", "publish"].includes(command) ? "watch" : command;
     RAW.COMMAND = command;
     RAW.ARGUMENT = argument;
-    RAW.WATCH = command === "watch";
+    RAW.WATCH = argument === "watch";
     RAW.PACKAGE = originPackageEssential.name;
     RAW.VERSION = originPackageEssential.version;
     DATA.SetENV(rootPath, workPath, originPackageEssential);
-    $.initialize(consoleWidth, command !== "watch" && command !== "archive");
+    $.INIT(command !== "watch" && command !== "archive");
 
     switch (RAW.COMMAND) {
-        case "init":
+        case "init": {
             await $.PLAY.Title(APP.name + " : Initialize", 500);
             const setupInit = await FETCH.VerifySetupStruct();
             if (setupInit.unstart) { $.POST(await FETCH.Initialize()); }
             else if (setupInit.proceed) {
-                $.POST((await FETCH.VerifyConfigure()).report);
+                $.POST((await FETCH.VerifyConfigure(true)).report);
             } else {
                 $.POST(setupInit.report);
             }
             break;
-        case "watch":
-            execute(RAW.PACKAGE + " : Active Runtime");
+        }
+        case "debug": {
+            execute(RAW.PACKAGE + " : Debug " + RAW.WATCH ? "Watch" : "Build");
             break;
-        case "preview":
-            await execute(RAW.PACKAGE + " : Preview Build");
+        }
+        case "preview": {
+            await execute(RAW.PACKAGE + " : Preview " + RAW.WATCH ? "Watch" : "Build");
             break;
-        case "publish":
-            await execute(RAW.PACKAGE + " : Final Build");
+        }
+        case "publish": {
+            await execute(RAW.PACKAGE + " : Production Build");
             break;
-        case "split":
+        }
+        case "archive": {
             await execute(RAW.PACKAGE + " : Split for Components");
             break;
-        case "install":
+        }
+        case "install": {
             $.POST("\n" + $.MOLD.secondary.Section("Installing Portables"));
 
             const verifyStructResult = await FETCH.VerifySetupStruct();
             if (verifyStructResult.proceed) {
-                const verifyConfigsResult = await FETCH.VerifyConfigure();
+                const verifyConfigsResult = await FETCH.VerifyConfigure(true);
                 if (verifyConfigsResult.status) {
                     const fetchResult = await FetchPortables(argument);
                     await fileman.write.bulk(fetchResult.SaveFiles);
@@ -230,7 +233,8 @@ async function commander({
                 } else { $.POST(verifyConfigsResult.report); };
             } else { $.POST(verifyStructResult.report); };
             break;
-        default:
+        }
+        default: {
             await FETCH.FetchDocs();
             $.POST(
                 $.MOLD.std.Chapter(`${RAW.COMMAND} @ ` + APP.version, [
@@ -251,9 +255,10 @@ async function commander({
             );
             $.POST(
                 $.MOLD.secondary.Section("Documentation : " + SYNC.DOCS.readme.path, [
-                    "For more information visit " + $.style.bold.White(APP.website),
+                    "For more information visit " + $.MAKE(APP.website, $.style.TS_Bold, $.style.FG_Bright_White),
                 ]),
             );
+        }
     }
 }
 

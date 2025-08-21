@@ -7,12 +7,13 @@ import { T_PackageEssential, T_PackageJson } from "./types.js";
 
 const commandList = [
     "init",
-    "watch",
+    "debug",
     "preview",
     "publish",
     "archive",
     "install",
-];
+];     
+
 const packagePath = "package.json";
 
 

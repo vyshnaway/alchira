@@ -8,7 +8,7 @@ import { INDEX } from "../Data/init.js";
 import { t_Data_FILING, t_SelectorData, t_SelectorMeta, t_TagRawStyle } from "../types.js";
 
 function xtylemerge(classList: string[] = []) {
-	const result: Record<string, object> = {}, preBinds: string[] = [], postBinds: string[] = [];
+	const result: Record<string, object> = {}, attachments: string[] = [];
 	classList.reduce((res, className) => {
 		const index =
 			(CACHE.PortableStyle2Index[className] || 0) +
@@ -16,21 +16,19 @@ function xtylemerge(classList: string[] = []) {
 			(CACHE.NativeStyle2Index[className] || 0);
 		if (index) {
 			const found = INDEX.IMPORT(index);
-			preBinds.push(...found.preBinds);
-			postBinds.push(...found.postBinds);
+			attachments.push(...found.attachments);
 			res = Use.object.multiMerge([result, found.object], true);
 		}
 		return res;
 	}, {});
-	return { result, preBinds, postBinds };
+	return { result, attachments };
 }
 
 function SCANNER(content: string, initial: string, sourceSelector: string, forceImportant = false) {
 	const scanned = CSSBLOCK(content);
 	const variables = scanned.variables;
-	const merged = xtylemerge(scanned.compose);
-	const preBinds = [...merged.preBinds, ...scanned.preBinds.filter(bind => bind[0] !== "/")],
-		postBinds = [...merged.postBinds, ...scanned.postBinds.filter(bind => bind[0] !== "/")];
+	const merged = xtylemerge(scanned.assemble);
+	const attachments = [...merged.attachments, ...scanned.attachment.filter(attach => attach[0] !== "/")];
 
 	const object = Use.object.deepMerge(merged.result, {
 		...Object.entries(scanned.atProps).map(([propKey, propValue]) => {
@@ -47,28 +45,26 @@ function SCANNER(content: string, initial: string, sourceSelector: string, force
 	for (const selector in scanned.allBlocks) {
 		const result = SCANNER(scanned.allBlocks[selector], initial, sourceSelector + " -> " + selector);
 		Object.assign(variables, result.variables);
-		preBinds.push(...result.preBinds);
-		postBinds.push(...result.postBinds);
+		attachments.push(...result.attachments);
 		object[selector] = result.object;
 	}
 
-	return { object, preBinds, postBinds, variables };
+	return { object, attachments, variables };
 }
 
 function CSSCANNER(content: string, initial = "") {
-	const variables: Record<string, string> = {}, preBinds: string[] = [], postBinds: string[] = [];
+	const variables: Record<string, string> = {}, attachments: string[] = [];
 	const scanned = CSSBLOCK(content, true);
 	const object: [string, string | object][] = scanned.XatProps;
 
 	scanned.XallBlocks.forEach(([key, value]) => {
 		const result = SCANNER(value, initial, key);
 		Object.assign(variables, result.variables);
-		preBinds.push(...result.preBinds);
-		postBinds.push(...result.postBinds);
+		attachments.push(...result.attachments);
 		object.push([key, result.object]);
 	});
 
-	return { object, preBinds, postBinds, variables };
+	return { object, attachments, variables };
 }
 
 function CSSLIBRARY(fileDatas: t_Data_FILING[] = [], initial = "", forPortable = false) {
@@ -84,7 +80,7 @@ function CSSLIBRARY(fileDatas: t_Data_FILING[] = [], initial = "", forPortable =
 			const declaration = source.sourcePath;
 			const stampSelector = stamp + Use.string.normalize(selector, [], ["\\", "."]);
 			const scannedStyle = SCANNER(OBJECT, initial + " : " + filePath + " ||", selector,);
-			const preBinds = scannedStyle.preBinds, postBinds = scannedStyle.postBinds;
+			const attachments = scannedStyle.attachments;
 			const object = { "": scannedStyle.object };
 
 			const index = (IndexMap[stampSelector] || 0) + (selectors[stampSelector] || 0);
@@ -104,8 +100,7 @@ function CSSLIBRARY(fileDatas: t_Data_FILING[] = [], initial = "", forPortable =
 					selector,
 					object,
 					metadata,
-					preBinds: forPortable ? preBinds.map(bind => stamp + bind) : preBinds,
-					postBinds: forPortable ? postBinds.map(bind => stamp + bind) : postBinds,
+					attachments: forPortable ? attachments.map(attach => stamp + attach) : attachments,
 					metaClass: metaFront + "_" + Use.string.normalize(stampSelector, [], [], ["$", "/"]),
 					declarations: [declaration], // only library declarations
 					snippets: {
@@ -137,16 +132,15 @@ function TAGSTYLE(
 ) {
 	const
 		object: Record<string, Record<string, object>> = {},
-		preBinds: string[] = [],
-		postBinds: string[] = [],
+		attachments: string[] = [],
 		errors: string[] = [],
 		essentials: [string, string | object][] = [];
 
 	const forPortable = file.group === "xtyling";
 	const xcope = (forPortable ? "" : raw.scope).toUpperCase();
 	const xelector = raw.selector === "" ? "" : file.stamp + raw.selector;
-	const declaration = `${file.filePath}:${raw.rowMarker}:${raw.columnMarker}`;
-	const metaClass = `${xcope}${file.metaFront}\\:${raw.rowMarker}\\:${raw.columnMarker}_${Use.string.normalize(raw.selector, [], [], forPortable ? ["$", "/"] : ["$"])}`;
+	const declaration = `${file.filePath}:${raw.rowIndex}:${raw.colIndex}`;
+	const metaClass = `${xcope}${file.metaFront}\\:${raw.rowIndex}\\:${raw.colIndex}_${Use.string.normalize(raw.selector, [], [], forPortable ? ["$", "/"] : ["$"])}`;
 	const variables = {};
 
 	for (const subSelector in raw.styles) {
@@ -154,8 +148,7 @@ function TAGSTYLE(
 		if (!query.status) { errors.push(query.error); }
 		const styleObj = SCANNER(raw.styles[subSelector], `${raw.scope.toUpperCase()} : ${file.filePath} ||`, `${raw.selector} => ${subSelector}`);
 
-		postBinds.push(...styleObj.postBinds);
-		preBinds.push(...styleObj.preBinds);
+		attachments.push(...styleObj.attachments);
 		Object.assign(variables, styleObj.variables);
 
 		if (Object.keys(styleObj).length) {
@@ -184,7 +177,7 @@ function TAGSTYLE(
 	let identity = { index: 0, class: '' };
 	if (raw.selector === "") {
 		essentials.push(...Object.entries(object).map(([k, v]) => [
-			RAW.WATCH ? `${k} /* ${declaration} */` : k,v
+			RAW.WATCH ? `${k} /* ${declaration} */` : k, v
 		]) as [string, string | object][]);
 	} else {
 		const index = (IndexMap[xelector] || 0) + (CACHE.LibraryStyle2Index[xelector] || 0) + (CACHE.GlobalsStyle2Index[xelector] || 0);
@@ -208,8 +201,7 @@ function TAGSTYLE(
 					skeleton: Use.object.skeleton(object),
 					declarations
 				},
-				preBinds: forPortable ? preBinds.map(bind => file.stamp + "$/" + bind) : preBinds,
-				postBinds: forPortable ? postBinds.map(bind => file.stamp + "$/" + bind) : postBinds,
+				attachments: forPortable ? attachments.map(attach => file.stamp + "$/" + attach) : attachments,
 				metaClass,
 				declarations,
 				snippets: {
@@ -228,8 +220,7 @@ function TAGSTYLE(
 		index: identity.index,
 		isOriginal,
 		essentials,
-		postBinds,
-		preBinds,
+		attachments,
 		metadata: INDEX.IMPORT(identity.index).metadata,
 		errors,
 	};

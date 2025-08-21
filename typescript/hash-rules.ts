@@ -18,12 +18,10 @@ function IMPORT(string: string, watchUndef = true, ErrorisWarning = false) {
 	const errors = {
 		recursionLoop: (recursionPreview: Record<string, string>, cause: string) => {
 			response.status = false;
-			recursionPreview["ERROR BY"] = $.style.bold.Red(cause);
+			recursionPreview["ERROR BY"] = $.MAKE(cause, $.style.TS_Bold, $.style.BG_Normal_Red);
 			response.error = $.MOLD[ErrorisWarning ? "warning" : "failed"].List(
 				source +
-				$.style.text[ErrorisWarning ? "Orange" : "Red"](
-					" : Hashrule recursion loop.",
-				),
+				$.MAKE(" : Hashrule recursion loop.", ErrorisWarning ? $.style.FG_Normal_Yellow : $.style.FG_Normal_Red),
 				$$.Props.text(recursionPreview),
 				$.list.std.Waterfall,
 			);
@@ -31,12 +29,10 @@ function IMPORT(string: string, watchUndef = true, ErrorisWarning = false) {
 		},
 		undefinedHash: (recursionPreview: Record<string, string>, cause: string) => {
 			response.status = false;
-			recursionPreview["ERROR BY"] = $.style.bold.Red(cause);
+			recursionPreview["ERROR BY"] = $.MAKE(cause, $.style.TS_Bold, $.style.BG_Normal_Red);
 			response.error = $.MOLD[ErrorisWarning ? "warning" : "failed"].List(
 				source +
-				$.style.text[ErrorisWarning ? "Orange" : "Red"](
-					" : Undefined hashrule.",
-				),
+				$.MAKE(" : Undefined hashrule.", ErrorisWarning ? $.style.FG_Normal_Yellow : $.style.FG_Normal_Red),
 				$$.Props.text(recursionPreview),
 				$.list.std.Waterfall,
 			);

@@ -8,7 +8,6 @@ APP.URL["Worker"] = "https://workers.xpktr.com/api/xcss-build-request";
 // APP.URL["Worker"] = APP.Worker + "api/publish";
 
 
-
 export default async function order(
 	sequences: number[][],
 	CMD: "preview" | "publish",
@@ -17,7 +16,8 @@ export default async function order(
 		name: '',
 		version: '',
 		jsonContent: ''
-	}) {
+	}
+) {
 	const previewResult = previewOrganize(sequences);
 
 	if (CMD === "publish") {

@@ -14,10 +14,19 @@ export interface t_StyleStack {
 }
 
 export interface t_FileCursor {
+	char: string | undefined,
 	marker: number,
 	rowMarker: number,
 	colMarker: number,
-	tagCount: number
+	tagCount: number,
+	colFallback: number,
+}
+
+export interface t_FileScanBuffer {
+	content: string,
+	active: t_FileCursor,
+	fallback: t_FileCursor,
+	reference: t_FileCursor,
 }
 
 export interface t_BindStack {
@@ -43,10 +52,10 @@ export default function classExtract(
 	string: string,
 	action: t_Actions,
 	fileData: t_Data_FILING,
-	BindStack: t_BindStack,
+	attacments: Set<string>,
 	StyleStack: t_StyleStack,
 	FileCursor: t_FileCursor,
-	OrderedClassList: Record<string, Record<number, string>> = {}
+	OrderedClassList: Record<string, Record<number, string>>,
 ) {
 	const classList: string[] = [], quotes = ["'", "`", '"'];
 	let activeQuote = "",
@@ -92,14 +101,7 @@ export default function classExtract(
 				if (ch === " " || ch === activeQuote) {
 					if (["<", ">"].includes(entry[0])) {
 						const className = entry.slice(1);
-						switch (entry[0]) {
-							case "<":
-								BindStack.preBinds.add(className);
-								break;
-							case ">":
-								BindStack.postBinds.add(className);
-								break;
-						}
+						if (entry[0] === '*') { attacments.add(className); }
 					} else {
 						const index = (
 							(StyleStack.Portable[entry] || 0) +

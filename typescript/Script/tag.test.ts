@@ -1,4 +1,4 @@
-import scan from "./file.js";
+import scan from "./tag.js";
 
 const test = (content: string) => console.log(
 	scan({
@@ -45,9 +45,7 @@ const test = (content: string) => console.log(
 	),
 );
 
-test(`
-	hi helllow 
-123<button=num
+test(`<button=num
 	class="$font-button $bg-primary-500 $text-bright $p-2 $radius-2 $cursor-pointer anim$all custom$button size color icon"
 	xcss-color='primary'
 	custom$button="
@@ -55,20 +53,15 @@ test(`
 		align-items: center;"
 	#Ms1="sdf:hgg;"
 	$="asd:asdd"
->123ve<button
+>`);
+
+test(`<button
 		class="$font-button $bg-primary-500 $text-bright $p-2 $radius-2 $cursor-pointer anim$all custom$button size color icon"
-		xcss-color='primary'
-	1<div custom$button="
+		xcss-color='primary'custom$button="
 		display: inline-flex;
 			align-items: center;"
-		#Ms1="sdf:hgg;"
-		$="asd
-			asdd"
->
-`);
-// `
-// 	hi helllow 
-// 123<button=num class="$font-button $bg-primary-500 $text-bright $p-2 $radius-2 $cursor-pointer anim$all custom$button size color icon" xcss-color='primary'>123ve<button
-// 		class="$font-button $bg-primary-500 $text-bright $p-2 $radius-2 $cursor-pointer anim$all custom$button size color icon"
-// 		xcss-color='primary'
-// 	1<div>`
+		#Ms1="sdf:hgg;
+		<div 
+		$='asd
+			asdd'
+>" now`);
