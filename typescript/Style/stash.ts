@@ -2,58 +2,58 @@ import PARSE from "./parse.js";
 
 import $ from "../Shell/main.js";
 import Use from "../Utils/main.js";
+import Fileman from "../fileman.js";
 import FILING from "../Data/filing.js";
 import SCRIPTFILE from "../Script/file.js";
 
 import { INDEX } from "../Data/init.js";
-import { NAV, CACHE, STACK, RAW } from "../Data/cache.js";
 import { t_Data_FILING, t_SelectorMeta } from "../types.js";
+import { NAVIGATE, CACHE_DYNAMIC, CACHE_STORAGE, CACHE_STATIC } from "../Data/cache.js";
 
 function _DeleteLibraryFile(filePath: string) {
-	if (STACK.LIBRARIES[filePath]) {
-		STACK.LIBRARIES[filePath].styleData.usedIndexes.forEach(i => INDEX.DISPOSE(i));
-		delete STACK.LIBRARIES[filePath];
+	if (CACHE_STORAGE.LIBRARIES[filePath]) {
+		CACHE_STORAGE.LIBRARIES[filePath].styleData.usedIndexes.forEach(i => INDEX.DISPOSE(i));
+		delete CACHE_STORAGE.LIBRARIES[filePath];
 	}
 }
 
-function _DeletePortableFile(filePath: string) {
-	if (STACK.PORTABLES[filePath]) {
-		STACK.PORTABLES[filePath].styleData.usedIndexes.forEach(i => INDEX.DISPOSE(i));
-		delete STACK.PORTABLES[filePath];
+function _DeletePackageFile(filePath: string) {
+	if (CACHE_STORAGE.PACKAGES[filePath]) {
+		CACHE_STORAGE.PACKAGES[filePath].styleData.usedIndexes.forEach(i => INDEX.DISPOSE(i));
+		delete CACHE_STORAGE.PACKAGES[filePath];
 	}
 }
 
 function _ClearStash() {
-	Object.entries(CACHE.LibraryStyle2Index).forEach(([selector, index]) => {
+	Object.entries(CACHE_DYNAMIC.LibraryClass_Index).forEach(([selector, index]) => {
 		INDEX.DISPOSE(index);
-		delete CACHE.LibraryStyle2Index[selector];
+		delete CACHE_DYNAMIC.LibraryClass_Index[selector];
 	});
-	Object.entries(CACHE.PortableStyle2Index).forEach(([selector, index]) => {
+	Object.entries(CACHE_DYNAMIC.PackageClass_Index).forEach(([selector, index]) => {
 		INDEX.DISPOSE(index);
-		delete CACHE.PortableStyle2Index[selector];
+		delete CACHE_DYNAMIC.PackageClass_Index[selector];
 	});
-	CACHE.PortableEssentials = [];
 
-	Object.keys(STACK.LIBRARIES).forEach((filePath) => _DeleteLibraryFile(filePath));
-	Object.keys(STACK.PORTABLES).forEach((filePath) => _DeletePortableFile(filePath));
+	Object.keys(CACHE_STORAGE.LIBRARIES).forEach((filePath) => _DeleteLibraryFile(filePath));
+	Object.keys(CACHE_STORAGE.PACKAGES).forEach((filePath) => _DeletePackageFile(filePath));
 }
 
 function _SaveLibraryFile(filePath: string, fileContent: string) {
-	if (STACK.LIBRARIES[filePath]) { _DeleteLibraryFile(filePath); }
-	STACK.LIBRARIES[filePath] = FILING(
+	if (CACHE_STORAGE.LIBRARIES[filePath]) { _DeleteLibraryFile(filePath); }
+	CACHE_STORAGE.LIBRARIES[filePath] = FILING(
 		"",
-		NAV.folder.library.path,
-		filePath.slice(NAV.folder.library.path.length + 1),
+		NAVIGATE.folder.libraries.path,
+		filePath.slice(NAVIGATE.folder.libraries.path.length + 1),
 		fileContent, true, false
 	);
 }
 
-function _SavePortableFile(filePath: string, fileContent: string) {
-	if (STACK.PORTABLES[filePath]) { _DeletePortableFile(filePath); }
-	STACK.PORTABLES[filePath] = FILING(
+function _SavePackageFile(filePath: string, fileContent: string) {
+	if (CACHE_STORAGE.PACKAGES[filePath]) { _DeletePackageFile(filePath); }
+	CACHE_STORAGE.PACKAGES[filePath] = FILING(
 		"",
-		NAV.folder.portables.path,
-		filePath.slice(NAV.folder.portables.path.length + 1),
+		NAVIGATE.folder.packages.path,
+		filePath.slice(NAVIGATE.folder.packages.path.length + 1),
 		fileContent, true, true
 	);
 }
@@ -67,7 +67,7 @@ function _StackLibraryFiles() {
 		axiom: Record<string, t_Data_FILING[]> = {},
 		cluster: Record<string, t_Data_FILING[]> = {},
 		libraryTable: Record<string, { group: string, id: string }> = {};
-	Object.entries(STACK.LIBRARIES).forEach(([filePath, fileData]) => {
+	Object.entries(CACHE_STORAGE.LIBRARIES).forEach(([filePath, fileData]) => {
 		const { id, group } = fileData;
 		libraryTable[filePath] = { group, id };
 		if (group === "axiom") {
@@ -84,21 +84,21 @@ function _StackLibraryFiles() {
 	return { libraryTable, axiomsArray, clustersArray };
 }
 
-function _StackPortableFiles() {
+function _StackPackageFiles() {
 	const
 		bindingArray: t_Data_FILING[] = [],
 		xtylingArray: t_Data_FILING[] = [],
-		portableTable: Record<string, { group: string, id: string }> = {};
+		packageTable: Record<string, { group: string, id: string }> = {};
 
-	Object.entries(STACK.PORTABLES).forEach(([filePath, fileData]) => {
+	Object.entries(CACHE_STORAGE.PACKAGES).forEach(([filePath, fileData]) => {
 		fileData.id = filePath;
 		const { id, group } = fileData;
-		portableTable[filePath] = { group, id };
+		packageTable[filePath] = { group, id };
 		if (group === "binding") { bindingArray.push(fileData); }
 		else if (group === "xtyling") { xtylingArray.push(fileData); }
 	});
 
-	return { portableTable, bindingArray, xtylingArray };
+	return { packageTable, bindingArray, xtylingArray };
 }
 
 
@@ -110,21 +110,21 @@ let report = "";
 let axiomCount = 0;
 let clusterCount = 0;
 let bindingCount = 0;
-let portableCount = 0;
+let packageCount = 0;
 
 let warnings: string[] = [];
 let axiomChart: Record<string, string[]> = {};
 let clusterChart: Record<string, string[]> = {};
 let bindingChart: Record<string, string[]> = {};
-let portableChart: Record<string, string[]> = {};
+let packageChart: Record<string, string[]> = {};
 
 function _UpdateFiles() {
 	_ClearStash();
-	Object.entries(RAW.LIBRARIES).forEach(([filePath, fileContent]) => {
+	Object.entries(CACHE_STATIC.LIBRARIES).forEach(([filePath, fileContent]) => {
 		_SaveLibraryFile(filePath, fileContent);
 	});
-	Object.entries(RAW.PORTABLES).forEach(([filePath, fileContent]) => {
-		_SavePortableFile(filePath, fileContent);
+	Object.entries(CACHE_STATIC.PACKAGES).forEach(([filePath, fileContent]) => {
+		_SavePackageFile(filePath, fileContent);
 	});
 
 }
@@ -135,45 +135,48 @@ function ReRender() {
 	report = "";
 	axiomCount = 0;
 	clusterCount = 0;
-	portableCount = 0;
+	packageCount = 0;
 	bindingCount = 0;
 	warnings = [];
 	axiomChart = {};
 	clusterChart = {};
 	bindingChart = {};
-	portableChart = {};
+	packageChart = {};
 
 	const { libraryTable, axiomsArray, clustersArray } = _StackLibraryFiles();
-	const { portableTable: modulesTable, bindingArray, xtylingArray: portablesArray } = _StackPortableFiles();
+	console.log(libraryTable);
+	console.log(axiomsArray);
+	console.log(clustersArray);
+	const { packageTable: modulesTable, bindingArray, xtylingArray: packagesArray } = _StackPackageFiles();
 
-	const PortableEssentials: [string, string | object][] = [];
-	const XtylingStyleSkeleton = portablesArray.reduce((collection: Record<string, Record<string, t_SelectorMeta>>, fileData) => {
-		const filePath = NAV.folder.portables + "/" + fileData.filePath;
+	const PackageEssentials: [string, string | object][] = [];
+	const XtylingStyleSkeleton = packagesArray.reduce((collection: Record<string, Record<string, t_SelectorMeta>>, fileData) => {
+		const filePath = Fileman.path.join(NAVIGATE.folder.packages.path, fileData.filePath);
 		const tagStash = SCRIPTFILE(fileData).stylesList, indexMetaCollection: Record<string, t_SelectorMeta> = {};
 		tagStash.forEach((style) => {
 			style.scope = "package";
-			const response = PARSE.TAGSTYLE(style, fileData, CACHE.PortableStyle2Index,);
+			const response = PARSE.TAGSTYLE(style, fileData, CACHE_DYNAMIC.PackageClass_Index,);
 
 			warnings.push(...response.errors);
 
 			if (response.selector === "") {
-				PortableEssentials.push(...response.essentials);
-				if (!RAW.WATCH) { fileData.styleData.essentials.push(...response.essentials); }
+				PackageEssentials.push(...response.essentials);
+				if (!CACHE_STATIC.WATCH) { fileData.styleData.essentials.push(...response.essentials); }
 			} else if (response.isOriginal) {
 				fileData.styleData.usedIndexes.add(response.index);
 				indexMetaCollection[response.selector] = response.metadata;
-				portableCount++;
+				packageCount++;
 			}
 		});
 		collection[filePath] = indexMetaCollection;
 		const classNames = Object.keys(indexMetaCollection);
-		if (classNames.length) { portableChart[`Portable [${fileData.filePath}]: ${classNames.length} Classes`] = classNames; }
+		if (classNames.length) { packageChart[`Package [${fileData.filePath}]: ${classNames.length} Classes`] = classNames; }
 		return collection;
 	}, {});
 
 	const BindingStyleSkeleton = bindingArray.reduce((collection: Record<string, Record<string, t_SelectorMeta>>, fileData) => {
 		const result = PARSE.CSSLIBRARY([fileData], "BINDING", true);
-		collection[NAV.folder.portables + "/" + fileData.filePath] = result.indexMetaCollection;
+		collection[Fileman.path.join(NAVIGATE.folder.packages.path, fileData.filePath)] = result.indexMetaCollection;
 		if (result.selectorList.length) { bindingChart[`Binding [${fileData.filePath}]: ${result.selectorList.length} Classes`] = result.selectorList; }
 		bindingCount += result.selectorList.length;
 		return collection;
@@ -196,12 +199,12 @@ function ReRender() {
 		return collection;
 	}, {});
 
-	Object.values(CACHE.PortableStyle2Index).forEach((index) => {
+	Object.values(CACHE_DYNAMIC.PackageClass_Index).forEach((index) => {
 		const InStash = INDEX.IMPORT(index);
 		if (InStash.metadata.declarations.length > 1) {
 			warnings.push(
 				$.MOLD.warning.List(
-					"Multiple portable declarations: " + InStash.selector,
+					"Multiple package declarations: " + InStash.selector,
 					InStash.declarations,
 					$.list.text.Bullets,
 				),
@@ -209,7 +212,7 @@ function ReRender() {
 		}
 	});
 
-	Object.values(CACHE.LibraryStyle2Index).forEach((index) => {
+	Object.values(CACHE_DYNAMIC.LibraryClass_Index).forEach((index) => {
 		const InStash = INDEX.IMPORT(index);
 		if (InStash.declarations.length > 1) {
 			warnings.push(
@@ -242,24 +245,24 @@ function ReRender() {
 			),
 		),
 		$.MOLD.primary.Section(
-			`Xtylings: ${portableCount}`,
-			Object.entries(portableChart).map(([heading, entries]) =>
+			`Xtylings: ${packageCount}`,
+			Object.entries(packageChart).map(([heading, entries]) =>
 				$.MOLD.tertiary.Topic(heading, entries, $.list.text.Entries),
 			),
 		),
 	].join("");
 
 	const nameCollitions: string[] | undefined = [];
-	Object.values(STACK.PORTABLES).forEach((F) => {
-		if (RAW.PACKAGE === F.fileName) { nameCollitions.push(F.sourcePath); }
+	Object.values(CACHE_STORAGE.PACKAGES).forEach((F) => {
+		if (CACHE_STATIC.PROJECT_NAME === F.fileName) { nameCollitions.push(F.sourcePath); }
 	});
-	if (nameCollitions.length) { warnings.push($.MOLD.warning.List(`Package-name collitions: ${RAW.PACKAGE}`, nameCollitions, $.list.failed.Bullets)); }
+	if (nameCollitions.length) { warnings.push($.MOLD.warning.List(`Package-name collitions: ${CACHE_STATIC.PROJECT_NAME}`, nameCollitions, $.list.failed.Bullets)); }
 
 	return {
 		libraryTable,
 		modulesTable,
 		nameCollitions,
-		PortableEssentials,
+		PackageEssentials,
 		AxiomStyleSkeleton,
 		ClusterStyleSkeleton,
 		BindingStyleSkeleton,
@@ -268,8 +271,8 @@ function ReRender() {
 }
 
 function ReDeclare() {
-	Object.values(CACHE.LibraryStyle2Index).forEach((val) => {
-		const value = CACHE.Index2StylesObject[val];
+	Object.values(CACHE_DYNAMIC.LibraryClass_Index).forEach((val) => {
+		const value = CACHE_DYNAMIC.Index_ClassData[val];
 		value.metadata.declarations = [...value.declarations];
 	});
 }
@@ -277,12 +280,12 @@ function ReDeclare() {
 function Appendix(indexes: number[] = []) {
 	const stash: Record<string, { readme: string[], binding: number[], xtyling: number[] }> = {}, essentials: [string, string | object][] = [];
 
-	if (!RAW.WATCH) {
-		const usedPortables = Object.values(CACHE.PortableStyle2Index).filter(i => indexes.includes(i))
-			.reduce((a, c) => { a.add(INDEX.IMPORT(c).portable); return a; }, new Set());
+	if (!CACHE_STATIC.WATCH) {
+		const usedPackages = Object.values(CACHE_DYNAMIC.PackageClass_Index).filter(i => indexes.includes(i))
+			.reduce((a, c) => { a.add(INDEX.IMPORT(c).package); return a; }, new Set());
 
-		Object.values(STACK.PORTABLES).forEach((F) => {
-			if (usedPortables.has(F.fileName)) {
+		Object.values(CACHE_STORAGE.PACKAGES).forEach((F) => {
+			if (usedPackages.has(F.fileName)) {
 				if (F.extension === "md") {
 					if (stash[F.fileName]) { stash[F.fileName].readme.push(F.content); }
 					else { stash[F.fileName] = { readme: [F.content], binding: [], xtyling: [] }; }

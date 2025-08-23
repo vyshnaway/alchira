@@ -7,20 +7,21 @@
     "url": "https://github.com/yshell-dev/xcss"
   },
   "bin": {
-    "xjs": "./execute/javascript/index.js",
-    "xcss": "./execute/xcss.js"
+    "xcss": "./execute/xcss.js",
+    "xjs": "./execute/javascript/index.js"
   },
   "funding": {
     "type": "individual",
     "url": "https://yshell.dev/xcss/funding/"
   },
   "scripts": {
-    "init": "chmod +x ./execute/script/chmod.sh && ./execute/script/chmod.sh && xjs init",
-    "xgo:debug": "xgo debug watch",
-    "xgo:install": "xgo install",
-    "xgo:preview": "xgo preview",
-    "xgo:publish": "xgo publish",
-    "xgo:archive": "xgo archive",
+    "init": "chmod +x ./execute/script/chmod.sh && ./execute/script/chmod.sh && xcss init",
+    "debug": "xcss debug watch",
+    "install": "xcss install",
+    "preview": "xcss preview",
+    "publish": "xcss publish",
+    "archive": "xcss archive",
+    "xjs:init": "xjs init",
     "xjs:debug": "xjs debug watch",
     "xjs:install": "xjs install",
     "xjs:preview": "xjs preview",
@@ -36,7 +37,7 @@
   },
   "author": "Yshell.dev",
   "license": "SEE LICENSE IN AGREEMENTS/LICENSE.md",
-  "homepage": "https://xcss.xpktr.com/",
+  "homepage": "www.xcss.io",
   "keywords": [
     "css",
     "xcss",

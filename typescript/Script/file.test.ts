@@ -55,20 +55,16 @@ test(`
 		align-items: center;"
 	#Ms1="sdf:hgg;"
 	$="asd:asdd"
->123ve<button
-		class="$font-button $bg-primary-500 $text-bright $p-2 $radius-2 $cursor-pointer anim$all custom$button size color icon"
-		xcss-color='primary'
-	1<div custom$button="
+123ve
+;<xtyle custom$button="
 		display: inline-flex;
 			align-items: center;"
-		#Ms1="sdf:hgg;"
+		class="$font-button $bg-primary-500 $text-bright $p-2 $radius-2 $cursor-pointer anim$all custom$button size color icon"
+		xcss-color='primary'
+	#Ms1="sdf:hgg;"
 		$="asd
 			asdd"
 >
+			h1{}
+</xtyle>
 `);
-// `
-// 	hi helllow 
-// 123<button=num class="$font-button $bg-primary-500 $text-bright $p-2 $radius-2 $cursor-pointer anim$all custom$button size color icon" xcss-color='primary'>123ve<button
-// 		class="$font-button $bg-primary-500 $text-bright $p-2 $radius-2 $cursor-pointer anim$all custom$button size color icon"
-// 		xcss-color='primary'
-// 	1<div>`

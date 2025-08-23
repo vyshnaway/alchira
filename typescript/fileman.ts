@@ -188,7 +188,10 @@ const fileman = {
 		 */
 		safe: async (source: string, destination: string, ignoreFiles: string[] = []): Promise<void> => {
 			const destinationFiles = fs.existsSync(destination)
-				? (await fileman.path.listFiles(destination)).map((file) =>
+				? [
+					...(await fileman.path.listFiles(destination)),
+					...(await fileman.path.listFolders(destination))
+				].map((file) =>
 					path.join(source, file.replace(destination, ""))
 				)
 				: [];
@@ -218,8 +221,7 @@ const fileman = {
 					const fileData = await fs.promises.readFile(target, "utf8");
 					return { status: true, data: fileData };
 				}
-			} catch (error: unknown) {
-				console.error(`Error reading file ${target}:`, error);
+			} catch {
 				return { status: false, data: "" };
 			}
 		},
@@ -249,8 +251,7 @@ const fileman = {
 						data: JSON.parse(cleanedContent),
 					};
 				}
-			} catch (error: unknown) {
-				console.error(`Error reading JSON ${target}:`, error);
+			} catch {
 				return { status: false, data: {} as T };
 			}
 		},

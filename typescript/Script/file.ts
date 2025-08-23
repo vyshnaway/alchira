@@ -1,17 +1,17 @@
-import tagScanner, {
-	TagSummonStyle,
-	TagSummonAttach,
-	TagSummonStencil,
-	rgx_elementFirstChar,
-	CustomTagElements,
-	FileCursorInitialize,
-	FileCursorIncremnet
-} from './tag.js';
+import Use from "../Utils/main.js";
+import tagScanner from './tag.js';
 
+import { ORIGIN } from '../Data/cache.js';
 import { t_Actions, t_StyleStack } from "./value.js";
-import { t_Data_FILING, t_TagRawStyle } from "../types.js";
+import { t_Data_FILING, t_OrderedClassList, t_TagRawStyle } from "../types.js";
 
-
+export const TagSummonStyle = `<${ORIGIN.customTag.style}/>`;
+export const TagSummonAttach = `<${ORIGIN.customTag.attach}/>`;
+export const TagSummonStencil = `<${ORIGIN.customTag.stencil}/>`;
+export const CustomTagElements = Object.values(ORIGIN.customTag);
+export const TagFn_ReplaceStyle = (sourceString: string, replacement: string) => sourceString.replace(TagSummonStyle, replacement);
+export const TagFn_ReplaceAttach = (sourceString: string, replacement: string) => sourceString.replace(TagSummonAttach, replacement);
+export const TagFn_ReplaceStencil = (sourceString: string, replacement: string) => sourceString.replace(TagSummonStencil, replacement);
 
 
 export default function scanner(
@@ -20,7 +20,7 @@ export default function scanner(
 	action: t_Actions = "read",
 	attachments = new Set<string>(),
 	styleStack: t_StyleStack = { Portable: {}, Library: {}, Native: {}, Local: {}, Global: {} },
-	OrderedClassList: Record<string, Record<number, string>> = {}
+	OrderedClassList: t_OrderedClassList = {}
 ) {
 	fileData.styleData.hasMainTag = false;
 	fileData.styleData.hasStyleTag = false;
@@ -31,96 +31,74 @@ export default function scanner(
 	const content = fileData.content;
 	const tagTrack: t_TagRawStyle[] = [];
 	const classesList: string[][] = [];
-	const fileCursor = FileCursorInitialize(fileData.content);
+	const fileCursor = Use.cursor.Initialize(fileData.content);
 
-	let scribed = "", interim = "";
+	let scribed = "";
 
 	do {
 		const char = fileCursor.active.char;
 
 		if (
 			(content[fileCursor.active.marker - 1] !== "\\")
-			&& (char === "<") &&
-			(rgx_elementFirstChar.test(content[fileCursor.active.marker + 1]))
+			&& (char === "<")
+			&& (/^[/\d\w-]*$/i.test(content[fileCursor.active.marker + 1]))
 		) {
-
-			const { ok, selfClosed, styleDeclarations, nativeAttributes, classList }
-				= tagScanner(fileData, classProps, action, attachments, styleStack, OrderedClassList, fileCursor);
-
 			let subScribed = '';
+			const tagStart = fileCursor.active.marker;
+			const { ok, selfClosed, styleDeclarations, nativeAttributes, classList } = tagScanner(fileData, classProps, action, attachments, styleStack, OrderedClassList, fileCursor);
+			const fragment = content.slice(tagStart + 1, styleDeclarations.tagOpenMarker);
+
 			if (ok) {
+				switch (fragment) {
+					case TagSummonStyle: fileData.styleData.hasStyleTag = true; break;
+					case TagSummonAttach: fileData.styleData.hasAttachTag = true; break;
+					case TagSummonStencil: fileData.styleData.hasStencilTag = true; break;
+				}
+				subScribed = (
+					action === "archive"
+						? styleDeclarations.scope === "local"
+						: (Object.keys(nativeAttributes).length === 0 && Object.keys(styleDeclarations.styles).length === 0)
+				) ? fragment
+					: '<' + [
+						styleDeclarations.element + (styleDeclarations.elvalue.length ? `=${styleDeclarations.elvalue}` : ''),
+						...Object.entries(nativeAttributes).map(([A, V]) => V === "" ? A : `${A}=${V}`)
+					].join(' ') + '>';
 
-				const strippedTag = (() => {
-					if ((action === "archive" && styleDeclarations.scope === "local") ||
-						(Object.keys(nativeAttributes).length === 0 && Object.keys(styleDeclarations.styles).length === 0)) {
-						const sliced = content.slice(styleDeclarations.contentStart, fileCursor.active.marker);
-						switch (sliced) {
-							case TagSummonStyle:
-								fileData.styleData.hasStyleTag = true;
-								break;
-							case TagSummonAttach:
-								fileData.styleData.hasAttachTag = true;
-								break;
-							case TagSummonStencil:
-								fileData.styleData.hasStencilTag = true;
-								break;
-						}
-						return sliced;
-					} else {
-						return '<' + [
-							styleDeclarations.element + (styleDeclarations.elvalue.length ? `=${styleDeclarations.elvalue}` : ''),
-							...Object.entries(nativeAttributes).map(([A, V]) => V === "" ? A : `${A}=${V}`)
-						].join(' ') + '>';
-					}
-				})();
-
-				subScribed = action === "archive" ? strippedTag : (() => {
-					let replacement = '';
-					if (CustomTagElements.includes(styleDeclarations.element)) {
-						replacement = 'styleTagCheck(content.slice(tagStartMarker, FileCursor.marker)) ? styleTag : ""';
-					} else {
-						replacement = strippedTag;
-					}
-					return ok ? styleDeclarations.element === 'APP.customTag' && Object.keys(styleDeclarations.styles).length ?
-						"" : replacement : content.slice(styleDeclarations.contentStart, fileCursor.active.marker);
-				})();
-
-				FileCursorIncremnet(fileCursor);
+				Use.cursor.Incremnet(fileCursor);
 				if (classList.length) { classesList.push(classList); }
 				if (Object.keys(styleDeclarations.styles).length > 0) { stylesList.push(styleDeclarations); }
 				Object.entries(styleDeclarations.styles).forEach(([k, v]) => styleDeclarations.styles[k] = v.slice(1, -1));
 			} else {
-				subScribed += fileData.content.slice(styleDeclarations.contentStart, fileCursor.active.marker);
+				subScribed += fragment;
 			}
 
-			if (tagTrack.length === 0) { scribed += subScribed; }
-
 			if (!selfClosed && ok) {
-				if (styleDeclarations.element[0] === '/' && tagTrack.length) {
+				if (styleDeclarations.element[0] === '/') {
 					const element = styleDeclarations.element.slice(1);
 					const watchTrack = tagTrack.pop();
 					if (watchTrack !== undefined) {
 						if (watchTrack.element === element) {
-							watchTrack.snippet_Style = interim.slice(watchTrack.intrimEnding);
-							watchTrack.snippet_Attach = interim.slice(watchTrack.intrimEnding);
-							watchTrack.snippet_Stencil = interim.slice(watchTrack.intrimEnding);
+							const snippet = content.slice(watchTrack.tagOpenMarker, tagStart).trim();
+							switch (element) {
+								case ORIGIN.customTag["style"]: watchTrack.snippet_Style = snippet; break;
+								case ORIGIN.customTag["attach"]: watchTrack.snippet_Attach = snippet; break;
+								case ORIGIN.customTag["stencil"]: watchTrack.snippet_Stencil = snippet; break;
+							}
 						} else {
 							tagTrack.push(watchTrack);
 						}
 					}
-				} else {
+				} else if (CustomTagElements.includes(styleDeclarations.element)) {
 					tagTrack.push(styleDeclarations);
 				}
 			}
-
-			interim += subScribed;
+			if (tagTrack.length === 0) { scribed += subScribed; }
 		} else {
+			Use.cursor.Incremnet(fileCursor);
 			if (tagTrack.length === 0) { scribed += char; }
-			FileCursorIncremnet(fileCursor);
 		}
 
 	} while (fileCursor.active.marker < content.length);
 
-	console.log(`'${scribed}'`);
 	return { scribed, classesList, stylesList };
 }

@@ -26,7 +26,7 @@ const task = (string: string, rowshift = -1) => {
     render.write(
       [
         rowshift >= 0 ? tag.Br(rowshift) : "",
-        tag.Div(format(">>>", ...canvas.config.primary, style.TS_Rare)),
+        tag.Div(format(">>>", style.TS_Bold, ...canvas.config.primary)),
         canvas.tab,
         tag.Div(format(string + ".", style.TS_Bold, style.TS_Italic, ...canvas.config.tertiary)),
         tag.Br(1),
@@ -41,7 +41,7 @@ const step = (string: string, rowshift = -1) => {
     render.write(
       [
         rowshift >= 0 ? tag.Br(rowshift) : "",
-        tag.Div(format(">>>", style.TS_Rare, style.TS_Bold, ...canvas.config.primary)),
+        tag.Div(format(">>>", style.TS_Rare, ...canvas.config.primary)),
         canvas.tab,
         tag.Div(format(string + " ...", style.TS_Italic, ...canvas.config.tertiary)),
       ].join(""),
@@ -53,7 +53,7 @@ const step = (string: string, rowshift = -1) => {
 
 const post = (string?: string, ...styles: string[]) => {
   render.write(format(string, ...styles));
-}
+};
 
 export default {
   tag,

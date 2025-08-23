@@ -1,9 +1,9 @@
 import Use from "../Utils/main.js";
-import { CACHE, RAW } from "../Data/cache.js";
 import { INDEX } from "../Data/init.js";
-import { t_Data_FILING } from "../types.js";
+import { CACHE_DYNAMIC, CACHE_STATIC } from "../Data/cache.js";
+import { t_Data_FILING, t_FileCursor } from "../types.js";
 
-export type t_Actions = 'read' | 'archive' | 'watch' | 'preview' | 'publish';
+export type t_Actions = 'read' | 'archive' | 'debug' | 'preview' | 'publish';
 
 export interface t_StyleStack {
 	Portable: Record<string, number>,
@@ -11,22 +11,6 @@ export interface t_StyleStack {
 	Native: Record<string, number>,
 	Local: Record<string, number>,
 	Global: Record<string, number>
-}
-
-export interface t_FileCursor {
-	char: string | undefined,
-	marker: number,
-	rowMarker: number,
-	colMarker: number,
-	tagCount: number,
-	colFallback: number,
-}
-
-export interface t_FileScanBuffer {
-	content: string,
-	active: t_FileCursor,
-	fallback: t_FileCursor,
-	reference: t_FileCursor,
 }
 
 export interface t_BindStack {
@@ -115,15 +99,15 @@ export default function classExtract(
 								case "archive": {
 									const isGlobal = (StyleStack.Global[entry] || 0);
 									const isLibrary = (StyleStack.Global[entry] || 0);
-									const className = isGlobal ? `/${RAW.PACKAGE}/${entry}`
-										: isLibrary ? `/${RAW.PACKAGE}/$/${entry}` : entry;
+									const className = isGlobal ? `/${CACHE_STATIC.PROJECT_NAME}/${entry}`
+										: isLibrary ? `/${CACHE_STATIC.PROJECT_NAME}/$/${entry}` : entry;
 									scribed += className;
 									break;
 								}
-								case "watch": {
+								case "debug": {
 									const devClass = metaFront + INDEX.IMPORT(index).metaClass;
 									scribed += Use.string.normalize(devClass, ["/", ".", ":", "|", "$"], ["\\"]);
-									CACHE.FinalStack["." + devClass] = index;
+									// CACHE.FinalStack["." + devClass] = index;
 									break;
 								}
 								case "preview":

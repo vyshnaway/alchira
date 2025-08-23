@@ -1,10 +1,10 @@
 import krypt from "./kryptic.js";
-import { APP } from "../Data/cache.js";
+import { ORIGIN } from "../Data/cache.js";
 import previewOrganize from "./organize.js";
 import { t_OrganizedResultDictionary } from "../types.js";
 
 
-APP.URL["Worker"] = "https://workers.xpktr.com/api/xcss-build-request";
+ORIGIN.URL["Worker"] = "https://workers.xpktr.com/api/xcss-build-request";
 // APP.URL["Worker"] = APP.Worker + "api/publish";
 
 
@@ -67,7 +67,7 @@ export default async function order(
 			redirect: "follow",
 		};
 
-		return fetch(APP.URL["Worfer"], requestOptions)
+		return fetch(ORIGIN.URL["Worfer"], requestOptions)
 			.then((response) => response.json())
 			.then(async (response) => {
 				if (response.status) {

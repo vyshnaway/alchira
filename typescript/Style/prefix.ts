@@ -1,13 +1,13 @@
 import palletes from "./color.js";
 
 import Use from "../Utils/main.js";
-import { APP, PREFIX } from "../Data/cache.js";
+import { ORIGIN, PREFIXES } from "../Data/cache.js";
 
-const VENDORS = APP.vendors;
+const VENDORS = ORIGIN.vendors;
 
 
 function forAttribute(content: string, prefixes = VENDORS) {
-	const attrVals = PREFIX.attributes[content];
+	const attrVals = PREFIXES.attributes[content];
 	if (!attrVals) { return { "": content }; }
 
 	const result: Record<string, string> = {};
@@ -21,7 +21,7 @@ function forAttribute(content: string, prefixes = VENDORS) {
 
 function forValues(attribute: string, value: string, prefixes = VENDORS) {
 	const cleanValue = Use.code.uncomment.Css(value);
-	const venVals = PREFIX.values?.[attribute]?.[cleanValue];
+	const venVals = PREFIXES.values?.[attribute]?.[cleanValue];
 	if (!venVals) { return { "": value }; }
 
 	const result: Record<string, string> = {};
@@ -68,8 +68,8 @@ export function forAtRule(
 
 	const result: Record<string, string> = {};
 	prefixes.forEach((group) => {
-		if (PREFIX.atrules[rule] && PREFIX.atrules[rule][group]) {
-			result[group] = PREFIX.atrules[rule][group] + data;
+		if (PREFIXES.atrules[rule] && PREFIXES.atrules[rule][group]) {
+			result[group] = PREFIXES.atrules[rule][group] + data;
 		}
 	}, {});
 	result[""] = content;
@@ -88,12 +88,12 @@ export function forPseudos(
 
 		prefixes.forEach((group) => {
 			result[group].out = string.replace(/:+[\w-]+/g, (selector) => {
-				if (PREFIX.pseudos[selector] && PREFIX.pseudos[selector][group]) {
+				if (PREFIXES.pseudos[selector] && PREFIXES.pseudos[selector][group]) {
 					result[group].score++;
-					return PREFIX.pseudos[selector][group];
+					return PREFIXES.pseudos[selector][group];
 				}
 
-				if (PREFIX.pseudos[selector]) {
+				if (PREFIXES.pseudos[selector]) {
 					return selector;
 				}
 

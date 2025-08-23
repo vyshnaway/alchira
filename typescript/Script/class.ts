@@ -1,17 +1,16 @@
 import SCRIPTPARSE from "./file.js";
 import {
-	TagFn_ReplaceMain,
 	TagFn_ReplaceStyle,
 	TagFn_ReplaceAttach,
 	TagFn_ReplaceStencil,
-} from "./tag.js";
+} from "./file.js";
 import fileman from "../fileman.js";
 
 import $ from "../Shell/main.js";
 import FILING from "../Data/filing.js";
 import STYLEPARSE from "../Style/parse.js";
 import { INDEX } from "../Data/init.js";
-import { RAW, CACHE } from "../Data/cache.js";
+import { CACHE_STATIC, CACHE_DYNAMIC } from "../Data/cache.js";
 import { t_Data_FILING, t_FileManifest, t_ProxyMap } from "../types.js";
 import { t_Actions } from "./value.js";
 
@@ -80,8 +79,8 @@ export default class C_Proxy {
 			file.styleData.errors.push(...response.errors);
 		});
 
-		Object.assign(CACHE.GlobalsStyle2Index, file.styleData.styleGlobals);
-		Object.assign(file.manifest.file, { group: "target", id: RAW.WorkPath + file.targetPath });
+		Object.assign(CACHE_DYNAMIC.GlobalClass__Index, file.styleData.styleGlobals);
+		Object.assign(file.manifest.file, { group: "target", id: CACHE_STATIC.WorkPath + file.targetPath });
 	}
 
 	Accumulator() {
@@ -102,7 +101,7 @@ export default class C_Proxy {
 			attachments: new Set(),
 		}, styleGlobals: Record<string, number> = {};
 
-		C.styleMap.push({ file: { group: "stylesheet", id: RAW.WorkPath + this.targetStylesheet, }, global: {}, local: {}, });
+		C.styleMap.push({ file: { group: "stylesheet", id: CACHE_STATIC.WorkPath + this.targetStylesheet, }, global: {}, local: {}, });
 
 		Object.values(this.fileCache).forEach((file) => {
 			C.indexes.push(...Object.values(file.styleData.styleLocals));
@@ -154,10 +153,10 @@ export default class C_Proxy {
 				attachments,
 				{
 					Local: file.styleData.styleLocals,
-					Global: CACHE.GlobalsStyle2Index,
-					Native: CACHE.NativeStyle2Index,
-					Library: CACHE.LibraryStyle2Index,
-					Portable: CACHE.PortableStyle2Index
+					Global: CACHE_DYNAMIC.GlobalClass__Index,
+					Native: CACHE_DYNAMIC.NativeClass__Index,
+					Library: CACHE_DYNAMIC.LibraryClass_Index,
+					Portable: CACHE_DYNAMIC.PackageClass_Index
 				},
 				OrderedClassList
 			).scribed;
@@ -167,7 +166,6 @@ export default class C_Proxy {
 	SummonFiles(
 		SaveFiles: Record<string, string> = {},
 		stylesheet: string,
-		MainBlock: string,
 		StyleBlock: string,
 		AttachBlock: string,
 		StencilBlock: string,
@@ -177,7 +175,6 @@ export default class C_Proxy {
 		Object.values(this.fileCache).forEach((file) => {
 			if (file.extension !== "xcss") {
 				let fileContent = file.midway;
-				if (file.styleData.hasMainTag) { fileContent = TagFn_ReplaceMain(fileContent, MainBlock); }
 				if (file.styleData.hasStyleTag) { fileContent = TagFn_ReplaceStyle(fileContent, StyleBlock); }
 				if (file.styleData.hasAttachTag) { fileContent = TagFn_ReplaceAttach(fileContent, AttachBlock); }
 				if (file.styleData.hasStencilTag) { fileContent = TagFn_ReplaceStencil(fileContent, StencilBlock); }
@@ -197,10 +194,10 @@ export default class C_Proxy {
 			file.styleData.classGroups.forEach((group) => {
 				const indexGroup = group.reduce((indexAcc: number[], className) => {
 					const index =
-						(CACHE.PortableStyle2Index[className] || 0) +
-						(CACHE.LibraryStyle2Index[className] || 0) +
-						(CACHE.GlobalsStyle2Index[className] || 0) +
-						(CACHE.NativeStyle2Index[className] || 0) +
+						(CACHE_DYNAMIC.PackageClass_Index[className] || 0) +
+						(CACHE_DYNAMIC.LibraryClass_Index[className] || 0) +
+						(CACHE_DYNAMIC.GlobalClass__Index[className] || 0) +
+						(CACHE_DYNAMIC.NativeClass__Index[className] || 0) +
 						(file.styleData.styleLocals[className] || 0);
 					if (index) { indexAcc.push(index); }
 					return indexAcc;

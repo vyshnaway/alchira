@@ -100,14 +100,14 @@ export const canvas: {
 
 Object.assign(canvas.config,
   {
-    title: [style.FG_Normal_Green],
-    text: [style.FG_Normal_White],
-    primary: [style.FG_Normal_Yellow],
-    secondary: [style.FG_Bright_Yellow],
-    tertiary: [style.FG_Bright_Black],
-    success: [style.FG_Normal_Green],
-    failed: [style.FG_Normal_Red],
-    warning: [style.FG_Normal_Yellow],
+    title: [style.BG_Normal_Green],
+    text: [style.BG_Normal_White],
+    primary: [style.BG_Normal_Yellow],
+    secondary: [style.BG_Bright_Yellow],
+    tertiary: [style.BG_Bright_Black],
+    success: [style.BG_Normal_Green],
+    failed: [style.BG_Normal_Red],
+    warning: [style.BG_Normal_Yellow],
   }
 );
 

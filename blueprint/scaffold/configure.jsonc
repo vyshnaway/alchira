@@ -14,10 +14,15 @@
       }
     }
   ],
-  "portables": {
-    "portable-name": "source-link"
+  "packages": {
+    "package-name": "source-link"
   },
   "tweaks": {
+    // ---
+    "IntelGroup": "browser",
+    // - Select intellisense group for css suggestions.
+    // - Available options: ["browser"(default), "none"]
+    // ---
     "OpenXtyles": true,
     // - Support for ungroup-declaration:[like `$class="+++"`], in target files.
     // - For frameworks with occupied funcitonality use false, [eg: svelte].
@@ -27,7 +32,7 @@
     // - Enforces intellisense to trigger after "$" or "/".
     // - If causes override conflicts with your current stack in any manner, use false. 
     // ---
-    "Shorthands": true,
+    "Shorthands": true
     // - A few symbols can be used for some keyworks to write queries/at-rules inline.
     // - Alternatively you can define rule in ***@{***}, anyways.
     // - Available tokens.
@@ -47,13 +52,5 @@
     //   =>
     //   @media only screen and (min-width: 600px), not screen and (max-width: 400px) { $class {} }    
     // ---
-    "ForceLocal": false,
-    // - All local styles are enforced with most priority.
-    // - All valued will have a essential "!important" at the end.
-    // ---
-    "IntelGroup": "browser"
-    // - Select intellisense group for css suggestions.
-    // - Available options: ["browser", "none"]
-    // - Fallback/default: "browser".
   }
 }

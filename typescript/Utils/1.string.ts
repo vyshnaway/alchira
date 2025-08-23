@@ -19,12 +19,9 @@ export default {
 				else if (addBackSlashFor.includes(ch)) { final += "\\" + ch; }
 				else {
 					final +=
-						ch === "_"
-							? "_"
-							: keepChars.includes(ch)
-								? ch
-								: ch.match(ALPHANUMERIC)
-									? ch
+						ch === "_" ? "_"
+							: keepChars.includes(ch) ? ch
+								: ch.match(ALPHANUMERIC) ? ch
 									: "-";
 				}
 			});

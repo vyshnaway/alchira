@@ -1,8 +1,15 @@
 import $ from './Shell/main.js'
 
 function PropMap(record: Record<string, string>, color: keyof typeof $.list) {
-    const [keys, values] = Object.entries(record);
-    const coloredKeys = $.list[color].Level(keys);
+    const keys: string[] = [];
+    const values: string[] = [];
+
+    Object.entries(record).forEach(([k, v]) => {
+        keys.push(k);
+        values.push(v);
+    });
+
+    const coloredKeys = $.list[color].Level(keys.map(k => $.MAKE(k, $.style.TS_Bold)));
     return coloredKeys.map((k, i) => k + ": " + values[i]);
 }
 

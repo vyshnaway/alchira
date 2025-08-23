@@ -1,17 +1,17 @@
 import {
-    t_CACHE,
-    t_Data_APP,
+    t_Data_ORIGIN,
     t_Data_PREFIX,
     t_Data_Source,
     t_Data_TWEAKS,
-    t_PUBLISH,
-    t_RAW,
-    t_Stack
+    t_CACHE_REPORT,
+    t_CACHE_STATIC,
+    t_CACHE_DYNAMIC,
+    t_CACHE_STORAGE,
 } from "../types.js";
 
 const domain = "xcss.io";
 
-export const APP: t_Data_APP = {
+export const ORIGIN: t_Data_ORIGIN = {
     name: "",
     version: "",
     website: "",
@@ -19,6 +19,7 @@ export const APP: t_Data_APP = {
     vendors: [],
     URL: {
         Cdn: `https://cdn.${domain}/`,
+        Site: `https://www.${domain}/`,
         Worker: `https://worker.${domain}/`,
         Console: `https://console.${domain}/`,
         PrefixCdn: `https://prefix.${domain}/`,
@@ -26,16 +27,24 @@ export const APP: t_Data_APP = {
     },
     commandList: {
         init: "Initiate or Update & Verify setup.",
-        watch: "Live build for developer environment",
+        debug: "Live build for developer environment",
         preview: 'Test build. Pass test for "publish" command.',
         publish: "Optimized build, uses web-api.",
+        archive: "Split and stash project styles to *.xcss files.",
+        install: "Install packages from sources.",
     },
+    exposedCommands: [
+        "init",
+        "debug",
+        "preview",
+        "publish",
+        "archive",
+        "install",
+    ],
     defaultTweaks: {
         OpenXtyles: true,
         RapidSense: true,
         Shorthands: true,
-        WatchDebug: true,
-        ForceLocal: false,
         IntelGroup: "browser"
     },
     customTag: {
@@ -45,8 +54,8 @@ export const APP: t_Data_APP = {
     }
 };
 
-export const SYNC: Record<string, Record<string, t_Data_Source>> = {
-    DOCS: {
+export const DOCUMENTS: Record<string, Record<string, t_Data_Source>> = {
+    MARKDOWN: {
         readme: {
             title: "README",
             url: "readme.md",
@@ -94,7 +103,7 @@ export const SYNC: Record<string, Record<string, t_Data_Source>> = {
     }
 };
 
-export const NAV: Record<string, Record<string, t_Data_Source>> = {
+export const NAVIGATE: Record<string, Record<string, t_Data_Source>> = {
     blueprint: {
         scaffold: {
             frags: ["blueprint", "scaffold"],
@@ -123,8 +132,8 @@ export const NAV: Record<string, Record<string, t_Data_Source>> = {
             path: "",
             content: "",
         },
-        library: {
-            frags: ["xtyles", "library"],
+        libraries: {
+            frags: ["xtyles", "libraries"],
             path: "",
             content: "",
         },
@@ -174,11 +183,6 @@ export const NAV: Record<string, Record<string, t_Data_Source>> = {
         },
     },
     md: {
-        instructions: {
-            frags: ["xtyles", "instructions.md"],
-            path: "",
-            content: "",
-        },
         readme: {
             frags: ["xtyles", "readme.md"],
             path: "",
@@ -209,7 +213,7 @@ export const NAV: Record<string, Record<string, t_Data_Source>> = {
     }
 };
 
-export const PREFIX: t_Data_PREFIX = {
+export const PREFIXES: t_Data_PREFIX = {
     atrules: {},
     attributes: {},
     pseudos: {},
@@ -219,18 +223,20 @@ export const PREFIX: t_Data_PREFIX = {
 };
 
 export const TWEAKS: t_Data_TWEAKS = {
-    ...APP.defaultTweaks
+    ...ORIGIN.defaultTweaks
 };
 
 
-export const PUBLISH: t_PUBLISH = {
+// --- CACHE DECLARE ---
+
+export const CACHE_REPORT: t_CACHE_REPORT = {
     DeltaPath: "",
     DeltaContent: "",
     FinalMessage: "",
     FinalError: "",
     ErrorCount: 0,
     WarningCount: 0,
-    Report: {
+    Content: {
         library: "",
         variables: "",
         hashrule: "",
@@ -241,7 +247,7 @@ export const PUBLISH: t_PUBLISH = {
     },
     MANIFEST: {
         prefix: "",
-        elements: Object.values(APP.customTag),
+        elements: Object.values(ORIGIN.customTag),
         constants: [],
         hashrules: {},
         file: {},
@@ -251,46 +257,49 @@ export const PUBLISH: t_PUBLISH = {
         global: {},
         xtyling: {},
         binding: {},
+        errors: []
     },
     LibFilesTemp: {},
 };
 
-export const STACK: t_Stack = {
-    PROXYCACHE: {},
-    LIBRARIES: {},
-    PORTABLES: {},
-};
 
-export const CACHE: t_CACHE = {
-    HashRule: {},
-    SortedIndexes: [],
-    PortableEssentials: [],
-    Index2StylesObject: {},
-    NativeStyle2Index: {},
-    LibraryStyle2Index: {},
-    GlobalsStyle2Index: {},
-    PortableStyle2Index: {},
-    FinalStack: {},
-    Archive: {
-        name: '',
-        version: '',
-    }
-};
-
-export const RAW: t_RAW = {
+export const CACHE_STATIC: t_CACHE_STATIC = {
     WATCH: false,
-    PACKAGE: "",
-    VERSION: "",
+    PROJECT_NAME: "",
+    PROJECT_VERSION: "",
+    FALLBACK_NAME: "",
+    FALLBACK_VERSION: "",
     COMMAND: "",
     ARGUMENT: "",
-    ReadMe: "",
     CSSIndex: "",
     RootPath: "",
     WorkPath: "",
     PROXYMAP: [],
     HASHRULE: {},
     LIBRARIES: {},
-    PORTABLES: {},
+    PACKAGES: {},
     PROXYFILES: {},
     DEPENDENTS: {},
+    ARCHIVE: {
+        name: '',
+        version: '',
+        readme: '',
+    },
+};
+
+export const CACHE_DYNAMIC: t_CACHE_DYNAMIC = {
+    HashRule: {},
+    Index_ClassData: {},
+    NativeClass__Index: {},
+    GlobalClass__Index: {},
+    PublicClass__Index: {},
+    LibraryClass_Index: {},
+    PackageClass_Index: {},
+    Computed_ClassIndex: {}
+};
+
+export const CACHE_STORAGE: t_CACHE_STORAGE = {
+    LIBRARIES: {},
+    PACKAGES: {},
+    PROJECT: {}
 };

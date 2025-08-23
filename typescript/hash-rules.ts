@@ -1,5 +1,5 @@
 import $ from "./Shell/main.js";
-import { CACHE, RAW, TWEAKS } from "./Data/cache.js";
+import { CACHE_DYNAMIC, CACHE_STATIC, TWEAKS } from "./Data/cache.js";
 import * as $$ from "./shell.js";
 
 const hashPattern = /#\{[a-z0-9]+\}/i;
@@ -44,8 +44,8 @@ function IMPORT(string: string, watchUndef = true, ErrorisWarning = false) {
 		const hash = hashMatch[0];
 		const key = hash.slice(2, -1);
 		const replacement = watchUndef
-			? CACHE.HashRule[key]
-			: (CACHE.HashRule[key] ?? hash);
+			? CACHE_DYNAMIC.HashRule[key]
+			: (CACHE_DYNAMIC.HashRule[key] ?? hash);
 		recursionPreview["FROM " + hash] = `GETS ${replacement} FROM ${string}`;
 
 		if (replacement === undefined) {
@@ -64,10 +64,10 @@ function IMPORT(string: string, watchUndef = true, ErrorisWarning = false) {
 }
 
 function UPLOAD() {
-	const hashrule = RAW.HASHRULE;
+	const hashrule = CACHE_STATIC.HASHRULE;
 	const hashruleErrors: string[] = [];
 
-	CACHE.HashRule = { ...hashrule };
+	CACHE_DYNAMIC.HashRule = { ...hashrule };
 	Object.keys(hashrule).map((key) => {
 		const hash = "#" + key;
 		const response = IMPORT(hash);
@@ -80,7 +80,7 @@ function UPLOAD() {
 			}
 		}
 	});
-	CACHE.HashRule = hashrule;
+	CACHE_DYNAMIC.HashRule = hashrule;
 
 	return $.MOLD.std.Block([
 		$.MOLD.primary.Section("Active Hashrules"),

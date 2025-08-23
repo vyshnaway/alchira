@@ -1,7 +1,7 @@
 import fileman from "../fileman.js";
 import { t_Data_TWEAKS, T_PackageEssential, t_SelectorData } from "../types.js";
 import Use from "../Utils/main.js";
-import { APP, RAW, NAV, SYNC, CACHE, STACK, PUBLISH, PREFIX, TWEAKS } from "./cache.js";
+import { ORIGIN, CACHE_STATIC, NAVIGATE, DOCUMENTS, CACHE_DYNAMIC, CACHE_STORAGE, CACHE_REPORT, PREFIXES, TWEAKS } from "./cache.js";
 
 function collectTypeStringKeys(object: object) {
     return Object.entries(object).reduce((A, [K, V]) => {
@@ -12,11 +12,11 @@ function collectTypeStringKeys(object: object) {
 }
 
 export function collectVendors() {
-    APP.vendors = Array.from(collectTypeStringKeys(PREFIX));
+    ORIGIN.vendors = Array.from(collectTypeStringKeys(PREFIXES));
 }
 
 export function collectTWEAKS(tweaks: t_Data_TWEAKS) {
-    Object.assign(TWEAKS, APP.defaultTweaks);
+    Object.assign(TWEAKS, ORIGIN.defaultTweaks);
     if (typeof tweaks === "object") {
         Object.keys(TWEAKS).forEach(key => {
             if (typeof TWEAKS[key] === typeof tweaks[key]) {
@@ -28,42 +28,42 @@ export function collectTWEAKS(tweaks: t_Data_TWEAKS) {
 
 export function SetENV(rootPath: string, workPath: string, packageEssential: T_PackageEssential) {
 
-    APP.name = packageEssential.name;
-    APP.version = packageEssential.version;
-    APP.website = packageEssential.website;
-    APP.bins = packageEssential.bins;
+    CACHE_STATIC.RootPath = rootPath;
+    CACHE_STATIC.WorkPath = workPath;
 
-    RAW.RootPath = rootPath;
-    RAW.WorkPath = workPath;
+    ORIGIN.name = packageEssential.name;
+    ORIGIN.version = packageEssential.version;
+    ORIGIN.website = packageEssential.website;
+    ORIGIN.bins = packageEssential.bins;
 
-    Object.entries(NAV).forEach(([groupName, groupPaths]) => {
+    Object.entries(NAVIGATE).forEach(([groupName, groupPaths]) => {
         if (groupName === "blueprint" || groupName === "autogen") {
             Object.values(groupPaths).forEach((source) => {
-                source.path = fileman.path.join(RAW.RootPath, ...source.frags);
+                source.path = fileman.path.join(CACHE_STATIC.RootPath, ...source.frags);
             });
         } else {
             Object.values(groupPaths).forEach((source) => {
-                source.path = fileman.path.join(RAW.WorkPath, ...source.frags);
+                source.path = fileman.path.join(CACHE_STATIC.WorkPath, ...source.frags);
             });
         }
     });
 
-    const CDN = APP.URL.Cdn + "version/" + APP.version.split(".")[0] + "/";
-    Object.values(SYNC).forEach((object) => {
+    const CDN = ORIGIN.URL.Cdn + "version/" + ORIGIN.version.split(".")[0] + "/";
+    Object.values(DOCUMENTS).forEach((object) => {
         Object.values(object).forEach((entry) => {
             entry.url = CDN + entry.url;
-            entry.path = fileman.path.join(RAW.RootPath, ...entry.frags);
+            entry.path = fileman.path.join(CACHE_STATIC.RootPath, ...entry.frags);
         });
     });
 }
 
 export function MemoryUsage() {
     const chart: Record<string, number> = {
-        "Files": Use.string.stringMem(JSON.stringify(RAW)),
-        "Cache": Use.string.stringMem(JSON.stringify(CACHE)),
-        "Stack": Use.string.stringMem(JSON.stringify(STACK)),
-        "Report": Use.string.stringMem(JSON.stringify(PUBLISH)),
-        "Proxy": Object.values(STACK.PROXYCACHE).reduce((t: number, c) => {
+        "Files": Use.string.stringMem(JSON.stringify(CACHE_STATIC)),
+        "Cache": Use.string.stringMem(JSON.stringify(CACHE_DYNAMIC)),
+        "Stack": Use.string.stringMem(JSON.stringify(CACHE_STORAGE)),
+        "Report": Use.string.stringMem(JSON.stringify(CACHE_REPORT)),
+        "Proxy": Object.values(CACHE_STORAGE.PROJECT).reduce((t: number, c) => {
             t += Use.string.stringMem(JSON.stringify(c));
             return t;
         }, 0),
@@ -77,48 +77,33 @@ export const INDEX = {
     _NOW: 0,
     _BIN: new Set<number>(),
     IMPORT: (index = 0) => {
-        return CACHE.Index2StylesObject[index];
+        return CACHE_DYNAMIC.Index_ClassData[index];
     },
-    // CLONE: (index = 0) => {
-    //     const object = structuredClone(CACHE.Index2StylesObject[index]);
-    //     if (INDEX._BIN.size > 0) {
-    //         object.index = INDEX._BIN.values().next().value;
-    //         if (object.index && INDEX._BIN.has(object.index)) {
-    //             INDEX._BIN.delete(object.index);
-    //         }
-    //     } else { object.index = ++INDEX._NOW; }
-
-    //     if (!object.index) { return; }
-    //     const encounted = Use.string.enCounter(object.index + 768);
-    //     object.miniClass = "_" + encounted;
-    //     CACHE.Index2StylesObject[object.index] = CACHE.Index2StylesObject[index];
-    //     return { index: object.index, class: object.miniClass };
-    // },
     DECLARE: (object: t_SelectorData) => {
         object.index = INDEX._BIN.values().next().value || ++INDEX._NOW;
         if (INDEX._BIN.has(object.index)) { INDEX._BIN.delete(object.index); }
 
         const encounted = Use.string.enCounter(object.index + 768);
         object.miniClass = "_" + encounted;
-        CACHE.Index2StylesObject[object.index] = object;
+        CACHE_DYNAMIC.Index_ClassData[object.index] = object;
         return { index: object.index, class: object.miniClass };
     },
     DISPOSE: (...indexes: number[]) => {
         indexes.forEach((index) => {
             if (index > 0) {
                 INDEX._BIN.add(index);
-                delete CACHE.Index2StylesObject[index.toString()];
+                delete CACHE_DYNAMIC.Index_ClassData[index.toString()];
             }
         });
     },
     RESET: (after = 0) => {
         after = after > 0 ? after : 0;
         let removed = 0;
-        Object.keys(CACHE.Index2StylesObject).forEach((index) => {
+        Object.keys(CACHE_DYNAMIC.Index_ClassData).forEach((index) => {
             const number = Number(index);
             if (number > after) {
                 if (INDEX._BIN.has(number)) { INDEX._BIN.delete(number); }
-                delete CACHE.Index2StylesObject[number];
+                delete CACHE_DYNAMIC.Index_ClassData[number];
                 removed++;
             }
         });

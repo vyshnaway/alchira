@@ -3,7 +3,7 @@ import CSSBLOCK from "./block.js";
 import $ from "../Shell/main.js";
 import Use from "../Utils/main.js";
 import HASHRULE from "../hash-rules.js";
-import { RAW, CACHE } from "../Data/cache.js";
+import { CACHE_STATIC, CACHE_DYNAMIC } from "../Data/cache.js";
 import { INDEX } from "../Data/init.js";
 import { t_Data_FILING, t_SelectorData, t_SelectorMeta, t_TagRawStyle } from "../types.js";
 
@@ -11,9 +11,9 @@ function xtylemerge(classList: string[] = []) {
 	const result: Record<string, object> = {}, attachments: string[] = [];
 	classList.reduce((res, className) => {
 		const index =
-			(CACHE.PortableStyle2Index[className] || 0) +
-			(CACHE.LibraryStyle2Index[className] || 0) +
-			(CACHE.NativeStyle2Index[className] || 0);
+			(CACHE_DYNAMIC.PackageClass_Index[className] || 0) +
+			(CACHE_DYNAMIC.LibraryClass_Index[className] || 0) +
+			(CACHE_DYNAMIC.NativeClass__Index[className] || 0);
 		if (index) {
 			const found = INDEX.IMPORT(index);
 			attachments.push(...found.attachments);
@@ -32,11 +32,11 @@ function SCANNER(content: string, initial: string, sourceSelector: string, force
 
 	const object = Use.object.deepMerge(merged.result, {
 		...Object.entries(scanned.atProps).map(([propKey, propValue]) => {
-			return [propKey, RAW.WATCH ? `${propValue}/* ${initial} ${sourceSelector} */` : propValue];
+			return [propKey, CACHE_STATIC.WATCH ? `${propValue}/* ${initial} ${sourceSelector} */` : propValue];
 		}),
 		...Object.entries(scanned.properties).map(([propKey, propValue]) => {
 			return [propKey, (
-				(RAW.WATCH ? `${propValue}/* ${initial} ${sourceSelector} */` : propValue) +
+				(CACHE_STATIC.WATCH ? `${propValue}/* ${initial} ${sourceSelector} */` : propValue) +
 				(forceImportant ? ' !important' : '')
 			)];
 		}),
@@ -71,7 +71,7 @@ function CSSLIBRARY(fileDatas: t_Data_FILING[] = [], initial = "", forPortable =
 	const selectorList: string[] = [],
 		selectors: Record<string, number> = {},
 		indexSkeleton: Record<string, t_SelectorMeta> = {};
-	const IndexMap = forPortable ? CACHE.PortableStyle2Index : CACHE.LibraryStyle2Index;
+	const IndexMap = forPortable ? CACHE_DYNAMIC.PackageClass_Index : CACHE_DYNAMIC.LibraryClass_Index;
 
 	fileDatas.forEach((source) => {
 		const { stamp, filePath, metaFront, content, group } = source;
@@ -95,7 +95,7 @@ function CSSLIBRARY(fileDatas: t_Data_FILING[] = [], initial = "", forPortable =
 					declarations: [] // manifest and cross-check declarations assigned later from parse.js
 				};
 				const identity = INDEX.DECLARE({
-					portable: forPortable ? source.fileName : "",
+					package: forPortable ? source.fileName : "",
 					scope: group,
 					selector,
 					object,
@@ -177,21 +177,21 @@ function TAGSTYLE(
 	let identity = { index: 0, class: '' };
 	if (raw.selector === "") {
 		essentials.push(...Object.entries(object).map(([k, v]) => [
-			RAW.WATCH ? `${k} /* ${declaration} */` : k, v
+			CACHE_STATIC.WATCH ? `${k} /* ${declaration} */` : k, v
 		]) as [string, string | object][]);
 	} else {
-		const index = (IndexMap[xelector] || 0) + (CACHE.LibraryStyle2Index[xelector] || 0) + (CACHE.GlobalsStyle2Index[xelector] || 0);
+		const index = (IndexMap[xelector] || 0) + (CACHE_DYNAMIC.LibraryClass_Index[xelector] || 0) + (CACHE_DYNAMIC.GlobalClass__Index[xelector] || 0);
 		if (index) {
 			const InStash = INDEX.IMPORT(index);
 			InStash.metadata.declarations.push(declaration);
-			if (CACHE.LibraryStyle2Index[xelector] || 0) {
+			if (CACHE_DYNAMIC.LibraryClass_Index[xelector] || 0) {
 				errors.push($.MOLD.failed.List("Multiple declarations: " + InStash.selector, InStash.metadata.declarations, $.list.text.Bullets));
 			}
 		} else {
 			const declarations = [declaration];
 			isOriginal = true;
 			identity = INDEX.DECLARE({
-				portable: forPortable ? file.fileName : "",
+				package: forPortable ? file.fileName : "",
 				scope: raw.scope,
 				selector: raw.selector,
 				object,

@@ -1,7 +1,8 @@
 /* eslint-disable no-useless-escape */
-import classExtract, { t_FileScanBuffer } from "./value.js";
+import Use from "../Utils/main.js";
+import classExtract from "./value.js";
 
-import { APP, TWEAKS } from "../Data/cache.js";
+import { TWEAKS } from "../Data/cache.js";
 import { t_Data_FILING, t_TagRawStyle } from "../types.js";
 import { t_Actions, t_StyleStack } from "./value.js";
 
@@ -17,99 +18,11 @@ type t_OpenBrace = keyof typeof bracePair;
 export const openBraces = Object.keys(bracePair);
 export const closeBraces = ["]", "}", ")"];
 
-export const TagSummonStyle = `<${APP.customTag.style}/>`;
-export const TagSummonAttach = `<${APP.customTag.attach}/>`;
-export const TagSummonStencil = `<${APP.customTag.stencil}/>`;
-
-export const TagClosedStyle = `</${APP.customTag.style}>`;
-export const TagClosedAttach = `</${APP.customTag.attach}>`;
-export const TagClosedStencil = `</${APP.customTag.stencil}>`;
-
-export const TagRegex_SelfStyle = new RegExp(`(?<!\\\\)<\s*${APP.customTag.style}\s*/\s*>`);
-export const TagRegex_SelfAttach = new RegExp(`(?<!\\\\)<\s*${APP.customTag.attach}\s*/\s*>`);
-export const TagRegex_SelfStencil = new RegExp(`(?<!\\\\)<\s*${APP.customTag.stencil}\s*/\s*>`);
-
-export const TagFn_ElementCheckStyle = (element: string) => (APP.customTag.style === element);
-export const TagFn_ElementCheckAttach = (element: string) => (APP.customTag.attach === element);
-export const TagFn_ElementCheckStencil = (element: string) => (APP.customTag.stencil === element);
-
-export const TagFn_SelfCheckStyle = (string: string) => TagRegex_SelfStyle.test(string);
-export const TagFn_SelfCheckAttach = (string: string) => TagRegex_SelfAttach.test(string);
-export const TagFn_SelfCheckStencil = (string: string) => TagRegex_SelfStencil.test(string);
-
-export const TagFn_ReplaceStyle = (sourceString: string, replacement: string) => sourceString.replace(TagRegex_SelfStyle, replacement);
-export const TagFn_ReplaceAttach = (sourceString: string, replacement: string) => sourceString.replace(TagRegex_SelfAttach, replacement);
-export const TagFn_ReplaceStencil = (sourceString: string, replacement: string) => sourceString.replace(TagRegex_SelfStencil, replacement);
-
-export const CustomTagElements = Object.values(APP.customTag);
-
 export const rgx_subXtyleRegex = /[\$@#]/;
 export const rgx_zeroXtyleRegex = /^[\w\-]*\$+[\w\-]*$/i;
 export const rgx_openlibXtyleRegex = /^[\w\-]*\$+[\w\-]+$/i;
 export const rgx_onlylibXtyleRegex = /^[\w\-]+\$+[\w\-]+$/i;
-export const rgx_elementFirstChar = /^[\d\w\-]*$/i;
 
-export function FileCursorIncremnet(fileScanner: t_FileScanBuffer) {
-	fileScanner.active.char = fileScanner.content[++fileScanner.active.marker];
-	if (fileScanner.active.char === "\n") {
-		fileScanner.active.rowMarker++;
-		fileScanner.active.colFallback = fileScanner.active.colMarker;
-		fileScanner.active.colMarker = 0;
-	} else {
-		fileScanner.active.colMarker++;
-	}
-	return fileScanner.active.char;
-}
-
-export function FileCursorDecrement(fileScanner: t_FileScanBuffer) {
-	fileScanner.active.char = fileScanner.content[--fileScanner.active.marker];
-	if (fileScanner.active.char === "\n") {
-		fileScanner.active.rowMarker--;
-		fileScanner.active.colMarker = fileScanner.active.colFallback;
-	} else {
-		fileScanner.active.colMarker--;
-	}
-	return fileScanner.active.char;
-}
-
-export function FileCursorInitialize(content: string): t_FileScanBuffer {
-	const fileScanner: t_FileScanBuffer = {
-		content,
-		active: {
-			char: '',
-			marker: 0,
-			rowMarker: 0,
-			colMarker: 0,
-			tagCount: 0,
-			colFallback: 0,
-		},
-		fallback: {
-			char: '',
-			marker: 0,
-			rowMarker: 0,
-			colMarker: 0,
-			tagCount: 0,
-			colFallback: 0,
-		},
-		reference: {
-			char: '',
-			marker: 0,
-			rowMarker: 0,
-			colMarker: 0,
-			tagCount: 0,
-			colFallback: 0,
-		},
-	};
-
-	fileScanner.active.char = content[fileScanner.active.marker];
-	if (fileScanner.active.char === "\n") {
-		fileScanner.active.rowMarker++;
-		fileScanner.active.colMarker = 0;
-	} else {
-		fileScanner.active.colMarker++;
-	}
-	return fileScanner;
-}
 
 export default function scanner(
 	fileData: t_Data_FILING,
@@ -118,7 +31,7 @@ export default function scanner(
 	attachments = new Set<string>(),
 	styleStack: t_StyleStack = { Portable: {}, Library: {}, Native: {}, Local: {}, Global: {} },
 	OrderedClassList: Record<string, Record<number, string>>,
-	fileCursor = FileCursorInitialize(fileData.content),
+	fileCursor = Use.cursor.Initialize(fileData.content),
 ) {
 	const
 		classList: string[] = [],
@@ -132,8 +45,7 @@ export default function scanner(
 			tagCount: fileCursor.active.tagCount,
 			rowIndex: fileCursor.active.rowMarker,
 			colIndex: fileCursor.active.colMarker,
-			contentStart: fileCursor.active.marker,
-			intrimEnding: 0,
+			tagOpenMarker: 0,
 			comments: [],
 			styles: {},
 			snippet_Style: "",
@@ -151,10 +63,9 @@ export default function scanner(
 		selfClosed = false,
 		fallbackAquired = false;
 
-
 	while (fileCursor.active.marker < fileData.content.length) {
 		const lastCh = fileCursor.active.char;
-		const liveCh = FileCursorIncremnet(fileCursor);
+		const liveCh = Use.cursor.Incremnet(fileCursor);
 		if (lastCh !== "\\") {
 			if (!fallbackAquired && liveCh === "<") {
 				fallbackAquired = true;
@@ -171,10 +82,9 @@ export default function scanner(
 				awaitBrace = bracePair[liveCh as t_OpenBrace];
 			} else if (deviance === 0 && closeBraces.includes(liveCh)) { break; }
 
-			if (deviance === 0 && [" ", "\n", "\r", " > ", "\t"].includes(liveCh) && (attr !== "")) {
+			if (deviance === 0 && [" ", "\n", "\r", ">", "\t"].includes(liveCh) && (attr !== "")) {
 				const tr_Attr = attr.trim();
 				const tr_Value = value.trim();
-
 				if (!styleDeclarations.element.length) {
 					styleDeclarations.element = tr_Attr;
 					styleDeclarations.elvalue = tr_Value;
@@ -201,10 +111,8 @@ export default function scanner(
 				value = "";
 
 			}
-
 			if (deviance === 0 && (liveCh === ">" || liveCh === ";" || liveCh === ',' || liveCh === "<")) {
 				ok = liveCh === ">";
-				selfClosed = fileData.content[fileCursor.active.marker - 1] === '/';
 				break;
 			}
 		}
@@ -217,7 +125,8 @@ export default function scanner(
 
 	if (ok) {
 		fileCursor.active.tagCount++;
-		styleDeclarations.intrimEnding = fileCursor.active.marker;
+		selfClosed = fileData.content[fileCursor.active.marker - 1] === '/';
+		styleDeclarations.tagOpenMarker = fileCursor.active.marker + 1;
 	} else if (fallbackAquired) {
 		Object.assign(fileCursor.active, fileCursor.fallback);
 	}
