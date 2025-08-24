@@ -10,7 +10,7 @@ import XTYLES from "./Style/stash.js";
 import { CACHE_STATIC, CACHE_STORAGE, CACHE_DYNAMIC, CACHE_REPORT } from "./Data/cache.js";
 import { INDEX } from "./Data/init.js";
 // import { GeneratePortable } from "./portable.js";
-import { t_FileManifest, t_FileMap } from "./types.js";
+import { t_FILE_Manifest, t_FILE_Reference } from "./types.js";
 
 export function UpdateXtylesFolder() {
 	INDEX.RESET();
@@ -36,16 +36,16 @@ export function UpdateXtylesFolder() {
 		modulesTable,
 		AxiomStyleSkeleton,
 		ClusterStyleSkeleton,
-		XtylingStyleSkeleton,
-		BindingStyleSkeleton,
+		PackageStyleSkeleton,
+		PacbindStyleSkeleton,
 	} = XTYLES.ReRender();
 
 	CACHE_REPORT.MANIFEST.axiom = AxiomStyleSkeleton;
 	CACHE_REPORT.MANIFEST.cluster = ClusterStyleSkeleton;
-	CACHE_REPORT.MANIFEST.xtyling = XtylingStyleSkeleton;
-	CACHE_REPORT.MANIFEST.binding = BindingStyleSkeleton;
+	CACHE_REPORT.MANIFEST.xtyling = PackageStyleSkeleton;
+	CACHE_REPORT.MANIFEST.binding = PacbindStyleSkeleton;
 
-	CACHE_REPORT.LibFilesTemp = { ...libraryTable, ...modulesTable } as Record<string, t_FileMap>;
+	CACHE_REPORT.LibFilesTemp = { ...libraryTable, ...modulesTable } as Record<string, t_FILE_Reference>;
 }
 
 export function ProcessProxies(
@@ -84,7 +84,7 @@ export function ProcessProxies(
 		Object.keys(CACHE_DYNAMIC.GlobalClass__Index).forEach(key => delete CACHE_DYNAMIC.GlobalClass__Index[key]);
 		Object.entries(CACHE_STORAGE.PROJECT).forEach(([key, cache]) => { cache.ClearFiles(); delete CACHE_STORAGE.PROJECT[key]; });
 		Object.entries(CACHE_STATIC.PROXYFILES).forEach(([key, files]) => { CACHE_STORAGE.PROJECT[key] = new SCRIPT(files); });
-		CACHE_DYNAMIC.NativeClass__Index = {
+		CACHE_DYNAMIC.ArchiveClass_Index = {
 			...Object.fromEntries(Object.entries(CACHE_DYNAMIC.LibraryClass_Index).map(([s, i]) => [`/${CACHE_STATIC.PROJECT_NAME}/$/${s}`, i])),
 			...Object.fromEntries(Object.entries(CACHE_DYNAMIC.GlobalClass__Index).map(([s, i]) => [`/${CACHE_STATIC.PROJECT_NAME}/${s}`, i]))
 		};
@@ -96,7 +96,7 @@ async function Engine() {
 		indexes: number[],
 		report: string[],
 		errors: string[],
-		styleMap: t_FileManifest[],
+		styleMap: t_FILE_Manifest[],
 		essentials: [string, string | object][],
 		attachments: Set<string>,
 	} = {
@@ -123,9 +123,9 @@ async function Engine() {
 	CACHE_REPORT.MANIFEST.local = {};
 	CACHE_REPORT.MANIFEST.file = CACHE_REPORT.LibFilesTemp;
 	CUMULATES.styleMap.forEach((map) => {
-		CACHE_REPORT.MANIFEST.global[map.file.id] = map.global;
-		CACHE_REPORT.MANIFEST.local[map.file.id] = map.local;
-		CACHE_REPORT.MANIFEST.file[map.file.id] = map.file;
+		CACHE_REPORT.MANIFEST.global[map.refer.id] = map.global;
+		CACHE_REPORT.MANIFEST.local[map.refer.id] = map.local;
+		CACHE_REPORT.MANIFEST.file[map.refer.id] = map.refer;
 	});
 
 

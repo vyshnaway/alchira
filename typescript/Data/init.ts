@@ -1,5 +1,5 @@
 import fileman from "../fileman.js";
-import { t_Data_TWEAKS, T_PackageEssential, t_SelectorData } from "../types.js";
+import { t_Data_TWEAKS, T_PackageEssential, t_ClassData } from "../types.js";
 import Use from "../Utils/main.js";
 import { ORIGIN, CACHE_STATIC, NAVIGATE, DOCUMENTS, CACHE_DYNAMIC, CACHE_STORAGE, CACHE_REPORT, PREFIXES, TWEAKS } from "./cache.js";
 
@@ -79,14 +79,14 @@ export const INDEX = {
     IMPORT: (index = 0) => {
         return CACHE_DYNAMIC.Index_ClassData[index];
     },
-    DECLARE: (object: t_SelectorData) => {
+    DECLARE: (object: t_ClassData) => {
         object.index = INDEX._BIN.values().next().value || ++INDEX._NOW;
         if (INDEX._BIN.has(object.index)) { INDEX._BIN.delete(object.index); }
 
         const encounted = Use.string.enCounter(object.index + 768);
-        object.miniClass = "_" + encounted;
+        object.watchclass = "____" + encounted;
         CACHE_DYNAMIC.Index_ClassData[object.index] = object;
-        return { index: object.index, class: object.miniClass };
+        return { index: object.index, class: object.watchclass };
     },
     DISPOSE: (...indexes: number[]) => {
         indexes.forEach((index) => {

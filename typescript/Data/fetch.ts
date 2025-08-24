@@ -201,12 +201,12 @@ export async function VerifyConfigure(loadStatics: boolean) {
 			return acc;
 		}, [] as t_ProxyMap[]) : [];
 
-		
+
 		Object.assign(CACHE_STATIC.ARCHIVE, config.data);
 		CACHE_STATIC.ARCHIVE.readme = (await fileman.read.file(NAVIGATE.md.readme.path)).data;
 		CACHE_STATIC.ARCHIVE.name = CACHE_STATIC.PROJECT_NAME = CONFIG.name || CACHE_STATIC.FALLBACK_NAME;
 		CACHE_STATIC.ARCHIVE.version = CACHE_STATIC.PROJECT_VERSION = CONFIG.version || CACHE_STATIC.FALLBACK_VERSION;
-		CACHE_STATIC.DEPENDENTS = Object.entries((typeof CONFIG.packages === "object") ? CONFIG.packages : {})
+		CACHE_STATIC.PACKAGES = Object.entries((typeof CONFIG.packages === "object") ? CONFIG.packages : {})
 			.reduce((a: Record<string, string>, [k, v]) => {
 				if (
 					typeof v === "string"

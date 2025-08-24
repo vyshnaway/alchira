@@ -25,6 +25,10 @@ interface FileReadResult<T> {
 
 const fileman = {
 	path: {
+		basename: (pathString:string) => {
+			return path.basename(pathString);
+		},
+
 		/**
 		 * Joins multiple path segments together.
 		 * @param pathString1 The first path segment.

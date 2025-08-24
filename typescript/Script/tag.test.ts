@@ -4,18 +4,18 @@ const test = (content: string) => console.log(
 	scan({
 		id: '',
 		group: '',
-		stamp: '',
+		xcssclassFront: '',
 		cluster: '',
 		filePath: '',
-		fileName: '',
+		packageName: '',
 		extension: '',
 		sourcePath: '',
 		targetPath: '',
-		metaFront: 'metaFront__',
+		metaclassFront: 'metaFront__',
 		content: content,
 		midway: "",
 		manifest: {
-			file: {
+			refer: {
 				group: '',
 				id: ''
 			},

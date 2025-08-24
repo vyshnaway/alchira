@@ -7,7 +7,7 @@ import FILING from "../Data/filing.js";
 import SCRIPTFILE from "../Script/file.js";
 
 import { INDEX } from "../Data/init.js";
-import { t_Data_FILING, t_SelectorMeta } from "../types.js";
+import { t_FILE_Storage, t_FILE_Reference, t_ClassMeta } from "../types.js";
 import { NAVIGATE, CACHE_DYNAMIC, CACHE_STORAGE, CACHE_STATIC } from "../Data/cache.js";
 
 function _DeleteLibraryFile(filePath: string) {
@@ -41,20 +41,22 @@ function _ClearStash() {
 function _SaveLibraryFile(filePath: string, fileContent: string) {
 	if (CACHE_STORAGE.LIBRARIES[filePath]) { _DeleteLibraryFile(filePath); }
 	CACHE_STORAGE.LIBRARIES[filePath] = FILING(
+		filePath.slice(NAVIGATE.folder.libraries.path.length + 1),
+		fileContent,
 		"",
 		NAVIGATE.folder.libraries.path,
-		filePath.slice(NAVIGATE.folder.libraries.path.length + 1),
-		fileContent, true, false
+		"library"
 	);
 }
 
 function _SavePackageFile(filePath: string, fileContent: string) {
 	if (CACHE_STORAGE.PACKAGES[filePath]) { _DeletePackageFile(filePath); }
 	CACHE_STORAGE.PACKAGES[filePath] = FILING(
+		filePath.slice(NAVIGATE.folder.packages.path.length + 1),
+		fileContent,
 		"",
 		NAVIGATE.folder.packages.path,
-		filePath.slice(NAVIGATE.folder.packages.path.length + 1),
-		fileContent, true, true
+		"package"
 	);
 }
 
@@ -64,41 +66,46 @@ function _SavePackageFile(filePath: string, fileContent: string) {
 function _StackLibraryFiles() {
 	let length = 0;
 	const
-		axiom: Record<string, t_Data_FILING[]> = {},
-		cluster: Record<string, t_Data_FILING[]> = {},
-		libraryTable: Record<string, { group: string, id: string }> = {};
-	Object.entries(CACHE_STORAGE.LIBRARIES).forEach(([filePath, fileData]) => {
-		const { id, group } = fileData;
-		libraryTable[filePath] = { group, id };
-		if (group === "axiom") {
-			if (!axiom[id]) { axiom[id] = []; }
-			axiom[id].push(fileData);
-		} else if (group === "cluster") {
-			if (!cluster[id]) { cluster[id] = []; }
-			cluster[id].push(fileData);
-		}
-		if (Number(id) > length) { length = Number(id); }
+		none: Record<string, t_FILE_Storage[]> = {},
+		axiomArray: Record<string, t_FILE_Storage[]> = {},
+		clusterArray: Record<string, t_FILE_Storage[]> = {},
+		libraryTable: Record<string, t_FILE_Reference> = {};
+
+	Object.entries(CACHE_STORAGE.LIBRARIES).forEach(([path, data]) => {
+		const reference = data.manifest.refer;
+		const collection = reference.group === "AXIOM" ? axiomArray
+			: reference.group === "CLUSTER" ? clusterArray : none;
+
+		libraryTable[path] = reference;
+		if (!collection[reference.id]) { collection[reference.id] = [data]; }
+		else { collection[reference.id].push(data); }
+
+		if (Number(reference.id) > length) { length = Number(reference.id); }
 	});
-	const axiomsArray = Use.array.fromNumberedObject(axiom, length);
-	const clustersArray = Use.array.fromNumberedObject(cluster, length);
+
+	const axiomsArray = Use.array.fromNumberedObject(axiomArray, length);
+	const clustersArray = Use.array.fromNumberedObject(clusterArray, length);
 	return { libraryTable, axiomsArray, clustersArray };
 }
 
 function _StackPackageFiles() {
 	const
-		bindingArray: t_Data_FILING[] = [],
-		xtylingArray: t_Data_FILING[] = [],
-		packageTable: Record<string, { group: string, id: string }> = {};
+		none: t_FILE_Storage[] = [],
+		pacbindsArray: t_FILE_Storage[] = [],
+		packagesArray: t_FILE_Storage[] = [],
+		packageTable: Record<string, t_FILE_Reference> = {};
 
-	Object.entries(CACHE_STORAGE.PACKAGES).forEach(([filePath, fileData]) => {
-		fileData.id = filePath;
-		const { id, group } = fileData;
-		packageTable[filePath] = { group, id };
-		if (group === "binding") { bindingArray.push(fileData); }
-		else if (group === "xtyling") { xtylingArray.push(fileData); }
+	Object.entries(CACHE_STORAGE.PACKAGES).forEach(([path, data]) => {
+		const reference = data.manifest.refer;
+		packageTable[path] = reference;
+
+		const collection = reference.group === "PACBIND" ? pacbindsArray
+			: reference.group === "PACKAGE" ? packagesArray : none;
+
+		collection.push(data);
 	});
 
-	return { packageTable, bindingArray, xtylingArray };
+	return { packageTable, pacbindsArray, packagesArray };
 }
 
 
@@ -109,16 +116,18 @@ let report = "";
 
 let axiomCount = 0;
 let clusterCount = 0;
-let bindingCount = 0;
+let pacbindCount = 0;
 let packageCount = 0;
 
 let warnings: string[] = [];
 let axiomChart: Record<string, string[]> = {};
 let clusterChart: Record<string, string[]> = {};
-let bindingChart: Record<string, string[]> = {};
+let pacbindChart: Record<string, string[]> = {};
 let packageChart: Record<string, string[]> = {};
 
-function _UpdateFiles() {
+
+function ReRender() {
+
 	_ClearStash();
 	Object.entries(CACHE_STATIC.LIBRARIES).forEach(([filePath, fileContent]) => {
 		_SaveLibraryFile(filePath, fileContent);
@@ -127,44 +136,34 @@ function _UpdateFiles() {
 		_SavePackageFile(filePath, fileContent);
 	});
 
-}
-
-function ReRender() {
-	_UpdateFiles();
-
 	report = "";
 	axiomCount = 0;
 	clusterCount = 0;
 	packageCount = 0;
-	bindingCount = 0;
+	pacbindCount = 0;
 	warnings = [];
 	axiomChart = {};
 	clusterChart = {};
-	bindingChart = {};
+	pacbindChart = {};
 	packageChart = {};
 
-	const { libraryTable, axiomsArray, clustersArray } = _StackLibraryFiles();
-	console.log(libraryTable);
-	console.log(axiomsArray);
-	console.log(clustersArray);
-	const { packageTable: modulesTable, bindingArray, xtylingArray: packagesArray } = _StackPackageFiles();
+	const { packageTable, pacbindsArray, packagesArray } = _StackPackageFiles();
 
-	const PackageEssentials: [string, string | object][] = [];
-	const XtylingStyleSkeleton = packagesArray.reduce((collection: Record<string, Record<string, t_SelectorMeta>>, fileData) => {
+
+	const PackageStyleSkeleton = packagesArray.reduce((collection: Record<string, Record<string, t_ClassMeta>>, fileData) => {
 		const filePath = Fileman.path.join(NAVIGATE.folder.packages.path, fileData.filePath);
-		const tagStash = SCRIPTFILE(fileData).stylesList, indexMetaCollection: Record<string, t_SelectorMeta> = {};
+		const tagStash = SCRIPTFILE(fileData).stylesList;
+		const indexMetaCollection: Record<string, t_ClassMeta> = {};
+
 		tagStash.forEach((style) => {
-			style.scope = "package";
+			style.scope = "PACKAGE";
 			const response = PARSE.TAGSTYLE(style, fileData, CACHE_DYNAMIC.PackageClass_Index,);
 
 			warnings.push(...response.errors);
 
-			if (response.selector === "") {
-				PackageEssentials.push(...response.essentials);
-				if (!CACHE_STATIC.WATCH) { fileData.styleData.essentials.push(...response.essentials); }
-			} else if (response.isOriginal) {
+			if (response.isOriginal) {
 				fileData.styleData.usedIndexes.add(response.index);
-				indexMetaCollection[response.selector] = response.metadata;
+				indexMetaCollection[response.selector] = INDEX.IMPORT(response.index).metadata;
 				packageCount++;
 			}
 		});
@@ -174,24 +173,30 @@ function ReRender() {
 		return collection;
 	}, {});
 
-	const BindingStyleSkeleton = bindingArray.reduce((collection: Record<string, Record<string, t_SelectorMeta>>, fileData) => {
+	const PacbindStyleSkeleton = pacbindsArray.reduce((collection: Record<string, Record<string, t_ClassMeta>>, fileData) => {
 		const result = PARSE.CSSLIBRARY([fileData], "BINDING", true);
 		collection[Fileman.path.join(NAVIGATE.folder.packages.path, fileData.filePath)] = result.indexMetaCollection;
-		if (result.selectorList.length) { bindingChart[`Binding [${fileData.filePath}]: ${result.selectorList.length} Classes`] = result.selectorList; }
-		bindingCount += result.selectorList.length;
+		if (result.selectorList.length) {
+			pacbindChart[`Pacbind [${fileData.filePath}]: ${result.selectorList.length} Classes`] = result.selectorList;
+		}
+		pacbindCount += result.selectorList.length;
 		return collection;
 	}, {});
+	console.log(PackageStyleSkeleton);
 
 
-	const AxiomStyleSkeleton = axiomsArray.reduce((collection: Record<string, Record<string, t_SelectorMeta>>, fileData, index) => {
+	const { libraryTable, axiomsArray, clustersArray } = _StackLibraryFiles();
+	const AxiomStyleSkeleton = axiomsArray.reduce((collection: Record<string, Record<string, t_ClassMeta>>, fileData, index) => {
 		const result = PARSE.CSSLIBRARY(fileData, "AXIOM");
 		collection[index] = result.indexMetaCollection;
-		if (result.selectorList.length) { axiomChart[`Level ${index}: ${result.selectorList.length} Classes`] = result.selectorList; }
+		if (result.selectorList.length) {
+			axiomChart[`Level ${index}: ${result.selectorList.length} Classes`] = result.selectorList;
+		}
 		axiomCount += result.selectorList.length;
 		return collection;
 	}, {});
 
-	const ClusterStyleSkeleton = clustersArray.reduce((collection: Record<string, Record<string, t_SelectorMeta>>, level, index) => {
+	const ClusterStyleSkeleton = clustersArray.reduce((collection: Record<string, Record<string, t_ClassMeta>>, level, index) => {
 		const result = PARSE.CSSLIBRARY(level, "CLUSTER");
 		collection[index] = result.indexMetaCollection;
 		if (result.selectorList.length) { clusterChart[`Level ${index}: ${result.selectorList.length} Classes`] = result.selectorList; }
@@ -239,8 +244,8 @@ function ReRender() {
 			),
 		),
 		$.MOLD.primary.Section(
-			`Bindings: ${bindingCount}`,
-			Object.entries(bindingChart).map(([heading, entries]) =>
+			`Pacbinds: ${pacbindCount}`,
+			Object.entries(pacbindChart).map(([heading, entries]) =>
 				$.MOLD.tertiary.Topic(heading, entries, $.list.text.Entries),
 			),
 		),
@@ -254,19 +259,18 @@ function ReRender() {
 
 	const nameCollitions: string[] | undefined = [];
 	Object.values(CACHE_STORAGE.PACKAGES).forEach((F) => {
-		if (CACHE_STATIC.PROJECT_NAME === F.fileName) { nameCollitions.push(F.sourcePath); }
+		if (CACHE_STATIC.PROJECT_NAME === F.packageName) { nameCollitions.push(F.sourcePath); }
 	});
 	if (nameCollitions.length) { warnings.push($.MOLD.warning.List(`Package-name collitions: ${CACHE_STATIC.PROJECT_NAME}`, nameCollitions, $.list.failed.Bullets)); }
 
 	return {
 		libraryTable,
-		modulesTable,
+		modulesTable: packageTable,
 		nameCollitions,
-		PackageEssentials,
 		AxiomStyleSkeleton,
 		ClusterStyleSkeleton,
-		BindingStyleSkeleton,
-		XtylingStyleSkeleton,
+		PacbindStyleSkeleton,
+		PackageStyleSkeleton,
 	};
 }
 
@@ -278,31 +282,29 @@ function ReDeclare() {
 }
 
 function Appendix(indexes: number[] = []) {
-	const stash: Record<string, { readme: string[], binding: number[], xtyling: number[] }> = {}, essentials: [string, string | object][] = [];
+	const stash: Record<string, { readme: string[], pacbind: number[], package: number[] }> = {};
 
 	if (!CACHE_STATIC.WATCH) {
 		const usedPackages = Object.values(CACHE_DYNAMIC.PackageClass_Index).filter(i => indexes.includes(i))
 			.reduce((a, c) => { a.add(INDEX.IMPORT(c).package); return a; }, new Set());
 
 		Object.values(CACHE_STORAGE.PACKAGES).forEach((F) => {
-			if (usedPackages.has(F.fileName)) {
+			if (usedPackages.has(F.packageName)) {
 				if (F.extension === "md") {
-					if (stash[F.fileName]) { stash[F.fileName].readme.push(F.content); }
-					else { stash[F.fileName] = { readme: [F.content], binding: [], xtyling: [] }; }
+					if (stash[F.packageName]) { stash[F.packageName].readme.push(F.content); }
+					else { stash[F.packageName] = { readme: [F.content], pacbind: [], package: [] }; }
 				} else if (F.extension === "xcss") {
-					if (stash[F.fileName]) { F.styleData.usedIndexes.forEach((i: number) => stash[F.fileName].xtyling.push(i)); }
-					else { stash[F.fileName] = { readme: [], binding: [], xtyling: Array.from(F.styleData.usedIndexes) }; }
+					if (stash[F.packageName]) { F.styleData.usedIndexes.forEach((i: number) => stash[F.packageName].package.push(i)); }
+					else { stash[F.packageName] = { readme: [], pacbind: [], package: Array.from(F.styleData.usedIndexes) }; }
 				} else if (F.extension === "css") {
-					if (stash[F.fileName]) { F.styleData.usedIndexes.forEach((i: number) => stash[F.fileName].binding.push(i)); }
-					else { stash[F.fileName] = { readme: [], binding: Array.from(F.styleData.usedIndexes), xtyling: [] }; }
+					if (stash[F.packageName]) { F.styleData.usedIndexes.forEach((i: number) => stash[F.packageName].pacbind.push(i)); }
+					else { stash[F.packageName] = { readme: [], pacbind: Array.from(F.styleData.usedIndexes), package: [] }; }
 				}
-				essentials.push(...F.styleData.essentials);
 			}
 		});
 	}
 
 	return {
-		essentials,
 		warnings,
 		report,
 		stash

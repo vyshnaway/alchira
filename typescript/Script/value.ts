@@ -1,7 +1,7 @@
 import Use from "../Utils/main.js";
 import { INDEX } from "../Data/init.js";
-import { CACHE_DYNAMIC, CACHE_STATIC } from "../Data/cache.js";
-import { t_Data_FILING, t_FileCursor } from "../types.js";
+import { CACHE_STATIC } from "../Data/cache.js";
+import { t_FILE_Storage, t_FileCursor } from "../types.js";
 
 export type t_Actions = 'read' | 'archive' | 'debug' | 'preview' | 'publish';
 
@@ -35,7 +35,7 @@ function loadActiveIndexes(classList: string[], StyleStack: t_StyleStack) {
 export default function classExtract(
 	string: string,
 	action: t_Actions,
-	fileData: t_Data_FILING,
+	fileData: t_FILE_Storage,
 	attacments: Set<string>,
 	StyleStack: t_StyleStack,
 	FileCursor: t_FileCursor,
@@ -69,7 +69,7 @@ export default function classExtract(
 	}
 
 	if (action !== "read") {
-		const metaFront = `TAG${fileData.metaFront}\\:${FileCursor.rowMarker}\\:${FileCursor.colMarker}__`;
+		const metaFront = `TAG${fileData.metaclassFront}\\:${FileCursor.rowMarker}\\:${FileCursor.colMarker}__`;
 		activeQuote = "";
 		entry = "";
 		scribed = "";
@@ -105,7 +105,7 @@ export default function classExtract(
 									break;
 								}
 								case "debug": {
-									const devClass = metaFront + INDEX.IMPORT(index).metaClass;
+									const devClass = metaFront + INDEX.IMPORT(index).debugClass;
 									scribed += Use.string.normalize(devClass, ["/", ".", ":", "|", "$"], ["\\"]);
 									// CACHE.FinalStack["." + devClass] = index;
 									break;

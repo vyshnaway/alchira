@@ -1,9 +1,8 @@
 /* eslint-disable no-useless-escape */
-import Use from "../Utils/main.js";
+import cursor from "./cursor.js";
 import classExtract from "./value.js";
 
-import { TWEAKS } from "../Data/cache.js";
-import { t_Data_FILING, t_TagRawStyle } from "../types.js";
+import { t_FILE_Storage, t_TagRawStyle } from "../types.js";
 import { t_Actions, t_StyleStack } from "./value.js";
 
 const bracePair = {
@@ -18,20 +17,15 @@ type t_OpenBrace = keyof typeof bracePair;
 export const openBraces = Object.keys(bracePair);
 export const closeBraces = ["]", "}", ")"];
 
-export const rgx_subXtyleRegex = /[\$@#]/;
-export const rgx_zeroXtyleRegex = /^[\w\-]*\$+[\w\-]*$/i;
-export const rgx_openlibXtyleRegex = /^[\w\-]*\$+[\w\-]+$/i;
-export const rgx_onlylibXtyleRegex = /^[\w\-]+\$+[\w\-]+$/i;
-
 
 export default function scanner(
-	fileData: t_Data_FILING,
+	fileData: t_FILE_Storage,
 	classProps: string[] = [],
 	action: t_Actions = "read",
 	attachments = new Set<string>(),
 	styleStack: t_StyleStack = { Portable: {}, Library: {}, Native: {}, Local: {}, Global: {} },
 	OrderedClassList: Record<string, Record<number, string>>,
-	fileCursor = Use.cursor.Initialize(fileData.content),
+	fileCursor = cursor.Initialize(fileData.content),
 ) {
 	const
 		classList: string[] = [],
@@ -41,16 +35,14 @@ export default function scanner(
 			element: "",
 			elvalue: "",
 			selector: "",
-			scope: "essential",
+			scope: "PACKAGE",
 			tagCount: fileCursor.active.tagCount,
 			rowIndex: fileCursor.active.rowMarker,
 			colIndex: fileCursor.active.colMarker,
 			tagOpenMarker: 0,
 			comments: [],
 			styles: {},
-			snippet_Style: "",
-			snippet_Attach: "",
-			snippet_Stencil: "",
+			attachstring: "",
 		};
 
 	let
@@ -65,7 +57,7 @@ export default function scanner(
 
 	while (fileCursor.active.marker < fileData.content.length) {
 		const lastCh = fileCursor.active.char;
-		const liveCh = Use.cursor.Incremnet(fileCursor);
+		const liveCh = cursor.Incremnet(fileCursor);
 		if (lastCh !== "\\") {
 			if (!fallbackAquired && liveCh === "<") {
 				fallbackAquired = true;
@@ -90,13 +82,19 @@ export default function scanner(
 					styleDeclarations.elvalue = tr_Value;
 				} else if (tr_Attr === "$") {
 					styleDeclarations.comments.push(...tr_Value.slice(1, -1).split("\n").map(l => l.trim()));
-				} else if ((TWEAKS.openXtyles && rgx_openlibXtyleRegex.test(tr_Attr)) || (!TWEAKS.openXtyles && rgx_onlylibXtyleRegex.test(tr_Attr))) {
+				} else if (/^[\w\-]+\$+[\w\-]+$/i.test(tr_Attr)) {
 					styleDeclarations.selector = tr_Attr;
-					styleDeclarations.scope = tr_Attr.includes("$$$") ? "public"
-						: tr_Attr.includes("$$") ? "global" : "local";
-
+					if (fileData.manifest.refer.group === "PACKAGE") {
+						styleDeclarations.scope = "PACKAGE";
+					} else if (tr_Attr.includes("$$$")) {
+						styleDeclarations.scope = "PUBLIC";
+					} else if (tr_Attr.includes("$$")) {
+						styleDeclarations.scope = "GLOBAL";
+					} else {
+						styleDeclarations.scope = "LOCAL";
+					}
 					if (tr_Value) { styleDeclarations.styles[""] = tr_Value; }
-				} else if (!rgx_zeroXtyleRegex.test(tr_Attr) && rgx_subXtyleRegex.test(tr_Attr) && !tr_Attr.endsWith("$") && !tr_Attr.startsWith("@")) {
+				} else if (/[\$@#]/.test(tr_Attr) && !"$@".includes(tr_Attr[0]) && !"$@".includes(tr_Attr[tr_Attr.length - 1])) {
 					styleDeclarations.styles[tr_Attr] = tr_Value;
 				} else if (classProps.includes(tr_Attr)) {
 					const result = classExtract(tr_Value, action, fileData, attachments, styleStack, fileCursor.active, OrderedClassList);

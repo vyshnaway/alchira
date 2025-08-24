@@ -42,14 +42,13 @@ export const ORIGIN: t_Data_ORIGIN = {
         "install",
     ],
     defaultTweaks: {
-        OpenXtyles: true,
         RapidSense: true,
         Shorthands: true,
         IntelGroup: "browser"
     },
     customTag: {
         style: "xtyle",
-        attach: "xtaple",
+        staple: "xtaple",
         stencil: "xtencil",
     }
 };
@@ -277,9 +276,8 @@ export const CACHE_STATIC: t_CACHE_STATIC = {
     PROXYMAP: [],
     HASHRULE: {},
     LIBRARIES: {},
-    PACKAGES: {},
     PROXYFILES: {},
-    DEPENDENTS: {},
+    PACKAGES: {},
     ARCHIVE: {
         name: '',
         version: '',
@@ -290,7 +288,7 @@ export const CACHE_STATIC: t_CACHE_STATIC = {
 export const CACHE_DYNAMIC: t_CACHE_DYNAMIC = {
     HashRule: {},
     Index_ClassData: {},
-    NativeClass__Index: {},
+    ArchiveClass_Index: {},
     GlobalClass__Index: {},
     PublicClass__Index: {},
     LibraryClass_Index: {},

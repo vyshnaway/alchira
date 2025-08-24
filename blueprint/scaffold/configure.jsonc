@@ -23,10 +23,6 @@
     // - Select intellisense group for css suggestions.
     // - Available options: ["browser"(default), "none"]
     // ---
-    "OpenXtyles": true,
-    // - Support for ungroup-declaration:[like `$class="+++"`], in target files.
-    // - For frameworks with occupied funcitonality use false, [eg: svelte].
-    // ---
     "RapidSense": true,
     // - Trigger intellisense suggestion in valid rages after space or line-break.
     // - Enforces intellisense to trigger after "$" or "/".
@@ -36,11 +32,6 @@
     // - A few symbols can be used for some keyworks to write queries/at-rules inline.
     // - Alternatively you can define rule in ***@{***}, anyways.
     // - Available tokens.
-    //   - "|" : "or" 
-    //   - "&" : "and" 
-    //   - "!" : "not" 
-    //   - "*" : "all" 
-    //   - "^" : "only" 
     //   - ("width>=") : "min-width:" 
     //   - ("width<=") : "max-width:" 
     //   - ("height>=") : "min-height:" 

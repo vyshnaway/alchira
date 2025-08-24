@@ -1,15 +1,26 @@
 import $ from "./Shell/main.js";
-import { CACHE_DYNAMIC, CACHE_STATIC, TWEAKS } from "./Data/cache.js";
+import { CACHE_DYNAMIC, CACHE_STATIC } from "./Data/cache.js";
 import * as $$ from "./shell.js";
+import { t_Diagnostic } from "./types.js";
 
 const hashPattern = /#\{[a-z0-9]+\}/i;
 
-function IMPORT(string: string, watchUndef = true, ErrorisWarning = false) {
-	const response = {
+function IMPORT(string: string, watchUndef = true, sourcePath = "") {
+	const response: {
+		status: boolean,
+		result: string,
+		error: string,
+		diagnostic: t_Diagnostic
+	} = {
 		status: true,
 		result: "",
 		error: "",
+		diagnostic: {
+			source: sourcePath,
+			cause: ""
+		}
 	};
+
 	let hashMatch;
 	const source = string;
 	const recursionPreview: Record<string, string> = {};
@@ -19,10 +30,15 @@ function IMPORT(string: string, watchUndef = true, ErrorisWarning = false) {
 		recursionLoop: (recursionPreview: Record<string, string>, cause: string) => {
 			response.status = false;
 			recursionPreview["ERROR BY"] = $.MAKE(cause, $.style.TS_Bold, $.style.BG_Normal_Red);
-			response.error = $.MOLD[ErrorisWarning ? "warning" : "failed"].List(
+			response.error = $.MOLD.failed.List(
 				source +
-				$.MAKE(" : Hashrule recursion loop.", ErrorisWarning ? $.style.FG_Normal_Yellow : $.style.FG_Normal_Red),
+				$.MAKE(" : Hashrule recursion loop.", $.style.FG_Normal_Yellow),
 				$$.Props.text(recursionPreview),
+				$.list.std.Waterfall,
+			);
+			response.diagnostic.cause = $.MOLD.std.List(
+				source + " : Hashrule recursion loop.",
+				$$.Props.std(recursionPreview),
 				$.list.std.Waterfall,
 			);
 			return response;
@@ -30,10 +46,15 @@ function IMPORT(string: string, watchUndef = true, ErrorisWarning = false) {
 		undefinedHash: (recursionPreview: Record<string, string>, cause: string) => {
 			response.status = false;
 			recursionPreview["ERROR BY"] = $.MAKE(cause, $.style.TS_Bold, $.style.BG_Normal_Red);
-			response.error = $.MOLD[ErrorisWarning ? "warning" : "failed"].List(
+			response.error = $.MOLD.failed.List(
 				source +
-				$.MAKE(" : Undefined hashrule.", ErrorisWarning ? $.style.FG_Normal_Yellow : $.style.FG_Normal_Red),
+				$.MAKE(" : Undefined hashrule.", $.style.FG_Normal_Yellow),
 				$$.Props.text(recursionPreview),
+				$.list.std.Waterfall,
+			);
+			response.diagnostic.cause = $.MOLD.std.List(
+				source + " : Undefined hashrule.",
+				$$.Props.std(recursionPreview),
 				$.list.std.Waterfall,
 			);
 			return response;
@@ -89,8 +110,8 @@ function UPLOAD() {
 	]);
 }
 
-function RENDER(string: string, sourcePath = "", ErrorisWarning = false) {
-	const extended = IMPORT(string, true, ErrorisWarning);
+function RENDER(string: string, sourcePath = "") {
+	const extended = IMPORT(string, true, sourcePath);
 	string = extended.result;
 	const length = string.length;
 	let rule = '', selector = '', Marker = 0, deviance = 0;
@@ -111,25 +132,7 @@ function RENDER(string: string, sourcePath = "", ErrorisWarning = false) {
 					rule += "";
 					break;
 				case "}":
-					rule += "";
-					break;
-				case ",":
-					rule += TWEAKS.shorthands ? ", " : ",";
-					break;
-				case "|":
-					rule += TWEAKS.shorthands ? " or " : "|";
-					break;
-				case "&":
-					rule += TWEAKS.shorthands ? " and " : "&";
-					break;
-				case "!":
-					rule += TWEAKS.shorthands ? " not " : "!";
-					break;
-				case "*":
-					rule += TWEAKS.shorthands ? " all " : "*";
-					break;
-				case "^":
-					rule += TWEAKS.shorthands ? " only " : "^";
+					rule += " ";
 					break;
 				case "@":
 					rule = "@" + rule;
@@ -153,6 +156,7 @@ function RENDER(string: string, sourcePath = "", ErrorisWarning = false) {
 		}
 	}
 
+	const subSelector = selector.trim();
 	const finalRule = rule.trim()
 		.replace(/width\s*>=/g, "min-width:")
 		.replace(/width\s*<=/g, "max-width:")
@@ -160,11 +164,13 @@ function RENDER(string: string, sourcePath = "", ErrorisWarning = false) {
 		.replace(/height\s*<=/g, "max-height:")
 		.replace(/\s+/g, " ");
 
+
 	return {
-		rule: finalRule,
-		subSelector: selector.trim(),
+		rule: (finalRule === "_" || finalRule === "-") ? "" : finalRule,
+		subSelector: (subSelector === "_" || subSelector === "-") ? "" : subSelector,
 		status: extended.status,
 		error: extended.error + $.MOLD.text.Item(sourcePath) + "\n",
+		diagnostic: extended.diagnostic
 	};
 }
 

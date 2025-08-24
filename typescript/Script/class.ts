@@ -1,7 +1,7 @@
 import SCRIPTPARSE from "./file.js";
 import {
 	TagFn_ReplaceStyle,
-	TagFn_ReplaceAttach,
+	TagFn_ReplaceStaple,
 	TagFn_ReplaceStencil,
 } from "./file.js";
 import fileman from "../fileman.js";
@@ -11,7 +11,7 @@ import FILING from "../Data/filing.js";
 import STYLEPARSE from "../Style/parse.js";
 import { INDEX } from "../Data/init.js";
 import { CACHE_STATIC, CACHE_DYNAMIC } from "../Data/cache.js";
-import { t_Data_FILING, t_FileManifest, t_ProxyMap } from "../types.js";
+import { t_FILE_Storage, t_FILE_Manifest, t_ProxyMap } from "../types.js";
 import { t_Actions } from "./value.js";
 
 export default class C_Proxy {
@@ -24,7 +24,7 @@ export default class C_Proxy {
 
 	extensions: string[] = [];
 	extnsProps: Record<string, string[]> = {};
-	fileCache: Record<string, t_Data_FILING> = {};
+	fileCache: Record<string, t_FILE_Storage> = {};
 
 	constructor({
 		source,
@@ -64,8 +64,8 @@ export default class C_Proxy {
 		fileStyle.classGroups.push(...sciptResponse.classesList);
 
 		sciptResponse.stylesList.forEach((style) => {
-			const IndexMap = style.scope === "global" ? fileStyle.styleGlobals : style.scope === "local" ? fileStyle.styleLocals : {};
-			const skeletonMap = style.scope === "global" ? file.manifest.global : style.scope === "local" ? file.manifest.global : {};
+			const IndexMap = style.scope === "GLOBAL" ? fileStyle.styleGlobals : style.scope === "local" ? fileStyle.styleLocals : {};
+			const skeletonMap = style.scope === "GLOBAL" ? file.manifest.global : style.scope === "local" ? file.manifest.global : {};
 			const response = STYLEPARSE.TAGSTYLE(style, file, IndexMap);
 
 			if (style.scope === "essential") {
@@ -80,7 +80,7 @@ export default class C_Proxy {
 		});
 
 		Object.assign(CACHE_DYNAMIC.GlobalClass__Index, file.styleData.styleGlobals);
-		Object.assign(file.manifest.file, { group: "target", id: CACHE_STATIC.WorkPath + file.targetPath });
+		Object.assign(file.manifest.refer, { group: "target", id: CACHE_STATIC.WorkPath + file.targetPath });
 	}
 
 	Accumulator() {
@@ -89,7 +89,7 @@ export default class C_Proxy {
 			report: string[],
 			errors: string[],
 			indexes: number[],
-			styleMap: t_FileManifest[],
+			styleMap: t_FILE_Manifest[],
 			essentials: [string, string | object][],
 			attachments: Set<string>,
 		} = {
@@ -101,7 +101,7 @@ export default class C_Proxy {
 			attachments: new Set(),
 		}, styleGlobals: Record<string, number> = {};
 
-		C.styleMap.push({ file: { group: "stylesheet", id: CACHE_STATIC.WorkPath + this.targetStylesheet, }, global: {}, local: {}, });
+		C.styleMap.push({ refer: { group: "STYLESHEET", id: CACHE_STATIC.WorkPath + this.targetStylesheet, }, global: {}, local: {}, });
 
 		Object.values(this.fileCache).forEach((file) => {
 			C.indexes.push(...Object.values(file.styleData.styleLocals));
@@ -154,7 +154,7 @@ export default class C_Proxy {
 				{
 					Local: file.styleData.styleLocals,
 					Global: CACHE_DYNAMIC.GlobalClass__Index,
-					Native: CACHE_DYNAMIC.NativeClass__Index,
+					Native: CACHE_DYNAMIC.ArchiveClass_Index,
 					Library: CACHE_DYNAMIC.LibraryClass_Index,
 					Portable: CACHE_DYNAMIC.PackageClass_Index
 				},
@@ -176,7 +176,7 @@ export default class C_Proxy {
 			if (file.extension !== "xcss") {
 				let fileContent = file.midway;
 				if (file.styleData.hasStyleTag) { fileContent = TagFn_ReplaceStyle(fileContent, StyleBlock); }
-				if (file.styleData.hasAttachTag) { fileContent = TagFn_ReplaceAttach(fileContent, AttachBlock); }
+				if (file.styleData.hasAttachTag) { fileContent = TagFn_ReplaceStaple(fileContent, AttachBlock); }
 				if (file.styleData.hasStencilTag) { fileContent = TagFn_ReplaceStencil(fileContent, StencilBlock); }
 				tagSummons.push(file.sourcePath);
 				SaveFiles[file.sourcePath] = fileContent;
@@ -197,7 +197,7 @@ export default class C_Proxy {
 						(CACHE_DYNAMIC.PackageClass_Index[className] || 0) +
 						(CACHE_DYNAMIC.LibraryClass_Index[className] || 0) +
 						(CACHE_DYNAMIC.GlobalClass__Index[className] || 0) +
-						(CACHE_DYNAMIC.NativeClass__Index[className] || 0) +
+						(CACHE_DYNAMIC.ArchiveClass_Index[className] || 0) +
 						(file.styleData.styleLocals[className] || 0);
 					if (index) { indexAcc.push(index); }
 					return indexAcc;

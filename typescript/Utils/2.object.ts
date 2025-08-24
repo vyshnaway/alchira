@@ -38,7 +38,7 @@ function objectSwitch(srcObject: Record<string, any>): Record<string, any> {
  */
 function deepMerge(target: Record<string, any>, source: Record<string, any>): Record<string, any> {
 	if (!source || typeof source !== "object") { return target; }
-
+	
 	for (const key in source) {
 		const sourceValue = source[key];
 		if (sourceValue === undefined) { continue; }
