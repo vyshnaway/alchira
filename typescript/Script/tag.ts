@@ -1,5 +1,5 @@
 /* eslint-disable no-useless-escape */
-import cursor from "./cursor.js";
+import cursor from "./_cursor.js";
 import classExtract from "./value.js";
 
 import { t_FILE_Storage, t_TagRawStyle } from "../types.js";
@@ -22,13 +22,13 @@ export default function scanner(
 	fileData: t_FILE_Storage,
 	classProps: string[] = [],
 	action: t_Actions = "read",
-	attachments = new Set<string>(),
 	styleStack: t_StyleStack = { Portable: {}, Library: {}, Native: {}, Local: {}, Global: {} },
 	OrderedClassList: Record<string, Record<number, string>>,
 	fileCursor = cursor.Initialize(fileData.content),
 ) {
 	const
-		classList: string[] = [],
+		classesList: string[][] = [],
+		attachments = new Set<string>(),
 		braceTrack: t_OpenBrace[] = [],
 		nativeAttributes: Record<string, string> = {},
 		styleDeclarations: t_TagRawStyle = {
@@ -98,7 +98,7 @@ export default function scanner(
 					styleDeclarations.styles[tr_Attr] = tr_Value;
 				} else if (classProps.includes(tr_Attr)) {
 					const result = classExtract(tr_Value, action, fileData, attachments, styleStack, fileCursor.active, OrderedClassList);
-					classList.push(...result.classList);
+					classesList.push(result.classList);
 					nativeAttributes[tr_Attr] = result.scribed;
 				} else {
 					nativeAttributes[tr_Attr] = tr_Value;
@@ -129,5 +129,5 @@ export default function scanner(
 		Object.assign(fileCursor.active, fileCursor.fallback);
 	}
 
-	return { ok, selfClosed, styleDeclarations, nativeAttributes, classList, fileCursor };
+	return { ok, selfClosed, styleDeclarations, nativeAttributes, classesList, attachments, fileCursor };
 }

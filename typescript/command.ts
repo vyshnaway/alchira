@@ -1,13 +1,13 @@
 /* eslint-disable no-fallthrough */
 import $ from "./Shell/main.js";
 import * as $$ from "./shell.js";
-import * as DATA from "./Data/init.js";
+import * as DATA from "./Data/action.js";
 import * as FETCH from "./Data/fetch.js";
-import * as SMITH from "./execute.js";
+import * as SMITH from "./assemble.js";
 import * as worker from "./Data/watch.js";
 
 import fileman from "./fileman.js";
-import { MemoryUsage } from "./Data/init.js";
+import { MemoryUsage } from "./Data/action.js";
 import { T_PackageEssential } from "./types.js";
 import { DOCUMENTS, ORIGIN, CACHE_STATIC, NAVIGATE, CACHE_STORAGE } from "./Data/cache.js";
 import Use from "./Utils/main.js";
@@ -50,10 +50,10 @@ async function execute(chapter: string) {
                 }
             }
             case "ReadIndex": {
-                await FETCH.UpdateIndexContent();
+                await FETCH.SaveIndexContent();
             }
             case "ReadLibraries": {
-                await FETCH.UpdateLibrary();
+                await FETCH.SaveLibrary();
             }
             case "VerifyConfigure": {
                 const verifyConfigsResult = await FETCH.VerifyConfigure(!staticsFetched);
@@ -66,11 +66,14 @@ async function execute(chapter: string) {
                     report = "";
                 }
             }
+            case "ReadPackages": {
+                await FETCH.SavePackages();
+            }
             case "ReadProxyFolders": {
-                await FETCH.UpdateProxies();
+                await FETCH.SaveProxies();
             }
             case "ReadHashrules": {
-                const hashruleAnalysis = await FETCH.UpdateHashrules();
+                const hashruleAnalysis = await FETCH.SaveHashrules();
                 if (!hashruleAnalysis.status) {
                     report = hashruleAnalysis.report;
                     step = "WatchFolders";
@@ -82,14 +85,14 @@ async function execute(chapter: string) {
             case "ProcessXtylesFolder": {
                 SMITH.UpdateXtylesFolder();
             }
-            // case "ProcessProxyFolders": {
-            //     SMITH.ProcessProxies();
-            // }
-            // case "GenerateFinals": {
-            //     const response = await SMITH.Generate();
-            //     Object.assign(SaveFiles, response.SaveFiles);
-            //     report = response.ConsoleReport;
-            // }
+            case "ProcessProxyFolders": {
+                SMITH.SaveTargets();
+            }
+            case "GenerateFinals": {
+                const response = await SMITH.Generate();
+                SaveFiles = response.SaveFiles;
+                report = response.ConsoleReport;
+            }
             // case "Publish": {
             //     if (Object.keys(SaveFiles).length) { await fileman.write.bulk(SaveFiles); }
             //     if (reportNext) { reporter(heading, targets, report); reportNext = false; };
@@ -193,17 +196,20 @@ async function commander({
     projectVersion: string,
     originPackageEssential: T_PackageEssential
 }) {
-    CACHE_STATIC.COMMAND = command;
-    CACHE_STATIC.ARGUMENT = argument;
+    CACHE_STATIC.Command = command;
+    CACHE_STATIC.Argument = argument;
     CACHE_STATIC.WATCH = argument === "watch";
-    CACHE_STATIC.FALLBACK_NAME = Use.string.normalize(projectName);
-    CACHE_STATIC.FALLBACK_VERSION = projectVersion;
+    CACHE_STATIC.DEBUG = command === "debug";
+    CACHE_STATIC.Project_Name = Use.string.normalize(projectName);
+    CACHE_STATIC.Project_Version = projectVersion;
     DATA.SetENV(rootPath, workPath, originPackageEssential);
     $.INIT(command !== "debug" && command !== "archive");
 
-    switch (CACHE_STATIC.COMMAND) {
+    const APP_VERSION = `${ORIGIN.name} @ ${ORIGIN.version}`;
+
+    switch (CACHE_STATIC.Command) {
         case "init": {
-            const title = $.PLAY.Title(ORIGIN.name + " : Initialize", 500);
+            const title = $.PLAY.Title(`${APP_VERSION} : Initialize`, 500);
             await FETCH.FetchDocs();
             await title;
             const setupInit = await FETCH.VerifySetupStruct();
@@ -217,15 +223,15 @@ async function commander({
             break;
         }
         case "debug": {
-            await execute(`${CACHE_STATIC.PROJECT_NAME} : Debug ${CACHE_STATIC.WATCH ? "Watch" : "Build"}`);
+            await execute(`${APP_VERSION} : Debug ${CACHE_STATIC.WATCH ? "Watch" : "Build"}`);
             break;
         }
         case "preview": {
-            await execute(`${CACHE_STATIC.PROJECT_NAME} : Preview ${CACHE_STATIC.WATCH ? "Watch" : "Build"}`);
+            await execute(`${APP_VERSION} : Preview ${CACHE_STATIC.WATCH ? "Watch" : "Build"}`);
             break;
         }
         case "publish": {
-            await execute(`${CACHE_STATIC.PROJECT_NAME} : Publishing for Production`);
+            await execute(`${APP_VERSION} : Publishing for Production`);
             break;
         }
         // case "archive": {
@@ -250,7 +256,7 @@ async function commander({
             await FETCH.FetchDocs();
 
             $.POST(
-                $.MOLD.std.Chapter(`${CACHE_STATIC.COMMAND} @ ` + ORIGIN.version,
+                $.MOLD.std.Chapter(APP_VERSION,
                     DOCUMENTS.MARKDOWN.alerts.content ? [DOCUMENTS.MARKDOWN.alerts.content] : []
                 )
             );

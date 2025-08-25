@@ -1,6 +1,6 @@
 import Use from "../Utils/main.js";
-import { INDEX } from "../Data/init.js";
-import { CACHE_STATIC } from "../Data/cache.js";
+import { INDEX } from "../Data/action.js";
+import { CACHE_STATIC, ORIGIN } from "../Data/cache.js";
 import { t_FILE_Storage, t_FileCursor } from "../types.js";
 
 export type t_Actions = 'read' | 'archive' | 'debug' | 'preview' | 'publish';
@@ -36,7 +36,7 @@ export default function classExtract(
 	string: string,
 	action: t_Actions,
 	fileData: t_FILE_Storage,
-	attacments: Set<string>,
+	attachments: Set<string>,
 	StyleStack: t_StyleStack,
 	FileCursor: t_FileCursor,
 	OrderedClassList: Record<string, Record<number, string>>,
@@ -53,7 +53,11 @@ export default function classExtract(
 	while (ch !== undefined) {
 		if (inQuote) {
 			if (ch === " " || ch === activeQuote) {
-				classList.push(entry);
+				if(entry.startsWith(ORIGIN.customOps["attach"])){
+					attachments.add(entry.slice(1));
+				}else{
+					classList.push(entry);
+				}
 				entry = "";
 			} else { entry += ch; }
 			if (ch === activeQuote) {
@@ -69,7 +73,7 @@ export default function classExtract(
 	}
 
 	if (action !== "read") {
-		const metaFront = `TAG${fileData.metaclassFront}\\:${FileCursor.rowMarker}\\:${FileCursor.colMarker}__`;
+		const metaFront = `TAG${fileData.debugclassFront}\\:${FileCursor.rowMarker}\\:${FileCursor.colMarker}__`;
 		activeQuote = "";
 		entry = "";
 		scribed = "";
@@ -83,10 +87,7 @@ export default function classExtract(
 		while (ch !== undefined) {
 			if (inQuote) {
 				if (ch === " " || ch === activeQuote) {
-					if (["<", ">"].includes(entry[0])) {
-						const className = entry.slice(1);
-						if (entry[0] === '*') { attacments.add(className); }
-					} else {
+					if (!entry.startsWith(ORIGIN.customOps["attach"])) {
 						const index = (
 							(StyleStack.Portable[entry] || 0) +
 							(StyleStack.Library[entry] || 0) +
@@ -99,13 +100,13 @@ export default function classExtract(
 								case "archive": {
 									const isGlobal = (StyleStack.Global[entry] || 0);
 									const isLibrary = (StyleStack.Global[entry] || 0);
-									const className = isGlobal ? `/${CACHE_STATIC.PROJECT_NAME}/${entry}`
-										: isLibrary ? `/${CACHE_STATIC.PROJECT_NAME}/$/${entry}` : entry;
+									const className = isGlobal ? `/${CACHE_STATIC.Package.Name}/${entry}`
+										: isLibrary ? `/${CACHE_STATIC.Package.Name}/$/${entry}` : entry;
 									scribed += className;
 									break;
 								}
 								case "debug": {
-									const devClass = metaFront + INDEX.IMPORT(index).debugClass;
+									const devClass = metaFront + INDEX.IMPORT(index).debugclass;
 									scribed += Use.string.normalize(devClass, ["/", ".", ":", "|", "$"], ["\\"]);
 									// CACHE.FinalStack["." + devClass] = index;
 									break;
@@ -137,5 +138,5 @@ export default function classExtract(
 		}
 	}
 
-	return { classList, scribed };
+	return { classList, attachments, scribed };
 }

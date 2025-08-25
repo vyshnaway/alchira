@@ -4,7 +4,7 @@ import $ from "../Shell/main.js";
 import Use from "../Utils/main.js";
 import HASHRULE from "../hash-rules.js";
 import { CACHE_STATIC, CACHE_DYNAMIC, ORIGIN } from "../Data/cache.js";
-import { INDEX } from "../Data/init.js";
+import { INDEX } from "../Data/action.js";
 import { t_FILE_Storage, t_ClassMeta, t_TagRawStyle, t_Diagnostic, t_ClassData } from "../types.js";
 
 function xtylemerge(classList: string[] = []) {
@@ -40,10 +40,10 @@ function SCANNER(content: string, initial: string, sourceSelector: string) {
 
 	const object = Use.object.deepMerge(assembled.result, Object.fromEntries([
 		...Object.entries(scanned.atProps).map(([propKey, propValue]) =>
-			[propKey, CACHE_STATIC.WATCH ? `${propValue}/* ${initial} ${sourceSelector} */` : propValue]
+			[propKey, CACHE_STATIC.DEBUG ? `${propValue}/* ${initial} ${sourceSelector} */` : propValue]
 		),
 		...Object.entries(scanned.properties).map(([propKey, propValue]) =>
-			[propKey, CACHE_STATIC.WATCH ? `${propValue}/* ${initial} ${sourceSelector} */` : propValue]
+			[propKey, CACHE_STATIC.DEBUG ? `${propValue}/* ${initial} ${sourceSelector} */` : propValue]
 		)
 	]));
 
@@ -79,7 +79,7 @@ function CSSLIBRARY(fileDatas: t_FILE_Storage[] = [], initial = "", forPortable 
 	const IndexMap = forPortable ? CACHE_DYNAMIC.PackageClass_Index : CACHE_DYNAMIC.LibraryClass_Index;
 
 	fileDatas.forEach((source) => {
-		const { xcssclassFront: stamp, filePath, metaclassFront: metaFront, content, manifest } = source;
+		const { classFront: stamp, filePath, debugclassFront: metaFront, content, manifest } = source;
 
 		CSSBLOCK(content, true).XallBlocks.forEach(([SELECTOR, OBJECT]) => {
 			const declaration = source.sourcePath;
@@ -104,7 +104,6 @@ function CSSLIBRARY(fileDatas: t_FILE_Storage[] = [], initial = "", forPortable 
 						variables: scannedStyle.variables,
 						skeleton: Use.object.skeleton(object),
 						declarations: [], // manifest and cross-check declarations assigned later from parse.js
-						element: '',
 						stencil: '',
 						watchclass: '',
 					},
@@ -147,21 +146,20 @@ function TAGSTYLE(
 	const errors: string[] = [];
 	const variables = {};
 
-	let isOriginal = false;
 	let identity = { index: 0, class: '' };
-	const xelector = raw.selector === "" ? "" : file.xcssclassFront + raw.selector.replace(/^-\$/, "$");
-	const debugclass = `${scope}${file.metaclassFront}\\:${raw.rowIndex}\\:${raw.colIndex}_${Use.string.normalize(raw.selector, [], [], forPackage ? ["$", "/"] : ["$"])}`;
+	const classname = raw.selector === "" ? "" : file.classFront + raw.selector.replace(/^-\$/, "$");
+	const debugclass = `${scope}${file.debugclassFront}\\:${raw.rowIndex}\\:${raw.colIndex}_${Use.string.normalize(raw.selector, [], [], forPackage ? ["$", "/"] : ["$"])}`;
 	const index_found =
-		IndexMap[xelector]
-		|| CACHE_DYNAMIC.PackageClass_Index[xelector]
-		|| CACHE_DYNAMIC.LibraryClass_Index[xelector]
-		|| CACHE_DYNAMIC.GlobalClass__Index[xelector]
+		IndexMap[classname]
+		|| CACHE_DYNAMIC.PackageClass_Index[classname]
+		|| CACHE_DYNAMIC.LibraryClass_Index[classname]
+		|| CACHE_DYNAMIC.GlobalClass__Index[classname]
 		|| 0;
 
 	if (raw.selector === "") {
 		diagnostics.push({
-			source: declaration,
-			cause: "Classname missing declaration scope."
+			error: "Classname missing declaration scope.",
+			source: [declaration]
 		});
 		errors.push($.MOLD.failed.List(
 			"Classname missing declaration scope.",
@@ -192,14 +190,10 @@ function TAGSTYLE(
 			}
 		}
 
+
 		if (index_found) {
 			const InStash = INDEX.IMPORT(index_found);
 			InStash.metadata.declarations.push(declaration);
-			errors.push($.MOLD.failed.List("Multiple declarations: " + InStash.selector, InStash.metadata.declarations, $.list.text.Bullets));
-			diagnostics.push({
-				source: declaration,
-				cause: $.MOLD.std.List("Multiple declarations: " + InStash.selector, InStash.metadata.declarations, $.list.std.Bullets)
-			});
 		} else {
 			const declarations = [declaration];
 			const style_snippet = SCANNER(
@@ -210,9 +204,8 @@ function TAGSTYLE(
 			attachments.push(...style_snippet.attachments);
 			Object.assign(variables, style_snippet.variables);
 
-			isOriginal = true;
 			identity = INDEX.DECLARE({
-				package: forPackage ? file.packageName : CACHE_STATIC.PROJECT_NAME,
+				package: forPackage ? file.packageName : CACHE_STATIC.Package.Name,
 				scope: raw.scope,
 				selector: raw.selector,
 				object,
@@ -222,27 +215,25 @@ function TAGSTYLE(
 					variables,
 					skeleton: Use.object.skeleton(object),
 					declarations,
-					element: '',
 					watchclass: '',
 					stencil: '',
 				},
-				attachments: forPackage ? attachments.map(attach => file.xcssclassFront + "$/" + attach) : attachments,
+				attachments: forPackage ? attachments.map(attach => file.classFront + "$/" + attach) : attachments,
 				debugclass,
 				declarations,
 				attached_style: style_snippet.object,
 				attached_staple: raw.element === ORIGIN.customTag["staple"] ? raw.attachstring : "",
 				attached_stencil: raw.element === ORIGIN.customTag["stencil"] ? raw.attachstring : "",
 			});
-			IndexMap[xelector] = identity.index;
+			IndexMap[classname] = identity.index;
 		}
 	}
 
 	return {
-		selector: xelector,
-		index: identity.index,
+		classname,
+		identity,
 		attachments,
 		diagnostics,
-		isOriginal,
 		errors,
 	};
 }

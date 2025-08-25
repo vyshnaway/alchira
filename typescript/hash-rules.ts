@@ -16,8 +16,8 @@ function IMPORT(string: string, watchUndef = true, sourcePath = "") {
 		result: "",
 		error: "",
 		diagnostic: {
-			source: sourcePath,
-			cause: ""
+			error: '',
+			source: [sourcePath]
 		}
 	};
 
@@ -36,7 +36,7 @@ function IMPORT(string: string, watchUndef = true, sourcePath = "") {
 				$$.Props.text(recursionPreview),
 				$.list.std.Waterfall,
 			);
-			response.diagnostic.cause = $.MOLD.std.List(
+			response.diagnostic.error = $.MOLD.std.List(
 				source + " : Hashrule recursion loop.",
 				$$.Props.std(recursionPreview),
 				$.list.std.Waterfall,
@@ -52,7 +52,7 @@ function IMPORT(string: string, watchUndef = true, sourcePath = "") {
 				$$.Props.text(recursionPreview),
 				$.list.std.Waterfall,
 			);
-			response.diagnostic.cause = $.MOLD.std.List(
+			response.diagnostic.error = $.MOLD.std.List(
 				source + " : Undefined hashrule.",
 				$$.Props.std(recursionPreview),
 				$.list.std.Waterfall,
@@ -85,7 +85,7 @@ function IMPORT(string: string, watchUndef = true, sourcePath = "") {
 }
 
 function UPLOAD() {
-	const hashrule = CACHE_STATIC.HASHRULE;
+	const hashrule = CACHE_STATIC.HashRule;
 	const hashruleErrors: string[] = [];
 
 	CACHE_DYNAMIC.HashRule = { ...hashrule };

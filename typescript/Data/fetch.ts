@@ -2,7 +2,7 @@ import $ from "../Shell/main.js";
 import fileman from "../fileman.js";
 import * as $$ from "../shell.js";
 import * as worker from "./watch.js";
-import { collectTWEAKS, collectVendors } from "./init.js";
+import { collectTWEAKS, collectVendors } from "./action.js";
 import { t_Config, t_Data_PREFIX, t_ProxyMap } from "../types.js";
 import { NAVIGATE, DOCUMENTS, ORIGIN, CACHE_STATIC, PREFIXES } from "./cache.js";
 
@@ -194,19 +194,18 @@ export async function VerifyConfigure(loadStatics: boolean) {
 		if (loadStatics) { await FetchStatics(CONFIG.vendors); }
 		collectTWEAKS(CONFIG.tweaks);
 
-		CACHE_STATIC.PROXYMAP = (Array.isArray(CONFIG.proxy)) ? CONFIG.proxy.reduce((acc, proxy) => {
+		CACHE_STATIC.ProxyMap = (Array.isArray(CONFIG.proxy)) ? CONFIG.proxy.reduce((acc, proxy) => {
 			if (typeof proxy === "object") {
 				acc.push(proxy);
 			}
 			return acc;
 		}, [] as t_ProxyMap[]) : [];
 
-
-		Object.assign(CACHE_STATIC.ARCHIVE, config.data);
-		CACHE_STATIC.ARCHIVE.readme = (await fileman.read.file(NAVIGATE.md.readme.path)).data;
-		CACHE_STATIC.ARCHIVE.name = CACHE_STATIC.PROJECT_NAME = CONFIG.name || CACHE_STATIC.FALLBACK_NAME;
-		CACHE_STATIC.ARCHIVE.version = CACHE_STATIC.PROJECT_VERSION = CONFIG.version || CACHE_STATIC.FALLBACK_VERSION;
-		CACHE_STATIC.PACKAGES = Object.entries((typeof CONFIG.packages === "object") ? CONFIG.packages : {})
+		Object.assign(CACHE_STATIC.Package, config.data);
+		CACHE_STATIC.Package.Readme = (await fileman.read.file(NAVIGATE.md.readme.path)).data;
+		CACHE_STATIC.Package.Name = CACHE_STATIC.Package.Name = CONFIG.Name || CACHE_STATIC.Project_Name;
+		CACHE_STATIC.Package.Version = CACHE_STATIC.Package.Version = CONFIG.Version || CACHE_STATIC.Project_Version;
+		CACHE_STATIC.Package_Saved = Object.entries((typeof CONFIG.packages === "object") ? CONFIG.packages : {})
 			.reduce((a: Record<string, string>, [k, v]) => {
 				if (
 					typeof v === "string"
@@ -218,12 +217,12 @@ export async function VerifyConfigure(loadStatics: boolean) {
 				return a;
 			}, {});
 
-		delete CACHE_STATIC.ARCHIVE.proxy;
-		delete CACHE_STATIC.ARCHIVE.tweaks;
-		delete CACHE_STATIC.ARCHIVE.vendors;
-		delete CACHE_STATIC.ARCHIVE.packages;
+		delete CACHE_STATIC.Package.proxy;
+		delete CACHE_STATIC.Package.tweaks;
+		delete CACHE_STATIC.Package.vendors;
+		delete CACHE_STATIC.Package.packages;
 
-		const results = await worker.proxyMapDependency(CACHE_STATIC.PROXYMAP, NAVIGATE.folder.setup.path);
+		const results = await worker.proxyMapDependency(CACHE_STATIC.ProxyMap, NAVIGATE.folder.setup.path);
 		errors.push(...results.warnings);
 	} else {
 		errors.push(`${NAVIGATE.json.configure} : Bad json file.`);
@@ -241,34 +240,40 @@ export async function VerifyConfigure(loadStatics: boolean) {
 
 
 
-export async function UpdateIndexContent() {
+export async function SaveIndexContent() {
 	$.TASK("Updating Index");
 	CACHE_STATIC.CSSIndex = await worker.cssImport(Object.values(NAVIGATE.css).map(css => css.path));
 }
 
-export async function UpdateLibrary() {
+export async function SaveLibrary() {
 	$.TASK("Updating Library");
-	CACHE_STATIC.LIBRARIES = await fileman.read.bulk(NAVIGATE.folder.libraries.path, ["css"]);
-	CACHE_STATIC.PACKAGES = await fileman.read.bulk(NAVIGATE.folder.packages.path, ["xcss"]);
+	CACHE_STATIC.Library_Saved = await fileman.read.bulk(NAVIGATE.folder.libraries.path, ["css"]);
 }
 
-export async function UpdateProxies() {
+export async function SavePackages() {
+	$.TASK("Updating Packages");
+	CACHE_STATIC.Package_Saved = await fileman.read.bulk(NAVIGATE.folder.packages.path, ["xcss", "css", "md"]);
+}
+
+
+
+export async function SaveProxies() {
 	$.TASK("Syncing proxy folders", 0);
-	Object.keys(CACHE_STATIC.PROXYFILES).forEach((key) => delete CACHE_STATIC.PROXYFILES[key]);
-	await worker.proxyMapSync(CACHE_STATIC.PROXYMAP);
+	Object.keys(CACHE_STATIC.Targets_Saved).forEach((key) => delete CACHE_STATIC.Targets_Saved[key]);
+	CACHE_STATIC.Targets_Saved = await worker.proxyMapSync(CACHE_STATIC.ProxyMap);
 }
 
-export async function UpdateHashrules() {
+export async function SaveHashrules() {
 	$.TASK("Updating Hashrules", 0);
 	const errors = [];
 
 	$.STEP("PATH : " + NAVIGATE.json.hashrules);
 	const hashrule = await fileman.read.json(NAVIGATE.json.hashrules.path);
-	Object.keys(CACHE_STATIC.HASHRULE).forEach(key => delete CACHE_STATIC.HASHRULE[key]);
+	Object.keys(CACHE_STATIC.HashRule).forEach(key => delete CACHE_STATIC.HashRule[key]);
 	if (hashrule.status) {
 		Object.entries(hashrule.data).forEach(([key, value]) => {
 			if (typeof value === "string") {
-				CACHE_STATIC.HASHRULE[key] = value;
+				CACHE_STATIC.HashRule[key] = value;
 			} else {
 				errors.push(`Hashrule: ${key} does not have a value of type STRING.`);
 			}

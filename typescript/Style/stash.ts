@@ -6,9 +6,11 @@ import Fileman from "../fileman.js";
 import FILING from "../Data/filing.js";
 import SCRIPTFILE from "../Script/file.js";
 
-import { INDEX } from "../Data/init.js";
-import { t_FILE_Storage, t_FILE_Reference, t_ClassMeta } from "../types.js";
-import { NAVIGATE, CACHE_DYNAMIC, CACHE_STORAGE, CACHE_STATIC } from "../Data/cache.js";
+import { INDEX } from "../Data/action.js";
+import { t_FILE_Storage, t_FILE_Reference, t_ClassMeta, t_Diagnostic } from "../types.js";
+import { NAVIGATE, CACHE_DYNAMIC, CACHE_STORAGE, CACHE_STATIC, CACHE_LIVEDOCS } from "../Data/cache.js";
+
+
 
 function _DeleteLibraryFile(filePath: string) {
 	if (CACHE_STORAGE.LIBRARIES[filePath]) {
@@ -24,6 +26,7 @@ function _DeletePackageFile(filePath: string) {
 	}
 }
 
+
 function _ClearStash() {
 	Object.entries(CACHE_DYNAMIC.LibraryClass_Index).forEach(([selector, index]) => {
 		INDEX.DISPOSE(index);
@@ -38,30 +41,17 @@ function _ClearStash() {
 	Object.keys(CACHE_STORAGE.PACKAGES).forEach((filePath) => _DeletePackageFile(filePath));
 }
 
+
 function _SaveLibraryFile(filePath: string, fileContent: string) {
 	if (CACHE_STORAGE.LIBRARIES[filePath]) { _DeleteLibraryFile(filePath); }
-	CACHE_STORAGE.LIBRARIES[filePath] = FILING(
-		filePath.slice(NAVIGATE.folder.libraries.path.length + 1),
-		fileContent,
-		"",
-		NAVIGATE.folder.libraries.path,
-		"library"
-	);
+	CACHE_STORAGE.LIBRARIES[filePath] = FILING("library", filePath, fileContent);
 }
 
 function _SavePackageFile(filePath: string, fileContent: string) {
 	if (CACHE_STORAGE.PACKAGES[filePath]) { _DeletePackageFile(filePath); }
-	CACHE_STORAGE.PACKAGES[filePath] = FILING(
-		filePath.slice(NAVIGATE.folder.packages.path.length + 1),
-		fileContent,
-		"",
-		NAVIGATE.folder.packages.path,
-		"package"
-	);
+	CACHE_STORAGE.PACKAGES[filePath] = FILING("package", filePath, fileContent);
 }
 
-
-/////////////////////////////////////////////////////////////////////////////
 
 function _StackLibraryFiles() {
 	let length = 0;
@@ -85,7 +75,7 @@ function _StackLibraryFiles() {
 
 	const axiomsArray = Use.array.fromNumberedObject(axiomArray, length);
 	const clustersArray = Use.array.fromNumberedObject(clusterArray, length);
-	return { libraryTable, axiomsArray, clustersArray };
+	return { LibraryLookupTable: libraryTable, axiomsArray, clustersArray };
 }
 
 function _StackPackageFiles() {
@@ -105,174 +95,221 @@ function _StackPackageFiles() {
 		collection.push(data);
 	});
 
-	return { packageTable, pacbindsArray, packagesArray };
+	return { PackageLookupTable: packageTable, pacbindsArray, packagesArray };
 }
 
 
 /////////////////////////////////////////////////////////////////////////////
 
 
-let report = "";
-
-let axiomCount = 0;
-let clusterCount = 0;
-let pacbindCount = 0;
-let packageCount = 0;
-
-let warnings: string[] = [];
-let axiomChart: Record<string, string[]> = {};
-let clusterChart: Record<string, string[]> = {};
-let pacbindChart: Record<string, string[]> = {};
-let packageChart: Record<string, string[]> = {};
-
 
 function ReRender() {
 
 	_ClearStash();
-	Object.entries(CACHE_STATIC.LIBRARIES).forEach(([filePath, fileContent]) => {
+	Object.entries(CACHE_STATIC.Library_Saved).forEach(([filePath, fileContent]) => {
 		_SaveLibraryFile(filePath, fileContent);
 	});
-	Object.entries(CACHE_STATIC.PACKAGES).forEach(([filePath, fileContent]) => {
+	Object.entries(CACHE_STATIC.Package_Saved).forEach(([filePath, fileContent]) => {
 		_SavePackageFile(filePath, fileContent);
 	});
 
-	report = "";
-	axiomCount = 0;
-	clusterCount = 0;
-	packageCount = 0;
-	pacbindCount = 0;
-	warnings = [];
-	axiomChart = {};
-	clusterChart = {};
-	pacbindChart = {};
-	packageChart = {};
-
-	const { packageTable, pacbindsArray, packagesArray } = _StackPackageFiles();
 
 
-	const PackageStyleSkeleton = packagesArray.reduce((collection: Record<string, Record<string, t_ClassMeta>>, fileData) => {
-		const filePath = Fileman.path.join(NAVIGATE.folder.packages.path, fileData.filePath);
-		const tagStash = SCRIPTFILE(fileData).stylesList;
-		const indexMetaCollection: Record<string, t_ClassMeta> = {};
 
-		tagStash.forEach((style) => {
-			style.scope = "PACKAGE";
-			const response = PARSE.TAGSTYLE(style, fileData, CACHE_DYNAMIC.PackageClass_Index,);
+	const pacbindChart: Record<string, string[]> = {};
+	const packageChart: Record<string, string[]> = {};
+	const { PackageLookupTable, pacbindsArray, packagesArray } = _StackPackageFiles();
 
-			warnings.push(...response.errors);
 
-			if (response.isOriginal) {
-				fileData.styleData.usedIndexes.add(response.index);
-				indexMetaCollection[response.selector] = INDEX.IMPORT(response.index).metadata;
-				packageCount++;
+	const PackageStyleSkeleton = packagesArray.reduce((collection, fileData) => {
+		const indexMetaCollection = collection[fileData.filePath] = {} as Record<string, t_ClassMeta>;
+		SCRIPTFILE(fileData).stylesList.forEach((style) => {
+			const response = PARSE.TAGSTYLE(style, fileData, CACHE_DYNAMIC.PackageClass_Index);
+			const styleData = INDEX.IMPORT(response.identity.index);
+
+			fileData.manifest.errors.push(...response.errors);
+			fileData.manifest.diagnostics.push(...response.diagnostics);
+
+			if (styleData.declarations.length === 1) {
+				fileData.styleData.usedIndexes.add(response.identity.index);
+				indexMetaCollection[response.classname] = styleData.metadata;
 			}
 		});
-		collection[filePath] = indexMetaCollection;
 		const classNames = Object.keys(indexMetaCollection);
 		if (classNames.length) { packageChart[`Package [${fileData.filePath}]: ${classNames.length} Classes`] = classNames; }
 		return collection;
-	}, {});
+	}, {} as Record<string, Record<string, t_ClassMeta>>);
 
-	const PacbindStyleSkeleton = pacbindsArray.reduce((collection: Record<string, Record<string, t_ClassMeta>>, fileData) => {
-		const result = PARSE.CSSLIBRARY([fileData], "BINDING", true);
+
+	const PacbindStyleSkeleton = pacbindsArray.reduce((collection, fileData) => {
+		const result = PARSE.CSSLIBRARY([fileData], fileData.manifest.refer.group, true);
 		collection[Fileman.path.join(NAVIGATE.folder.packages.path, fileData.filePath)] = result.indexMetaCollection;
 		if (result.selectorList.length) {
 			pacbindChart[`Pacbind [${fileData.filePath}]: ${result.selectorList.length} Classes`] = result.selectorList;
 		}
-		pacbindCount += result.selectorList.length;
 		return collection;
-	}, {});
-	console.log(PackageStyleSkeleton);
+	}, {} as Record<string, Record<string, t_ClassMeta>>);
 
 
-	const { libraryTable, axiomsArray, clustersArray } = _StackLibraryFiles();
+
+	const PackageErrors: string[] = [];
+	const PackageDiagnostics: t_Diagnostic[] = [];
+
+
+	Object.values(packagesArray).forEach(file => {
+		PackageErrors.push(...file.manifest.errors);
+		PackageDiagnostics.push(...file.manifest.diagnostics);
+	});
+
+	Object.values(pacbindsArray).forEach(file => {
+		PackageErrors.push(...file.manifest.errors);
+		PackageDiagnostics.push(...file.manifest.diagnostics);
+	});
+
+
+	Object.values(CACHE_DYNAMIC.PackageClass_Index).forEach((index) => {
+		const InStash = INDEX.IMPORT(index);
+		if (InStash.metadata.declarations.length > 1) {
+			PackageErrors.push(
+				$.MOLD.warning.List(
+					"Duplicate Package declarations: " + InStash.selector,
+					InStash.declarations,
+					$.list.text.Bullets,
+				),
+			);
+			PackageDiagnostics.push({
+				error: "Duplicate Package declarations: " + InStash.selector,
+				source: InStash.declarations,
+
+			});
+		}
+	});
+
+
+	const nameCollitions = Object.values(CACHE_STORAGE.PACKAGES).reduce((A, F) => {
+		if (CACHE_STATIC.Package.Name === F.packageName) { A.push(F.sourcePath); }
+		return A;
+	}, [] as string[]);
+
+	if (nameCollitions.length) {
+		PackageErrors.push($.MOLD.warning.List(
+			`Package-name collitions: ${CACHE_STATIC.Package.Name}`,
+			nameCollitions,
+			$.list.failed.Bullets
+		));
+		PackageDiagnostics.push({
+			error: `Package-name collitions: ${CACHE_STATIC.Package.Name}`,
+			source: nameCollitions
+		});
+	}
+
+
+
+
+	const axiomChart: Record<string, string[]> = {};
+	const clusterChart: Record<string, string[]> = {};
+	const { LibraryLookupTable, axiomsArray, clustersArray } = _StackLibraryFiles();
+
+
 	const AxiomStyleSkeleton = axiomsArray.reduce((collection: Record<string, Record<string, t_ClassMeta>>, fileData, index) => {
 		const result = PARSE.CSSLIBRARY(fileData, "AXIOM");
 		collection[index] = result.indexMetaCollection;
 		if (result.selectorList.length) {
 			axiomChart[`Level ${index}: ${result.selectorList.length} Classes`] = result.selectorList;
 		}
-		axiomCount += result.selectorList.length;
 		return collection;
 	}, {});
+
 
 	const ClusterStyleSkeleton = clustersArray.reduce((collection: Record<string, Record<string, t_ClassMeta>>, level, index) => {
 		const result = PARSE.CSSLIBRARY(level, "CLUSTER");
 		collection[index] = result.indexMetaCollection;
 		if (result.selectorList.length) { clusterChart[`Level ${index}: ${result.selectorList.length} Classes`] = result.selectorList; }
-		clusterCount += result.selectorList.length;
 		return collection;
 	}, {});
 
-	Object.values(CACHE_DYNAMIC.PackageClass_Index).forEach((index) => {
-		const InStash = INDEX.IMPORT(index);
-		if (InStash.metadata.declarations.length > 1) {
-			warnings.push(
-				$.MOLD.warning.List(
-					"Multiple package declarations: " + InStash.selector,
-					InStash.declarations,
-					$.list.text.Bullets,
-				),
-			);
-		}
-	});
+
+
+	const LibraryErrors: string[] = [];
+	const LibraryDiagnostics: t_Diagnostic[] = [];
+
 
 	Object.values(CACHE_DYNAMIC.LibraryClass_Index).forEach((index) => {
 		const InStash = INDEX.IMPORT(index);
 		if (InStash.declarations.length > 1) {
-			warnings.push(
+			LibraryErrors.push(
 				$.MOLD.warning.List(
-					"Multiple Library declarations: " + InStash.selector,
+					"Duplicate Library declarations: " + InStash.selector,
 					InStash.declarations,
 					$.list.text.Bullets,
 				),
 			);
+			LibraryDiagnostics.push({
+				error: "Duplicate Library declarations: " + InStash.selector,
+				source: InStash.declarations,
+
+			});
 		}
 	});
 
-	report = [
+
+
+
+	const LibraryReport = [
 		$.MOLD.primary.Section(
-			`Axioms: ${axiomCount}`,
+			`Axioms: ${Object.values(ClusterStyleSkeleton).reduce((a, v) => a += Object.keys(v).length, 0)}`,
 			Object.entries(axiomChart).map(([heading, entries]) =>
 				$.MOLD.tertiary.Topic(heading, entries, $.list.text.Entries),
 			),
 		),
 		$.MOLD.primary.Section(
-			`Clusters: ${clusterCount}`,
+			`Clusters: ${Object.values(PacbindStyleSkeleton).reduce((a, v) => a += Object.keys(v).length, 0)}`,
 			Object.entries(clusterChart).map(([heading, entries]) =>
 				$.MOLD.tertiary.Topic(heading, entries, $.list.text.Entries),
 			),
-		),
+		)
+	].join("");
+
+
+	const PackageReport = [
 		$.MOLD.primary.Section(
-			`Pacbinds: ${pacbindCount}`,
+			`Pacbinds: ${Object.values(PackageStyleSkeleton).reduce((a, v) => a += Object.keys(v).length, 0)}`,
 			Object.entries(pacbindChart).map(([heading, entries]) =>
 				$.MOLD.tertiary.Topic(heading, entries, $.list.text.Entries),
 			),
 		),
 		$.MOLD.primary.Section(
-			`Xtylings: ${packageCount}`,
+			`Packages: ${Object.values(PacbindStyleSkeleton).reduce((a, v) => a += Object.keys(v).length, 0)}`,
 			Object.entries(packageChart).map(([heading, entries]) =>
 				$.MOLD.tertiary.Topic(heading, entries, $.list.text.Entries),
 			),
 		),
 	].join("");
 
-	const nameCollitions: string[] | undefined = [];
-	Object.values(CACHE_STORAGE.PACKAGES).forEach((F) => {
-		if (CACHE_STATIC.PROJECT_NAME === F.packageName) { nameCollitions.push(F.sourcePath); }
-	});
-	if (nameCollitions.length) { warnings.push($.MOLD.warning.List(`Package-name collitions: ${CACHE_STATIC.PROJECT_NAME}`, nameCollitions, $.list.failed.Bullets)); }
 
-	return {
-		libraryTable,
-		modulesTable: packageTable,
-		nameCollitions,
-		AxiomStyleSkeleton,
-		ClusterStyleSkeleton,
-		PacbindStyleSkeleton,
-		PackageStyleSkeleton,
-	};
+
+
+
+	CACHE_LIVEDOCS.ShellDoc.library = LibraryReport;
+	CACHE_LIVEDOCS.ShellDoc.package = PackageReport;
+
+	CACHE_LIVEDOCS.Errors.library = LibraryErrors;
+	CACHE_LIVEDOCS.Errors.package = PackageErrors;
+
+	CACHE_LIVEDOCS.Diagnostics.library = LibraryDiagnostics;
+	CACHE_LIVEDOCS.Diagnostics.package = PackageDiagnostics;
+
+	CACHE_LIVEDOCS.Manifest.AXIOM = AxiomStyleSkeleton;
+	CACHE_LIVEDOCS.Manifest.CLUSTER = ClusterStyleSkeleton;
+	CACHE_LIVEDOCS.Manifest.PACKAGE = PackageStyleSkeleton;
+	CACHE_LIVEDOCS.Manifest.PACBIND = PacbindStyleSkeleton;
+
+	CACHE_LIVEDOCS.Lookup.library = LibraryLookupTable;
+	CACHE_LIVEDOCS.Lookup.package = PackageLookupTable;
+
 }
+
+
 
 function ReDeclare() {
 	Object.values(CACHE_DYNAMIC.LibraryClass_Index).forEach((val) => {
@@ -280,6 +317,8 @@ function ReDeclare() {
 		value.metadata.declarations = [...value.declarations];
 	});
 }
+
+
 
 function Appendix(indexes: number[] = []) {
 	const stash: Record<string, { readme: string[], pacbind: number[], package: number[] }> = {};
@@ -304,12 +343,10 @@ function Appendix(indexes: number[] = []) {
 		});
 	}
 
-	return {
-		warnings,
-		report,
-		stash
-	};
+	return stash;
 }
+
+
 
 export default {
 	ReRender,

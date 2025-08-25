@@ -1,7 +1,7 @@
 import path from "path";
 import chokidar from "chokidar";
 import fileman from "../fileman.js";
-import { t_Event, t_ProxyMap } from "../types.js";
+import { t_Event, t_ProxyMap, t_ProxyMapStatic } from "../types.js";
 
 export async function cssImport(filePathArray: string[] = []) {
 	const processedFiles = new Set(
@@ -113,9 +113,18 @@ export async function proxyMapDependency(proxyMap: t_ProxyMap[] = [], xtylesDire
 	return { warnings, notifications };
 }
 
-export async function proxyMapSync(proxyMap: t_ProxyMap[] = []) {
+export async function proxyMapSync(proxyMaps: t_ProxyMap[] = []): Promise<Record<string, t_ProxyMapStatic>> {
+	const ProxyMapStatic = proxyMaps.reduce((acc, map) => {
+		acc[map.target] = {
+			...map,
+			fileContents: {},
+			stylesheetContent: ''
+		} as t_ProxyMapStatic;
+		return acc;
+	}, {} as Record<string, t_ProxyMapStatic>);
+
 	await Promise.all(
-		proxyMap.map(async (map) => {
+		Object.values(ProxyMapStatic).map(async (map) => {
 			map.extensions.xcss = [];
 			const syncResult = await fileman.sync.bulk(
 				map.target,
@@ -126,10 +135,16 @@ export async function proxyMapSync(proxyMap: t_ProxyMap[] = []) {
 			);
 			if (syncResult.status) {
 				map.fileContents = syncResult.fileContents;
-				map.stylesheetContent = (await fileman.read.file(fileman.path.join(map.target, map.stylesheet))).data;
+				map.stylesheetContent = (
+					await fileman.read.file(
+						fileman.path.join(map.target, map.stylesheet)
+					)
+				).data;
 			}
 		}),
 	);
+
+	return ProxyMapStatic;
 }
 
 

@@ -1,7 +1,7 @@
-import {  t_OrganizedResult } from "../types.js";
+import { t_OrganizedResult } from "../types.js";
 import utils from "../Utils/main.js";
 
-export default function previewOrganize(arrarr: number[][], merge = true): t_OrganizedResult {
+export default function previewOrganize(arrarr: number[][], merge = false): t_OrganizedResult {
 
     let maxLen = 0;
 
@@ -25,7 +25,7 @@ export default function previewOrganize(arrarr: number[][], merge = true): t_Org
             if (lenmap_arrarr[maxLen]) {
                 sorted.push(...lenmap_arrarr[maxLen]);
             }
-        } while (--maxLen);
+        } while (maxLen--);
         return sorted;
     })();
 
@@ -43,8 +43,8 @@ export default function previewOrganize(arrarr: number[][], merge = true): t_Org
 
     const onlyParrentArrays = Object.keys(shorted_arrarr).map(i => JSON.parse(i) as number[]);
 
-
-    let counter = 4096;
+    const counter_zero = 768;
+    let counter = counter_zero;
     const indexMap: Record<string, number> = {};
     const referenceMap = Object.entries(shorted_arrarr).reduce((acc, [key, arrarr]) => {
         const templateArray = JSON.parse(key) as number[];
@@ -66,7 +66,7 @@ export default function previewOrganize(arrarr: number[][], merge = true): t_Org
     return {
         referenceMap,
         indexMap,
-        classes: counter - 768,
+        classcount: counter - counter_zero,
         shortlistedArrays: onlyParrentArrays
     };
 }

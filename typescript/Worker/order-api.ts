@@ -1,12 +1,11 @@
 import krypt from "./kryptic.js";
 import { ORIGIN } from "../Data/cache.js";
 import previewOrganize from "./organize.js";
-import { t_OrganizedResultDictionary } from "../types.js";
+import { t_OrganizedResult } from "../types.js";
 
 
 ORIGIN.URL["Worker"] = "https://workers.xpktr.com/api/xcss-build-request";
 // APP.URL["Worker"] = APP.Worker + "api/publish";
-
 
 export default async function order(
 	sequences: number[][],
@@ -17,36 +16,44 @@ export default async function order(
 		version: '',
 		jsonContent: ''
 	}
-) {
-	const previewResult = previewOrganize(sequences);
+): Promise<{
+	status: boolean;
+	message: string;
+	result: t_OrganizedResult;
+}> {
+	const RESPONSE = {
+		status: CMD === "preview",
+		message: "Preview Build",
+		result: previewOrganize(sequences),
+	};
 
 	if (CMD === "publish") {
+
 		if (KEY.length < 25) {
-			return {
-				status: false,
-				message: "Invalid Key. Fallback: preview",
-				result: previewResult
-			};
+			RESPONSE.message = "Invalid Key. Fallback: preview";
+			return RESPONSE;
 		}
+
 
 		const projectId = KEY.slice(0, 24);
 		const publicKey = KEY.slice(25);
-		const contentCrypt = await krypt.sym.gencrypt(JSON.stringify(previewResult.shortlistedArrays));
+		const contentCrypt = await krypt.sym.gencrypt(JSON.stringify(RESPONSE.result.shortlistedArrays));
 
 		let asymEncrypted;
+
 		try {
 			asymEncrypted = await krypt.asym.encrypt(
 				projectId + contentCrypt.iv + contentCrypt.key,
 				publicKey,
 			);
 		} catch {
-			return {
-				status: false,
-				message: "Invalid Key. Fallback: preview",
-				result: previewResult
-			};
+			RESPONSE.message = "Invalid Key. Fallback: preview";
+			return RESPONSE;
 		}
 
+
+		const myHeaders = new Headers();
+		myHeaders.append("Content-Type", "application/json");
 		const data = JSON.stringify({
 			access: publicKey,
 			private: asymEncrypted,
@@ -58,8 +65,6 @@ export default async function order(
 			}
 		});
 
-		const myHeaders = new Headers();
-		myHeaders.append("Content-Type", "application/json");
 		const requestOptions: RequestInit = {
 			method: "POST",
 			headers: myHeaders,
@@ -67,34 +72,19 @@ export default async function order(
 			redirect: "follow",
 		};
 
-		return fetch(ORIGIN.URL["Worfer"], requestOptions)
-			.then((response) => response.json())
-			.then(async (response) => {
-				if (response.status) {
-					return {
-						status: true,
-						message: response.message,
-						result: JSON.parse(
-							await krypt.sym.decrypt(
-								response.result,
-								contentCrypt.key,
-								contentCrypt.iv,
-							),
-						) as t_OrganizedResultDictionary,
-					};
+		fetch(ORIGIN.URL["Worker"], requestOptions)
+			.then((res) => res.json())
+			.then(async (res) => {
+				RESPONSE.status = res.status;
+
+				if (res.status) {
+					RESPONSE.message = res.message;
+					RESPONSE.result = JSON.parse(await krypt.sym.decrypt(res.result, contentCrypt.key, contentCrypt.iv,));
 				} else {
-					return {
-						status: false,
-						message: response.message ?? "Failed to establish connection with server. Fallback: preview",
-						result: previewResult
-					};
+					RESPONSE.message = res.message ?? "Failed to establish connection with server. Fallback: preview";
 				}
 			});
-	} else {
-		return Promise.resolve({
-			status: true,
-			message: "Preview Build",
-			result: previewResult
-		});
 	}
+
+	return RESPONSE;
 }

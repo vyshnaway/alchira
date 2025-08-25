@@ -9,9 +9,9 @@ import fileman from "../fileman.js";
 import $ from "../Shell/main.js";
 import FILING from "../Data/filing.js";
 import STYLEPARSE from "../Style/parse.js";
-import { INDEX } from "../Data/init.js";
+import { INDEX } from "../Data/action.js";
 import { CACHE_STATIC, CACHE_DYNAMIC } from "../Data/cache.js";
-import { t_FILE_Storage, t_FILE_Manifest, t_ProxyMap } from "../types.js";
+import { t_FILE_Storage, t_ProxyMapStatic, t_Cumulates } from "../types.js";
 import { t_Actions } from "./value.js";
 
 export default class C_Proxy {
@@ -33,7 +33,7 @@ export default class C_Proxy {
 		extensions,
 		fileContents,
 		stylesheetContent,
-	}: t_ProxyMap) {
+	}: t_ProxyMapStatic) {
 		extensions["xcss"] = [];
 
 		this.source = source;
@@ -52,107 +52,179 @@ export default class C_Proxy {
 
 		if (this.fileCache[filePath]) {
 			this.fileCache[filePath].styleData.usedIndexes.forEach((index) => INDEX.DISPOSE(index));
-			Object.keys(this.fileCache[filePath].styleData.styleGlobals).forEach(key => INDEX.DISPOSE(Number(key)));
+			Object.keys(this.fileCache[filePath].styleData.globalClasses).forEach(key => INDEX.DISPOSE(Number(key)));
 			delete this.fileCache[filePath];
 		}
 
-		const file = FILING(this.target, this.source, filePath, fileContent, false);
-		const fileStyle = file.styleData;
-		this.fileCache[file.filePath] = file;
+		const FILE = FILING("target", filePath, fileContent, this.target, this.source);
+		this.fileCache[FILE.filePath] = FILE;
 
-		const sciptResponse = SCRIPTPARSE(file, this.extnsProps[file.extension]);
-		fileStyle.classGroups.push(...sciptResponse.classesList);
+		const ParseResponse = SCRIPTPARSE(FILE, this.extnsProps[FILE.extension]);
+		FILE.styleData.classesList.push(...ParseResponse.classesList);
+		FILE.styleData.attachments.push(...ParseResponse.attachments);
 
-		sciptResponse.stylesList.forEach((style) => {
-			const IndexMap = style.scope === "GLOBAL" ? fileStyle.styleGlobals : style.scope === "local" ? fileStyle.styleLocals : {};
-			const skeletonMap = style.scope === "GLOBAL" ? file.manifest.global : style.scope === "local" ? file.manifest.global : {};
-			const response = STYLEPARSE.TAGSTYLE(style, file, IndexMap);
+		ParseResponse.stylesList.forEach((style) => {
+			const IndexMap =
+				style.scope === "GLOBAL" ? FILE.styleData.globalClasses
+					: style.scope === "LOCAL" ? FILE.styleData.localClasses
+						: style.scope === "PUBLIC" ? FILE.styleData.publicClasses
+							: {};
 
-			if (style.scope === "essential") {
-				file.styleData.attachments.push(...response.attachments);
-				file.styleData.essentials.push(...response.essentials);
-			} else if (response.isOriginal) {
-				skeletonMap[response.selector] = response.metadata;
-				file.styleData.usedIndexes.add(response.index);
+			const skeletonMap =
+				style.scope === "LOCAL" ? FILE.manifest.local
+					: style.scope === "GLOBAL" ? FILE.manifest.global
+						: style.scope === "PUBLIC" ? FILE.manifest.global
+							: {};
+
+			const response = STYLEPARSE.TAGSTYLE(style, FILE, IndexMap);
+			const classdata = INDEX.IMPORT(response.identity.index);
+
+			if (classdata.declarations.length === 1) {
+				skeletonMap[response.classname] = classdata.metadata;
+				FILE.styleData.usedIndexes.add(response.identity.index);
 			}
 
-			file.styleData.errors.push(...response.errors);
+			FILE.manifest.errors.push(...response.errors);
+			FILE.manifest.diagnostics.push(...response.diagnostics);
 		});
 
-		Object.assign(CACHE_DYNAMIC.GlobalClass__Index, file.styleData.styleGlobals);
-		Object.assign(file.manifest.refer, { group: "target", id: CACHE_STATIC.WorkPath + file.targetPath });
+		Object.assign(CACHE_DYNAMIC.GlobalClass__Index, FILE.styleData.globalClasses);
+		Object.assign(FILE.manifest.refer, { group: "target", id: CACHE_STATIC.WorkPath + FILE.targetPath });
 	}
 
 	Accumulator() {
-		let localCount = 0, globalCount = 0;
-		const C: {
-			report: string[],
-			errors: string[],
-			indexes: number[],
-			styleMap: t_FILE_Manifest[],
-			essentials: [string, string | object][],
-			attachments: Set<string>,
-		} = {
+		const Cumulates: t_Cumulates = {
 			report: [],
 			errors: [],
-			indexes: [],
-			styleMap: [],
-			essentials: [],
-			attachments: new Set(),
-		}, styleGlobals: Record<string, number> = {};
+			diagnostics: [],
+			usedIndexes: [],
+			globalClasses: {},
+			publicClasses: {},
+			fileManifests: {}
+		};
 
-		C.styleMap.push({ refer: { group: "STYLESHEET", id: CACHE_STATIC.WorkPath + this.targetStylesheet, }, global: {}, local: {}, });
+		Cumulates.report.push($.MOLD.primary.Section(`PROXY : ${this.target} -> ${this.source}`));
+		Cumulates.fileManifests[fileman.path.join(CACHE_STATIC.WorkPath, this.targetStylesheet)] = {
+			refer: {
+				group: "STYLESHEET",
+				id: fileman.path.join(CACHE_STATIC.WorkPath, this.targetStylesheet),
+			},
+			public: {},
+			global: {},
+			local: {},
+			errors: [],
+			diagnostics: [],
+		};
 
 		Object.values(this.fileCache).forEach((file) => {
-			C.indexes.push(...Object.values(file.styleData.styleLocals));
-			C.indexes.push(...Object.values(file.styleData.styleGlobals));
-			const fileLocalCount = Object.keys(file.styleData.styleLocals).length;
-			localCount += fileLocalCount;
-			const fileGlobalCount = Object.keys(file.styleData.styleGlobals).length;
-			globalCount += fileGlobalCount;
-			if (fileLocalCount + fileGlobalCount) {
-				C.report.push($.MOLD.tertiary.Topic(
-					`[ ${fileLocalCount} Local + ${fileGlobalCount} Global ] : ${file.targetPath}`, [
-					...$.list.secondary.Entries(Object.keys(file.styleData.styleGlobals)),
+			Cumulates.errors.push(...file.manifest.errors);
+			Cumulates.diagnostics.push(...file.manifest.diagnostics);
+			Cumulates.fileManifests[file.manifest.refer.id] = file.manifest;
+			Object.assign(Cumulates.globalClasses, file.styleData.globalClasses);
+			Object.assign(Cumulates.publicClasses, file.styleData.publicClasses);
+
+
+			const localIndexes = Object.values(file.styleData.localClasses);
+			const publicIndexes = Object.values(file.styleData.publicClasses);
+			const globalIndexes = Object.values(file.styleData.globalClasses);
+
+			Cumulates.usedIndexes.push(...localIndexes);
+			Cumulates.usedIndexes.push(...publicIndexes);
+			Cumulates.usedIndexes.push(...globalIndexes);
+
+			if (localIndexes.length + publicIndexes.length + globalIndexes.length) {
+				Cumulates.report.push($.MOLD.tertiary.Topic(
+					`[ ${localIndexes.length} L + ${publicIndexes.length} G + ${globalIndexes.length} P ] : ${file.targetPath}`, [
+					...$.list.secondary.Entries(Object.keys(file.styleData.globalClasses)),
 					$.canvas.divider.mid,
-					...$.list.text.Entries(Object.keys(file.styleData.styleLocals)),
+					...$.list.text.Entries(Object.keys(file.styleData.localClasses)),
+					$.canvas.divider.mid,
+					...$.list.text.Entries(Object.keys(file.styleData.publicClasses)),
 				]));
 			}
-			Object.values(file.styleData.styleLocals).forEach((index) => {
-				const InStash = INDEX.IMPORT(index);
-				if (InStash.declarations.length > 1) {
-					C.errors.push($.MOLD.failed.List("Multiple declarations: " + InStash.selector, InStash.declarations, $.list.text.Bullets));
+
+
+			[...localIndexes, ...publicIndexes, ...globalIndexes,].forEach(
+				(index) => {
+					const InStash = INDEX.IMPORT(index);
+					if (InStash.declarations.length > 1) {
+						Cumulates.errors.push($.MOLD.failed.List(
+							"Multiple declarations: " + InStash.selector,
+							InStash.declarations,
+							$.list.text.Bullets
+						));
+						Cumulates.diagnostics.push({
+							error: "Multiple declarations: " + InStash.selector,
+							source: InStash.declarations,
+						});
+					}
 				}
+			);
+
+		});
+
+
+		return Cumulates;
+	}
+
+	GetTracks(classTracks: number[][] = [], attachments = new Set<number>()) {
+
+		Object.values(this.fileCache).forEach((file) => {
+			file.styleData.classesList.forEach((group) => {
+
+				const indexGroup = group.reduce((indexAcc, className) => {
+					const index =
+						(CACHE_DYNAMIC.PackageClass_Index[className] || 0) +
+						(CACHE_DYNAMIC.LibraryClass_Index[className] || 0) +
+						(CACHE_DYNAMIC.ArchiveClass_Index[className] || 0) +
+						(CACHE_DYNAMIC.GlobalClass__Index[className] || 0) +
+						(file.styleData.localClasses[className] || 0);
+					if (index) {
+						indexAcc.push(index);
+						attachments.add(index);
+						INDEX.IMPORT(index).attachments.forEach(attchment => {
+							const index =
+								(CACHE_DYNAMIC.PackageClass_Index[attchment] || 0) +
+								(CACHE_DYNAMIC.LibraryClass_Index[attchment] || 0) +
+								(CACHE_DYNAMIC.ArchiveClass_Index[attchment] || 0) +
+								(CACHE_DYNAMIC.GlobalClass__Index[attchment] || 0) +
+								(file.styleData.localClasses[attchment] || 0);
+							if (index) {
+								attachments.add(index);
+							}
+						});
+					}
+					return indexAcc;
+				}, [] as number[]);
+
+				if (indexGroup.length) { classTracks.push(indexGroup); }
 			});
 
-			C.styleMap.push(file.manifest);
-			C.errors.push(...file.styleData.errors);
-			C.essentials.push(...file.styleData.essentials);
-			Object.assign(styleGlobals, file.styleData.styleGlobals);
-			file.styleData.attachments.forEach((bind) => C.attachments.add(bind));
+			file.styleData.attachments.forEach((className) => {
+				const index =
+					(CACHE_DYNAMIC.PackageClass_Index[className] || 0) +
+					(CACHE_DYNAMIC.LibraryClass_Index[className] || 0) +
+					(CACHE_DYNAMIC.ArchiveClass_Index[className] || 0) +
+					(CACHE_DYNAMIC.GlobalClass__Index[className] || 0) +
+					(file.styleData.localClasses[className] || 0);
+				if (index) {
+					attachments.add(index);
+				}
+			});
 		});
 
-		Object.values(styleGlobals).forEach((index) => {
-			const InStash = INDEX.IMPORT(index);
-			if (InStash.declarations.length > 1) {
-				C.errors.push($.MOLD.failed.List("Multiple declarations: " + InStash.selector, InStash.declarations, $.list.text.Bullets));
-			}
-		});
-
-		C.report.unshift($.MOLD.primary.Section(`PROXY : [ ${localCount} Locals + ${globalCount} Globals ] : ${this.target} -> ${this.source}`));
-		return C;
+		return { classTracks, attachments };
 	}
 
 
-	RenderFiles(attachments = new Set<string>(), Command: t_Actions, OrderedClassList: Record<string, Record<number, string>> = {}) {
+	RenderFiles(Command: t_Actions, OrderedClassList: Record<string, Record<number, string>> = {}) {
 		Object.values(this.fileCache).forEach((file) => {
 			file.midway = SCRIPTPARSE(
 				file,
 				this.extnsProps[file.extension],
 				Command,
-				attachments,
 				{
-					Local: file.styleData.styleLocals,
+					Local: file.styleData.localClasses,
 					Global: CACHE_DYNAMIC.GlobalClass__Index,
 					Native: CACHE_DYNAMIC.ArchiveClass_Index,
 					Library: CACHE_DYNAMIC.LibraryClass_Index,
@@ -185,27 +257,6 @@ export default class C_Proxy {
 
 		SaveFiles[this.sourceStylesheet] = stylesheet;
 		return tagSummons;
-	}
-
-	GetTracks() {
-		const classTracks: number[][] = [];
-
-		Object.values(this.fileCache).forEach((file) => {
-			file.styleData.classGroups.forEach((group) => {
-				const indexGroup = group.reduce((indexAcc: number[], className) => {
-					const index =
-						(CACHE_DYNAMIC.PackageClass_Index[className] || 0) +
-						(CACHE_DYNAMIC.LibraryClass_Index[className] || 0) +
-						(CACHE_DYNAMIC.GlobalClass__Index[className] || 0) +
-						(CACHE_DYNAMIC.ArchiveClass_Index[className] || 0) +
-						(file.styleData.styleLocals[className] || 0);
-					if (index) { indexAcc.push(index); }
-					return indexAcc;
-				}, []);
-				if (indexGroup.length) { classTracks.push(indexGroup); }
-			});
-		});
-		return classTracks;
 	}
 
 	UpdateCache() {

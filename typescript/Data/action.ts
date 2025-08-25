@@ -1,7 +1,22 @@
-import fileman from "../fileman.js";
-import { t_Data_TWEAKS, T_PackageEssential, t_ClassData } from "../types.js";
 import Use from "../Utils/main.js";
-import { ORIGIN, CACHE_STATIC, NAVIGATE, DOCUMENTS, CACHE_DYNAMIC, CACHE_STORAGE, CACHE_REPORT, PREFIXES, TWEAKS } from "./cache.js";
+import fileman from "../fileman.js";
+
+import {
+    t_Data_TWEAKS,
+    T_PackageEssential,
+    t_ClassData
+} from "../types.js";
+import {
+    ORIGIN,
+    CACHE_STATIC,
+    NAVIGATE,
+    DOCUMENTS,
+    CACHE_DYNAMIC,
+    CACHE_STORAGE,
+    CACHE_LIVEDOCS,
+    PREFIXES,
+    TWEAKS
+} from "./cache.js";
 
 function collectTypeStringKeys(object: object) {
     return Object.entries(object).reduce((A, [K, V]) => {
@@ -31,9 +46,9 @@ export function SetENV(rootPath: string, workPath: string, packageEssential: T_P
     CACHE_STATIC.RootPath = rootPath;
     CACHE_STATIC.WorkPath = workPath;
 
-    ORIGIN.name = packageEssential.name;
-    ORIGIN.version = packageEssential.version;
-    ORIGIN.website = packageEssential.website;
+    ORIGIN.name = packageEssential.name || ORIGIN.name;
+    ORIGIN.version = packageEssential.version || ORIGIN.version;
+    ORIGIN.website = packageEssential.website || ORIGIN.website;
     ORIGIN.bins = packageEssential.bins;
 
     Object.entries(NAVIGATE).forEach(([groupName, groupPaths]) => {
@@ -62,7 +77,7 @@ export function MemoryUsage() {
         "Files": Use.string.stringMem(JSON.stringify(CACHE_STATIC)),
         "Cache": Use.string.stringMem(JSON.stringify(CACHE_DYNAMIC)),
         "Stack": Use.string.stringMem(JSON.stringify(CACHE_STORAGE)),
-        "Report": Use.string.stringMem(JSON.stringify(CACHE_REPORT)),
+        "Report": Use.string.stringMem(JSON.stringify(CACHE_LIVEDOCS)),
         "Proxy": Object.values(CACHE_STORAGE.PROJECT).reduce((t: number, c) => {
             t += Use.string.stringMem(JSON.stringify(c));
             return t;

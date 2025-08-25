@@ -3,7 +3,7 @@ import {
     t_Data_PREFIX,
     t_Data_Source,
     t_Data_TWEAKS,
-    t_CACHE_REPORT,
+    t_CACHE_LIVEDOCS,
     t_CACHE_STATIC,
     t_CACHE_DYNAMIC,
     t_CACHE_STORAGE,
@@ -12,9 +12,9 @@ import {
 const domain = "xcss.io";
 
 export const ORIGIN: t_Data_ORIGIN = {
-    name: "",
-    version: "",
-    website: "",
+    name: "xcss-engine",
+    version: "0.0.0",
+    website: domain,
     bins: [],
     vendors: [],
     URL: {
@@ -50,6 +50,10 @@ export const ORIGIN: t_Data_ORIGIN = {
         style: "xtyle",
         staple: "xtaple",
         stencil: "xtencil",
+    },
+    customOps: {
+        attach: "+",
+        assmeble: "*",
     }
 };
 
@@ -228,61 +232,75 @@ export const TWEAKS: t_Data_TWEAKS = {
 
 // --- CACHE DECLARE ---
 
-export const CACHE_REPORT: t_CACHE_REPORT = {
+export const CACHE_LIVEDOCS: t_CACHE_LIVEDOCS = {
     DeltaPath: "",
     DeltaContent: "",
     FinalMessage: "",
     FinalError: "",
     ErrorCount: 0,
     WarningCount: 0,
-    Content: {
+    ShellDoc: {
         library: "",
-        variables: "",
+        package: "",
+        project: "",
+        constants: "",
         hashrule: "",
-        targets: "",
         errors: "",
         memChart: "",
         footer: "",
     },
-    MANIFEST: {
+    Lookup: {
+        library: {},
+        package: {},
+        project: {},
+    },
+    Errors: {
+        library: [],
+        package: [],
+        project: []
+    },
+    Diagnostics: {
+        library: [],
+        project: [],
+        package: []
+    },
+    Manifest: {
         prefix: "",
         elements: Object.values(ORIGIN.customTag),
         constants: [],
         hashrules: {},
         file: {},
-        axiom: {},
-        cluster: {},
-        local: {},
-        global: {},
-        xtyling: {},
-        binding: {},
+        AXIOM: {},
+        CLUSTER: {},
+        LOCAL: {},
+        GLOBAL: {},
+        PACKAGE: {},
+        PACBIND: {},
         errors: []
     },
-    LibFilesTemp: {},
 };
 
 
 export const CACHE_STATIC: t_CACHE_STATIC = {
     WATCH: false,
-    PROJECT_NAME: "",
-    PROJECT_VERSION: "",
-    FALLBACK_NAME: "",
-    FALLBACK_VERSION: "",
-    COMMAND: "",
-    ARGUMENT: "",
+    DEBUG: false,
+    Project_Name: "",
+    Project_Version: "",
+    Command: "",
+    Argument: "",
     CSSIndex: "",
     RootPath: "",
     WorkPath: "",
-    PROXYMAP: [],
-    HASHRULE: {},
-    LIBRARIES: {},
-    PROXYFILES: {},
-    PACKAGES: {},
-    ARCHIVE: {
-        name: '',
-        version: '',
-        readme: '',
+    ProxyMap: [],
+    HashRule: {},
+    Package: {
+        Name: '',
+        Version: '',
+        Readme: '',
     },
+    Library_Saved: {},
+    Targets_Saved: {},
+    Package_Saved: {},
 };
 
 export const CACHE_DYNAMIC: t_CACHE_DYNAMIC = {
@@ -293,7 +311,8 @@ export const CACHE_DYNAMIC: t_CACHE_DYNAMIC = {
     PublicClass__Index: {},
     LibraryClass_Index: {},
     PackageClass_Index: {},
-    Computed_ClassIndex: {}
+    Final_ClassIndexMap: {},
+    Computed_ClassDictionary: {}
 };
 
 export const CACHE_STORAGE: t_CACHE_STORAGE = {

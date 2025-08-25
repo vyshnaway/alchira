@@ -30,27 +30,27 @@ function resolveGroup(
 }
 
 export default function FILING(
+	fileGroup: "index" | "library" | "package" | "target",
 	filePath: string,
 	content: string,
-	target: string,
-	source: string,
-	fileGroup: "index" | "library" | "package" | "target"
+	target = '',
+	source = '',
 ) {
 	const isLibrary = fileGroup === "library";
 	const isPackage = fileGroup === "package";
 	const fromXtylesFolder = fileGroup !== "target";
 
-	const targetPath = target.length ? Fileman.path.join(target, filePath) : filePath;
-	const sourcePath = source.length ? Fileman.path.join(source, filePath) : filePath;
+	const targetPath = target.length ? Fileman.path.join(target, filePath) : '';
+	const sourcePath = source.length ? Fileman.path.join(source, filePath) : '';
 
-	const [extension, packageName, id, cluster]: string[] = Fileman.path.basename(targetPath).split(".").reverse();
+	const [extension, packageName, id, cluster]: string[] = Fileman.path.basename(filePath).split(".").reverse();
 	const num = Number(id);
 	const idn = isNaN(num) || num < 0 ? 0 : Math.floor(num);
-	const normalFileName = isPackage ? Use.string.normalize(packageName) : CACHE_STATIC.PROJECT_NAME;
+	const normalFileName = isPackage ? Use.string.normalize(packageName) : CACHE_STATIC.Package.Name;
 
 	const group: t_FILE_Group = resolveGroup(extension, Boolean(cluster), isPackage, isLibrary);
 
-	const xcssclassFront =
+	const classFront =
 		(
 			isPackage ? `/${normalFileName}${group === "PACBIND" ? "/$/" : "/"}` : ""
 		) + (
@@ -65,25 +65,27 @@ export default function FILING(
 		sourcePath,
 		targetPath,
 		packageName,
-		xcssclassFront,
-		metaclassFront: `${(fromXtylesFolder) ? group : ""}\\|${Use.string.normalize(targetPath, [], [], ["/", "."])}`,
+		classFront,
+		debugclassFront: `${(fromXtylesFolder) ? group : ""}\\|${Use.string.normalize(filePath, [], [], ["/", "."])}`,
 		manifest: {
 			refer: {
-				id: (isLibrary) ? String(idn) : filePath,
+				id: isLibrary ? String(idn) : isPackage ? filePath : targetPath,
 				group,
 			},
+			local: {},
 			global: {},
-			local: {}
+			public: {},
+			errors: [],
+			diagnostics: [],
 		},
 		styleData: {
 			usedIndexes: new Set(),
-			styleGlobals: {},
-			styleLocals: {},
+			globalClasses: {},
+			localClasses: {},
+			publicClasses: {},
 			styleMap: {},
-			classGroups: [],
+			classesList: [],
 			attachments: [],
-			diagnostics: [],
-			errors: [],
 			hasMainTag: false,
 			hasStyleTag: false,
 			hasAttachTag: false,
