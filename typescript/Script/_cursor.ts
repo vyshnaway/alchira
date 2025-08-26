@@ -8,7 +8,7 @@ function Initialize(content: string): t_FileScanBuffer {
             marker: 0,
             rowMarker: 0,
             colMarker: 0,
-            tagCount: 0,
+            cycle: 0,
             colFallback: 0,
         },
         fallback: {
@@ -16,7 +16,7 @@ function Initialize(content: string): t_FileScanBuffer {
             marker: 0,
             rowMarker: 0,
             colMarker: 0,
-            tagCount: 0,
+            cycle: 0,
             colFallback: 0,
         },
     };

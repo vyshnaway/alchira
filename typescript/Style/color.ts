@@ -173,5 +173,5 @@ export default function parser(
         console.error('Error scanning content:', errorMessage);
     }
 
-    return score ? [result, source] : [result, source];
+    return score ? [result, source] : [source];
 }

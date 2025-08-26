@@ -1,11 +1,11 @@
-import { ORIGIN } from "../Data/cache.js";
+import { ROOT } from "../Data/cache.js";
 import * as LOADPREFIX from "./prefix.js";
 
 type t_styleSorceTemplate = Record<string, string | object>;
 
 function LoadVendors(collection = {}, vendor = "") {
 	return vendor == ""
-		? ORIGIN.vendors.filter(
+		? ROOT.vendors.filter(
 			(ven) => !Object.prototype.hasOwnProperty.call(collection, ven),
 		)
 		: [vendor];

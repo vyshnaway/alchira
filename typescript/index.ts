@@ -3,19 +3,19 @@
 import fileman from "./fileman.js";
 import commander from "./command.js";
 import { T_PackageEssential } from "./types.js";
-import { ORIGIN } from "./Data/cache.js";
+import { ROOT } from "./Data/cache.js";
 
 const fallback_project_name = "-";
 const fallback_project_version = "0.0.0";
 const fallback_origin_name = "xcss";
 const fallback_origin_version = "0.0.0";
-const fallback_origin_website = ORIGIN.URL.Site;
+const fallback_origin_website = ROOT.URL.Site;
 
 
 
 async function main() {
-    const command = ORIGIN.exposedCommands.includes(process.argv[2]) ? process.argv[2] : "";
-    const argument = ORIGIN.exposedCommands.includes(process.argv[3]) ? process.argv[2] : "";
+    const command = ROOT.exposedCommands.includes(process.argv[2]) ? process.argv[2] : "";
+    const argument = ROOT.exposedCommands.includes(process.argv[3]) ? process.argv[2] : "";
 
     const workPath = fileman.path.resolves(".");
     const rootPath = fileman.path.fromOrigin(".");
@@ -49,11 +49,11 @@ async function main() {
 
     if (projectPackageJson.status
         && (typeof projectPackageJson.data.scripts === "object")
-        && (ORIGIN.exposedCommands as string[]).includes(command)
+        && (ROOT.exposedCommands as string[]).includes(command)
     ) {
         let addedCommands = 0;
         const scripts = projectPackageJson.data.scripts as Record<string, string>;
-        for (const cmd of ORIGIN.exposedCommands) {
+        for (const cmd of ROOT.exposedCommands) {
             if (originPackageEssential.scripts[cmd] && !scripts[cmd]) {
                 addedCommands++;
                 scripts[`${originPackageEssential.bins[0]}:${cmd}`] = originPackageEssential.scripts[cmd];

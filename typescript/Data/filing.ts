@@ -35,6 +35,7 @@ export default function FILING(
 	content: string,
 	target = '',
 	source = '',
+	label = '',
 ) {
 	const isLibrary = fileGroup === "library";
 	const isPackage = fileGroup === "package";
@@ -60,6 +61,7 @@ export default function FILING(
 		);
 
 	const result: t_FILE_Storage = {
+		label,
 		filePath,
 		extension,
 		sourcePath,
@@ -88,8 +90,7 @@ export default function FILING(
 			attachments: [],
 			hasMainTag: false,
 			hasStyleTag: false,
-			hasAttachTag: false,
-			hasStencilTag: false,
+			hasStapleTag: false,
 		},
 		content: (fromXtylesFolder && extension === "css") ? Use.code.uncomment.Css(content) : content,
 		midway: "",

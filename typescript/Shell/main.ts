@@ -4,31 +4,17 @@ import list from "./2.list.js";
 import write from "./3.write.js";
 
 import play from "./frames/index.js";
-import render from "./4.post.js";
+import render from "./_.render.js";
 
-function init(
-  taskActive = true,
-  postActive = true,
-  tabWidth = 2,
-) {
-  const width = canvas.width();
-
-  canvas.tab = canvas.tab[0].repeat(tabWidth);
-  canvas.config.taskActive = taskActive;
-  canvas.config.postActive = postActive;
-  canvas.divider.low = canvas.divider.low[0].repeat(width);
-  canvas.divider.mid = canvas.divider.mid[0].repeat(width);
-  canvas.divider.top = canvas.divider.top[0].repeat(width);
-}
 
 const task = (string: string, rowshift = -1) => {
   if (canvas.config.taskActive && canvas.config.postActive) {
     render.write(
       [
         rowshift >= 0 ? tag.Br(rowshift) : "",
-        tag.Div(format(">>>", style.TS_Bold, ...canvas.config.primary)),
+        tag.Div(format(">>>", style.AS_Bold, ...canvas.config.primary)),
         canvas.tab,
-        tag.Div(format(string + ".", style.TS_Bold, style.TS_Italic, ...canvas.config.tertiary)),
+        tag.Div(format(string + ".", style.AS_Bold, style.AS_Italic, ...canvas.config.tertiary)),
         tag.Br(1),
       ].join(""),
       rowshift < 0 ? -rowshift : rowshift,
@@ -41,18 +27,13 @@ const step = (string: string, rowshift = -1) => {
     render.write(
       [
         rowshift >= 0 ? tag.Br(rowshift) : "",
-        tag.Div(format(">>>", style.TS_Rare, ...canvas.config.primary)),
+        tag.Div(format(">>>", style.AS_Rare, ...canvas.config.primary)),
         canvas.tab,
-        tag.Div(format(string + " ...", style.TS_Italic, ...canvas.config.tertiary)),
+        tag.Div(format(string + " ...", style.AS_Italic, ...canvas.config.tertiary)),
       ].join(""),
       rowshift < 0 ? -rowshift : rowshift,
     );
   }
-};
-
-
-const post = (string?: string, ...styles: string[]) => {
-  render.write(format(string, ...styles));
 };
 
 export default {

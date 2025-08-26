@@ -37,55 +37,55 @@ export const blockColor: Record<string, t_blockColor> = {
 	std: (blockType, heading, contents) =>
 		format(
 			blockType(heading, contents.map((content) => content)),
-			style.TS_Bold,
+			style.AS_Bold,
 			...canvas.config.primary
 		),
 	title: (blockType, heading, contents) =>
 		format(
 			blockType(heading, contents.map((content) => format(content, ...canvas.config.title))),
-			style.TS_Bold,
+			style.AS_Bold,
 			...canvas.config.title
 		),
 	text: (blockType, heading, contents) =>
 		format(
 			blockType(heading, contents.map((content) => format(content, ...canvas.config.text))),
-			style.TS_Bold,
+			style.AS_Bold,
 			...canvas.config.text
 		),
 	primary: (blockType, heading, contents) =>
 		format(
 			blockType(heading, contents.map((content) => format(content, ...canvas.config.primary))),
-			style.TS_Bold,
+			style.AS_Bold,
 			...canvas.config.primary
 		),
 	secondary: (blockType, heading, contents) =>
 		format(
 			blockType(heading, contents.map((content) => format(content, ...canvas.config.secondary))),
-			style.TS_Bold,
+			style.AS_Bold,
 			...canvas.config.secondary
 		),
 	tertiary: (blockType, heading, contents) =>
 		format(
 			blockType(heading, contents.map((content) => format(content, ...canvas.config.tertiary))),
-			style.TS_Bold,
+			style.AS_Bold,
 			...canvas.config.tertiary
 		),
 	success: (blockType, heading, contents) =>
 		format(
 			blockType(heading, contents.map((content) => format(content, ...canvas.config.success))),
-			style.TS_Bold,
+			style.AS_Bold,
 			...canvas.config.success
 		),
 	failed: (blockType, heading, contents) =>
 		format(
 			blockType(heading, contents.map((content) => format(content, ...canvas.config.failed))),
-			style.TS_Bold,
+			style.AS_Bold,
 			...canvas.config.failed
 		),
 	warning: (blockType, heading, contents) =>
 		format(
 			blockType(heading, contents.map((content) => format(content, ...canvas.config.warning))),
-			style.TS_Bold,
+			style.AS_Bold,
 			...canvas.config.warning
 		),
 };
@@ -119,10 +119,10 @@ const createBlockGroupExport = (
 	blockColorKey: keyof typeof blockColor
 ) => {
 	return {
-		Text: (string: string, intent = 0): string => 
-			canvas.tab.repeat(intent)+ contentColorMapper(string, blockColorKey),
-		Item: (string: string, intent = 0): string => 
-			canvas.tab.repeat(intent)+ tag.Li(contentColorMapper(string, blockColorKey)),
+		Text: (string: string, intent = 0): string =>
+			canvas.tab.repeat(intent) + contentColorMapper(string, blockColorKey),
+		Item: (string: string, intent = 0): string =>
+			canvas.tab.repeat(intent) + tag.Li(contentColorMapper(string, blockColorKey)),
 		Block: (contents: string[] = [], selectListType: t_SelectListTypeFn = list.std.Blocks, intent = 0): string =>
 			canvas.tab.repeat(intent) + selectListType(contents, intent).join("\n") + "\n",
 		Chapter: (heading: string, contents: string[] = [], selectListType: t_SelectListTypeFn = list.std.Blocks, intent = 0) =>

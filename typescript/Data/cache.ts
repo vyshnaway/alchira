@@ -1,5 +1,5 @@
 import {
-    t_Data_ORIGIN,
+    t_Data_ROOT,
     t_Data_PREFIX,
     t_Data_Source,
     t_Data_TWEAKS,
@@ -11,7 +11,7 @@ import {
 
 const domain = "xcss.io";
 
-export const ORIGIN: t_Data_ORIGIN = {
+export const ROOT: t_Data_ROOT = {
     name: "xcss-engine",
     version: "0.0.0",
     website: domain,
@@ -46,14 +46,18 @@ export const ORIGIN: t_Data_ORIGIN = {
         Shorthands: true,
         IntelGroup: "browser"
     },
-    customTag: {
+    customElements: {
         style: "xtyle",
         staple: "xtaple",
         stencil: "xtencil",
     },
-    customOps: {
-        attach: "+",
-        assmeble: "*",
+    customOperations: {
+        attach: "~",
+        assemble: "=",
+    },
+    customAtrules: {
+        attach: "@--attach",
+        assemble: "@--assemble",
     }
 };
 
@@ -226,7 +230,7 @@ export const PREFIXES: t_Data_PREFIX = {
 };
 
 export const TWEAKS: t_Data_TWEAKS = {
-    ...ORIGIN.defaultTweaks
+    ...ROOT.defaultTweaks
 };
 
 
@@ -236,10 +240,9 @@ export const CACHE_LIVEDOCS: t_CACHE_LIVEDOCS = {
     DeltaPath: "",
     DeltaContent: "",
     FinalMessage: "",
-    FinalError: "",
+    PublishError: "",
     ErrorCount: 0,
-    WarningCount: 0,
-    ShellDoc: {
+    Report: {
         library: "",
         package: "",
         project: "",
@@ -266,7 +269,7 @@ export const CACHE_LIVEDOCS: t_CACHE_LIVEDOCS = {
     },
     Manifest: {
         prefix: "",
-        elements: Object.values(ORIGIN.customTag),
+        elements: Object.values(ROOT.customElements),
         constants: [],
         hashrules: {},
         file: {},
@@ -288,7 +291,7 @@ export const CACHE_STATIC: t_CACHE_STATIC = {
     Project_Version: "",
     Command: "",
     Argument: "",
-    CSSIndex: "",
+    RootCSS: "",
     RootPath: "",
     WorkPath: "",
     ProxyMap: [],
@@ -299,24 +302,25 @@ export const CACHE_STATIC: t_CACHE_STATIC = {
         Readme: '',
     },
     Library_Saved: {},
-    Targets_Saved: {},
+    TargeAS_Saved: {},
     Package_Saved: {},
 };
 
 export const CACHE_DYNAMIC: t_CACHE_DYNAMIC = {
     HashRule: {},
     Index_ClassData: {},
-    ArchiveClass_Index: {},
     GlobalClass__Index: {},
     PublicClass__Index: {},
+    ArchiveClass_Index: {},
+    ArcbindClass_Index: {},
     LibraryClass_Index: {},
     PackageClass_Index: {},
-    Final_ClassIndexMap: {},
-    Computed_ClassDictionary: {}
+    Sync_PublishIndexMap: {},
+    Sync_ClassDictionary: {}
 };
 
 export const CACHE_STORAGE: t_CACHE_STORAGE = {
     LIBRARIES: {},
     PACKAGES: {},
-    PROJECT: {}
+    TARGET: {}
 };

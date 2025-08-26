@@ -29,7 +29,7 @@ function BuildFromIndexMap(selectorIndexObject: Record<string, number>) {
 	const attachments: string[] = [];
 	const object = Object.entries(_styleSwitch(
 		Object.entries(selectorIndexObject).reduce((A: Record<string, Record<string, object>>, [selector, index]) => {
-			const imported = INDEX.IMPORT(index);
+			const imported = INDEX.FETCH(index);
 			A[selector] = imported.object;
 			attachments.push(...imported.attachments);
 			return A;
@@ -48,10 +48,10 @@ function _loadAttachObjectsFromIndex(
 	order.forEach((identity) => {
 		const index = CACHE_DYNAMIC.LibraryClass_Index[identity];
 		if (index) {
-			const selector = INDEX.IMPORT(index).selector;
+			const selector = INDEX.FETCH(index).selector;
 			const evaluated = (["@", "."].includes(selector[0]) ? "" : ".") + selector;
 			indexMap[evaluated] = index;
-			result[evaluated] = INDEX.IMPORT(index).object;
+			result[evaluated] = INDEX.FETCH(index).object;
 		}
 	});
 
@@ -65,7 +65,7 @@ function buildAttachments(attachments = new Set<string>()) {
 	do {
 		attachments.forEach((element) => {
 			if (CACHE_DYNAMIC.LibraryClass_Index[element]) {
-				INDEX.IMPORT(CACHE_DYNAMIC.LibraryClass_Index[element]).attachments.forEach((E: string) => {
+				INDEX.FETCH(CACHE_DYNAMIC.LibraryClass_Index[element]).attachments.forEach((E: string) => {
 					if (!attachments.has(E)) { attachments.add(E); }
 				});
 			}

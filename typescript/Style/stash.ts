@@ -125,7 +125,7 @@ function ReRender() {
 		const indexMetaCollection = collection[fileData.filePath] = {} as Record<string, t_ClassMeta>;
 		SCRIPTFILE(fileData).stylesList.forEach((style) => {
 			const response = PARSE.TAGSTYLE(style, fileData, CACHE_DYNAMIC.PackageClass_Index);
-			const styleData = INDEX.IMPORT(response.identity.index);
+			const styleData = INDEX.FETCH(response.identity.index);
 
 			fileData.manifest.errors.push(...response.errors);
 			fileData.manifest.diagnostics.push(...response.diagnostics);
@@ -168,7 +168,7 @@ function ReRender() {
 
 
 	Object.values(CACHE_DYNAMIC.PackageClass_Index).forEach((index) => {
-		const InStash = INDEX.IMPORT(index);
+		const InStash = INDEX.FETCH(index);
 		if (InStash.metadata.declarations.length > 1) {
 			PackageErrors.push(
 				$.MOLD.warning.List(
@@ -235,7 +235,7 @@ function ReRender() {
 
 
 	Object.values(CACHE_DYNAMIC.LibraryClass_Index).forEach((index) => {
-		const InStash = INDEX.IMPORT(index);
+		const InStash = INDEX.FETCH(index);
 		if (InStash.declarations.length > 1) {
 			LibraryErrors.push(
 				$.MOLD.warning.List(
@@ -290,8 +290,8 @@ function ReRender() {
 
 
 
-	CACHE_LIVEDOCS.ShellDoc.library = LibraryReport;
-	CACHE_LIVEDOCS.ShellDoc.package = PackageReport;
+	CACHE_LIVEDOCS.Report.library = LibraryReport;
+	CACHE_LIVEDOCS.Report.package = PackageReport;
 
 	CACHE_LIVEDOCS.Errors.library = LibraryErrors;
 	CACHE_LIVEDOCS.Errors.package = PackageErrors;
@@ -325,7 +325,7 @@ function Appendix(indexes: number[] = []) {
 
 	if (!CACHE_STATIC.WATCH) {
 		const usedPackages = Object.values(CACHE_DYNAMIC.PackageClass_Index).filter(i => indexes.includes(i))
-			.reduce((a, c) => { a.add(INDEX.IMPORT(c).package); return a; }, new Set());
+			.reduce((a, c) => { a.add(INDEX.FETCH(c).package); return a; }, new Set());
 
 		Object.values(CACHE_STORAGE.PACKAGES).forEach((F) => {
 			if (usedPackages.has(F.packageName)) {

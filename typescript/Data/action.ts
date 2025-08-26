@@ -4,10 +4,11 @@ import fileman from "../fileman.js";
 import {
     t_Data_TWEAKS,
     T_PackageEssential,
-    t_ClassData
+    t_ClassData,
+    t_ClassIndexMap
 } from "../types.js";
 import {
-    ORIGIN,
+    ROOT,
     CACHE_STATIC,
     NAVIGATE,
     DOCUMENTS,
@@ -27,11 +28,11 @@ function collectTypeStringKeys(object: object) {
 }
 
 export function collectVendors() {
-    ORIGIN.vendors = Array.from(collectTypeStringKeys(PREFIXES));
+    ROOT.vendors = Array.from(collectTypeStringKeys(PREFIXES));
 }
 
 export function collectTWEAKS(tweaks: t_Data_TWEAKS) {
-    Object.assign(TWEAKS, ORIGIN.defaultTweaks);
+    Object.assign(TWEAKS, ROOT.defaultTweaks);
     if (typeof tweaks === "object") {
         Object.keys(TWEAKS).forEach(key => {
             if (typeof TWEAKS[key] === typeof tweaks[key]) {
@@ -46,10 +47,10 @@ export function SetENV(rootPath: string, workPath: string, packageEssential: T_P
     CACHE_STATIC.RootPath = rootPath;
     CACHE_STATIC.WorkPath = workPath;
 
-    ORIGIN.name = packageEssential.name || ORIGIN.name;
-    ORIGIN.version = packageEssential.version || ORIGIN.version;
-    ORIGIN.website = packageEssential.website || ORIGIN.website;
-    ORIGIN.bins = packageEssential.bins;
+    ROOT.name = packageEssential.name || ROOT.name;
+    ROOT.version = packageEssential.version || ROOT.version;
+    ROOT.website = packageEssential.website || ROOT.website;
+    ROOT.bins = packageEssential.bins;
 
     Object.entries(NAVIGATE).forEach(([groupName, groupPaths]) => {
         if (groupName === "blueprint" || groupName === "autogen") {
@@ -63,7 +64,7 @@ export function SetENV(rootPath: string, workPath: string, packageEssential: T_P
         }
     });
 
-    const CDN = ORIGIN.URL.Cdn + "version/" + ORIGIN.version.split(".")[0] + "/";
+    const CDN = ROOT.URL.Cdn + "version/" + ROOT.version.split(".")[0] + "/";
     Object.values(DOCUMENTS).forEach((object) => {
         Object.values(object).forEach((entry) => {
             entry.url = CDN + entry.url;
@@ -78,7 +79,7 @@ export function MemoryUsage() {
         "Cache": Use.string.stringMem(JSON.stringify(CACHE_DYNAMIC)),
         "Stack": Use.string.stringMem(JSON.stringify(CACHE_STORAGE)),
         "Report": Use.string.stringMem(JSON.stringify(CACHE_LIVEDOCS)),
-        "Proxy": Object.values(CACHE_STORAGE.PROJECT).reduce((t: number, c) => {
+        "Proxy": Object.values(CACHE_STORAGE.TARGET).reduce((t: number, c) => {
             t += Use.string.stringMem(JSON.stringify(c));
             return t;
         }, 0),
@@ -91,8 +92,46 @@ export function MemoryUsage() {
 export const INDEX = {
     _NOW: 0,
     _BIN: new Set<number>(),
-    IMPORT: (index = 0) => {
+    FETCH: (index: number) => {
         return CACHE_DYNAMIC.Index_ClassData[index];
+    },
+    FIND: (classname: string, includeTargets = false, localmap: t_ClassIndexMap = {}) => {
+        let index = 0;
+        let group: ""
+            | "PACKAGE"
+            | "LIBRARY"
+            | "ARCBIND"
+            | "ARCHIVE"
+            | "GLOBAL"
+            | "PUBLIC"
+            | "LOCAL"
+            = '';
+
+        if (CACHE_DYNAMIC.PackageClass_Index[classname]) {
+            index = CACHE_DYNAMIC.PackageClass_Index[classname];
+            group = "PACKAGE";
+        } else if (CACHE_DYNAMIC.LibraryClass_Index[classname]) {
+            index = CACHE_DYNAMIC.LibraryClass_Index[classname];
+            group = "LIBRARY";
+        } else if (CACHE_DYNAMIC.ArcbindClass_Index[classname]) {
+            index = CACHE_DYNAMIC.ArcbindClass_Index[classname];
+            group = "ARCBIND";
+        } else if (includeTargets) {
+            if (CACHE_DYNAMIC.ArchiveClass_Index[classname]) {
+                index = CACHE_DYNAMIC.ArchiveClass_Index[classname];
+                group = "ARCHIVE";
+            } else if (CACHE_DYNAMIC.GlobalClass__Index[classname]) {
+                index = CACHE_DYNAMIC.GlobalClass__Index[classname];
+                group = "GLOBAL";
+            } else if (CACHE_DYNAMIC.PublicClass__Index[classname]) {
+                index = CACHE_DYNAMIC.PublicClass__Index[classname];
+                group = "PUBLIC";
+            }
+        } else if (localmap[classname]) {
+            index = localmap[classname];
+            group = "LOCAL";
+        }
+        return { index, group };
     },
     DECLARE: (object: t_ClassData) => {
         object.index = INDEX._BIN.values().next().value || ++INDEX._NOW;

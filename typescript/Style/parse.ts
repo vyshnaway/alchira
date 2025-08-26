@@ -3,7 +3,7 @@ import CSSBLOCK from "./block.js";
 import $ from "../Shell/main.js";
 import Use from "../Utils/main.js";
 import HASHRULE from "../hash-rules.js";
-import { CACHE_STATIC, CACHE_DYNAMIC, ORIGIN } from "../Data/cache.js";
+import { CACHE_STATIC, CACHE_DYNAMIC, ROOT } from "../Data/cache.js";
 import { INDEX } from "../Data/action.js";
 import { t_FILE_Storage, t_ClassMeta, t_TagRawStyle, t_Diagnostic, t_ClassData } from "../types.js";
 
@@ -21,7 +21,7 @@ function xtylemerge(classList: string[] = []) {
 			|| 0;
 
 		if (index) {
-			const found = INDEX.IMPORT(index);
+			const found = INDEX.FETCH(index);
 			Object.assign(variables, found.metadata.variables);
 			attachments.push(...found.attachments);
 			res = Use.object.multiMerge([result, found.object], true);
@@ -90,7 +90,7 @@ function CSSLIBRARY(fileDatas: t_FILE_Storage[] = [], initial = "", forPortable 
 
 			const index = (IndexMap[stampSelector] || 0) + (selectors[stampSelector] || 0);
 			if (index) {
-				const InStash = INDEX.IMPORT(index);
+				const InStash = INDEX.FETCH(index);
 				InStash.declarations.push(declaration);
 			} else {
 				const selectorData: t_ClassData = {
@@ -192,12 +192,12 @@ function TAGSTYLE(
 
 
 		if (index_found) {
-			const InStash = INDEX.IMPORT(index_found);
+			const InStash = INDEX.FETCH(index_found);
 			InStash.metadata.declarations.push(declaration);
 		} else {
 			const declarations = [declaration];
 			const style_snippet = SCANNER(
-				raw.element === ORIGIN.customTag["stencil"] ? raw.attachstring : '',
+				raw.element === ROOT.customElements["stencil"] ? raw.attachstring : '',
 				`${raw.scope}:ATTACHMENT : ${file.filePath} ||`,
 				`${raw.selector}`
 			);
@@ -222,8 +222,8 @@ function TAGSTYLE(
 				debugclass,
 				declarations,
 				attached_style: style_snippet.object,
-				attached_staple: raw.element === ORIGIN.customTag["staple"] ? raw.attachstring : "",
-				attached_stencil: raw.element === ORIGIN.customTag["stencil"] ? raw.attachstring : "",
+				attached_staple: raw.element === ROOT.customElements["staple"] ? raw.attachstring : "",
+				attached_stencil: raw.element === ROOT.customElements["stencil"] ? raw.attachstring : "",
 			});
 			IndexMap[classname] = identity.index;
 		}

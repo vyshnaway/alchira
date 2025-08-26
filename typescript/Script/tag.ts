@@ -3,7 +3,7 @@ import cursor from "./_cursor.js";
 import classExtract from "./value.js";
 
 import { t_FILE_Storage, t_TagRawStyle } from "../types.js";
-import { t_Actions, t_StyleStack } from "./value.js";
+import { t_RescriptAction } from "./value.js";
 
 const bracePair = {
 	"{": "}",
@@ -21,9 +21,7 @@ export const closeBraces = ["]", "}", ")"];
 export default function scanner(
 	fileData: t_FILE_Storage,
 	classProps: string[] = [],
-	action: t_Actions = "read",
-	styleStack: t_StyleStack = { Portable: {}, Library: {}, Native: {}, Local: {}, Global: {} },
-	OrderedClassList: Record<string, Record<number, string>>,
+	action: t_RescriptAction = "read",
 	fileCursor = cursor.Initialize(fileData.content),
 ) {
 	const
@@ -36,7 +34,7 @@ export default function scanner(
 			elvalue: "",
 			selector: "",
 			scope: "PACKAGE",
-			tagCount: fileCursor.active.tagCount,
+			tagCount: ++fileCursor.active.cycle,
 			rowIndex: fileCursor.active.rowMarker,
 			colIndex: fileCursor.active.colMarker,
 			tagOpenMarker: 0,
@@ -97,7 +95,7 @@ export default function scanner(
 				} else if (/[\$@#]/.test(tr_Attr) && !"$@".includes(tr_Attr[0]) && !"$@".includes(tr_Attr[tr_Attr.length - 1])) {
 					styleDeclarations.styles[tr_Attr] = tr_Value;
 				} else if (classProps.includes(tr_Attr)) {
-					const result = classExtract(tr_Value, action, fileData, attachments, styleStack, fileCursor.active, OrderedClassList);
+					const result = classExtract(tr_Value, action, fileData, attachments, fileCursor.active);
 					classesList.push(result.classList);
 					nativeAttributes[tr_Attr] = result.scribed;
 				} else {
@@ -122,7 +120,6 @@ export default function scanner(
 	};
 
 	if (ok) {
-		fileCursor.active.tagCount++;
 		selfClosed = fileData.content[fileCursor.active.marker - 1] === '/';
 		styleDeclarations.tagOpenMarker = fileCursor.active.marker + 1;
 	} else if (fallbackAquired) {

@@ -1,17 +1,9 @@
 import Use from "../Utils/main.js";
 import { INDEX } from "../Data/action.js";
-import { CACHE_STATIC, ORIGIN } from "../Data/cache.js";
+import { CACHE_STATIC, CACHE_DYNAMIC, ROOT } from "../Data/cache.js";
 import { t_FILE_Storage, t_FileCursor } from "../types.js";
 
-export type t_Actions = 'read' | 'archive' | 'debug' | 'preview' | 'publish';
-
-export interface t_StyleStack {
-	Portable: Record<string, number>,
-	Library: Record<string, number>,
-	Native: Record<string, number>,
-	Local: Record<string, number>,
-	Global: Record<string, number>
-}
+export type t_RescriptAction = 'read' | 'archive' | 'monitor' | 'watch' | 'sync';
 
 export interface t_BindStack {
 	preBinds: Set<string>,
@@ -19,27 +11,65 @@ export interface t_BindStack {
 }
 
 
-function loadActiveIndexes(classList: string[], StyleStack: t_StyleStack) {
-	return classList.reduce((A: number[], entry) => {
-		const index =
-			(StyleStack.Portable[entry] || 0) +
-			(StyleStack.Library[entry] || 0) +
-			(StyleStack.Native[entry] || 0) +
-			(StyleStack.Global[entry] || 0) +
-			(StyleStack.Local[entry] || 0);
-		if (index) { A.push(index); }
-		return A;
-	}, []);
+function EvaluateIndexTraces(
+	action: t_RescriptAction,
+	metaFront: string,
+	classList: string[],
+	localClassMap: Record<string, number>
+): Record<string, string> {
+	let classMap: Record<string, string> = {};
+
+	if (action === "archive") {
+		classMap = classList.reduce((acc, entry) => {
+			const found = INDEX.FIND(entry, true, localClassMap);
+			if (found.index) {
+				if (found.group === "LIBRARY") {
+					acc[entry] = `/${CACHE_STATIC.Package.Name}/$/${entry}`;
+				} else if (found.group === "PUBLIC") {
+					acc[entry] = `/${CACHE_STATIC.Package.Name}/${entry}`;
+				}
+			}
+			return acc;
+		}, {} as Record<string, string>);
+
+
+	} else {
+
+		const index_array: number[] = [];
+		const class_trace: [number, string][] = [];
+		const string_index_map: Record<string, number> = {};
+
+		classList.forEach((entry) => {
+			const found = INDEX.FIND(entry, true, localClassMap);
+			if (found.index) {
+				class_trace.push([found.index, entry]);
+				index_array.push(found.index);
+			}
+		});
+		const indexSetback = Use.array.setback(index_array);
+
+		if (action === 'sync') {
+			classMap = CACHE_DYNAMIC.Sync_ClassDictionary[JSON.stringify(indexSetback)] || {};
+		} else {
+			if (action === "watch") {
+				classMap = Object.fromEntries(class_trace.map(([K, V]) => [V, metaFront + INDEX.FETCH(K).watchclass]));
+			}
+			if (action === "monitor") {
+				classMap = Object.fromEntries(class_trace.map(([K, V]) => [V, metaFront + INDEX.FETCH(K).debugclass]));
+			}
+
+			Object.entries(string_index_map).forEach(([k, v]) => CACHE_DYNAMIC.Sync_PublishIndexMap["." + k] = v);
+		}
+	}
+	return classMap;
 }
 
 export default function classExtract(
 	string: string,
-	action: t_Actions,
+	action: t_RescriptAction,
 	fileData: t_FILE_Storage,
 	attachments: Set<string>,
-	StyleStack: t_StyleStack,
 	FileCursor: t_FileCursor,
-	OrderedClassList: Record<string, Record<number, string>>,
 ) {
 	const classList: string[] = [], quotes = ["'", "`", '"'];
 	let activeQuote = "",
@@ -53,9 +83,9 @@ export default function classExtract(
 	while (ch !== undefined) {
 		if (inQuote) {
 			if (ch === " " || ch === activeQuote) {
-				if(entry.startsWith(ORIGIN.customOps["attach"])){
+				if (entry.startsWith(ROOT.customOperations["attach"])) {
 					attachments.add(entry.slice(1));
-				}else{
+				} else {
 					classList.push(entry);
 				}
 				entry = "";
@@ -73,7 +103,6 @@ export default function classExtract(
 	}
 
 	if (action !== "read") {
-		const metaFront = `TAG${fileData.debugclassFront}\\:${FileCursor.rowMarker}\\:${FileCursor.colMarker}__`;
 		activeQuote = "";
 		entry = "";
 		scribed = "";
@@ -81,43 +110,21 @@ export default function classExtract(
 		inQuote = false;
 		ch = string[marker];
 
-		const availableIndexes = (action === 'preview' || action === "publish") ? Use.array.setback(loadActiveIndexes(classList, StyleStack)) : [];
-		const index_to_classNames = (action === 'preview' || action === "publish") ? OrderedClassList[JSON.stringify(availableIndexes)] : [];
+		const metaFront = action === "monitor"
+			? `TAG${fileData.debugclassFront}\\:${FileCursor.rowMarker}\\:${FileCursor.colMarker}__`
+			: action === "watch" ? `${fileData.label}_${FileCursor.cycle}_` : '';
+
+		const classMap = EvaluateIndexTraces(action, metaFront, classList, fileData.styleData.localClasses);
 
 		while (ch !== undefined) {
 			if (inQuote) {
 				if (ch === " " || ch === activeQuote) {
-					if (!entry.startsWith(ORIGIN.customOps["attach"])) {
-						const index = (
-							(StyleStack.Portable[entry] || 0) +
-							(StyleStack.Library[entry] || 0) +
-							(StyleStack.Native[entry] || 0) +
-							(StyleStack.Global[entry] || 0) +
-							(StyleStack.Local[entry] || 0)
-						);
-						if (index) {
-							switch (action) {
-								case "archive": {
-									const isGlobal = (StyleStack.Global[entry] || 0);
-									const isLibrary = (StyleStack.Global[entry] || 0);
-									const className = isGlobal ? `/${CACHE_STATIC.Package.Name}/${entry}`
-										: isLibrary ? `/${CACHE_STATIC.Package.Name}/$/${entry}` : entry;
-									scribed += className;
-									break;
-								}
-								case "debug": {
-									const devClass = metaFront + INDEX.IMPORT(index).debugclass;
-									scribed += Use.string.normalize(devClass, ["/", ".", ":", "|", "$"], ["\\"]);
-									// CACHE.FinalStack["." + devClass] = index;
-									break;
-								}
-								case "preview":
-								case "publish": {
-									if (availableIndexes.includes(index)) { scribed += index_to_classNames[index]; }
-									break;
-								}
-							}
-						} else { scribed += entry; }
+					if (!entry.startsWith(ROOT.customOperations["attach"])) {
+						scribed += classMap[entry] ?
+							(action === "monitor"
+								? Use.string.normalize(classMap[entry], ["/", ".", ":", "|", "$"], ["\\"])
+								: classMap[entry]
+							) : entry;
 					}
 					scribed += ch;
 					entry = "";

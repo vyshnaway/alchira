@@ -9,7 +9,7 @@ function PropMap(record: Record<string, string>, color: keyof typeof $.list) {
         values.push(v);
     });
 
-    const coloredKeys = $.list[color].Level(keys.map(k => $.MAKE(k, $.style.TS_Bold)));
+    const coloredKeys = $.list[color].Level(keys.map(k => $.MAKE(k, $.style.AS_Bold)));
     return coloredKeys.map((k, i) => k + ": " + values[i]);
 }
 

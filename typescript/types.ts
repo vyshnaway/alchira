@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/naming-convention */
-import C_Proxy from "./Script/class.js";
+import c_Target from "./Script/class.js";
 
 
 // --- Initial Data ---
@@ -35,7 +35,7 @@ export interface t_FileCursor {
     marker: number,
     rowMarker: number,
     colMarker: number,
-    tagCount: number,
+    cycle: number,
     colFallback: number,
 }
 
@@ -46,7 +46,7 @@ export interface t_FileScanBuffer {
 }
 export type t_Data_TWEAKS = Record<string, string | boolean>;
 
-export interface t_Data_ORIGIN {
+export interface t_Data_ROOT {
     name: string,
     version: string,
     website: string,
@@ -55,8 +55,9 @@ export interface t_Data_ORIGIN {
     commandList: Record<string, string>,
     exposedCommands: string[]
     defaultTweaks: t_Data_TWEAKS,
-    customTag: Record<string, string>,
-    customOps: Record<string, string>
+    customElements: Record<string, string>,
+    customOperations: Record<string, string>
+    customAtrules: Record<string, string>
     URL: Record<string, string>,
 }
 
@@ -121,9 +122,9 @@ export interface t_ClassData {
     selector: string,
     debugclass: string,
     watchclass: string,
+    attachments: string[],
     object: Record<string, object>,
     metadata: t_ClassMeta,
-    attachments: string[]
     declarations: string[],
     attached_style: object,
     attached_staple: string,
@@ -186,6 +187,7 @@ export interface t_FILE_Storage {
     debugclassFront: string,
     content: string,
     midway: string,
+    label: string,
     manifest: t_FILE_Manifest,
     styleData: {
         attachments: string[],
@@ -197,8 +199,7 @@ export interface t_FILE_Storage {
         styleMap: Record<string, t_ClassMeta>,
         hasMainTag: boolean,
         hasStyleTag: boolean,
-        hasAttachTag: boolean,
-        hasStencilTag: boolean,
+        hasStapleTag: boolean,
     }
 }
 
@@ -243,11 +244,10 @@ export interface t_Archive extends t_Config_Archive_Intersection {
 export interface t_CACHE_LIVEDOCS {
     DeltaPath: string,
     DeltaContent: string,
-    FinalError: string,
+    PublishError: string,
     FinalMessage: string,
     ErrorCount: number,
-    WarningCount: number,
-    ShellDoc: {
+    Report: {
         library: string,
         package: string,
         project: string,
@@ -295,7 +295,7 @@ export interface t_CACHE_STATIC {
     Argument: string,
     Project_Name: string,
     Project_Version: string,
-    CSSIndex: string,
+    RootCSS: string,
     RootPath: string,
     WorkPath: string,
     Package: t_Archive,
@@ -303,7 +303,7 @@ export interface t_CACHE_STATIC {
     HashRule: Record<string, string>,
     Package_Saved: Record<string, string>,
     Library_Saved: Record<string, string>,
-    Targets_Saved: Record<string, t_ProxyMapStatic>,
+    TargeAS_Saved: Record<string, t_ProxyMapStatic>,
 }
 
 export interface t_CACHE_DYNAMIC {
@@ -312,14 +312,15 @@ export interface t_CACHE_DYNAMIC {
     GlobalClass__Index: t_ClassIndexMap,
     PublicClass__Index: t_ClassIndexMap,
     ArchiveClass_Index: t_ClassIndexMap,
+    ArcbindClass_Index: t_ClassIndexMap,
     LibraryClass_Index: t_ClassIndexMap,
     PackageClass_Index: t_ClassIndexMap,
-    Final_ClassIndexMap: t_ClassIndexMap,
-    Computed_ClassDictionary: t_ClassDictionary,
+    Sync_PublishIndexMap: t_ClassIndexMap,
+    Sync_ClassDictionary: t_ClassDictionary,
 };
 
 export interface t_CACHE_STORAGE {
     LIBRARIES: Record<string, t_FILE_Storage>,
     PACKAGES: Record<string, t_FILE_Storage>,
-    PROJECT: Record<string, C_Proxy>,
+    TARGET: Record<string, c_Target>,
 }

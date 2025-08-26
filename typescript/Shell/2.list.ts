@@ -1,87 +1,76 @@
-import { canvas, style, format } from "./0.root.js";
-import tag from "./1.tag.js";
+import * as root from "./0.root.js";
+import * as tag from "./1.tag.js";
 
-type t_color_fn = (item: string) => string;
 
-const colors: Record<string, t_color_fn> = {
-	std: (item) => format(item),
-	title: (item) => format(item, ...canvas.config.title),
-	text: (item) => format(item, ...canvas.config.text),
-	primary: (item) => format(item, ...canvas.config.primary),
-	secondary: (item) => format(item, ...canvas.config.secondary),
-	tertiary: (item) => format(item, ...canvas.config.tertiary),
-	warning: (item) => format(item, ...canvas.config.warning),
-	failed: (item) => format(item, ...canvas.config.failed),
-	success: (item) => format(item, ...canvas.config.success),
-};
+export function Level(items: string[] = [], intent = 0, ...styles: string[]) {
+	intent = intent < 0 ? 0 : intent;
+	const keyLength = items.reduce((max, key) => (key.length > max ? key.length : max), 0);
+	return items.map((key) => (root.format(tag.Tab(intent) + key.padEnd(keyLength) + tag.Tab(), ...styles)));
+}
 
-const createListFormatters = (colorTheme: t_color_fn) => ({
-	Level: (items: string[] = [], intent = 0) => {
-		const keyLength = items.reduce((max, key) => (key.length > max ? key.length : max), 0);
-		return items.map((key) => (canvas.tab.repeat(intent) + colorTheme(key.padEnd(keyLength) + canvas.tab)));
-	},
-	Blocks: (items: string[] = [], intent = 0) => {
+export function Catalog(items: string[] = [], intent = 0, ...styles: string[]) {
+	intent = intent < 0 ? 0 : intent;
 
-		const size =
-			items.reduce((length, item) => {
-				if (item.length > length) { length = item.length; }
-				return length;
-			}, 0) +
-			intent +
-			canvas.tab.length;
-		const cols = Math.floor(canvas.width() / (size + 3));
-		const result: string[] = [];
-		let subResult = "";
-		items.forEach((item, index) => {
-			if ((index + 1) % cols) {
-				subResult += tag.Li(colorTheme(item.padEnd(size)));
-			} else {
-				subResult += tag.Li(colorTheme(item.padEnd(size)));
-				result.push(subResult);
-				subResult = "";
-			}
-		});
-		if (subResult.length) { result.push(subResult); }
-		return result;
-	},
-	Entries: (items: string[] = [], intent = 0) => {
-		return items.map((item) => canvas.tab.repeat(intent) + tag.Div(colorTheme(item)));
-	},
-	Bullets: (items: string[] = [], intent = 0) => {
-		return items.map((item) => canvas.tab.repeat(intent) + tag.Li(colorTheme(item)));
-	},
-	Numbers: (items: string[] = [], intent = 0) => {
-		return items.map(
-			(item, index) =>
-				canvas.tab.repeat(intent) +
-				format(String(index + 1), ...canvas.config.secondary, ...style.TS_Bold) +
-				canvas.tab.repeat(intent) +
-				tag.Div(colorTheme(item)),
-		);
-	},
-	Intents: (items: string[] = [], intent = 0) => {
-		return items.map((item) => "\n".repeat(intent - 1) + tag.P(colorTheme(item)));
-	},
-	Waterfall: (items: string[] = [], intent = 0) => {
-		return items.map((item, key) => {
-			return (
-				canvas.tab.repeat(intent) +
-				format(key === items.length - 1 ? "└─>" : "├─>", style.TS_Bold, ...canvas.config.secondary) +
-				colorTheme(canvas.tab.repeat(intent) + item)
-			);
-		});
-	}
+	const size =
+		items.reduce((length, item) => {
+			if (item.length > length) { length = item.length; }
+			return length;
+		}, 0) +
+		intent +
+		root.canvas.tab.length;
+	const cols = Math.floor(root.canvas.width() / (size + 3));
+	const result: string[] = [];
+	let subResult = "";
+	items.forEach((item, index) => {
+		if ((index + 1) % cols) {
+			subResult += tag.Li(root.format(item.padEnd(size), ...styles));
+		} else {
+			subResult += tag.Li(root.format(item.padEnd(size), ...styles));
+			result.push(subResult);
+			subResult = "";
+		}
+	});
+	if (subResult.length) { result.push(subResult); }
+	return result;
+}
+
+export function Paragraphs(items: string[] = [], intent = 0, ...styles: string[]) {
+	intent = intent < 0 ? 0 : intent;
+	return items.map((item) => tag.Tab(intent) + tag.Div(root.format(item, ...styles)));
+}
+
+export function Bullets(items: string[] = [], intent = 0, ...styles: string[]) {
+	intent = intent < 0 ? 0 : intent;
+	return items.map((item) => tag.Tab(intent) + tag.Li(root.format(item, ...styles)));
+}
+
+export function Numbers(items: string[] = [], intent = 0, ...styles: string[]) {
+	intent = intent < 0 ? 0 : intent;
+	return items.map(
+		(item, index) =>
+			tag.Tab(intent) +
+			root.format(String(index + 1), ...styles) +
+			tag.Tab(intent) +
+			tag.Div(root.format(item)),
+	);
+}
+
+export function Breaks(items: string[] = [], intent = 0, ...styles: string[]) {
+	intent = intent < 0 ? 0 : intent;
+	return items.map((item) => root.format("\n".repeat(intent) + tag.P(item), ...styles));
+}
+
+export function Waterfall(items: string[] = [], intent = 0, ...styles: string[]) {
+	intent = intent < 0 ? 0 : intent;
+	return items.map((item, key) => {
+		return root.format(root.canvas.tab.repeat(intent) + (key === items.length - 1 ? "└─>" : "├─>") + tag.Tab(intent) + item);
+	});
+}
+
+
+[
+	Level,
+	Breaks
+].forEach((Fn: (items: string[], intent: number, ...styles: string[]) => string[]) => {
+	console.log(Fn(['asdfafdsfs', "df dfa", "gbhd"], 1, root.style.TC_Normal_Magenta).join("\n"));
 });
-
-export default {
-	std: createListFormatters(colors.std),
-	title: createListFormatters(colors.title),
-	text: createListFormatters(colors.text),
-	primary: createListFormatters(colors.primary),
-	secondary: createListFormatters(colors.secondary),
-	tertiary: createListFormatters(colors.tertiary),
-	failed: createListFormatters(colors.failed),
-	success: createListFormatters(colors.success),
-	warning: createListFormatters(colors.warning),
-};
-

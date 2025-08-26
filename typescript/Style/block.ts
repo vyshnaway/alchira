@@ -1,3 +1,4 @@
+import { ROOT } from "../Data/cache.js";
 import Use from "../Utils/main.js";
 
 const OPEN_CHARS = ["{", "[", "("];
@@ -98,12 +99,12 @@ export default function parseBlock(content: string, blockArrays = false) {
 								const directive = value.slice(0, spaceIndex);
 
 								switch (directive) {
-									case "@--attach":
+									case ROOT.customAtrules["attach"]:
 										result.attachment.push(
 											...Use.string.zeroBreaks(value.slice(spaceIndex)),
 										);
 										break;
-									case "@--assemble":
+									case ROOT.customAtrules["assemble"]:
 										result.assemble.push(
 											...Use.string.zeroBreaks(value.slice(spaceIndex)),
 										);
@@ -115,11 +116,11 @@ export default function parseBlock(content: string, blockArrays = false) {
 							} else {
 								const breaks = Use.string.zeroBreaks(value);
 								switch (breaks[0]) {
-									case "*":
+									case ROOT.customOperations["attach"]:
 										breaks.shift();
 										result.attachment.push(...breaks);
 										break;
-									case "+":
+									case ROOT.customOperations["assemble"]:
 										breaks.shift();
 										result.assemble.push(...breaks);
 										break;

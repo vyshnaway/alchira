@@ -1,11 +1,6 @@
 import readline from "readline";
 
-/**
- * Backspace characters in terminal.
- * @param {number} chars About of characters to backspace
- * @returns {null}
- */
-const backspace = (chars: number) => {
+export function backspace(chars: number) {
   if (chars <= 0) {
     return;
   }
@@ -13,7 +8,8 @@ const backspace = (chars: number) => {
   readline.clearLine(process.stdout, 1);
 };
 
-const write = (string = "", backRows = 0) => {
+
+export function write (string = "", backRows = 0) {
   if (backRows > 0) {
     readline.moveCursor(process.stdout, 0, -backRows);
     readline.clearScreenDown(process.stdout);
@@ -25,14 +21,14 @@ const write = (string = "", backRows = 0) => {
   return rowsCreated;
 };
 
+
 /**
  * Run animation in terminal from array of strings as frames.
- * @param {Array} frames String snippets for frames
- * @param {number} duration in milliseconds
- * @param {number} repeat = 0 => infinite loop
- * @returns {null}
+ * @param frames String snippets for frames
+ * @param duration in milliseconds
+ * @param repeat = 0 => infinite loop
  */
-const animate = (frames: string[] = [], duration = 1000, repeat = 0) => {
+export function animate(frames: string[] = [], duration = 1000, repeat = 0) {
   const interval = Math.ceil(duration / (frames.length * (repeat || 1))) || 1;
 
   let iteration = 0,
@@ -52,10 +48,4 @@ const animate = (frames: string[] = [], duration = 1000, repeat = 0) => {
       backRows = write(frames[frameIndex++], backRows);
     }, interval);
   });
-};
-
-export default {
-  write,
-  animate,
-  backspace,
 };

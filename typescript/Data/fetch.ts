@@ -4,7 +4,7 @@ import * as $$ from "../shell.js";
 import * as worker from "./watch.js";
 import { collectTWEAKS, collectVendors } from "./action.js";
 import { t_Config, t_Data_PREFIX, t_ProxyMap } from "../types.js";
-import { NAVIGATE, DOCUMENTS, ORIGIN, CACHE_STATIC, PREFIXES } from "./cache.js";
+import { NAVIGATE, DOCUMENTS, ROOT, CACHE_STATIC, PREFIXES } from "./cache.js";
 
 export async function FetchDocs() {
 	await Promise.all(Object.values(DOCUMENTS).map(sync => {
@@ -29,21 +29,21 @@ export async function Initialize() {
 				"Next Steps",
 				[
 					"Adjust " +
-					$.MAKE(NAVIGATE.json.configure.path, $.style.TS_Bold, ...$.canvas.config.primary) +
+					$.MAKE(NAVIGATE.json.configure.path, $.style.AS_Bold, ...$.canvas.config.primary) +
 					" according to the requirements of your project.",
 					"Execute " +
-					$.MAKE('"init"', $.style.TS_Bold, ...$.canvas.config.primary) +
+					$.MAKE('"init"', $.style.AS_Bold, ...$.canvas.config.primary) +
 					" again to generate the necessary configuration folders.",
 					"During execution " +
-					$.MAKE("{target}", $.style.TS_Bold, ...$.canvas.config.primary) +
+					$.MAKE("{target}", $.style.AS_Bold, ...$.canvas.config.primary) +
 					" folder will be cloned from " +
-					$.MAKE("{source}", $.style.TS_Bold, ...$.canvas.config.primary) +
+					$.MAKE("{source}", $.style.AS_Bold, ...$.canvas.config.primary) +
 					" folder.",
-					"This folder will act as proxy for " + ORIGIN.name + ".",
+					"This folder will act as proxy for " + ROOT.name + ".",
 					"In the " +
-					$.MAKE("{target}/{stylesheet}", $.style.TS_Bold, ...$.canvas.config.primary) +
+					$.MAKE("{target}/{stylesheet}", $.style.AS_Bold, ...$.canvas.config.primary) +
 					", content from " +
-					$.MAKE("{target}/{stylesheet}", $.style.TS_Bold, ...$.canvas.config.primary) +
+					$.MAKE("{target}/{stylesheet}", $.style.AS_Bold, ...$.canvas.config.primary) +
 					" will be appended.",
 				],
 				$.list.std.Bullets,
@@ -53,7 +53,7 @@ export async function Initialize() {
 		$.POST(
 			$.MOLD.std.Section(
 				"Available Commands",
-				$$.Props.primary(ORIGIN.commandList),
+				$$.Props.primary(ROOT.commandList),
 				$.list.std.Bullets,
 			),
 		);
@@ -61,15 +61,15 @@ export async function Initialize() {
 		$.POST(
 			$.MOLD.std.Section(
 				"Publish command instructions.",
-				ORIGIN.version === "0"
+				ROOT.version === "0"
 					? ["This command uses an internet connection."]
 					: [
 						"Create a new project and use its access key. For action visit " +
-						$.MAKE(ORIGIN.URL.Console, $.style.TS_Bold, ...$.canvas.config.primary),
+						$.MAKE(ROOT.URL.Console, $.style.AS_Bold, ...$.canvas.config.primary),
 						"For personal projects, you can use the key in " +
-						$.MAKE(NAVIGATE.json.configure.path, $.style.TS_Bold, ...$.canvas.config.primary),
+						$.MAKE(NAVIGATE.json.configure.path, $.style.AS_Bold, ...$.canvas.config.primary),
 						"If using in CI/CD workflow, it is suggested to use " +
-						$.MAKE("xcss publish {key}", $.style.TS_Bold, ...$.canvas.config.primary),
+						$.MAKE("xcss publish {key}", $.style.AS_Bold, ...$.canvas.config.primary),
 					],
 				$.list.std.Bullets,
 			),
@@ -147,7 +147,7 @@ export async function FetchStatics(vendorSource: string) {
 		const result1 = await fileman.read.json(vendorSource, true);
 		if (result1.status) { return result1.data; };
 
-		const result2 = await fileman.read.json(ORIGIN.URL.PrefixCdn + vendorSource, true);
+		const result2 = await fileman.read.json(ROOT.URL.PrefixCdn + vendorSource, true);
 		if (result2.status) { return result2.data; };
 
 		const result3 = await fileman.read.json(NAVIGATE.blueprint.prefixes.path, false);
@@ -240,9 +240,9 @@ export async function VerifyConfigure(loadStatics: boolean) {
 
 
 
-export async function SaveIndexContent() {
+export async function SaveRootCSS() {
 	$.TASK("Updating Index");
-	CACHE_STATIC.CSSIndex = await worker.cssImport(Object.values(NAVIGATE.css).map(css => css.path));
+	CACHE_STATIC.RootCSS = await worker.cssImport(Object.values(NAVIGATE.css).map(css => css.path));
 }
 
 export async function SaveLibrary() {
@@ -259,8 +259,8 @@ export async function SavePackages() {
 
 export async function SaveProxies() {
 	$.TASK("Syncing proxy folders", 0);
-	Object.keys(CACHE_STATIC.Targets_Saved).forEach((key) => delete CACHE_STATIC.Targets_Saved[key]);
-	CACHE_STATIC.Targets_Saved = await worker.proxyMapSync(CACHE_STATIC.ProxyMap);
+	Object.keys(CACHE_STATIC.TargeAS_Saved).forEach((key) => delete CACHE_STATIC.TargeAS_Saved[key]);
+	CACHE_STATIC.TargeAS_Saved = await worker.proxyMapSync(CACHE_STATIC.ProxyMap);
 }
 
 export async function SaveHashrules() {

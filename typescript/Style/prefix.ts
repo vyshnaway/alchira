@@ -1,9 +1,9 @@
 import palletes from "./color.js";
 
 import Use from "../Utils/main.js";
-import { ORIGIN, PREFIXES } from "../Data/cache.js";
+import { ROOT, PREFIXES } from "../Data/cache.js";
 
-const VENDORS = ORIGIN.vendors;
+const VENDORS = ROOT.vendors;
 
 
 function forAttribute(content: string, prefixes = VENDORS) {
@@ -52,7 +52,7 @@ export function LoadProps(
 			}
 		});
 	});
-
+	
 	return results;
 }
 

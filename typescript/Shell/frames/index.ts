@@ -1,4 +1,4 @@
-import render from "../4.post.js";
+import render from "../_.render.js";
 
 import renderTitle from "./0.title.js";
 import renderLoki from "./1.loki.js";

@@ -29,10 +29,10 @@ function IMPORT(string: string, watchUndef = true, sourcePath = "") {
 	const errors = {
 		recursionLoop: (recursionPreview: Record<string, string>, cause: string) => {
 			response.status = false;
-			recursionPreview["ERROR BY"] = $.MAKE(cause, $.style.TS_Bold, $.style.BG_Normal_Red);
+			recursionPreview["ERROR BY"] = $.MAKE(cause, $.style.AS_Bold, $.style.TC_Normal_Red);
 			response.error = $.MOLD.failed.List(
 				source +
-				$.MAKE(" : Hashrule recursion loop.", $.style.FG_Normal_Yellow),
+				$.MAKE(" : Hashrule recursion loop.", $.style.BC_Normal_Yellow),
 				$$.Props.text(recursionPreview),
 				$.list.std.Waterfall,
 			);
@@ -45,10 +45,10 @@ function IMPORT(string: string, watchUndef = true, sourcePath = "") {
 		},
 		undefinedHash: (recursionPreview: Record<string, string>, cause: string) => {
 			response.status = false;
-			recursionPreview["ERROR BY"] = $.MAKE(cause, $.style.TS_Bold, $.style.BG_Normal_Red);
+			recursionPreview["ERROR BY"] = $.MAKE(cause, $.style.AS_Bold, $.style.TC_Normal_Red);
 			response.error = $.MOLD.failed.List(
 				source +
-				$.MAKE(" : Undefined hashrule.", $.style.FG_Normal_Yellow),
+				$.MAKE(" : Undefined hashrule.", $.style.BC_Normal_Yellow),
 				$$.Props.text(recursionPreview),
 				$.list.std.Waterfall,
 			);

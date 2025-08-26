@@ -1,16 +1,17 @@
 import $ from "./Shell/main.js";
+import * as $$ from "./shell.js";
 import Use from "./Utils/main.js";
 import HASHRULE from "./hash-rules.js";
 import STYLE from "./Style/parse.js";
 import COMPILE from "./Style/render.js";
-import FORGE from "./Style/forge.js";
 import ORDER from "./Worker/order-api.js";
 import SCRIPT from "./Script/class.js";
 import XTYLES from "./Style/stash.js";
-import { CACHE_STATIC, CACHE_STORAGE, CACHE_DYNAMIC, CACHE_LIVEDOCS } from "./Data/cache.js";
+import { CACHE_STATIC, CACHE_STORAGE, CACHE_DYNAMIC, CACHE_LIVEDOCS, NAVIGATE } from "./Data/cache.js";
 import { INDEX } from "./Data/action.js";
 // import { GeneratePortable } from "./portable.js";
 import { t_ClassIndexMap, t_Cumulates, t_Diagnostic, t_FILE_Reference, t_OrganizedResult } from "./types.js";
+import { t_RescriptAction } from "./Script/value.js";
 
 export function UpdateXtylesFolder() {
 	INDEX.RESET();
@@ -33,7 +34,7 @@ export function UpdateXtylesFolder() {
 	XTYLES.ReRender();
 }
 
-export function SaveTargets(
+export function SaveToTarget(
 	action: "upload" | "add" | "change" | "unlink" = "upload",
 	targetFolder = '',
 	filePath = '',
@@ -44,26 +45,26 @@ export function SaveTargets(
 
 	switch (action) {
 		case "add": case "change":
-			if (CACHE_STORAGE.PROJECT[targetFolder].stylesheetPath === filePath) {
-				CACHE_STATIC.Targets_Saved[targetFolder].stylesheetContent = fileContent;
-				CACHE_STORAGE.PROJECT[targetFolder].stylesheetContent = fileContent;
+			if (CACHE_STORAGE.TARGET[targetFolder].stylesheetPath === filePath) {
+				CACHE_STATIC.TargeAS_Saved[targetFolder].stylesheetContent = fileContent;
+				CACHE_STORAGE.TARGET[targetFolder].stylesheetContent = fileContent;
 				reCache = false;
-			} else if (CACHE_STORAGE.PROJECT[targetFolder].extensions.includes(extension)) {
-				CACHE_STATIC.Targets_Saved[targetFolder].fileContents[filePath] = fileContent;
-				CACHE_LIVEDOCS.DeltaPath = `${CACHE_STORAGE.PROJECT[targetFolder].source}/${filePath}`;
+			} else if (CACHE_STORAGE.TARGET[targetFolder].extensions.includes(extension)) {
+				CACHE_STATIC.TargeAS_Saved[targetFolder].fileContents[filePath] = fileContent;
+				CACHE_LIVEDOCS.DeltaPath = `${CACHE_STORAGE.TARGET[targetFolder].source}/${filePath}`;
 			} else {
-				CACHE_LIVEDOCS.DeltaPath = `${CACHE_STORAGE.PROJECT[targetFolder].source}/${filePath}`;
+				CACHE_LIVEDOCS.DeltaPath = `${CACHE_STORAGE.TARGET[targetFolder].source}/${filePath}`;
 				CACHE_LIVEDOCS.DeltaContent = fileContent;
 				reCache = false;
 			}
 			break;
 		case "unlink":
-			if (CACHE_STATIC.Targets_Saved[targetFolder]) {
-				delete CACHE_STATIC.Targets_Saved[targetFolder].fileContents[filePath];
+			if (CACHE_STATIC.TargeAS_Saved[targetFolder]) {
+				delete CACHE_STATIC.TargeAS_Saved[targetFolder].fileContents[filePath];
 			}
 			break;
 		default:
-			CACHE_LIVEDOCS.ShellDoc.hashrule = HASHRULE.UPLOAD();
+			CACHE_LIVEDOCS.Report.hashrule = HASHRULE.UPLOAD();
 			CACHE_LIVEDOCS.Manifest.hashrules = CACHE_DYNAMIC.HashRule;
 	}
 
@@ -73,21 +74,21 @@ export function SaveTargets(
 		CACHE_DYNAMIC.PublicClass__Index = {};
 		CACHE_DYNAMIC.GlobalClass__Index = {};
 
-		Object.entries(CACHE_STORAGE.PROJECT).forEach(([key, cache]) => {
+		Object.entries(CACHE_STORAGE.TARGET).forEach(([key, cache]) => {
 			cache.ClearFiles();
-			delete CACHE_STORAGE.PROJECT[key];
+			delete CACHE_STORAGE.TARGET[key];
 		});
 
-		Object.entries(CACHE_STATIC.Targets_Saved).forEach(([key, files]) => {
-			CACHE_STORAGE.PROJECT[key] = new SCRIPT(files);
+		Object.entries(CACHE_STATIC.TargeAS_Saved).forEach(([key, files], index) => {
+			CACHE_STORAGE.TARGET[key] = new SCRIPT(files, Use.string.enCounter(index + 768));
 		});
 	}
 
 }
 
 function SaveClassRefs(stash: t_OrganizedResult) {
-	CACHE_DYNAMIC.Computed_ClassDictionary = stash.referenceMap;
-	CACHE_DYNAMIC.Final_ClassIndexMap = Object.entries(stash.indexMap).reduce((A, [classname, index]) => {
+	CACHE_DYNAMIC.Sync_ClassDictionary = stash.referenceMap;
+	CACHE_DYNAMIC.Sync_PublishIndexMap = Object.entries(stash.indexMap).reduce((A, [classname, index]) => {
 		A["." + classname] = index;
 		return A;
 	}, {} as t_ClassIndexMap);
@@ -107,7 +108,7 @@ async function Accumulate() {
 	};
 
 
-	Object.values(CACHE_STORAGE.PROJECT).forEach((cache) => {
+	Object.values(CACHE_STORAGE.TARGET).forEach((cache) => {
 		const C = cache.Accumulator();
 		CUMULATES.report.push(...C.report);
 		CUMULATES.errors.push(...C.errors);
@@ -120,11 +121,12 @@ async function Accumulate() {
 
 	CACHE_DYNAMIC.GlobalClass__Index = CUMULATES.globalClasses;
 	CACHE_DYNAMIC.PublicClass__Index = CUMULATES.publicClasses;
-	CACHE_DYNAMIC.ArchiveClass_Index = {
-		...Object.fromEntries(Object.entries(CACHE_DYNAMIC.LibraryClass_Index).map(([s, i]) => [`/${CACHE_STATIC.Package.Name}/$/${s}`, i])),
-		...Object.fromEntries(Object.entries(CACHE_DYNAMIC.GlobalClass__Index).map(([s, i]) => [`/${CACHE_STATIC.Package.Name}/${s}`, i])),
-		...Object.fromEntries(Object.entries(CACHE_DYNAMIC.PublicClass__Index).map(([s, i]) => [`/${CACHE_STATIC.Package.Name}/${s}`, i])),
-	};
+	CACHE_DYNAMIC.ArchiveClass_Index = Object.fromEntries([
+		...Object.entries(CACHE_DYNAMIC.GlobalClass__Index).map(([s, i]) => [`/${CACHE_STATIC.Package.Name}/${s}`, i]),
+		...Object.entries(CACHE_DYNAMIC.PublicClass__Index).map(([s, i]) => [`/${CACHE_STATIC.Package.Name}/${s}`, i]),
+	]);
+	CACHE_DYNAMIC.ArcbindClass_Index =
+		Object.fromEntries(Object.entries(CACHE_DYNAMIC.LibraryClass_Index).map(([s, i]) => [`/${CACHE_STATIC.Package.Name}/$/${s}`, i]));
 
 
 	CACHE_LIVEDOCS.Lookup.project = {};
@@ -146,7 +148,7 @@ async function Accumulate() {
 
 	CACHE_LIVEDOCS.Errors.project = CUMULATES.errors;
 	CACHE_LIVEDOCS.Diagnostics.project = CUMULATES.diagnostics;
-	CACHE_LIVEDOCS.ShellDoc.project = $.MOLD.std.Block(CUMULATES.report);
+	CACHE_LIVEDOCS.Report.project = $.MOLD.std.Block(CUMULATES.report);
 
 	CACHE_LIVEDOCS.Manifest.errors = Object.values(CACHE_LIVEDOCS.Diagnostics).reduce((A, V) => {
 		A.push(...V);
@@ -154,25 +156,32 @@ async function Accumulate() {
 	}, [] as t_Diagnostic[]);
 
 
+	const ERRORS = Object.values(CACHE_LIVEDOCS.Errors).reduce((A, I) => { A.push(...I); return A; }, [] as string[]);
+
+	CACHE_LIVEDOCS.ErrorCount = ERRORS.length;
+	CACHE_LIVEDOCS.Report.errors = CACHE_LIVEDOCS.ErrorCount ?
+		$.MOLD.failed.Section(`${CACHE_LIVEDOCS.ErrorCount} Errors`, ERRORS) :
+		$.MOLD.success.Section(`${CACHE_LIVEDOCS.ErrorCount} Errors`);
 
 	return CUMULATES;
 }
 
 
 async function Synthasize() {
-	const ERRORS = CACHE_LIVEDOCS.Errors.project;
+
+	Accumulate();
 
 	const CLASSESLIST: number[][] = [];
 	const ATTACHMENTS = new Set<number>();
-	const SAVEFILES: Record<string, string> = {};
+	const ERRORS = CACHE_LIVEDOCS.Errors.project;
+
+	Object.values(CACHE_STORAGE.TARGET).forEach((cache) => cache.GetTracks(CLASSESLIST, ATTACHMENTS));
 
 	if (CACHE_STATIC.WATCH) {
-		CACHE_DYNAMIC.Final_ClassIndexMap = {};
-		CACHE_DYNAMIC.Computed_ClassDictionary = {};
+		CACHE_DYNAMIC.Sync_PublishIndexMap = {};
+		CACHE_DYNAMIC.Sync_ClassDictionary = {};
 		CACHE_LIVEDOCS.FinalMessage = ERRORS.length + " Errors.";
 	} else {
-
-		Object.values(CACHE_STORAGE.PROJECT).forEach((cache) => cache.GetTracks(CLASSESLIST, ATTACHMENTS));
 
 		if (CACHE_STATIC.Command === "preview") {
 			const response = await ORDER(CLASSESLIST, CACHE_STATIC.Command, CACHE_STATIC.Argument);
@@ -194,158 +203,137 @@ async function Synthasize() {
 				CACHE_LIVEDOCS.FinalMessage = "Errors in " + ERRORS.length + " Tags. Falling back to 'preview' command.";
 			} else {
 				// const json = GeneratePortable(CUMULATES.essentials);
-				// SAVEFILES[json.jsonPath] = json.jsonContent;
 				const response = await ORDER(CLASSESLIST, CACHE_STATIC.Command, CACHE_STATIC.Argument);
 				SaveClassRefs(response.result);
 
 				if (response.status) {
 					CACHE_LIVEDOCS.FinalMessage = "Build Success.";
 				} else {
-					CACHE_LIVEDOCS.FinalError = response.message;
+					CACHE_LIVEDOCS.PublishError = response.message;
 					CACHE_LIVEDOCS.FinalMessage = "Build Atttempt Failed. Fallback with Preview.";
 				}
 			}
 		}
 	}
 
-	return { ATTACHMENTS, SAVEFILES };
+	return ATTACHMENTS;
 }
 
 
-function createStylesheet(ATTACHMENTS: Set<number>) {
+function GenFinalSheets(ATTACHMENTS: Set<number>) {
+
 	const RENDERFRAGS = {
-		INDEX: "",
-		PREBINDS: "",
-		RENDERED: "",
-		BOUNDSTYLES: "",
+		ROOT: "",
+		CLASS: "",
+		ATTACH: "",
 		APPENDIX: "",
-		ATTACHES: "",
 	};
 
-	const indexScanned = STYLE.CSSCANNER(Use.code.uncomment.Css(CACHE_STATIC.CSSIndex), "INDEX ||");
-	indexScanned.attachments.forEach((i) => ATTACHMENTS.add(i));
-	RENDERFRAGS.INDEX = COMPILE.forPublish(indexScanned.object, !CACHE_STATIC.WATCH);
+	const targetRenderAction: t_RescriptAction = (CACHE_STATIC.Command === "debug") ? "monitor"
+		: (CACHE_STATIC.Command === "preview" && CACHE_STATIC.Argument === "watch") ? "watch" : "sync";
+	Object.values(CACHE_STORAGE.TARGET).forEach((cache) => cache.RenderFiles(targetRenderAction));
 
-	CACHE_LIVEDOCS.Manifest.constants = Object.keys(indexScanned.variables);
-	CACHE_LIVEDOCS.ShellDoc.constants = $.MOLD.primary.Section(
-		"Root variables",
-		CACHE_LIVEDOCS.Manifest.constants,
-		$.list.text.Entries,
+	RENDERFRAGS.CLASS = COMPILE.forPublish(
+		Object.entries(CACHE_DYNAMIC.Sync_PublishIndexMap).map(([K, V]) => [K, INDEX.FETCH(V)]),
+		CACHE_STATIC.DEBUG
 	);
 
-	Object.values(CACHE_STORAGE.PROJECT).forEach((cache) => cache.RenderFiles(ATTACHMENTS, POSTBINDS, CACHE_STATIC.CMD));
-	const renderdScanned = FORGE.indexMaps(CACHE_DYNAMIC.Computed_ClassDictionary);
-	renderdScanned.postBinds.forEach((i) => POSTBINDS.add(i));
-	renderdScanned.preBinds.forEach((i) => ATTACHMENTS.add(i));
-	RENDERFRAGS.RENDERED = COMPILE.forPublish(renderdScanned.object, !CACHE_STATIC.WATCH);
+
+	const indexScanned = STYLE.CSSCANNER(Use.code.uncomment.Css(CACHE_STATIC.RootCSS), "INDEX ||");
+	indexScanned.attachments.forEach((attachment) => ATTACHMENTS.add(INDEX.FIND(attachment, false).index));
+	const INDEXSHEET = RENDERFRAGS.ROOT = COMPILE.forPublish(indexScanned.object, CACHE_STATIC.DEBUG);
+
+	CACHE_LIVEDOCS.Manifest.constants = Object.keys(indexScanned.variables);
+	CACHE_LIVEDOCS.Report.constants =
+		$.MOLD.primary.Section("Root variables", CACHE_LIVEDOCS.Manifest.constants, $.list.text.Entries);
 
 
 	RENDERFRAGS.APPENDIX = COMPILE.forPublish(
-		Object.values(CACHE_STORAGE.PROJECT).reduce((appendix, cache) => {
+		Object.values(CACHE_STORAGE.TARGET).reduce((appendix, cache) => {
 			const appendixScanned = STYLE.CSSCANNER(
 				Use.code.uncomment.Css(cache.stylesheetContent),
 				`APPENDIX : ${cache.targetStylesheet} ||`
 			);
 			appendix.push(...appendixScanned.object);
-			appendixScanned.postBinds.forEach((i) => POSTBINDS.add(i));
-			appendixScanned.preBinds.forEach((i) => ATTACHMENTS.add(i));
+			appendixScanned.attachments.forEach((i) => ATTACHMENTS.add(INDEX.FIND(i).index));
 			return appendix;
-		}, []), !CACHE_STATIC.WATCH
+		}, [] as [string, string | object][]), !CACHE_STATIC.DEBUG
 	);
 
-	const bindObjects = FORGE.attachIndex(ATTACHMENTS, POSTBINDS);
-	RENDERFRAGS.PREBINDS = COMPILE.forPublish(Object.entries(bindObjects.object), !CACHE_STATIC.WATCH);
-	RENDERFRAGS.ATTACHES = COMPILE.forPublish(Object.entries(bindObjects.postBindsObject), !CACHE_STATIC.WATCH);
 
-	(CACHE_STATIC.WATCH
-		? Object.values(CACHE_DYNAMIC.Index_ClassData)
-		: CACHE_DYNAMIC.SortedIndexes.map(index => CACHE_DYNAMIC.Index_ClassData[index])
-	).reduce((a, obj) => {
-		if (obj.boundSnippet.length) a.boundsnippets.push(obj.boundSnippet);
-		if (obj.boundStyles.length) a.boundStyles.push(obj.boundStyles);
-		return a;
-	}, { boundsnippets: [], boundStyles: [] })
+	const ATTACH_STAPLES: string[] = [];
+	const ATTACH_OBJECTS = Array.from(ATTACHMENTS).map(attachment => {
+		const ClassData = INDEX.FETCH(attachment);
+		if (ClassData.attached_staple.length) {
+			ATTACH_STAPLES.push(ClassData.attached_staple);
+		}
+		return ClassData.attached_style;
+	});
 
-	return { RENDERFRAGS, PREBINDS: ATTACHMENTS, POSTBINDS, SNIPPETSHEET };
+	RENDERFRAGS.ATTACH = COMPILE.forPublish(Object.entries(ATTACH_OBJECTS), !CACHE_STATIC.DEBUG);
+
+
+
+	const STYLESHEET = Object.entries(RENDERFRAGS).map(([chapter, content]) =>
+		CACHE_STATIC.DEBUG ? `\n\n/* CHAPTER: ${chapter} */\n${content}\n` : content).join("");
+	const STAPLESHEET = ATTACH_STAPLES.join("\n");
+	const STYLETAG = `<style>${STYLESHEET}</style>`;
+	const WATCHSHEET = CACHE_STATIC.WATCH
+		? COMPILE.forPublish(Object.values(CACHE_DYNAMIC.Index_ClassData).reduce((A, D) => {
+			A.push([D.watchclass, D.object], Object.entries(D.attached_style) as [string, string | object]);
+			return A;
+		}, [] as [string, string | object][]), !CACHE_STATIC.DEBUG) : '';
+
+	return { RENDERFRAGS, STYLESHEET, STYLETAG, STAPLESHEET, INDEXSHEET, WATCHSHEET };
 }
 
 // On target stylesheet edit.
 export async function Generate() {
-	const CUMULATES = Accumulate();
-	const { SAVEFILES } = await Synthasize();
-	console.log(SAVEFILES);
-	// console.log(CUMULATES);
-	// const XRESPONSE = XTYLES.Appendix(CACHE_DYNAMIC.SortedIndexes);
+	const OUTFILES: Record<string, string> = {};
 
-	// CACHE_LIVEDOCS.TerminalDoc.library = XRESPONSE.report;
-	// CACHE_LIVEDOCS.TerminalDoc.targets = $.MOLD.std.Block(CUMULATES.report);
+	if (CACHE_LIVEDOCS.DeltaContent.length) {
+		OUTFILES[CACHE_LIVEDOCS.DeltaPath] = CACHE_LIVEDOCS.DeltaContent;
+	} else {
 
-	// if (CACHE_LIVEDOCS.FinalError.length) {
-	// 	CUMULATES.errors.push($.MOLD.failed.List(CACHE_LIVEDOCS.FinalError))
-	// }
-
-	// CACHE_LIVEDOCS.ErrorCount = CUMULATES.errors.length;
-	// CACHE_LIVEDOCS.WarningCount = XRESPONSE.warnings.length;
-	// CACHE_LIVEDOCS.TerminalDoc.errors = $.MOLD[CACHE_LIVEDOCS.ErrorCount ? "failed" : "success"].Section(
-	// 	`${CACHE_LIVEDOCS.ErrorCount} Errors & ${CACHE_LIVEDOCS.WarningCount} Warnings`,
-	// 	[...XRESPONSE.warnings, ...CUMULATES.errors]
-	// );
+		const ATTACHMENTS = await Synthasize();
+		const { RENDERFRAGS, STYLESHEET, STYLETAG, STAPLESHEET } = GenFinalSheets(ATTACHMENTS);
 
 
-	// if (PUBLISH.DeltaContent.length) {
-	// 	SAVEFILES[PUBLISH.DeltaPath] = PUBLISH.DeltaContent;
-	// } else {
-	// 	const { RENDERFRAGS, SNIPPETSHEET } = createStylesheet(CUMULATES, XRESPONSE.essentials);
+		const DeployedFiles = Object.values(CACHE_STORAGE.TARGET).reduce((acc, cache) => {
+			acc.push(...cache.SummonFiles(OUTFILES, STYLESHEET, STYLETAG, STAPLESHEET));
+			return acc;
+		}, [CACHE_LIVEDOCS.DeltaPath]);
 
-	// 	const FinalStylesheet = Object.entries(RENDERFRAGS).map(([chapter, content]) =>
-	// 		RAW.WATCH ? `\n\n/* CHAPTER: ${chapter} */\n${content}\n` : content).join("");
+		if (CACHE_STATIC.WATCH) {
+			if (CACHE_LIVEDOCS.DeltaPath.length) {
+				Object.keys(OUTFILES).forEach((filePath) => {
+					if (!DeployedFiles.includes(filePath)) { delete OUTFILES[filePath]; }
+				});
+			}
+			OUTFILES[NAVIGATE.json.manifest.path] = JSON.stringify(CACHE_LIVEDOCS.Manifest);
+		} else {
 
-	// 	const br = RAW.WATCH ? "\n" : "";
-	// 	const stylesheetBlock = `${br}<style>${FinalStylesheet}${br}</style>${br}`;
-	// 	const styleBlock = stylesheetBlock + SNIPPETSHEET;
-	// 	const summons = Object.values(STACK.PROXYCACHE).reduce((sum, cache) => {
-	// 		sum.push(...cache.SummonFiles(SAVEFILES, FinalStylesheet, styleBlock, stylesheetBlock, SNIPPETSHEET));
-	// 		return sum
-	// 	}, [PUBLISH.DeltaPath]);
+			const memChart = $$.Props.std(Object.entries(RENDERFRAGS).reduce((A, [K, V]) => {
+				A[K] = `${Use.string.stringMem(V)} Kb`.padStart(9, " ");
+				return A;
+			}, {} as Record<string, string>));
 
-	// 	if (RAW.WATCH) {
-	// 		if (PUBLISH.DeltaPath.length) {
-	// 			Object.keys(SAVEFILES).forEach((filePath) => {
-	// 				if (!summons.includes(filePath)) delete SAVEFILES[filePath];
-	// 			});
-	// 		}
+			CACHE_LIVEDOCS.Report.memChart = CACHE_LIVEDOCS.ErrorCount ?
+				$.MOLD.failed.Section(CACHE_LIVEDOCS.FinalMessage, memChart, $.list.std.Bullets) :
+				$.MOLD.success.Section(CACHE_LIVEDOCS.FinalMessage, memChart, $.list.std.Bullets);
 
-	// 		SAVEFILES[NAV.json.manifest.path] = JSON.stringify(PUBLISH.MANIFEST);
-	// 	} else {
+			CACHE_LIVEDOCS.Report.footer =
+				$.MOLD.std.Footer(`Output size : ${Use.string.stringMem(STYLESHEET)} Kb`.padStart(9, " "));
+		}
+	}
 
-	// 		const memChart = {
-	// 			Index: Use.string.stringMem(RENDERFRAGS.INDEX),
-	// 			Essentials: Use.string.stringMem(RENDERFRAGS.ESSENTIALS),
-	// 			Prebinds: Use.string.stringMem(RENDERFRAGS.PREBINDS),
-	// 			Rendered: Use.string.stringMem(RENDERFRAGS.RENDERED),
-	// 			Postbinds: Use.string.stringMem(RENDERFRAGS.POSTBINDS),
-	// 			Appendix: Use.string.stringMem(RENDERFRAGS.APPENDIX),
-	// 		};
-	// 		PUBLISH.Report.memChart = $.MOLD[PUBLISH.ErrorCount ? "failed" : "success"]
-	// 			.Section(PUBLISH.FinalMessage,
-	// 				Object.entries(memChart).reduce((ch, [k, v]) => {
-	// 					ch[k] = `${v} Kb`.padStart(9, " ");
-	// 					return ch;
-	// 				}, {}), $.list.std.Props);
-
-	// 		PUBLISH.Report.footer = $.MOLD.std.Footer(
-	// 			"Output size :  " +
-	// 			`${Use.string.stringMem(FinalStylesheet)} Kb`.padStart(9, " "),
-	// 		);
-	// 	}
-	// }
-
-	CACHE_LIVEDOCS.DeltaPath = ""; CACHE_LIVEDOCS.DeltaContent = "";
+	CACHE_LIVEDOCS.DeltaPath = "";
+	CACHE_LIVEDOCS.DeltaContent = "";
 
 	return {
-		SaveFiles: SAVEFILES,
+		SaveFiles: OUTFILES,
 		ConsoleReport: $.MOLD.std.Block(
-			Object.values(CACHE_LIVEDOCS.ShellDoc).filter((string) => string !== ""),
+			Object.values(CACHE_LIVEDOCS.Report).filter((string) => string !== ""),
 		),
 	};
 }
