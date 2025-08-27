@@ -57,7 +57,9 @@ export function SetENV(rootPath: string, workPath: string, packageEssential: TYP
         });
     });
 
-    console.log(CACHE);
+    console.log(CACHE.STATIC);
+    console.log(CACHE._ROOT);
+    console.log(CACHE._SYNC);
 }
 
 export function MemoryUsage() {

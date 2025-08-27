@@ -236,20 +236,16 @@ export default class C_Proxy {
 		Object.values(this.fileCache).forEach((file) => {
 			if (file.extension !== "xcss") {
 				let fileContent = file.midway;
-				if (file.styleData.hasStyleTag) {
-					fileContent = stringReplacementByPosition(
-						fileContent,
-						file.styleData.stapleTagReplaces,
-						AttachBlock
-					);
-				}
-				if (file.styleData.hasStapleTag) {
-					fileContent = stringReplacementByPosition(
-						fileContent,
-						file.styleData.styleTagReplaces,
-						AttachBlock
-					);
-				}
+				fileContent = stringReplacementByPosition(
+					fileContent,
+					file.styleData.stapleTagReplaces,
+					AttachBlock
+				);
+				fileContent = stringReplacementByPosition(
+					fileContent,
+					file.styleData.styleTagReplaces,
+					StyleBlock
+				);
 				DeployedFiles.push(file.sourcePath);
 				SaveFiles[file.sourcePath] = fileContent;
 			}

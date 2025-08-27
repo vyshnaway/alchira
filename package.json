@@ -16,8 +16,8 @@
   },
   "scripts": {
     "init": "chmod +x ./execute/script/chmod.sh && ./execute/script/chmod.sh && xcss init",
-    "dev:tscompile": "tsc -p ./typescript",
-    "dev:escompile": "node ./execute/script/esbuild.js",
+    "ts:compile": "tsc -p ./typescript",
+    "es:compile": "node ./execute/script/esbuild.js",
     "dev:package": "chmod +x ./execute/script/build.sh && ./execute/script/build.sh",
     "dev:publish": "node ./execute/script/publish.js"
   },

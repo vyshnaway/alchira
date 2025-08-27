@@ -63,6 +63,7 @@ export interface Data_ROOT {
 export interface Data_Source {
     path: string,
     frags: string[],
+    essential?: boolean,
     content?: string,
     title?: string,
     url?: string,
@@ -196,9 +197,7 @@ export interface FILE_Storage {
         globalClasses: Record<string, number>,
         publicClasses: Record<string, number>,
         styleMap: Record<string, ClassMeta>,
-        hasStyleTag: boolean,
         styleTagReplaces: [number, number][],
-        hasStapleTag: boolean,
         stapleTagReplaces: [number, number][],
     }
 }

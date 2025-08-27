@@ -8,7 +8,7 @@ import * as CACHE from "./Data/cache.js";
 import * as ACTION from "./Data/action.js";
 import * as worker from "./Data/watcher.js";
 
-import fileman from "./fileman.js";
+// import fileman from "./fileman.js";
 import { MemoryUsage } from "./Data/action.js";
 import Use from "./Utils/main.js";
 // import { FetchPortables, SplitGlobalForComponents } from "./portable.js";
@@ -26,7 +26,7 @@ function reporter(heading: string, targets: string[], report: string) {
 async function execute(chapter: string) {
     let stopWatcher: null | (() => void) = null;
     let OutFiles: Record<string, string> = {};
-    let SaveAction: Promise<void> | null = null;
+    // let SaveAction: Promise<void> | null = null;
     let report = "",
         targets: string[] = [],
         reportNext = false,
@@ -96,9 +96,10 @@ async function execute(chapter: string) {
             }
             case "Publish": {
                 if (Object.keys(OutFiles).length) {
-                    if (SaveAction) {
-                        await SaveAction;
-                    }
+                    // if (SaveAction) {
+                    //     await SaveAction;
+                    // }
+                    // console.log(OutFiles)
                     // SaveAction = fileman.write.bulk(OutFiles);
                 }
                 if (reportNext) {

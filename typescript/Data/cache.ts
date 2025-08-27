@@ -52,165 +52,6 @@ export const _ROOT: TYPE.Data_ROOT = {
     }
 };
 
-export const _SYNC: Record<string, Record<string, TYPE.Data_Source>> = {
-    MARKDOWN: {
-        readme: {
-            title: "README",
-            url: "readme.md",
-            path: "",
-            content: "",
-            frags: ["readme.md"],
-        },
-        alerts: {
-            title: "ALERTS",
-            url: "alerts.md",
-            path: "",
-            content: "",
-            frags: ["alerts.md"],
-        },
-        changelog: {
-            title: "CHANGELOG",
-            url: "changelog.md",
-            path: "",
-            content: "",
-            frags: ["changelog.md"],
-        },
-    },
-    AGREEMENT: {
-        license: {
-            title: "LICENSE",
-            url: "agreements-txt/license.txt",
-            path: "",
-            content: "",
-            frags: ["agreements", "license.txt"],
-        },
-        terms: {
-            title: "TERMS & CONDITIONS",
-            url: "agreements-txt/terms.txt",
-            path: "",
-            content: "",
-            frags: ["agreements", "terms.txt"],
-        },
-        privacy: {
-            title: "PRIVACY POLICY",
-            url: "agreements-txt/privacy.txt",
-            path: "agreements/privacy.txt",
-            frags: ["agreements", "privacy.txt"],
-            content: "",
-        },
-    }
-};
-
-export const _PATH: Record<string, Record<string, TYPE.Data_Source>> = {
-    blueprint: {
-        scaffold: {
-            frags: ["blueprint", "scaffold"],
-            path: "",
-            content: "",
-        },
-        libraries: {
-            frags: ["blueprint", "libraries"],
-            path: "",
-            content: "",
-        },
-        prefixes: {
-            frags: ["blueprint", "prefixes.json"],
-            path: "",
-            content: "",
-        },
-    },
-    folder: {
-        setup: {
-            frags: ["xtyles"],
-            path: "",
-            content: "",
-        },
-        autogen: {
-            frags: ["xtyles", "autogen"],
-            path: "",
-            content: "",
-        },
-        libraries: {
-            frags: ["xtyles", "libraries"],
-            path: "",
-            content: "",
-        },
-        packages: {
-            frags: ["xtyles", "packages"],
-            path: "",
-            content: "",
-        },
-        archives: {
-            frags: ["xtyles", "autogen", "archives"],
-            path: "",
-            content: "",
-        },
-    },
-    css: {
-        atrules: {
-            frags: ["xtyles", "#at-rules.css"],
-            path: "",
-            content: "",
-        },
-        constants: {
-            frags: ["xtyles", "#constants.css"],
-            path: "",
-            content: "",
-        },
-        elements: {
-            frags: ["xtyles", "#elements.css"],
-            path: "",
-            content: "",
-        },
-        extends: {
-            frags: ["xtyles", "#extends.css"],
-            path: "",
-            content: "",
-        },
-    },
-    json: {
-        configure: {
-            frags: ["xtyles", "configure.jsonc"],
-            path: "",
-            content: "",
-        },
-        hashrules: {
-            frags: ["xtyles", "/hashrules.jsonc"],
-            path: "",
-            content: "",
-        },
-    },
-    md: {
-        readme: {
-            frags: ["xtyles", "readme.md"],
-            path: "",
-            content: "",
-        },
-    },
-    autogen: {
-        index: {
-            path: "",
-            frags: ["xtyles", "autogen", "watch", "index.css"],
-            content: "",
-        },
-        styles: {
-            path: "",
-            frags: ["xtyles", "autogen", "watch", "styles.css"],
-            content: "",
-        },
-        ignore: {
-            path: "",
-            frags: ["xtyles", "autogen", ".gitignore"],
-            content: `watch/**\nmanifest.json`
-        },
-        manifest: {
-            path: "",
-            frags: ["xtyles", "autogen", "manifest.json"],
-            content: `{}`
-        },
-    }
-};
-
 export const _PREFIX: TYPE.Data_PREFIX = {
     atrules: {},
     attributes: {},
@@ -225,7 +66,8 @@ export const _TWEAKS: TYPE.Data_TWEAKS = {
 };
 
 
-// --- CACHE DECLARE ---
+
+// --- Cache Declare ---
 
 export const LIVEDOCS: TYPE.CACHE_LIVEDOCS = {
     DeltaPath: "",
@@ -314,4 +156,177 @@ export const STORAGE: TYPE.CACHE_STORAGE = {
     LIBRARIES: {},
     PACKAGES: {},
     TARGET: {}
+};
+
+
+
+// --- Path Declare --- 
+
+export const _SYNC: Record<string, Record<string, TYPE.Data_Source>> = {
+    MARKDOWN: {
+        readme: {
+            title: "README",
+            url: "readme.md",
+            path: "",
+            content: "",
+            frags: ["readme.md"],
+        },
+        alerts: {
+            title: "ALERTS",
+            url: "alerts.md",
+            path: "",
+            content: "",
+            frags: ["alerts.md"],
+        },
+        changelog: {
+            title: "CHANGELOG",
+            url: "changelog.md",
+            path: "",
+            content: "",
+            frags: ["changelog.md"],
+        },
+    },
+    AGREEMENT: {
+        license: {
+            title: "LICENSE",
+            url: "agreements-txt/license.txt",
+            path: "",
+            content: "",
+            frags: ["agreements", "license.txt"],
+        },
+        terms: {
+            title: "TERMS & CONDITIONS",
+            url: "agreements-txt/terms.txt",
+            path: "",
+            content: "",
+            frags: ["agreements", "terms.txt"],
+        },
+        privacy: {
+            title: "PRIVACY POLICY",
+            url: "agreements-txt/privacy.txt",
+            path: "agreements/privacy.txt",
+            frags: ["agreements", "privacy.txt"],
+            content: "",
+        },
+    }
+};
+
+export const _PATH: Record<string, Record<string, TYPE.Data_Source>> = {
+    blueprint: {
+        archive: {
+            frags: ["blueprint", "archive"],
+            path: "",
+            content: "",
+        },
+        libraries: {
+            frags: ["blueprint", "libraries"],
+            path: "",
+            content: "",
+        },
+        scaffold: {
+            frags: ["blueprint", "scaffold"],
+            path: "",
+            content: "",
+        },
+        prefixes: {
+            frags: ["blueprint", "prefixes.json"],
+            path: "",
+            content: "",
+        },
+    },
+    folder: {
+        setup: {
+            frags: ["xtyles"],
+            path: "",
+            content: "",
+        },
+        autogen: {
+            frags: ["xtyles", "autogen"],
+            path: "",
+            content: "",
+        },
+        libraries: {
+            frags: ["xtyles", "libraries"],
+            path: "",
+            content: "",
+        },
+        packages: {
+            frags: ["xtyles", "packages"],
+            path: "",
+            content: "",
+        },
+        archive: {
+            frags: ["xtyles", "archive"],
+            path: "",
+            content: "",
+        },
+    },
+    css: {
+        atrules: {
+            frags: ["xtyles", "#at-rules.css"],
+            path: "",
+            content: "",
+        },
+        constants: {
+            frags: ["xtyles", "#constants.css"],
+            path: "",
+            content: "",
+        },
+        elements: {
+            frags: ["xtyles", "#elements.css"],
+            path: "",
+            content: "",
+        },
+        extends: {
+            frags: ["xtyles", "#extends.css"],
+            path: "",
+            content: "",
+        },
+    },
+    json: {
+        configure: {
+            frags: ["xtyles", "configure.jsonc"],
+            path: "",
+            content: "",
+        },
+        hashrules: {
+            frags: ["xtyles", "hashrules.jsonc"],
+            path: "",
+            content: "",
+        },
+    },
+    md: {
+        readme: {
+            frags: ["xtyles", "readme.md"],
+            path: "",
+            content: "",
+        },
+        reference: {
+            frags: ["xtyles", "reference.md"],
+            path: "",
+            content: "",
+        },
+    },
+    autogen: {
+        index: {
+            path: "",
+            frags: ["xtyles", "autogen", "watch", "index.css"],
+            content: "",
+        },
+        styles: {
+            path: "",
+            frags: ["xtyles", "autogen", "watch", "styles.css"],
+            content: "",
+        },
+        ignore: {
+            path: "",
+            frags: ["xtyles", "autogen", ".gitignore"],
+            content: "*\n!.gitignore"
+        },
+        manifest: {
+            path: "",
+            frags: ["xtyles", "autogen", "manifest.json"],
+            content: JSON.stringify(LIVEDOCS.Manifest)
+        },
+    }
 };

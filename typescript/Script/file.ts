@@ -13,8 +13,8 @@ export default function scanner(
 	classProps: string[] = [],
 	action: TYPE.ScriptParseActions = "read"
 ) {
-	fileData.styleData.hasStyleTag = false;
-	fileData.styleData.hasStapleTag = false;
+	fileData.styleData.styleTagReplaces.length = 0;
+	fileData.styleData.stapleTagReplaces.length = 0;
 
 	const stylesList = [];
 	const content = fileData.content;
@@ -36,16 +36,14 @@ export default function scanner(
 			let subScribed = '';
 			const tagStart = fileCursor.active.marker;
 			const res = TAGSCAN(fileData, classProps, action, fileCursor);
-			const fragment = content.slice(tagStart + 1, res.styleDeclarations.tagOpenMarker);
+			const fragment = content.slice(tagStart, res.styleDeclarations.tagOpenMarker);
 
 			if (res.ok) {
 				switch (fragment) {
 					case TagSummonStyle:
-						fileData.styleData.hasStyleTag = true;
 						fileData.styleData.styleTagReplaces.push([tagStart, fileCursor.active.marker]);
 						break;
 					case TagSummonStaple:
-						fileData.styleData.hasStapleTag = true;
 						fileData.styleData.stapleTagReplaces.push([tagStart, fileCursor.active.marker]);
 						break;
 				}

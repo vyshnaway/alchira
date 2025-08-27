@@ -45,7 +45,7 @@ function EvaluateIndexTraces(
 			classMap = CACHE.DYNAMIC.Sync_ClassDictionary[JSON.stringify(indexSetback)] || {};
 		} else {
 			if (action === "watch") {
-				classMap = Object.fromEntries(class_trace.map(([K, V]) => [V, metaFront + INDEX.FETCH(K).watchclass]));
+				classMap = Object.fromEntries(class_trace.map(([_, V], index) => [V, metaFront + index]));
 			}
 			if (action === "monitor") {
 				classMap = Object.fromEntries(class_trace.map(([K, V]) => [V, metaFront + INDEX.FETCH(K).debugclass]));

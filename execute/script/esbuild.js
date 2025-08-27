@@ -29,13 +29,12 @@ clearFolder(destination);
 esbuild.build({
     entryPoints: ['typescript/main.ts'],
     bundle: true,
-    minify: false,
+    minify: true,
     outfile: destination + 'main.js',
     target: ['node18'],
     platform: 'node',
     format: 'esm',
-    legalComments: 'none',
-    external: ['vscode', 'vscode-css-languageservice']
+    legalComments: 'none'
 })
     .then(() => {
         console.log('Js Bundling successful.');
