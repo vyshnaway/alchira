@@ -1,8 +1,8 @@
 import USE from "../utils/main.js";
 
-import * as TYPE from "../types.js";
+import * as tStyle from "../type/style.js";
 
-export default function previewOrganize(arrarr: number[][], merge = false): TYPE.OrganizedResult {
+export default function previewOrganize(arrarr: number[][], merge = false): tStyle.SortedOutput {
 
     let maxLen = 0;
 

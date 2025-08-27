@@ -1,7 +1,13 @@
-import * as TYPE from "../types.js";
+// import * as _Config from "../type/config.js";
+import * as _File from "../type/file.js";
+// import * as _Style from "../type/style.js";
+// import * as _Script from "../type/script.js";
+// import * as _Cache from "../type/cache.js";
+// import * as _Support from "../type/support.js";
 
-function Initialize(content: string): TYPE.FileScanBuffer {
-    const fileScanner: TYPE.FileScanBuffer = {
+
+function Initialize(content: string): _File.Reader {
+    const fileScanner: _File.Reader = {
         content,
         active: {
             char: '',
@@ -31,7 +37,7 @@ function Initialize(content: string): TYPE.FileScanBuffer {
     return fileScanner;
 }
 
-function Incremnet(fileScanner: TYPE.FileScanBuffer) {
+function Incremnet(fileScanner: _File.Reader) {
     fileScanner.active.char = fileScanner.content[++fileScanner.active.marker];
     if (fileScanner.active.char === "\n") {
         fileScanner.active.rowMarker++;
@@ -43,7 +49,7 @@ function Incremnet(fileScanner: TYPE.FileScanBuffer) {
     return fileScanner.active.char;
 }
 
-function Decrement(fileScanner: TYPE.FileScanBuffer) {
+function Decrement(fileScanner: _File.Reader) {
     fileScanner.active.char = fileScanner.content[--fileScanner.active.marker];
     if (fileScanner.active.char === "\n") {
         fileScanner.active.rowMarker--;

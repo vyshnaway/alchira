@@ -1,7 +1,13 @@
+// import * as _Config from "./type/config.js";
+// import * as _File from "./type/file.js";
+// import * as _Style from "./type/style.js";
+// import * as _Script from "./type/script.js";
+// import * as _Cache from "./type/cache.js";
+import * as _Support from "./type/support.js";
+
 /* eslint-disable no-fallthrough */
 import $ from "./shell/main.js";
 import * as $$ from "./shell.js";
-import * as TYPE from "./types.js";
 import * as SMITH from "./assemble.js";
 import * as FETCH from "./data/fetch.js";
 import * as CACHE from "./data/cache.js";
@@ -30,7 +36,7 @@ async function execute(chapter: string) {
     let report = "",
         targets: string[] = [],
         reportNext = false,
-        step = "Initialize",
+        step = "VerifySetupStruct",
         staticsFetched = false,
         heading = "Initial Build";
 
@@ -39,7 +45,6 @@ async function execute(chapter: string) {
     do {
 
         switch (step) {
-            case "Initialize":
             case "VerifySetupStruct": {
                 const verifyStructResult = await FETCH.VerifySetupStruct();
                 if (!verifyStructResult.proceed) {
@@ -121,7 +126,7 @@ async function execute(chapter: string) {
 
                 if (!stopWatcher) {
                     targets = Object.keys(CACHE.STORAGE.TARGET);
-                    const targetFolders = [...targets, CACHE._PATH.folder.setup.path];
+                    const targetFolders = [...targets, CACHE.PATH.folder.setup.path];
                     process.on("SIGINT", () => {
                         if (stopWatcher) {
                             stopWatcher();
@@ -138,31 +143,31 @@ async function execute(chapter: string) {
                     const event = worker.EventQueue.dequeue();
                     if (!event) { break; }
                     const filePath = `${event.folder}/${event.filePath}`;
-                    if (filePath.startsWith(CACHE._PATH.folder.autogen.path)) {
+                    if (filePath.startsWith(CACHE.PATH.folder.autogen.path)) {
                         break;
                     } else {
-                        if (event.folder === CACHE._PATH.folder.setup.path) {
+                        if (event.folder === CACHE.PATH.folder.setup.path) {
                             if (event.action === "add" || event.action === "change") {
                                 switch (filePath) {
-                                    case CACHE._PATH.json.configure.path:
+                                    case CACHE.PATH.json.configure.path:
                                         stopWatcher();
                                         stopWatcher = null;
                                         step = "VerifyConfigure";
                                         break;
-                                    case CACHE._PATH.css.atrules.path:
-                                    case CACHE._PATH.css.constants.path:
-                                    case CACHE._PATH.css.elements.path:
-                                    case CACHE._PATH.css.extends.path:
+                                    case CACHE.PATH.css.atrules.path:
+                                    case CACHE.PATH.css.constants.path:
+                                    case CACHE.PATH.css.elements.path:
+                                    case CACHE.PATH.css.extends.path:
                                         await FETCH.SaveRootCSS();
                                         step = "GenerateFinals";
                                         break;
-                                    case CACHE._PATH.json.hashrules.path:
+                                    case CACHE.PATH.json.hashrules.path:
                                         step = "ReadHashrules";
                                         break;
                                     default:
-                                        if (filePath.startsWith(CACHE._PATH.folder.library.path) && event.extension === "css") {
+                                        if (filePath.startsWith(CACHE.PATH.folder.library.path) && event.extension === "css") {
                                             CACHE.STATIC.Library_Saved[filePath] = event.fileContent;
-                                        } else if (filePath.startsWith(CACHE._PATH.folder.portables.path) && ["xcss", "css", "md"].includes(event.extension)) {
+                                        } else if (filePath.startsWith(CACHE.PATH.folder.portables.path) && ["xcss", "css", "md"].includes(event.extension)) {
                                             CACHE.STATIC.Package_Saved[filePath] = event.fileContent;
                                         }
                                         step = "ProcessXtylesFolder";
@@ -208,7 +213,7 @@ async function commander({
     workPath: string,
     projectName: string,
     projectVersion: string,
-    rootPackageEssential: TYPE.PackageEssential
+    rootPackageEssential: _Support.PackageEssential
 }) {
     CACHE.STATIC.Command = command;
     CACHE.STATIC.Argument = argument;
@@ -219,7 +224,7 @@ async function commander({
     ACTION.SetENV(rootPath, workPath, originPackageEssential);
     $.init(command !== "debug" && command !== "archive");
 
-    const APP_VERSION = `${CACHE._ROOT.name} @ ${CACHE._ROOT.version}`;
+    const APP_VERSION = `${CACHE.ROOT.name} @ ${CACHE.ROOT.version}`;
 
     switch (CACHE.STATIC.Command) {
         case "init": {
@@ -271,14 +276,14 @@ async function commander({
 
             $.POST(
                 $.MAKE($.tag.H1(APP_VERSION),
-                    CACHE._SYNC.MARKDOWN.alerts.content ? [CACHE._SYNC.MARKDOWN.alerts.content] : []
+                    CACHE.SYNC.MARKDOWN.alerts.content ? [CACHE.SYNC.MARKDOWN.alerts.content] : []
                 )
             );
 
             $.POST(
                 $.MAKE(
                     "Available Commands",
-                    $$.PropMap(CACHE._ROOT.commandList, []),
+                    $$.PropMap(CACHE.ROOT.commandList, []),
                     [$.list.Bullets, 0, $.preset.primary]
                 ),
             );
@@ -286,7 +291,7 @@ async function commander({
             $.POST(
                 $.MAKE(
                     "Agreements",
-                    $$.PropMap(Object.fromEntries(Object.values(CACHE._SYNC.AGREEMENT).map((i) => [i.title, i.path]))),
+                    $$.PropMap(Object.fromEntries(Object.values(CACHE.SYNC.AGREEMENT).map((i) => [i.title, i.path]))),
                     [$.list.Bullets, 0, $.preset.primary]
                 ),
             );
@@ -294,13 +299,13 @@ async function commander({
             $.POST(
                 $.MAKE(
                     "References",
-                    $$.PropMap(Object.fromEntries(Object.values(CACHE._SYNC.MARKDOWN).map((i) => [i.title, i.path]))),
+                    $$.PropMap(Object.fromEntries(Object.values(CACHE.SYNC.MARKDOWN).map((i) => [i.title, i.path]))),
                     [$.list.Bullets, 0, $.preset.primary]
                 ),
             );
 
             $.POST(
-                $.MAKE($.tag.H2("For more information visit : " + CACHE._ROOT.website)),
+                $.MAKE($.tag.H2("For more information visit : " + CACHE.ROOT.website)),
             );
         }
     }

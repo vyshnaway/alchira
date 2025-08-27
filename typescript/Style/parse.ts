@@ -1,3 +1,11 @@
+// import * as _Config from "../type/config.js";
+import * as _File from "../type/file.js";
+import * as _Style from "../type/style.js";
+import * as _Script from "../type/script.js";
+// import * as _Cache from "../type/cache.js";
+import * as _Support from "../type/support.js";
+
+
 import CSSBLOCK from "./block.js";
 
 import $ from "../shell/main.js";
@@ -5,7 +13,6 @@ import Use from "../utils/main.js";
 import HASHRULE from "../hash-rules.js";
 import * as CACHE from "../data/cache.js";
 import { INDEX } from "../data/action.js";
-import * as TYPE from "../types.js";
 
 function xtylemerge(classList: string[] = []) {
 	const
@@ -72,10 +79,10 @@ function CSSCANNER(content: string, initial = "") {
 	return { object, attachments, variables };
 }
 
-function CSSLIBRARY(fileDatas: TYPE.FILE_Storage[] = [], initial = "", forPortable = false) {
+function CSSLIBRARY(fileDatas: _File.Storage[] = [], initial = "", forPortable = false) {
 	const selectorList: string[] = [],
 		selectors: Record<string, number> = {},
-		indexSkeleton: Record<string, TYPE.ClassMeta> = {};
+		indexSkeleton: Record<string, _Style.Metadata> = {};
 	const IndexMap = forPortable ? CACHE.DYNAMIC.PackageClass_Index : CACHE.DYNAMIC.LibraryClass_Index;
 
 	fileDatas.forEach((source) => {
@@ -93,7 +100,7 @@ function CSSLIBRARY(fileDatas: TYPE.FILE_Storage[] = [], initial = "", forPortab
 				const InStash = INDEX.FETCH(index);
 				InStash.declarations.push(declaration);
 			} else {
-				const selectorData: TYPE.ClassData = {
+				const selectorData: _Style.Classdata = {
 					package: forPortable ? source.packageName : "",
 					scope: manifest.refer.group,
 					selector: SELECTOR,
@@ -132,8 +139,8 @@ function CSSLIBRARY(fileDatas: TYPE.FILE_Storage[] = [], initial = "", forPortab
 }
 
 function TAGSTYLE(
-	raw: TYPE.TagRawStyle,
-	file: TYPE.FILE_Storage,
+	raw: _Script.RawStyle,
+	file: _File.Storage,
 	IndexMap: Record<string, number> = {},
 ) {
 	const scope = raw.scope === "PACKAGE" ? "" : raw.scope;
@@ -141,7 +148,7 @@ function TAGSTYLE(
 	const declaration = `${file.targetPath}:${raw.rowIndex}:${raw.colIndex}`;
 
 	const object: Record<string, Record<string, object>> = {};
-	const diagnostics: TYPE.Diagnostic[] = [];
+	const diagnostics: _Support.Diagnostic[] = [];
 	const attachments: string[] = [];
 	const errors: string[] = [];
 	const variables = {};
@@ -197,7 +204,7 @@ function TAGSTYLE(
 		} else {
 			const declarations = [declaration];
 			const style_snippet = SCANNER(
-				raw.element === CACHE._ROOT.customElements["stencil"] ? raw.attachstring : '',
+				raw.element === CACHE.ROOT.customElements["stencil"] ? raw.attachstring : '',
 				`${raw.scope}:ATTACHMENT : ${file.filePath} ||`,
 				`${raw.selector}`
 			);
@@ -205,7 +212,7 @@ function TAGSTYLE(
 			Object.assign(variables, style_snippet.variables);
 
 			identity = INDEX.DECLARE({
-				package: forPackage ? file.packageName : CACHE.STATIC.Package.Name,
+				package: forPackage ? file.packageName : CACHE.STATIC.Archive.name,
 				scope: raw.scope,
 				selector: raw.selector,
 				object,
@@ -222,8 +229,8 @@ function TAGSTYLE(
 				debugclass,
 				declarations,
 				attached_style: style_snippet.object,
-				attached_staple: raw.element === CACHE._ROOT.customElements["staple"] ? raw.attachstring : "",
-				attached_stencil: raw.element === CACHE._ROOT.customElements["stencil"] ? raw.attachstring : "",
+				attached_staple: raw.element === CACHE.ROOT.customElements["staple"] ? raw.attachstring : "",
+				attached_stencil: raw.element === CACHE.ROOT.customElements["stencil"] ? raw.attachstring : "",
 			});
 			IndexMap[classname] = identity.index;
 		}

@@ -1,11 +1,11 @@
-import * as root from "./0.root.js";
-import $ from "./main.js";
+// import * as root from "./0.root.js";
+// import $ from "./main.js";
 
-$.POST($.MAKE(
-    $.tag.H2("Style Previews"),
-    Object.entries(root.style).map(([k, v]) => root.fmt(k, v)),
-    [$.list.Catalog, 0, []]
-));
+// $.POST($.MAKE(
+//     $.tag.H2("Style Previews"),
+//     Object.entries(root.style).map(([k, v]) => root.fmt(k, v)),
+//     [$.list.Catalog, 0, []]
+// ));
 
 
 // [

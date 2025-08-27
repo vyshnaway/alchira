@@ -3,11 +3,11 @@ import palletes from "./color.js";
 import Use from "../utils/main.js";
 import * as CACHE from "../data/cache.js";
 
-const VENDORS = CACHE._ROOT.vendors;
+const VENDORS = CACHE.ROOT.vendors;
 
 
 function forAttribute(content: string, prefixes = VENDORS) {
-	const attrVals = CACHE._PREFIX.attributes[content];
+	const attrVals = CACHE.STATIC.Prefix.attributes[content];
 	if (!attrVals) { return { "": content }; }
 
 	const result: Record<string, string> = {};
@@ -21,7 +21,7 @@ function forAttribute(content: string, prefixes = VENDORS) {
 
 function forValues(attribute: string, value: string, prefixes = VENDORS) {
 	const cleanValue = Use.code.uncomment.Css(value);
-	const venVals = CACHE._PREFIX.values?.[attribute]?.[cleanValue];
+	const venVals = CACHE.STATIC.Prefix.values?.[attribute]?.[cleanValue];
 	if (!venVals) { return { "": value }; }
 
 	const result: Record<string, string> = {};
@@ -68,8 +68,8 @@ export function forAtRule(
 
 	const result: Record<string, string> = {};
 	prefixes.forEach((group) => {
-		if (CACHE._PREFIX.atrules[rule] && CACHE._PREFIX.atrules[rule][group]) {
-			result[group] = CACHE._PREFIX.atrules[rule][group] + data;
+		if (CACHE.STATIC.Prefix.atrules[rule] && CACHE.STATIC.Prefix.atrules[rule][group]) {
+			result[group] = CACHE.STATIC.Prefix.atrules[rule][group] + data;
 		}
 	}, {});
 	result[""] = content;
@@ -88,12 +88,12 @@ export function forPseudos(
 
 		prefixes.forEach((group) => {
 			result[group].out = string.replace(/:+[\w-]+/g, (selector) => {
-				if (CACHE._PREFIX.pseudos[selector] && CACHE._PREFIX.pseudos[selector][group]) {
+				if (CACHE.STATIC.Prefix.pseudos[selector] && CACHE.STATIC.Prefix.pseudos[selector][group]) {
 					result[group].score++;
-					return CACHE._PREFIX.pseudos[selector][group];
+					return CACHE.STATIC.Prefix.pseudos[selector][group];
 				}
 
-				if (CACHE._PREFIX.pseudos[selector]) {
+				if (CACHE.STATIC.Prefix.pseudos[selector]) {
 					return selector;
 				}
 

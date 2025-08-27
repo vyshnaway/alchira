@@ -1,24 +1,30 @@
+// import * as _Config from "../type/config.js";
+import * as _File from "../type/file.js";
+// import * as _Style from "../type/style.js";
+import * as _Script from "../type/script.js";
+// import * as _Cache from "../type/cache.js";
+// import * as _Support from "../type/support.js";
+
 import CURSOR from "./_cursor.js";
 import TAGSCAN from './tag.js';
 
 import * as CACHE from '../data/cache.js';
-import * as TYPE from "../types.js";
 
-const TagSummonStyle = `<${CACHE._ROOT.customElements["style"]}/>`;
-const TagSummonStaple = `<${CACHE._ROOT.customElements["staple"]}/>`;
-const CustomTagElements = Object.values(CACHE._ROOT.customElements);
+const TagSummonStyle = `<${CACHE.ROOT.customElements["style"]}/>`;
+const TagSummonStaple = `<${CACHE.ROOT.customElements["staple"]}/>`;
+const CustomTagElements = Object.values(CACHE.ROOT.customElements);
 
 export default function scanner(
-	fileData: TYPE.FILE_Storage,
+	fileData: _File.Storage,
 	classProps: string[] = [],
-	action: TYPE.ScriptParseActions = "read"
+	action: _Script.Actions = "read"
 ) {
 	fileData.styleData.styleTagReplaces.length = 0;
 	fileData.styleData.stapleTagReplaces.length = 0;
 
 	const stylesList = [];
 	const content = fileData.content;
-	const tagTrack: TYPE.TagRawStyle[] = [];
+	const tagTrack: _Script.RawStyle[] = [];
 	const classesList: string[][] = [];
 	const attachments = new Set<string>();
 	const fileCursor = CURSOR.Initialize(fileData.content);

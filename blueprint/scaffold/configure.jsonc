@@ -2,7 +2,7 @@
   "name": "",
   "version": "",
   "vendors": "none",
-  "proxy": [
+  "proxymap": [
     {
       "source": "src",
       "target": "xrc",

@@ -1,14 +1,20 @@
+import * as _Config from "../type/config.js";
+// import * as _File from "../type/file.js";
+// import * as _Style from "../type/style.js";
+// import * as _Script from "../type/script.js";
+import * as _Cache from "../type/cache.js";
+// import * as _Support from "../type/support.js";
+
 import $ from "../shell/main.js";
 import FILEMAN from "../fileman.js";
 
 import * as $$ from "../shell.js";
-import * as TYPE from "../types.js";
 import * as CACHE from "./cache.js";
 import * as WORKER from "./watcher.js";
 import * as ACTION from "./action.js";
 
 export async function FetchDocs() {
-	await Promise.all(Object.values(CACHE._SYNC).map(sync => {
+	await Promise.all(Object.values(CACHE.SYNC).map(sync => {
 		Object.values(sync).map(async s => {
 			if (s.url && s.path) {
 				s.content = await FILEMAN.sync.file(s.url, s.path);
@@ -22,15 +28,15 @@ export async function Initialize() {
 		$.TASK("Initializing XCSS setup.", 0);
 		$.TASK("Cloning scaffold to Project");
 
-		await FILEMAN.clone.safe(CACHE._PATH.blueprint.scaffold.path, CACHE._PATH.folder.setup.path);
-		await FILEMAN.clone.safe(CACHE._PATH.blueprint.libraries.path, CACHE._PATH.folder.libraries.path);
+		await FILEMAN.clone.safe(CACHE.PATH.blueprint.scaffold.path, CACHE.PATH.folder.setup.path);
+		await FILEMAN.clone.safe(CACHE.PATH.blueprint.libraries.path, CACHE.PATH.folder.libraries.path);
 
 		$.POST(
 			$.MAKE(
 				$.tag.H2("Next Steps"),
 				[
 					"Adjust " +
-					$.FMT(CACHE._PATH.json.configure.path, $.style.AS_Bold, ...$.preset.primary) +
+					$.FMT(CACHE.PATH.json.configure.path, $.style.AS_Bold, ...$.preset.primary) +
 					" according to the requirements of your project.",
 					"Execute " +
 					$.FMT('"init"', $.style.AS_Bold, ...$.preset.primary) +
@@ -40,7 +46,7 @@ export async function Initialize() {
 					" folder will be cloned from " +
 					$.FMT("{source}", $.style.AS_Bold, ...$.preset.primary) +
 					" folder.",
-					"This folder will act as proxy for " + CACHE._ROOT.name + ".",
+					"This folder will act as proxy for " + CACHE.ROOT.name + ".",
 					"In the " +
 					$.FMT("{target}/{stylesheet}", $.style.AS_Bold, ...$.preset.primary) +
 					", content from " +
@@ -54,7 +60,7 @@ export async function Initialize() {
 		$.POST(
 			$.MAKE(
 				$.tag.H2("Available Commands"),
-				$$.PropMap(CACHE._ROOT.commandList),
+				$$.PropMap(CACHE.ROOT.commandList),
 				[$.list.Bullets, 0, []]
 			),
 		);
@@ -62,13 +68,13 @@ export async function Initialize() {
 		$.POST(
 			$.MAKE(
 				$.tag.H2("Publish command instructions."),
-				CACHE._ROOT.version === "0"
+				CACHE.ROOT.version === "0"
 					? ["This command uses an internet connection."]
 					: [
 						"Create a new project and use its access key. For action visit " +
-						$.FMT(CACHE._ROOT.URL.Console, $.style.AS_Bold, ...$.preset.primary),
+						$.FMT(CACHE.ROOT.URL.Console, $.style.AS_Bold, ...$.preset.primary),
 						"For personal projects, you can use the key in " +
-						$.FMT(CACHE._PATH.json.configure.path, $.style.AS_Bold, ...$.preset.primary),
+						$.FMT(CACHE.PATH.json.configure.path, $.style.AS_Bold, ...$.preset.primary),
 						"If using in CI/CD workflow, it is suggested to use " +
 						$.FMT("xcss publish {key}", $.style.AS_Bold, ...$.preset.primary),
 					],
@@ -89,19 +95,19 @@ export async function Initialize() {
 export async function VerifySetupStruct() {
 	const result = { started: false, proceed: false, report: "" };
 
-	if (FILEMAN.path.ifFolder(CACHE._PATH.folder.setup.path)) {
+	if (FILEMAN.path.ifFolder(CACHE.PATH.folder.setup.path)) {
 		const errors: Record<string, string> = {};
-		await FILEMAN.clone.safe(CACHE._PATH.blueprint.scaffold.path, CACHE._PATH.folder.setup.path);
+		await FILEMAN.clone.safe(CACHE.PATH.blueprint.scaffold.path, CACHE.PATH.folder.setup.path);
 
 		$.TASK("Verifying directory status", 0);
-		for (const item of Object.values(CACHE._PATH.css)) {
+		for (const item of Object.values(CACHE.PATH.css)) {
 			const path = item.path;
 			$.STEP("Path : " + path);
 			if (!FILEMAN.path.ifFile(path)) {
 				errors[path] = "File not found.";
 			}
 		}
-		for (const item of Object.values(CACHE._PATH.json)) {
+		for (const item of Object.values(CACHE.PATH.json)) {
 			const path = item.path;
 			$.STEP("Path : " + path);
 			if (!FILEMAN.path.ifFile(path)) {
@@ -129,15 +135,15 @@ export async function VerifySetupStruct() {
 
 export async function FetchStatics(vendorSource: string) {
 
-	const manifestIgnores = (await FILEMAN.read.file(CACHE._PATH.autogen.ignore.path)).data.split("\n");
-	const modPts = (CACHE._PATH.autogen.ignore.content || "").split("\n").reduce((modPts: number, ign) => {
+	const manifestIgnores = (await FILEMAN.read.file(CACHE.PATH.autogen.ignore.path)).data.split("\n");
+	const modPts = (CACHE.PATH.autogen.ignore.content || "").split("\n").reduce((modPts: number, ign) => {
 		if (!manifestIgnores.includes(ign)) {
 			manifestIgnores.push(ign);
 			modPts++;
 		}
 		return modPts;
 	}, 0);
-	if (modPts) { await FILEMAN.write.file(CACHE._PATH.autogen.ignore.path, manifestIgnores.join("\n")); }
+	if (modPts) { await FILEMAN.write.file(CACHE.PATH.autogen.ignore.path, manifestIgnores.join("\n")); }
 
 
 	$.TASK("Loading vendor-prefixes");
@@ -146,18 +152,18 @@ export async function FetchStatics(vendorSource: string) {
 		const result1 = await FILEMAN.read.json(vendorSource, true);
 		if (result1.status) { return result1.data; };
 
-		const result2 = await FILEMAN.read.json(CACHE._ROOT.URL.PrefixCdn + vendorSource, true);
+		const result2 = await FILEMAN.read.json(CACHE.ROOT.URL.PrefixCdn + vendorSource, true);
 		if (result2.status) { return result2.data; };
 
-		const result3 = await FILEMAN.read.json(CACHE._PATH.blueprint.prefixes.path, false);
+		const result3 = await FILEMAN.read.json(CACHE.PATH.blueprint.prefixes.path, false);
 		if (result3.status) { return result3.data; };
 
 		return {};
-	})() as TYPE.Data_PREFIX;
-	await FILEMAN.write.json(CACHE._PATH.blueprint.prefixes.path, PrefixObtained);
+	})() as _Cache.PREFIX;
+	await FILEMAN.write.json(CACHE.PATH.blueprint.prefixes.path, PrefixObtained);
 
 
-	const PrefixRead: TYPE.Data_PREFIX = {
+	const PrefixRead: _Cache.PREFIX = {
 		attributes: {},
 		pseudos: {},
 		values: {},
@@ -167,7 +173,7 @@ export async function FetchStatics(vendorSource: string) {
 	};
 
 	for (const key in PrefixRead) {
-		const typedKey = key as keyof TYPE.Data_PREFIX;
+		const typedKey = key as keyof _Cache.PREFIX;
 		const valueFromObtained = PrefixObtained[typedKey];
 		if (typedKey === 'values') {
 			PrefixRead[typedKey] = valueFromObtained as Record<string, Record<string, Record<string, string>>>;
@@ -175,10 +181,10 @@ export async function FetchStatics(vendorSource: string) {
 			PrefixRead[typedKey] = valueFromObtained as Record<string, Record<string, string>>;
 		}
 	}
-	CACHE._PREFIX.pseudos = { ...PrefixRead.classes, ...PrefixRead.elements, ...PrefixRead.pseudos };
-	CACHE._PREFIX.attributes = { ...PrefixRead.attributes };
-	CACHE._PREFIX.atrules = { ...PrefixRead.atrules };
-	CACHE._PREFIX.values = { ...PrefixRead.values };
+	CACHE.STATIC.Prefix.pseudos = { ...PrefixRead.classes, ...PrefixRead.elements, ...PrefixRead.pseudos };
+	CACHE.STATIC.Prefix.attributes = { ...PrefixRead.attributes };
+	CACHE.STATIC.Prefix.atrules = { ...PrefixRead.atrules };
+	CACHE.STATIC.Prefix.values = { ...PrefixRead.values };
 	ACTION.collectVendors();
 }
 
@@ -186,24 +192,24 @@ export async function VerifyConfigure(loadStatics: boolean) {
 	$.TASK("Initializing configs", 0);
 	const errors: string[] = [], alerts: string[] = [];
 
-	$.STEP("PATH : " + CACHE._PATH.json.configure.path);
-	const config = await FILEMAN.read.json(CACHE._PATH.json.configure.path);
+	$.STEP("PATH : " + CACHE.PATH.json.configure.path);
+	const config = await FILEMAN.read.json(CACHE.PATH.json.configure.path);
 	if (config.status) {
-		const CONFIG = config.data as TYPE.Config;
+		const CONFIG = config.data as _Config.Raw;
 		if (loadStatics) { await FetchStatics(CONFIG.vendors); }
 		ACTION.collectTWEAKS(CONFIG.tweaks);
 
-		CACHE.STATIC.ProxyMap = (Array.isArray(CONFIG.proxy)) ? CONFIG.proxy.reduce((acc, proxy) => {
+		CACHE.STATIC.ProxyMap = (Array.isArray(CONFIG.proxymap)) ? CONFIG.proxymap.reduce((acc, proxy) => {
 			if (typeof proxy === "object") {
 				acc.push(proxy);
 			}
 			return acc;
-		}, [] as TYPE.ProxyMap[]) : [];
+		}, [] as _Config.ProxyMap[]) : [];
 
-		Object.assign(CACHE.STATIC.Package, config.data);
-		CACHE.STATIC.Package.Readme = (await FILEMAN.read.file(CACHE._PATH.md.readme.path)).data;
-		CACHE.STATIC.Package.Name = CACHE.STATIC.Package.Name = CONFIG.Name || CACHE.STATIC.Project_Name;
-		CACHE.STATIC.Package.Version = CACHE.STATIC.Package.Version = CONFIG.Version || CACHE.STATIC.Project_Version;
+		Object.assign(CACHE.STATIC.Archive, config.data);
+		CACHE.STATIC.Archive.readme = (await FILEMAN.read.file(CACHE.PATH.md.readme.path)).data;
+		CACHE.STATIC.Archive.name = CACHE.STATIC.Archive.name = CONFIG.name || CACHE.STATIC.Project_Name;
+		CACHE.STATIC.Archive.version = CACHE.STATIC.Archive.version = CONFIG.version || CACHE.STATIC.Project_Version;
 		CACHE.STATIC.Package_Saved = Object.entries((typeof CONFIG.packages === "object") ? CONFIG.packages : {})
 			.reduce((a: Record<string, string>, [k, v]) => {
 				if (
@@ -216,15 +222,15 @@ export async function VerifyConfigure(loadStatics: boolean) {
 				return a;
 			}, {});
 
-		delete CACHE.STATIC.Package.proxy;
-		delete CACHE.STATIC.Package.tweaks;
-		delete CACHE.STATIC.Package.vendors;
-		delete CACHE.STATIC.Package.packages;
+		delete CACHE.STATIC.Archive.proxy;
+		delete CACHE.STATIC.Archive.tweaks;
+		delete CACHE.STATIC.Archive.vendors;
+		delete CACHE.STATIC.Archive.packages;
 
-		const results = await WORKER.proxyMapDependency(CACHE.STATIC.ProxyMap, CACHE._PATH.folder.setup.path);
+		const results = await WORKER.proxyMapDependency(CACHE.STATIC.ProxyMap, CACHE.PATH.folder.setup.path);
 		errors.push(...results.warnings);
 	} else {
-		errors.push(`${CACHE._PATH.json.configure} : Bad json file.`);
+		errors.push(`${CACHE.PATH.json.configure} : Bad json file.`);
 	}
 
 	$.TASK("Initialization finished");
@@ -241,33 +247,33 @@ export async function VerifyConfigure(loadStatics: boolean) {
 
 export async function SaveRootCSS() {
 	$.TASK("Updating Index");
-	CACHE.STATIC.RootCSS = await WORKER.cssImport(Object.values(CACHE._PATH.css).map(css => css.path));
+	CACHE.STATIC.RootCSS = await WORKER.cssImport(Object.values(CACHE.PATH.css).map(css => css.path));
 }
 
 export async function SaveLibrary() {
 	$.TASK("Updating Library");
-	CACHE.STATIC.Library_Saved = await FILEMAN.read.bulk(CACHE._PATH.folder.libraries.path, ["css"]);
+	CACHE.STATIC.Library_Saved = await FILEMAN.read.bulk(CACHE.PATH.folder.libraries.path, ["css"]);
 }
 
 export async function SavePackages() {
 	$.TASK("Updating Packages");
-	CACHE.STATIC.Package_Saved = await FILEMAN.read.bulk(CACHE._PATH.folder.packages.path, ["xcss", "css", "md"]);
+	CACHE.STATIC.Package_Saved = await FILEMAN.read.bulk(CACHE.PATH.folder.packages.path, ["xcss", "css", "md"]);
 }
 
 
 
 export async function SaveProxies() {
 	$.TASK("Syncing proxy folders", 0);
-	Object.keys(CACHE.STATIC.TargeAS_Saved).forEach((key) => delete CACHE.STATIC.TargeAS_Saved[key]);
-	CACHE.STATIC.TargeAS_Saved = await WORKER.proxyMapSync(CACHE.STATIC.ProxyMap);
+	Object.keys(CACHE.STATIC.Targets_Saved).forEach((key) => delete CACHE.STATIC.Targets_Saved[key]);
+	CACHE.STATIC.Targets_Saved = await WORKER.proxyMapSync(CACHE.STATIC.ProxyMap);
 }
 
 export async function SaveHashrules() {
 	$.TASK("Updating Hashrules", 0);
 	const errors = [];
 
-	$.STEP("PATH : " + CACHE._PATH.json.hashrules);
-	const hashrule = await FILEMAN.read.json(CACHE._PATH.json.hashrules.path);
+	$.STEP("PATH : " + CACHE.PATH.json.hashrules);
+	const hashrule = await FILEMAN.read.json(CACHE.PATH.json.hashrules.path);
 	Object.keys(CACHE.STATIC.HashRule).forEach(key => delete CACHE.STATIC.HashRule[key]);
 	if (hashrule.status) {
 		Object.entries(hashrule.data).forEach(([key, value]) => {
@@ -278,7 +284,7 @@ export async function SaveHashrules() {
 			}
 		});
 	} else {
-		errors.push(`${CACHE._PATH.json.hashrules.path} : Bad json file.`);
+		errors.push(`${CACHE.PATH.json.hashrules.path} : Bad json file.`);
 	}
 	$.TASK("Analysis complete");
 	return {

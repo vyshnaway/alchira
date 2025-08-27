@@ -1,6 +1,6 @@
 import $ from "./shell/main.js";
 import * as $$ from "./shell.js";
-import * as TYPE from "./types.js";
+import * as _support from "./type/support.js";
 import * as CACHE from "./data/cache.js";
 
 const hashPattern = /#\{[a-z0-9]+\}/i;
@@ -10,7 +10,7 @@ function IMPORT(string: string, watchUndef = true, sourcePath = "") {
 		status: boolean,
 		result: string,
 		error: string,
-		diagnostic: TYPE.Diagnostic
+		diagnostic: _support.Diagnostic
 	} = {
 		status: true,
 		result: "",

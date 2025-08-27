@@ -1,7 +1,13 @@
+// import * as _Config from "../type/config.js";
+import * as _File from "../type/file.js";
+// import * as _Style from "../type/style.js";
+// import * as _Script from "../type/script.js";
+// import * as _Cache from "../type/cache.js";
+// import * as _Support from "../type/support.js";
+
 import USE from "../utils/main.js";
 import FILEMAN from "../fileman.js";
 
-import * as TYPE from "../types.js";
 import * as CACHE from "./cache.js";
 
 function resolveGroup(
@@ -9,7 +15,7 @@ function resolveGroup(
 	hasCluster: boolean,
 	fromPackage: boolean,
 	fromLibrary: boolean,
-): TYPE.FILE_Group {
+): _File.Group {
 	if (fromPackage) {
 		switch (extension) {
 			case "css":
@@ -48,9 +54,9 @@ export default function FILING(
 	const [extension, packageName, id, cluster]: string[] = FILEMAN.path.basename(filePath).split(".").reverse();
 	const num = Number(id);
 	const idn = isNaN(num) || num < 0 ? 0 : Math.floor(num);
-	const normalFileName = isPackage ? USE.string.normalize(packageName) : CACHE.STATIC.Package.Name;
+	const normalFileName = isPackage ? USE.string.normalize(packageName) : CACHE.STATIC.Archive.name;
 
-	const group: TYPE.FILE_Group = resolveGroup(extension, Boolean(cluster), isPackage, isLibrary);
+	const group: _File.Group = resolveGroup(extension, Boolean(cluster), isPackage, isLibrary);
 
 	const classFront =
 		(
@@ -61,7 +67,7 @@ export default function FILING(
 			"$".repeat(idn)
 		);
 
-	const result: TYPE.FILE_Storage = {
+	const result: _File.Storage = {
 		label,
 		filePath,
 		extension,
@@ -89,9 +95,7 @@ export default function FILING(
 			styleMap: {},
 			classesList: [],
 			attachments: [],
-			hasStyleTag: false,
 			styleTagReplaces: [],
-			hasStapleTag: false,
 			stapleTagReplaces: [],
 		},
 		content: (fromXtylesFolder && extension === "css") ? USE.code.uncomment.Css(content) : content,

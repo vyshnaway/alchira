@@ -1,4 +1,11 @@
-import SCRIPTPARSE from "./file.js";
+import * as _Config from "../type/config.js";
+import * as _File from "../type/file.js";
+// import * as _Style from "../type/style.js";
+import * as _Script from "../type/script.js";
+// import * as _Cache from "../type/cache.js";
+// import * as _Support from "../type/support.js";
+
+import SEEK from "./file.js";
 import fileman from "../fileman.js";
 
 import $ from "../shell/main.js";
@@ -6,7 +13,6 @@ import FILING from "../data/filing.js";
 import STYLEPARSE from "../style/parse.js";
 import { INDEX } from "../data/action.js";
 import * as CACHE from "../data/cache.js";
-import * as TYPE from "../types.js";
 import Use from "../utils/main.js";
 
 function stringReplacementByPosition(master_string: string, ranges: [number, number][], replace_with: string) {
@@ -28,7 +34,7 @@ export default class C_Proxy {
 	label: string;
 	extensions: string[];
 	extnsProps: Record<string, string[]>;
-	fileCache: Record<string, TYPE.FILE_Storage> = {};
+	fileCache: Record<string, _File.Storage> = {};
 
 	constructor({
 		source,
@@ -37,7 +43,7 @@ export default class C_Proxy {
 		extensions,
 		fileContents,
 		stylesheetContent,
-	}: TYPE.ProxyMapStatic, identifier: string) {
+	}: _Config.ProxyStorage, identifier: string) {
 		extensions["xcss"] = [];
 
 		this.source = source;
@@ -66,7 +72,7 @@ export default class C_Proxy {
 		const FILE = FILING("target", filePath, fileContent, this.target, this.source, label);
 		this.fileCache[FILE.filePath] = FILE;
 
-		const ParseResponse = SCRIPTPARSE(FILE, this.extnsProps[FILE.extension]);
+		const ParseResponse = SEEK(FILE, this.extnsProps[FILE.extension]);
 		FILE.styleData.classesList.push(...ParseResponse.classesList);
 		FILE.styleData.attachments.push(...ParseResponse.attachments);
 
@@ -100,7 +106,7 @@ export default class C_Proxy {
 	}
 
 	Accumulator() {
-		const Cumulates: TYPE.Cumulates = {
+		const Cumulates: _Script.Cumulates = {
 			report: [],
 			errors: [],
 			diagnostics: [],
@@ -215,9 +221,9 @@ export default class C_Proxy {
 	}
 
 
-	RenderFiles(action: TYPE.ScriptParseActions) {
+	RenderFiles(action: _Script.Actions) {
 		Object.values(this.fileCache).forEach((filedata) => {
-			filedata.midway = SCRIPTPARSE(
+			filedata.midway = SEEK(
 				filedata,
 				this.extnsProps[filedata.extension],
 				action,

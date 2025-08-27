@@ -1,11 +1,18 @@
+// import * as _Config from "../type/config.js";
+import * as _File from "../type/file.js";
+// import * as _Style from "../type/style.js";
+import * as _Script from "../type/script.js";
+// import * as _Cache from "../type/cache.js";
+// import * as _Support from "../type/support.js";
+
+
 import Use from "../utils/main.js";
 import { INDEX } from "../data/action.js";
 import * as CACHE from "../data/cache.js";
-import * as TYPE from "../types.js";
 
 
 function EvaluateIndexTraces(
-	action: TYPE.ScriptParseActions,
+	action: _Script.Actions,
 	metaFront: string,
 	classList: string[],
 	localClassMap: Record<string, number>
@@ -17,9 +24,9 @@ function EvaluateIndexTraces(
 			const found = INDEX.FIND(entry, true, localClassMap);
 			if (found.index) {
 				if (found.group === "LIBRARY") {
-					acc[entry] = `/${CACHE.STATIC.Package.Name}/$/${entry}`;
+					acc[entry] = `/${CACHE.STATIC.Archive.name}/$/${entry}`;
 				} else if (found.group === "PUBLIC") {
-					acc[entry] = `/${CACHE.STATIC.Package.Name}/${entry}`;
+					acc[entry] = `/${CACHE.STATIC.Archive.name}/${entry}`;
 				}
 			}
 			return acc;
@@ -59,10 +66,10 @@ function EvaluateIndexTraces(
 
 export default function classExtract(
 	string: string,
-	action: TYPE.ScriptParseActions,
-	fileData: TYPE.FILE_Storage,
+	action: _Script.Actions,
+	fileData: _File.Storage,
 	attachments: Set<string>,
-	FileCursor: TYPE.FileCursor,
+	FileCursor: _File.Position,
 ) {
 	const classList: string[] = [], quotes = ["'", "`", '"'];
 	let activeQuote = "",
@@ -76,7 +83,7 @@ export default function classExtract(
 	while (ch !== undefined) {
 		if (inQuote) {
 			if (ch === " " || ch === activeQuote) {
-				if (entry.startsWith(CACHE._ROOT.customOperations["attach"])) {
+				if (entry.startsWith(CACHE.ROOT.customOperations["attach"])) {
 					attachments.add(entry.slice(1));
 				} else {
 					classList.push(entry);
@@ -112,7 +119,7 @@ export default function classExtract(
 		while (ch !== undefined) {
 			if (inQuote) {
 				if (ch === " " || ch === activeQuote) {
-					if (!entry.startsWith(CACHE._ROOT.customOperations["attach"])) {
+					if (!entry.startsWith(CACHE.ROOT.customOperations["attach"])) {
 						scribed += classMap[entry] ?
 							(action === "monitor"
 								? Use.string.normalize(classMap[entry], ["/", ".", ":", "|", "$"], ["\\"])

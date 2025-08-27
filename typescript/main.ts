@@ -1,16 +1,17 @@
 #!/usr/bin/env node
+/* eslint-disable @typescript-eslint/naming-convention */
 
 import fileman from "./fileman.js";
 import commander from "./command.js";
 
 import * as CACHE from "./data/cache.js";
-import * as TYPE from "./types.js";
+import * as _support from "./type/support.js";
 
 const fallback_project_name = "-";
 const fallback_project_version = "0.0.0";
-const fallback_root_name = CACHE._ROOT.name;
-const fallback_root_version = CACHE._ROOT.version;
-const fallback_root_website = CACHE._ROOT.URL.Site;
+const fallback_root_name = CACHE.ROOT.name;
+const fallback_root_version = CACHE.ROOT.version;
+const fallback_root_website = CACHE.ROOT.URL.Site;
 
 const user_scripts = {
     "debug": "xcss debug watch",
@@ -21,8 +22,8 @@ const user_scripts = {
 };
 
 const bin = process.argv[1];
-const cmd = CACHE._ROOT.exposedCommands.includes(process.argv[2]) ? process.argv[2] : "";
-const arg = CACHE._ROOT.exposedCommands.includes(process.argv[2]) ? process.argv[3] : "";
+const cmd = CACHE.ROOT.exposedCommands.includes(process.argv[2]) ? process.argv[2] : "";
+const arg = CACHE.ROOT.exposedCommands.includes(process.argv[2]) ? process.argv[3] : "";
 
 const workPath = fileman.path.resolves(".");
 const rootPath = fileman.path.fromOrigin(".");
@@ -42,7 +43,7 @@ if (!originPackageJson.status && typeof originPackageJson === "object") {
     process.exit(1);
 }
 
-const rootPackageEssential: TYPE.PackageEssential = {
+const rootPackageEssential: _support.PackageEssential = {
     bin,
     name: typeof originPackageJson.data.name === "string" ? originPackageJson.data.name : fallback_root_name,
     version: typeof originPackageJson.data.version === "string" ? originPackageJson.data.version : fallback_root_version,
@@ -54,11 +55,11 @@ const rootScripts = user_scripts as Record<string, string>;
 
 if (projectPackageJson.status
     && (typeof projectPackageJson.data.scripts === "object")
-    && (CACHE._ROOT.exposedCommands as string[]).includes(cmd)
+    && (CACHE.ROOT.exposedCommands as string[]).includes(cmd)
 ) {
     let addedCommands = 0;
     const scripts = projectPackageJson.data.scripts as Record<string, string>;
-    for (const cmd of CACHE._ROOT.exposedCommands) {
+    for (const cmd of CACHE.ROOT.exposedCommands) {
         if (rootScripts[cmd] && !scripts[cmd]) {
             addedCommands++;
             scripts[`${bin}:${cmd}`] = rootScripts[cmd];

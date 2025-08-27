@@ -1,3 +1,10 @@
+// import * as _Config from "../type/config.js";
+import * as _File from "../type/file.js";
+import * as _Style from "../type/style.js";
+// import * as _Script from "../type/script.js";
+// import * as _Cache from "../type/cache.js";
+import * as _Support from "../type/support.js";
+
 import PARSE from "./parse.js";
 
 import $ from "../shell/main.js";
@@ -7,7 +14,6 @@ import FILING from "../data/filing.js";
 import SCRIPTFILE from "../script/file.js";
 
 import { INDEX } from "../data/action.js";
-import * as TYPE from "../types.js";
 import * as CACHE from "../data/cache.js";
 
 
@@ -56,10 +62,10 @@ function _SavePackageFile(filePath: string, fileContent: string) {
 function _StackLibraryFiles() {
 	let length = 0;
 	const
-		none: Record<string, TYPE.FILE_Storage[]> = {},
-		axiomArray: Record<string, TYPE.FILE_Storage[]> = {},
-		clusterArray: Record<string, TYPE.FILE_Storage[]> = {},
-		libraryTable: Record<string, TYPE.FILE_Reference> = {};
+		none: Record<string, _File.Storage[]> = {},
+		axiomArray: Record<string, _File.Storage[]> = {},
+		clusterArray: Record<string, _File.Storage[]> = {},
+		libraryTable: Record<string, _File.Lookup> = {};
 
 	Object.entries(CACHE.STORAGE.LIBRARIES).forEach(([path, data]) => {
 		const reference = data.manifest.refer;
@@ -80,10 +86,10 @@ function _StackLibraryFiles() {
 
 function _StackPackageFiles() {
 	const
-		none: TYPE.FILE_Storage[] = [],
-		pacbindsArray: TYPE.FILE_Storage[] = [],
-		packagesArray: TYPE.FILE_Storage[] = [],
-		packageTable: Record<string, TYPE.FILE_Reference> = {};
+		none: _File.Storage[] = [],
+		pacbindsArray: _File.Storage[] = [],
+		packagesArray: _File.Storage[] = [],
+		packageTable: Record<string, _File.Lookup> = {};
 
 	Object.entries(CACHE.STORAGE.PACKAGES).forEach(([path, data]) => {
 		const reference = data.manifest.refer;
@@ -122,7 +128,7 @@ function ReRender() {
 
 
 	const PackageStyleSkeleton = packagesArray.reduce((collection, fileData) => {
-		const indexMetaCollection = collection[fileData.filePath] = {} as Record<string, TYPE.ClassMeta>;
+		const indexMetaCollection = collection[fileData.filePath] = {} as Record<string, _Style.Metadata>;
 		SCRIPTFILE(fileData).stylesList.forEach((style) => {
 			const response = PARSE.TAGSTYLE(style, fileData, CACHE.DYNAMIC.PackageClass_Index);
 			const styleData = INDEX.FETCH(response.identity.index);
@@ -138,22 +144,22 @@ function ReRender() {
 		const classNames = Object.keys(indexMetaCollection);
 		if (classNames.length) { packageChart[`Package [${fileData.filePath}]: ${classNames.length} Classes`] = classNames; }
 		return collection;
-	}, {} as Record<string, Record<string, TYPE.ClassMeta>>);
+	}, {} as Record<string, Record<string, _Style.Metadata>>);
 
 
 	const PacbindStyleSkeleton = pacbindsArray.reduce((collection, fileData) => {
 		const result = PARSE.CSSLIBRARY([fileData], fileData.manifest.refer.group, true);
-		collection[Fileman.path.join(CACHE._PATH.folder.packages.path, fileData.filePath)] = result.indexMetaCollection;
+		collection[Fileman.path.join(CACHE.PATH.folder.packages.path, fileData.filePath)] = result.indexMetaCollection;
 		if (result.selectorList.length) {
 			pacbindChart[`Pacbind [${fileData.filePath}]: ${result.selectorList.length} Classes`] = result.selectorList;
 		}
 		return collection;
-	}, {} as Record<string, Record<string, TYPE.ClassMeta>>);
+	}, {} as Record<string, Record<string, _Style.Metadata>>);
 
 
 
 	const PackageErrors: string[] = [];
-	const PackageDiagnostics: TYPE.Diagnostic[] = [];
+	const PackageDiagnostics: _Support.Diagnostic[] = [];
 
 
 	Object.values(packagesArray).forEach(file => {
@@ -187,20 +193,20 @@ function ReRender() {
 
 
 	const nameCollitions = Object.values(CACHE.STORAGE.PACKAGES).reduce((A, F) => {
-		if (CACHE.STATIC.Package.Name === F.packageName) { A.push(F.sourcePath); }
+		if (CACHE.STATIC.Archive.name === F.packageName) { A.push(F.sourcePath); }
 		return A;
 	}, [] as string[]);
 
 	if (nameCollitions.length) {
 		PackageErrors.push(
 			$.MAKE(
-				$.tag.H6(`Package-name collitions: ${CACHE.STATIC.Package.Name}`, $.preset.warning),
+				$.tag.H6(`Package-name collitions: ${CACHE.STATIC.Archive.name}`, $.preset.warning),
 				nameCollitions,
 				[$.list.Bullets, 0, []]
 			)
 		);
 		PackageDiagnostics.push({
-			error: `Package-name collitions: ${CACHE.STATIC.Package.Name}`,
+			error: `Package-name collitions: ${CACHE.STATIC.Archive.name}`,
 			source: nameCollitions
 		});
 	}
@@ -213,7 +219,7 @@ function ReRender() {
 	const { LibraryLookupTable, axiomsArray, clustersArray } = _StackLibraryFiles();
 
 
-	const AxiomStyleSkeleton = axiomsArray.reduce((collection: Record<string, Record<string, TYPE.ClassMeta>>, fileData, index) => {
+	const AxiomStyleSkeleton = axiomsArray.reduce((collection: Record<string, Record<string, _Style.Metadata>>, fileData, index) => {
 		const result = PARSE.CSSLIBRARY(fileData, "AXIOM");
 		collection[index] = result.indexMetaCollection;
 		if (result.selectorList.length) {
@@ -223,7 +229,7 @@ function ReRender() {
 	}, {});
 
 
-	const ClusterStyleSkeleton = clustersArray.reduce((collection: Record<string, Record<string, TYPE.ClassMeta>>, level, index) => {
+	const ClusterStyleSkeleton = clustersArray.reduce((collection: Record<string, Record<string, _Style.Metadata>>, level, index) => {
 		const result = PARSE.CSSLIBRARY(level, "CLUSTER");
 		collection[index] = result.indexMetaCollection;
 		if (result.selectorList.length) { clusterChart[`Level ${index}: ${result.selectorList.length} Classes`] = result.selectorList; }
@@ -233,7 +239,7 @@ function ReRender() {
 
 
 	const LibraryErrors: string[] = [];
-	const LibraryDiagnostics: TYPE.Diagnostic[] = [];
+	const LibraryDiagnostics: _Support.Diagnostic[] = [];
 
 
 	Object.values(CACHE.DYNAMIC.LibraryClass_Index).forEach((index) => {

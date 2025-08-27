@@ -1,8 +1,13 @@
 /* eslint-disable no-useless-escape */
+// import * as _Config from "../type/config.js";
+import * as _File from "../type/file.js";
+// import * as _Style from "../type/style.js";
+import * as _Script from "../type/script.js";
+// import * as _Cache from "../type/cache.js";
+// import * as _Support from "../type/support.js";
+
 import VALUE from "./value.js";
 import CURSOR from "./_cursor.js";
-
-import * as TYPE from "../types.js";
 
 const bracePair = {
 	"{": "}",
@@ -19,9 +24,9 @@ export const closeBraces = ["]", "}", ")"];
 
 
 export default function scanner(
-	fileData: TYPE.FILE_Storage,
+	fileData: _File.Storage,
 	classProps: string[] = [],
-	action: TYPE.ScriptParseActions = "read",
+	action: _Script.Actions = "read",
 	fileCursor = CURSOR.Initialize(fileData.content),
 ) {
 	const
@@ -29,7 +34,7 @@ export default function scanner(
 		attachments = new Set<string>(),
 		braceTrack: OpenBrace[] = [],
 		nativeAttributes: Record<string, string> = {},
-		styleDeclarations: TYPE.TagRawStyle = {
+		styleDeclarations: _Script.RawStyle = {
 			element: "",
 			elvalue: "",
 			selector: "",

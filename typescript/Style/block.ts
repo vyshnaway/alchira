@@ -1,29 +1,17 @@
+// import * as _Config from "../type/config.js";
+// import * as _File from "../type/file.js";
+import * as _Style from "../type/style.js";
+// import * as _Script from "../type/script.js";
+// import * as _Cache from "../type/cache.js";
+// import * as _Support from "../type/support.js";
+
+
 import * as CACHE from "../data/cache.js";
 import Use from "../utils/main.js";
 
 const OPEN_CHARS = ["{", "[", "("];
 const CLOSE_CHARS = ["}", "]", ")"];
 const QUOTE_CHARS = ["`", "'", '"'];
-
-interface t_Result {
-	assemble: string[],
-	attachment: string[],
-	variables: Record<string, string>,
-	XatProps: [string, string][],
-	atProps: Record<string, string>,
-	Xproperties: [string, string][],
-	properties: Record<string, string>,
-	XatRules: [string, string][],
-	atRules: Record<string, string>,
-	Xnested: [string, string][],
-	nested: Record<string, string>,
-	Xclasses: [string, string][],
-	classes: Record<string, string>,
-	Xflats: [string, string][],
-	flats: Record<string, string>,
-	XallBlocks: [string, string][],
-	allBlocks: Record<string, string>,
-}
 
 export default function parseBlock(content: string, blockArrays = false) {
 	content += ";";
@@ -36,7 +24,7 @@ export default function parseBlock(content: string, blockArrays = false) {
 		key = "",
 		isProp = true;
 
-	const result: t_Result = {
+	const result: _Style.ParsedResult = {
 		assemble: [],
 		attachment: [],
 		variables: {},
@@ -99,12 +87,12 @@ export default function parseBlock(content: string, blockArrays = false) {
 								const directive = value.slice(0, spaceIndex);
 
 								switch (directive) {
-									case CACHE._ROOT.customAtrules["attach"]:
+									case CACHE.ROOT.customAtrules["attach"]:
 										result.attachment.push(
 											...Use.string.zeroBreaks(value.slice(spaceIndex)),
 										);
 										break;
-									case CACHE._ROOT.customAtrules["assemble"]:
+									case CACHE.ROOT.customAtrules["assemble"]:
 										result.assemble.push(
 											...Use.string.zeroBreaks(value.slice(spaceIndex)),
 										);
@@ -116,11 +104,11 @@ export default function parseBlock(content: string, blockArrays = false) {
 							} else {
 								const breaks = Use.string.zeroBreaks(value);
 								switch (breaks[0]) {
-									case CACHE._ROOT.customOperations["attach"]:
+									case CACHE.ROOT.customOperations["attach"]:
 										breaks.shift();
 										result.attachment.push(...breaks);
 										break;
-									case CACHE._ROOT.customOperations["assemble"]:
+									case CACHE.ROOT.customOperations["assemble"]:
 										breaks.shift();
 										result.assemble.push(...breaks);
 										break;

@@ -1,3 +1,11 @@
+import * as _Config from "./type/config.js";
+import * as _File from "./type/file.js";
+import * as _Style from "./type/style.js";
+import * as _Script from "./type/script.js";
+import * as _Cache from "./type/cache.js";
+import * as _Support from "./type/support.js";
+
+
 import $ from "./shell/main.js";
 import * as $$ from "./shell.js";
 import Use from "./utils/main.js";
@@ -7,14 +15,13 @@ import COMPILE from "./style/render.js";
 import ORDER from "./sort/order-api.js";
 import SCRIPT from "./script/class.js";
 import XTYLES from "./style/stash.js";
-import { STATIC, STORAGE, DYNAMIC, LIVEDOCS, _PATH } from "./data/cache.js";
+import { STATIC, STORAGE, DYNAMIC, LIVEDOCS, PATH } from "./data/cache.js";
 import { INDEX } from "./data/action.js";
 // import { GeneratePortable } from "./portable.js";
-import * as TYPE from "./types.js";
 
 export function UpdateXtylesFolder() {
 	INDEX.RESET();
-	LIVEDOCS.Manifest.prefix = STATIC.Package.Name;
+	LIVEDOCS.Manifest.prefix = STATIC.Archive.name;
 	Object.assign(DYNAMIC, {
 		HashRule: {},
 		Index_ClassData: {},
@@ -45,11 +52,11 @@ export function SaveToTarget(
 	switch (action) {
 		case "add": case "change":
 			if (STORAGE.TARGET[targetFolder].stylesheetPath === filePath) {
-				STATIC.TargeAS_Saved[targetFolder].stylesheetContent = fileContent;
+				STATIC.Targets_Saved[targetFolder].stylesheetContent = fileContent;
 				STORAGE.TARGET[targetFolder].stylesheetContent = fileContent;
 				reCache = false;
 			} else if (STORAGE.TARGET[targetFolder].extensions.includes(extension)) {
-				STATIC.TargeAS_Saved[targetFolder].fileContents[filePath] = fileContent;
+				STATIC.Targets_Saved[targetFolder].fileContents[filePath] = fileContent;
 				LIVEDOCS.DeltaPath = `${STORAGE.TARGET[targetFolder].source}/${filePath}`;
 			} else {
 				LIVEDOCS.DeltaPath = `${STORAGE.TARGET[targetFolder].source}/${filePath}`;
@@ -58,8 +65,8 @@ export function SaveToTarget(
 			}
 			break;
 		case "unlink":
-			if (STATIC.TargeAS_Saved[targetFolder]) {
-				delete STATIC.TargeAS_Saved[targetFolder].fileContents[filePath];
+			if (STATIC.Targets_Saved[targetFolder]) {
+				delete STATIC.Targets_Saved[targetFolder].fileContents[filePath];
 			}
 			break;
 		default:
@@ -78,25 +85,25 @@ export function SaveToTarget(
 			delete STORAGE.TARGET[key];
 		});
 
-		Object.entries(STATIC.TargeAS_Saved).forEach(([key, files], index) => {
+		Object.entries(STATIC.Targets_Saved).forEach(([key, files], index) => {
 			STORAGE.TARGET[key] = new SCRIPT(files, Use.string.enCounter(index + 768));
 		});
 	}
 
 }
 
-function SaveClassRefs(stash: TYPE.OrganizedResult) {
+function SaveClassRefs(stash: _Style.SortedOutput) {
 	DYNAMIC.Sync_ClassDictionary = stash.referenceMap;
 	DYNAMIC.Sync_PublishIndexMap = Object.entries(stash.indexMap).reduce((A, [classname, index]) => {
 		A["." + classname] = index;
 		return A;
-	}, {} as TYPE.ClassIndexMap);
+	}, {} as _Style.ClassIndexMap);
 }
 
 
 async function Accumulate() {
 
-	const CUMULATES: TYPE.Cumulates = {
+	const CUMULATES: _Script.Cumulates = {
 		report: [],
 		errors: [],
 		diagnostics: [],
@@ -121,11 +128,11 @@ async function Accumulate() {
 	DYNAMIC.GlobalClass__Index = CUMULATES.globalClasses;
 	DYNAMIC.PublicClass__Index = CUMULATES.publicClasses;
 	DYNAMIC.ArchiveClass_Index = Object.fromEntries([
-		...Object.entries(DYNAMIC.GlobalClass__Index).map(([s, i]) => [`/${STATIC.Package.Name}/${s}`, i]),
-		...Object.entries(DYNAMIC.PublicClass__Index).map(([s, i]) => [`/${STATIC.Package.Name}/${s}`, i]),
+		...Object.entries(DYNAMIC.GlobalClass__Index).map(([s, i]) => [`/${STATIC.Archive.name}/${s}`, i]),
+		...Object.entries(DYNAMIC.PublicClass__Index).map(([s, i]) => [`/${STATIC.Archive.name}/${s}`, i]),
 	]);
 	DYNAMIC.ArcbindClass_Index =
-		Object.fromEntries(Object.entries(DYNAMIC.LibraryClass_Index).map(([s, i]) => [`/${STATIC.Package.Name}/$/${s}`, i]));
+		Object.fromEntries(Object.entries(DYNAMIC.LibraryClass_Index).map(([s, i]) => [`/${STATIC.Archive.name}/$/${s}`, i]));
 
 
 	LIVEDOCS.Lookup.project = {};
@@ -141,7 +148,7 @@ async function Accumulate() {
 	LIVEDOCS.Manifest.file = Object.values(LIVEDOCS.Lookup).reduce((A, V) => {
 		Object.assign(A, V);
 		return A;
-	}, {} as Record<string, TYPE.FILE_Reference>);
+	}, {} as Record<string, _File.Lookup>);
 
 
 
@@ -152,7 +159,7 @@ async function Accumulate() {
 	LIVEDOCS.Manifest.errors = Object.values(LIVEDOCS.Diagnostics).reduce((A, V) => {
 		A.push(...V);
 		return A;
-	}, [] as TYPE.Diagnostic[]);
+	}, [] as _Support.Diagnostic[]);
 
 
 	const ERRORS = Object.values(LIVEDOCS.Errors).reduce((A, I) => { A.push(...I); return A; }, [] as string[]);
@@ -228,7 +235,7 @@ function GenFinalSheets(ATTACHMENTS: Set<number>) {
 		APPENDIX: "",
 	};
 
-	const targetRenderAction: TYPE.ScriptParseActions = (STATIC.Command === "debug") ? "monitor"
+	const targetRenderAction: _Script.Actions = (STATIC.Command === "debug") ? "monitor"
 		: (STATIC.Command === "preview" && STATIC.Argument === "watch") ? "watch" : "sync";
 	Object.values(STORAGE.TARGET).forEach((cache) => cache.RenderFiles(targetRenderAction));
 
@@ -309,7 +316,7 @@ export async function Generate() {
 					if (!DeployedFiles.includes(filePath)) { delete OUTFILES[filePath]; }
 				});
 			}
-			OUTFILES[_PATH.json.manifest.path] = JSON.stringify(LIVEDOCS.Manifest);
+			OUTFILES[PATH.json.manifest.path] = JSON.stringify(LIVEDOCS.Manifest);
 		} else {
 
 			const memChart = $$.PropMap(Object.entries(RENDERFRAGS).reduce((A, [K, V]) => {

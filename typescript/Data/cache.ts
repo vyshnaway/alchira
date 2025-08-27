@@ -1,8 +1,14 @@
-import * as TYPE from "../types.js";
+// import * as _Config from "../type/config.js";
+import * as _File from "../type/file.js";
+// import * as _Style from "../type/style.js";
+// import * as _Script from "../type/script.js";
+import * as _Cache from "../type/cache.js";
+// import * as _Support from "../type/support.js";
+
 
 const domain = "xcss.io";
 
-export const _ROOT: TYPE.Data_ROOT = {
+export const ROOT: _Cache.ROOT = {
     bin: "",
     name: "xcss-engine",
     version: "0.0.0",
@@ -52,24 +58,44 @@ export const _ROOT: TYPE.Data_ROOT = {
     }
 };
 
-export const _PREFIX: TYPE.Data_PREFIX = {
-    atrules: {},
-    attributes: {},
-    pseudos: {},
-    classes: {},
-    elements: {},
-    values: {},
-};
-
-export const _TWEAKS: TYPE.Data_TWEAKS = {
-    ..._ROOT.defaultTweaks
-};
-
 
 
 // --- Cache Declare ---
 
-export const LIVEDOCS: TYPE.CACHE_LIVEDOCS = {
+export const STATIC: _Cache.STATIC = {
+    WATCH: false,
+    DEBUG: false,
+    Project_Name: "",
+    Project_Version: "",
+    Command: "",
+    Argument: "",
+    RootCSS: "",
+    RootPath: "",
+    WorkPath: "",
+    ProxyMap: [],
+    HashRule: {},
+    Archive: {
+        name: '',
+        version: '',
+        readme: '',
+    },
+    Prefix: {
+        atrules: {},
+        attributes: {},
+        pseudos: {},
+        classes: {},
+        elements: {},
+        values: {},
+    },
+    Tweaks: {
+        ...ROOT.defaultTweaks
+    },
+    Library_Saved: {},
+    Targets_Saved: {},
+    Package_Saved: {},
+};
+
+export const LIVEDOCS: _Cache.LIVEDOCS = {
     DeltaPath: "",
     DeltaContent: "",
     FinalMessage: "",
@@ -102,7 +128,7 @@ export const LIVEDOCS: TYPE.CACHE_LIVEDOCS = {
     },
     Manifest: {
         prefix: "",
-        elements: Object.values(_ROOT.customElements),
+        elements: Object.values(ROOT.customElements),
         constants: [],
         hashrules: {},
         file: {},
@@ -116,30 +142,7 @@ export const LIVEDOCS: TYPE.CACHE_LIVEDOCS = {
     },
 };
 
-
-export const STATIC: TYPE.CACHE_STATIC = {
-    WATCH: false,
-    DEBUG: false,
-    Project_Name: "",
-    Project_Version: "",
-    Command: "",
-    Argument: "",
-    RootCSS: "",
-    RootPath: "",
-    WorkPath: "",
-    ProxyMap: [],
-    HashRule: {},
-    Package: {
-        Name: '',
-        Version: '',
-        Readme: '',
-    },
-    Library_Saved: {},
-    TargeAS_Saved: {},
-    Package_Saved: {},
-};
-
-export const DYNAMIC: TYPE.CACHE_DYNAMIC = {
+export const DYNAMIC: _Cache.DYNAMIC = {
     HashRule: {},
     Index_ClassData: {},
     GlobalClass__Index: {},
@@ -152,7 +155,7 @@ export const DYNAMIC: TYPE.CACHE_DYNAMIC = {
     Sync_ClassDictionary: {}
 };
 
-export const STORAGE: TYPE.CACHE_STORAGE = {
+export const STORAGE: _Cache.STORAGE = {
     LIBRARIES: {},
     PACKAGES: {},
     TARGET: {}
@@ -162,28 +165,28 @@ export const STORAGE: TYPE.CACHE_STORAGE = {
 
 // --- Path Declare --- 
 
-export const _SYNC: Record<string, Record<string, TYPE.Data_Source>> = {
+export const SYNC: Record<string, Record<string, _File.Sync>> = {
     MARKDOWN: {
         readme: {
             title: "README",
             url: "readme.md",
             path: "",
-            content: "",
             frags: ["readme.md"],
+            content: "",
         },
         alerts: {
             title: "ALERTS",
             url: "alerts.md",
             path: "",
-            content: "",
             frags: ["alerts.md"],
+            content: "",
         },
         changelog: {
             title: "CHANGELOG",
             url: "changelog.md",
             path: "",
-            content: "",
             frags: ["changelog.md"],
+            content: "",
         },
     },
     AGREEMENT: {
@@ -191,47 +194,51 @@ export const _SYNC: Record<string, Record<string, TYPE.Data_Source>> = {
             title: "LICENSE",
             url: "agreements-txt/license.txt",
             path: "",
-            content: "",
             frags: ["agreements", "license.txt"],
+            content: "",
         },
         terms: {
             title: "TERMS & CONDITIONS",
             url: "agreements-txt/terms.txt",
             path: "",
-            content: "",
             frags: ["agreements", "terms.txt"],
+            content: "",
         },
         privacy: {
             title: "PRIVACY POLICY",
             url: "agreements-txt/privacy.txt",
-            path: "agreements/privacy.txt",
+            path: "",
             frags: ["agreements", "privacy.txt"],
             content: "",
         },
     }
 };
 
-export const _PATH: Record<string, Record<string, TYPE.Data_Source>> = {
+export const PATH: Record<string, Record<string, _File.Path>> = {
     blueprint: {
         archive: {
             frags: ["blueprint", "archive"],
             path: "",
             content: "",
+            essential: true,
         },
         libraries: {
             frags: ["blueprint", "libraries"],
             path: "",
             content: "",
+            essential: true,
         },
         scaffold: {
             frags: ["blueprint", "scaffold"],
             path: "",
             content: "",
+            essential: true,
         },
         prefixes: {
             frags: ["blueprint", "prefixes.json"],
             path: "",
             content: "",
+            essential: true,
         },
     },
     folder: {
@@ -239,26 +246,31 @@ export const _PATH: Record<string, Record<string, TYPE.Data_Source>> = {
             frags: ["xtyles"],
             path: "",
             content: "",
+            essential: true,
         },
         autogen: {
             frags: ["xtyles", "autogen"],
             path: "",
             content: "",
+            essential: true,
         },
         libraries: {
             frags: ["xtyles", "libraries"],
             path: "",
             content: "",
+            essential: true,
         },
         packages: {
             frags: ["xtyles", "packages"],
             path: "",
             content: "",
+            essential: true,
         },
         archive: {
             frags: ["xtyles", "archive"],
             path: "",
             content: "",
+            essential: false,
         },
     },
     css: {
@@ -266,21 +278,25 @@ export const _PATH: Record<string, Record<string, TYPE.Data_Source>> = {
             frags: ["xtyles", "#at-rules.css"],
             path: "",
             content: "",
+            essential: true,
         },
         constants: {
             frags: ["xtyles", "#constants.css"],
             path: "",
             content: "",
+            essential: true,
         },
         elements: {
             frags: ["xtyles", "#elements.css"],
             path: "",
             content: "",
+            essential: true,
         },
         extends: {
             frags: ["xtyles", "#extends.css"],
             path: "",
             content: "",
+            essential: true,
         },
     },
     json: {
@@ -288,11 +304,13 @@ export const _PATH: Record<string, Record<string, TYPE.Data_Source>> = {
             frags: ["xtyles", "configure.jsonc"],
             path: "",
             content: "",
+            essential: true,
         },
         hashrules: {
             frags: ["xtyles", "hashrules.jsonc"],
             path: "",
             content: "",
+            essential: true,
         },
     },
     md: {
@@ -300,11 +318,13 @@ export const _PATH: Record<string, Record<string, TYPE.Data_Source>> = {
             frags: ["xtyles", "readme.md"],
             path: "",
             content: "",
+            essential: true,
         },
         reference: {
             frags: ["xtyles", "reference.md"],
             path: "",
             content: "",
+            essential: true,
         },
     },
     autogen: {
@@ -312,21 +332,25 @@ export const _PATH: Record<string, Record<string, TYPE.Data_Source>> = {
             path: "",
             frags: ["xtyles", "autogen", "watch", "index.css"],
             content: "",
+            essential: false,
         },
         styles: {
             path: "",
             frags: ["xtyles", "autogen", "watch", "styles.css"],
             content: "",
+            essential: false,
         },
         ignore: {
             path: "",
             frags: ["xtyles", "autogen", ".gitignore"],
-            content: "*\n!.gitignore"
+            content: "*\n!.gitignore",
+            essential: false,
         },
         manifest: {
             path: "",
             frags: ["xtyles", "autogen", "manifest.json"],
-            content: JSON.stringify(LIVEDOCS.Manifest)
+            content: JSON.stringify(LIVEDOCS.Manifest),
+            essential: false,
         },
     }
 };

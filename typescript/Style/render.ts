@@ -5,7 +5,7 @@ type t_styleSorceTemplate = Record<string, string | object>;
 
 function LoadVendors(collection = {}, vendor = "") {
 	return vendor == ""
-		? CACHE._ROOT.vendors.filter((ven) =>
+		? CACHE.ROOT.vendors.filter((ven) =>
 			!Object.prototype.hasOwnProperty.call(collection, ven),
 		) : [vendor];
 }

@@ -1,7 +1,13 @@
+import * as _Config from "../type/config.js";
+// import * as _File from "../type/file.js";
+import * as _Style from "../type/style.js";
+// import * as _Script from "../type/script.js";
+// import * as _Cache from "../type/cache.js";
+import * as _Support from "../type/support.js";
+
 import USE from "../utils/main.js";
 import FILEMAN from "../fileman.js";
 
-import * as TYPE from "../types.js";
 import * as CACHE from "./cache.js";
 
 function collectTypeStringKeys(object: object) {
@@ -13,31 +19,31 @@ function collectTypeStringKeys(object: object) {
 }
 
 export function collectVendors() {
-    CACHE._ROOT.vendors = Array.from(collectTypeStringKeys(CACHE._PREFIX));
+    CACHE.ROOT.vendors = Array.from(collectTypeStringKeys(CACHE.STATIC.Prefix));
 }
 
-export function collectTWEAKS(tweaks: TYPE.Data_TWEAKS) {
-    Object.assign(CACHE._TWEAKS, CACHE._ROOT.defaultTweaks);
+export function collectTWEAKS(tweaks: _Config.Tweaks) {
+    Object.assign(CACHE.STATIC.Tweaks, CACHE.ROOT.defaultTweaks);
     if (typeof tweaks === "object") {
-        Object.keys(CACHE._TWEAKS).forEach(key => {
-            if (typeof CACHE._TWEAKS[key] === typeof tweaks[key]) {
-                CACHE._TWEAKS[key] = tweaks[key];
+        Object.keys(CACHE.STATIC.Tweaks).forEach(key => {
+            if (typeof CACHE.STATIC.Tweaks[key] === typeof tweaks[key]) {
+                CACHE.STATIC.Tweaks[key] = tweaks[key];
             }
         });
     };
 }
 
-export function SetENV(rootPath: string, workPath: string, packageEssential: TYPE.PackageEssential) {
+export function SetENV(rootPath: string, workPath: string, packageEssential: _Support.PackageEssential) {
 
     CACHE.STATIC.RootPath = rootPath;
     CACHE.STATIC.WorkPath = workPath;
 
-    CACHE._ROOT.name = packageEssential.name || CACHE._ROOT.name;
-    CACHE._ROOT.version = packageEssential.version || CACHE._ROOT.version;
-    CACHE._ROOT.website = packageEssential.website || CACHE._ROOT.website;
-    CACHE._ROOT.bin = packageEssential.bin;
+    CACHE.ROOT.name = packageEssential.name || CACHE.ROOT.name;
+    CACHE.ROOT.version = packageEssential.version || CACHE.ROOT.version;
+    CACHE.ROOT.website = packageEssential.website || CACHE.ROOT.website;
+    CACHE.ROOT.bin = packageEssential.bin;
 
-    Object.entries(CACHE._PATH).forEach(([groupName, groupPaths]) => {
+    Object.entries(CACHE.PATH).forEach(([groupName, groupPaths]) => {
         if (groupName === "blueprint" || groupName === "autogen") {
             Object.values(groupPaths).forEach((source) => {
                 source.path = FILEMAN.path.join(CACHE.STATIC.RootPath, ...source.frags);
@@ -49,8 +55,8 @@ export function SetENV(rootPath: string, workPath: string, packageEssential: TYP
         }
     });
 
-    const CDN = CACHE._ROOT.URL.Cdn + "version/" + CACHE._ROOT.version.split(".")[0] + "/";
-    Object.values(CACHE._SYNC).forEach((object) => {
+    const CDN = CACHE.ROOT.URL.Cdn + "version/" + CACHE.ROOT.version.split(".")[0] + "/";
+    Object.values(CACHE.SYNC).forEach((object) => {
         Object.values(object).forEach((entry) => {
             entry.url = CDN + entry.url;
             entry.path = FILEMAN.path.join(CACHE.STATIC.RootPath, ...entry.frags);
@@ -58,8 +64,8 @@ export function SetENV(rootPath: string, workPath: string, packageEssential: TYP
     });
 
     console.log(CACHE.STATIC);
-    console.log(CACHE._ROOT);
-    console.log(CACHE._SYNC);
+    console.log(CACHE.ROOT);
+    console.log(CACHE.SYNC);
 }
 
 export function MemoryUsage() {
@@ -84,17 +90,9 @@ export const INDEX = {
     FETCH: (index: number) => {
         return CACHE.DYNAMIC.Index_ClassData[index];
     },
-    FIND: (classname: string, includeTargets = false, localmap: TYPE.ClassIndexMap = {}) => {
+    FIND: (classname: string, includeTargets = false, localmap: _Style.ClassIndexMap = {}) => {
         let index = 0;
-        let group: ""
-            | "PACKAGE"
-            | "LIBRARY"
-            | "ARCBIND"
-            | "ARCHIVE"
-            | "GLOBAL"
-            | "PUBLIC"
-            | "LOCAL"
-            = '';
+        let group: _Style.Group = '';
 
         if (CACHE.DYNAMIC.PackageClass_Index[classname]) {
             index = CACHE.DYNAMIC.PackageClass_Index[classname];
@@ -122,7 +120,7 @@ export const INDEX = {
         }
         return { index, group };
     },
-    DECLARE: (object: TYPE.ClassData) => {
+    DECLARE: (object: _Style.Classdata) => {
         object.index = INDEX._BIN.values().next().value || ++INDEX._NOW;
         if (INDEX._BIN.has(object.index)) { INDEX._BIN.delete(object.index); }
 

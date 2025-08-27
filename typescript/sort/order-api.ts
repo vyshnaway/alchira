@@ -1,10 +1,16 @@
+// import * as _Config from "../type/config.js";
+// import * as _File from "../type/file.js";
+import * as _Style from "../type/style.js";
+// import * as _Script from "../type/script.js";
+// import * as _Cache from "../type/cache.js";
+// import * as _Support from "../type/support.js";
+
 import krypt from "./kryptic.js";
 import * as CACHE from "../data/cache.js";
 import previewOrganize from "./organize.js";
-import * as TYPE from "../types.js";
 
 
-CACHE._ROOT.URL["Worker"] = "https://workers.xpktr.com/api/xcss-build-request";
+CACHE.ROOT.URL["Worker"] = "https://workers.xpktr.com/api/xcss-build-request";
 // APP.URL["Worker"] = APP.Worker + "api/publish";
 
 export default async function order(
@@ -19,7 +25,7 @@ export default async function order(
 ): Promise<{
 	status: boolean;
 	message: string;
-	result: TYPE.OrganizedResult;
+	result: _Style.SortedOutput;
 }> {
 	const RESPONSE = {
 		status: CMD === "preview",
@@ -72,7 +78,7 @@ export default async function order(
 			redirect: "follow",
 		};
 
-		fetch(CACHE._ROOT.URL["Worker"], requestOptions)
+		fetch(CACHE.ROOT.URL["Worker"], requestOptions)
 			.then((res) => res.json())
 			.then(async (res) => {
 				RESPONSE.status = res.status;
