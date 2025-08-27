@@ -1,6 +1,6 @@
-import $ from './Shell/main.js';
+import $ from './shell/main.js';
 
-export function PropMap(record: Record<string, string>, preset: string[] =[], ...styles: string[]) {
+export function PropMap(record: Record<string, string>, preset: string[] = [], ...styles: string[]) {
     const keys: string[] = [];
     const values: string[] = [];
 

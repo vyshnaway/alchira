@@ -1,4 +1,4 @@
-import Utils from "../Utils/main.js";
+import Utils from "../utils/main.js";
 
 const bracePair: Record<string, string> = {
     "{": "}",

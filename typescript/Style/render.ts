@@ -1,13 +1,13 @@
-import * as CACHE from "../Data/cache.js";
+import * as CACHE from "../data/cache.js";
 import * as LOADPREFIX from "./prefix.js";
 
 type t_styleSorceTemplate = Record<string, string | object>;
 
 function LoadVendors(collection = {}, vendor = "") {
 	return vendor == ""
-		? CACHE._ROOT.vendors.filter((ven) => 
+		? CACHE._ROOT.vendors.filter((ven) =>
 			!Object.prototype.hasOwnProperty.call(collection, ven),
-		): [vendor];
+		) : [vendor];
 }
 
 function StylePartialsArray(object: t_styleSorceTemplate, vendors = LoadVendors()) {

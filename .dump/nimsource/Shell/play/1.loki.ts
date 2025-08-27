@@ -1,6 +1,4 @@
-import { fmt } from "../root.js";
-import * as style from "../style.js";
-
+import { style, fmt } from "../0.root.js";
 
 export default (string: string, frames = 1) => {
   const characters = Math.floor(Math.random() * string.length);

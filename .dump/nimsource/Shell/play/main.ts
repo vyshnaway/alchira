@@ -1,4 +1,4 @@
-import * as render from "../render.js";
+import * as render from "../_.render.js";
 
 import renderTitle from "./0.title.js";
 import renderLoki from "./1.loki.js";

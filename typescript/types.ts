@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/naming-convention */
-import c_Target from "./Script/class.js";
+import c_Target from "./script/class.js";
 
 
 // --- Initial Data ---

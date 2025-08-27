@@ -1,10 +1,10 @@
 import CSSBLOCK from "./block.js";
 
-import $ from "../Shell/main.js";
-import Use from "../Utils/main.js";
+import $ from "../shell/main.js";
+import Use from "../utils/main.js";
 import HASHRULE from "../hash-rules.js";
-import * as CACHE from "../Data/cache.js";
-import { INDEX } from "../Data/action.js";
+import * as CACHE from "../data/cache.js";
+import { INDEX } from "../data/action.js";
 import * as TYPE from "../types.js";
 
 function xtylemerge(classList: string[] = []) {

@@ -1,8 +1,5 @@
-import * as style from "../style.js";
-
-import { H1 } from "../tag.js";
-import { canvas, fmt, preset } from "../root.js";
-
+import { canvas, style, fmt, preset } from "../0.root.js";
+import { H1 } from "../1.tag.js";
 
 const padBothSides = (str: string, totalLength: number) => {
   const totalPadding = totalLength - str.length;
@@ -34,7 +31,7 @@ export default (string: string) => {
       ]),
       ...new Array(previewFrames).fill([
         "",
-        canvas.divider.btm,
+        canvas.divider.low,
         "·" + padBothSides("·", canvas.width() - 2) + "·",
         canvas.divider.top,
         "",
@@ -50,7 +47,7 @@ export default (string: string) => {
         "",
         canvas.divider.top,
         ">>" + padBothSides("×", canvas.width() - 4) + "<<",
-        canvas.divider.btm,
+        canvas.divider.low,
         "",
       ]),
     ].map((frame) => fmt(frame.join("\n"), style.AS_Bold, ...preset.title));

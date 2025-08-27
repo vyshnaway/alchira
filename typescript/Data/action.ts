@@ -1,4 +1,4 @@
-import USE from "../Utils/main.js";
+import USE from "../utils/main.js";
 import FILEMAN from "../fileman.js";
 
 import * as TYPE from "../types.js";
@@ -31,7 +31,7 @@ export function SetENV(rootPath: string, workPath: string, packageEssential: TYP
 
     CACHE.STATIC.RootPath = rootPath;
     CACHE.STATIC.WorkPath = workPath;
-    
+
     CACHE._ROOT.name = packageEssential.name || CACHE._ROOT.name;
     CACHE._ROOT.version = packageEssential.version || CACHE._ROOT.version;
     CACHE._ROOT.website = packageEssential.website || CACHE._ROOT.website;

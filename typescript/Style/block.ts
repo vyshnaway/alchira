@@ -1,5 +1,5 @@
-import * as CACHE from "../Data/cache.js";
-import Use from "../Utils/main.js";
+import * as CACHE from "../data/cache.js";
+import Use from "../utils/main.js";
 
 const OPEN_CHARS = ["{", "[", "("];
 const CLOSE_CHARS = ["}", "]", ")"];

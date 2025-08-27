@@ -1,13 +1,13 @@
 import SCRIPTPARSE from "./file.js";
 import fileman from "../fileman.js";
 
-import $ from "../Shell/main.js";
-import FILING from "../Data/filing.js";
-import STYLEPARSE from "../Style/parse.js";
-import { INDEX } from "../Data/action.js";
-import * as CACHE from "../Data/cache.js";
+import $ from "../shell/main.js";
+import FILING from "../data/filing.js";
+import STYLEPARSE from "../style/parse.js";
+import { INDEX } from "../data/action.js";
+import * as CACHE from "../data/cache.js";
 import * as TYPE from "../types.js";
-import Use from "../Utils/main.js";
+import Use from "../utils/main.js";
 
 function stringReplacementByPosition(master_string: string, ranges: [number, number][], replace_with: string) {
 	const result = ranges.reduce((modified, [from, to]) => {

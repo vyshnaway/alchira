@@ -1,4 +1,4 @@
-import $ from "../Shell/main.js";
+import $ from "../shell/main.js";
 import FILEMAN from "../fileman.js";
 
 import * as $$ from "../shell.js";

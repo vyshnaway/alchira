@@ -1,16 +1,16 @@
 /* eslint-disable no-fallthrough */
-import $ from "./Shell/main.js";
+import $ from "./shell/main.js";
 import * as $$ from "./shell.js";
 import * as TYPE from "./types.js";
 import * as SMITH from "./assemble.js";
-import * as FETCH from "./Data/fetch.js";
-import * as CACHE from "./Data/cache.js";
-import * as ACTION from "./Data/action.js";
-import * as worker from "./Data/watcher.js";
+import * as FETCH from "./data/fetch.js";
+import * as CACHE from "./data/cache.js";
+import * as ACTION from "./data/action.js";
+import * as worker from "./data/watcher.js";
 
 // import fileman from "./fileman.js";
-import { MemoryUsage } from "./Data/action.js";
-import Use from "./Utils/main.js";
+import { MemoryUsage } from "./data/action.js";
+import Use from "./utils/main.js";
 // import { FetchPortables, SplitGlobalForComponents } from "./portable.js";
 
 function reporter(heading: string, targets: string[], report: string) {

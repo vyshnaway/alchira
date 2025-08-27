@@ -1,14 +1,14 @@
-import $ from "./Shell/main.js";
+import $ from "./shell/main.js";
 import * as $$ from "./shell.js";
-import Use from "./Utils/main.js";
+import Use from "./utils/main.js";
 import HASHRULE from "./hash-rules.js";
-import STYLE from "./Style/parse.js";
-import COMPILE from "./Style/render.js";
-import ORDER from "./Worker/order-api.js";
-import SCRIPT from "./Script/class.js";
-import XTYLES from "./Style/stash.js";
-import { STATIC, STORAGE, DYNAMIC, LIVEDOCS, _PATH } from "./Data/cache.js";
-import { INDEX } from "./Data/action.js";
+import STYLE from "./style/parse.js";
+import COMPILE from "./style/render.js";
+import ORDER from "./sort/order-api.js";
+import SCRIPT from "./script/class.js";
+import XTYLES from "./style/stash.js";
+import { STATIC, STORAGE, DYNAMIC, LIVEDOCS, _PATH } from "./data/cache.js";
+import { INDEX } from "./data/action.js";
 // import { GeneratePortable } from "./portable.js";
 import * as TYPE from "./types.js";
 

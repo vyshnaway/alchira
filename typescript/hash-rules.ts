@@ -1,7 +1,7 @@
-import $ from "./Shell/main.js";
+import $ from "./shell/main.js";
 import * as $$ from "./shell.js";
 import * as TYPE from "./types.js";
-import * as CACHE from "./Data/cache.js";
+import * as CACHE from "./data/cache.js";
 
 const hashPattern = /#\{[a-z0-9]+\}/i;
 

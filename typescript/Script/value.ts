@@ -1,6 +1,6 @@
-import Use from "../Utils/main.js";
-import { INDEX } from "../Data/action.js";
-import * as CACHE from "../Data/cache.js";
+import Use from "../utils/main.js";
+import { INDEX } from "../data/action.js";
+import * as CACHE from "../data/cache.js";
 import * as TYPE from "../types.js";
 
 

@@ -1,7 +1,7 @@
 import palletes from "./color.js";
 
-import Use from "../Utils/main.js";
-import * as CACHE from "../Data/cache.js";
+import Use from "../utils/main.js";
+import * as CACHE from "../data/cache.js";
 
 const VENDORS = CACHE._ROOT.vendors;
 

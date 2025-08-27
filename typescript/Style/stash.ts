@@ -1,14 +1,14 @@
 import PARSE from "./parse.js";
 
-import $ from "../Shell/main.js";
-import Use from "../Utils/main.js";
+import $ from "../shell/main.js";
+import Use from "../utils/main.js";
 import Fileman from "../fileman.js";
-import FILING from "../Data/filing.js";
-import SCRIPTFILE from "../Script/file.js";
+import FILING from "../data/filing.js";
+import SCRIPTFILE from "../script/file.js";
 
-import { INDEX } from "../Data/action.js";
+import { INDEX } from "../data/action.js";
 import * as TYPE from "../types.js";
-import * as CACHE from "../Data/cache.js";
+import * as CACHE from "../data/cache.js";
 
 
 

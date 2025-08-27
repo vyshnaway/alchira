@@ -1,6 +1,6 @@
-import Use from "../Utils/main.js";
-import * as CACHE from "../Data/cache.js";
-import { INDEX } from "../Data/action.js";
+import Use from "../utils/main.js";
+import * as CACHE from "../data/cache.js";
+import { INDEX } from "../data/action.js";
 
 export function _styleSwitch(object: Record<string, Record<string, object | string>>) {
 	const switched = Use.object.switch(object);

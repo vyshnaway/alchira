@@ -1,10 +1,9 @@
 import * as play from "./play/main.js";
 
-import * as style from "./style.js";
-import * as render from "./render.js";
-import * as root from "./root.js";
-import * as tag from "./tag.js";
-import * as list from "./list.js";
+import * as render from "./_.render.js";
+import * as root from "./0.root.js";
+import * as tag from "./1.tag.js";
+import * as list from "./2.list.js";
 
 
 function task(string: string, rowshift = -1) {
@@ -12,9 +11,9 @@ function task(string: string, rowshift = -1) {
     render.write(
       [
         rowshift >= 0 ? tag.Br(rowshift) : "",
-        root.fmt(">>>", style.AS_Bold, ...root.preset.primary),
+        root.fmt(">>>", root.style.AS_Bold, ...root.preset.primary),
         root.canvas.tab,
-        root.fmt(string + ".", style.AS_Bold, style.AS_Italic, ...root.preset.tertiary),
+        root.fmt(string + ".", root.style.AS_Bold, root.style.AS_Italic, ...root.preset.tertiary),
         tag.Br(1),
       ].join(""),
       rowshift < 0 ? -rowshift : rowshift,
@@ -28,9 +27,9 @@ function step(string: string, rowshift = -1) {
     render.write(
       [
         rowshift >= 0 ? tag.Br(rowshift) : "",
-        root.fmt(">>>", style.AS_Rare, ...root.preset.primary),
+        root.fmt(">>>", root.style.AS_Rare, ...root.preset.primary),
         root.canvas.tab,
-        root.fmt(string + " ...", style.AS_Italic, ...root.preset.tertiary),
+        root.fmt(string + " ...", root.style.AS_Italic, ...root.preset.tertiary),
       ].join(""),
       rowshift < 0 ? -rowshift : rowshift,
     );
@@ -44,7 +43,7 @@ function MAKE(
 ) {
   if (contents.length) { contents.push(root.fmt()); }
   return [
-    root.fmt(heading, style.AS_Bold),
+    root.fmt(heading, root.style.AS_Bold),
     ...listDeplyment.reduce((A, [type, intent, preset, ...styles]) => {
       A = type(A, intent, preset, ...styles);
       return A;
@@ -59,7 +58,7 @@ export default {
   init: root.init,
   canvas: root.canvas,
   preset: root.preset,
-  style: style,
+  style: root.style,
   PLAY: play,
   MAKE,
   POST: root.post,

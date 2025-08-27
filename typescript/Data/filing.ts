@@ -1,4 +1,4 @@
-import USE from "../Utils/main.js";
+import USE from "../utils/main.js";
 import FILEMAN from "../fileman.js";
 
 import * as TYPE from "../types.js";

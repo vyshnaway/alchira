@@ -1,7 +1,7 @@
 import CURSOR from "./_cursor.js";
 import TAGSCAN from './tag.js';
 
-import * as CACHE from '../Data/cache.js';
+import * as CACHE from '../data/cache.js';
 import * as TYPE from "../types.js";
 
 const TagSummonStyle = `<${CACHE._ROOT.customElements["style"]}/>`;
