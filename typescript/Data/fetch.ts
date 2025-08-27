@@ -1,16 +1,17 @@
 import $ from "../Shell/main.js";
-import fileman from "../fileman.js";
+import FILEMAN from "../fileman.js";
+
 import * as $$ from "../shell.js";
-import * as worker from "./watch.js";
-import { collectTWEAKS, collectVendors } from "./action.js";
-import { t_Config, t_Data_PREFIX, t_ProxyMap } from "../types.js";
-import { NAVIGATE, DOCUMENTS, ROOT, CACHE_STATIC, PREFIXES } from "./cache.js";
+import * as TYPE from "../types.js";
+import * as CACHE from "./cache.js";
+import * as WORKER from "./watcher.js";
+import * as ACTION from "./action.js";
 
 export async function FetchDocs() {
-	await Promise.all(Object.values(DOCUMENTS).map(sync => {
+	await Promise.all(Object.values(CACHE._SYNC).map(sync => {
 		Object.values(sync).map(async s => {
 			if (s.url && s.path) {
-				s.content = await fileman.sync.file(s.url, s.path);
+				s.content = await FILEMAN.sync.file(s.url, s.path);
 			}
 		});
 	}));
@@ -21,29 +22,29 @@ export async function Initialize() {
 		$.TASK("Initializing XCSS setup.", 0);
 		$.TASK("Cloning scaffold to Project");
 
-		await fileman.clone.safe(NAVIGATE.blueprint.scaffold.path, NAVIGATE.folder.setup.path);
-		await fileman.clone.safe(NAVIGATE.blueprint.libraries.path, NAVIGATE.folder.libraries.path);
+		await FILEMAN.clone.safe(CACHE._PATH.blueprint.scaffold.path, CACHE._PATH.folder.setup.path);
+		await FILEMAN.clone.safe(CACHE._PATH.blueprint.libraries.path, CACHE._PATH.folder.libraries.path);
 
 		$.POST(
 			$.MAKE(
 				$.tag.H2("Next Steps"),
 				[
 					"Adjust " +
-					$.FMT(NAVIGATE.json.configure.path, $.style.AS_Bold, ...$.canvas.preset.primary) +
+					$.FMT(CACHE._PATH.json.configure.path, $.style.AS_Bold, ...$.preset.primary) +
 					" according to the requirements of your project.",
 					"Execute " +
-					$.FMT('"init"', $.style.AS_Bold, ...$.canvas.preset.primary) +
+					$.FMT('"init"', $.style.AS_Bold, ...$.preset.primary) +
 					" again to generate the necessary configuration folders.",
 					"During execution " +
-					$.FMT("{target}", $.style.AS_Bold, ...$.canvas.preset.primary) +
+					$.FMT("{target}", $.style.AS_Bold, ...$.preset.primary) +
 					" folder will be cloned from " +
-					$.FMT("{source}", $.style.AS_Bold, ...$.canvas.preset.primary) +
+					$.FMT("{source}", $.style.AS_Bold, ...$.preset.primary) +
 					" folder.",
-					"This folder will act as proxy for " + ROOT.name + ".",
+					"This folder will act as proxy for " + CACHE._ROOT.name + ".",
 					"In the " +
-					$.FMT("{target}/{stylesheet}", $.style.AS_Bold, ...$.canvas.preset.primary) +
+					$.FMT("{target}/{stylesheet}", $.style.AS_Bold, ...$.preset.primary) +
 					", content from " +
-					$.FMT("{target}/{stylesheet}", $.style.AS_Bold, ...$.canvas.preset.primary) +
+					$.FMT("{target}/{stylesheet}", $.style.AS_Bold, ...$.preset.primary) +
 					" will be appended.",
 				],
 				[$.list.Bullets, 0, []],
@@ -53,7 +54,7 @@ export async function Initialize() {
 		$.POST(
 			$.MAKE(
 				$.tag.H2("Available Commands"),
-				$$.PropMap(ROOT.commandList),
+				$$.PropMap(CACHE._ROOT.commandList),
 				[$.list.Bullets, 0, []]
 			),
 		);
@@ -61,15 +62,15 @@ export async function Initialize() {
 		$.POST(
 			$.MAKE(
 				$.tag.H2("Publish command instructions."),
-				ROOT.version === "0"
+				CACHE._ROOT.version === "0"
 					? ["This command uses an internet connection."]
 					: [
 						"Create a new project and use its access key. For action visit " +
-						$.FMT(ROOT.URL.Console, $.style.AS_Bold, ...$.canvas.preset.primary),
+						$.FMT(CACHE._ROOT.URL.Console, $.style.AS_Bold, ...$.preset.primary),
 						"For personal projects, you can use the key in " +
-						$.FMT(NAVIGATE.json.configure.path, $.style.AS_Bold, ...$.canvas.preset.primary),
+						$.FMT(CACHE._PATH.json.configure.path, $.style.AS_Bold, ...$.preset.primary),
 						"If using in CI/CD workflow, it is suggested to use " +
-						$.FMT("xcss publish {key}", $.style.AS_Bold, ...$.canvas.preset.primary),
+						$.FMT("xcss publish {key}", $.style.AS_Bold, ...$.preset.primary),
 					],
 				[$.list.Bullets, 0, []]
 			),
@@ -88,22 +89,22 @@ export async function Initialize() {
 export async function VerifySetupStruct() {
 	const result = { started: false, proceed: false, report: "" };
 
-	if (fileman.path.ifFolder(NAVIGATE.folder.setup.path)) {
+	if (FILEMAN.path.ifFolder(CACHE._PATH.folder.setup.path)) {
 		const errors: Record<string, string> = {};
-		await fileman.clone.safe(NAVIGATE.blueprint.scaffold.path, NAVIGATE.folder.setup.path);
+		await FILEMAN.clone.safe(CACHE._PATH.blueprint.scaffold.path, CACHE._PATH.folder.setup.path);
 
 		$.TASK("Verifying directory status", 0);
-		for (const item of Object.values(NAVIGATE.css)) {
+		for (const item of Object.values(CACHE._PATH.css)) {
 			const path = item.path;
 			$.STEP("Path : " + path);
-			if (!fileman.path.ifFile(path)) {
+			if (!FILEMAN.path.ifFile(path)) {
 				errors[path] = "File not found.";
 			}
 		}
-		for (const item of Object.values(NAVIGATE.json)) {
+		for (const item of Object.values(CACHE._PATH.json)) {
 			const path = item.path;
 			$.STEP("Path : " + path);
-			if (!fileman.path.ifFile(path)) {
+			if (!FILEMAN.path.ifFile(path)) {
 				errors[path] = "File not found.";
 			}
 		}
@@ -128,35 +129,35 @@ export async function VerifySetupStruct() {
 
 export async function FetchStatics(vendorSource: string) {
 
-	const manifestIgnores = (await fileman.read.file(NAVIGATE.autogen.ignore.path)).data.split("\n");
-	const modPts = (NAVIGATE.autogen.ignore.content || "").split("\n").reduce((modPts: number, ign) => {
+	const manifestIgnores = (await FILEMAN.read.file(CACHE._PATH.autogen.ignore.path)).data.split("\n");
+	const modPts = (CACHE._PATH.autogen.ignore.content || "").split("\n").reduce((modPts: number, ign) => {
 		if (!manifestIgnores.includes(ign)) {
 			manifestIgnores.push(ign);
 			modPts++;
 		}
 		return modPts;
 	}, 0);
-	if (modPts) { await fileman.write.file(NAVIGATE.autogen.ignore.path, manifestIgnores.join("\n")); }
+	if (modPts) { await FILEMAN.write.file(CACHE._PATH.autogen.ignore.path, manifestIgnores.join("\n")); }
 
 
 	$.TASK("Loading vendor-prefixes");
 
 	const PrefixObtained = await (async function () {
-		const result1 = await fileman.read.json(vendorSource, true);
+		const result1 = await FILEMAN.read.json(vendorSource, true);
 		if (result1.status) { return result1.data; };
 
-		const result2 = await fileman.read.json(ROOT.URL.PrefixCdn + vendorSource, true);
+		const result2 = await FILEMAN.read.json(CACHE._ROOT.URL.PrefixCdn + vendorSource, true);
 		if (result2.status) { return result2.data; };
 
-		const result3 = await fileman.read.json(NAVIGATE.blueprint.prefixes.path, false);
+		const result3 = await FILEMAN.read.json(CACHE._PATH.blueprint.prefixes.path, false);
 		if (result3.status) { return result3.data; };
 
 		return {};
-	})() as t_Data_PREFIX;
-	await fileman.write.json(NAVIGATE.blueprint.prefixes.path, PrefixObtained);
+	})() as TYPE.Data_PREFIX;
+	await FILEMAN.write.json(CACHE._PATH.blueprint.prefixes.path, PrefixObtained);
 
 
-	const PrefixRead: t_Data_PREFIX = {
+	const PrefixRead: TYPE.Data_PREFIX = {
 		attributes: {},
 		pseudos: {},
 		values: {},
@@ -166,7 +167,7 @@ export async function FetchStatics(vendorSource: string) {
 	};
 
 	for (const key in PrefixRead) {
-		const typedKey = key as keyof t_Data_PREFIX;
+		const typedKey = key as keyof TYPE.Data_PREFIX;
 		const valueFromObtained = PrefixObtained[typedKey];
 		if (typedKey === 'values') {
 			PrefixRead[typedKey] = valueFromObtained as Record<string, Record<string, Record<string, string>>>;
@@ -174,36 +175,36 @@ export async function FetchStatics(vendorSource: string) {
 			PrefixRead[typedKey] = valueFromObtained as Record<string, Record<string, string>>;
 		}
 	}
-	PREFIXES.pseudos = { ...PrefixRead.classes, ...PrefixRead.elements, ...PrefixRead.pseudos };
-	PREFIXES.attributes = { ...PrefixRead.attributes };
-	PREFIXES.atrules = { ...PrefixRead.atrules };
-	PREFIXES.values = { ...PrefixRead.values };
-	collectVendors();
+	CACHE._PREFIX.pseudos = { ...PrefixRead.classes, ...PrefixRead.elements, ...PrefixRead.pseudos };
+	CACHE._PREFIX.attributes = { ...PrefixRead.attributes };
+	CACHE._PREFIX.atrules = { ...PrefixRead.atrules };
+	CACHE._PREFIX.values = { ...PrefixRead.values };
+	ACTION.collectVendors();
 }
 
 export async function VerifyConfigure(loadStatics: boolean) {
 	$.TASK("Initializing configs", 0);
 	const errors: string[] = [], alerts: string[] = [];
 
-	$.STEP("PATH : " + NAVIGATE.json.configure.path);
-	const config = await fileman.read.json(NAVIGATE.json.configure.path);
+	$.STEP("PATH : " + CACHE._PATH.json.configure.path);
+	const config = await FILEMAN.read.json(CACHE._PATH.json.configure.path);
 	if (config.status) {
-		const CONFIG = config.data as t_Config;
+		const CONFIG = config.data as TYPE.Config;
 		if (loadStatics) { await FetchStatics(CONFIG.vendors); }
-		collectTWEAKS(CONFIG.tweaks);
+		ACTION.collectTWEAKS(CONFIG.tweaks);
 
-		CACHE_STATIC.ProxyMap = (Array.isArray(CONFIG.proxy)) ? CONFIG.proxy.reduce((acc, proxy) => {
+		CACHE.STATIC.ProxyMap = (Array.isArray(CONFIG.proxy)) ? CONFIG.proxy.reduce((acc, proxy) => {
 			if (typeof proxy === "object") {
 				acc.push(proxy);
 			}
 			return acc;
-		}, [] as t_ProxyMap[]) : [];
+		}, [] as TYPE.ProxyMap[]) : [];
 
-		Object.assign(CACHE_STATIC.Package, config.data);
-		CACHE_STATIC.Package.Readme = (await fileman.read.file(NAVIGATE.md.readme.path)).data;
-		CACHE_STATIC.Package.Name = CACHE_STATIC.Package.Name = CONFIG.Name || CACHE_STATIC.Project_Name;
-		CACHE_STATIC.Package.Version = CACHE_STATIC.Package.Version = CONFIG.Version || CACHE_STATIC.Project_Version;
-		CACHE_STATIC.Package_Saved = Object.entries((typeof CONFIG.packages === "object") ? CONFIG.packages : {})
+		Object.assign(CACHE.STATIC.Package, config.data);
+		CACHE.STATIC.Package.Readme = (await FILEMAN.read.file(CACHE._PATH.md.readme.path)).data;
+		CACHE.STATIC.Package.Name = CACHE.STATIC.Package.Name = CONFIG.Name || CACHE.STATIC.Project_Name;
+		CACHE.STATIC.Package.Version = CACHE.STATIC.Package.Version = CONFIG.Version || CACHE.STATIC.Project_Version;
+		CACHE.STATIC.Package_Saved = Object.entries((typeof CONFIG.packages === "object") ? CONFIG.packages : {})
 			.reduce((a: Record<string, string>, [k, v]) => {
 				if (
 					typeof v === "string"
@@ -215,15 +216,15 @@ export async function VerifyConfigure(loadStatics: boolean) {
 				return a;
 			}, {});
 
-		delete CACHE_STATIC.Package.proxy;
-		delete CACHE_STATIC.Package.tweaks;
-		delete CACHE_STATIC.Package.vendors;
-		delete CACHE_STATIC.Package.packages;
+		delete CACHE.STATIC.Package.proxy;
+		delete CACHE.STATIC.Package.tweaks;
+		delete CACHE.STATIC.Package.vendors;
+		delete CACHE.STATIC.Package.packages;
 
-		const results = await worker.proxyMapDependency(CACHE_STATIC.ProxyMap, NAVIGATE.folder.setup.path);
+		const results = await WORKER.proxyMapDependency(CACHE.STATIC.ProxyMap, CACHE._PATH.folder.setup.path);
 		errors.push(...results.warnings);
 	} else {
-		errors.push(`${NAVIGATE.json.configure} : Bad json file.`);
+		errors.push(`${CACHE._PATH.json.configure} : Bad json file.`);
 	}
 
 	$.TASK("Initialization finished");
@@ -240,44 +241,44 @@ export async function VerifyConfigure(loadStatics: boolean) {
 
 export async function SaveRootCSS() {
 	$.TASK("Updating Index");
-	CACHE_STATIC.RootCSS = await worker.cssImport(Object.values(NAVIGATE.css).map(css => css.path));
+	CACHE.STATIC.RootCSS = await WORKER.cssImport(Object.values(CACHE._PATH.css).map(css => css.path));
 }
 
 export async function SaveLibrary() {
 	$.TASK("Updating Library");
-	CACHE_STATIC.Library_Saved = await fileman.read.bulk(NAVIGATE.folder.libraries.path, ["css"]);
+	CACHE.STATIC.Library_Saved = await FILEMAN.read.bulk(CACHE._PATH.folder.libraries.path, ["css"]);
 }
 
 export async function SavePackages() {
 	$.TASK("Updating Packages");
-	CACHE_STATIC.Package_Saved = await fileman.read.bulk(NAVIGATE.folder.packages.path, ["xcss", "css", "md"]);
+	CACHE.STATIC.Package_Saved = await FILEMAN.read.bulk(CACHE._PATH.folder.packages.path, ["xcss", "css", "md"]);
 }
 
 
 
 export async function SaveProxies() {
 	$.TASK("Syncing proxy folders", 0);
-	Object.keys(CACHE_STATIC.TargeAS_Saved).forEach((key) => delete CACHE_STATIC.TargeAS_Saved[key]);
-	CACHE_STATIC.TargeAS_Saved = await worker.proxyMapSync(CACHE_STATIC.ProxyMap);
+	Object.keys(CACHE.STATIC.TargeAS_Saved).forEach((key) => delete CACHE.STATIC.TargeAS_Saved[key]);
+	CACHE.STATIC.TargeAS_Saved = await WORKER.proxyMapSync(CACHE.STATIC.ProxyMap);
 }
 
 export async function SaveHashrules() {
 	$.TASK("Updating Hashrules", 0);
 	const errors = [];
 
-	$.STEP("PATH : " + NAVIGATE.json.hashrules);
-	const hashrule = await fileman.read.json(NAVIGATE.json.hashrules.path);
-	Object.keys(CACHE_STATIC.HashRule).forEach(key => delete CACHE_STATIC.HashRule[key]);
+	$.STEP("PATH : " + CACHE._PATH.json.hashrules);
+	const hashrule = await FILEMAN.read.json(CACHE._PATH.json.hashrules.path);
+	Object.keys(CACHE.STATIC.HashRule).forEach(key => delete CACHE.STATIC.HashRule[key]);
 	if (hashrule.status) {
 		Object.entries(hashrule.data).forEach(([key, value]) => {
 			if (typeof value === "string") {
-				CACHE_STATIC.HashRule[key] = value;
+				CACHE.STATIC.HashRule[key] = value;
 			} else {
 				errors.push(`Hashrule: ${key} does not have a value of type STRING.`);
 			}
 		});
 	} else {
-		errors.push(`${NAVIGATE.json.hashrules.path} : Bad json file.`);
+		errors.push(`${CACHE._PATH.json.hashrules.path} : Bad json file.`);
 	}
 	$.TASK("Analysis complete");
 	return {

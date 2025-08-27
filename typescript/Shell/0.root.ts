@@ -13,14 +13,31 @@ export const style = {
   AS_Strikethrough: '9',
   AS_Rare: '20',
 
-  AR_Bold_2UL: '21',
+  AR_2Underline: '21',
   AR_intensity: '22',
   AR_italic: '23',
-  AR_underlined: '24',
+  AR_underline: '24',
   AR_blinking: '25',
   AR_inverted: '27',
   AR_hidden: '28',
   AR_struck: '29',
+
+  TB_Normal_Black: '40',
+  TB_Normal_Red: '41',
+  TB_Normal_Green: '42',
+  TB_Normal_Yellow: '43',
+  TB_Normal_Blue: '44',
+  TB_Normal_Magenta: '45',
+  TB_Normal_Cyan: '46',
+  TB_Normal_White: '47',
+  TB_Bright_Black: '100',
+  TB_Bright_Red: '101',
+  TB_Bright_Green: '102',
+  TB_Bright_Yellow: '103',
+  TB_Bright_Blue: '104',
+  TB_Bright_Magenta: '105',
+  TB_Bright_Cyan: '106',
+  TB_Bright_White: '107',
 
   TC_Normal_Black: '30',
   TC_Normal_Red: '31',
@@ -38,36 +55,10 @@ export const style = {
   TC_Bright_Magenta: '95',
   TC_Bright_Cyan: '96',
   TC_Bright_White: '97',
-
-  BC_Normal_Black: '40',
-  BC_Normal_Red: '41',
-  BC_Normal_Green: '42',
-  BC_Normal_Yellow: '43',
-  BC_Normal_Blue: '44',
-  BC_Normal_Magenta: '45',
-  BC_Normal_Cyan: '46',
-  BC_Normal_White: '47',
-  BC_Bright_Black: '100',
-  BC_Bright_Red: '101',
-  BC_Bright_Green: '102',
-  BC_Bright_Yellow: '103',
-  BC_Bright_Blue: '104',
-  BC_Bright_Magenta: '105',
-  BC_Bright_Cyan: '106',
-  BC_Bright_White: '107',
+  
 };
 
 export const canvas: {
-  preset: {
-    title: string[],
-    text: string[],
-    primary: string[],
-    secondary: string[],
-    tertiary: string[],
-    success: string[],
-    failed: string[],
-    warning: string[],
-  },
 
   config: {
     taskActive: boolean,
@@ -87,17 +78,6 @@ export const canvas: {
 
 } = {
 
-  preset: {
-    title: [],
-    text: [],
-    primary: [],
-    secondary: [],
-    tertiary: [],
-    success: [],
-    failed: [],
-    warning: [],
-  },
-
   config: {
     taskActive: true,
     postActive: true,
@@ -116,18 +96,17 @@ export const canvas: {
 
 };
 
-Object.assign(canvas.preset,
-  {
-    title: [style.TC_Normal_Green],
-    text: [style.TC_Normal_White],
-    primary: [style.TC_Normal_Yellow],
-    secondary: [style.TC_Bright_Yellow],
-    tertiary: [style.TC_Bright_Black],
-    warning: [style.TC_Normal_Yellow],
-    success: [style.TC_Normal_Green],
-    failed: [style.TC_Normal_Red],
-  }
-);
+export const preset = {
+  title: [style.TC_Normal_Green],
+  text: [style.TC_Normal_White],
+  link: [style.AS_Underline],
+  primary: [style.TC_Normal_Yellow],
+  secondary: [style.TC_Bright_Yellow],
+  tertiary: [style.TC_Bright_Black],
+  warning: [style.TC_Normal_Yellow],
+  success: [style.TC_Normal_Green],
+  failed: [style.TC_Normal_Red],
+};
 
 export function init(
   taskActive = true,

@@ -2,6 +2,8 @@ import fs from 'fs';
 import path from 'path';
 import esbuild from 'esbuild';
 
+const destination ='./execute/javascript/';
+
 function clearFolder(folderPath) {
     if (!fs.existsSync(folderPath)) {
         console.error(`Folder does not exist: ${folderPath}`);
@@ -22,17 +24,17 @@ function clearFolder(folderPath) {
     });
 }
 
-clearFolder('./binaries/javascript/');
+clearFolder(destination);
 
 esbuild.build({
-
-    entryPoints: ['typescript/index.ts'],
+    entryPoints: ['typescript/main.ts'],
     bundle: true,
     minify: false,
-    outfile: './binaries/javascript/index.js',
+    outfile: destination + 'main.js',
     target: ['node18'],
     platform: 'node',
-    format: 'cjs',
+    format: 'esm',
+    legalComments: 'none',
     external: ['vscode', 'vscode-css-languageservice']
 })
     .then(() => {

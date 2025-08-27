@@ -7,8 +7,8 @@
     "url": "https://github.com/yshell-dev/xcss"
   },
   "bin": {
-    "xcss": "./execute/xcss.js",
-    "xjs": "./execute/javascript/index.js"
+    "xdev": "./execute/javascript/main.js",
+    "xcss": "./execute/xcss.js"
   },
   "funding": {
     "type": "individual",
@@ -16,17 +16,6 @@
   },
   "scripts": {
     "init": "chmod +x ./execute/script/chmod.sh && ./execute/script/chmod.sh && xcss init",
-    "debug": "xcss debug watch",
-    "install": "xcss install",
-    "preview": "xcss preview",
-    "publish": "xcss publish",
-    "archive": "xcss archive",
-    "xjs:init": "xjs init",
-    "xjs:debug": "xjs debug watch",
-    "xjs:install": "xjs install",
-    "xjs:preview": "xjs preview",
-    "xjs:publish": "xjs publish",
-    "xjs:archive": "xjs archive",
     "dev:tscompile": "tsc -p ./typescript",
     "dev:escompile": "node ./execute/script/esbuild.js",
     "dev:package": "chmod +x ./execute/script/build.sh && ./execute/script/build.sh",

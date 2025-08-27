@@ -1,13 +1,13 @@
 import palletes from "./color.js";
 
 import Use from "../Utils/main.js";
-import { ROOT, PREFIXES } from "../Data/cache.js";
+import * as CACHE from "../Data/cache.js";
 
-const VENDORS = ROOT.vendors;
+const VENDORS = CACHE._ROOT.vendors;
 
 
 function forAttribute(content: string, prefixes = VENDORS) {
-	const attrVals = PREFIXES.attributes[content];
+	const attrVals = CACHE._PREFIX.attributes[content];
 	if (!attrVals) { return { "": content }; }
 
 	const result: Record<string, string> = {};
@@ -21,7 +21,7 @@ function forAttribute(content: string, prefixes = VENDORS) {
 
 function forValues(attribute: string, value: string, prefixes = VENDORS) {
 	const cleanValue = Use.code.uncomment.Css(value);
-	const venVals = PREFIXES.values?.[attribute]?.[cleanValue];
+	const venVals = CACHE._PREFIX.values?.[attribute]?.[cleanValue];
 	if (!venVals) { return { "": value }; }
 
 	const result: Record<string, string> = {};
@@ -52,7 +52,7 @@ export function LoadProps(
 			}
 		});
 	});
-	
+
 	return results;
 }
 
@@ -68,8 +68,8 @@ export function forAtRule(
 
 	const result: Record<string, string> = {};
 	prefixes.forEach((group) => {
-		if (PREFIXES.atrules[rule] && PREFIXES.atrules[rule][group]) {
-			result[group] = PREFIXES.atrules[rule][group] + data;
+		if (CACHE._PREFIX.atrules[rule] && CACHE._PREFIX.atrules[rule][group]) {
+			result[group] = CACHE._PREFIX.atrules[rule][group] + data;
 		}
 	}, {});
 	result[""] = content;
@@ -88,12 +88,12 @@ export function forPseudos(
 
 		prefixes.forEach((group) => {
 			result[group].out = string.replace(/:+[\w-]+/g, (selector) => {
-				if (PREFIXES.pseudos[selector] && PREFIXES.pseudos[selector][group]) {
+				if (CACHE._PREFIX.pseudos[selector] && CACHE._PREFIX.pseudos[selector][group]) {
 					result[group].score++;
-					return PREFIXES.pseudos[selector][group];
+					return CACHE._PREFIX.pseudos[selector][group];
 				}
 
-				if (PREFIXES.pseudos[selector]) {
+				if (CACHE._PREFIX.pseudos[selector]) {
 					return selector;
 				}
 

@@ -1,21 +1,12 @@
-import {
-    t_Data_ROOT,
-    t_Data_PREFIX,
-    t_Data_Source,
-    t_Data_TWEAKS,
-    t_CACHE_LIVEDOCS,
-    t_CACHE_STATIC,
-    t_CACHE_DYNAMIC,
-    t_CACHE_STORAGE,
-} from "../types.js";
+import * as TYPE from "../types.js";
 
 const domain = "xcss.io";
 
-export const ROOT: t_Data_ROOT = {
+export const _ROOT: TYPE.Data_ROOT = {
+    bin: "",
     name: "xcss-engine",
     version: "0.0.0",
     website: domain,
-    bins: [],
     vendors: [],
     URL: {
         Cdn: `https://cdn.${domain}/`,
@@ -61,7 +52,7 @@ export const ROOT: t_Data_ROOT = {
     }
 };
 
-export const DOCUMENTS: Record<string, Record<string, t_Data_Source>> = {
+export const _SYNC: Record<string, Record<string, TYPE.Data_Source>> = {
     MARKDOWN: {
         readme: {
             title: "README",
@@ -110,7 +101,7 @@ export const DOCUMENTS: Record<string, Record<string, t_Data_Source>> = {
     }
 };
 
-export const NAVIGATE: Record<string, Record<string, t_Data_Source>> = {
+export const _PATH: Record<string, Record<string, TYPE.Data_Source>> = {
     blueprint: {
         scaffold: {
             frags: ["blueprint", "scaffold"],
@@ -220,7 +211,7 @@ export const NAVIGATE: Record<string, Record<string, t_Data_Source>> = {
     }
 };
 
-export const PREFIXES: t_Data_PREFIX = {
+export const _PREFIX: TYPE.Data_PREFIX = {
     atrules: {},
     attributes: {},
     pseudos: {},
@@ -229,14 +220,14 @@ export const PREFIXES: t_Data_PREFIX = {
     values: {},
 };
 
-export const TWEAKS: t_Data_TWEAKS = {
-    ...ROOT.defaultTweaks
+export const _TWEAKS: TYPE.Data_TWEAKS = {
+    ..._ROOT.defaultTweaks
 };
 
 
 // --- CACHE DECLARE ---
 
-export const CACHE_LIVEDOCS: t_CACHE_LIVEDOCS = {
+export const LIVEDOCS: TYPE.CACHE_LIVEDOCS = {
     DeltaPath: "",
     DeltaContent: "",
     FinalMessage: "",
@@ -269,7 +260,7 @@ export const CACHE_LIVEDOCS: t_CACHE_LIVEDOCS = {
     },
     Manifest: {
         prefix: "",
-        elements: Object.values(ROOT.customElements),
+        elements: Object.values(_ROOT.customElements),
         constants: [],
         hashrules: {},
         file: {},
@@ -284,7 +275,7 @@ export const CACHE_LIVEDOCS: t_CACHE_LIVEDOCS = {
 };
 
 
-export const CACHE_STATIC: t_CACHE_STATIC = {
+export const STATIC: TYPE.CACHE_STATIC = {
     WATCH: false,
     DEBUG: false,
     Project_Name: "",
@@ -306,7 +297,7 @@ export const CACHE_STATIC: t_CACHE_STATIC = {
     Package_Saved: {},
 };
 
-export const CACHE_DYNAMIC: t_CACHE_DYNAMIC = {
+export const DYNAMIC: TYPE.CACHE_DYNAMIC = {
     HashRule: {},
     Index_ClassData: {},
     GlobalClass__Index: {},
@@ -319,7 +310,7 @@ export const CACHE_DYNAMIC: t_CACHE_DYNAMIC = {
     Sync_ClassDictionary: {}
 };
 
-export const CACHE_STORAGE: t_CACHE_STORAGE = {
+export const STORAGE: TYPE.CACHE_STORAGE = {
     LIBRARIES: {},
     PACKAGES: {},
     TARGET: {}

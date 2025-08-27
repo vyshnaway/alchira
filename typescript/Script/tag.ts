@@ -1,9 +1,8 @@
 /* eslint-disable no-useless-escape */
-import cursor from "./_cursor.js";
-import classExtract from "./value.js";
+import VALUE from "./value.js";
+import CURSOR from "./_cursor.js";
 
-import { t_FILE_Storage, t_TagRawStyle } from "../types.js";
-import { t_RescriptAction } from "./value.js";
+import * as TYPE from "../types.js";
 
 const bracePair = {
 	"{": "}",
@@ -13,23 +12,24 @@ const bracePair = {
 	"`": "`",
 	'"': '"',
 };
-type t_OpenBrace = keyof typeof bracePair;
+
+type OpenBrace = keyof typeof bracePair;
 export const openBraces = Object.keys(bracePair);
 export const closeBraces = ["]", "}", ")"];
 
 
 export default function scanner(
-	fileData: t_FILE_Storage,
+	fileData: TYPE.FILE_Storage,
 	classProps: string[] = [],
-	action: t_RescriptAction = "read",
-	fileCursor = cursor.Initialize(fileData.content),
+	action: TYPE.ScriptParseActions = "read",
+	fileCursor = CURSOR.Initialize(fileData.content),
 ) {
 	const
 		classesList: string[][] = [],
 		attachments = new Set<string>(),
-		braceTrack: t_OpenBrace[] = [],
+		braceTrack: OpenBrace[] = [],
 		nativeAttributes: Record<string, string> = {},
-		styleDeclarations: t_TagRawStyle = {
+		styleDeclarations: TYPE.TagRawStyle = {
 			element: "",
 			elvalue: "",
 			selector: "",
@@ -55,7 +55,7 @@ export default function scanner(
 
 	while (fileCursor.active.marker < fileData.content.length) {
 		const lastCh = fileCursor.active.char;
-		const liveCh = cursor.Incremnet(fileCursor);
+		const liveCh = CURSOR.Incremnet(fileCursor);
 		if (lastCh !== "\\") {
 			if (!fallbackAquired && liveCh === "<") {
 				fallbackAquired = true;
@@ -67,9 +67,9 @@ export default function scanner(
 				deviance = braceTrack.length;
 				awaitBrace = bracePair[braceTrack[deviance - 1]];
 			} else if (openBraces.includes(liveCh) && !["'", '"', "`"].includes(awaitBrace)) {
-				braceTrack.push(liveCh as t_OpenBrace);
+				braceTrack.push(liveCh as OpenBrace);
 				deviance = braceTrack.length;
-				awaitBrace = bracePair[liveCh as t_OpenBrace];
+				awaitBrace = bracePair[liveCh as OpenBrace];
 			} else if (deviance === 0 && closeBraces.includes(liveCh)) { break; }
 
 			if (deviance === 0 && [" ", "\n", "\r", ">", "\t"].includes(liveCh) && (attr !== "")) {
@@ -95,7 +95,7 @@ export default function scanner(
 				} else if (/[\$@#]/.test(tr_Attr) && !"$@".includes(tr_Attr[0]) && !"$@".includes(tr_Attr[tr_Attr.length - 1])) {
 					styleDeclarations.styles[tr_Attr] = tr_Value;
 				} else if (classProps.includes(tr_Attr)) {
-					const result = classExtract(tr_Value, action, fileData, attachments, fileCursor.active);
+					const result = VALUE(tr_Value, action, fileData, attachments, fileCursor.active);
 					classesList.push(result.classList);
 					nativeAttributes[tr_Attr] = result.scribed;
 				} else {

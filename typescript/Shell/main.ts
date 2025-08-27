@@ -11,9 +11,9 @@ function task(string: string, rowshift = -1) {
     render.write(
       [
         rowshift >= 0 ? tag.Br(rowshift) : "",
-        root.fmt(">>>", root.style.AS_Bold, ...root.canvas.preset.primary),
+        root.fmt(">>>", root.style.AS_Bold, ...root.preset.primary),
         root.canvas.tab,
-        root.fmt(string + ".", root.style.AS_Bold, root.style.AS_Italic, ...root.canvas.preset.tertiary),
+        root.fmt(string + ".", root.style.AS_Bold, root.style.AS_Italic, ...root.preset.tertiary),
         tag.Br(1),
       ].join(""),
       rowshift < 0 ? -rowshift : rowshift,
@@ -27,9 +27,9 @@ function step(string: string, rowshift = -1) {
     render.write(
       [
         rowshift >= 0 ? tag.Br(rowshift) : "",
-        root.fmt(">>>", root.style.AS_Rare, ...root.canvas.preset.primary),
+        root.fmt(">>>", root.style.AS_Rare, ...root.preset.primary),
         root.canvas.tab,
-        root.fmt(string + " ...", root.style.AS_Italic, ...root.canvas.preset.tertiary),
+        root.fmt(string + " ...", root.style.AS_Italic, ...root.preset.tertiary),
       ].join(""),
       rowshift < 0 ? -rowshift : rowshift,
     );
@@ -43,7 +43,7 @@ function MAKE(
 ) {
   if (contents.length) { contents.push(root.fmt()); }
   return [
-    heading,
+    root.fmt(heading, root.style.AS_Bold),
     ...listDeplyment.reduce((A, [type, intent, preset, ...styles]) => {
       A = type(A, intent, preset, ...styles);
       return A;
@@ -57,7 +57,7 @@ export default {
   render,
   init: root.init,
   canvas: root.canvas,
-  preset: root.canvas.preset,
+  preset: root.preset,
   style: root.style,
   PLAY: play,
   MAKE,

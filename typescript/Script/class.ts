@@ -1,18 +1,21 @@
 import SCRIPTPARSE from "./file.js";
-import {
-	TagFn_ReplaceStyle,
-	TagFn_ReplaceStaple,
-} from "./file.js";
 import fileman from "../fileman.js";
 
 import $ from "../Shell/main.js";
 import FILING from "../Data/filing.js";
 import STYLEPARSE from "../Style/parse.js";
 import { INDEX } from "../Data/action.js";
-import { CACHE_STATIC, CACHE_DYNAMIC } from "../Data/cache.js";
-import { t_FILE_Storage, t_ProxyMapStatic, t_Cumulates } from "../types.js";
-import { t_RescriptAction } from "./value.js";
+import * as CACHE from "../Data/cache.js";
+import * as TYPE from "../types.js";
 import Use from "../Utils/main.js";
+
+function stringReplacementByPosition(master_string: string, ranges: [number, number][], replace_with: string) {
+	const result = ranges.reduce((modified, [from, to]) => {
+		modified = master_string.slice(0, from) + replace_with + master_string.slice(to);
+		return modified;
+	}, master_string);
+	return result;
+};
 
 export default class C_Proxy {
 	source = "";
@@ -25,7 +28,7 @@ export default class C_Proxy {
 	label: string;
 	extensions: string[];
 	extnsProps: Record<string, string[]>;
-	fileCache: Record<string, t_FILE_Storage> = {};
+	fileCache: Record<string, TYPE.FILE_Storage> = {};
 
 	constructor({
 		source,
@@ -34,7 +37,7 @@ export default class C_Proxy {
 		extensions,
 		fileContents,
 		stylesheetContent,
-	}: t_ProxyMapStatic, identifier: string) {
+	}: TYPE.ProxyMapStatic, identifier: string) {
 		extensions["xcss"] = [];
 
 		this.source = source;
@@ -92,12 +95,12 @@ export default class C_Proxy {
 			FILE.manifest.diagnostics.push(...response.diagnostics);
 		});
 
-		Object.assign(CACHE_DYNAMIC.GlobalClass__Index, FILE.styleData.globalClasses);
-		Object.assign(FILE.manifest.refer, { group: "target", id: CACHE_STATIC.WorkPath + FILE.targetPath });
+		Object.assign(CACHE.DYNAMIC.GlobalClass__Index, FILE.styleData.globalClasses);
+		Object.assign(FILE.manifest.refer, { group: "target", id: CACHE.STATIC.WorkPath + FILE.targetPath });
 	}
 
 	Accumulator() {
-		const Cumulates: t_Cumulates = {
+		const Cumulates: TYPE.Cumulates = {
 			report: [],
 			errors: [],
 			diagnostics: [],
@@ -108,10 +111,10 @@ export default class C_Proxy {
 		};
 
 		Cumulates.report.push($.MAKE($.tag.H2(`PROXY : ${this.target} -> ${this.source}`)));
-		Cumulates.fileManifests[fileman.path.join(CACHE_STATIC.WorkPath, this.targetStylesheet)] = {
+		Cumulates.fileManifests[fileman.path.join(CACHE.STATIC.WorkPath, this.targetStylesheet)] = {
 			refer: {
 				group: "STYLESHEET",
-				id: fileman.path.join(CACHE_STATIC.WorkPath, this.targetStylesheet),
+				id: fileman.path.join(CACHE.STATIC.WorkPath, this.targetStylesheet),
 			},
 			public: {},
 			global: {},
@@ -212,7 +215,7 @@ export default class C_Proxy {
 	}
 
 
-	RenderFiles(action: t_RescriptAction) {
+	RenderFiles(action: TYPE.ScriptParseActions) {
 		Object.values(this.fileCache).forEach((filedata) => {
 			filedata.midway = SCRIPTPARSE(
 				filedata,
@@ -233,8 +236,20 @@ export default class C_Proxy {
 		Object.values(this.fileCache).forEach((file) => {
 			if (file.extension !== "xcss") {
 				let fileContent = file.midway;
-				if (file.styleData.hasStyleTag) { fileContent = TagFn_ReplaceStyle(fileContent, StyleBlock); }
-				if (file.styleData.hasStapleTag) { fileContent = TagFn_ReplaceStaple(fileContent, AttachBlock); }
+				if (file.styleData.hasStyleTag) {
+					fileContent = stringReplacementByPosition(
+						fileContent,
+						file.styleData.stapleTagReplaces,
+						AttachBlock
+					);
+				}
+				if (file.styleData.hasStapleTag) {
+					fileContent = stringReplacementByPosition(
+						fileContent,
+						file.styleData.styleTagReplaces,
+						AttachBlock
+					);
+				}
 				DeployedFiles.push(file.sourcePath);
 				SaveFiles[file.sourcePath] = fileContent;
 			}

@@ -1,5 +1,5 @@
 import Use from "../Utils/main.js";
-import { CACHE_DYNAMIC } from "../Data/cache.js";
+import * as CACHE from "../Data/cache.js";
 import { INDEX } from "../Data/action.js";
 
 export function _styleSwitch(object: Record<string, Record<string, object | string>>) {
@@ -46,7 +46,7 @@ function _loadAttachObjectsFromIndex(
 	const indexMap: Record<string, number> = {}, result: Record<string, Record<string, object>> = {};
 
 	order.forEach((identity) => {
-		const index = CACHE_DYNAMIC.LibraryClass_Index[identity];
+		const index = CACHE.DYNAMIC.LibraryClass_Index[identity];
 		if (index) {
 			const selector = INDEX.FETCH(index).selector;
 			const evaluated = (["@", "."].includes(selector[0]) ? "" : ".") + selector;
@@ -64,8 +64,8 @@ function buildAttachments(attachments = new Set<string>()) {
 
 	do {
 		attachments.forEach((element) => {
-			if (CACHE_DYNAMIC.LibraryClass_Index[element]) {
-				INDEX.FETCH(CACHE_DYNAMIC.LibraryClass_Index[element]).attachments.forEach((E: string) => {
+			if (CACHE.DYNAMIC.LibraryClass_Index[element]) {
+				INDEX.FETCH(CACHE.DYNAMIC.LibraryClass_Index[element]).attachments.forEach((E: string) => {
 					if (!attachments.has(E)) { attachments.add(E); }
 				});
 			}

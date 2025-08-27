@@ -1,32 +1,27 @@
-import cursor from "./_cursor.js";
-import tagScanner from './tag.js';
+import CURSOR from "./_cursor.js";
+import TAGSCAN from './tag.js';
 
-import { ROOT } from '../Data/cache.js';
-import { t_RescriptAction } from "./value.js";
-import { t_FILE_Storage, t_TagRawStyle } from "../types.js";
+import * as CACHE from '../Data/cache.js';
+import * as TYPE from "../types.js";
 
-export const TagSummonStyle = `<${ROOT.customElements["style"]}/>`;
-export const TagSummonStaple = `<${ROOT.customElements["staple"]}/>`;
-export const TagFn_ReplaceStyle = (sourceString: string, replacement: string) => sourceString.replace(TagSummonStyle, replacement);
-export const TagFn_ReplaceStaple = (sourceString: string, replacement: string) => sourceString.replace(TagSummonStaple, replacement);
-
-export const CustomTagElements = Object.values(ROOT.customElements);
+const TagSummonStyle = `<${CACHE._ROOT.customElements["style"]}/>`;
+const TagSummonStaple = `<${CACHE._ROOT.customElements["staple"]}/>`;
+const CustomTagElements = Object.values(CACHE._ROOT.customElements);
 
 export default function scanner(
-	fileData: t_FILE_Storage,
+	fileData: TYPE.FILE_Storage,
 	classProps: string[] = [],
-	action: t_RescriptAction = "read"
+	action: TYPE.ScriptParseActions = "read"
 ) {
-	fileData.styleData.hasMainTag = false;
 	fileData.styleData.hasStyleTag = false;
 	fileData.styleData.hasStapleTag = false;
 
 	const stylesList = [];
 	const content = fileData.content;
-	const tagTrack: t_TagRawStyle[] = [];
+	const tagTrack: TYPE.TagRawStyle[] = [];
 	const classesList: string[][] = [];
 	const attachments = new Set<string>();
-	const fileCursor = cursor.Initialize(fileData.content);
+	const fileCursor = CURSOR.Initialize(fileData.content);
 
 	let scribed = "";
 
@@ -40,13 +35,19 @@ export default function scanner(
 		) {
 			let subScribed = '';
 			const tagStart = fileCursor.active.marker;
-			const res = tagScanner(fileData, classProps, action, fileCursor);
+			const res = TAGSCAN(fileData, classProps, action, fileCursor);
 			const fragment = content.slice(tagStart + 1, res.styleDeclarations.tagOpenMarker);
 
 			if (res.ok) {
 				switch (fragment) {
-					case TagSummonStyle: fileData.styleData.hasStyleTag = true; break;
-					case TagSummonStaple: fileData.styleData.hasStapleTag = true; break;
+					case TagSummonStyle:
+						fileData.styleData.hasStyleTag = true;
+						fileData.styleData.styleTagReplaces.push([tagStart, fileCursor.active.marker]);
+						break;
+					case TagSummonStaple:
+						fileData.styleData.hasStapleTag = true;
+						fileData.styleData.stapleTagReplaces.push([tagStart, fileCursor.active.marker]);
+						break;
 				}
 
 				subScribed = (
@@ -59,7 +60,7 @@ export default function scanner(
 						...Object.entries(res.nativeAttributes).map(([A, V]) => V === "" ? A : `${A}=${V}`)
 					].join(' ') + '>';
 
-				cursor.Incremnet(fileCursor);
+				CURSOR.Incremnet(fileCursor);
 
 				res.classesList.forEach(classList => {
 					if (classList.length) {
@@ -98,7 +99,7 @@ export default function scanner(
 			}
 			if (tagTrack.length === 0) { scribed += subScribed; }
 		} else {
-			cursor.Incremnet(fileCursor);
+			CURSOR.Incremnet(fileCursor);
 			if (tagTrack.length === 0) { scribed += char; }
 		}
 

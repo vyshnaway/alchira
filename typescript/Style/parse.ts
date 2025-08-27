@@ -3,9 +3,9 @@ import CSSBLOCK from "./block.js";
 import $ from "../Shell/main.js";
 import Use from "../Utils/main.js";
 import HASHRULE from "../hash-rules.js";
-import { CACHE_STATIC, CACHE_DYNAMIC, ROOT } from "../Data/cache.js";
+import * as CACHE from "../Data/cache.js";
 import { INDEX } from "../Data/action.js";
-import { t_FILE_Storage, t_ClassMeta, t_TagRawStyle, t_Diagnostic, t_ClassData } from "../types.js";
+import * as TYPE from "../types.js";
 
 function xtylemerge(classList: string[] = []) {
 	const
@@ -15,9 +15,9 @@ function xtylemerge(classList: string[] = []) {
 
 	classList.reduce((res, className) => {
 		const index =
-			CACHE_DYNAMIC.PackageClass_Index[className]
-			|| CACHE_DYNAMIC.ArchiveClass_Index[className]
-			|| CACHE_DYNAMIC.LibraryClass_Index[className]
+			CACHE.DYNAMIC.PackageClass_Index[className]
+			|| CACHE.DYNAMIC.ArchiveClass_Index[className]
+			|| CACHE.DYNAMIC.LibraryClass_Index[className]
 			|| 0;
 
 		if (index) {
@@ -40,10 +40,10 @@ function SCANNER(content: string, initial: string, sourceSelector: string) {
 
 	const object = Use.object.deepMerge(assembled.result, Object.fromEntries([
 		...Object.entries(scanned.atProps).map(([propKey, propValue]) =>
-			[propKey, CACHE_STATIC.DEBUG ? `${propValue}/* ${initial} ${sourceSelector} */` : propValue]
+			[propKey, CACHE.STATIC.DEBUG ? `${propValue}/* ${initial} ${sourceSelector} */` : propValue]
 		),
 		...Object.entries(scanned.properties).map(([propKey, propValue]) =>
-			[propKey, CACHE_STATIC.DEBUG ? `${propValue}/* ${initial} ${sourceSelector} */` : propValue]
+			[propKey, CACHE.STATIC.DEBUG ? `${propValue}/* ${initial} ${sourceSelector} */` : propValue]
 		)
 	]));
 
@@ -72,11 +72,11 @@ function CSSCANNER(content: string, initial = "") {
 	return { object, attachments, variables };
 }
 
-function CSSLIBRARY(fileDatas: t_FILE_Storage[] = [], initial = "", forPortable = false) {
+function CSSLIBRARY(fileDatas: TYPE.FILE_Storage[] = [], initial = "", forPortable = false) {
 	const selectorList: string[] = [],
 		selectors: Record<string, number> = {},
-		indexSkeleton: Record<string, t_ClassMeta> = {};
-	const IndexMap = forPortable ? CACHE_DYNAMIC.PackageClass_Index : CACHE_DYNAMIC.LibraryClass_Index;
+		indexSkeleton: Record<string, TYPE.ClassMeta> = {};
+	const IndexMap = forPortable ? CACHE.DYNAMIC.PackageClass_Index : CACHE.DYNAMIC.LibraryClass_Index;
 
 	fileDatas.forEach((source) => {
 		const { classFront: stamp, filePath, debugclassFront: metaFront, content, manifest } = source;
@@ -93,7 +93,7 @@ function CSSLIBRARY(fileDatas: t_FILE_Storage[] = [], initial = "", forPortable 
 				const InStash = INDEX.FETCH(index);
 				InStash.declarations.push(declaration);
 			} else {
-				const selectorData: t_ClassData = {
+				const selectorData: TYPE.ClassData = {
 					package: forPortable ? source.packageName : "",
 					scope: manifest.refer.group,
 					selector: SELECTOR,
@@ -132,8 +132,8 @@ function CSSLIBRARY(fileDatas: t_FILE_Storage[] = [], initial = "", forPortable 
 }
 
 function TAGSTYLE(
-	raw: t_TagRawStyle,
-	file: t_FILE_Storage,
+	raw: TYPE.TagRawStyle,
+	file: TYPE.FILE_Storage,
 	IndexMap: Record<string, number> = {},
 ) {
 	const scope = raw.scope === "PACKAGE" ? "" : raw.scope;
@@ -141,7 +141,7 @@ function TAGSTYLE(
 	const declaration = `${file.targetPath}:${raw.rowIndex}:${raw.colIndex}`;
 
 	const object: Record<string, Record<string, object>> = {};
-	const diagnostics: t_Diagnostic[] = [];
+	const diagnostics: TYPE.Diagnostic[] = [];
 	const attachments: string[] = [];
 	const errors: string[] = [];
 	const variables = {};
@@ -151,9 +151,9 @@ function TAGSTYLE(
 	const debugclass = `${scope}${file.debugclassFront}\\:${raw.rowIndex}\\:${raw.colIndex}_${Use.string.normalize(raw.selector, [], [], forPackage ? ["$", "/"] : ["$"])}`;
 	const index_found =
 		IndexMap[classname]
-		|| CACHE_DYNAMIC.PackageClass_Index[classname]
-		|| CACHE_DYNAMIC.LibraryClass_Index[classname]
-		|| CACHE_DYNAMIC.GlobalClass__Index[classname]
+		|| CACHE.DYNAMIC.PackageClass_Index[classname]
+		|| CACHE.DYNAMIC.LibraryClass_Index[classname]
+		|| CACHE.DYNAMIC.GlobalClass__Index[classname]
 		|| 0;
 
 	if (raw.selector === "") {
@@ -197,7 +197,7 @@ function TAGSTYLE(
 		} else {
 			const declarations = [declaration];
 			const style_snippet = SCANNER(
-				raw.element === ROOT.customElements["stencil"] ? raw.attachstring : '',
+				raw.element === CACHE._ROOT.customElements["stencil"] ? raw.attachstring : '',
 				`${raw.scope}:ATTACHMENT : ${file.filePath} ||`,
 				`${raw.selector}`
 			);
@@ -205,7 +205,7 @@ function TAGSTYLE(
 			Object.assign(variables, style_snippet.variables);
 
 			identity = INDEX.DECLARE({
-				package: forPackage ? file.packageName : CACHE_STATIC.Package.Name,
+				package: forPackage ? file.packageName : CACHE.STATIC.Package.Name,
 				scope: raw.scope,
 				selector: raw.selector,
 				object,
@@ -222,8 +222,8 @@ function TAGSTYLE(
 				debugclass,
 				declarations,
 				attached_style: style_snippet.object,
-				attached_staple: raw.element === ROOT.customElements["staple"] ? raw.attachstring : "",
-				attached_stencil: raw.element === ROOT.customElements["stencil"] ? raw.attachstring : "",
+				attached_staple: raw.element === CACHE._ROOT.customElements["staple"] ? raw.attachstring : "",
+				attached_stencil: raw.element === CACHE._ROOT.customElements["stencil"] ? raw.attachstring : "",
 			});
 			IndexMap[classname] = identity.index;
 		}

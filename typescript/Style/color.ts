@@ -106,7 +106,6 @@ export default function parser(
             else { result += capture.length ? capture + ch : ch; capture = ''; }
 
             if (fallbackPalettes.includes(capture) && source[activeMarker] === "(") {
-                console.log(capture);
                 const { values, endingMarker } = stdScanner(source, activeMarker, capture);
                 if (values.length > 2) {
                     score++;
@@ -157,7 +156,6 @@ export default function parser(
                             break;
                         default:
                             converted = capture + source.slice(activeMarker, endingMarker);
-                            console.log(converted);
                     }
                     result += fallback_RGB1_HEX0 ? converted : Utils.color.LoadHex(r, g, b, alpha);
                 } else {

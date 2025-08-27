@@ -32,8 +32,5 @@
     },
     "include": [
         "**/*.ts"
-    ],
-    "exclude": [
-        // "**/*.test.ts"
     ]
 }

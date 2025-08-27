@@ -1,14 +1,15 @@
-import Fileman from "../fileman.js";
-import { t_FILE_Group, t_FILE_Storage } from "../types.js";
-import Use from "../Utils/main.js";
-import { CACHE_STATIC } from "./cache.js";
+import USE from "../Utils/main.js";
+import FILEMAN from "../fileman.js";
+
+import * as TYPE from "../types.js";
+import * as CACHE from "./cache.js";
 
 function resolveGroup(
 	extension: string,
 	hasCluster: boolean,
 	fromPackage: boolean,
 	fromLibrary: boolean,
-): t_FILE_Group {
+): TYPE.FILE_Group {
 	if (fromPackage) {
 		switch (extension) {
 			case "css":
@@ -41,26 +42,26 @@ export default function FILING(
 	const isPackage = fileGroup === "package";
 	const fromXtylesFolder = fileGroup !== "target";
 
-	const targetPath = target.length ? Fileman.path.join(target, filePath) : '';
-	const sourcePath = source.length ? Fileman.path.join(source, filePath) : '';
+	const targetPath = target.length ? FILEMAN.path.join(target, filePath) : '';
+	const sourcePath = source.length ? FILEMAN.path.join(source, filePath) : '';
 
-	const [extension, packageName, id, cluster]: string[] = Fileman.path.basename(filePath).split(".").reverse();
+	const [extension, packageName, id, cluster]: string[] = FILEMAN.path.basename(filePath).split(".").reverse();
 	const num = Number(id);
 	const idn = isNaN(num) || num < 0 ? 0 : Math.floor(num);
-	const normalFileName = isPackage ? Use.string.normalize(packageName) : CACHE_STATIC.Package.Name;
+	const normalFileName = isPackage ? USE.string.normalize(packageName) : CACHE.STATIC.Package.Name;
 
-	const group: t_FILE_Group = resolveGroup(extension, Boolean(cluster), isPackage, isLibrary);
+	const group: TYPE.FILE_Group = resolveGroup(extension, Boolean(cluster), isPackage, isLibrary);
 
 	const classFront =
 		(
 			isPackage ? `/${normalFileName}${group === "PACBIND" ? "/$/" : "/"}` : ""
 		) + (
-			(idn === 0 && extension === "css") ? "" : Use.string.normalize(cluster)
+			(idn === 0 && extension === "css") ? "" : USE.string.normalize(cluster)
 		) + (
 			"$".repeat(idn)
 		);
 
-	const result: t_FILE_Storage = {
+	const result: TYPE.FILE_Storage = {
 		label,
 		filePath,
 		extension,
@@ -68,7 +69,7 @@ export default function FILING(
 		targetPath,
 		packageName,
 		classFront,
-		debugclassFront: `${(fromXtylesFolder) ? group : ""}\\|${Use.string.normalize(filePath, [], [], ["/", "."])}`,
+		debugclassFront: `${(fromXtylesFolder) ? group : ""}\\|${USE.string.normalize(filePath, [], [], ["/", "."])}`,
 		manifest: {
 			refer: {
 				id: isLibrary ? String(idn) : isPackage ? filePath : targetPath,
@@ -88,11 +89,12 @@ export default function FILING(
 			styleMap: {},
 			classesList: [],
 			attachments: [],
-			hasMainTag: false,
 			hasStyleTag: false,
+			styleTagReplaces: [],
 			hasStapleTag: false,
+			stapleTagReplaces: [],
 		},
-		content: (fromXtylesFolder && extension === "css") ? Use.code.uncomment.Css(content) : content,
+		content: (fromXtylesFolder && extension === "css") ? USE.code.uncomment.Css(content) : content,
 		midway: "",
 	};
 

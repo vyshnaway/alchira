@@ -1,18 +1,11 @@
 import Use from "../Utils/main.js";
 import { INDEX } from "../Data/action.js";
-import { CACHE_STATIC, CACHE_DYNAMIC, ROOT } from "../Data/cache.js";
-import { t_FILE_Storage, t_FileCursor } from "../types.js";
-
-export type t_RescriptAction = 'read' | 'archive' | 'monitor' | 'watch' | 'sync';
-
-export interface t_BindStack {
-	preBinds: Set<string>,
-	postBinds: Set<string>,
-}
+import * as CACHE from "../Data/cache.js";
+import * as TYPE from "../types.js";
 
 
 function EvaluateIndexTraces(
-	action: t_RescriptAction,
+	action: TYPE.ScriptParseActions,
 	metaFront: string,
 	classList: string[],
 	localClassMap: Record<string, number>
@@ -24,9 +17,9 @@ function EvaluateIndexTraces(
 			const found = INDEX.FIND(entry, true, localClassMap);
 			if (found.index) {
 				if (found.group === "LIBRARY") {
-					acc[entry] = `/${CACHE_STATIC.Package.Name}/$/${entry}`;
+					acc[entry] = `/${CACHE.STATIC.Package.Name}/$/${entry}`;
 				} else if (found.group === "PUBLIC") {
-					acc[entry] = `/${CACHE_STATIC.Package.Name}/${entry}`;
+					acc[entry] = `/${CACHE.STATIC.Package.Name}/${entry}`;
 				}
 			}
 			return acc;
@@ -49,7 +42,7 @@ function EvaluateIndexTraces(
 		const indexSetback = Use.array.setback(index_array);
 
 		if (action === 'sync') {
-			classMap = CACHE_DYNAMIC.Sync_ClassDictionary[JSON.stringify(indexSetback)] || {};
+			classMap = CACHE.DYNAMIC.Sync_ClassDictionary[JSON.stringify(indexSetback)] || {};
 		} else {
 			if (action === "watch") {
 				classMap = Object.fromEntries(class_trace.map(([K, V]) => [V, metaFront + INDEX.FETCH(K).watchclass]));
@@ -58,7 +51,7 @@ function EvaluateIndexTraces(
 				classMap = Object.fromEntries(class_trace.map(([K, V]) => [V, metaFront + INDEX.FETCH(K).debugclass]));
 			}
 
-			Object.entries(string_index_map).forEach(([k, v]) => CACHE_DYNAMIC.Sync_PublishIndexMap["." + k] = v);
+			Object.entries(string_index_map).forEach(([k, v]) => CACHE.DYNAMIC.Sync_PublishIndexMap["." + k] = v);
 		}
 	}
 	return classMap;
@@ -66,10 +59,10 @@ function EvaluateIndexTraces(
 
 export default function classExtract(
 	string: string,
-	action: t_RescriptAction,
-	fileData: t_FILE_Storage,
+	action: TYPE.ScriptParseActions,
+	fileData: TYPE.FILE_Storage,
 	attachments: Set<string>,
-	FileCursor: t_FileCursor,
+	FileCursor: TYPE.FileCursor,
 ) {
 	const classList: string[] = [], quotes = ["'", "`", '"'];
 	let activeQuote = "",
@@ -83,7 +76,7 @@ export default function classExtract(
 	while (ch !== undefined) {
 		if (inQuote) {
 			if (ch === " " || ch === activeQuote) {
-				if (entry.startsWith(ROOT.customOperations["attach"])) {
+				if (entry.startsWith(CACHE._ROOT.customOperations["attach"])) {
 					attachments.add(entry.slice(1));
 				} else {
 					classList.push(entry);
@@ -119,7 +112,7 @@ export default function classExtract(
 		while (ch !== undefined) {
 			if (inQuote) {
 				if (ch === " " || ch === activeQuote) {
-					if (!entry.startsWith(ROOT.customOperations["attach"])) {
+					if (!entry.startsWith(CACHE._ROOT.customOperations["attach"])) {
 						scribed += classMap[entry] ?
 							(action === "monitor"
 								? Use.string.normalize(classMap[entry], ["/", ".", ":", "|", "$"], ["\\"])

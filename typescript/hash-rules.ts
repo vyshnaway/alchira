@@ -1,7 +1,7 @@
 import $ from "./Shell/main.js";
-import { CACHE_DYNAMIC, CACHE_STATIC } from "./Data/cache.js";
 import * as $$ from "./shell.js";
-import { t_Diagnostic } from "./types.js";
+import * as TYPE from "./types.js";
+import * as CACHE from "./Data/cache.js";
 
 const hashPattern = /#\{[a-z0-9]+\}/i;
 
@@ -10,7 +10,7 @@ function IMPORT(string: string, watchUndef = true, sourcePath = "") {
 		status: boolean,
 		result: string,
 		error: string,
-		diagnostic: t_Diagnostic
+		diagnostic: TYPE.Diagnostic
 	} = {
 		status: true,
 		result: "",
@@ -31,7 +31,7 @@ function IMPORT(string: string, watchUndef = true, sourcePath = "") {
 			response.status = false;
 			recursionPreview["ERROR BY"] = $.FMT(cause, $.style.AS_Bold, $.style.TC_Normal_Red);
 			response.error = $.MAKE(
-				$.tag.H6(source + $.FMT(" : Hashrule recursion loop.", $.style.BC_Normal_Yellow)),
+				$.tag.H6(source + $.FMT(" : Hashrule recursion loop.", $.style.TB_Normal_Yellow)),
 				$$.PropMap(recursionPreview),
 				[$.list.Waterfall, 0, []],
 			);
@@ -46,7 +46,7 @@ function IMPORT(string: string, watchUndef = true, sourcePath = "") {
 			response.status = false;
 			recursionPreview["ERROR BY"] = $.FMT(cause, $.style.AS_Bold, $.style.TC_Normal_Red);
 			response.error = $.MAKE(
-				$.tag.H6(source + $.FMT(" : Undefined hashrule.", $.style.BC_Normal_Yellow)),
+				$.tag.H6(source + $.FMT(" : Undefined hashrule.", $.style.TB_Normal_Yellow)),
 				$$.PropMap(recursionPreview),
 				[$.list.Waterfall, 0, []],
 			);
@@ -63,8 +63,8 @@ function IMPORT(string: string, watchUndef = true, sourcePath = "") {
 		const hash = hashMatch[0];
 		const key = hash.slice(2, -1);
 		const replacement = watchUndef
-			? CACHE_DYNAMIC.HashRule[key]
-			: (CACHE_DYNAMIC.HashRule[key] ?? hash);
+			? CACHE.DYNAMIC.HashRule[key]
+			: (CACHE.DYNAMIC.HashRule[key] ?? hash);
 		recursionPreview["FROM " + hash] = `GETS ${replacement} FROM ${string}`;
 
 		if (replacement === undefined) {
@@ -83,10 +83,10 @@ function IMPORT(string: string, watchUndef = true, sourcePath = "") {
 }
 
 function UPLOAD() {
-	const hashrule = CACHE_STATIC.HashRule;
+	const hashrule = CACHE.STATIC.HashRule;
 	const hashruleErrors: string[] = [];
 
-	CACHE_DYNAMIC.HashRule = { ...hashrule };
+	CACHE.DYNAMIC.HashRule = { ...hashrule };
 	Object.keys(hashrule).map((key) => {
 		const hash = "#" + key;
 		const response = IMPORT(hash);
@@ -99,7 +99,7 @@ function UPLOAD() {
 			}
 		}
 	});
-	CACHE_DYNAMIC.HashRule = hashrule;
+	CACHE.DYNAMIC.HashRule = hashrule;
 
 	return $.MAKE("", [
 		$.tag.H2("Active Hashrules", $.preset.primary),

@@ -4,7 +4,7 @@ import c_Target from "./Script/class.js";
 
 // --- Initial Data ---
 
-export type t_COMMAND = ""
+export type COMMAND = ""
     | "init"
     | "debug"
     | "preview"
@@ -12,15 +12,14 @@ export type t_COMMAND = ""
     | "archive"
     | "install";
 
-export interface T_PackageEssential {
+export interface PackageEssential {
+    bin: string;
     name: string;
     version: string;
     website: string;
-    bins: string[];
-    scripts: Record<string, string>;
 }
 
-export interface t_Data_PREFIX {
+export interface Data_PREFIX {
     atrules: Record<string, Record<string, string>>,
     attributes: Record<string, Record<string, string>>,
     pseudos: Record<string, Record<string, string>>,
@@ -30,7 +29,7 @@ export interface t_Data_PREFIX {
 }
 
 
-export interface t_FileCursor {
+export interface FileCursor {
     char: string | undefined,
     marker: number,
     rowMarker: number,
@@ -39,29 +38,29 @@ export interface t_FileCursor {
     colFallback: number,
 }
 
-export interface t_FileScanBuffer {
+export interface FileScanBuffer {
     content: string,
-    active: t_FileCursor,
-    fallback: t_FileCursor,
+    active: FileCursor,
+    fallback: FileCursor,
 }
-export type t_Data_TWEAKS = Record<string, string | boolean>;
+export type Data_TWEAKS = Record<string, string | boolean>;
 
-export interface t_Data_ROOT {
+export interface Data_ROOT {
+    bin: string,
     name: string,
     version: string,
     website: string,
-    bins: string[],
     vendors: string[],
     commandList: Record<string, string>,
     exposedCommands: string[]
-    defaultTweaks: t_Data_TWEAKS,
+    defaultTweaks: Data_TWEAKS,
     customElements: Record<string, string>,
     customOperations: Record<string, string>
     customAtrules: Record<string, string>
     URL: Record<string, string>,
 }
 
-export interface t_Data_Source {
+export interface Data_Source {
     path: string,
     frags: string[],
     content?: string,
@@ -72,17 +71,17 @@ export interface t_Data_Source {
 
 // ---
 
-export interface t_Cumulates {
+export interface Cumulates {
     report: string[],
     errors: string[],
     usedIndexes: number[],
-    diagnostics: t_Diagnostic[],
+    diagnostics: Diagnostic[],
     globalClasses: Record<string, number>,
     publicClasses: Record<string, number>,
-    fileManifests: Record<string, t_FILE_Manifest>
+    fileManifests: Record<string, FILE_Manifest>
 }
 
-export interface t_Event {
+export interface Event {
     timeStamp: string,
     action: string,
     folder: string,
@@ -91,7 +90,7 @@ export interface t_Event {
     extension: string,
 }
 
-export interface t_TagRawStyle {
+export interface TagRawStyle {
     element: string,
     elvalue: string,
     tagCount: number,
@@ -106,7 +105,7 @@ export interface t_TagRawStyle {
 }
 
 
-export interface t_ClassMeta {
+export interface ClassMeta {
     info: string[],
     variables: Record<string, string>,
     skeleton: object,
@@ -115,7 +114,7 @@ export interface t_ClassMeta {
     watchclass: string,
 }
 
-export interface t_ClassData {
+export interface ClassData {
     index?: number,
     package: string,
     scope: string,
@@ -124,7 +123,7 @@ export interface t_ClassData {
     watchclass: string,
     attachments: string[],
     object: Record<string, object>,
-    metadata: t_ClassMeta,
+    metadata: ClassMeta,
     declarations: string[],
     attached_style: object,
     attached_staple: string,
@@ -132,17 +131,17 @@ export interface t_ClassData {
 }
 
 
-export type t_ClassDictionary = Record<string, Record<number, string>>;
-export type t_ClassIndexMap = Record<string, number>;
+export type ClassDictionary = Record<string, Record<number, string>>;
+export type ClassIndexMap = Record<string, number>;
 
-export interface t_OrganizedResult {
+export interface OrganizedResult {
     indexMap: Record<string, number>;
     classcount: number;
-    referenceMap: t_ClassDictionary;
+    referenceMap: ClassDictionary;
     shortlistedArrays: number[][]
 };
 
-export interface t_Diagnostic {
+export interface Diagnostic {
     error: string,
     source: string[]
 }
@@ -151,7 +150,7 @@ export interface t_Diagnostic {
 
 // --- File Storage ---
 
-export type t_FILE_Group = ""
+export type FILE_Group = ""
     | "PACKAGE"
     | "PACBIND"
     | "STYLESHEET"
@@ -163,21 +162,21 @@ export type t_FILE_Group = ""
     | "README";
 
 
-export interface t_FILE_Reference {
+export interface FILE_Reference {
     id: string;
-    group: t_FILE_Group;
+    group: FILE_Group;
 }
 
-export interface t_FILE_Manifest {
-    refer: t_FILE_Reference,
-    public: Record<string, t_ClassMeta>,
-    global: Record<string, t_ClassMeta>,
-    local: Record<string, t_ClassMeta>,
+export interface FILE_Manifest {
+    refer: FILE_Reference,
+    public: Record<string, ClassMeta>,
+    global: Record<string, ClassMeta>,
+    local: Record<string, ClassMeta>,
     errors: string[],
-    diagnostics: t_Diagnostic[],
+    diagnostics: Diagnostic[],
 }
 
-export interface t_FILE_Storage {
+export interface FILE_Storage {
     classFront: string,
     filePath: string,
     packageName: string,
@@ -188,7 +187,7 @@ export interface t_FILE_Storage {
     content: string,
     midway: string,
     label: string,
-    manifest: t_FILE_Manifest,
+    manifest: FILE_Manifest,
     styleData: {
         attachments: string[],
         classesList: string[][],
@@ -196,52 +195,53 @@ export interface t_FILE_Storage {
         localClasses: Record<string, number>,
         globalClasses: Record<string, number>,
         publicClasses: Record<string, number>,
-        styleMap: Record<string, t_ClassMeta>,
-        hasMainTag: boolean,
+        styleMap: Record<string, ClassMeta>,
         hasStyleTag: boolean,
+        styleTagReplaces: [number, number][],
         hasStapleTag: boolean,
+        stapleTagReplaces: [number, number][],
     }
 }
 
 
 // Cache Support
 
-export interface t_ProxyMap {
+export interface ProxyMap {
     source: string,
     target: string,
     stylesheet: '',
     extensions: Record<string, string[]>,
 }
 
-export interface t_ProxyMapStatic extends t_ProxyMap {
+export interface ProxyMapStatic extends ProxyMap {
     fileContents: Record<string, string>,
     stylesheetContent: string
 }
 
-interface t_Config_Archive_Intersection {
+interface Config_Archive_Intersection {
     Name: string,
     Version: string,
 }
 
-export interface t_Config extends t_Config_Archive_Intersection {
+export interface Config extends Config_Archive_Intersection {
     vendors: string,
     packages: Record<string, string>,
-    proxy: t_ProxyMap[],
-    tweaks: t_Data_TWEAKS
+    proxy: ProxyMap[],
+    tweaks: Data_TWEAKS
 }
 
-export interface t_Archive extends t_Config_Archive_Intersection {
+export interface Archive extends Config_Archive_Intersection {
     Readme: string,
     vendors?: string,
     packages?: Record<string, string>,
-    proxy?: t_ProxyMap[],
-    tweaks?: t_Data_TWEAKS
+    proxy?: ProxyMap[],
+    tweaks?: Data_TWEAKS
 }
 
 
 // --- Cache Varients ---
 
-export interface t_CACHE_LIVEDOCS {
+export interface CACHE_LIVEDOCS {
     DeltaPath: string,
     DeltaContent: string,
     PublishError: string,
@@ -258,9 +258,9 @@ export interface t_CACHE_LIVEDOCS {
         footer: string,
     },
     Lookup: {
-        library: Record<string, t_FILE_Reference>,
-        package: Record<string, t_FILE_Reference>,
-        project: Record<string, t_FILE_Reference>,
+        library: Record<string, FILE_Reference>,
+        package: Record<string, FILE_Reference>,
+        project: Record<string, FILE_Reference>,
     },
     Errors: {
         library: string[],
@@ -268,27 +268,27 @@ export interface t_CACHE_LIVEDOCS {
         project: string[],
     },
     Diagnostics: {
-        library: t_Diagnostic[],
-        package: t_Diagnostic[],
-        project: t_Diagnostic[],
+        library: Diagnostic[],
+        package: Diagnostic[],
+        project: Diagnostic[],
     },
     Manifest: {
         prefix: string,
         elements: string[],
         constants: string[],
         hashrules: Record<string, string>,
-        file: Record<string, t_FILE_Reference>,
-        AXIOM: Record<string, Record<string, t_ClassMeta>>,
-        CLUSTER: Record<string, Record<string, t_ClassMeta>>,
-        LOCAL: Record<string, Record<string, t_ClassMeta>>,
-        GLOBAL: Record<string, Record<string, t_ClassMeta>>,
-        PACKAGE: Record<string, Record<string, t_ClassMeta>>,
-        PACBIND: Record<string, Record<string, t_ClassMeta>>,
-        errors: t_Diagnostic[]
+        file: Record<string, FILE_Reference>,
+        AXIOM: Record<string, Record<string, ClassMeta>>,
+        CLUSTER: Record<string, Record<string, ClassMeta>>,
+        LOCAL: Record<string, Record<string, ClassMeta>>,
+        GLOBAL: Record<string, Record<string, ClassMeta>>,
+        PACKAGE: Record<string, Record<string, ClassMeta>>,
+        PACBIND: Record<string, Record<string, ClassMeta>>,
+        errors: Diagnostic[]
     },
 }
 
-export interface t_CACHE_STATIC {
+export interface CACHE_STATIC {
     WATCH: boolean,
     DEBUG: boolean,
     Command: string,
@@ -298,29 +298,33 @@ export interface t_CACHE_STATIC {
     RootCSS: string,
     RootPath: string,
     WorkPath: string,
-    Package: t_Archive,
-    ProxyMap: t_ProxyMap[],
+    Package: Archive,
+    ProxyMap: ProxyMap[],
     HashRule: Record<string, string>,
     Package_Saved: Record<string, string>,
     Library_Saved: Record<string, string>,
-    TargeAS_Saved: Record<string, t_ProxyMapStatic>,
+    TargeAS_Saved: Record<string, ProxyMapStatic>,
 }
 
-export interface t_CACHE_DYNAMIC {
+export interface CACHE_DYNAMIC {
     HashRule: Record<string, string>,
-    Index_ClassData: Record<string, t_ClassData>,
-    GlobalClass__Index: t_ClassIndexMap,
-    PublicClass__Index: t_ClassIndexMap,
-    ArchiveClass_Index: t_ClassIndexMap,
-    ArcbindClass_Index: t_ClassIndexMap,
-    LibraryClass_Index: t_ClassIndexMap,
-    PackageClass_Index: t_ClassIndexMap,
-    Sync_PublishIndexMap: t_ClassIndexMap,
-    Sync_ClassDictionary: t_ClassDictionary,
+    Index_ClassData: Record<string, ClassData>,
+    GlobalClass__Index: ClassIndexMap,
+    PublicClass__Index: ClassIndexMap,
+    ArchiveClass_Index: ClassIndexMap,
+    ArcbindClass_Index: ClassIndexMap,
+    LibraryClass_Index: ClassIndexMap,
+    PackageClass_Index: ClassIndexMap,
+    Sync_PublishIndexMap: ClassIndexMap,
+    Sync_ClassDictionary: ClassDictionary,
 };
 
-export interface t_CACHE_STORAGE {
-    LIBRARIES: Record<string, t_FILE_Storage>,
-    PACKAGES: Record<string, t_FILE_Storage>,
+export interface CACHE_STORAGE {
+    LIBRARIES: Record<string, FILE_Storage>,
+    PACKAGES: Record<string, FILE_Storage>,
     TARGET: Record<string, c_Target>,
 }
+
+// ---
+
+export type ScriptParseActions = 'read' | 'archive' | 'monitor' | 'watch' | 'sync';

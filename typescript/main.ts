@@ -2,20 +2,28 @@
 
 import fileman from "./fileman.js";
 import commander from "./command.js";
-import { T_PackageEssential } from "./types.js";
-import { ROOT } from "./Data/cache.js";
+
+import * as CACHE from "./Data/cache.js";
+import * as TYPE from "./types.js";
 
 const fallback_project_name = "-";
 const fallback_project_version = "0.0.0";
-const fallback_origin_name = "xcss";
-const fallback_origin_version = "0.0.0";
-const fallback_origin_website = ROOT.URL.Site;
+const fallback_root_name = CACHE._ROOT.name;
+const fallback_root_version = CACHE._ROOT.version;
+const fallback_root_website = CACHE._ROOT.URL.Site;
 
-
+const user_scripts = {
+    "debug": "xcss debug watch",
+    "install": "xcss install",
+    "preview": "xcss preview",
+    "publish": "xcss publish",
+    "archive": "xcss archive",
+};
 
 async function main() {
-    const command = ROOT.exposedCommands.includes(process.argv[2]) ? process.argv[2] : "";
-    const argument = ROOT.exposedCommands.includes(process.argv[3]) ? process.argv[2] : "";
+    const bin = process.argv[1];
+    const cmd = CACHE._ROOT.exposedCommands.includes(process.argv[2]) ? process.argv[2] : "";
+    const arg = CACHE._ROOT.exposedCommands.includes(process.argv[2]) ? process.argv[3] : "";
 
     const workPath = fileman.path.resolves(".");
     const rootPath = fileman.path.fromOrigin(".");
@@ -35,28 +43,26 @@ async function main() {
         process.exit(1);
     }
 
-    const originPackageEssential: T_PackageEssential = {
-        name: typeof originPackageJson.data.name === "string" ? originPackageJson.data.name : fallback_origin_name,
-        version: typeof originPackageJson.data.version === "string" ? originPackageJson.data.version : fallback_origin_version,
-        website: typeof originPackageJson.data.homepage === "string" ? originPackageJson.data.homepage : fallback_origin_website,
-        bins: Object.keys(originPackageJson.data.bin ?? {}),
-        scripts: typeof originPackageJson.data.scripts === "object"
-            ? Object.entries(originPackageJson.data.scripts as Record<string, unknown>).reduce((A, [K, V]) => {
-                if (typeof V === "string") { A[K] = V; }
-                return A;
-            }, {} as Record<string, string>) : {},
+    const rootPackageEssential: TYPE.PackageEssential = {
+        bin,
+        name: typeof originPackageJson.data.name === "string" ? originPackageJson.data.name : fallback_root_name,
+        version: typeof originPackageJson.data.version === "string" ? originPackageJson.data.version : fallback_root_version,
+        website: typeof originPackageJson.data.homepage === "string" ? originPackageJson.data.homepage : fallback_root_website,
     };
+
+
+    const rootScripts = user_scripts as Record<string, string>;
 
     if (projectPackageJson.status
         && (typeof projectPackageJson.data.scripts === "object")
-        && (ROOT.exposedCommands as string[]).includes(command)
+        && (CACHE._ROOT.exposedCommands as string[]).includes(cmd)
     ) {
         let addedCommands = 0;
         const scripts = projectPackageJson.data.scripts as Record<string, string>;
-        for (const cmd of ROOT.exposedCommands) {
-            if (originPackageEssential.scripts[cmd] && !scripts[cmd]) {
+        for (const cmd of CACHE._ROOT.exposedCommands) {
+            if (rootScripts[cmd] && !scripts[cmd]) {
                 addedCommands++;
-                scripts[`${originPackageEssential.bins[0]}:${cmd}`] = originPackageEssential.scripts[cmd];
+                scripts[`${bin}:${cmd}`] = rootScripts[cmd];
             }
 
         }
@@ -74,13 +80,13 @@ async function main() {
         : fallback_project_version;
 
     await commander({
-        command,
-        argument,
+        command: cmd,
+        argument: arg,
         rootPath,
         workPath,
         projectName,
         projectVersion,
-        originPackageEssential,
+        rootPackageEssential,
     });
 }
 

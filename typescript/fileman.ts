@@ -25,7 +25,7 @@ interface FileReadResult<T> {
 
 const fileman = {
 	path: {
-		basename: (pathString:string) => {
+		basename: (pathString: string) => {
 			return path.basename(pathString);
 		},
 
@@ -60,7 +60,7 @@ const fileman = {
 		/**
 		 * Checks if a given path exists and determines its type (file or folder).
 		 * @param pathString The path to check.
-		 * @returns An object indicating existence and type.
+		 * @returns An object indicating existence and  TYPE.
 		 */
 		available: (pathString: string): PathAvailability => {
 			try {

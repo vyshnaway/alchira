@@ -1,22 +1,22 @@
 /* eslint-disable no-fallthrough */
 import $ from "./Shell/main.js";
 import * as $$ from "./shell.js";
-import * as DATA from "./Data/action.js";
-import * as FETCH from "./Data/fetch.js";
+import * as TYPE from "./types.js";
 import * as SMITH from "./assemble.js";
-import * as worker from "./Data/watch.js";
+import * as FETCH from "./Data/fetch.js";
+import * as CACHE from "./Data/cache.js";
+import * as ACTION from "./Data/action.js";
+import * as worker from "./Data/watcher.js";
 
 import fileman from "./fileman.js";
 import { MemoryUsage } from "./Data/action.js";
-import { T_PackageEssential } from "./types.js";
-import { DOCUMENTS, ROOT, CACHE_STATIC, NAVIGATE, CACHE_STORAGE } from "./Data/cache.js";
 import Use from "./Utils/main.js";
 // import { FetchPortables, SplitGlobalForComponents } from "./portable.js";
 
 function reporter(heading: string, targets: string[], report: string) {
     $.POST(
         $.MAKE("", [
-            $.MAKE($.tag.H5(heading), targets.map(i => `Watching : ${i}`), [$.list.Bullets,0, $.preset.tertiary]),
+            $.MAKE($.tag.H5(heading), targets.map(i => `Watching : ${i}`), [$.list.Bullets, 0, $.preset.tertiary]),
             report,
             $.MAKE($.tag.H5("Press Ctrl+C to stop watching.", $.preset.failed), MemoryUsage(), [$.list.Catalog, 0, $.preset.tertiary]),
         ]),
@@ -99,7 +99,6 @@ async function execute(chapter: string) {
                     if (SaveAction) {
                         await SaveAction;
                     }
-                    console.log(Object.keys(OutFiles));
                     // SaveAction = fileman.write.bulk(OutFiles);
                 }
                 if (reportNext) {
@@ -109,7 +108,7 @@ async function execute(chapter: string) {
             }
 
             case "WatchFolders": {
-                if (CACHE_STATIC.WATCH) {
+                if (CACHE.STATIC.WATCH) {
                     step = "WatchFolders";
                 } else {
                     if (stopWatcher) {
@@ -120,8 +119,8 @@ async function execute(chapter: string) {
                 }
 
                 if (!stopWatcher) {
-                    targets = Object.keys(CACHE_STORAGE.TARGET);
-                    const targetFolders = [...targets, NAVIGATE.folder.setup.path];
+                    targets = Object.keys(CACHE.STORAGE.TARGET);
+                    const targetFolders = [...targets, CACHE._PATH.folder.setup.path];
                     process.on("SIGINT", () => {
                         if (stopWatcher) {
                             stopWatcher();
@@ -138,32 +137,32 @@ async function execute(chapter: string) {
                     const event = worker.EventQueue.dequeue();
                     if (!event) { break; }
                     const filePath = `${event.folder}/${event.filePath}`;
-                    if (filePath.startsWith(NAVIGATE.folder.autogen.path)) {
+                    if (filePath.startsWith(CACHE._PATH.folder.autogen.path)) {
                         break;
                     } else {
-                        if (event.folder === NAVIGATE.folder.setup.path) {
+                        if (event.folder === CACHE._PATH.folder.setup.path) {
                             if (event.action === "add" || event.action === "change") {
                                 switch (filePath) {
-                                    case NAVIGATE.json.configure.path:
+                                    case CACHE._PATH.json.configure.path:
                                         stopWatcher();
                                         stopWatcher = null;
                                         step = "VerifyConfigure";
                                         break;
-                                    case NAVIGATE.css.atrules.path:
-                                    case NAVIGATE.css.constants.path:
-                                    case NAVIGATE.css.elements.path:
-                                    case NAVIGATE.css.extends.path:
+                                    case CACHE._PATH.css.atrules.path:
+                                    case CACHE._PATH.css.constants.path:
+                                    case CACHE._PATH.css.elements.path:
+                                    case CACHE._PATH.css.extends.path:
                                         await FETCH.SaveRootCSS();
                                         step = "GenerateFinals";
                                         break;
-                                    case NAVIGATE.json.hashrules.path:
+                                    case CACHE._PATH.json.hashrules.path:
                                         step = "ReadHashrules";
                                         break;
                                     default:
-                                        if (filePath.startsWith(NAVIGATE.folder.library.path) && event.extension === "css") {
-                                            CACHE_STATIC.Library_Saved[filePath] = event.fileContent;
-                                        } else if (filePath.startsWith(NAVIGATE.folder.portables.path) && ["xcss", "css", "md"].includes(event.extension)) {
-                                            CACHE_STATIC.Package_Saved[filePath] = event.fileContent;
+                                        if (filePath.startsWith(CACHE._PATH.folder.library.path) && event.extension === "css") {
+                                            CACHE.STATIC.Library_Saved[filePath] = event.fileContent;
+                                        } else if (filePath.startsWith(CACHE._PATH.folder.portables.path) && ["xcss", "css", "md"].includes(event.extension)) {
+                                            CACHE.STATIC.Package_Saved[filePath] = event.fileContent;
                                         }
                                         step = "ProcessXtylesFolder";
                                 }
@@ -183,7 +182,7 @@ async function execute(chapter: string) {
                 await new Promise((resolve) => setTimeout(resolve, 50));
             }
         }
-    } while (CACHE_STATIC.WATCH);
+    } while (CACHE.STATIC.WATCH);
 
     if (stopWatcher) {
         stopWatcher();
@@ -200,7 +199,7 @@ async function commander({
     workPath,
     projectName,
     projectVersion,
-    originPackageEssential
+    rootPackageEssential: originPackageEssential
 }: {
     command: string,
     argument: string,
@@ -208,20 +207,20 @@ async function commander({
     workPath: string,
     projectName: string,
     projectVersion: string,
-    originPackageEssential: T_PackageEssential
+    rootPackageEssential: TYPE.PackageEssential
 }) {
-    CACHE_STATIC.Command = command;
-    CACHE_STATIC.Argument = argument;
-    CACHE_STATIC.WATCH = argument === "watch";
-    CACHE_STATIC.DEBUG = command === "debug";
-    CACHE_STATIC.Project_Name = Use.string.normalize(projectName);
-    CACHE_STATIC.Project_Version = projectVersion;
-    DATA.SetENV(rootPath, workPath, originPackageEssential);
+    CACHE.STATIC.Command = command;
+    CACHE.STATIC.Argument = argument;
+    CACHE.STATIC.DEBUG = command === "debug";
+    CACHE.STATIC.WATCH = (command === "debug" || command === "preview") && argument === "watch";
+    CACHE.STATIC.Project_Name = Use.string.normalize(projectName);
+    CACHE.STATIC.Project_Version = projectVersion;
+    ACTION.SetENV(rootPath, workPath, originPackageEssential);
     $.init(command !== "debug" && command !== "archive");
 
-    const APP_VERSION = `${ROOT.name} @ ${ROOT.version}`;
+    const APP_VERSION = `${CACHE._ROOT.name} @ ${CACHE._ROOT.version}`;
 
-    switch (CACHE_STATIC.Command) {
+    switch (CACHE.STATIC.Command) {
         case "init": {
             const title = $.PLAY.Title(`${APP_VERSION} : Initialize`, 500);
             await FETCH.FetchDocs();
@@ -237,11 +236,11 @@ async function commander({
             break;
         }
         case "debug": {
-            await execute(`${APP_VERSION} : Debug ${CACHE_STATIC.WATCH ? "Watch" : "Build"}`);
+            await execute(`${APP_VERSION} : Debug ${CACHE.STATIC.WATCH ? "Watch" : "Build"}`);
             break;
         }
         case "preview": {
-            await execute(`${APP_VERSION} : Preview ${CACHE_STATIC.WATCH ? "Watch" : "Build"}`);
+            await execute(`${APP_VERSION} : Preview ${CACHE.STATIC.WATCH ? "Watch" : "Build"}`);
             break;
         }
         case "publish": {
@@ -249,7 +248,7 @@ async function commander({
             break;
         }
         // case "archive": {
-        //     await execute(STATIC_CACHE.PACKAGE + " : Split for Components");
+        //     await execute(CACHE.STATIC_CACHE.PACKAGE + " : Split for Components");
         //     break;
         // }
         // case "install": {
@@ -271,14 +270,14 @@ async function commander({
 
             $.POST(
                 $.MAKE($.tag.H1(APP_VERSION),
-                    DOCUMENTS.MARKDOWN.alerts.content ? [DOCUMENTS.MARKDOWN.alerts.content] : []
+                    CACHE._SYNC.MARKDOWN.alerts.content ? [CACHE._SYNC.MARKDOWN.alerts.content] : []
                 )
             );
 
             $.POST(
                 $.MAKE(
                     "Available Commands",
-                    $$.PropMap(ROOT.commandList, []),
+                    $$.PropMap(CACHE._ROOT.commandList, []),
                     [$.list.Bullets, 0, $.preset.primary]
                 ),
             );
@@ -286,7 +285,7 @@ async function commander({
             $.POST(
                 $.MAKE(
                     "Agreements",
-                    $$.PropMap(Object.fromEntries(Object.values(DOCUMENTS.AGREEMENT).map((i) => [i.title, i.path]))),
+                    $$.PropMap(Object.fromEntries(Object.values(CACHE._SYNC.AGREEMENT).map((i) => [i.title, i.path]))),
                     [$.list.Bullets, 0, $.preset.primary]
                 ),
             );
@@ -294,13 +293,13 @@ async function commander({
             $.POST(
                 $.MAKE(
                     "References",
-                    $$.PropMap(Object.fromEntries(Object.values(DOCUMENTS.MARKDOWN).map((i) => [i.title, i.path]))),
+                    $$.PropMap(Object.fromEntries(Object.values(CACHE._SYNC.MARKDOWN).map((i) => [i.title, i.path]))),
                     [$.list.Bullets, 0, $.preset.primary]
                 ),
             );
 
             $.POST(
-                $.MAKE($.tag.H2("For more information visit : " + ROOT.website)),
+                $.MAKE($.tag.H2("For more information visit : " + CACHE._ROOT.website)),
             );
         }
     }

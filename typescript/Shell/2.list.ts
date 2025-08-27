@@ -43,7 +43,7 @@ export const Catalog: _T_list = (items: string[] = [], intent = 0, preset: strin
 	const prefix = tag.Tab(intent);
 
 	const size = items.reduce((l, i) => { if (i.length > l) { l = i.length; } return l; }, 0) + tag.Li().length;
-	const cols = Math.ceil((root.canvas.width() - prefix.length + tag.Tab().length) / (size + tag.Tab().length));
+	const cols = Math.floor((root.canvas.width() - prefix.length + tag.Tab().length) / (size + tag.Tab().length));
 	const result: string[] = [];
 
 	let subResult = '';
@@ -61,53 +61,3 @@ export const Catalog: _T_list = (items: string[] = [], intent = 0, preset: strin
 	return result.map(i => prefix + i);
 };
 
-
-
-// [
-// 	Bullets,
-// 	Numbers,
-// 	Level,
-// 	Paragraphs,
-// 	Breaks,
-// 	Catalog
-// ].forEach((Fn: (items: string[], intent: number, preset:string[], ...styles: string[]) => string[]) => {
-// 	console.log(Fn([
-// 		'asdfafdsfs',
-// 		"df dfa",
-// 		"gbhd",
-// 		'asdfafdsfs',
-// 		"df dfa",
-// 		"gbhd",
-// 		'asdfafdsfs',
-// 		"df dfa",
-// 		"gbhd",
-// 		'asdfafdsfs',
-// 		"df dfa",
-// 		"gbhd",
-// 		'asdfafdsfs',
-// 		"df dfa",
-// 		"gbhd",
-// 		'asdfafdsfs',
-// 		"df dfa",
-// 		"gbhd",
-// 		'asdfafdsfs',
-// 		"df dfa",
-// 		"gbhd",
-// 		'asdfafdsfs',
-// 		"df dfa",
-// 		"gbhd",
-// 		'asdfafdsfs',
-// 		"df dfa",
-// 		"gbhd",
-// 		'asdfafdsfs',
-// 		"df dfa",
-// 		"gbhd",
-// 		'asdfafdsfs',
-// 		"df dfa",
-// 		"gbhd",
-// 		'asdfafdsfs',
-// 		"df dfa",
-// 		"gbhd",
-// 	], 1, root.style.BC_Normal_Yellow).join("\n"));
-// 	console.log("---");
-// });

@@ -51,6 +51,10 @@ export function P(content = '', presets: string[] = [], ...styles: string[]) {
   return root.fmt(root.canvas.tab + content, ...presets, ...styles) + "\n";
 }
 
+export function Span(content = '', presets: string[] = [], ...styles: string[]) {
+  return root.fmt(content, ...presets, ...styles) + "\n";
+}
+
 export function Li(content = '', presets: string[] = [], ...styles: string[]) {
   return root.fmt(">" + root.canvas.tab + content, ...presets, ...styles);
 }

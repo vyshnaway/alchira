@@ -1,5 +1,5 @@
-import { canvas, style, fmt } from "../0.root.js";
-import { blockType } from "../3.write.js";
+import { canvas, style, fmt, preset } from "../0.root.js";
+import { H1 } from "../1.tag.js";
 
 const padBothSides = (str: string, totalLength: number) => {
   const totalPadding = totalLength - str.length;
@@ -25,7 +25,7 @@ export default (string: string) => {
       ...new Array(previewFrames * 2).fill(["", "", canvas.divider.mid, ""]),
       ...new Array(previewFrames).fill([
         "",
-        fmt(canvas.divider.top, style.AS_Bold, style.AS_Underline, ...canvas.preset.title),
+        fmt(canvas.divider.top, style.AS_Bold, style.AS_Underline, ...preset.title),
         "",
         "",
       ]),
@@ -50,13 +50,13 @@ export default (string: string) => {
         canvas.divider.low,
         "",
       ]),
-    ].map((frame) => fmt(frame.join("\n"), style.AS_Bold, ...canvas.preset.title));
+    ].map((frame) => fmt(frame.join("\n"), style.AS_Bold, ...preset.title));
 
   string = "   " + string + "   ";
   while (string.length !== 1 && string.length !== 2) {
     string = modifyString(string);
     renders.unshift(
-      fmt(blockType.Chapter(string, []), style.AS_Bold, ...canvas.preset.title),
+      fmt(H1(string, []), style.AS_Bold, ...preset.title),
     );
   }
 

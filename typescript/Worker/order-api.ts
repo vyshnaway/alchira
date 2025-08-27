@@ -1,10 +1,10 @@
 import krypt from "./kryptic.js";
-import { ROOT } from "../Data/cache.js";
+import * as CACHE from "../Data/cache.js";
 import previewOrganize from "./organize.js";
-import { t_OrganizedResult } from "../types.js";
+import * as TYPE from "../types.js";
 
 
-ROOT.URL["Worker"] = "https://workers.xpktr.com/api/xcss-build-request";
+CACHE._ROOT.URL["Worker"] = "https://workers.xpktr.com/api/xcss-build-request";
 // APP.URL["Worker"] = APP.Worker + "api/publish";
 
 export default async function order(
@@ -19,7 +19,7 @@ export default async function order(
 ): Promise<{
 	status: boolean;
 	message: string;
-	result: t_OrganizedResult;
+	result: TYPE.OrganizedResult;
 }> {
 	const RESPONSE = {
 		status: CMD === "preview",
@@ -72,7 +72,7 @@ export default async function order(
 			redirect: "follow",
 		};
 
-		fetch(ROOT.URL["Worker"], requestOptions)
+		fetch(CACHE._ROOT.URL["Worker"], requestOptions)
 			.then((res) => res.json())
 			.then(async (res) => {
 				RESPONSE.status = res.status;

@@ -1,7 +1,8 @@
-import { t_OrganizedResult } from "../types.js";
-import utils from "../Utils/main.js";
+import USE from "../Utils/main.js";
 
-export default function previewOrganize(arrarr: number[][], merge = false): t_OrganizedResult {
+import * as TYPE from "../types.js";
+
+export default function previewOrganize(arrarr: number[][], merge = false): TYPE.OrganizedResult {
 
     let maxLen = 0;
 
@@ -31,7 +32,7 @@ export default function previewOrganize(arrarr: number[][], merge = false): t_Or
 
 
     const shorted_arrarr = sorted_arrarr.reduce((acc: Record<string, number[][]>, arr) => {
-        const superParent = merge ? utils.array.findArrSuperParent(arr, sorted_arrarr) : arr;
+        const superParent = merge ? USE.array.findArrSuperParent(arr, sorted_arrarr) : arr;
         const superParentString = JSON.stringify(superParent);
         if (acc[superParentString]) {
             acc[superParentString].push(arr);
@@ -50,7 +51,7 @@ export default function previewOrganize(arrarr: number[][], merge = false): t_Or
         const templateArray = JSON.parse(key) as number[];
 
         const indexMapFragment = templateArray.reduce((map, item) => {
-            map[item] = '_' + utils.string.enCounter(counter++);
+            map[item] = '_' + USE.string.enCounter(counter++);
             indexMap[map[item]] = Number(item);
             return map;
         }, {} as Record<number, string>);
