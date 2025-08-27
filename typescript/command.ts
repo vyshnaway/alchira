@@ -15,10 +15,10 @@ import Use from "./Utils/main.js";
 
 function reporter(heading: string, targets: string[], report: string) {
     $.POST(
-        $.MOLD.std.Block([
-            $.MOLD.title.Chapter(heading, targets.map(i => `Watching : ${i}`), $.list.tertiary.Bullets),
+        $.MAKE("", [
+            $.MAKE($.tag.H5(heading), targets.map(i => `Watching : ${i}`), [$.list.Bullets,0, $.preset.tertiary]),
             report,
-            $.MOLD.failed.Footer("Press Ctrl+C to stop watching.", MemoryUsage(), $.list.tertiary.Entries),
+            $.MAKE($.tag.H5("Press Ctrl+C to stop watching.", $.preset.failed), MemoryUsage(), [$.list.Catalog, 0, $.preset.tertiary]),
         ]),
     );
 }
@@ -34,7 +34,7 @@ async function execute(chapter: string) {
         staticsFetched = false,
         heading = "Initial Build";
 
-    $.POST($.MOLD.tertiary.Chapter(chapter));
+    $.POST($.MAKE($.tag.H1(chapter)));
 
     do {
 
@@ -217,7 +217,7 @@ async function commander({
     CACHE_STATIC.Project_Name = Use.string.normalize(projectName);
     CACHE_STATIC.Project_Version = projectVersion;
     DATA.SetENV(rootPath, workPath, originPackageEssential);
-    $.INIT(command !== "debug" && command !== "archive");
+    $.init(command !== "debug" && command !== "archive");
 
     const APP_VERSION = `${ROOT.name} @ ${ROOT.version}`;
 
@@ -253,7 +253,7 @@ async function commander({
         //     break;
         // }
         // case "install": {
-        //     $.POST("\n" + $.MOLD.secondary.Section("Installing Portables"));
+        //     $.POST("\n" + $.MAKE("Installing Portables"));
 
         //     const verifyStructResult = await FETCH.VerifySetupStruct();
         //     if (verifyStructResult.proceed) {
@@ -270,37 +270,37 @@ async function commander({
             await FETCH.FetchDocs();
 
             $.POST(
-                $.MOLD.std.Chapter(APP_VERSION,
+                $.MAKE($.tag.H1(APP_VERSION),
                     DOCUMENTS.MARKDOWN.alerts.content ? [DOCUMENTS.MARKDOWN.alerts.content] : []
                 )
             );
 
             $.POST(
-                $.MOLD.secondary.Section(
+                $.MAKE(
                     "Available Commands",
-                    $$.Props.std(ROOT.commandList),
-                    $.list.primary.Bullets
+                    $$.PropMap(ROOT.commandList, []),
+                    [$.list.Bullets, 0, $.preset.primary]
                 ),
             );
 
             $.POST(
-                $.MOLD.secondary.Section(
+                $.MAKE(
                     "Agreements",
-                    $$.Props.std(Object.fromEntries(Object.values(DOCUMENTS.AGREEMENT).map((i) => [i.title, i.path]))),
-                    $.list.primary.Bullets
+                    $$.PropMap(Object.fromEntries(Object.values(DOCUMENTS.AGREEMENT).map((i) => [i.title, i.path]))),
+                    [$.list.Bullets, 0, $.preset.primary]
                 ),
             );
 
             $.POST(
-                $.MOLD.secondary.Section(
+                $.MAKE(
                     "References",
-                    $$.Props.std(Object.fromEntries(Object.values(DOCUMENTS.MARKDOWN).map((i) => [i.title, i.path]))),
-                    $.list.primary.Bullets
+                    $$.PropMap(Object.fromEntries(Object.values(DOCUMENTS.MARKDOWN).map((i) => [i.title, i.path]))),
+                    [$.list.Bullets, 0, $.preset.primary]
                 ),
             );
 
             $.POST(
-                $.MOLD.secondary.Section("For more information visit : " + ROOT.website),
+                $.MAKE($.tag.H2("For more information visit : " + ROOT.website)),
             );
         }
     }

@@ -1,4 +1,4 @@
-import { style, format } from "../0.root.js";
+import { style, fmt } from "../0.root.js";
 
 export default (string: string, frames = 1) => {
   const characters = Math.floor(Math.random() * string.length);
@@ -21,7 +21,7 @@ export default (string: string, frames = 1) => {
       styledIndices.add(randomIndex);
 
       const randomStyle = styles[Math.floor(Math.random() * styles.length)];
-      const styledCharacter = format(string[randomIndex], randomStyle);
+      const styledCharacter = fmt(string[randomIndex], randomStyle);
 
       styledString =
         styledString.substring(0, randomIndex) +

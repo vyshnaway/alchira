@@ -161,10 +161,10 @@ function TAGSTYLE(
 			error: "Classname missing declaration scope.",
 			source: [declaration]
 		});
-		errors.push($.MOLD.failed.List(
-			"Classname missing declaration scope.",
+		errors.push($.MAKE(
+			$.tag.H6("Classname missing declaration scope.", $.preset.failed),
 			[declaration],
-			$.list.text.Bullets
+			[$.list.Bullets, 0, []]
 		));
 	} else {
 		for (const subSelector in raw.styles) {

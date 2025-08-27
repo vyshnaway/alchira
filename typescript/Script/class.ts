@@ -107,7 +107,7 @@ export default class C_Proxy {
 			fileManifests: {}
 		};
 
-		Cumulates.report.push($.MOLD.primary.Section(`PROXY : ${this.target} -> ${this.source}`));
+		Cumulates.report.push($.MAKE($.tag.H2(`PROXY : ${this.target} -> ${this.source}`)));
 		Cumulates.fileManifests[fileman.path.join(CACHE_STATIC.WorkPath, this.targetStylesheet)] = {
 			refer: {
 				group: "STYLESHEET",
@@ -137,14 +137,18 @@ export default class C_Proxy {
 			Cumulates.usedIndexes.push(...globalIndexes);
 
 			if (localIndexes.length + publicIndexes.length + globalIndexes.length) {
-				Cumulates.report.push($.MOLD.tertiary.Topic(
-					`[ ${localIndexes.length} L + ${publicIndexes.length} G + ${globalIndexes.length} P ] : ${file.targetPath}`, [
-					...$.list.secondary.Entries(Object.keys(file.styleData.globalClasses)),
-					$.canvas.divider.mid,
-					...$.list.text.Entries(Object.keys(file.styleData.localClasses)),
-					$.canvas.divider.mid,
-					...$.list.text.Entries(Object.keys(file.styleData.publicClasses)),
-				]));
+				Cumulates.report.push(
+					$.MAKE(
+						$.tag.H4(`[ ${localIndexes.length} L + ${publicIndexes.length} G + ${globalIndexes.length} P ] : ${file.targetPath}`, $.preset.tertiary),
+						[
+							...$.list.Catalog(Object.keys(file.styleData.globalClasses)),
+							$.canvas.divider.mid,
+							...$.list.Catalog(Object.keys(file.styleData.localClasses)),
+							$.canvas.divider.mid,
+							...$.list.Catalog(Object.keys(file.styleData.publicClasses)),
+						]
+					)
+				);
 			}
 
 
@@ -152,11 +156,13 @@ export default class C_Proxy {
 				(index) => {
 					const InStash = INDEX.FETCH(index);
 					if (InStash.declarations.length > 1) {
-						Cumulates.errors.push($.MOLD.failed.List(
-							"Multiple declarations: " + InStash.selector,
-							InStash.declarations,
-							$.list.text.Bullets
-						));
+						Cumulates.errors.push(
+							$.MAKE(
+								$.tag.H5("Multiple declarations: " + InStash.selector, $.preset.failed),
+								InStash.declarations,
+								[$.list.Bullets, 0, $.preset.failed]
+							)
+						);
 						Cumulates.diagnostics.push({
 							error: "Multiple declarations: " + InStash.selector,
 							source: InStash.declarations,

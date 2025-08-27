@@ -25,62 +25,62 @@ export async function Initialize() {
 		await fileman.clone.safe(NAVIGATE.blueprint.libraries.path, NAVIGATE.folder.libraries.path);
 
 		$.POST(
-			$.MOLD.std.Section(
-				"Next Steps",
+			$.MAKE(
+				$.tag.H2("Next Steps"),
 				[
 					"Adjust " +
-					$.MAKE(NAVIGATE.json.configure.path, $.style.AS_Bold, ...$.canvas.config.primary) +
+					$.FMT(NAVIGATE.json.configure.path, $.style.AS_Bold, ...$.canvas.preset.primary) +
 					" according to the requirements of your project.",
 					"Execute " +
-					$.MAKE('"init"', $.style.AS_Bold, ...$.canvas.config.primary) +
+					$.FMT('"init"', $.style.AS_Bold, ...$.canvas.preset.primary) +
 					" again to generate the necessary configuration folders.",
 					"During execution " +
-					$.MAKE("{target}", $.style.AS_Bold, ...$.canvas.config.primary) +
+					$.FMT("{target}", $.style.AS_Bold, ...$.canvas.preset.primary) +
 					" folder will be cloned from " +
-					$.MAKE("{source}", $.style.AS_Bold, ...$.canvas.config.primary) +
+					$.FMT("{source}", $.style.AS_Bold, ...$.canvas.preset.primary) +
 					" folder.",
 					"This folder will act as proxy for " + ROOT.name + ".",
 					"In the " +
-					$.MAKE("{target}/{stylesheet}", $.style.AS_Bold, ...$.canvas.config.primary) +
+					$.FMT("{target}/{stylesheet}", $.style.AS_Bold, ...$.canvas.preset.primary) +
 					", content from " +
-					$.MAKE("{target}/{stylesheet}", $.style.AS_Bold, ...$.canvas.config.primary) +
+					$.FMT("{target}/{stylesheet}", $.style.AS_Bold, ...$.canvas.preset.primary) +
 					" will be appended.",
 				],
-				$.list.std.Bullets,
+				[$.list.Bullets, 0, []],
 			),
 		);
 
 		$.POST(
-			$.MOLD.std.Section(
-				"Available Commands",
-				$$.Props.primary(ROOT.commandList),
-				$.list.std.Bullets,
+			$.MAKE(
+				$.tag.H2("Available Commands"),
+				$$.PropMap(ROOT.commandList),
+				[$.list.Bullets, 0, []]
 			),
 		);
 
 		$.POST(
-			$.MOLD.std.Section(
-				"Publish command instructions.",
+			$.MAKE(
+				$.tag.H2("Publish command instructions."),
 				ROOT.version === "0"
 					? ["This command uses an internet connection."]
 					: [
 						"Create a new project and use its access key. For action visit " +
-						$.MAKE(ROOT.URL.Console, $.style.AS_Bold, ...$.canvas.config.primary),
+						$.FMT(ROOT.URL.Console, $.style.AS_Bold, ...$.canvas.preset.primary),
 						"For personal projects, you can use the key in " +
-						$.MAKE(NAVIGATE.json.configure.path, $.style.AS_Bold, ...$.canvas.config.primary),
+						$.FMT(NAVIGATE.json.configure.path, $.style.AS_Bold, ...$.canvas.preset.primary),
 						"If using in CI/CD workflow, it is suggested to use " +
-						$.MAKE("xcss publish {key}", $.style.AS_Bold, ...$.canvas.config.primary),
+						$.FMT("xcss publish {key}", $.style.AS_Bold, ...$.canvas.preset.primary),
 					],
-				$.list.std.Bullets,
+				[$.list.Bullets, 0, []]
 			),
 		);
 
-		return $.MOLD.success.Footer("Initialized directory");
+		return $.tag.H5("Initialized directory", $.preset.success);
 	} catch (err) {
-		return $.MOLD.failed.Footer(
-			"Initialization failed.",
+		return $.MAKE(
+			$.tag.H5("Initialization failed.", $.preset.failed),
 			err instanceof Error ? [err.message] : [],
-			$.list.failed.Bullets,
+			[$.list.Bullets, 0, $.preset.failed],
 		);
 	}
 }
@@ -109,19 +109,17 @@ export async function VerifySetupStruct() {
 		}
 		$.TASK("Verification finished");
 
-		const errSrcs = $.list.failed.Level(Object.keys(errors));
-		const errList = Object.values(errors).map((err, ind) => `${errSrcs[ind]}: ${err}`);
 		result.started = true;
-		result.proceed = errSrcs.length === 0;
+		result.proceed = Object.keys(errors).length === 0;
 		result.report =
 			Object.keys(errors).length === 0
-				? $.MOLD.success.Footer("Setup Healthy")
-				: $.MOLD.failed.Footer("Error Paths", errList, $.list.failed.Bullets);
+				? $.MAKE($.tag.H6("Setup Healthy", $.preset.success))
+				: $.MAKE($.tag.H6("Error Paths", $.preset.failed), $$.PropMap(errors), [$.list.Bullets, 0, $.preset.failed]);
 	} else {
-		result.report = $.MOLD.warning.Footer(
-			"XCSS is not yet initialized in directory.",
+		result.report = $.MAKE(
+			$.tag.H5("XCSS is not yet initialized in directory.", $.preset.warning),
 			[`Use "init" command to initialize.`],
-			$.list.warning.Bullets,
+			[$.list.Bullets, 0, $.preset.warning],
 		);
 	}
 
@@ -232,8 +230,8 @@ export async function VerifyConfigure(loadStatics: boolean) {
 	return {
 		status: Object.keys(errors).length === 0,
 		report: Object.keys(errors).length === 0
-			? $.MOLD.success.Footer("Configs Healthy", alerts, $.list.success.Bullets,)
-			: $.MOLD.failed.Footer("Error Paths", errors, $.list.failed.Bullets),
+			? $.MAKE($.tag.H6("Configs Healthy", $.preset.success), alerts, [$.list.Bullets, 0, $.preset.success],)
+			: $.MAKE($.tag.H6("Error Paths", $.preset.failed), errors, [$.list.Bullets, 0, $.preset.failed]),
 	};
 }
 
@@ -284,6 +282,6 @@ export async function SaveHashrules() {
 	$.TASK("Analysis complete");
 	return {
 		status: Object.keys(errors).length === 0,
-		report: $.MOLD.failed.Footer("Error Paths", errors, $.list.failed.Bullets),
+		report: $.MAKE($.tag.H5("Error Paths", $.preset.failed), errors, [$.list.Bullets, 0, $.preset.failed]),
 	};
 }

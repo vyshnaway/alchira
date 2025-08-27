@@ -1,6 +1,6 @@
 import * as root from "./0.root.js";
 
-export function H1(content: string) {
+export function H1(content = '', presets: string[] = [], ...styles: string[]) {
   const minWidth = 10;
   const width = Math.max(root.canvas.width(), minWidth);
   const lines = [];
@@ -24,49 +24,45 @@ export function H1(content: string) {
     paddedLines.push(`>>>${leftPad}${line}${rightPad}<<<`);
   }
 
-  return root.format(["", root.canvas.divider.mid, ...paddedLines, root.canvas.divider.mid, ""].join("\n"));
+  return root.fmt(["", root.canvas.divider.mid, ...paddedLines, root.canvas.divider.mid, ""].join("\n"), ...presets, ...styles);
 }
 
-export function H2(content: string) {
-  return root.format([root.canvas.divider.mid, content, root.canvas.divider.mid, ""].join("\n"));
+export function H2(content = '', presets: string[] = [], ...styles: string[]) {
+  return root.fmt([root.canvas.divider.mid, content, root.canvas.divider.mid, ""].join("\n"), ...presets, ...styles);
 }
 
-export function H3(content: string) {
-  return root.format(["", content, root.canvas.divider.mid, ""].join("\n"));
+export function H3(content = '', presets: string[] = [], ...styles: string[]) {
+  return root.fmt(["", content, root.canvas.divider.mid, ""].join("\n"), ...presets, ...styles);
 }
 
-export function H4(content: string) {
-  return root.format([root.canvas.divider.mid, content, ""].join("\n"));
+export function H4(content = '', presets: string[] = [], ...styles: string[]) {
+  return root.fmt([root.canvas.divider.mid, content, ""].join("\n"), ...presets, ...styles);
 }
 
-export function H5(content: string) {
-  return root.format([content, ""].join("\n"));
+export function H5(content = '', presets: string[] = [], ...styles: string[]) {
+  return root.fmt([content, ""].join("\n"), ...presets, ...styles);
 }
 
-export function H6(content: string) {
-  return root.format([content + root.canvas.tab + root.canvas.divider.mid[0].repeat(root.canvas.width() - root.canvas.tab.length - content.length), ""].join("\n"));
+export function H6(content = '', presets: string[] = [], ...styles: string[]) {
+  return root.fmt([content + root.canvas.tab + root.canvas.divider.mid[0].repeat(root.canvas.width() - root.canvas.tab.length - content.length), ""].join("\n"), ...presets, ...styles);
 }
 
-export function P(content: string) {
-  return root.format(root.canvas.tab + content) + "\n";
+export function P(content = '', presets: string[] = [], ...styles: string[]) {
+  return root.fmt(root.canvas.tab + content, ...presets, ...styles) + "\n";
 }
 
-export function Li(content: string) {
-  return root.format(">" + root.canvas.tab + content);
+export function Li(content = '', presets: string[] = [], ...styles: string[]) {
+  return root.fmt(">" + root.canvas.tab + content, ...presets, ...styles);
 }
 
-export function Div(content: string) {
-  return root.format(content);
+export function Hr(content = root.canvas.divider.mid[0], presets: string[] = [], ...styles: string[]) {
+  return root.fmt("\n" + content.charAt(0).repeat(Math.ceil(root.canvas.width() / content.length)).slice(0, root.canvas.width()), ...presets, ...styles);
 }
 
-export function Hr(content = root.canvas.divider.mid[0]) {
-  return root.format("\n" + content.charAt(0).repeat(Math.ceil(root.canvas.width() / content.length)).slice(0, root.canvas.width()));
+export function Br(repeat = 1, presets: string[] = [], ...styles: string[]) {
+  return root.fmt("\n".repeat(repeat < 0 ? 0 : repeat), ...presets, ...styles);
 }
 
-export function Br(repeat = 1) {
-  return root.format("\n".repeat(repeat < 0 ? 0 : repeat));
-}
-
-export function Tab(repeat = 1) {
-  return root.format(root.canvas.tab.repeat(repeat < 0 ? 0 : repeat));
+export function Tab(repeat = 1, presets: string[] = [], ...styles: string[]) {
+  return root.fmt(root.canvas.tab.repeat(repeat < 0 ? 0 : repeat), ...presets, ...styles);
 }

@@ -171,10 +171,10 @@ function ReRender() {
 		const InStash = INDEX.FETCH(index);
 		if (InStash.metadata.declarations.length > 1) {
 			PackageErrors.push(
-				$.MOLD.warning.List(
-					"Duplicate Package declarations: " + InStash.selector,
+				$.MAKE(
+					$.tag.H6("Duplicate Package declarations: ", $.preset.warning),
 					InStash.declarations,
-					$.list.text.Bullets,
+					[$.list.Bullets, 0, []]
 				),
 			);
 			PackageDiagnostics.push({
@@ -192,11 +192,13 @@ function ReRender() {
 	}, [] as string[]);
 
 	if (nameCollitions.length) {
-		PackageErrors.push($.MOLD.warning.List(
-			`Package-name collitions: ${CACHE_STATIC.Package.Name}`,
-			nameCollitions,
-			$.list.failed.Bullets
-		));
+		PackageErrors.push(
+			$.MAKE(
+				$.tag.H6(`Package-name collitions: ${CACHE_STATIC.Package.Name}`, $.preset.warning),
+				nameCollitions,
+				[$.list.Bullets, 0, []]
+			)
+		);
 		PackageDiagnostics.push({
 			error: `Package-name collitions: ${CACHE_STATIC.Package.Name}`,
 			source: nameCollitions
@@ -238,10 +240,10 @@ function ReRender() {
 		const InStash = INDEX.FETCH(index);
 		if (InStash.declarations.length > 1) {
 			LibraryErrors.push(
-				$.MOLD.warning.List(
-					"Duplicate Library declarations: " + InStash.selector,
+				$.MAKE(
+					$.tag.H4("Duplicate Library declarations: " + InStash.selector, $.preset.warning),
 					InStash.declarations,
-					$.list.text.Bullets,
+					[$.list.Bullets, 0, []],
 				),
 			);
 			LibraryDiagnostics.push({
@@ -253,37 +255,26 @@ function ReRender() {
 	});
 
 
-
-
-	const LibraryReport = [
-		$.MOLD.primary.Section(
-			`Axioms: ${Object.values(ClusterStyleSkeleton).reduce((a, v) => a += Object.keys(v).length, 0)}`,
-			Object.entries(axiomChart).map(([heading, entries]) =>
-				$.MOLD.tertiary.Topic(heading, entries, $.list.text.Entries),
-			),
-		),
-		$.MOLD.primary.Section(
-			`Clusters: ${Object.values(PacbindStyleSkeleton).reduce((a, v) => a += Object.keys(v).length, 0)}`,
-			Object.entries(clusterChart).map(([heading, entries]) =>
-				$.MOLD.tertiary.Topic(heading, entries, $.list.text.Entries),
+	const template = (heading: string, items: Record<string, string[]>) => $.MAKE(
+		$.tag.H2(heading, $.preset.primary),
+		Object.entries(items).map(([heading, entries]) =>
+			$.MAKE(
+				$.tag.H2(heading, $.preset.tertiary),
+				entries,
+				[$.list.Catalog, 0, $.preset.tertiary]
 			),
 		)
+	);
+
+	const LibraryReport = [
+		template(`Axioms: ${Object.values(ClusterStyleSkeleton).reduce((a, v) => a += Object.keys(v).length, 0)}`, axiomChart),
+		template(`Clusters: ${Object.values(PacbindStyleSkeleton).reduce((a, v) => a += Object.keys(v).length, 0)}`, clusterChart),
 	].join("");
 
 
 	const PackageReport = [
-		$.MOLD.primary.Section(
-			`Pacbinds: ${Object.values(PackageStyleSkeleton).reduce((a, v) => a += Object.keys(v).length, 0)}`,
-			Object.entries(pacbindChart).map(([heading, entries]) =>
-				$.MOLD.tertiary.Topic(heading, entries, $.list.text.Entries),
-			),
-		),
-		$.MOLD.primary.Section(
-			`Packages: ${Object.values(PacbindStyleSkeleton).reduce((a, v) => a += Object.keys(v).length, 0)}`,
-			Object.entries(packageChart).map(([heading, entries]) =>
-				$.MOLD.tertiary.Topic(heading, entries, $.list.text.Entries),
-			),
-		),
+		template(`Pacbinds: ${Object.values(PackageStyleSkeleton).reduce((a, v) => a += Object.keys(v).length, 0)}`, pacbindChart),
+		template(`Packages: ${Object.values(PacbindStyleSkeleton).reduce((a, v) => a += Object.keys(v).length, 0)}`, packageChart),
 	].join("");
 
 

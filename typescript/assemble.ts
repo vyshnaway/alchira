@@ -148,7 +148,7 @@ async function Accumulate() {
 
 	CACHE_LIVEDOCS.Errors.project = CUMULATES.errors;
 	CACHE_LIVEDOCS.Diagnostics.project = CUMULATES.diagnostics;
-	CACHE_LIVEDOCS.Report.project = $.MOLD.std.Block(CUMULATES.report);
+	CACHE_LIVEDOCS.Report.project = $.MAKE("", (CUMULATES.report));
 
 	CACHE_LIVEDOCS.Manifest.errors = Object.values(CACHE_LIVEDOCS.Diagnostics).reduce((A, V) => {
 		A.push(...V);
@@ -160,8 +160,8 @@ async function Accumulate() {
 
 	CACHE_LIVEDOCS.ErrorCount = ERRORS.length;
 	CACHE_LIVEDOCS.Report.errors = CACHE_LIVEDOCS.ErrorCount ?
-		$.MOLD.failed.Section(`${CACHE_LIVEDOCS.ErrorCount} Errors`, ERRORS) :
-		$.MOLD.success.Section(`${CACHE_LIVEDOCS.ErrorCount} Errors`);
+		$.MAKE($.tag.H2(`${CACHE_LIVEDOCS.ErrorCount} Errors`, $.preset.failed), ERRORS) :
+		$.MAKE($.tag.H2(`${CACHE_LIVEDOCS.ErrorCount} Errors`, $.preset.success));
 
 	return CUMULATES;
 }
@@ -245,7 +245,7 @@ function GenFinalSheets(ATTACHMENTS: Set<number>) {
 
 	CACHE_LIVEDOCS.Manifest.constants = Object.keys(indexScanned.variables);
 	CACHE_LIVEDOCS.Report.constants =
-		$.MOLD.primary.Section("Root variables", CACHE_LIVEDOCS.Manifest.constants, $.list.text.Entries);
+		$.MAKE($.tag.H6("Root variables", $.preset.primary), CACHE_LIVEDOCS.Manifest.constants, [$.list.Catalog, 0, []]);
 
 
 	RENDERFRAGS.APPENDIX = COMPILE.forPublish(
@@ -313,17 +313,17 @@ export async function Generate() {
 			OUTFILES[NAVIGATE.json.manifest.path] = JSON.stringify(CACHE_LIVEDOCS.Manifest);
 		} else {
 
-			const memChart = $$.Props.std(Object.entries(RENDERFRAGS).reduce((A, [K, V]) => {
+			const memChart = $$.PropMap(Object.entries(RENDERFRAGS).reduce((A, [K, V]) => {
 				A[K] = `${Use.string.stringMem(V)} Kb`.padStart(9, " ");
 				return A;
-			}, {} as Record<string, string>));
+			}, {} as Record<string, string>), $.preset.text);
 
 			CACHE_LIVEDOCS.Report.memChart = CACHE_LIVEDOCS.ErrorCount ?
-				$.MOLD.failed.Section(CACHE_LIVEDOCS.FinalMessage, memChart, $.list.std.Bullets) :
-				$.MOLD.success.Section(CACHE_LIVEDOCS.FinalMessage, memChart, $.list.std.Bullets);
+				$.MAKE($.tag.H2(CACHE_LIVEDOCS.FinalMessage, $.preset.failed), memChart, [$.list.Bullets, 0, []]) :
+				$.MAKE($.tag.H2(CACHE_LIVEDOCS.FinalMessage, $.preset.success), memChart, [$.list.Bullets, 0, []]);
 
 			CACHE_LIVEDOCS.Report.footer =
-				$.MOLD.std.Footer(`Output size : ${Use.string.stringMem(STYLESHEET)} Kb`.padStart(9, " "));
+				$.MAKE($.tag.H5(`Output size : ${Use.string.stringMem(STYLESHEET)} Kb`.padStart(9, " ")));
 		}
 	}
 
@@ -332,8 +332,6 @@ export async function Generate() {
 
 	return {
 		SaveFiles: OUTFILES,
-		ConsoleReport: $.MOLD.std.Block(
-			Object.values(CACHE_LIVEDOCS.Report).filter((string) => string !== ""),
-		),
+		ConsoleReport: $.MAKE("", Object.values(CACHE_LIVEDOCS.Report).filter((string) => string !== "")),
 	};
 }

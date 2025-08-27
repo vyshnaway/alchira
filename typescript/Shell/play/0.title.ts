@@ -1,4 +1,4 @@
-import { canvas, style, format } from "../0.root.js";
+import { canvas, style, fmt } from "../0.root.js";
 import { blockType } from "../3.write.js";
 
 const padBothSides = (str: string, totalLength: number) => {
@@ -25,7 +25,7 @@ export default (string: string) => {
       ...new Array(previewFrames * 2).fill(["", "", canvas.divider.mid, ""]),
       ...new Array(previewFrames).fill([
         "",
-        format(canvas.divider.top, style.AS_Bold, style.AS_Underline, ...canvas.config.title),
+        fmt(canvas.divider.top, style.AS_Bold, style.AS_Underline, ...canvas.preset.title),
         "",
         "",
       ]),
@@ -50,13 +50,13 @@ export default (string: string) => {
         canvas.divider.low,
         "",
       ]),
-    ].map((frame) => format(frame.join("\n"), style.AS_Bold, ...canvas.config.title));
+    ].map((frame) => fmt(frame.join("\n"), style.AS_Bold, ...canvas.preset.title));
 
   string = "   " + string + "   ";
   while (string.length !== 1 && string.length !== 2) {
     string = modifyString(string);
     renders.unshift(
-      format(blockType.Chapter(string, []), style.AS_Bold, ...canvas.config.title),
+      fmt(blockType.Chapter(string, []), style.AS_Bold, ...canvas.preset.title),
     );
   }
 

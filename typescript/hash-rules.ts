@@ -29,33 +29,31 @@ function IMPORT(string: string, watchUndef = true, sourcePath = "") {
 	const errors = {
 		recursionLoop: (recursionPreview: Record<string, string>, cause: string) => {
 			response.status = false;
-			recursionPreview["ERROR BY"] = $.MAKE(cause, $.style.AS_Bold, $.style.TC_Normal_Red);
-			response.error = $.MOLD.failed.List(
-				source +
-				$.MAKE(" : Hashrule recursion loop.", $.style.BC_Normal_Yellow),
-				$$.Props.text(recursionPreview),
-				$.list.std.Waterfall,
+			recursionPreview["ERROR BY"] = $.FMT(cause, $.style.AS_Bold, $.style.TC_Normal_Red);
+			response.error = $.MAKE(
+				$.tag.H6(source + $.FMT(" : Hashrule recursion loop.", $.style.BC_Normal_Yellow)),
+				$$.PropMap(recursionPreview),
+				[$.list.Waterfall, 0, []],
 			);
-			response.diagnostic.error = $.MOLD.std.List(
-				source + " : Hashrule recursion loop.",
-				$$.Props.std(recursionPreview),
-				$.list.std.Waterfall,
+			response.diagnostic.error = $.MAKE(
+				$.tag.H6(source + " : Hashrule recursion loop."),
+				$$.PropMap(recursionPreview),
+				[$.list.Waterfall, 0, []],
 			);
 			return response;
 		},
 		undefinedHash: (recursionPreview: Record<string, string>, cause: string) => {
 			response.status = false;
-			recursionPreview["ERROR BY"] = $.MAKE(cause, $.style.AS_Bold, $.style.TC_Normal_Red);
-			response.error = $.MOLD.failed.List(
-				source +
-				$.MAKE(" : Undefined hashrule.", $.style.BC_Normal_Yellow),
-				$$.Props.text(recursionPreview),
-				$.list.std.Waterfall,
+			recursionPreview["ERROR BY"] = $.FMT(cause, $.style.AS_Bold, $.style.TC_Normal_Red);
+			response.error = $.MAKE(
+				$.tag.H6(source + $.FMT(" : Undefined hashrule.", $.style.BC_Normal_Yellow)),
+				$$.PropMap(recursionPreview),
+				[$.list.Waterfall, 0, []],
 			);
-			response.diagnostic.error = $.MOLD.std.List(
-				source + " : Undefined hashrule.",
-				$$.Props.std(recursionPreview),
-				$.list.std.Waterfall,
+			response.diagnostic.error = $.MAKE(
+				$.tag.H6(source + " : Undefined hashrule."),
+				$$.PropMap(recursionPreview),
+				[$.list.Waterfall, 0, []],
 			);
 			return response;
 		},
@@ -103,10 +101,10 @@ function UPLOAD() {
 	});
 	CACHE_DYNAMIC.HashRule = hashrule;
 
-	return $.MOLD.std.Block([
-		$.MOLD.primary.Section("Active Hashrules"),
-		$.MOLD.std.Block($$.Props.std(hashrule), $.list.std.Bullets),
-		...(hashruleErrors.length ? [$.MOLD.failed.Footer("Invalid Hashrules", hashruleErrors)] : []),
+	return $.MAKE("", [
+		$.tag.H2("Active Hashrules", $.preset.primary),
+		$.MAKE("", $$.PropMap(hashrule), [$.list.Bullets, 0, []]),
+		...(hashruleErrors.length ? [$.MAKE($.tag.H5("Invalid Hashrules", $.preset.failed), hashruleErrors)] : []),
 	]);
 }
 
@@ -169,7 +167,7 @@ function RENDER(string: string, sourcePath = "") {
 		rule: (finalRule === "_" || finalRule === "-") ? "" : finalRule,
 		subSelector: (subSelector === "_" || subSelector === "-") ? "" : subSelector,
 		status: extended.status,
-		error: extended.error + $.MOLD.text.Item(sourcePath) + "\n",
+		error: extended.error + $.tag.Li(sourcePath) + "\n",
 		diagnostic: extended.diagnostic
 	};
 }

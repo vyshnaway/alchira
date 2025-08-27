@@ -1,20 +1,19 @@
-import { canvas, style, format } from "./0.root.js";
-import tag from "./1.tag.js";
-import list from "./2.list.js";
-import write from "./3.write.js";
+import * as play from "./play/main.js";
 
-import play from "./frames/index.js";
-import render from "./_.render.js";
+import * as render from "./_.render.js";
+import * as root from "./0.root.js";
+import * as tag from "./1.tag.js";
+import * as list from "./2.list.js";
 
 
-const task = (string: string, rowshift = -1) => {
-  if (canvas.config.taskActive && canvas.config.postActive) {
+function task(string: string, rowshift = -1) {
+  if (root.canvas.config.taskActive && root.canvas.config.postActive) {
     render.write(
       [
         rowshift >= 0 ? tag.Br(rowshift) : "",
-        tag.Div(format(">>>", style.AS_Bold, ...canvas.config.primary)),
-        canvas.tab,
-        tag.Div(format(string + ".", style.AS_Bold, style.AS_Italic, ...canvas.config.tertiary)),
+        root.fmt(">>>", root.style.AS_Bold, ...root.canvas.preset.primary),
+        root.canvas.tab,
+        root.fmt(string + ".", root.style.AS_Bold, root.style.AS_Italic, ...root.canvas.preset.tertiary),
         tag.Br(1),
       ].join(""),
       rowshift < 0 ? -rowshift : rowshift,
@@ -22,31 +21,48 @@ const task = (string: string, rowshift = -1) => {
   }
 };
 
-const step = (string: string, rowshift = -1) => {
-  if (canvas.config.taskActive && canvas.config.postActive) {
+
+function step(string: string, rowshift = -1) {
+  if (root.canvas.config.taskActive && root.canvas.config.postActive) {
     render.write(
       [
         rowshift >= 0 ? tag.Br(rowshift) : "",
-        tag.Div(format(">>>", style.AS_Rare, ...canvas.config.primary)),
-        canvas.tab,
-        tag.Div(format(string + " ...", style.AS_Italic, ...canvas.config.tertiary)),
+        root.fmt(">>>", root.style.AS_Rare, ...root.canvas.preset.primary),
+        root.canvas.tab,
+        root.fmt(string + " ...", root.style.AS_Italic, ...root.canvas.preset.tertiary),
       ].join(""),
       rowshift < 0 ? -rowshift : rowshift,
     );
   }
 };
 
+function MAKE(
+  heading: string,
+  contents: string[] = [],
+  ...listDeplyment: [type: list._T_list, intent: number, preset: string[], ...styles: string[]][]
+) {
+  if (contents.length) { contents.push(root.fmt()); }
+  return [
+    heading,
+    ...listDeplyment.reduce((A, [type, intent, preset, ...styles]) => {
+      A = type(A, intent, preset, ...styles);
+      return A;
+    }, contents)
+  ].join("\n");
+};
+
 export default {
   tag,
   list,
-  style,
-  canvas,
   render,
-  INIT: init,
+  init: root.init,
+  canvas: root.canvas,
+  preset: root.canvas.preset,
+  style: root.style,
+  PLAY: play,
+  MAKE,
+  POST: root.post,
   TASK: task,
   STEP: step,
-  POST: post,
-  PLAY: play,
-  MOLD: write,
-  MAKE: format,
+  FMT: root.fmt,
 };

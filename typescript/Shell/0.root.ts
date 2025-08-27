@@ -58,7 +58,7 @@ export const style = {
 };
 
 export const canvas: {
-  config: {
+  preset: {
     title: string[],
     text: string[],
     primary: string[],
@@ -67,10 +67,14 @@ export const canvas: {
     success: string[],
     failed: string[],
     warning: string[],
+  },
+
+  config: {
     taskActive: boolean,
     postActive: boolean,
     tabSpace: number,
   },
+
   divider: {
     top: string,
     mid: string,
@@ -78,9 +82,12 @@ export const canvas: {
   },
 
   tab: string,
+
   width: () => number,
+
 } = {
-  config: {
+
+  preset: {
     title: [],
     text: [],
     primary: [],
@@ -89,6 +96,9 @@ export const canvas: {
     success: [],
     failed: [],
     warning: [],
+  },
+
+  config: {
     taskActive: true,
     postActive: true,
     tabSpace: 2,
@@ -101,10 +111,12 @@ export const canvas: {
   },
 
   tab: " ",
+
   width: () => typeof process.stdout.columns === 'number' ? process.stdout.columns : 48
+
 };
 
-Object.assign(canvas.config,
+Object.assign(canvas.preset,
   {
     title: [style.TC_Normal_Green],
     text: [style.TC_Normal_White],
@@ -132,10 +144,10 @@ export function init(
   canvas.divider.top = canvas.divider.top[0].repeat(width);
 }
 
-export function format(string = '', ...styles: (typeof style)[keyof typeof style][]) {
+export function fmt(string = '', ...styles: string[]) {
   return (styles.length ? `\x1b[${styles.join(';')}m` : "") + string + `\x1b[0m`;
 }
 
 export function post(string?: string, ...styles: string[]) {
-  render.write(format(string, ...styles));
+  render.write(fmt(string, ...styles));
 };

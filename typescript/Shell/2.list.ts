@@ -1,76 +1,113 @@
 import * as root from "./0.root.js";
 import * as tag from "./1.tag.js";
 
+export type _T_list = (items?: string[], intent?: number, preset?: string[], ...styles: string[]) => string[];
 
-export function Level(items: string[] = [], intent = 0, ...styles: string[]) {
+export const Bullets: _T_list = (items: string[] = [], intent = 0, preset: string[] = [], ...styles: string[]) => {
+	intent = intent < 0 ? 0 : intent;
+	return items.map((item) => tag.Tab(intent) + root.fmt(tag.Li(item), ...preset, ...styles));
+};
+
+export const Numbers: _T_list = (items: string[] = [], intent = 0, preset: string[] = [], ...styles: string[]) => {
+	intent = intent < 0 ? 0 : intent;
+	return items.map((item, index) =>
+		tag.Tab(intent) + root.fmt(String(index + 1) + tag.Tab() + root.fmt(item), ...preset, ...styles),
+	);
+};
+
+export const Level: _T_list = (items: string[] = [], intent = 0, preset: string[] = [], ...styles: string[]) => {
 	intent = intent < 0 ? 0 : intent;
 	const keyLength = items.reduce((max, key) => (key.length > max ? key.length : max), 0);
-	return items.map((key) => (root.format(tag.Tab(intent) + key.padEnd(keyLength) + tag.Tab(), ...styles)));
-}
+	return items.map((key) => tag.Tab(intent) + root.fmt(key.padEnd(keyLength) + tag.Tab(), ...preset, ...styles));
+};
 
-export function Catalog(items: string[] = [], intent = 0, ...styles: string[]) {
+export const Paragraphs: _T_list = (items: string[] = [], intent = 0, preset: string[] = [], ...styles: string[]) => {
 	intent = intent < 0 ? 0 : intent;
+	return items.map((item) => tag.Tab(intent) + root.fmt(item, ...preset, ...styles));
+};
 
-	const size =
-		items.reduce((length, item) => {
-			if (item.length > length) { length = item.length; }
-			return length;
-		}, 0) +
-		intent +
-		root.canvas.tab.length;
-	const cols = Math.floor(root.canvas.width() / (size + 3));
-	const result: string[] = [];
-	let subResult = "";
-	items.forEach((item, index) => {
-		if ((index + 1) % cols) {
-			subResult += tag.Li(root.format(item.padEnd(size), ...styles));
-		} else {
-			subResult += tag.Li(root.format(item.padEnd(size), ...styles));
-			result.push(subResult);
-			subResult = "";
-		}
-	});
-	if (subResult.length) { result.push(subResult); }
-	return result;
-}
-
-export function Paragraphs(items: string[] = [], intent = 0, ...styles: string[]) {
+export const Breaks: _T_list = (items: string[] = [], intent = 0, preset: string[] = [], ...styles: string[]) => {
 	intent = intent < 0 ? 0 : intent;
-	return items.map((item) => tag.Tab(intent) + tag.Div(root.format(item, ...styles)));
-}
+	return items.map((item) => "\n".repeat(intent) + root.fmt(tag.P(item), ...preset, ...styles));
+};
 
-export function Bullets(items: string[] = [], intent = 0, ...styles: string[]) {
-	intent = intent < 0 ? 0 : intent;
-	return items.map((item) => tag.Tab(intent) + tag.Li(root.format(item, ...styles)));
-}
-
-export function Numbers(items: string[] = [], intent = 0, ...styles: string[]) {
-	intent = intent < 0 ? 0 : intent;
-	return items.map(
-		(item, index) =>
-			tag.Tab(intent) +
-			root.format(String(index + 1), ...styles) +
-			tag.Tab(intent) +
-			tag.Div(root.format(item)),
-	);
-}
-
-export function Breaks(items: string[] = [], intent = 0, ...styles: string[]) {
-	intent = intent < 0 ? 0 : intent;
-	return items.map((item) => root.format("\n".repeat(intent) + tag.P(item), ...styles));
-}
-
-export function Waterfall(items: string[] = [], intent = 0, ...styles: string[]) {
+export const Waterfall: _T_list = (items: string[] = [], intent = 0, preset: string[] = [], ...styles: string[]) => {
 	intent = intent < 0 ? 0 : intent;
 	return items.map((item, key) => {
-		return root.format(root.canvas.tab.repeat(intent) + (key === items.length - 1 ? "└─>" : "├─>") + tag.Tab(intent) + item);
+		return tag.Tab(intent) + root.fmt((key === items.length - 1 ? "└─>" : "├─>") + tag.Tab(intent) + item, ...preset, ...styles);
 	});
-}
+};
+
+export const Catalog: _T_list = (items: string[] = [], intent = 0, preset: string[] = [], ...styles: string[]) => {
+	intent = intent < 0 ? 0 : intent;
+	const prefix = tag.Tab(intent);
+
+	const size = items.reduce((l, i) => { if (i.length > l) { l = i.length; } return l; }, 0) + tag.Li().length;
+	const cols = Math.ceil((root.canvas.width() - prefix.length + tag.Tab().length) / (size + tag.Tab().length));
+	const result: string[] = [];
+
+	let subResult = '';
+	items.forEach((item, index) => {
+		if ((index + 1) % cols === 0) {
+			subResult += root.fmt(tag.Li(item.padEnd(size)), ...preset, ...styles);
+			result.push(subResult);
+			subResult = '';
+		} else {
+			subResult += root.fmt(tag.Li(item.padEnd(size)), ...preset, ...styles) + tag.Tab();
+		}
+	});
+
+	if (subResult.length) { result.push(subResult); }
+	return result.map(i => prefix + i);
+};
 
 
-[
-	Level,
-	Breaks
-].forEach((Fn: (items: string[], intent: number, ...styles: string[]) => string[]) => {
-	console.log(Fn(['asdfafdsfs', "df dfa", "gbhd"], 1, root.style.TC_Normal_Magenta).join("\n"));
-});
+
+// [
+// 	Bullets,
+// 	Numbers,
+// 	Level,
+// 	Paragraphs,
+// 	Breaks,
+// 	Catalog
+// ].forEach((Fn: (items: string[], intent: number, preset:string[], ...styles: string[]) => string[]) => {
+// 	console.log(Fn([
+// 		'asdfafdsfs',
+// 		"df dfa",
+// 		"gbhd",
+// 		'asdfafdsfs',
+// 		"df dfa",
+// 		"gbhd",
+// 		'asdfafdsfs',
+// 		"df dfa",
+// 		"gbhd",
+// 		'asdfafdsfs',
+// 		"df dfa",
+// 		"gbhd",
+// 		'asdfafdsfs',
+// 		"df dfa",
+// 		"gbhd",
+// 		'asdfafdsfs',
+// 		"df dfa",
+// 		"gbhd",
+// 		'asdfafdsfs',
+// 		"df dfa",
+// 		"gbhd",
+// 		'asdfafdsfs',
+// 		"df dfa",
+// 		"gbhd",
+// 		'asdfafdsfs',
+// 		"df dfa",
+// 		"gbhd",
+// 		'asdfafdsfs',
+// 		"df dfa",
+// 		"gbhd",
+// 		'asdfafdsfs',
+// 		"df dfa",
+// 		"gbhd",
+// 		'asdfafdsfs',
+// 		"df dfa",
+// 		"gbhd",
+// 	], 1, root.style.BC_Normal_Yellow).join("\n"));
+// 	console.log("---");
+// });
