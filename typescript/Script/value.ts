@@ -7,7 +7,7 @@ import * as _Script from "../type/script.js";
 
 
 import Use from "../utils/main.js";
-import { INDEX } from "../data/action.js";
+import * as INDEX from "../data/index.js";
 import * as CACHE from "../data/cache.js";
 
 
@@ -49,7 +49,7 @@ function EvaluateIndexTraces(
 		const indexSetback = Use.array.setback(index_array);
 
 		if (action === 'sync') {
-			classMap = CACHE.DYNAMIC.Sync_ClassDictionary[JSON.stringify(indexSetback)] || {};
+			classMap = CACHE.CLASS.Sync_ClassDictionary[JSON.stringify(indexSetback)] || {};
 		} else {
 			if (action === "watch") {
 				classMap = Object.fromEntries(class_trace.map(([_, V], index) => [V, metaFront + index]));
@@ -58,7 +58,7 @@ function EvaluateIndexTraces(
 				classMap = Object.fromEntries(class_trace.map(([K, V]) => [V, metaFront + INDEX.FETCH(K).debugclass]));
 			}
 
-			Object.entries(string_index_map).forEach(([k, v]) => CACHE.DYNAMIC.Sync_PublishIndexMap["." + k] = v);
+			Object.entries(string_index_map).forEach(([k, v]) => CACHE.CLASS.Sync_PublishIndexMap["." + k] = v);
 		}
 	}
 	return classMap;

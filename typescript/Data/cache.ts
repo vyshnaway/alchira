@@ -95,7 +95,7 @@ export const STATIC: _Cache.STATIC = {
     Package_Saved: {},
 };
 
-export const LIVEDOCS: _Cache.LIVEDOCS = {
+export const DELTA: _Cache.DELTA = {
     DeltaPath: "",
     DeltaContent: "",
     FinalMessage: "",
@@ -142,7 +142,7 @@ export const LIVEDOCS: _Cache.LIVEDOCS = {
     },
 };
 
-export const DYNAMIC: _Cache.DYNAMIC = {
+export const CLASS: _Cache.CLASS = {
     HashRule: {},
     Index_ClassData: {},
     GlobalClass__Index: {},
@@ -155,7 +155,7 @@ export const DYNAMIC: _Cache.DYNAMIC = {
     Sync_ClassDictionary: {}
 };
 
-export const STORAGE: _Cache.STORAGE = {
+export const FILES: _Cache.FILES = {
     LIBRARIES: {},
     PACKAGES: {},
     TARGET: {}
@@ -349,7 +349,7 @@ export const PATH: Record<string, Record<string, _File.Path>> = {
         manifest: {
             path: "",
             frags: ["xtyles", "autogen", "manifest.json"],
-            content: JSON.stringify(LIVEDOCS.Manifest),
+            content: JSON.stringify(DELTA.Manifest),
             essential: false,
         },
     }

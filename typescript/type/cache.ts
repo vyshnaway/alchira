@@ -29,7 +29,7 @@ export interface PREFIX {
     values: Record<string, Record<string, Record<string, string>>>,
 }
 
-export interface LIVEDOCS {
+export interface DELTA {
     DeltaPath: string,
     DeltaContent: string,
     PublishError: string,
@@ -96,7 +96,7 @@ export interface STATIC {
     Targets_Saved: Record<string, _config.ProxyStorage>,
 }
 
-export interface DYNAMIC {
+export interface CLASS {
     HashRule: Record<string, string>,
     Index_ClassData: Record<string, _style.Classdata>,
     GlobalClass__Index: _style.ClassIndexMap,
@@ -109,7 +109,7 @@ export interface DYNAMIC {
     Sync_ClassDictionary: _style.Dictionary,
 };
 
-export interface STORAGE {
+export interface FILES {
     LIBRARIES: Record<string, _file.Storage>,
     PACKAGES: Record<string, _file.Storage>,
     TARGET: Record<string, TARGET>,

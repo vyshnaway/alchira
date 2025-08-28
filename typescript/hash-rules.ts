@@ -63,8 +63,8 @@ function IMPORT(string: string, watchUndef = true, sourcePath = "") {
 		const hash = hashMatch[0];
 		const key = hash.slice(2, -1);
 		const replacement = watchUndef
-			? CACHE.DYNAMIC.HashRule[key]
-			: (CACHE.DYNAMIC.HashRule[key] ?? hash);
+			? CACHE.CLASS.HashRule[key]
+			: (CACHE.CLASS.HashRule[key] ?? hash);
 		recursionPreview["FROM " + hash] = `GETS ${replacement} FROM ${string}`;
 
 		if (replacement === undefined) {
@@ -86,7 +86,7 @@ function UPLOAD() {
 	const hashrule = CACHE.STATIC.HashRule;
 	const hashruleErrors: string[] = [];
 
-	CACHE.DYNAMIC.HashRule = { ...hashrule };
+	CACHE.CLASS.HashRule = { ...hashrule };
 	Object.keys(hashrule).map((key) => {
 		const hash = "#" + key;
 		const response = IMPORT(hash);
@@ -99,7 +99,7 @@ function UPLOAD() {
 			}
 		}
 	});
-	CACHE.DYNAMIC.HashRule = hashrule;
+	CACHE.CLASS.HashRule = hashrule;
 
 	return $.MAKE("", [
 		$.tag.H2("Active Hashrules", $.preset.primary),

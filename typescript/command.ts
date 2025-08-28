@@ -125,7 +125,7 @@ async function execute(chapter: string) {
                 }
 
                 if (!stopWatcher) {
-                    targets = Object.keys(CACHE.STORAGE.TARGET);
+                    targets = Object.keys(CACHE.FILES.TARGET);
                     const targetFolders = [...targets, CACHE.PATH.folder.setup.path];
                     process.on("SIGINT", () => {
                         if (stopWatcher) {

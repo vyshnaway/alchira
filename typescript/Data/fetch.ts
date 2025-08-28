@@ -185,7 +185,7 @@ export async function FetchStatics(vendorSource: string) {
 	CACHE.STATIC.Prefix.attributes = { ...PrefixRead.attributes };
 	CACHE.STATIC.Prefix.atrules = { ...PrefixRead.atrules };
 	CACHE.STATIC.Prefix.values = { ...PrefixRead.values };
-	ACTION.collectVendors();
+	ACTION.setVendors();
 }
 
 export async function VerifyConfigure(loadStatics: boolean) {
@@ -197,7 +197,7 @@ export async function VerifyConfigure(loadStatics: boolean) {
 	if (config.status) {
 		const CONFIG = config.data as _Config.Raw;
 		if (loadStatics) { await FetchStatics(CONFIG.vendors); }
-		ACTION.collectTWEAKS(CONFIG.tweaks);
+		ACTION.setTWEAKS(CONFIG.tweaks);
 
 		CACHE.STATIC.ProxyMap = (Array.isArray(CONFIG.proxymap)) ? CONFIG.proxymap.reduce((acc, proxy) => {
 			if (typeof proxy === "object") {

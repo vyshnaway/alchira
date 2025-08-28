@@ -12,7 +12,7 @@ import $ from "../shell/main.js";
 import Use from "../utils/main.js";
 import HASHRULE from "../hash-rules.js";
 import * as CACHE from "../data/cache.js";
-import { INDEX } from "../data/action.js";
+import * as INDEX from "../data/index.js";
 
 function xtylemerge(classList: string[] = []) {
 	const
@@ -22,9 +22,9 @@ function xtylemerge(classList: string[] = []) {
 
 	classList.reduce((res, className) => {
 		const index =
-			CACHE.DYNAMIC.PackageClass_Index[className]
-			|| CACHE.DYNAMIC.ArchiveClass_Index[className]
-			|| CACHE.DYNAMIC.LibraryClass_Index[className]
+			CACHE.CLASS.PackageClass_Index[className]
+			|| CACHE.CLASS.ArchiveClass_Index[className]
+			|| CACHE.CLASS.LibraryClass_Index[className]
 			|| 0;
 
 		if (index) {
@@ -83,7 +83,7 @@ function CSSLIBRARY(fileDatas: _File.Storage[] = [], initial = "", forPortable =
 	const selectorList: string[] = [],
 		selectors: Record<string, number> = {},
 		indexSkeleton: Record<string, _Style.Metadata> = {};
-	const IndexMap = forPortable ? CACHE.DYNAMIC.PackageClass_Index : CACHE.DYNAMIC.LibraryClass_Index;
+	const IndexMap = forPortable ? CACHE.CLASS.PackageClass_Index : CACHE.CLASS.LibraryClass_Index;
 
 	fileDatas.forEach((source) => {
 		const { classFront: stamp, filePath, debugclassFront: metaFront, content, manifest } = source;
@@ -158,9 +158,9 @@ function TAGSTYLE(
 	const debugclass = `${scope}${file.debugclassFront}\\:${raw.rowIndex}\\:${raw.colIndex}_${Use.string.normalize(raw.selector, [], [], forPackage ? ["$", "/"] : ["$"])}`;
 	const index_found =
 		IndexMap[classname]
-		|| CACHE.DYNAMIC.PackageClass_Index[classname]
-		|| CACHE.DYNAMIC.LibraryClass_Index[classname]
-		|| CACHE.DYNAMIC.GlobalClass__Index[classname]
+		|| CACHE.CLASS.PackageClass_Index[classname]
+		|| CACHE.CLASS.LibraryClass_Index[classname]
+		|| CACHE.CLASS.GlobalClass__Index[classname]
 		|| 0;
 
 	if (raw.selector === "") {

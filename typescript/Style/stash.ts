@@ -13,49 +13,49 @@ import Fileman from "../fileman.js";
 import FILING from "../data/filing.js";
 import SCRIPTFILE from "../script/file.js";
 
-import { INDEX } from "../data/action.js";
+import * as INDEX from "../data/index.js";
 import * as CACHE from "../data/cache.js";
 
 
 
 function _DeleteLibraryFile(filePath: string) {
-	if (CACHE.STORAGE.LIBRARIES[filePath]) {
-		CACHE.STORAGE.LIBRARIES[filePath].styleData.usedIndexes.forEach(i => INDEX.DISPOSE(i));
-		delete CACHE.STORAGE.LIBRARIES[filePath];
+	if (CACHE.FILES.LIBRARIES[filePath]) {
+		CACHE.FILES.LIBRARIES[filePath].styleData.usedIndexes.forEach(i => INDEX.DISPOSE(i));
+		delete CACHE.FILES.LIBRARIES[filePath];
 	}
 }
 
 function _DeletePackageFile(filePath: string) {
-	if (CACHE.STORAGE.PACKAGES[filePath]) {
-		CACHE.STORAGE.PACKAGES[filePath].styleData.usedIndexes.forEach(i => INDEX.DISPOSE(i));
-		delete CACHE.STORAGE.PACKAGES[filePath];
+	if (CACHE.FILES.PACKAGES[filePath]) {
+		CACHE.FILES.PACKAGES[filePath].styleData.usedIndexes.forEach(i => INDEX.DISPOSE(i));
+		delete CACHE.FILES.PACKAGES[filePath];
 	}
 }
 
 
 function _ClearStash() {
-	Object.entries(CACHE.DYNAMIC.LibraryClass_Index).forEach(([selector, index]) => {
+	Object.entries(CACHE.CLASS.LibraryClass_Index).forEach(([selector, index]) => {
 		INDEX.DISPOSE(index);
-		delete CACHE.DYNAMIC.LibraryClass_Index[selector];
+		delete CACHE.CLASS.LibraryClass_Index[selector];
 	});
-	Object.entries(CACHE.DYNAMIC.PackageClass_Index).forEach(([selector, index]) => {
+	Object.entries(CACHE.CLASS.PackageClass_Index).forEach(([selector, index]) => {
 		INDEX.DISPOSE(index);
-		delete CACHE.DYNAMIC.PackageClass_Index[selector];
+		delete CACHE.CLASS.PackageClass_Index[selector];
 	});
 
-	Object.keys(CACHE.STORAGE.LIBRARIES).forEach((filePath) => _DeleteLibraryFile(filePath));
-	Object.keys(CACHE.STORAGE.PACKAGES).forEach((filePath) => _DeletePackageFile(filePath));
+	Object.keys(CACHE.FILES.LIBRARIES).forEach((filePath) => _DeleteLibraryFile(filePath));
+	Object.keys(CACHE.FILES.PACKAGES).forEach((filePath) => _DeletePackageFile(filePath));
 }
 
 
 function _SaveLibraryFile(filePath: string, fileContent: string) {
-	if (CACHE.STORAGE.LIBRARIES[filePath]) { _DeleteLibraryFile(filePath); }
-	CACHE.STORAGE.LIBRARIES[filePath] = FILING("library", filePath, fileContent);
+	if (CACHE.FILES.LIBRARIES[filePath]) { _DeleteLibraryFile(filePath); }
+	CACHE.FILES.LIBRARIES[filePath] = FILING("library", filePath, fileContent);
 }
 
 function _SavePackageFile(filePath: string, fileContent: string) {
-	if (CACHE.STORAGE.PACKAGES[filePath]) { _DeletePackageFile(filePath); }
-	CACHE.STORAGE.PACKAGES[filePath] = FILING("package", filePath, fileContent);
+	if (CACHE.FILES.PACKAGES[filePath]) { _DeletePackageFile(filePath); }
+	CACHE.FILES.PACKAGES[filePath] = FILING("package", filePath, fileContent);
 }
 
 
@@ -67,7 +67,7 @@ function _StackLibraryFiles() {
 		clusterArray: Record<string, _File.Storage[]> = {},
 		libraryTable: Record<string, _File.Lookup> = {};
 
-	Object.entries(CACHE.STORAGE.LIBRARIES).forEach(([path, data]) => {
+	Object.entries(CACHE.FILES.LIBRARIES).forEach(([path, data]) => {
 		const reference = data.manifest.refer;
 		const collection = reference.group === "AXIOM" ? axiomArray
 			: reference.group === "CLUSTER" ? clusterArray : none;
@@ -91,7 +91,7 @@ function _StackPackageFiles() {
 		packagesArray: _File.Storage[] = [],
 		packageTable: Record<string, _File.Lookup> = {};
 
-	Object.entries(CACHE.STORAGE.PACKAGES).forEach(([path, data]) => {
+	Object.entries(CACHE.FILES.PACKAGES).forEach(([path, data]) => {
 		const reference = data.manifest.refer;
 		packageTable[path] = reference;
 
@@ -130,7 +130,7 @@ function ReRender() {
 	const PackageStyleSkeleton = packagesArray.reduce((collection, fileData) => {
 		const indexMetaCollection = collection[fileData.filePath] = {} as Record<string, _Style.Metadata>;
 		SCRIPTFILE(fileData).stylesList.forEach((style) => {
-			const response = PARSE.TAGSTYLE(style, fileData, CACHE.DYNAMIC.PackageClass_Index);
+			const response = PARSE.TAGSTYLE(style, fileData, CACHE.CLASS.PackageClass_Index);
 			const styleData = INDEX.FETCH(response.identity.index);
 
 			fileData.manifest.errors.push(...response.errors);
@@ -173,7 +173,7 @@ function ReRender() {
 	});
 
 
-	Object.values(CACHE.DYNAMIC.PackageClass_Index).forEach((index) => {
+	Object.values(CACHE.CLASS.PackageClass_Index).forEach((index) => {
 		const InStash = INDEX.FETCH(index);
 		if (InStash.metadata.declarations.length > 1) {
 			PackageErrors.push(
@@ -192,7 +192,7 @@ function ReRender() {
 	});
 
 
-	const nameCollitions = Object.values(CACHE.STORAGE.PACKAGES).reduce((A, F) => {
+	const nameCollitions = Object.values(CACHE.FILES.PACKAGES).reduce((A, F) => {
 		if (CACHE.STATIC.Archive.name === F.packageName) { A.push(F.sourcePath); }
 		return A;
 	}, [] as string[]);
@@ -242,7 +242,7 @@ function ReRender() {
 	const LibraryDiagnostics: _Support.Diagnostic[] = [];
 
 
-	Object.values(CACHE.DYNAMIC.LibraryClass_Index).forEach((index) => {
+	Object.values(CACHE.CLASS.LibraryClass_Index).forEach((index) => {
 		const InStash = INDEX.FETCH(index);
 		if (InStash.declarations.length > 1) {
 			LibraryErrors.push(
@@ -287,30 +287,30 @@ function ReRender() {
 
 
 
-	CACHE.LIVEDOCS.Report.library = LibraryReport;
-	CACHE.LIVEDOCS.Report.package = PackageReport;
+	CACHE.DELTA.Report.library = LibraryReport;
+	CACHE.DELTA.Report.package = PackageReport;
 
-	CACHE.LIVEDOCS.Errors.library = LibraryErrors;
-	CACHE.LIVEDOCS.Errors.package = PackageErrors;
+	CACHE.DELTA.Errors.library = LibraryErrors;
+	CACHE.DELTA.Errors.package = PackageErrors;
 
-	CACHE.LIVEDOCS.Diagnostics.library = LibraryDiagnostics;
-	CACHE.LIVEDOCS.Diagnostics.package = PackageDiagnostics;
+	CACHE.DELTA.Diagnostics.library = LibraryDiagnostics;
+	CACHE.DELTA.Diagnostics.package = PackageDiagnostics;
 
-	CACHE.LIVEDOCS.Manifest.AXIOM = AxiomStyleSkeleton;
-	CACHE.LIVEDOCS.Manifest.CLUSTER = ClusterStyleSkeleton;
-	CACHE.LIVEDOCS.Manifest.PACKAGE = PackageStyleSkeleton;
-	CACHE.LIVEDOCS.Manifest.PACBIND = PacbindStyleSkeleton;
+	CACHE.DELTA.Manifest.AXIOM = AxiomStyleSkeleton;
+	CACHE.DELTA.Manifest.CLUSTER = ClusterStyleSkeleton;
+	CACHE.DELTA.Manifest.PACKAGE = PackageStyleSkeleton;
+	CACHE.DELTA.Manifest.PACBIND = PacbindStyleSkeleton;
 
-	CACHE.LIVEDOCS.Lookup.library = LibraryLookupTable;
-	CACHE.LIVEDOCS.Lookup.package = PackageLookupTable;
+	CACHE.DELTA.Lookup.library = LibraryLookupTable;
+	CACHE.DELTA.Lookup.package = PackageLookupTable;
 
 }
 
 
 
 function ReDeclare() {
-	Object.values(CACHE.DYNAMIC.LibraryClass_Index).forEach((val) => {
-		const value = CACHE.DYNAMIC.Index_ClassData[val];
+	Object.values(CACHE.CLASS.LibraryClass_Index).forEach((val) => {
+		const value = CACHE.CLASS.Index_ClassData[val];
 		value.metadata.declarations = [...value.declarations];
 	});
 }
@@ -321,10 +321,10 @@ function Appendix(indexes: number[] = []) {
 	const stash: Record<string, { readme: string[], pacbind: number[], package: number[] }> = {};
 
 	if (!CACHE.STATIC.WATCH) {
-		const usedPackages = Object.values(CACHE.DYNAMIC.PackageClass_Index).filter(i => indexes.includes(i))
+		const usedPackages = Object.values(CACHE.CLASS.PackageClass_Index).filter(i => indexes.includes(i))
 			.reduce((a, c) => { a.add(INDEX.FETCH(c).package); return a; }, new Set());
 
-		Object.values(CACHE.STORAGE.PACKAGES).forEach((F) => {
+		Object.values(CACHE.FILES.PACKAGES).forEach((F) => {
 			if (usedPackages.has(F.packageName)) {
 				if (F.extension === "md") {
 					if (stash[F.packageName]) { stash[F.packageName].readme.push(F.content); }

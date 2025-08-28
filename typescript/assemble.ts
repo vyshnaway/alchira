@@ -1,8 +1,8 @@
-import * as _Config from "./type/config.js";
+// import * as _Config from "./type/config.js";
 import * as _File from "./type/file.js";
 import * as _Style from "./type/style.js";
 import * as _Script from "./type/script.js";
-import * as _Cache from "./type/cache.js";
+// import * as _Cache from "./type/cache.js";
 import * as _Support from "./type/support.js";
 
 
@@ -15,14 +15,14 @@ import COMPILE from "./style/render.js";
 import ORDER from "./sort/order-api.js";
 import SCRIPT from "./script/class.js";
 import XTYLES from "./style/stash.js";
-import { STATIC, STORAGE, DYNAMIC, LIVEDOCS, PATH } from "./data/cache.js";
-import { INDEX } from "./data/action.js";
+import { STATIC, FILES, CLASS, DELTA, PATH } from "./data/cache.js";
+import * as INDEX from "./data/index.js";
 // import { GeneratePortable } from "./portable.js";
 
 export function UpdateXtylesFolder() {
 	INDEX.RESET();
-	LIVEDOCS.Manifest.prefix = STATIC.Archive.name;
-	Object.assign(DYNAMIC, {
+	DELTA.Manifest.prefix = STATIC.Archive.name;
+	Object.assign(CLASS, {
 		HashRule: {},
 		Index_ClassData: {},
 		NativeClass__Index: {},
@@ -32,7 +32,7 @@ export function UpdateXtylesFolder() {
 		PackageClass_Index: {},
 		Computed_ClassMaps: {}
 	});
-	Object.assign(STORAGE, {
+	Object.assign(FILES, {
 		PROXYCACHE: {},
 		LIBRARIES: {},
 		PORTABLES: {},
@@ -51,16 +51,16 @@ export function SaveToTarget(
 
 	switch (action) {
 		case "add": case "change":
-			if (STORAGE.TARGET[targetFolder].stylesheetPath === filePath) {
+			if (FILES.TARGET[targetFolder].stylesheetPath === filePath) {
 				STATIC.Targets_Saved[targetFolder].stylesheetContent = fileContent;
-				STORAGE.TARGET[targetFolder].stylesheetContent = fileContent;
+				FILES.TARGET[targetFolder].stylesheetContent = fileContent;
 				reCache = false;
-			} else if (STORAGE.TARGET[targetFolder].extensions.includes(extension)) {
+			} else if (FILES.TARGET[targetFolder].extensions.includes(extension)) {
 				STATIC.Targets_Saved[targetFolder].fileContents[filePath] = fileContent;
-				LIVEDOCS.DeltaPath = `${STORAGE.TARGET[targetFolder].source}/${filePath}`;
+				DELTA.DeltaPath = `${FILES.TARGET[targetFolder].source}/${filePath}`;
 			} else {
-				LIVEDOCS.DeltaPath = `${STORAGE.TARGET[targetFolder].source}/${filePath}`;
-				LIVEDOCS.DeltaContent = fileContent;
+				DELTA.DeltaPath = `${FILES.TARGET[targetFolder].source}/${filePath}`;
+				DELTA.DeltaContent = fileContent;
 				reCache = false;
 			}
 			break;
@@ -70,31 +70,31 @@ export function SaveToTarget(
 			}
 			break;
 		default:
-			LIVEDOCS.Report.hashrule = HASHRULE.UPLOAD();
-			LIVEDOCS.Manifest.hashrules = DYNAMIC.HashRule;
+			DELTA.Report.hashrule = HASHRULE.UPLOAD();
+			DELTA.Manifest.hashrules = CLASS.HashRule;
 	}
 
 	if (reCache) {
 		XTYLES.ReDeclare();
 
-		DYNAMIC.PublicClass__Index = {};
-		DYNAMIC.GlobalClass__Index = {};
+		CLASS.PublicClass__Index = {};
+		CLASS.GlobalClass__Index = {};
 
-		Object.entries(STORAGE.TARGET).forEach(([key, cache]) => {
+		Object.entries(FILES.TARGET).forEach(([key, cache]) => {
 			cache.ClearFiles();
-			delete STORAGE.TARGET[key];
+			delete FILES.TARGET[key];
 		});
 
 		Object.entries(STATIC.Targets_Saved).forEach(([key, files], index) => {
-			STORAGE.TARGET[key] = new SCRIPT(files, Use.string.enCounter(index + 768));
+			FILES.TARGET[key] = new SCRIPT(files, Use.string.enCounter(index + 768));
 		});
 	}
 
 }
 
 function SaveClassRefs(stash: _Style.SortedOutput) {
-	DYNAMIC.Sync_ClassDictionary = stash.referenceMap;
-	DYNAMIC.Sync_PublishIndexMap = Object.entries(stash.indexMap).reduce((A, [classname, index]) => {
+	CLASS.Sync_ClassDictionary = stash.referenceMap;
+	CLASS.Sync_PublishIndexMap = Object.entries(stash.indexMap).reduce((A, [classname, index]) => {
 		A["." + classname] = index;
 		return A;
 	}, {} as _Style.ClassIndexMap);
@@ -114,7 +114,7 @@ async function Accumulate() {
 	};
 
 
-	Object.values(STORAGE.TARGET).forEach((cache) => {
+	Object.values(FILES.TARGET).forEach((cache) => {
 		const C = cache.Accumulator();
 		CUMULATES.report.push(...C.report);
 		CUMULATES.errors.push(...C.errors);
@@ -125,49 +125,49 @@ async function Accumulate() {
 		Object.assign(CUMULATES.fileManifests, C.fileManifests);
 	});
 
-	DYNAMIC.GlobalClass__Index = CUMULATES.globalClasses;
-	DYNAMIC.PublicClass__Index = CUMULATES.publicClasses;
-	DYNAMIC.ArchiveClass_Index = Object.fromEntries([
-		...Object.entries(DYNAMIC.GlobalClass__Index).map(([s, i]) => [`/${STATIC.Archive.name}/${s}`, i]),
-		...Object.entries(DYNAMIC.PublicClass__Index).map(([s, i]) => [`/${STATIC.Archive.name}/${s}`, i]),
+	CLASS.GlobalClass__Index = CUMULATES.globalClasses;
+	CLASS.PublicClass__Index = CUMULATES.publicClasses;
+	CLASS.ArchiveClass_Index = Object.fromEntries([
+		...Object.entries(CLASS.GlobalClass__Index).map(([s, i]) => [`/${STATIC.Archive.name}/${s}`, i]),
+		...Object.entries(CLASS.PublicClass__Index).map(([s, i]) => [`/${STATIC.Archive.name}/${s}`, i]),
 	]);
-	DYNAMIC.ArcbindClass_Index =
-		Object.fromEntries(Object.entries(DYNAMIC.LibraryClass_Index).map(([s, i]) => [`/${STATIC.Archive.name}/$/${s}`, i]));
+	CLASS.ArcbindClass_Index =
+		Object.fromEntries(Object.entries(CLASS.LibraryClass_Index).map(([s, i]) => [`/${STATIC.Archive.name}/$/${s}`, i]));
 
 
-	LIVEDOCS.Lookup.project = {};
-	LIVEDOCS.Manifest.LOCAL = {};
-	LIVEDOCS.Manifest.GLOBAL = {};
+	DELTA.Lookup.project = {};
+	DELTA.Manifest.LOCAL = {};
+	DELTA.Manifest.GLOBAL = {};
 
 	Object.entries(CUMULATES.fileManifests).forEach(([K, V]) => {
-		LIVEDOCS.Manifest.GLOBAL[K] = { ...V.public, ...V.global };
-		LIVEDOCS.Manifest.LOCAL[K] = V.local;
-		LIVEDOCS.Lookup.project[K] = V.refer;
+		DELTA.Manifest.GLOBAL[K] = { ...V.public, ...V.global };
+		DELTA.Manifest.LOCAL[K] = V.local;
+		DELTA.Lookup.project[K] = V.refer;
 	});
 
-	LIVEDOCS.Manifest.file = Object.values(LIVEDOCS.Lookup).reduce((A, V) => {
+	DELTA.Manifest.file = Object.values(DELTA.Lookup).reduce((A, V) => {
 		Object.assign(A, V);
 		return A;
 	}, {} as Record<string, _File.Lookup>);
 
 
 
-	LIVEDOCS.Errors.project = CUMULATES.errors;
-	LIVEDOCS.Diagnostics.project = CUMULATES.diagnostics;
-	LIVEDOCS.Report.project = $.MAKE("", (CUMULATES.report));
+	DELTA.Errors.project = CUMULATES.errors;
+	DELTA.Diagnostics.project = CUMULATES.diagnostics;
+	DELTA.Report.project = $.MAKE("", (CUMULATES.report));
 
-	LIVEDOCS.Manifest.errors = Object.values(LIVEDOCS.Diagnostics).reduce((A, V) => {
+	DELTA.Manifest.errors = Object.values(DELTA.Diagnostics).reduce((A, V) => {
 		A.push(...V);
 		return A;
 	}, [] as _Support.Diagnostic[]);
 
 
-	const ERRORS = Object.values(LIVEDOCS.Errors).reduce((A, I) => { A.push(...I); return A; }, [] as string[]);
+	const ERRORS = Object.values(DELTA.Errors).reduce((A, I) => { A.push(...I); return A; }, [] as string[]);
 
-	LIVEDOCS.ErrorCount = ERRORS.length;
-	LIVEDOCS.Report.errors = LIVEDOCS.ErrorCount ?
-		$.MAKE($.tag.H2(`${LIVEDOCS.ErrorCount} Errors`, $.preset.failed), ERRORS) :
-		$.MAKE($.tag.H2(`${LIVEDOCS.ErrorCount} Errors`, $.preset.success));
+	DELTA.ErrorCount = ERRORS.length;
+	DELTA.Report.errors = DELTA.ErrorCount ?
+		$.MAKE($.tag.H2(`${DELTA.ErrorCount} Errors`, $.preset.failed), ERRORS) :
+		$.MAKE($.tag.H2(`${DELTA.ErrorCount} Errors`, $.preset.success));
 
 	return CUMULATES;
 }
@@ -179,44 +179,44 @@ async function Synthasize() {
 
 	const CLASSESLIST: number[][] = [];
 	const ATTACHMENTS = new Set<number>();
-	const ERRORS = LIVEDOCS.Errors.project;
+	const ERRORS = DELTA.Errors.project;
 
-	Object.values(STORAGE.TARGET).forEach((cache) => cache.GetTracks(CLASSESLIST, ATTACHMENTS));
+	Object.values(FILES.TARGET).forEach((cache) => cache.GetTracks(CLASSESLIST, ATTACHMENTS));
 
 	if (STATIC.WATCH) {
-		DYNAMIC.Sync_PublishIndexMap = {};
-		DYNAMIC.Sync_ClassDictionary = {};
-		LIVEDOCS.FinalMessage = ERRORS.length + " Errors.";
+		CLASS.Sync_PublishIndexMap = {};
+		CLASS.Sync_ClassDictionary = {};
+		DELTA.FinalMessage = ERRORS.length + " Errors.";
 	} else {
 
 		if (STATIC.Command === "preview") {
 			const response = await ORDER(CLASSESLIST, STATIC.Command, STATIC.Argument);
 			SaveClassRefs(response.result);
 
-			if (LIVEDOCS.Manifest.errors.length) {
-				LIVEDOCS.FinalMessage = ERRORS.length + " Unresolved Errors. Rectify them to proceed with 'publish' command.";
+			if (DELTA.Manifest.errors.length) {
+				DELTA.FinalMessage = ERRORS.length + " Unresolved Errors. Rectify them to proceed with 'publish' command.";
 			} else {
-				LIVEDOCS.FinalMessage = "Preview verified with no major errors. Procceed to 'publish' using your key.";
+				DELTA.FinalMessage = "Preview verified with no major errors. Procceed to 'publish' using your key.";
 			}
 		}
 
 		if (STATIC.Command === "publish") {
-			if (LIVEDOCS.Manifest.errors.length) {
+			if (DELTA.Manifest.errors.length) {
 				const response = await ORDER(CLASSESLIST, "preview", STATIC.Argument);
 				STATIC.Command = "preview";
 				SaveClassRefs(response.result);
 
-				LIVEDOCS.FinalMessage = "Errors in " + ERRORS.length + " Tags. Falling back to 'preview' command.";
+				DELTA.FinalMessage = "Errors in " + ERRORS.length + " Tags. Falling back to 'preview' command.";
 			} else {
 				// const json = GeneratePortable(CUMULATES.essentials);
 				const response = await ORDER(CLASSESLIST, STATIC.Command, STATIC.Argument);
 				SaveClassRefs(response.result);
 
 				if (response.status) {
-					LIVEDOCS.FinalMessage = "Build Success.";
+					DELTA.FinalMessage = "Build Success.";
 				} else {
-					LIVEDOCS.PublishError = response.message;
-					LIVEDOCS.FinalMessage = "Build Atttempt Failed. Fallback with Preview.";
+					DELTA.PublishError = response.message;
+					DELTA.FinalMessage = "Build Atttempt Failed. Fallback with Preview.";
 				}
 			}
 		}
@@ -237,10 +237,10 @@ function GenFinalSheets(ATTACHMENTS: Set<number>) {
 
 	const targetRenderAction: _Script.Actions = (STATIC.Command === "debug") ? "monitor"
 		: (STATIC.Command === "preview" && STATIC.Argument === "watch") ? "watch" : "sync";
-	Object.values(STORAGE.TARGET).forEach((cache) => cache.RenderFiles(targetRenderAction));
+	Object.values(FILES.TARGET).forEach((cache) => cache.RenderFiles(targetRenderAction));
 
 	RENDERFRAGS.CLASS = COMPILE.forPublish(
-		Object.entries(DYNAMIC.Sync_PublishIndexMap).map(([K, V]) => [K, INDEX.FETCH(V)]),
+		Object.entries(CLASS.Sync_PublishIndexMap).map(([K, V]) => [K, INDEX.FETCH(V)]),
 		STATIC.DEBUG
 	);
 
@@ -249,13 +249,13 @@ function GenFinalSheets(ATTACHMENTS: Set<number>) {
 	indexScanned.attachments.forEach((attachment) => ATTACHMENTS.add(INDEX.FIND(attachment, false).index));
 	const INDEXSHEET = RENDERFRAGS.ROOT = COMPILE.forPublish(indexScanned.object, STATIC.DEBUG);
 
-	LIVEDOCS.Manifest.constants = Object.keys(indexScanned.variables);
-	LIVEDOCS.Report.constants =
-		$.MAKE($.tag.H6("Root variables", $.preset.primary), LIVEDOCS.Manifest.constants, [$.list.Catalog, 0, []]);
+	DELTA.Manifest.constants = Object.keys(indexScanned.variables);
+	DELTA.Report.constants =
+		$.MAKE($.tag.H6("Root variables", $.preset.primary), DELTA.Manifest.constants, [$.list.Catalog, 0, []]);
 
 
 	RENDERFRAGS.APPENDIX = COMPILE.forPublish(
-		Object.values(STORAGE.TARGET).reduce((appendix, cache) => {
+		Object.values(FILES.TARGET).reduce((appendix, cache) => {
 			const appendixScanned = STYLE.CSSCANNER(
 				Use.code.uncomment.Css(cache.stylesheetContent),
 				`APPENDIX : ${cache.targetStylesheet} ||`
@@ -285,7 +285,7 @@ function GenFinalSheets(ATTACHMENTS: Set<number>) {
 	const STAPLESHEET = ATTACH_STAPLES.join("\n");
 	const STYLETAG = `<style>${STYLESHEET}</style>`;
 	const WATCHSHEET = STATIC.WATCH
-		? COMPILE.forPublish(Object.values(DYNAMIC.Index_ClassData).reduce((A, D) => {
+		? COMPILE.forPublish(Object.values(CLASS.Index_ClassData).reduce((A, D) => {
 			A.push([D.watchclass, D.object], Object.entries(D.attached_style) as [string, string | object]);
 			return A;
 		}, [] as [string, string | object][]), !STATIC.DEBUG) : '';
@@ -297,26 +297,26 @@ function GenFinalSheets(ATTACHMENTS: Set<number>) {
 export async function Generate() {
 	const OUTFILES: Record<string, string> = {};
 
-	if (LIVEDOCS.DeltaContent.length) {
-		OUTFILES[LIVEDOCS.DeltaPath] = LIVEDOCS.DeltaContent;
+	if (DELTA.DeltaContent.length) {
+		OUTFILES[DELTA.DeltaPath] = DELTA.DeltaContent;
 	} else {
 
 		const ATTACHMENTS = await Synthasize();
 		const { RENDERFRAGS, STYLESHEET, STYLETAG, STAPLESHEET } = GenFinalSheets(ATTACHMENTS);
 
 
-		const DeployedFiles = Object.values(STORAGE.TARGET).reduce((acc, cache) => {
+		const DeployedFiles = Object.values(FILES.TARGET).reduce((acc, cache) => {
 			acc.push(...cache.SummonFiles(OUTFILES, STYLESHEET, STYLETAG, STAPLESHEET));
 			return acc;
-		}, [LIVEDOCS.DeltaPath]);
+		}, [DELTA.DeltaPath]);
 
 		if (STATIC.WATCH) {
-			if (LIVEDOCS.DeltaPath.length) {
+			if (DELTA.DeltaPath.length) {
 				Object.keys(OUTFILES).forEach((filePath) => {
 					if (!DeployedFiles.includes(filePath)) { delete OUTFILES[filePath]; }
 				});
 			}
-			OUTFILES[PATH.json.manifest.path] = JSON.stringify(LIVEDOCS.Manifest);
+			OUTFILES[PATH.json.manifest.path] = JSON.stringify(DELTA.Manifest);
 		} else {
 
 			const memChart = $$.PropMap(Object.entries(RENDERFRAGS).reduce((A, [K, V]) => {
@@ -324,20 +324,20 @@ export async function Generate() {
 				return A;
 			}, {} as Record<string, string>), $.preset.text);
 
-			LIVEDOCS.Report.memChart = LIVEDOCS.ErrorCount ?
-				$.MAKE($.tag.H2(LIVEDOCS.FinalMessage, $.preset.failed), memChart, [$.list.Bullets, 0, []]) :
-				$.MAKE($.tag.H2(LIVEDOCS.FinalMessage, $.preset.success), memChart, [$.list.Bullets, 0, []]);
+			DELTA.Report.memChart = DELTA.ErrorCount ?
+				$.MAKE($.tag.H2(DELTA.FinalMessage, $.preset.failed), memChart, [$.list.Bullets, 0, []]) :
+				$.MAKE($.tag.H2(DELTA.FinalMessage, $.preset.success), memChart, [$.list.Bullets, 0, []]);
 
-			LIVEDOCS.Report.footer =
+			DELTA.Report.footer =
 				$.MAKE($.tag.H5(`Output size : ${Use.string.stringMem(STYLESHEET)} Kb`.padStart(9, " ")));
 		}
 	}
 
-	LIVEDOCS.DeltaPath = "";
-	LIVEDOCS.DeltaContent = "";
+	DELTA.DeltaPath = "";
+	DELTA.DeltaContent = "";
 
 	return {
 		SaveFiles: OUTFILES,
-		ConsoleReport: $.MAKE("", Object.values(LIVEDOCS.Report).filter((string) => string !== "")),
+		ConsoleReport: $.MAKE("", Object.values(DELTA.Report).filter((string) => string !== "")),
 	};
 }

@@ -1,6 +1,6 @@
 import * as _Config from "../type/config.js";
 // import * as _File from "../type/file.js";
-import * as _Style from "../type/style.js";
+// import * as _Style from "../type/style.js";
 // import * as _Script from "../type/script.js";
 // import * as _Cache from "../type/cache.js";
 import * as _Support from "../type/support.js";
@@ -18,11 +18,11 @@ function collectTypeStringKeys(object: object) {
     }, new Set<string>());
 }
 
-export function collectVendors() {
+export function setVendors() {
     CACHE.ROOT.vendors = Array.from(collectTypeStringKeys(CACHE.STATIC.Prefix));
 }
 
-export function collectTWEAKS(tweaks: _Config.Tweaks) {
+export function setTWEAKS(tweaks: _Config.Tweaks) {
     Object.assign(CACHE.STATIC.Tweaks, CACHE.ROOT.defaultTweaks);
     if (typeof tweaks === "object") {
         Object.keys(CACHE.STATIC.Tweaks).forEach(key => {
@@ -55,6 +55,12 @@ export function SetENV(rootPath: string, workPath: string, packageEssential: _Su
         }
     });
 
+    Object.entries(CACHE.SYNC).forEach(([_, groupPaths]) => {
+        Object.values(groupPaths).forEach((source) => {
+            source.path = FILEMAN.path.join(CACHE.STATIC.RootPath, ...source.frags);
+        });
+    });
+
     const CDN = CACHE.ROOT.URL.Cdn + "version/" + CACHE.ROOT.version.split(".")[0] + "/";
     Object.values(CACHE.SYNC).forEach((object) => {
         Object.values(object).forEach((entry) => {
@@ -71,10 +77,10 @@ export function SetENV(rootPath: string, workPath: string, packageEssential: _Su
 export function MemoryUsage() {
     const chart: Record<string, number> = {
         "Files": USE.string.stringMem(JSON.stringify(CACHE.STATIC)),
-        "Cache": USE.string.stringMem(JSON.stringify(CACHE.DYNAMIC)),
-        "Stack": USE.string.stringMem(JSON.stringify(CACHE.STORAGE)),
-        "Report": USE.string.stringMem(JSON.stringify(CACHE.LIVEDOCS)),
-        "Proxy": Object.values(CACHE.STORAGE.TARGET).reduce((t: number, c) => {
+        "Cache": USE.string.stringMem(JSON.stringify(CACHE.CLASS)),
+        "Stack": USE.string.stringMem(JSON.stringify(CACHE.FILES)),
+        "Report": USE.string.stringMem(JSON.stringify(CACHE.DELTA)),
+        "Proxy": Object.values(CACHE.FILES.TARGET).reduce((t: number, c) => {
             t += USE.string.stringMem(JSON.stringify(c));
             return t;
         }, 0),
@@ -82,73 +88,3 @@ export function MemoryUsage() {
     chart["Total"] = Object.values(chart).reduce((a: number, i) => a += i, 0);
     return Object.entries(chart).map(([k, v]) => `${k} : ${v.toFixed(2)} Kb`);
 }
-
-
-export const INDEX = {
-    _NOW: 0,
-    _BIN: new Set<number>(),
-    FETCH: (index: number) => {
-        return CACHE.DYNAMIC.Index_ClassData[index];
-    },
-    FIND: (classname: string, includeTargets = false, localmap: _Style.ClassIndexMap = {}) => {
-        let index = 0;
-        let group: _Style.Group = '';
-
-        if (CACHE.DYNAMIC.PackageClass_Index[classname]) {
-            index = CACHE.DYNAMIC.PackageClass_Index[classname];
-            group = "PACKAGE";
-        } else if (CACHE.DYNAMIC.LibraryClass_Index[classname]) {
-            index = CACHE.DYNAMIC.LibraryClass_Index[classname];
-            group = "LIBRARY";
-        } else if (CACHE.DYNAMIC.ArcbindClass_Index[classname]) {
-            index = CACHE.DYNAMIC.ArcbindClass_Index[classname];
-            group = "ARCBIND";
-        } else if (includeTargets) {
-            if (CACHE.DYNAMIC.ArchiveClass_Index[classname]) {
-                index = CACHE.DYNAMIC.ArchiveClass_Index[classname];
-                group = "ARCHIVE";
-            } else if (CACHE.DYNAMIC.GlobalClass__Index[classname]) {
-                index = CACHE.DYNAMIC.GlobalClass__Index[classname];
-                group = "GLOBAL";
-            } else if (CACHE.DYNAMIC.PublicClass__Index[classname]) {
-                index = CACHE.DYNAMIC.PublicClass__Index[classname];
-                group = "PUBLIC";
-            }
-        } else if (localmap[classname]) {
-            index = localmap[classname];
-            group = "LOCAL";
-        }
-        return { index, group };
-    },
-    DECLARE: (object: _Style.Classdata) => {
-        object.index = INDEX._BIN.values().next().value || ++INDEX._NOW;
-        if (INDEX._BIN.has(object.index)) { INDEX._BIN.delete(object.index); }
-
-        const encounted = USE.string.enCounter(object.index + 768);
-        object.watchclass = "____" + encounted;
-        CACHE.DYNAMIC.Index_ClassData[object.index] = object;
-        return { index: object.index, class: object.watchclass };
-    },
-    DISPOSE: (...indexes: number[]) => {
-        indexes.forEach((index) => {
-            if (index > 0) {
-                INDEX._BIN.add(index);
-                delete CACHE.DYNAMIC.Index_ClassData[index.toString()];
-            }
-        });
-    },
-    RESET: (after = 0) => {
-        after = after > 0 ? after : 0;
-        let removed = 0;
-        Object.keys(CACHE.DYNAMIC.Index_ClassData).forEach((index) => {
-            const number = Number(index);
-            if (number > after) {
-                if (INDEX._BIN.has(number)) { INDEX._BIN.delete(number); }
-                delete CACHE.DYNAMIC.Index_ClassData[number];
-                removed++;
-            }
-        });
-        INDEX._NOW = after;
-        return removed;
-    }
-};

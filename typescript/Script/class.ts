@@ -9,11 +9,11 @@ import SEEK from "./file.js";
 import fileman from "../fileman.js";
 
 import $ from "../shell/main.js";
+import Use from "../utils/main.js";
 import FILING from "../data/filing.js";
 import STYLEPARSE from "../style/parse.js";
-import { INDEX } from "../data/action.js";
+import * as INDEX from "../data/index.js";
 import * as CACHE from "../data/cache.js";
-import Use from "../utils/main.js";
 
 function stringReplacementByPosition(master_string: string, ranges: [number, number][], replace_with: string) {
 	const result = ranges.reduce((modified, [from, to]) => {
@@ -101,7 +101,7 @@ export default class C_Proxy {
 			FILE.manifest.diagnostics.push(...response.diagnostics);
 		});
 
-		Object.assign(CACHE.DYNAMIC.GlobalClass__Index, FILE.styleData.globalClasses);
+		Object.assign(CACHE.CLASS.GlobalClass__Index, FILE.styleData.globalClasses);
 		Object.assign(FILE.manifest.refer, { group: "target", id: CACHE.STATIC.WorkPath + FILE.targetPath });
 	}
 
