@@ -44,7 +44,7 @@ export function SetENV(rootPath: string, workPath: string, packageEssential: _Su
     CACHE.ROOT.bin = packageEssential.bin;
 
     Object.entries(CACHE.PATH).forEach(([groupName, groupPaths]) => {
-        if (groupName === "blueprint" || groupName === "autogen") {
+        if (groupName === "blueprint") {
             Object.values(groupPaths).forEach((source) => {
                 source.path = FILEMAN.path.join(CACHE.STATIC.RootPath, ...source.frags);
             });
@@ -68,10 +68,6 @@ export function SetENV(rootPath: string, workPath: string, packageEssential: _Su
             entry.path = FILEMAN.path.join(CACHE.STATIC.RootPath, ...entry.frags);
         });
     });
-
-    // console.log(CACHE.STATIC);
-    // console.log(CACHE.ROOT);
-    // console.log(CACHE.SYNC);
 }
 
 export function GetCacheUsage(): string[] {

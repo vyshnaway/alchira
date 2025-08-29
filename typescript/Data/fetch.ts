@@ -10,7 +10,7 @@ import FILEMAN from "../fileman.js";
 
 import * as $$ from "../shell.js";
 import * as CACHE from "./cache.js";
-import * as WORKER from "./watcher.js";
+import * as VERIFY from "./verify.js";
 import * as ACTION from "./action.js";
 
 export async function FetchDocs() {
@@ -21,6 +21,7 @@ export async function FetchDocs() {
 			}
 		});
 	}));
+	await FILEMAN.write.file(CACHE.PATH.scaffold.reference.path, CACHE.SYNC.MARKDOWN.readme.content);
 }
 
 export async function Initialize() {
@@ -178,7 +179,7 @@ export async function FetchStatics(vendorSource: string) {
 
 export async function VerifyConfigs(loadStatics: boolean) {
 	$.TASK("Initializing configs", 0);
-	const errors: string[] = [], alerts: string[] = [];
+	const errors: string[] = [];
 
 	$.STEP("PATH : " + CACHE.PATH.json.configure.path);
 	const config = await FILEMAN.read.json(CACHE.PATH.json.configure.path);
@@ -188,13 +189,16 @@ export async function VerifyConfigs(loadStatics: boolean) {
 		ACTION.setTWEAKS(CONFIG.tweaks);
 
 		CACHE.STATIC.ProxyMap = Array.isArray(CONFIG.proxy) ? CONFIG.proxy.reduce((A, I) => {
-			console.log(I)
 			if (
 				typeof I === "object"
 				&& typeof I.source === "string"
 				&& typeof I.target === "string"
 				&& typeof I.stylesheet === "string"
 				&& typeof I.extensions === "object"
+				&& I.source !== ""
+				&& I.target !== ""
+				&& I.stylesheet !== ""
+				&& Object.keys(I.extensions).length !== 0
 			) {
 				Object.entries(I.extensions).forEach(([K, V]) => {
 					if (Array.isArray(V)) {
@@ -207,6 +211,9 @@ export async function VerifyConfigs(loadStatics: boolean) {
 			}
 			return A;
 		}, [] as _Config.ProxyMap[]) : [];
+		if (CACHE.STATIC.ProxyMap.length === 0) {
+			errors.push($.tag.Li(CACHE.PATH.json.configure.path + ": Workable proxies unavailable."));
+		}
 
 		Object.assign(CACHE.STATIC.Archive, config.data);
 		CACHE.STATIC.Archive.readme = (await FILEMAN.read.file(CACHE.PATH.md.readme.path)).data;
@@ -229,7 +236,7 @@ export async function VerifyConfigs(loadStatics: boolean) {
 		delete CACHE.STATIC.Archive.vendors;
 		delete CACHE.STATIC.Archive.packages;
 
-		const results = await WORKER.proxyMapDependency(CACHE.STATIC.ProxyMap, CACHE.PATH.folder.setup.path);
+		const results = await VERIFY.proxyMapDependency(CACHE.STATIC.ProxyMap, CACHE.PATH.folder.setup.path);
 		errors.push(...results.warnings);
 	} else {
 		errors.push(`${CACHE.PATH.json.configure} : Bad json file.`);
@@ -240,9 +247,9 @@ export async function VerifyConfigs(loadStatics: boolean) {
 		status: Object.keys(errors).length === 0,
 		report: $.MAKE(
 			Object.keys(errors).length === 0
-				? $.tag.H5("Configs Healthy", $.preset.success)
-				: $.tag.H5("Error Paths", $.preset.failed)
-			, alerts, [$.list.Bullets, 0, $.preset.success]
+				? $.tag.H2("Configs Healthy", $.preset.success)
+				: $.tag.H2("Error Paths: " + CACHE.PATH.json.configure.path, $.preset.failed),
+			errors, [$.list.Bullets, 0, $.preset.warning]
 		)
 	};
 }
@@ -252,7 +259,7 @@ export async function VerifyConfigs(loadStatics: boolean) {
 
 export async function SaveRootCss() {
 	$.TASK("Updating Index");
-	CACHE.STATIC.RootCSS = await WORKER.cssImport(Object.values(CACHE.PATH.css).map(css => css.path));
+	CACHE.STATIC.RootCSS = await VERIFY.cssImport(Object.values(CACHE.PATH.css).map(css => css.path));
 }
 
 export async function SaveLibraries() {
@@ -270,12 +277,12 @@ export async function SavePackages() {
 export async function SaveTargets() {
 	$.TASK("Syncing proxy folders", 0);
 	Object.keys(CACHE.STATIC.Targets_Saved).forEach((key) => delete CACHE.STATIC.Targets_Saved[key]);
-	CACHE.STATIC.Targets_Saved = await WORKER.proxyMapSync(CACHE.STATIC.ProxyMap);
+	CACHE.STATIC.Targets_Saved = await VERIFY.proxyMapSync(CACHE.STATIC.ProxyMap);
 }
 
 export async function SaveHashrules() {
 	$.TASK("Updating Hashrules", 0);
-	const errors = [];
+	const errors: Record<string, string> = {};
 
 	$.STEP("PATH : " + CACHE.PATH.json.hashrules);
 	const hashrule = await FILEMAN.read.json(CACHE.PATH.json.hashrules.path);
@@ -285,15 +292,20 @@ export async function SaveHashrules() {
 			if (typeof value === "string") {
 				CACHE.STATIC.HashRule[key] = value;
 			} else {
-				errors.push(`Hashrule: ${key} does not have a value of type STRING.`);
+				errors[key] = `Value of type "STRING".`;
 			}
 		});
 	} else {
-		errors.push(`${CACHE.PATH.json.hashrules.path} : Bad json file.`);
+		errors["ERROR"] = `Bad json file.`;
 	}
 	$.TASK("Analysis complete");
 	return {
 		status: Object.keys(errors).length === 0,
-		report: $.MAKE($.tag.H5("Error Paths", $.preset.failed), errors, [$.list.Bullets, 0, $.preset.failed]),
+		report: $.MAKE(
+			$.tag.H2("Hashrule error: " + CACHE.PATH.json.hashrules.path, $.preset.failed),
+			$$.ListProps(errors, $.preset.primary, $.preset.text),
+			[$.list.Blocks, 0, $.preset.text, $.style.AS_Bold],
+			[$.list.Bullets, 0, $.preset.failed, $.style.AS_Bold]
+		),
 	};
 }

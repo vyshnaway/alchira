@@ -97,78 +97,74 @@ export default function parser(
     fallbackPalettes: string[] = ['oklch', 'oklab', 'lab', 'lch', 'hwb', 'rgsb']
 ): string[] {
     let activeMarker = 0, ch = source[activeMarker], capture = '', result = '', score = 0;
-    try {
-        while (activeMarker < source.length) {
-            ch = source[activeMarker++];
-            const isAlNum = /\w/i.test(ch);
+    
+    while (activeMarker < source.length) {
+        ch = source[activeMarker++];
+        const isAlNum = /\w/i.test(ch);
 
-            if (isAlNum) { capture += ch; }
-            else { result += capture.length ? capture + ch : ch; capture = ''; }
+        if (isAlNum) { capture += ch; }
+        else { result += capture.length ? capture + ch : ch; capture = ''; }
 
-            if (fallbackPalettes.includes(capture) && source[activeMarker] === "(") {
-                const { values, endingMarker } = stdScanner(source, activeMarker, capture);
-                if (values.length > 2) {
-                    score++;
-                    let r = 0, g = 0, b = 0, alpha = 1, converted = '';
-                    switch (capture) {
-                        case 'hsl':
-                        case 'hsla':
-                            [r, g, b, alpha, converted] = (() => {
-                                const [h, s, l, a = 1] = values;
-                                const rgb = Utils.color.from.hsl(h, s * 100, l * 100, a);
-                                return [rgb.r, rgb.g, rgb.b, a, rgb.converted];
-                            })();
-                            break;
-                        case 'hwb':
-                            [r, g, b, alpha, converted] = (() => {
-                                const [h, w, b_, a = 1] = values;
-                                const rgb = Utils.color.from.hwb(h, w * 100, b_ * 100, a);
-                                return [rgb.r, rgb.g, rgb.b, a, rgb.converted];
-                            })();
-                            break;
-                        case 'lab':
-                            [r, g, b, alpha, converted] = (() => {
-                                const [l, a_, b_, a = 1] = values;
-                                const rgb = Utils.color.from.lab(l, a_, b_, a);
-                                return [rgb.r, rgb.g, rgb.b, a, rgb.converted];
-                            })();
-                            break;
-                        case 'lch':
-                            [r, g, b, alpha, converted] = (() => {
-                                const [l, c, h, a = 1] = values;
-                                const rgb = Utils.color.from.lch(l, c, h, a);
-                                return [rgb.r, rgb.g, rgb.b, a, rgb.converted];
-                            })();
-                            break;
-                        case 'oklab':
-                            [r, g, b, alpha, converted] = (() => {
-                                const [l, a_, b_, a = 1] = values;
-                                const rgb = Utils.color.from.oklab(l, a_, b_, a);
-                                return [rgb.r, rgb.g, rgb.b, a, rgb.converted];
-                            })();
-                            break;
-                        case 'oklch':
-                            [r, g, b, alpha, converted] = (() => {
-                                const [l, c, h, a = 1] = values;
-                                const rgb = Utils.color.from.oklch(l, c, h, a);
-                                return [rgb.r, rgb.g, rgb.b, a, rgb.converted];
-                            })();
-                            break;
-                        default:
-                            converted = capture + source.slice(activeMarker, endingMarker);
-                    }
-                    result += fallback_RGB1_HEX0 ? converted : Utils.color.LoadHex(r, g, b, alpha);
-                } else {
-                    result += capture + source.slice(activeMarker, endingMarker);
+        if (fallbackPalettes.includes(capture) && source[activeMarker] === "(") {
+            const { values, endingMarker } = stdScanner(source, activeMarker, capture);
+            if (values.length > 2) {
+                score++;
+                let r = 0, g = 0, b = 0, alpha = 1, converted = '';
+                switch (capture) {
+                    case 'hsl':
+                    case 'hsla':
+                        [r, g, b, alpha, converted] = (() => {
+                            const [h, s, l, a = 1] = values;
+                            const rgb = Utils.color.from.hsl(h, s * 100, l * 100, a);
+                            return [rgb.r, rgb.g, rgb.b, a, rgb.converted];
+                        })();
+                        break;
+                    case 'hwb':
+                        [r, g, b, alpha, converted] = (() => {
+                            const [h, w, b_, a = 1] = values;
+                            const rgb = Utils.color.from.hwb(h, w * 100, b_ * 100, a);
+                            return [rgb.r, rgb.g, rgb.b, a, rgb.converted];
+                        })();
+                        break;
+                    case 'lab':
+                        [r, g, b, alpha, converted] = (() => {
+                            const [l, a_, b_, a = 1] = values;
+                            const rgb = Utils.color.from.lab(l, a_, b_, a);
+                            return [rgb.r, rgb.g, rgb.b, a, rgb.converted];
+                        })();
+                        break;
+                    case 'lch':
+                        [r, g, b, alpha, converted] = (() => {
+                            const [l, c, h, a = 1] = values;
+                            const rgb = Utils.color.from.lch(l, c, h, a);
+                            return [rgb.r, rgb.g, rgb.b, a, rgb.converted];
+                        })();
+                        break;
+                    case 'oklab':
+                        [r, g, b, alpha, converted] = (() => {
+                            const [l, a_, b_, a = 1] = values;
+                            const rgb = Utils.color.from.oklab(l, a_, b_, a);
+                            return [rgb.r, rgb.g, rgb.b, a, rgb.converted];
+                        })();
+                        break;
+                    case 'oklch':
+                        [r, g, b, alpha, converted] = (() => {
+                            const [l, c, h, a = 1] = values;
+                            const rgb = Utils.color.from.oklch(l, c, h, a);
+                            return [rgb.r, rgb.g, rgb.b, a, rgb.converted];
+                        })();
+                        break;
+                    default:
+                        converted = capture + source.slice(activeMarker, endingMarker);
                 }
-                activeMarker = endingMarker;
-                capture = '';
+                result += fallback_RGB1_HEX0 ? converted : Utils.color.LoadHex(r, g, b, alpha);
+            } else {
+                result += capture + source.slice(activeMarker, endingMarker);
             }
-
+            activeMarker = endingMarker;
+            capture = '';
         }
-    } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-        console.error('Error scanning content:', errorMessage);
+
     }
 
     return score ? [result, source] : [source];

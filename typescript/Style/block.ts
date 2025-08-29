@@ -25,9 +25,9 @@ export default function parseBlock(content: string, blockArrays = false) {
 		isProp = true;
 
 	const result: _Style.ParsedResult = {
-		assemble: [],
+		assign: [],
 		attachment: [],
-		variables: {},
+		constants: {},
 		XatProps: [],
 		atProps: {},
 		Xproperties: [],
@@ -77,7 +77,7 @@ export default function parseBlock(content: string, blockArrays = false) {
 						const value = Use.string.minify(content.slice(valStart, index));
 						if (isProp) {
 							if (key.length > 0) {
-								if (key.startsWith("--")) { result.variables[key] = value; }
+								if (key.startsWith("--")) { result.constants[key] = value; }
 								result.properties[key] = value;
 								if (blockArrays) { result.Xproperties.push([key, value]); }
 							} else if (value[0] === "@") {
@@ -92,8 +92,8 @@ export default function parseBlock(content: string, blockArrays = false) {
 											...Use.string.zeroBreaks(value.slice(spaceIndex)),
 										);
 										break;
-									case CACHE.ROOT.customAtrules["assemble"]:
-										result.assemble.push(
+									case CACHE.ROOT.customAtrules["assign"]:
+										result.assign.push(
 											...Use.string.zeroBreaks(value.slice(spaceIndex)),
 										);
 										break;
@@ -108,9 +108,9 @@ export default function parseBlock(content: string, blockArrays = false) {
 										breaks.shift();
 										result.attachment.push(...breaks);
 										break;
-									case CACHE.ROOT.customOperations["assemble"]:
+									case CACHE.ROOT.customOperations["assign"]:
 										breaks.shift();
-										result.assemble.push(...breaks);
+										result.assign.push(...breaks);
 										break;
 								}
 							}

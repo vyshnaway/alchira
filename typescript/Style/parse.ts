@@ -17,7 +17,7 @@ function classmerge(classList: string[] = [], refpacks = false) {
 	const
 		result: Record<string, object> = {},
 		attachments: string[] = [],
-		variables: Record<string, string> = {};
+		constants: Record<string, string> = {};
 
 	classList.reduce((res, className) => {
 		const index =
@@ -28,23 +28,23 @@ function classmerge(classList: string[] = [], refpacks = false) {
 
 		if (index) {
 			const found = INDEX.FETCH(index);
-			Object.assign(variables, found.metadata.variables);
+			Object.assign(constants, found.metadata.constants);
 			attachments.push(...found.attachments);
 			res = Use.object.multiMerge([result, found.object], true);
 		}
 		return res;
 	}, {});
 
-	return { result, attachments, variables };
+	return { result, attachments, constants };
 }
 
 function SCANNER(content: string, initial: string, sourceSelector: string, refpacks = false) {
 	const scanned = CSSBlockScanner(content);
-	const assembled = classmerge(scanned.assemble, refpacks);
-	const variables = { ...scanned.variables, ...assembled.variables };
-	const attachments = [...assembled.attachments, ...scanned.attachment.filter(attach => attach[0] !== "/")];
+	const assigned = classmerge(scanned.assign, refpacks);
+	const constants = { ...scanned.constants, ...assigned.constants };
+	const attachments = [...assigned.attachments, ...scanned.attachment.filter(attach => attach[0] !== "/")];
 
-	const object = Use.object.deepMerge(assembled.result, Object.fromEntries([
+	const object = Use.object.deepMerge(assigned.result, Object.fromEntries([
 		...Object.entries(scanned.atProps).map(([propKey, propValue]) =>
 			[propKey, CACHE.STATIC.DEBUG ? `${propValue}/* ${initial} ${sourceSelector} */` : propValue]
 		),
@@ -55,27 +55,27 @@ function SCANNER(content: string, initial: string, sourceSelector: string, refpa
 
 	for (const selector in scanned.allBlocks) {
 		const result = SCANNER(scanned.allBlocks[selector], initial, sourceSelector + " -> " + selector, refpacks);
-		Object.assign(variables, result.variables);
+		Object.assign(constants, result.constants);
 		attachments.push(...result.attachments);
 		object[selector] = result.object;
 	}
 
-	return { object, attachments, variables };
+	return { object, attachments, constants };
 }
 
 function CSSFileScanner(content: string, initial = "", refpacks = false) {
 	const scanned = CSSBlockScanner(Use.code.uncomment.Script(content), true);
 	const object: [string, string | object][] = scanned.XatProps;
 
-	const variables: Record<string, string> = {}, attachments: string[] = [];
+	const constants: Record<string, string> = {}, attachments: string[] = [];
 	scanned.XallBlocks.forEach(([key, value]) => {
 		const result = SCANNER(value, initial, key, refpacks);
-		Object.assign(variables, result.variables);
+		Object.assign(constants, result.constants);
 		attachments.push(...result.attachments);
 		object.push([key, result.object]);
 	});
 
-	return { object, attachments, variables };
+	return { object, attachments, constants };
 }
 
 function CSSCollectionScanner(fileDatas: _File.Storage[] = [], initial = "", forPortable = false) {
@@ -107,7 +107,7 @@ function CSSCollectionScanner(fileDatas: _File.Storage[] = [], initial = "", for
 					watchclass: '',
 					metadata: {
 						info: [],
-						variables: scannedStyle.variables,
+						constants: scannedStyle.constants,
 						skeleton: Use.object.skeleton(object),
 						declarations: [], // manifest and cross-check declarations assigned later from parse.js
 						stencil: '',
@@ -150,7 +150,7 @@ function TAGSTYLE(
 	const diagnostics: _Support.Diagnostic[] = [];
 	const errors: string[] = [];
 	const attachments: string[] = [];
-	const variables = {};
+	const constants = {};
 
 	let identity = { index: 0, class: '' };
 	const classname = raw.selector === "" ? "" : file.classFront + raw.selector.replace(/^-\$/, "$");
@@ -175,7 +175,7 @@ function TAGSTYLE(
 			false
 		);
 		attachments.push(...styleObj.attachments);
-		Object.assign(variables, styleObj.variables);
+		Object.assign(constants, styleObj.constants);
 
 		if (Object.keys(styleObj).length) {
 			if (!object[query.rule]) {
@@ -202,7 +202,7 @@ function TAGSTYLE(
 			true
 		);
 		attachments.push(...style_snippet.attachments);
-		Object.assign(variables, style_snippet.variables);
+		Object.assign(constants, style_snippet.constants);
 
 		identity = INDEX.DECLARE({
 			package: forPackage ? file.packageName : CACHE.STATIC.Archive.name,
@@ -212,7 +212,7 @@ function TAGSTYLE(
 			watchclass: '',
 			metadata: {
 				info: raw.comments,
-				variables,
+				constants,
 				skeleton: Use.object.skeleton(object),
 				declarations,
 				watchclass: '',

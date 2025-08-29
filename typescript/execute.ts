@@ -8,14 +8,14 @@ import * as _Support from "./type/support.js";
 
 import $ from "./shell/main.js";
 import Use from "./utils/main.js";
-// import fileman from "./fileman.js";
+import fileman from "./fileman.js";
 
 import * as $$ from "./shell.js";
 import * as SMITH from "./assemble.js";
 import * as FETCH from "./data/fetch.js";
 import * as CACHE from "./data/cache.js";
+import * as EVENT from "./data/watch.js";
 import * as ACTION from "./data/action.js";
-import * as worker from "./data/watcher.js";
 
 // import { FetchPortables, SplitGlobalForComponents } from "./portable.js";
 
@@ -40,19 +40,18 @@ function reporter(heading: string, targets: string[], report: string) {
 async function execute(chapter: string) {
     let stopWatcher: null | (() => void) = null;
     let OutFiles: Record<string, string> = {};
-    // let SaveAction: Promise<void> | null = null;
+    let SaveAction: Promise<void> | null = null;
     let report = "",
         targets: string[] = [],
         reportNext = false,
-        step = "VerifySetupStruct",
+        step = "Initialize",
         staticsFetched = false,
         heading = "Initial Build";
 
-    $.POST($.MAKE($.tag.H1(chapter)));
-
     do {
-
         switch (step) {
+            case "Initialize":
+                $.POST($.MAKE($.tag.H1(chapter)));
             case "VerifySetupStruct": {
                 const verifyStructResult = await FETCH.VerifySetupStruct();
                 if (!verifyStructResult.proceed) {
@@ -109,11 +108,10 @@ async function execute(chapter: string) {
             }
             case "Publish": {
                 if (Object.keys(OutFiles).length) {
-                    // if (SaveAction) {
-                    //     await SaveAction;
-                    // }
-                    // console.log(OutFiles)
-                    // SaveAction = fileman.write.bulk(OutFiles);
+                    if (SaveAction) {
+                        await SaveAction;
+                    }
+                    SaveAction = fileman.write.bulk(OutFiles);
                 }
                 if (reportNext) {
                     reporter(heading, targets, report);
@@ -135,6 +133,10 @@ async function execute(chapter: string) {
                 if (!stopWatcher) {
                     targets = Object.keys(CACHE.FILES.TARGET);
                     const targetFolders = [...targets, CACHE.PATH.folder.setup.path];
+                    const ignoreFolders = [
+                        CACHE.PATH.folder.autogen.path,
+                        CACHE.PATH.folder.archive.path
+                    ];
                     process.on("SIGINT", () => {
                         if (stopWatcher) {
                             stopWatcher();
@@ -143,24 +145,27 @@ async function execute(chapter: string) {
                         }
                         process.exit();
                     });
-                    stopWatcher = worker.watchFolders(targetFolders);
+                    stopWatcher = EVENT.Init(targetFolders, ignoreFolders);
                     reporter(heading, targets, report);
                 }
 
-                if (worker.EventQueue.hasEvents()) {
-                    const event = worker.EventQueue.dequeue();
+                if (EVENT.queue.length > 8) {
+                    step = "Initialize";
+                    EVENT.queue.length = 0;
+                }
+                else if (EVENT.queue.length) {
+                    const event = EVENT.pull();
                     if (!event) { break; }
-                    const filePath = `${event.folder}/${event.filePath}`;
+                    const pathFromWork = `${event.folder}/${event.filePath}`;
                     if (
-                        filePath.startsWith(CACHE.PATH.folder.autogen.path)
-                        || filePath.startsWith(CACHE.PATH.folder.archive.path)
-
+                        pathFromWork.startsWith(CACHE.PATH.folder.autogen.path) ||
+                        pathFromWork.startsWith(CACHE.PATH.folder.archive.path)
                     ) {
                         break;
                     } else {
                         if (event.folder === CACHE.PATH.folder.setup.path) {
                             if (event.action === "add" || event.action === "change") {
-                                switch (filePath) {
+                                switch (pathFromWork) {
                                     case CACHE.PATH.json.configure.path:
                                         stopWatcher();
                                         stopWatcher = null;
@@ -178,15 +183,15 @@ async function execute(chapter: string) {
                                         break;
                                     default:
                                         if (
-                                            filePath.startsWith(CACHE.PATH.folder.library.path)
+                                            pathFromWork.startsWith(CACHE.PATH.folder.library.path)
                                             && event.extension === "css"
                                         ) {
-                                            CACHE.STATIC.Library_Saved[filePath] = event.fileContent;
+                                            CACHE.STATIC.Library_Saved[pathFromWork] = event.fileContent;
                                         } else if (
-                                            filePath.startsWith(CACHE.PATH.folder.packages.path)
+                                            pathFromWork.startsWith(CACHE.PATH.folder.packages.path)
                                             && ["xcss", "css", "md"].includes(event.extension)
                                         ) {
-                                            CACHE.STATIC.Package_Saved[filePath] = event.fileContent;
+                                            CACHE.STATIC.Package_Saved[pathFromWork] = event.fileContent;
                                         }
                                         step = "ProcessXtylesFolder";
                                 }
@@ -203,7 +208,7 @@ async function execute(chapter: string) {
                     }
                 }
 
-                await new Promise((resolve) => setTimeout(resolve, 50));
+                await new Promise((resolve) => setTimeout(resolve, 20));
             }
         }
     } while (CACHE.STATIC.WATCH);

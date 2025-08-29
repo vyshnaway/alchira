@@ -1,8 +1,8 @@
 
 export interface ParsedResult {
-    assemble: string[],
+    assign: string[],
     attachment: string[],
-    variables: Record<string, string>,
+    constants: Record<string, string>,
     XatProps: [string, string][],
     atProps: Record<string, string>,
     Xproperties: [string, string][],
@@ -21,7 +21,7 @@ export interface ParsedResult {
 
 export interface Metadata {
     info: string[],
-    variables: Record<string, string>,
+    constants: Record<string, string>,
     skeleton: object,
     declarations: string[],
     stencil: string,

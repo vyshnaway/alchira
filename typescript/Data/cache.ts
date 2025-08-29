@@ -44,11 +44,11 @@ export const ROOT: _Cache.ROOT = {
     },
     customOperations: {
         attach: "~",
-        assemble: "=",
+        assign: "=",
     },
     customAtrules: {
         attach: "@--attach",
-        assemble: "@--assemble",
+        assign: "@--assign",
     }
 };
 
@@ -226,6 +226,12 @@ export const PATH: Record<string, Record<string, _File.Path>> = {
         },
         prefixes: {
             frags: ["blueprint", "prefixes.json"],
+            path: "",
+            content: "",
+            essential: true,
+        },
+        reference: {
+            frags: ["blueprint", "scaffold", "reference.md"],
             path: "",
             content: "",
             essential: true,

@@ -85,6 +85,8 @@ export default function classExtract(
 			if (ch === " " || ch === activeQuote) {
 				if (entry.startsWith(CACHE.ROOT.customOperations["attach"])) {
 					attachments.add(entry.slice(1));
+				} else if (entry.startsWith(CACHE.ROOT.customOperations["assign"])) {
+					classList.push(entry.slice(1));
 				} else {
 					classList.push(entry);
 				}
@@ -119,7 +121,12 @@ export default function classExtract(
 		while (ch !== undefined) {
 			if (inQuote) {
 				if (ch === " " || ch === activeQuote) {
-					if (!entry.startsWith(CACHE.ROOT.customOperations["attach"])) {
+					if (
+						!entry.startsWith(CACHE.ROOT.customOperations["attach"])
+					) {
+						if (entry.startsWith(CACHE.ROOT.customOperations["assign"])) {
+							entry = entry.slice(1);
+						}
 						scribed += classMap[entry] ?
 							(action === "monitor"
 								? Use.string.normalize(classMap[entry], ["/", ".", ":", "|", "$"], ["\\"])

@@ -38,14 +38,17 @@ export default class C_Proxy {
 	extnsProps: Record<string, string[]>;
 	fileCache: Record<string, _File.Storage> = {};
 
-	constructor({
-		source,
-		target,
-		stylesheet,
-		extensions,
-		fileContents,
-		stylesheetContent,
-	}: _Config.ProxyStorage, identifier: string) {
+	constructor(
+		{
+			source,
+			target,
+			stylesheet,
+			extensions,
+			fileContents,
+			stylesheetContent,
+		}: _Config.ProxyStorage,
+		label: string
+	) {
 		extensions["xcss"] = [];
 
 		this.source = source;
@@ -54,16 +57,16 @@ export default class C_Proxy {
 		this.sourceStylesheet = Fileman.path.join(source, stylesheet);
 		this.targetStylesheet = Fileman.path.join(target, stylesheet);
 
-		this.label = identifier;
+		this.label = label;
 		this.extnsProps = extensions;
 		this.extensions = Object.keys(extensions);
 		this.stylesheetContent = stylesheetContent || '';
 		Object.entries(fileContents || {}).forEach(([filePath, fileContent], index) => {
-			this.SaveFile(filePath, fileContent, `_${identifier}_${Use.string.enCounter(index + 768)}_`);
+			this.SaveFile(filePath, fileContent, index);
 		});
 	}
 
-	SaveFile(filePath: string, fileContent: string, label: string) {
+	SaveFile(filePath: string, fileContent: string, fileIndex: number = Object.keys(this.fileCache).length) {
 
 		if (this.fileCache[filePath]) {
 			this.fileCache[filePath].styleData.usedIndexes.forEach((index) => INDEX.DISPOSE(index));
@@ -71,7 +74,13 @@ export default class C_Proxy {
 			delete this.fileCache[filePath];
 		}
 
-		const FILE = Filing("target", filePath, fileContent, this.target, this.source, label);
+		const FILE = Filing(
+			"target",
+			filePath,
+			fileContent,
+			this.target,
+			this.source,
+			`_${this.label}_${Use.string.enCounter(fileIndex + 768)}_`);
 		this.fileCache[FILE.filePath] = FILE;
 
 		const ParseResponse = Seek(FILE, this.extnsProps[FILE.extension]);
@@ -124,7 +133,6 @@ export default class C_Proxy {
 			fileManifests: {}
 		};
 
-		Cumulates.report.push($.tag.H2(`PROXY : ${this.target} -> ${this.source}`));
 		Cumulates.fileManifests[Fileman.path.join(CACHE.STATIC.WorkPath, this.targetStylesheet)] = {
 			refer: {
 				group: "STYLESHEET",
@@ -137,6 +145,8 @@ export default class C_Proxy {
 			diagnostics: [],
 		};
 
+		Cumulates.report.push($.tag.H2(`PROXY : ${this.target} -> ${this.source}`, $.preset.primary));
+
 		Object.values(this.fileCache).forEach((file) => {
 			Cumulates.errors.push(...file.manifest.errors);
 			Cumulates.diagnostics.push(...file.manifest.diagnostics);
@@ -145,6 +155,9 @@ export default class C_Proxy {
 			Object.assign(Cumulates.publicClasses, file.styleData.publicClasses);
 
 
+			const localKeys = Object.keys(file.styleData.localClasses);
+			const publicKeys = Object.keys(file.styleData.publicClasses);
+			const globalKeys = Object.keys(file.styleData.globalClasses);
 			const localIndexes = Object.values(file.styleData.localClasses);
 			const publicIndexes = Object.values(file.styleData.publicClasses);
 			const globalIndexes = Object.values(file.styleData.globalClasses);
@@ -153,16 +166,14 @@ export default class C_Proxy {
 			Cumulates.usedIndexes.push(...publicIndexes);
 			Cumulates.usedIndexes.push(...globalIndexes);
 
-			if (localIndexes.length + publicIndexes.length + globalIndexes.length) {
+			if (localKeys.length + globalKeys.length + publicKeys.length) {
 				Cumulates.report.push(
 					$.MAKE(
-						$.tag.H4(`[ ${localIndexes.length} L + ${publicIndexes.length} G + ${globalIndexes.length} P ] : ${file.targetPath}`, $.preset.tertiary),
+						$.tag.H5(file.targetPath),
 						[
-							...$.list.Catalog(Object.keys(file.styleData.globalClasses)),
-							$.canvas.divider.mid,
-							...$.list.Catalog(Object.keys(file.styleData.localClasses)),
-							$.canvas.divider.mid,
-							...$.list.Catalog(Object.keys(file.styleData.publicClasses)),
+							$.MAKE("", $.list.Catalog(localKeys, 0, $.preset.tertiary)),
+							$.MAKE("", $.list.Catalog(globalKeys, 0, $.preset.tertiary)),
+							$.MAKE("", $.list.Catalog(publicKeys, 0, $.preset.tertiary)),
 						]
 					)
 				);
@@ -181,6 +192,7 @@ export default class C_Proxy {
 			);
 
 		});
+
 
 
 		return Cumulates;
@@ -262,8 +274,8 @@ export default class C_Proxy {
 	}
 
 	UpdateCache() {
-		Object.entries(this.fileCache).forEach(([filepath, filedata]) => {
-			this.SaveFile(filepath, filedata.content, filedata.label);
+		Object.entries(this.fileCache).forEach(([filepath, filedata], index) => {
+			this.SaveFile(filepath, filedata.content, index);
 		});
 	}
 

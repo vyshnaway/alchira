@@ -17,7 +17,8 @@ const bin = process.argv[1];
 const cmd = ExposedCommands.includes(process.argv[2]) ? process.argv[2] : "";
 const arg = ExposedCommands.includes(process.argv[2]) ? process.argv[3] : "";
 
-const workPath = fileman.path.resolves(".");
+const workPath = ".";
+// const workPath = fileman.path.resolves(".");
 const rootPath = fileman.path.fromOrigin(".");
 const projectPackagePath = "package.json";
 const originPackagePath = fileman.path.fromOrigin("package.json");

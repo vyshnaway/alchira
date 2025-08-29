@@ -85,11 +85,8 @@ export function SaveToTarget(
 			cache.ClearFiles();
 			delete CACHE.FILES.TARGET[key];
 		});
-		// console.log(CACHE.STATIC);
-		// console.log(CACHE.FILES);
 		Object.entries(CACHE.STATIC.Targets_Saved).forEach(([key, files], index) => {
 			CACHE.FILES.TARGET[key] = new SCRIPT(files, Use.string.enCounter(index + 768));
-			console.log(CACHE.FILES.TARGET[key]);
 		});
 	}
 }
@@ -252,8 +249,8 @@ function GenFinalSheets(ATTACHMENTS: Set<number>) {
 	indexScanned.attachments.forEach((attachment) => ATTACHMENTS.add(INDEX.FIND(attachment, false).index));
 	const INDEXSHEET = RENDERFRAGS.Root = COMPILE.Prefixed(indexScanned.object, CACHE.STATIC.DEBUG);
 
-	CACHE.DELTA.Manifest.constants = Object.keys(indexScanned.variables);
-	CACHE.DELTA.Report.constants = $$.BulletCatalog("Root variables", CACHE.DELTA.Manifest.constants);
+	CACHE.DELTA.Manifest.constants = Object.keys(indexScanned.constants);
+	CACHE.DELTA.Report.constants = $$.BulletCatalog("Root Constants", CACHE.DELTA.Manifest.constants);
 
 
 	RENDERFRAGS.Appendix = COMPILE.Prefixed(

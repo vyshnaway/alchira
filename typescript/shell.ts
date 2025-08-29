@@ -31,18 +31,17 @@ export function BulletCatalog(heading: string, items: string[] = []) {
     return $.MAKE(
         $.tag.H2(heading, $.preset.primary),
         items,
-        [$.list.Bullets, 0, $.preset.text],
-        [$.list.Catalog, 0, $.preset.primary]
+        [$.list.Catalog, 0, []]
     );
 }
 export function ClassChart(heading: string, items: Record<string, string[]>) {
-    return Object.keys(items).length? $.MAKE(
+    return Object.keys(items).length ? $.MAKE(
         $.tag.H2(heading, $.preset.primary),
         Object.entries(items).map(([heading, entries]) =>
             $.MAKE(
                 $.tag.H5(heading, $.preset.tertiary),
                 entries,
-                [$.list.Catalog, 0, $.preset.tertiary]
+                [$.list.Catalog, 0, $.preset.primary]
             ),
         )
     ) : "";
