@@ -1,7 +1,32 @@
+import Use from "../utils/main.js";
+
+import * as INDEX from "../data/index.js";
 import * as CACHE from "../data/cache.js";
 import * as LOADPREFIX from "./prefix.js";
 
 type t_styleSorceTemplate = Record<string, string | object>;
+
+function styleSwitch(object: Record<string, Record<string, object | string>>) {
+	const switched = Use.object.switch(object);
+	const mins: string[] = [], maxs: string[] = [], inits: string[] = [], flats: string[] = [];
+
+	Object.keys(switched).forEach((key) => {
+		const min = key.indexOf("min");
+		const max = key.indexOf("max");
+		if (key !== "") {
+			if (min === -1 && max === -1) { inits.push(key); }
+			if (min < max) { mins.push(key); }
+			if (min > max) { maxs.push(key); }
+			if (min === max) { flats.push(key); }
+		}
+	});
+
+	const result: Record<string, object> = {};
+	inits.forEach(key => result[key] = switched[key]);
+	Object.assign(result, switched[""]);
+	[...flats.sort(), ...mins.sort().reverse(), ...maxs.sort()].forEach((key) => (result[key] = switched[key]));
+	return result;
+}
 
 function LoadVendors(collection = {}, vendor = "") {
 	return vendor == ""
@@ -10,7 +35,7 @@ function LoadVendors(collection = {}, vendor = "") {
 		) : [vendor];
 }
 
-function StylePartialsArray(object: t_styleSorceTemplate, vendors = LoadVendors()) {
+function stylePartialsArray(object: t_styleSorceTemplate, vendors = LoadVendors()) {
 	const result: [string, string | object][] = [];
 	Object.entries(object).forEach(([key, value]) => {
 		if (typeof value === "object") {
@@ -57,7 +82,7 @@ function unNester(selector = "", object: object = {}, cumulates: object = {}) {
 	return cumulates as t_styleSorceTemplate;
 }
 
-function objectCompose(
+function _objectCompose(
 	object: t_styleSorceTemplate,
 	minify = false,
 	vendors = LoadVendors(),
@@ -67,7 +92,7 @@ function objectCompose(
 		space = minify ? "" : " ",
 		styleSheet: string[] = [];
 
-	StylePartialsArray(object, vendors).forEach(([key, value]) => {
+	stylePartialsArray(object, vendors).forEach(([key, value]) => {
 		if (typeof value === "object") {
 			if (Object.keys(value).length) {
 				if (!minify && first) { styleSheet.push(""); }
@@ -75,7 +100,7 @@ function objectCompose(
 					const atPrefixes = LOADPREFIX.forAtRule;
 					Object.entries(atPrefixes(key, vendors)).forEach(
 						([vendor, selector]) => {
-							const composedObject = objectCompose(
+							const composedObject = _objectCompose(
 								value as t_styleSorceTemplate,
 								minify,
 								LoadVendors(atPrefixes, vendor),
@@ -92,7 +117,7 @@ function objectCompose(
 						},
 					);
 				} else {
-					const composedObject = objectCompose(
+					const composedObject = _objectCompose(
 						value as t_styleSorceTemplate,
 						minify,
 						vendors,
@@ -117,24 +142,28 @@ function objectCompose(
 	return styleSheet;
 }
 
-function stylesheetCreator(array: [string, string | object][], minify: boolean) {
+
+
+
+function ComposePrefixed(array: [string, string | object][], minify: boolean) {
 	const styleSheet: string[] = [];
 
 	array.forEach(([key, value]) => {
 		if (typeof value === "object") {
 			const unNested = unNester(key, value);
 			if (Object.keys(unNested).length) {
-				styleSheet.push(...objectCompose(unNested, minify));
+				styleSheet.push(..._objectCompose(unNested, minify));
 			}
 		} else {
-			styleSheet.push(...objectCompose({ [key]: value }, minify));
+			styleSheet.push(..._objectCompose({ [key]: value }, minify));
 		}
 	});
 
 	return styleSheet.join(minify ? "" : "\n");
 }
 
-function rawCompose(selectorObjectArray: [string, object | string][] = [], tab = "  ") {
+
+function ComposeArchive(selectorObjectArray: [string, object | string][] = [], tab = "  ") {
 	const styleSheet: string[] = [];
 
 	selectorObjectArray.forEach(([key, value]) => {
@@ -143,7 +172,7 @@ function rawCompose(selectorObjectArray: [string, object | string][] = [], tab =
 				styleSheet.push(
 					key,
 					"{",
-					...rawCompose(Object.entries(value), tab).map((i) => tab + i),
+					...ComposeArchive(Object.entries(value), tab).map((i) => tab + i),
 					"}",
 				);
 			}
@@ -157,7 +186,21 @@ function rawCompose(selectorObjectArray: [string, object | string][] = [], tab =
 	return styleSheet;
 }
 
+
+function ComposeSwitched(selectorIndexObject: Record<string, number>, minify: boolean) {
+	const object = Object.entries(styleSwitch(
+		Object.entries(selectorIndexObject).reduce((A: Record<string, Record<string, object>>, [selector, index]) => {
+			const imported = INDEX.FETCH(index);
+			A[selector] = imported.object;
+			return A;
+		}, {}),
+	));
+
+	return ComposePrefixed(Object.entries(object), minify);
+}
+
 export default {
-	forPortable: rawCompose,
-	forPublish: stylesheetCreator,
+	Packaged: ComposeArchive,
+	Prefixed: ComposePrefixed,
+	Switched: ComposeSwitched,
 };

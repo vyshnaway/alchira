@@ -28,7 +28,7 @@
     // - Enforces intellisense to trigger after "$" or "/".
     // - If causes override conflicts with your current stack in any manner, use false. 
     // ---
-    "Shorthands": true
+    "Shorthands": true,
     // - A few symbols can be used for some keyworks to write queries/at-rules inline.
     // - Alternatively you can define rule in ***@{***}, anyways.
     // - Available tokens.
@@ -42,6 +42,12 @@
     //   <div $class media@{only screen and (min-width: 600px), not screen and (max-width: 400px)}="" >
     //   =>
     //   @media only screen and (min-width: 600px), not screen and (max-width: 400px) { $class {} }    
+    // ---
+    "ShowReport": true,
+    // - Activate verbose-reports on "debug" | "preview" | "publish" commands. 
+    // ---
+    "CacheUsage": true
+    // - Nerds status, Memory usage on each cache groups. 
     // ---
   }
 }

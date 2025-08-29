@@ -69,22 +69,26 @@ export function SetENV(rootPath: string, workPath: string, packageEssential: _Su
         });
     });
 
-    console.log(CACHE.STATIC);
-    console.log(CACHE.ROOT);
-    console.log(CACHE.SYNC);
+    // console.log(CACHE.STATIC);
+    // console.log(CACHE.ROOT);
+    // console.log(CACHE.SYNC);
 }
 
-export function MemoryUsage() {
+export function GetCacheUsage(): string[] {
     const chart: Record<string, number> = {
-        "Files": USE.string.stringMem(JSON.stringify(CACHE.STATIC)),
-        "Cache": USE.string.stringMem(JSON.stringify(CACHE.CLASS)),
-        "Stack": USE.string.stringMem(JSON.stringify(CACHE.FILES)),
-        "Report": USE.string.stringMem(JSON.stringify(CACHE.DELTA)),
+        "Sync": USE.string.stringMem(JSON.stringify(CACHE.SYNC)),
+        "Path": USE.string.stringMem(JSON.stringify(CACHE.PATH)),
+        "Root": USE.string.stringMem(JSON.stringify(CACHE.ROOT)),
+        "Static": USE.string.stringMem(JSON.stringify(CACHE.STATIC)),
+        "Delta": USE.string.stringMem(JSON.stringify(CACHE.DELTA)),
+        "Class": USE.string.stringMem(JSON.stringify(CACHE.CLASS)),
+        "Files": USE.string.stringMem(JSON.stringify(CACHE.FILES)),
         "Proxy": Object.values(CACHE.FILES.TARGET).reduce((t: number, c) => {
             t += USE.string.stringMem(JSON.stringify(c));
             return t;
         }, 0),
     };
+
     chart["Total"] = Object.values(chart).reduce((a: number, i) => a += i, 0);
     return Object.entries(chart).map(([k, v]) => `${k} : ${v.toFixed(2)} Kb`);
 }

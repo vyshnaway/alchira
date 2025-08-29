@@ -41,16 +41,17 @@ export default function scanner(
 		) {
 			let subScribed = '';
 			const tagStart = fileCursor.active.marker;
+			const scribedLen = scribed.length;
 			const res = TAGSCAN(fileData, classProps, action, fileCursor);
 			const fragment = content.slice(tagStart, res.styleDeclarations.tagOpenMarker);
 
 			if (res.ok) {
 				switch (fragment) {
 					case TagSummonStyle:
-						fileData.styleData.styleTagReplaces.push([tagStart, fileCursor.active.marker]);
+						fileData.styleData.styleTagReplaces.push(scribedLen);
 						break;
 					case TagSummonStaple:
-						fileData.styleData.stapleTagReplaces.push([tagStart, fileCursor.active.marker]);
+						fileData.styleData.stapleTagReplaces.push(scribedLen);
 						break;
 				}
 

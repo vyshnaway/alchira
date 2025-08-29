@@ -23,18 +23,18 @@ export const Level: _T_list = (items: string[] = [], intent = 0, preset: string[
 
 export const Paragraphs: _T_list = (items: string[] = [], intent = 0, preset: string[] = [], ...styles: string[]) => {
 	intent = intent < 0 ? 0 : intent;
-	return items.map((item) => tag.Tab(intent) + root.fmt(item, ...preset, ...styles));
+	return items.map((item) => tag.Tab(intent) + root.fmt(tag.P(item), ...preset, ...styles));
 };
 
-export const Breaks: _T_list = (items: string[] = [], intent = 0, preset: string[] = [], ...styles: string[]) => {
+export const Blocks: _T_list = (items: string[] = [], intent = 0, preset: string[] = [], ...styles: string[]) => {
 	intent = intent < 0 ? 0 : intent;
-	return items.map((item) => "\n".repeat(intent) + root.fmt(tag.P(item), ...preset, ...styles));
+	return items.map((item) => "\n".repeat(intent) + root.fmt(item, ...preset, ...styles));
 };
 
 export const Waterfall: _T_list = (items: string[] = [], intent = 0, preset: string[] = [], ...styles: string[]) => {
 	intent = intent < 0 ? 0 : intent;
 	return items.map((item, key) => {
-		return tag.Tab(intent) + root.fmt((key === items.length - 1 ? "└─>" : "├─>") + tag.Tab(intent) + item, ...preset, ...styles);
+		return tag.Tab(intent) + root.fmt((key === items.length - 1 ? " └─> " : " ├─> ") + tag.Tab() + item, ...preset, ...styles);
 	});
 };
 
@@ -42,18 +42,18 @@ export const Catalog: _T_list = (items: string[] = [], intent = 0, preset: strin
 	intent = intent < 0 ? 0 : intent;
 	const prefix = tag.Tab(intent);
 
-	const size = items.reduce((l, i) => { if (i.length > l) { l = i.length; } return l; }, 0) + tag.Li().length;
+	const size = items.reduce((l, i) => { if (i.length > l) { l = i.length; } return l; }, 0);
 	const cols = Math.floor((root.canvas.width() - prefix.length + tag.Tab().length) / (size + tag.Tab().length));
 	const result: string[] = [];
 
 	let subResult = '';
 	items.forEach((item, index) => {
 		if ((index + 1) % cols === 0) {
-			subResult += root.fmt(tag.Li(item.padEnd(size)), ...preset, ...styles);
+			subResult += root.fmt(item.padEnd(size), ...preset, ...styles);
 			result.push(subResult);
 			subResult = '';
 		} else {
-			subResult += root.fmt(tag.Li(item.padEnd(size)), ...preset, ...styles) + tag.Tab();
+			subResult += root.fmt(item.padEnd(size), ...preset, ...styles) + tag.Tab();
 		}
 	});
 

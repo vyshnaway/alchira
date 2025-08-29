@@ -22,7 +22,7 @@ export const ROOT: _Cache.ROOT = {
         PrefixCdn: `https://prefix.${domain}/`,
         PackageCdn: `https://package.${domain}/`,
     },
-    commandList: {
+    Commands: {
         init: "Initiate or Update & Verify setup.",
         debug: "Live build for developer environment",
         preview: 'Test build. Pass test for "publish" command.',
@@ -30,23 +30,17 @@ export const ROOT: _Cache.ROOT = {
         archive: "Split and stash project styles to *.xcss files.",
         install: "Install packages from sources.",
     },
-    exposedCommands: [
-        "init",
-        "debug",
-        "preview",
-        "publish",
-        "archive",
-        "install",
-    ],
     defaultTweaks: {
+        IntelGroup: "browser",
         RapidSense: true,
         Shorthands: true,
-        IntelGroup: "browser"
+        ShowReport: true,
+        CacheUsage: true,
     },
     customElements: {
-        style: "xtyle",
-        staple: "xtaple",
-        stencil: "xtencil",
+        style: "style",
+        staple: "staple",
+        stencil: "stencil",
     },
     customOperations: {
         attach: "~",
@@ -57,10 +51,6 @@ export const ROOT: _Cache.ROOT = {
         assemble: "@--assemble",
     }
 };
-
-
-
-// --- Cache Declare ---
 
 export const STATIC: _Cache.STATIC = {
     WATCH: false,
@@ -144,13 +134,13 @@ export const DELTA: _Cache.DELTA = {
 
 export const CLASS: _Cache.CLASS = {
     HashRule: {},
-    Index_ClassData: {},
-    GlobalClass__Index: {},
-    PublicClass__Index: {},
-    ArchiveClass_Index: {},
-    ArcbindClass_Index: {},
-    LibraryClass_Index: {},
-    PackageClass_Index: {},
+    Index_to_Data: {},
+    Global__Index: {},
+    Public__Index: {},
+    Archive_Index: {},
+    Arcbind_Index: {},
+    Library_Index: {},
+    Package_Index: {},
     Sync_PublishIndexMap: {},
     Sync_ClassDictionary: {}
 };
@@ -252,7 +242,7 @@ export const PATH: Record<string, Record<string, _File.Path>> = {
             frags: ["xtyles", "autogen"],
             path: "",
             content: "",
-            essential: true,
+            essential: false,
         },
         libraries: {
             frags: ["xtyles", "libraries"],

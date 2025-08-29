@@ -5,19 +5,21 @@ import * as _Script from "../type/script.js";
 // import * as _Cache from "../type/cache.js";
 // import * as _Support from "../type/support.js";
 
-import SEEK from "./file.js";
-import fileman from "../fileman.js";
 
 import $ from "../shell/main.js";
 import Use from "../utils/main.js";
-import FILING from "../data/filing.js";
-import STYLEPARSE from "../style/parse.js";
+import Seek from "./file.js";
+import Filing from "../data/filing.js";
+import Fileman from "../fileman.js";
+import StyleParse from "../style/parse.js";
+
+import * as $$ from "../shell.js";
 import * as INDEX from "../data/index.js";
 import * as CACHE from "../data/cache.js";
 
-function stringReplacementByPosition(master_string: string, ranges: [number, number][], replace_with: string) {
-	const result = ranges.reduce((modified, [from, to]) => {
-		modified = master_string.slice(0, from) + replace_with + master_string.slice(to);
+function stringInjections(master_string: string, ranges: number[], replace_with: string) {
+	const result = ranges.reduce((modified, pos) => {
+		modified = master_string.slice(0, pos) + replace_with + master_string.slice(pos);
 		return modified;
 	}, master_string);
 	return result;
@@ -26,7 +28,7 @@ function stringReplacementByPosition(master_string: string, ranges: [number, num
 export default class C_Proxy {
 	source = "";
 	target = "";
-	stylesheetPath = "";
+	stylesheet = "";
 	sourceStylesheet = "";
 	targetStylesheet = "";
 	stylesheetContent = "";
@@ -48,9 +50,9 @@ export default class C_Proxy {
 
 		this.source = source;
 		this.target = target;
-		this.stylesheetPath = stylesheet;
-		this.sourceStylesheet = fileman.path.join(source, stylesheet);
-		this.targetStylesheet = fileman.path.join(target, stylesheet);
+		this.stylesheet = stylesheet;
+		this.sourceStylesheet = Fileman.path.join(source, stylesheet);
+		this.targetStylesheet = Fileman.path.join(target, stylesheet);
 
 		this.label = identifier;
 		this.extnsProps = extensions;
@@ -69,39 +71,45 @@ export default class C_Proxy {
 			delete this.fileCache[filePath];
 		}
 
-		const FILE = FILING("target", filePath, fileContent, this.target, this.source, label);
+		const FILE = Filing("target", filePath, fileContent, this.target, this.source, label);
 		this.fileCache[FILE.filePath] = FILE;
 
-		const ParseResponse = SEEK(FILE, this.extnsProps[FILE.extension]);
+		const ParseResponse = Seek(FILE, this.extnsProps[FILE.extension]);
 		FILE.styleData.classesList.push(...ParseResponse.classesList);
 		FILE.styleData.attachments.push(...ParseResponse.attachments);
 
-		ParseResponse.stylesList.forEach((style) => {
-			const IndexMap =
-				style.scope === "GLOBAL" ? FILE.styleData.globalClasses
-					: style.scope === "LOCAL" ? FILE.styleData.localClasses
-						: style.scope === "PUBLIC" ? FILE.styleData.publicClasses
-							: {};
+		ParseResponse.stylesList.forEach((tagStyle) => {
+			if (tagStyle.selector === "") {
+				const E = $$.GenerateError("Classname missing declaration scope.", [`${FILE.targetPath}:${tagStyle.rowIndex}:${tagStyle.colIndex}`]);
+				FILE.manifest.errors.push(E.error);
+				FILE.manifest.diagnostics.push(E.diagnostic);
+			} else {
+				const IndexMap =
+					tagStyle.scope === "GLOBAL" ? FILE.styleData.globalClasses
+						: tagStyle.scope === "LOCAL" ? FILE.styleData.localClasses
+							: tagStyle.scope === "PUBLIC" ? FILE.styleData.publicClasses
+								: {};
 
-			const skeletonMap =
-				style.scope === "LOCAL" ? FILE.manifest.local
-					: style.scope === "GLOBAL" ? FILE.manifest.global
-						: style.scope === "PUBLIC" ? FILE.manifest.global
-							: {};
+				const skeletonMap =
+					tagStyle.scope === "LOCAL" ? FILE.manifest.local
+						: tagStyle.scope === "GLOBAL" ? FILE.manifest.global
+							: tagStyle.scope === "PUBLIC" ? FILE.manifest.global
+								: {};
 
-			const response = STYLEPARSE.TAGSTYLE(style, FILE, IndexMap);
-			const classdata = INDEX.FETCH(response.identity.index);
+				const response = StyleParse.TAGSTYLE(tagStyle, FILE, IndexMap);
+				const classdata = INDEX.FETCH(response.identity.index);
 
-			if (classdata.declarations.length === 1) {
-				skeletonMap[response.classname] = classdata.metadata;
-				FILE.styleData.usedIndexes.add(response.identity.index);
+				if (classdata.declarations.length === 1) {
+					skeletonMap[response.classname] = classdata.metadata;
+					FILE.styleData.usedIndexes.add(response.identity.index);
+				}
+
+				FILE.manifest.errors.push(...response.errors);
+				FILE.manifest.diagnostics.push(...response.diagnostics);
 			}
-
-			FILE.manifest.errors.push(...response.errors);
-			FILE.manifest.diagnostics.push(...response.diagnostics);
 		});
 
-		Object.assign(CACHE.CLASS.GlobalClass__Index, FILE.styleData.globalClasses);
+		Object.assign(CACHE.CLASS.Global__Index, FILE.styleData.globalClasses);
 		Object.assign(FILE.manifest.refer, { group: "target", id: CACHE.STATIC.WorkPath + FILE.targetPath });
 	}
 
@@ -116,11 +124,11 @@ export default class C_Proxy {
 			fileManifests: {}
 		};
 
-		Cumulates.report.push($.MAKE($.tag.H2(`PROXY : ${this.target} -> ${this.source}`)));
-		Cumulates.fileManifests[fileman.path.join(CACHE.STATIC.WorkPath, this.targetStylesheet)] = {
+		Cumulates.report.push($.tag.H2(`PROXY : ${this.target} -> ${this.source}`));
+		Cumulates.fileManifests[Fileman.path.join(CACHE.STATIC.WorkPath, this.targetStylesheet)] = {
 			refer: {
 				group: "STYLESHEET",
-				id: fileman.path.join(CACHE.STATIC.WorkPath, this.targetStylesheet),
+				id: Fileman.path.join(CACHE.STATIC.WorkPath, this.targetStylesheet),
 			},
 			public: {},
 			global: {},
@@ -164,18 +172,10 @@ export default class C_Proxy {
 			[...localIndexes, ...publicIndexes, ...globalIndexes,].forEach(
 				(index) => {
 					const InStash = INDEX.FETCH(index);
+					const E = $$.GenerateError("Multiple declarations: " + InStash.selector, InStash.declarations);
 					if (InStash.declarations.length > 1) {
-						Cumulates.errors.push(
-							$.MAKE(
-								$.tag.H5("Multiple declarations: " + InStash.selector, $.preset.failed),
-								InStash.declarations,
-								[$.list.Bullets, 0, $.preset.failed]
-							)
-						);
-						Cumulates.diagnostics.push({
-							error: "Multiple declarations: " + InStash.selector,
-							source: InStash.declarations,
-						});
+						Cumulates.errors.push(E.error);
+						Cumulates.diagnostics.push(E.diagnostic);
 					}
 				}
 			);
@@ -223,7 +223,7 @@ export default class C_Proxy {
 
 	RenderFiles(action: _Script.Actions) {
 		Object.values(this.fileCache).forEach((filedata) => {
-			filedata.midway = SEEK(
+			filedata.midway = Seek(
 				filedata,
 				this.extnsProps[filedata.extension],
 				action,
@@ -242,12 +242,12 @@ export default class C_Proxy {
 		Object.values(this.fileCache).forEach((file) => {
 			if (file.extension !== "xcss") {
 				let fileContent = file.midway;
-				fileContent = stringReplacementByPosition(
+				fileContent = stringInjections(
 					fileContent,
 					file.styleData.stapleTagReplaces,
 					AttachBlock
 				);
-				fileContent = stringReplacementByPosition(
+				fileContent = stringInjections(
 					fileContent,
 					file.styleData.styleTagReplaces,
 					StyleBlock

@@ -1,3 +1,4 @@
+/* eslint-disable no-fallthrough */
 // import * as _Config from "./type/config.js";
 // import * as _File from "./type/file.js";
 // import * as _Style from "./type/style.js";
@@ -5,8 +6,10 @@
 // import * as _Cache from "./type/cache.js";
 import * as _Support from "./type/support.js";
 
-/* eslint-disable no-fallthrough */
 import $ from "./shell/main.js";
+import Use from "./utils/main.js";
+// import fileman from "./fileman.js";
+
 import * as $$ from "./shell.js";
 import * as SMITH from "./assemble.js";
 import * as FETCH from "./data/fetch.js";
@@ -14,17 +17,22 @@ import * as CACHE from "./data/cache.js";
 import * as ACTION from "./data/action.js";
 import * as worker from "./data/watcher.js";
 
-// import fileman from "./fileman.js";
-import { MemoryUsage } from "./data/action.js";
-import Use from "./utils/main.js";
 // import { FetchPortables, SplitGlobalForComponents } from "./portable.js";
 
 function reporter(heading: string, targets: string[], report: string) {
     $.POST(
         $.MAKE("", [
-            $.MAKE($.tag.H5(heading), targets.map(i => `Watching : ${i}`), [$.list.Bullets, 0, $.preset.tertiary]),
+            $.MAKE(
+                $.tag.H1(heading, $.preset.primary),
+                targets.map(i => `Watching : ${i}`),
+                [$.list.Bullets, 0, $.preset.tertiary]
+            ),
             report,
-            $.MAKE($.tag.H5("Press Ctrl+C to stop watching.", $.preset.failed), MemoryUsage(), [$.list.Catalog, 0, $.preset.tertiary]),
+            $.MAKE(
+                $.tag.H4("Press Ctrl+C to stop watching.", $.preset.failed),
+                CACHE.STATIC.Tweaks.CacheUsage ? ACTION.GetCacheUsage() : [],
+                [$.list.Catalog, 0, $.preset.tertiary]
+            ),
         ]),
     );
 }
@@ -55,14 +63,14 @@ async function execute(chapter: string) {
                     report = "";
                 }
             }
-            case "ReadIndex": {
-                await FETCH.SaveRootCSS();
+            case "ReadRootCss": {
+                await FETCH.SaveRootCss();
             }
             case "ReadLibraries": {
-                await FETCH.SaveLibrary();
+                await FETCH.SaveLibraries();
             }
-            case "VerifyConfigure": {
-                const verifyConfigsResult = await FETCH.VerifyConfigure(!staticsFetched);
+            case "VerifyConfigs": {
+                const verifyConfigsResult = await FETCH.VerifyConfigs(!staticsFetched);
                 if (!verifyConfigsResult.status) {
                     report = verifyConfigsResult.report;
                     step = "WatchFolders";
@@ -75,8 +83,8 @@ async function execute(chapter: string) {
             case "ReadPackages": {
                 await FETCH.SavePackages();
             }
-            case "ReadProxyFolders": {
-                await FETCH.SaveProxies();
+            case "ReadTargets": {
+                await FETCH.SaveTargets();
             }
             case "ReadHashrules": {
                 const hashruleAnalysis = await FETCH.SaveHashrules();
@@ -143,7 +151,11 @@ async function execute(chapter: string) {
                     const event = worker.EventQueue.dequeue();
                     if (!event) { break; }
                     const filePath = `${event.folder}/${event.filePath}`;
-                    if (filePath.startsWith(CACHE.PATH.folder.autogen.path)) {
+                    if (
+                        filePath.startsWith(CACHE.PATH.folder.autogen.path)
+                        || filePath.startsWith(CACHE.PATH.folder.archive.path)
+
+                    ) {
                         break;
                     } else {
                         if (event.folder === CACHE.PATH.folder.setup.path) {
@@ -152,22 +164,28 @@ async function execute(chapter: string) {
                                     case CACHE.PATH.json.configure.path:
                                         stopWatcher();
                                         stopWatcher = null;
-                                        step = "VerifyConfigure";
+                                        step = "VerifyConfigs";
                                         break;
                                     case CACHE.PATH.css.atrules.path:
                                     case CACHE.PATH.css.constants.path:
                                     case CACHE.PATH.css.elements.path:
                                     case CACHE.PATH.css.extends.path:
-                                        await FETCH.SaveRootCSS();
+                                        await FETCH.SaveRootCss();
                                         step = "GenerateFinals";
                                         break;
                                     case CACHE.PATH.json.hashrules.path:
                                         step = "ReadHashrules";
                                         break;
                                     default:
-                                        if (filePath.startsWith(CACHE.PATH.folder.library.path) && event.extension === "css") {
+                                        if (
+                                            filePath.startsWith(CACHE.PATH.folder.library.path)
+                                            && event.extension === "css"
+                                        ) {
                                             CACHE.STATIC.Library_Saved[filePath] = event.fileContent;
-                                        } else if (filePath.startsWith(CACHE.PATH.folder.portables.path) && ["xcss", "css", "md"].includes(event.extension)) {
+                                        } else if (
+                                            filePath.startsWith(CACHE.PATH.folder.packages.path)
+                                            && ["xcss", "css", "md"].includes(event.extension)
+                                        ) {
                                             CACHE.STATIC.Package_Saved[filePath] = event.fileContent;
                                         }
                                         step = "ProcessXtylesFolder";
@@ -178,7 +196,7 @@ async function execute(chapter: string) {
                         } else if (event.action === "add" || event.action === "change" || event.action === "unlink") {
                             SMITH.SaveToTarget(event.action, event.folder, event.filePath, event.fileContent, event.extension);
                             step = "GenerateFinals";
-                        } else { step = "VerifyConfigure"; }
+                        } else { step = "VerifyConfigs"; }
 
                         heading = `[${event.timeStamp}] | ${event.filePath} | [${event.action}]`;
                         reportNext = true;
@@ -222,7 +240,7 @@ async function commander({
     CACHE.STATIC.Project_Name = Use.string.normalize(projectName);
     CACHE.STATIC.Project_Version = projectVersion;
     ACTION.SetENV(rootPath, workPath, originPackageEssential);
-    $.init(command !== "debug" && command !== "archive");
+    $.init(!CACHE.STATIC.WATCH);
 
     const APP_VERSION = `${CACHE.ROOT.name} @ ${CACHE.ROOT.version}`;
 
@@ -235,7 +253,7 @@ async function commander({
             if (!setupInit.started) {
                 $.POST(await FETCH.Initialize());
             } else if (setupInit.proceed) {
-                $.POST((await FETCH.VerifyConfigure(true)).report);
+                $.POST((await FETCH.VerifyConfigs(true)).report);
             } else {
                 $.POST(setupInit.report);
             }
@@ -262,7 +280,7 @@ async function commander({
 
         //     const verifyStructResult = await FETCH.VerifySetupStruct();
         //     if (verifyStructResult.proceed) {
-        //         const verifyConfigsResult = await FETCH.VerifyConfigure(true);
+        //         const verifyConfigsResult = await FETCH.VerifyConfigs(true);
         //         if (verifyConfigsResult.status) {
         //             const fetchResult = await FETCH.FetchStatics(argument);
         //             await fileman.write.bulk(fetchResult.SaveFiles);
@@ -275,37 +293,16 @@ async function commander({
             await FETCH.FetchDocs();
 
             $.POST(
-                $.MAKE($.tag.H1(APP_VERSION),
-                    CACHE.SYNC.MARKDOWN.alerts.content ? [CACHE.SYNC.MARKDOWN.alerts.content] : []
+                $.MAKE(
+                    $.tag.H1(APP_VERSION),
+                    [
+                        CACHE.SYNC.MARKDOWN.alerts.content,
+                        $$.ListRecord("Available Commands", CACHE.ROOT.Commands),
+                        $$.ListRecord("Agreements", Object.fromEntries(Object.values(CACHE.SYNC.AGREEMENT).map((i) => [i.title, i.path]))),
+                        $$.ListRecord("References", Object.fromEntries(Object.values(CACHE.SYNC.MARKDOWN).map((i) => [i.title, i.path]))),
+                        $.tag.H4("For more information visit : " + CACHE.ROOT.website, $.preset.tertiary)
+                    ]
                 )
-            );
-
-            $.POST(
-                $.MAKE(
-                    "Available Commands",
-                    $$.PropMap(CACHE.ROOT.commandList, []),
-                    [$.list.Bullets, 0, $.preset.primary]
-                ),
-            );
-
-            $.POST(
-                $.MAKE(
-                    "Agreements",
-                    $$.PropMap(Object.fromEntries(Object.values(CACHE.SYNC.AGREEMENT).map((i) => [i.title, i.path]))),
-                    [$.list.Bullets, 0, $.preset.primary]
-                ),
-            );
-
-            $.POST(
-                $.MAKE(
-                    "References",
-                    $$.PropMap(Object.fromEntries(Object.values(CACHE.SYNC.MARKDOWN).map((i) => [i.title, i.path]))),
-                    [$.list.Bullets, 0, $.preset.primary]
-                ),
-            );
-
-            $.POST(
-                $.MAKE($.tag.H2("For more information visit : " + CACHE.ROOT.website)),
             );
         }
     }

@@ -23,6 +23,6 @@ export interface Event {
 }
 
 export interface Diagnostic {
-    error: string,
-    source: string[]
+    message: string,
+    sources: string[]
 }

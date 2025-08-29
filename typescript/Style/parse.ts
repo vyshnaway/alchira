@@ -6,15 +6,14 @@ import * as _Script from "../type/script.js";
 import * as _Support from "../type/support.js";
 
 
-import CSSBLOCK from "./block.js";
-
-import $ from "../shell/main.js";
-import Use from "../utils/main.js";
-import HASHRULE from "../hash-rules.js";
 import * as CACHE from "../data/cache.js";
 import * as INDEX from "../data/index.js";
 
-function xtylemerge(classList: string[] = []) {
+import Use from "../utils/main.js";
+import CSSBlockScanner from "./block.js";
+import HASHRULE from "../hash-rules.js";
+
+function classmerge(classList: string[] = [], refpacks = false) {
 	const
 		result: Record<string, object> = {},
 		attachments: string[] = [],
@@ -22,9 +21,9 @@ function xtylemerge(classList: string[] = []) {
 
 	classList.reduce((res, className) => {
 		const index =
-			CACHE.CLASS.PackageClass_Index[className]
-			|| CACHE.CLASS.ArchiveClass_Index[className]
-			|| CACHE.CLASS.LibraryClass_Index[className]
+			(refpacks ? CACHE.CLASS.Package_Index[className] : 0)
+			|| CACHE.CLASS.Archive_Index[className]
+			|| CACHE.CLASS.Library_Index[className]
 			|| 0;
 
 		if (index) {
@@ -39,9 +38,9 @@ function xtylemerge(classList: string[] = []) {
 	return { result, attachments, variables };
 }
 
-function SCANNER(content: string, initial: string, sourceSelector: string) {
-	const scanned = CSSBLOCK(content);
-	const assembled = xtylemerge(scanned.assemble);
+function SCANNER(content: string, initial: string, sourceSelector: string, refpacks = false) {
+	const scanned = CSSBlockScanner(content);
+	const assembled = classmerge(scanned.assemble, refpacks);
 	const variables = { ...scanned.variables, ...assembled.variables };
 	const attachments = [...assembled.attachments, ...scanned.attachment.filter(attach => attach[0] !== "/")];
 
@@ -55,7 +54,7 @@ function SCANNER(content: string, initial: string, sourceSelector: string) {
 	]));
 
 	for (const selector in scanned.allBlocks) {
-		const result = SCANNER(scanned.allBlocks[selector], initial, sourceSelector + " -> " + selector);
+		const result = SCANNER(scanned.allBlocks[selector], initial, sourceSelector + " -> " + selector, refpacks);
 		Object.assign(variables, result.variables);
 		attachments.push(...result.attachments);
 		object[selector] = result.object;
@@ -64,13 +63,13 @@ function SCANNER(content: string, initial: string, sourceSelector: string) {
 	return { object, attachments, variables };
 }
 
-function CSSCANNER(content: string, initial = "") {
-	const variables: Record<string, string> = {}, attachments: string[] = [];
-	const scanned = CSSBLOCK(content, true);
+function CSSFileScanner(content: string, initial = "", refpacks = false) {
+	const scanned = CSSBlockScanner(Use.code.uncomment.Script(content), true);
 	const object: [string, string | object][] = scanned.XatProps;
 
+	const variables: Record<string, string> = {}, attachments: string[] = [];
 	scanned.XallBlocks.forEach(([key, value]) => {
-		const result = SCANNER(value, initial, key);
+		const result = SCANNER(value, initial, key, refpacks);
 		Object.assign(variables, result.variables);
 		attachments.push(...result.attachments);
 		object.push([key, result.object]);
@@ -79,19 +78,19 @@ function CSSCANNER(content: string, initial = "") {
 	return { object, attachments, variables };
 }
 
-function CSSLIBRARY(fileDatas: _File.Storage[] = [], initial = "", forPortable = false) {
+function CSSCollectionScanner(fileDatas: _File.Storage[] = [], initial = "", forPortable = false) {
 	const selectorList: string[] = [],
 		selectors: Record<string, number> = {},
 		indexSkeleton: Record<string, _Style.Metadata> = {};
-	const IndexMap = forPortable ? CACHE.CLASS.PackageClass_Index : CACHE.CLASS.LibraryClass_Index;
+	const IndexMap = forPortable ? CACHE.CLASS.Package_Index : CACHE.CLASS.Library_Index;
 
 	fileDatas.forEach((source) => {
 		const { classFront: stamp, filePath, debugclassFront: metaFront, content, manifest } = source;
 
-		CSSBLOCK(content, true).XallBlocks.forEach(([SELECTOR, OBJECT]) => {
+		CSSBlockScanner(Use.code.uncomment.Script(content), true).XallBlocks.forEach(([SELECTOR, OBJECT]) => {
 			const declaration = source.sourcePath;
 			const stampSelector = stamp + Use.string.normalize(SELECTOR, [], ["\\", "."]);
-			const scannedStyle = SCANNER(OBJECT, initial + " : " + filePath + " ||", SELECTOR,);
+			const scannedStyle = SCANNER(OBJECT, initial + " : " + filePath + " ||", SELECTOR, false);
 			const attachments = scannedStyle.attachments;
 			const object = { "": scannedStyle.object };
 
@@ -149,8 +148,8 @@ function TAGSTYLE(
 
 	const object: Record<string, Record<string, object>> = {};
 	const diagnostics: _Support.Diagnostic[] = [];
-	const attachments: string[] = [];
 	const errors: string[] = [];
+	const attachments: string[] = [];
 	const variables = {};
 
 	let identity = { index: 0, class: '' };
@@ -158,82 +157,75 @@ function TAGSTYLE(
 	const debugclass = `${scope}${file.debugclassFront}\\:${raw.rowIndex}\\:${raw.colIndex}_${Use.string.normalize(raw.selector, [], [], forPackage ? ["$", "/"] : ["$"])}`;
 	const index_found =
 		IndexMap[classname]
-		|| CACHE.CLASS.PackageClass_Index[classname]
-		|| CACHE.CLASS.LibraryClass_Index[classname]
-		|| CACHE.CLASS.GlobalClass__Index[classname]
+		|| CACHE.CLASS.Package_Index[classname]
+		|| CACHE.CLASS.Library_Index[classname]
+		|| CACHE.CLASS.Global__Index[classname]
 		|| 0;
 
-	if (raw.selector === "") {
-		diagnostics.push({
-			error: "Classname missing declaration scope.",
-			source: [declaration]
-		});
-		errors.push($.MAKE(
-			$.tag.H6("Classname missing declaration scope.", $.preset.failed),
-			[declaration],
-			[$.list.Bullets, 0, []]
-		));
+	for (const subSelector in raw.styles) {
+		const query = HASHRULE.RENDER(subSelector, declaration);
+		if (!query.status) {
+			errors.push(query.error);
+			diagnostics.push(query.diagnostic);
+		}
+
+		const styleObj = SCANNER(
+			Use.code.uncomment.Script(raw.styles[subSelector]),
+			`${raw.scope} : ${file.filePath} ||`, `${raw.selector} => ${subSelector}`,
+			false
+		);
+		attachments.push(...styleObj.attachments);
+		Object.assign(variables, styleObj.variables);
+
+		if (Object.keys(styleObj).length) {
+			if (!object[query.rule]) {
+				object[query.rule] = {};
+			}
+			if (query.subSelector === "") {
+				Object.assign(object[query.rule], styleObj.object);
+			} else {
+				object[query.rule]["&" + query.subSelector] = styleObj.object;
+			}
+		}
+	}
+
+
+	if (index_found) {
+		const InStash = INDEX.FETCH(index_found);
+		InStash.metadata.declarations.push(declaration);
 	} else {
-		for (const subSelector in raw.styles) {
-			const query = HASHRULE.RENDER(subSelector, declaration);
-			if (!query.status) {
-				errors.push(query.error);
-				diagnostics.push(query.diagnostic);
-			}
+		const declarations = [declaration];
+		const style_snippet = SCANNER(
+			raw.element === CACHE.ROOT.customElements["stencil"] ? Use.code.uncomment.Script(raw.attachstring) : '',
+			`${raw.scope}:ATTACHMENT : ${file.filePath} ||`,
+			`${raw.selector}`,
+			true
+		);
+		attachments.push(...style_snippet.attachments);
+		Object.assign(variables, style_snippet.variables);
 
-			const styleObj = SCANNER(raw.styles[subSelector], `${raw.scope} : ${file.filePath} ||`, `${raw.selector} => ${subSelector}`);
-			attachments.push(...styleObj.attachments);
-			Object.assign(variables, styleObj.variables);
-
-			if (Object.keys(styleObj).length) {
-				if (!object[query.rule]) {
-					object[query.rule] = {};
-				}
-				if (query.subSelector === "") {
-					Object.assign(object[query.rule], styleObj.object);
-				} else {
-					object[query.rule]["&" + query.subSelector] = styleObj.object;
-				}
-			}
-		}
-
-
-		if (index_found) {
-			const InStash = INDEX.FETCH(index_found);
-			InStash.metadata.declarations.push(declaration);
-		} else {
-			const declarations = [declaration];
-			const style_snippet = SCANNER(
-				raw.element === CACHE.ROOT.customElements["stencil"] ? raw.attachstring : '',
-				`${raw.scope}:ATTACHMENT : ${file.filePath} ||`,
-				`${raw.selector}`
-			);
-			attachments.push(...style_snippet.attachments);
-			Object.assign(variables, style_snippet.variables);
-
-			identity = INDEX.DECLARE({
-				package: forPackage ? file.packageName : CACHE.STATIC.Archive.name,
-				scope: raw.scope,
-				selector: raw.selector,
-				object,
-				watchclass: '',
-				metadata: {
-					info: raw.comments,
-					variables,
-					skeleton: Use.object.skeleton(object),
-					declarations,
-					watchclass: '',
-					stencil: '',
-				},
-				attachments: forPackage ? attachments.map(attach => file.classFront + "$/" + attach) : attachments,
-				debugclass,
+		identity = INDEX.DECLARE({
+			package: forPackage ? file.packageName : CACHE.STATIC.Archive.name,
+			scope: raw.scope,
+			selector: raw.selector,
+			object,
+			watchclass: '',
+			metadata: {
+				info: raw.comments,
+				variables,
+				skeleton: Use.object.skeleton(object),
 				declarations,
-				attached_style: style_snippet.object,
-				attached_staple: raw.element === CACHE.ROOT.customElements["staple"] ? raw.attachstring : "",
-				attached_stencil: raw.element === CACHE.ROOT.customElements["stencil"] ? raw.attachstring : "",
-			});
-			IndexMap[classname] = identity.index;
-		}
+				watchclass: '',
+				stencil: '',
+			},
+			attachments: forPackage ? attachments.map(attach => file.classFront + "$/" + attach) : attachments,
+			debugclass,
+			declarations,
+			attached_style: style_snippet.object,
+			attached_staple: raw.element === CACHE.ROOT.customElements["staple"] ? raw.attachstring : "",
+			attached_stencil: raw.element === CACHE.ROOT.customElements["stencil"] ? raw.attachstring : "",
+		});
+		IndexMap[classname] = identity.index;
 	}
 
 	return {
@@ -246,7 +238,7 @@ function TAGSTYLE(
 }
 
 export default {
-	CSSLIBRARY,
-	CSSCANNER,
+	CSSCLUSTR: CSSCollectionScanner,
+	CSSCANNER: CSSFileScanner,
 	TAGSTYLE
 };

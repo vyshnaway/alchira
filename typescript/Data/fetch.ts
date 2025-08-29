@@ -31,56 +31,44 @@ export async function Initialize() {
 		await FILEMAN.clone.safe(CACHE.PATH.blueprint.scaffold.path, CACHE.PATH.folder.setup.path);
 		await FILEMAN.clone.safe(CACHE.PATH.blueprint.libraries.path, CACHE.PATH.folder.libraries.path);
 
-		$.POST(
-			$.MAKE(
-				$.tag.H2("Next Steps"),
-				[
-					"Adjust " +
-					$.FMT(CACHE.PATH.json.configure.path, $.style.AS_Bold, ...$.preset.primary) +
-					" according to the requirements of your project.",
-					"Execute " +
-					$.FMT('"init"', $.style.AS_Bold, ...$.preset.primary) +
-					" again to generate the necessary configuration folders.",
-					"During execution " +
-					$.FMT("{target}", $.style.AS_Bold, ...$.preset.primary) +
-					" folder will be cloned from " +
-					$.FMT("{source}", $.style.AS_Bold, ...$.preset.primary) +
-					" folder.",
-					"This folder will act as proxy for " + CACHE.ROOT.name + ".",
-					"In the " +
-					$.FMT("{target}/{stylesheet}", $.style.AS_Bold, ...$.preset.primary) +
-					", content from " +
-					$.FMT("{target}/{stylesheet}", $.style.AS_Bold, ...$.preset.primary) +
-					" will be appended.",
-				],
-				[$.list.Bullets, 0, []],
-			),
-		);
+		$.POST($$.ListSteps(
+			"Next Steps",
+			[
+				"Adjust " +
+				$.FMT(CACHE.PATH.json.configure.path, $.style.AS_Bold, ...$.preset.primary) +
+				" according to the requirements of your project.",
+				"Execute " +
+				$.FMT('"init"', $.style.AS_Bold, ...$.preset.primary) +
+				" again to generate the necessary configuration folders.",
+				"During execution " +
+				$.FMT("{target}", $.style.AS_Bold, ...$.preset.primary) +
+				" folder will be cloned from " +
+				$.FMT("{source}", $.style.AS_Bold, ...$.preset.primary) +
+				" folder.",
+				"This folder will act as proxy for " + CACHE.ROOT.name + ".",
+				"In the " +
+				$.FMT("{target}/{stylesheet}", $.style.AS_Bold, ...$.preset.primary) +
+				", content from " +
+				$.FMT("{target}/{stylesheet}", $.style.AS_Bold, ...$.preset.primary) +
+				" will be appended.",
+			],
+		));
 
-		$.POST(
-			$.MAKE(
-				$.tag.H2("Available Commands"),
-				$$.PropMap(CACHE.ROOT.commandList),
-				[$.list.Bullets, 0, []]
-			),
-		);
+		$.POST($$.ListRecord("Available Commands", CACHE.ROOT.Commands));
 
-		$.POST(
-			$.MAKE(
-				$.tag.H2("Publish command instructions."),
-				CACHE.ROOT.version === "0"
-					? ["This command uses an internet connection."]
-					: [
-						"Create a new project and use its access key. For action visit " +
-						$.FMT(CACHE.ROOT.URL.Console, $.style.AS_Bold, ...$.preset.primary),
-						"For personal projects, you can use the key in " +
-						$.FMT(CACHE.PATH.json.configure.path, $.style.AS_Bold, ...$.preset.primary),
-						"If using in CI/CD workflow, it is suggested to use " +
-						$.FMT("xcss publish {key}", $.style.AS_Bold, ...$.preset.primary),
-					],
-				[$.list.Bullets, 0, []]
-			),
-		);
+		$.POST($$.ListSteps(
+			"Publish command instructions.",
+			CACHE.ROOT.version === "0"
+				? ["This command is not activated."]
+				: [
+					"Create a new project and use its access key. For action visit " +
+					$.FMT(CACHE.ROOT.URL.Console, $.style.AS_Bold, ...$.preset.primary),
+					"For personal projects, you can use the key in " +
+					$.FMT(CACHE.PATH.json.configure.path, $.style.AS_Bold, ...$.preset.primary),
+					"If using in CI/CD workflow, it is suggested to use " +
+					$.FMT("xcss publish {key}", $.style.AS_Bold, ...$.preset.primary),
+				]
+		));
 
 		return $.tag.H5("Initialized directory", $.preset.success);
 	} catch (err) {
@@ -115,13 +103,13 @@ export async function VerifySetupStruct() {
 			}
 		}
 		$.TASK("Verification finished");
-
+		// Shell.js refactored till here >>>
 		result.started = true;
 		result.proceed = Object.keys(errors).length === 0;
 		result.report =
 			Object.keys(errors).length === 0
-				? $.MAKE($.tag.H6("Setup Healthy", $.preset.success))
-				: $.MAKE($.tag.H6("Error Paths", $.preset.failed), $$.PropMap(errors), [$.list.Bullets, 0, $.preset.failed]);
+				? $.MAKE($.tag.H5("Setup Healthy", $.preset.success))
+				: $.MAKE($.tag.H5("Error Paths", $.preset.failed), $$.ListProps(errors), [$.list.Bullets, 0, $.preset.failed]);
 	} else {
 		result.report = $.MAKE(
 			$.tag.H5("XCSS is not yet initialized in directory.", $.preset.warning),
@@ -188,7 +176,7 @@ export async function FetchStatics(vendorSource: string) {
 	ACTION.setVendors();
 }
 
-export async function VerifyConfigure(loadStatics: boolean) {
+export async function VerifyConfigs(loadStatics: boolean) {
 	$.TASK("Initializing configs", 0);
 	const errors: string[] = [], alerts: string[] = [];
 
@@ -199,11 +187,25 @@ export async function VerifyConfigure(loadStatics: boolean) {
 		if (loadStatics) { await FetchStatics(CONFIG.vendors); }
 		ACTION.setTWEAKS(CONFIG.tweaks);
 
-		CACHE.STATIC.ProxyMap = (Array.isArray(CONFIG.proxymap)) ? CONFIG.proxymap.reduce((acc, proxy) => {
-			if (typeof proxy === "object") {
-				acc.push(proxy);
+		CACHE.STATIC.ProxyMap = Array.isArray(CONFIG.proxy) ? CONFIG.proxy.reduce((A, I) => {
+			console.log(I)
+			if (
+				typeof I === "object"
+				&& typeof I.source === "string"
+				&& typeof I.target === "string"
+				&& typeof I.stylesheet === "string"
+				&& typeof I.extensions === "object"
+			) {
+				Object.entries(I.extensions).forEach(([K, V]) => {
+					if (Array.isArray(V)) {
+						I.extensions[K] = V.filter(e => typeof e === "string");
+					} else {
+						I.extensions[K] = [];
+					}
+				});
+				A.push(I);
 			}
-			return acc;
+			return A;
 		}, [] as _Config.ProxyMap[]) : [];
 
 		Object.assign(CACHE.STATIC.Archive, config.data);
@@ -236,21 +238,24 @@ export async function VerifyConfigure(loadStatics: boolean) {
 	$.TASK("Initialization finished");
 	return {
 		status: Object.keys(errors).length === 0,
-		report: Object.keys(errors).length === 0
-			? $.MAKE($.tag.H6("Configs Healthy", $.preset.success), alerts, [$.list.Bullets, 0, $.preset.success],)
-			: $.MAKE($.tag.H6("Error Paths", $.preset.failed), errors, [$.list.Bullets, 0, $.preset.failed]),
+		report: $.MAKE(
+			Object.keys(errors).length === 0
+				? $.tag.H5("Configs Healthy", $.preset.success)
+				: $.tag.H5("Error Paths", $.preset.failed)
+			, alerts, [$.list.Bullets, 0, $.preset.success]
+		)
 	};
 }
 
 
 
 
-export async function SaveRootCSS() {
+export async function SaveRootCss() {
 	$.TASK("Updating Index");
 	CACHE.STATIC.RootCSS = await WORKER.cssImport(Object.values(CACHE.PATH.css).map(css => css.path));
 }
 
-export async function SaveLibrary() {
+export async function SaveLibraries() {
 	$.TASK("Updating Library");
 	CACHE.STATIC.Library_Saved = await FILEMAN.read.bulk(CACHE.PATH.folder.libraries.path, ["css"]);
 }
@@ -262,7 +267,7 @@ export async function SavePackages() {
 
 
 
-export async function SaveProxies() {
+export async function SaveTargets() {
 	$.TASK("Syncing proxy folders", 0);
 	Object.keys(CACHE.STATIC.Targets_Saved).forEach((key) => delete CACHE.STATIC.Targets_Saved[key]);
 	CACHE.STATIC.Targets_Saved = await WORKER.proxyMapSync(CACHE.STATIC.ProxyMap);

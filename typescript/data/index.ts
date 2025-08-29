@@ -1,37 +1,37 @@
 import * as _Style from "../type/style.js";
 
-import { CLASS as CACHE_DYNAMIC } from "./cache.js";
+import * as CACHE from "./cache.js";
 import USE from "../utils/main.js";
 
 let NOW = 0;
 const BIN = new Set<number>();
 
 export function FETCH(index: number) {
-    return CACHE_DYNAMIC.Index_ClassData[index];
+    return CACHE.CLASS.Index_to_Data[index];
 }
 
 export function FIND(classname: string, includeTargets = false, localmap: _Style.ClassIndexMap = {}) {
     let index = 0;
     let group: _Style.Group = '';
 
-    if (CACHE_DYNAMIC.PackageClass_Index[classname]) {
-        index = CACHE_DYNAMIC.PackageClass_Index[classname];
+    if (CACHE.CLASS.Package_Index[classname]) {
+        index = CACHE.CLASS.Package_Index[classname];
         group = "PACKAGE";
-    } else if (CACHE_DYNAMIC.LibraryClass_Index[classname]) {
-        index = CACHE_DYNAMIC.LibraryClass_Index[classname];
+    } else if (CACHE.CLASS.Library_Index[classname]) {
+        index = CACHE.CLASS.Library_Index[classname];
         group = "LIBRARY";
-    } else if (CACHE_DYNAMIC.ArcbindClass_Index[classname]) {
-        index = CACHE_DYNAMIC.ArcbindClass_Index[classname];
+    } else if (CACHE.CLASS.Arcbind_Index[classname]) {
+        index = CACHE.CLASS.Arcbind_Index[classname];
         group = "ARCBIND";
     } else if (includeTargets) {
-        if (CACHE_DYNAMIC.ArchiveClass_Index[classname]) {
-            index = CACHE_DYNAMIC.ArchiveClass_Index[classname];
+        if (CACHE.CLASS.Archive_Index[classname]) {
+            index = CACHE.CLASS.Archive_Index[classname];
             group = "ARCHIVE";
-        } else if (CACHE_DYNAMIC.GlobalClass__Index[classname]) {
-            index = CACHE_DYNAMIC.GlobalClass__Index[classname];
+        } else if (CACHE.CLASS.Global__Index[classname]) {
+            index = CACHE.CLASS.Global__Index[classname];
             group = "GLOBAL";
-        } else if (CACHE_DYNAMIC.PublicClass__Index[classname]) {
-            index = CACHE_DYNAMIC.PublicClass__Index[classname];
+        } else if (CACHE.CLASS.Public__Index[classname]) {
+            index = CACHE.CLASS.Public__Index[classname];
             group = "PUBLIC";
         }
     } else if (localmap[classname]) {
@@ -47,7 +47,7 @@ export function DECLARE(object: _Style.Classdata) {
 
     const encounted = USE.string.enCounter(object.index + 768);
     object.watchclass = "____" + encounted;
-    CACHE_DYNAMIC.Index_ClassData[object.index] = object;
+    CACHE.CLASS.Index_to_Data[object.index] = object;
     return { index: object.index, class: object.watchclass };
 }
 
@@ -55,7 +55,7 @@ export function DISPOSE(...indexes: number[]) {
     indexes.forEach((index) => {
         if (index > 0) {
             BIN.add(index);
-            delete CACHE_DYNAMIC.Index_ClassData[index.toString()];
+            delete CACHE.CLASS.Index_to_Data[index.toString()];
         }
     });
 }
@@ -63,11 +63,11 @@ export function DISPOSE(...indexes: number[]) {
 export function RESET(after = 0) {
     after = after > 0 ? after : 0;
     let removed = 0;
-    Object.keys(CACHE_DYNAMIC.Index_ClassData).forEach((index) => {
+    Object.keys(CACHE.CLASS.Index_to_Data).forEach((index) => {
         const number = Number(index);
         if (number > after) {
             if (BIN.has(number)) { BIN.delete(number); }
-            delete CACHE_DYNAMIC.Index_ClassData[number];
+            delete CACHE.CLASS.Index_to_Data[number];
             removed++;
         }
     });

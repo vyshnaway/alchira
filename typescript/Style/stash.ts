@@ -5,16 +5,16 @@ import * as _Style from "../type/style.js";
 // import * as _Cache from "../type/cache.js";
 import * as _Support from "../type/support.js";
 
-import PARSE from "./parse.js";
+import * as $$ from "../shell.js";
+import * as INDEX from "../data/index.js";
+import * as CACHE from "../data/cache.js";
 
-import $ from "../shell/main.js";
 import Use from "../utils/main.js";
+import PARSE from "./parse.js";
 import Fileman from "../fileman.js";
 import FILING from "../data/filing.js";
 import SCRIPTFILE from "../script/file.js";
 
-import * as INDEX from "../data/index.js";
-import * as CACHE from "../data/cache.js";
 
 
 
@@ -34,13 +34,13 @@ function _DeletePackageFile(filePath: string) {
 
 
 function _ClearStash() {
-	Object.entries(CACHE.CLASS.LibraryClass_Index).forEach(([selector, index]) => {
+	Object.entries(CACHE.CLASS.Library_Index).forEach(([selector, index]) => {
 		INDEX.DISPOSE(index);
-		delete CACHE.CLASS.LibraryClass_Index[selector];
+		delete CACHE.CLASS.Library_Index[selector];
 	});
-	Object.entries(CACHE.CLASS.PackageClass_Index).forEach(([selector, index]) => {
+	Object.entries(CACHE.CLASS.Package_Index).forEach(([selector, index]) => {
 		INDEX.DISPOSE(index);
-		delete CACHE.CLASS.PackageClass_Index[selector];
+		delete CACHE.CLASS.Package_Index[selector];
 	});
 
 	Object.keys(CACHE.FILES.LIBRARIES).forEach((filePath) => _DeleteLibraryFile(filePath));
@@ -126,29 +126,34 @@ function ReRender() {
 	const packageChart: Record<string, string[]> = {};
 	const { PackageLookupTable, pacbindsArray, packagesArray } = _StackPackageFiles();
 
-
-	const PackageStyleSkeleton = packagesArray.reduce((collection, fileData) => {
+	const PackageSkeletons = packagesArray.reduce((collection, fileData) => {
 		const indexMetaCollection = collection[fileData.filePath] = {} as Record<string, _Style.Metadata>;
-		SCRIPTFILE(fileData).stylesList.forEach((style) => {
-			const response = PARSE.TAGSTYLE(style, fileData, CACHE.CLASS.PackageClass_Index);
-			const styleData = INDEX.FETCH(response.identity.index);
+		SCRIPTFILE(fileData).stylesList.forEach((tagStyle) => {
+			if (tagStyle.selector === "") {
+				const E = $$.GenerateError(`Missing Declaration: ${tagStyle.selector}`, [`${fileData.targetPath}:${tagStyle.rowIndex}:${tagStyle.colIndex}`]);
+				fileData.manifest.errors.push(E.error);
+				fileData.manifest.diagnostics.push(E.diagnostic);
+			} else {
+				const response = PARSE.TAGSTYLE(tagStyle, fileData, CACHE.CLASS.Package_Index);
+				const styleData = INDEX.FETCH(response.identity.index);
+				fileData.manifest.diagnostics.push(...response.diagnostics);
+				fileData.manifest.errors.push(...response.errors);
 
-			fileData.manifest.errors.push(...response.errors);
-			fileData.manifest.diagnostics.push(...response.diagnostics);
-
-			if (styleData.declarations.length === 1) {
-				fileData.styleData.usedIndexes.add(response.identity.index);
-				indexMetaCollection[response.classname] = styleData.metadata;
+				if (styleData.declarations.length === 1) {
+					fileData.styleData.usedIndexes.add(response.identity.index);
+					indexMetaCollection[response.classname] = styleData.metadata;
+				}
 			}
 		});
 		const classNames = Object.keys(indexMetaCollection);
-		if (classNames.length) { packageChart[`Package [${fileData.filePath}]: ${classNames.length} Classes`] = classNames; }
+		if (classNames.length) {
+			packageChart[`Package [${fileData.filePath}]: ${classNames.length} Classes`] = classNames;
+		}
 		return collection;
 	}, {} as Record<string, Record<string, _Style.Metadata>>);
 
-
-	const PacbindStyleSkeleton = pacbindsArray.reduce((collection, fileData) => {
-		const result = PARSE.CSSLIBRARY([fileData], fileData.manifest.refer.group, true);
+	const PacbindSkeletons = pacbindsArray.reduce((collection, fileData) => {
+		const result = PARSE.CSSCLUSTR([fileData], fileData.manifest.refer.group, true);
 		collection[Fileman.path.join(CACHE.PATH.folder.packages.path, fileData.filePath)] = result.indexMetaCollection;
 		if (result.selectorList.length) {
 			pacbindChart[`Pacbind [${fileData.filePath}]: ${result.selectorList.length} Classes`] = result.selectorList;
@@ -157,10 +162,8 @@ function ReRender() {
 	}, {} as Record<string, Record<string, _Style.Metadata>>);
 
 
-
 	const PackageErrors: string[] = [];
 	const PackageDiagnostics: _Support.Diagnostic[] = [];
-
 
 	Object.values(packagesArray).forEach(file => {
 		PackageErrors.push(...file.manifest.errors);
@@ -173,43 +176,28 @@ function ReRender() {
 	});
 
 
-	Object.values(CACHE.CLASS.PackageClass_Index).forEach((index) => {
+	Object.values(CACHE.CLASS.Package_Index).forEach((index) => {
 		const InStash = INDEX.FETCH(index);
 		if (InStash.metadata.declarations.length > 1) {
-			PackageErrors.push(
-				$.MAKE(
-					$.tag.H6("Duplicate Package declarations: ", $.preset.warning),
-					InStash.declarations,
-					[$.list.Bullets, 0, []]
-				),
-			);
-			PackageDiagnostics.push({
-				error: "Duplicate Package declarations: " + InStash.selector,
-				source: InStash.declarations,
-
-			});
+			const E = $$.GenerateError(`"Duplicate Declarations: ${InStash.selector}`, InStash.declarations);
+			PackageErrors.push(E.error);
+			PackageDiagnostics.push(E.diagnostic);
 		}
 	});
 
 
 	const nameCollitions = Object.values(CACHE.FILES.PACKAGES).reduce((A, F) => {
-		if (CACHE.STATIC.Archive.name === F.packageName) { A.push(F.sourcePath); }
+		if (CACHE.STATIC.Archive.name === F.packageName) { A.push(F.filePath); }
 		return A;
 	}, [] as string[]);
 
 	if (nameCollitions.length) {
-		PackageErrors.push(
-			$.MAKE(
-				$.tag.H6(`Package-name collitions: ${CACHE.STATIC.Archive.name}`, $.preset.warning),
-				nameCollitions,
-				[$.list.Bullets, 0, []]
-			)
-		);
-		PackageDiagnostics.push({
-			error: `Package-name collitions: ${CACHE.STATIC.Archive.name}`,
-			source: nameCollitions
-		});
+		const E = $$.GenerateError(`Package-name collitions: ${CACHE.STATIC.Archive.name}`, nameCollitions);
+		PackageErrors.push(E.error);
+		PackageDiagnostics.push(E.diagnostic);
 	}
+
+
 
 
 
@@ -219,8 +207,8 @@ function ReRender() {
 	const { LibraryLookupTable, axiomsArray, clustersArray } = _StackLibraryFiles();
 
 
-	const AxiomStyleSkeleton = axiomsArray.reduce((collection: Record<string, Record<string, _Style.Metadata>>, fileData, index) => {
-		const result = PARSE.CSSLIBRARY(fileData, "AXIOM");
+	const AxiomSkeletons = axiomsArray.reduce((collection: Record<string, Record<string, _Style.Metadata>>, fileData, index) => {
+		const result = PARSE.CSSCLUSTR(fileData, "AXIOM");
 		collection[index] = result.indexMetaCollection;
 		if (result.selectorList.length) {
 			axiomChart[`Level ${index}: ${result.selectorList.length} Classes`] = result.selectorList;
@@ -228,11 +216,12 @@ function ReRender() {
 		return collection;
 	}, {});
 
-
-	const ClusterStyleSkeleton = clustersArray.reduce((collection: Record<string, Record<string, _Style.Metadata>>, level, index) => {
-		const result = PARSE.CSSLIBRARY(level, "CLUSTER");
+	const ClusterSkeletons = clustersArray.reduce((collection: Record<string, Record<string, _Style.Metadata>>, level, index) => {
+		const result = PARSE.CSSCLUSTR(level, "CLUSTER");
 		collection[index] = result.indexMetaCollection;
-		if (result.selectorList.length) { clusterChart[`Level ${index}: ${result.selectorList.length} Classes`] = result.selectorList; }
+		if (result.selectorList.length) {
+			clusterChart[`Level ${index}: ${result.selectorList.length} Classes`] = result.selectorList;
+		}
 		return collection;
 	}, {});
 
@@ -242,48 +231,37 @@ function ReRender() {
 	const LibraryDiagnostics: _Support.Diagnostic[] = [];
 
 
-	Object.values(CACHE.CLASS.LibraryClass_Index).forEach((index) => {
+	Object.values(CACHE.CLASS.Library_Index).forEach((index) => {
 		const InStash = INDEX.FETCH(index);
 		if (InStash.declarations.length > 1) {
-			LibraryErrors.push(
-				$.MAKE(
-					$.tag.H4("Duplicate Library declarations: " + InStash.selector, $.preset.warning),
-					InStash.declarations,
-					[$.list.Bullets, 0, []],
-				),
-			);
-			LibraryDiagnostics.push({
-				error: "Duplicate Library declarations: " + InStash.selector,
-				source: InStash.declarations,
-
-			});
+			const E = $$.GenerateError(`Duplicate Declarations: ${InStash.selector}`, InStash.declarations);
+			LibraryErrors.push(E.error);
+			LibraryDiagnostics.push(E.diagnostic);
 		}
 	});
 
 
-	const template = (heading: string, items: Record<string, string[]>) => $.MAKE(
-		$.tag.H2(heading, $.preset.primary),
-		Object.entries(items).map(([heading, entries]) =>
-			$.MAKE(
-				$.tag.H2(heading, $.preset.tertiary),
-				entries,
-				[$.list.Catalog, 0, $.preset.tertiary]
-			),
-		)
-	);
-
 	const LibraryReport = [
-		template(`Axioms: ${Object.values(ClusterStyleSkeleton).reduce((a, v) => a += Object.keys(v).length, 0)}`, axiomChart),
-		template(`Clusters: ${Object.values(PacbindStyleSkeleton).reduce((a, v) => a += Object.keys(v).length, 0)}`, clusterChart),
+		$$.ClassChart(
+			`Axioms: ${Object.values(ClusterSkeletons).reduce((a, v) => a += Object.keys(v).length, 0)}`,
+			axiomChart
+		),
+		$$.ClassChart(
+			`Clusters: ${Object.values(PacbindSkeletons).reduce((a, v) => a += Object.keys(v).length, 0)}`,
+			clusterChart
+		),
 	].join("");
-
 
 	const PackageReport = [
-		template(`Pacbinds: ${Object.values(PackageStyleSkeleton).reduce((a, v) => a += Object.keys(v).length, 0)}`, pacbindChart),
-		template(`Packages: ${Object.values(PacbindStyleSkeleton).reduce((a, v) => a += Object.keys(v).length, 0)}`, packageChart),
+		$$.ClassChart(
+			`Pacbinds: ${Object.values(PackageSkeletons).reduce((a, v) => a += Object.keys(v).length, 0)}`,
+			pacbindChart
+		),
+		$$.ClassChart(
+			`Packages: ${Object.values(PacbindSkeletons).reduce((a, v) => a += Object.keys(v).length, 0)}`,
+			packageChart
+		),
 	].join("");
-
-
 
 
 
@@ -296,10 +274,10 @@ function ReRender() {
 	CACHE.DELTA.Diagnostics.library = LibraryDiagnostics;
 	CACHE.DELTA.Diagnostics.package = PackageDiagnostics;
 
-	CACHE.DELTA.Manifest.AXIOM = AxiomStyleSkeleton;
-	CACHE.DELTA.Manifest.CLUSTER = ClusterStyleSkeleton;
-	CACHE.DELTA.Manifest.PACKAGE = PackageStyleSkeleton;
-	CACHE.DELTA.Manifest.PACBIND = PacbindStyleSkeleton;
+	CACHE.DELTA.Manifest.AXIOM = AxiomSkeletons;
+	CACHE.DELTA.Manifest.CLUSTER = ClusterSkeletons;
+	CACHE.DELTA.Manifest.PACKAGE = PackageSkeletons;
+	CACHE.DELTA.Manifest.PACBIND = PacbindSkeletons;
 
 	CACHE.DELTA.Lookup.library = LibraryLookupTable;
 	CACHE.DELTA.Lookup.package = PackageLookupTable;
@@ -309,8 +287,8 @@ function ReRender() {
 
 
 function ReDeclare() {
-	Object.values(CACHE.CLASS.LibraryClass_Index).forEach((val) => {
-		const value = CACHE.CLASS.Index_ClassData[val];
+	Object.values(CACHE.CLASS.Library_Index).forEach((val) => {
+		const value = CACHE.CLASS.Index_to_Data[val];
 		value.metadata.declarations = [...value.declarations];
 	});
 }
@@ -321,7 +299,7 @@ function Appendix(indexes: number[] = []) {
 	const stash: Record<string, { readme: string[], pacbind: number[], package: number[] }> = {};
 
 	if (!CACHE.STATIC.WATCH) {
-		const usedPackages = Object.values(CACHE.CLASS.PackageClass_Index).filter(i => indexes.includes(i))
+		const usedPackages = Object.values(CACHE.CLASS.Package_Index).filter(i => indexes.includes(i))
 			.reduce((a, c) => { a.add(INDEX.FETCH(c).package); return a; }, new Set());
 
 		Object.values(CACHE.FILES.PACKAGES).forEach((F) => {

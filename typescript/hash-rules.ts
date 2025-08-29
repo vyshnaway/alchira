@@ -1,114 +1,81 @@
-import $ from "./shell/main.js";
 import * as $$ from "./shell.js";
-import * as _support from "./type/support.js";
 import * as CACHE from "./data/cache.js";
 
-const hashPattern = /#\{[a-z0-9]+\}/i;
+const hashPattern = /#\{[a-z0-9-]+\}/i;
 
-function IMPORT(string: string, watchUndef = true, sourcePath = "") {
-	const response: {
-		status: boolean,
+function IMPORT(rule: string, watchUndef = true, source = CACHE.PATH.json.hashrules.path) {
+	const primitive = rule;
+	const recursionSequence: string[] = [];
+	const preview: Record<string, string> = {};
+
+	const response = (
 		result: string,
-		error: string,
-		diagnostic: _support.Diagnostic
-	} = {
-		status: true,
-		result: "",
-		error: "",
-		diagnostic: {
-			error: '',
-			source: [sourcePath]
-		}
+		cause = '',
+		message = '',
+	) => {
+		const E = $$.HashruleError(
+			primitive,
+			cause,
+			source,
+			message,
+			preview
+		);
+
+		return {
+			status: message.length === 0,
+			result,
+			error: E.error,
+			diagnostic: E.diagnostic
+		};
 	};
 
 	let hashMatch;
-	const source = string;
-	const recursionPreview: Record<string, string> = {};
-	const recursionSequence: string[] = [];
-
-	const errors = {
-		recursionLoop: (recursionPreview: Record<string, string>, cause: string) => {
-			response.status = false;
-			recursionPreview["ERROR BY"] = $.FMT(cause, $.style.AS_Bold, $.style.TC_Normal_Red);
-			response.error = $.MAKE(
-				$.tag.H6(source + $.FMT(" : Hashrule recursion loop.", $.style.TB_Normal_Yellow)),
-				$$.PropMap(recursionPreview),
-				[$.list.Waterfall, 0, []],
-			);
-			response.diagnostic.error = $.MAKE(
-				$.tag.H6(source + " : Hashrule recursion loop."),
-				$$.PropMap(recursionPreview),
-				[$.list.Waterfall, 0, []],
-			);
-			return response;
-		},
-		undefinedHash: (recursionPreview: Record<string, string>, cause: string) => {
-			response.status = false;
-			recursionPreview["ERROR BY"] = $.FMT(cause, $.style.AS_Bold, $.style.TC_Normal_Red);
-			response.error = $.MAKE(
-				$.tag.H6(source + $.FMT(" : Undefined hashrule.", $.style.TB_Normal_Yellow)),
-				$$.PropMap(recursionPreview),
-				[$.list.Waterfall, 0, []],
-			);
-			response.diagnostic.error = $.MAKE(
-				$.tag.H6(source + " : Undefined hashrule."),
-				$$.PropMap(recursionPreview),
-				[$.list.Waterfall, 0, []],
-			);
-			return response;
-		},
-	};
-
-	while ((hashMatch = hashPattern.exec(string))) {
+	while ((hashMatch = hashPattern.exec(rule))) {
 		const hash = hashMatch[0];
 		const key = hash.slice(2, -1);
 		const replacement = watchUndef
 			? CACHE.CLASS.HashRule[key]
 			: (CACHE.CLASS.HashRule[key] ?? hash);
-		recursionPreview["FROM " + hash] = `GETS ${replacement} FROM ${string}`;
+		preview["FROM " + hash] = `GETS ${replacement} FROM ${rule}`;
 
 		if (replacement === undefined) {
-			return errors.undefinedHash(recursionPreview, hash);
+			return response('', hash, "Undefined Hashrule.");
 		}
 		if (recursionSequence.includes(hash)) {
-			return errors.recursionLoop(recursionPreview, hash);
+			return response('', hash, "Hashrule recursion loop.");
 		}
-		string = string.replace(hashPattern, replacement);
+		rule = rule.replace(hashPattern, replacement);
 
 		recursionSequence.push(hash);
 	}
 
-	response.result = string;
-	return response;
+	return response(rule);
 }
 
 function UPLOAD() {
-	const hashrule = CACHE.STATIC.HashRule;
-	const hashruleErrors: string[] = [];
+	const hashrules = CACHE.STATIC.HashRule;
+	const errors: string[] = [];
 
-	CACHE.CLASS.HashRule = { ...hashrule };
-	Object.keys(hashrule).map((key) => {
-		const hash = "#" + key;
+	CACHE.CLASS.HashRule = { ...hashrules };
+	Object.keys(hashrules).map((key) => {
+		const hash = `#{${key}}`;
 		const response = IMPORT(hash);
-		if (typeof hashrule[key] === "string") {
+		if (typeof hashrules[key] === "string") {
 			if (response.status) {
-				hashrule[key] = response.result;
+				hashrules[key] = response.result;
 			} else {
-				delete hashrule[key];
-				hashruleErrors.push(response.error);
+				delete hashrules[key];
+				errors.push(response.error);
 			}
 		}
 	});
-	CACHE.CLASS.HashRule = hashrule;
 
-	return $.MAKE("", [
-		$.tag.H2("Active Hashrules", $.preset.primary),
-		$.MAKE("", $$.PropMap(hashrule), [$.list.Bullets, 0, []]),
-		...(hashruleErrors.length ? [$.MAKE($.tag.H5("Invalid Hashrules", $.preset.failed), hashruleErrors)] : []),
-	]);
+	CACHE.CLASS.HashRule = hashrules;
+
+	return $$.HashruleReport(hashrules, errors);
 }
 
-function RENDER(string: string, sourcePath = "") {
+function RENDER(string: string, sourcePath:string) {
 	const extended = IMPORT(string, true, sourcePath);
 	string = extended.result;
 	const length = string.length;
@@ -167,7 +134,7 @@ function RENDER(string: string, sourcePath = "") {
 		rule: (finalRule === "_" || finalRule === "-") ? "" : finalRule,
 		subSelector: (subSelector === "_" || subSelector === "-") ? "" : subSelector,
 		status: extended.status,
-		error: extended.error + $.tag.Li(sourcePath) + "\n",
+		error: extended.error,
 		diagnostic: extended.diagnostic
 	};
 }

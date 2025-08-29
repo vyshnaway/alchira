@@ -5,8 +5,8 @@ import * as _Style from "../type/style.js";
 // import * as _Cache from "../type/cache.js";
 // import * as _Support from "../type/support.js";
 
-
 import * as CACHE from "../data/cache.js";
+
 import Use from "../utils/main.js";
 
 const OPEN_CHARS = ["{", "[", "("];

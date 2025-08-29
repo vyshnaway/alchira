@@ -1,7 +1,7 @@
 import FN from "./parse.js";
 
 console.log(
-  FN.CSSLIBRARY([
+  FN.CSSCLUSTR([
     // {
     //   stamp: "$",
     //   filePath: "filePath",

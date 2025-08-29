@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/naming-convention */
-import TARGET from "../script/class.js";
+import C_Target from "../script/class.js";
 import * as _support from "./support.js";
 import * as _style from "./style.js";
 import * as _config from "./config.js";
@@ -11,13 +11,19 @@ export interface ROOT {
     version: string,
     website: string,
     vendors: string[],
-    commandList: Record<string, string>,
-    exposedCommands: string[]
+    Commands: Record<string, string>,
     defaultTweaks: _config.Tweaks,
     customElements: Record<string, string>,
     customOperations: Record<string, string>
     customAtrules: Record<string, string>
-    URL: Record<string, string>,
+    URL: {
+        Cdn: string,
+        Site: string,
+        Worker: string,
+        Console: string,
+        PrefixCdn: string,
+        PackageCdn: string,
+    }
 }
 
 export interface PREFIX {
@@ -98,13 +104,13 @@ export interface STATIC {
 
 export interface CLASS {
     HashRule: Record<string, string>,
-    Index_ClassData: Record<string, _style.Classdata>,
-    GlobalClass__Index: _style.ClassIndexMap,
-    PublicClass__Index: _style.ClassIndexMap,
-    ArchiveClass_Index: _style.ClassIndexMap,
-    ArcbindClass_Index: _style.ClassIndexMap,
-    LibraryClass_Index: _style.ClassIndexMap,
-    PackageClass_Index: _style.ClassIndexMap,
+    Index_to_Data: Record<string, _style.Classdata>,
+    Global__Index: _style.ClassIndexMap,
+    Public__Index: _style.ClassIndexMap,
+    Archive_Index: _style.ClassIndexMap,
+    Arcbind_Index: _style.ClassIndexMap,
+    Library_Index: _style.ClassIndexMap,
+    Package_Index: _style.ClassIndexMap,
     Sync_PublishIndexMap: _style.ClassIndexMap,
     Sync_ClassDictionary: _style.Dictionary,
 };
@@ -112,5 +118,5 @@ export interface CLASS {
 export interface FILES {
     LIBRARIES: Record<string, _file.Storage>,
     PACKAGES: Record<string, _file.Storage>,
-    TARGET: Record<string, TARGET>,
+    TARGET: Record<string, C_Target>,
 }

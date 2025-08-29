@@ -37,7 +37,7 @@ function resolveGroup(
 }
 
 export default function FILING(
-	fileGroup: "index" | "library" | "package" | "target",
+	fileGroup: "library" | "package" | "target",
 	filePath: string,
 	content: string,
 	target = '',
@@ -98,7 +98,7 @@ export default function FILING(
 			styleTagReplaces: [],
 			stapleTagReplaces: [],
 		},
-		content: (fromXtylesFolder && extension === "css") ? USE.code.uncomment.Css(content) : content,
+		content: content,
 		midway: "",
 	};
 

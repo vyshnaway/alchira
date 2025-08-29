@@ -82,7 +82,7 @@ export interface Storage {
         globalClasses: _style.ClassIndexMap,
         publicClasses: _style.ClassIndexMap,
         styleMap: ClassMetaMap,
-        styleTagReplaces: [number, number][],
-        stapleTagReplaces: [number, number][],
+        styleTagReplaces: number[],
+        stapleTagReplaces: number[],
     }
 }

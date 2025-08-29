@@ -32,7 +32,7 @@ export function H2(content = '', presets: string[] = [], ...styles: string[]) {
 }
 
 export function H3(content = '', presets: string[] = [], ...styles: string[]) {
-  return root.fmt(["", content, root.canvas.divider.mid, ""].join("\n"), ...presets, ...styles);
+  return root.fmt(["", content, root.canvas.divider.mid].join("\n"), ...presets, ...styles);
 }
 
 export function H4(content = '', presets: string[] = [], ...styles: string[]) {
@@ -40,10 +40,6 @@ export function H4(content = '', presets: string[] = [], ...styles: string[]) {
 }
 
 export function H5(content = '', presets: string[] = [], ...styles: string[]) {
-  return root.fmt([content, ""].join("\n"), ...presets, ...styles);
-}
-
-export function H6(content = '', presets: string[] = [], ...styles: string[]) {
   return root.fmt([content + root.canvas.tab + root.canvas.divider.mid[0].repeat(root.canvas.width() - root.canvas.tab.length - content.length), ""].join("\n"), ...presets, ...styles);
 }
 

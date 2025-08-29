@@ -20,7 +20,7 @@ interface Base {
 export interface Raw extends Base {
     vendors: string,
     packages: Record<string, string>,
-    proxymap: ProxyMap[],
+    proxy: ProxyMap[],
     tweaks: Tweaks
 }
 
