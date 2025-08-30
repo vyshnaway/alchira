@@ -89,20 +89,18 @@ export async function VerifySetupStruct() {
 		await FILEMAN.clone.safe(CACHE.PATH.blueprint.scaffold.path, CACHE.PATH.folder.setup.path);
 
 		$.TASK("Verifying directory status", 0);
-		for (const item of Object.values(CACHE.PATH.css)) {
+		for (const item of [
+			...Object.values(CACHE.PATH.json),
+			...Object.values(CACHE.PATH.css),
+			...Object.values(CACHE.PATH.md),
+		]) {
 			const path = item.path;
 			$.STEP("Path : " + path);
 			if (!FILEMAN.path.ifFile(path)) {
 				errors[path] = "File not found.";
 			}
 		}
-		for (const item of Object.values(CACHE.PATH.json)) {
-			const path = item.path;
-			$.STEP("Path : " + path);
-			if (!FILEMAN.path.ifFile(path)) {
-				errors[path] = "File not found.";
-			}
-		}
+
 		$.TASK("Verification finished");
 		// Shell.js refactored till here >>>
 		result.started = true;

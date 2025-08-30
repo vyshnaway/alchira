@@ -3,7 +3,7 @@ export type Tweaks = Record<string, string | boolean>;
 export interface ProxyMap {
     source: string,
     target: string,
-    stylesheet: '',
+    stylesheet: string,
     extensions: Record<string, string[]>,
 }
 

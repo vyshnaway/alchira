@@ -145,7 +145,7 @@ function _objectCompose(
 
 
 
-function ComposePrefixed(array: [string, string | object][], minify: boolean) {
+function ComposePrefixed(array: [string, string | object][], minify = !CACHE.STATIC.DEBUG) {
 	const styleSheet: string[] = [];
 
 	array.forEach(([key, value]) => {
@@ -163,7 +163,7 @@ function ComposePrefixed(array: [string, string | object][], minify: boolean) {
 }
 
 
-function ComposeArchive(selectorObjectArray: [string, object | string][] = [], tab = "  ") {
+function ComposeArchived(selectorObjectArray: [string, object | string][] = [], tab = "  ") {
 	const styleSheet: string[] = [];
 
 	selectorObjectArray.forEach(([key, value]) => {
@@ -172,7 +172,7 @@ function ComposeArchive(selectorObjectArray: [string, object | string][] = [], t
 				styleSheet.push(
 					key,
 					"{",
-					...ComposeArchive(Object.entries(value), tab).map((i) => tab + i),
+					...ComposeArchived(Object.entries(value), tab).map((i) => tab + i),
 					"}",
 				);
 			}
@@ -187,11 +187,11 @@ function ComposeArchive(selectorObjectArray: [string, object | string][] = [], t
 }
 
 
-function ComposeSwitched(selectorIndexObject: Record<string, number>, minify: boolean) {
+function ComposeSwitched(selectorIndexObject: Record<string, number>, minify = !CACHE.STATIC.DEBUG) {
 	const object = Object.entries(styleSwitch(
 		Object.entries(selectorIndexObject).reduce((A: Record<string, Record<string, object>>, [selector, index]) => {
 			const imported = INDEX.FETCH(index);
-			A[selector] = imported.object;
+			A[selector] = imported.style_object;
 			return A;
 		}, {}),
 	));
@@ -200,7 +200,7 @@ function ComposeSwitched(selectorIndexObject: Record<string, number>, minify: bo
 }
 
 export default {
-	Packaged: ComposeArchive,
+	Archived: ComposeArchived,
 	Prefixed: ComposePrefixed,
 	Switched: ComposeSwitched,
 };

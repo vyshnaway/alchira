@@ -50,7 +50,7 @@ export function SetENV(rootPath: string, workPath: string, packageEssential: _Su
             });
         } else {
             Object.values(groupPaths).forEach((source) => {
-                source.path = FILEMAN.path.join(CACHE.STATIC.WorkPath, ...source.frags);
+                source.path = FILEMAN.path.join(...source.frags);
             });
         }
     });

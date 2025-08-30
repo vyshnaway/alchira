@@ -20,7 +20,7 @@ import * as ACTION from "./data/action.js";
 // import { FetchPortables, SplitGlobalForComponents } from "./portable.js";
 
 function reporter(heading: string, targets: string[], report: string) {
-    $.POST(
+    $.render.write(
         $.MAKE("", [
             $.MAKE(
                 $.tag.H1(heading, $.preset.primary),
@@ -33,7 +33,8 @@ function reporter(heading: string, targets: string[], report: string) {
                 CACHE.STATIC.Tweaks.CacheUsage ? ACTION.GetCacheUsage() : [],
                 [$.list.Catalog, 0, $.preset.tertiary]
             ),
-        ]),
+        ])
+        // , CACHE.STATIC.WATCH ? -1 : 0
     );
 }
 
@@ -183,7 +184,7 @@ async function execute(chapter: string) {
                                         break;
                                     default:
                                         if (
-                                            pathFromWork.startsWith(CACHE.PATH.folder.library.path)
+                                            pathFromWork.startsWith(CACHE.PATH.folder.libraries.path)
                                             && event.extension === "css"
                                         ) {
                                             CACHE.STATIC.Library_Saved[pathFromWork] = event.fileContent;

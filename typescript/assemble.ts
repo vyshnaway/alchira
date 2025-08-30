@@ -25,18 +25,20 @@ export function UpdateXtylesFolder() {
 	CACHE.DELTA.Manifest.prefix = CACHE.STATIC.Archive.name;
 	Object.assign(CACHE.CLASS, {
 		HashRule: {},
-		Index_ClassData: {},
-		NativeClass__Index: {},
-		GlobalClass__Index: {},
-		PublicClass__Index: {},
-		LibraryClass_Index: {},
-		PackageClass_Index: {},
-		Computed_ClassMaps: {}
+		Index_to_Data: {},
+		Global__Index: {},
+		Public__Index: {},
+		Archive_Index: {},
+		Arcbind_Index: {},
+		Library_Index: {},
+		Package_Index: {},
+		Sync_PublishIndexMap: {},
+		Sync_ClassDictionary: {},
 	});
 	Object.assign(CACHE.FILES, {
-		PROXYCACHE: {},
 		LIBRARIES: {},
-		PORTABLES: {},
+		PACKAGES: {},
+		TARGET: {},
 	});
 	XTYLES.ReRender();
 }
@@ -235,34 +237,30 @@ function GenFinalSheets(ATTACHMENTS: Set<number>) {
 		Appendix: "",
 	};
 
-	const targetRenderAction: _Script.Actions = (CACHE.STATIC.Command === "debug") ? "monitor"
-		: (CACHE.STATIC.Command === "preview" && CACHE.STATIC.Argument === "watch") ? "watch" : "sync";
-	Object.values(CACHE.FILES.TARGET).forEach((cache) => cache.RenderFiles(targetRenderAction));
 
-	RENDERFRAGS.Class = COMPILE.Prefixed(
-		Object.entries(CACHE.CLASS.Sync_PublishIndexMap).map(([K, V]) => [K, INDEX.FETCH(V)]),
-		CACHE.STATIC.DEBUG
-	);
-
-
-	const indexScanned = STYLE.CSSCANNER(Use.code.uncomment.Css(CACHE.STATIC.RootCSS), "INDEX ||");
-	indexScanned.attachments.forEach((attachment) => ATTACHMENTS.add(INDEX.FIND(attachment, false).index));
-	const INDEXSHEET = RENDERFRAGS.Root = COMPILE.Prefixed(indexScanned.object, CACHE.STATIC.DEBUG);
-
+	const indexScanned = STYLE.CSSFileScanner(Use.code.uncomment.Css(CACHE.STATIC.RootCSS), "INDEX ||");
 	CACHE.DELTA.Manifest.constants = Object.keys(indexScanned.constants);
-	CACHE.DELTA.Report.constants = $$.BulletCatalog("Root Constants", CACHE.DELTA.Manifest.constants);
+	CACHE.DELTA.Report.constants = $$.ListCatalog("Root Constants", CACHE.DELTA.Manifest.constants);
+	indexScanned.attachments.forEach((attachment) => ATTACHMENTS.add(INDEX.FIND(attachment, false).index));
+	const INDEXSHEET = RENDERFRAGS.Root = COMPILE.Prefixed(indexScanned.styles);
+
+
+	const targetRenderAction: _Script._Actions = (CACHE.STATIC.Command === "debug") ? _Script._Actions.monitor
+		: (CACHE.STATIC.Command === "preview" && CACHE.STATIC.Argument === "watch") ? _Script._Actions.watch : _Script._Actions.sync;
+	Object.values(CACHE.FILES.TARGET).forEach((cache) => cache.RenderFiles(targetRenderAction));
+	RENDERFRAGS.Class = COMPILE.Prefixed(Object.entries(CACHE.CLASS.Sync_PublishIndexMap).map(([K, V]) => [K, INDEX.FETCH(V)]));
 
 
 	RENDERFRAGS.Appendix = COMPILE.Prefixed(
 		Object.values(CACHE.FILES.TARGET).reduce((appendix, cache) => {
-			const appendixScanned = STYLE.CSSCANNER(
+			const appendixScanned = STYLE.CSSFileScanner(
 				cache.stylesheetContent,
 				`APPENDIX : ${cache.targetStylesheet} ||`
 			);
-			appendix.push(...appendixScanned.object);
+			appendix.push(...appendixScanned.styles);
 			appendixScanned.attachments.forEach((i) => ATTACHMENTS.add(INDEX.FIND(i).index));
 			return appendix;
-		}, [] as [string, string | object][]), !CACHE.STATIC.DEBUG
+		}, [] as [string, string | object][])
 	);
 
 
@@ -275,19 +273,30 @@ function GenFinalSheets(ATTACHMENTS: Set<number>) {
 		return ClassData.attached_style;
 	});
 
-	RENDERFRAGS.Attach = COMPILE.Prefixed(Object.entries(ATTACH_OBJECTS), !CACHE.STATIC.DEBUG);
+	RENDERFRAGS.Attach = CACHE.STATIC.Command === "publish"
+		? COMPILE.Prefixed(Object.entries(ATTACH_OBJECTS))
+		: COMPILE.Prefixed(Object.values(CACHE.CLASS.Index_to_Data).reduce((A, C) => {
+			return A;
+		}, [] as [string, string | object][]));
 
+
+
+	const WATCHSHEET = `CACHE.STATIC.WATCH
+		? COMPILE.Switched(
+			Object.values(CACHE.CLASS.Index_to_Data).reduce((A, D) => {
+				A.push(['.'+D.watchclass, D.object]);
+				return A;
+			}, [] as [string, object][])
+		) : ''; Object.entries(D.attached_style)`;
+
+	const STAPLESHEET = CACHE.STATIC.WATCH ? RENDERFRAGS.Attach : "";
 
 
 	const STYLESHEET = Object.entries(RENDERFRAGS).map(([chapter, content]) =>
 		CACHE.STATIC.DEBUG ? `\n\n/* CHAPTER: ${chapter} */\n${content}\n` : content).join("");
-	const STAPLESHEET = ATTACH_STAPLES.join("\n");
+
 	const STYLETAG = `<style>${STYLESHEET}</style>`;
-	const WATCHSHEET = CACHE.STATIC.WATCH
-		? COMPILE.Prefixed(Object.values(CACHE.CLASS.Index_to_Data).reduce((A, D) => {
-			A.push([D.watchclass, D.object], Object.entries(D.attached_style) as [string, string | object]);
-			return A;
-		}, [] as [string, string | object][]), !CACHE.STATIC.DEBUG) : '';
+
 
 	return { RENDERFRAGS, STYLESHEET, STYLETAG, STAPLESHEET, INDEXSHEET, WATCHSHEET };
 }
@@ -331,7 +340,7 @@ export async function Generate() {
 				return A;
 			}, {} as Record<string, string>);
 
-			memChart["FINAL-SIZE"] = `${Use.string.stringMem(STYLESHEET)} Kb`.padStart(9, " ");
+			memChart[`[final.css]`] = `${Use.string.stringMem(STYLESHEET)} Kb`.padStart(9, " ");
 
 			CACHE.DELTA.Report.memChart = $.MAKE(
 				$.tag.H2(CACHE.DELTA.FinalMessage, CACHE.DELTA.ErrorCount ? $.preset.failed : $.preset.success),

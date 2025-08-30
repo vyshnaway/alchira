@@ -2,19 +2,31 @@
 import * as _support from "./support.js";
 import * as _style from "./style.js";
 
-export type Group = ""
-    | "PACKAGE"
-    | "PACBIND"
-    | "STYLESHEET"
-    | "AXIOM"
-    | "CLUSTER"
-    | "LOCAL"
-    | "GLOBAL"
-    | "TARGET"
-    | "README";
+export enum _Type {
+    NULL = 0,
+    PACKAGE = 1,
+    PACBIND = 2,
+    AXIOM = 3,
+    CLUSTER = 4,
+    TARGET = 5,
+    STYLESHEET = 6,
+    README = 7,
+};
+
+export const _Import = [
+    '',
+    'PACKAGE',
+    'PACBIND',
+    'AXIOM',
+    'CLUSTER',
+    'TARGET',
+    'STYLESHEET',
+    'README',
+];
+
+
 
 export type ClassMetaMap = Record<string, _style.Metadata>;
-
 
 export interface Source {
     path: string,
@@ -50,10 +62,10 @@ export interface Reader {
 
 export interface Lookup {
     id: string;
-    group: Group;
+    type: _Type;
 }
 
-export interface Manifest {
+export interface LocalManifest {
     refer: Lookup,
     public: ClassMetaMap,
     global: ClassMetaMap,
@@ -73,7 +85,7 @@ export interface Storage {
     content: string,
     midway: string,
     label: string,
-    manifest: Manifest,
+    manifest: LocalManifest,
     styleData: {
         attachments: string[],
         classesList: string[][],

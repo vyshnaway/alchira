@@ -11,7 +11,6 @@ import * as CACHE from "../data/cache.js";
 
 import Use from "../utils/main.js";
 import PARSE from "./parse.js";
-import Fileman from "../fileman.js";
 import FILING from "../data/filing.js";
 import SCRIPTFILE from "../script/file.js";
 
@@ -65,14 +64,14 @@ function _StackLibraryFiles() {
 		none: Record<string, _File.Storage[]> = {},
 		axiomArray: Record<string, _File.Storage[]> = {},
 		clusterArray: Record<string, _File.Storage[]> = {},
-		libraryTable: Record<string, _File.Lookup> = {};
+		libraryLookup: Record<string, _File.Lookup> = {};
 
 	Object.entries(CACHE.FILES.LIBRARIES).forEach(([path, data]) => {
 		const reference = data.manifest.refer;
-		const collection = reference.group === "AXIOM" ? axiomArray
-			: reference.group === "CLUSTER" ? clusterArray : none;
+		const collection = reference.type === _File._Type.AXIOM ? axiomArray
+			: reference.type === _File._Type.CLUSTER ? clusterArray : none;
 
-		libraryTable[path] = reference;
+		libraryLookup[path] = reference;
 		if (!collection[reference.id]) { collection[reference.id] = [data]; }
 		else { collection[reference.id].push(data); }
 
@@ -81,7 +80,7 @@ function _StackLibraryFiles() {
 
 	const axiomsArray = Use.array.fromNumberedObject(axiomArray, length);
 	const clustersArray = Use.array.fromNumberedObject(clusterArray, length);
-	return { LibraryLookupTable: libraryTable, axiomsArray, clustersArray };
+	return { libraryLookup, axiomsArray, clustersArray };
 }
 
 function _StackPackageFiles() {
@@ -89,19 +88,19 @@ function _StackPackageFiles() {
 		none: _File.Storage[] = [],
 		pacbindsArray: _File.Storage[] = [],
 		packagesArray: _File.Storage[] = [],
-		packageTable: Record<string, _File.Lookup> = {};
+		packageLookup: Record<string, _File.Lookup> = {};
 
 	Object.entries(CACHE.FILES.PACKAGES).forEach(([path, data]) => {
 		const reference = data.manifest.refer;
-		packageTable[path] = reference;
+		packageLookup[path] = reference;
 
-		const collection = reference.group === "PACBIND" ? pacbindsArray
-			: reference.group === "PACKAGE" ? packagesArray : none;
+		const collection = reference.type === _File._Type.PACBIND ? pacbindsArray
+			: reference.type === _File._Type.PACKAGE ? packagesArray : none;
 
 		collection.push(data);
 	});
 
-	return { PackageLookupTable: packageTable, pacbindsArray, packagesArray };
+	return { packageLookup, pacbindsArray, packagesArray };
 }
 
 
@@ -124,23 +123,22 @@ function ReRender() {
 
 	const pacbindChart: Record<string, string[]> = {};
 	const packageChart: Record<string, string[]> = {};
-	const { PackageLookupTable, pacbindsArray, packagesArray } = _StackPackageFiles();
+	const { packageLookup, pacbindsArray, packagesArray } = _StackPackageFiles();
 
 	const PackageSkeletons = packagesArray.reduce((collection, fileData) => {
 		const indexMetaCollection = collection[fileData.filePath] = {} as Record<string, _Style.Metadata>;
 		SCRIPTFILE(fileData).stylesList.forEach((tagStyle) => {
 			if (tagStyle.selector === "") {
-				const E = $$.GenerateError(`Missing Declaration: ${tagStyle.selector}`, [`${fileData.targetPath}:${tagStyle.rowIndex}:${tagStyle.colIndex}`]);
+				const E = $$.GenerateError(`Missing Declaration: ${tagStyle.selector}`, [`${fileData.filePath}:${tagStyle.rowIndex}:${tagStyle.colIndex}`]);
 				fileData.manifest.errors.push(E.error);
 				fileData.manifest.diagnostics.push(E.diagnostic);
 			} else {
-				const response = PARSE.TAGSTYLE(tagStyle, fileData, CACHE.CLASS.Package_Index);
-				const styleData = INDEX.FETCH(response.identity.index);
+				const response = PARSE.TagStyleScanner(tagStyle, fileData, CACHE.CLASS.Package_Index);
+				const styleData = INDEX.FETCH(response.index);
 				fileData.manifest.diagnostics.push(...response.diagnostics);
 				fileData.manifest.errors.push(...response.errors);
-
-				if (styleData.declarations.length === 1) {
-					fileData.styleData.usedIndexes.add(response.identity.index);
+				if (styleData?.declarations.length === 1) {
+					fileData.styleData.usedIndexes.add(response.index);
 					indexMetaCollection[response.classname] = styleData.metadata;
 				}
 			}
@@ -153,8 +151,8 @@ function ReRender() {
 	}, {} as Record<string, Record<string, _Style.Metadata>>);
 
 	const PacbindSkeletons = pacbindsArray.reduce((collection, fileData) => {
-		const result = PARSE.CSSCLUSTR([fileData], fileData.manifest.refer.group, true);
-		collection[Fileman.path.join(CACHE.PATH.folder.packages.path, fileData.filePath)] = result.indexMetaCollection;
+		const result = PARSE.CSSBulkScanner([fileData], true);
+		collection[fileData.filePath] = result.indexMetaCollection;
 		if (result.selectorList.length) {
 			pacbindChart[`Pacbind [${fileData.filePath}]: ${result.selectorList.length} Classes`] = result.selectorList;
 		}
@@ -175,16 +173,14 @@ function ReRender() {
 		PackageDiagnostics.push(...file.manifest.diagnostics);
 	});
 
-
-	Object.values(CACHE.CLASS.Package_Index).forEach((index) => {
-		const InStash = INDEX.FETCH(index);
+	Object.entries(CACHE.CLASS.Package_Index).forEach(([k, v]) => {
+		const InStash = INDEX.FETCH(v);
 		if (InStash.metadata.declarations.length > 1) {
-			const E = $$.GenerateError(`"Duplicate Declarations: ${InStash.selector}`, InStash.declarations);
+			const E = $$.GenerateError(`Duplicate Declarations: ${k}`, InStash.declarations);
 			PackageErrors.push(E.error);
 			PackageDiagnostics.push(E.diagnostic);
 		}
 	});
-
 
 	const nameCollitions = Object.values(CACHE.FILES.PACKAGES).reduce((A, F) => {
 		if (CACHE.STATIC.Archive.name === F.packageName) { A.push(F.filePath); }
@@ -204,11 +200,11 @@ function ReRender() {
 
 	const axiomChart: Record<string, string[]> = {};
 	const clusterChart: Record<string, string[]> = {};
-	const { LibraryLookupTable, axiomsArray, clustersArray } = _StackLibraryFiles();
+	const { libraryLookup, axiomsArray, clustersArray } = _StackLibraryFiles();
 
 
 	const AxiomSkeletons = axiomsArray.reduce((collection: Record<string, Record<string, _Style.Metadata>>, fileData, index) => {
-		const result = PARSE.CSSCLUSTR(fileData, "AXIOM");
+		const result = PARSE.CSSBulkScanner(fileData);
 		collection[index] = result.indexMetaCollection;
 		if (result.selectorList.length) {
 			axiomChart[`Level ${index}: ${result.selectorList.length} Classes`] = result.selectorList;
@@ -216,8 +212,8 @@ function ReRender() {
 		return collection;
 	}, {});
 
-	const ClusterSkeletons = clustersArray.reduce((collection: Record<string, Record<string, _Style.Metadata>>, level, index) => {
-		const result = PARSE.CSSCLUSTR(level, "CLUSTER");
+	const ClusterSkeletons = clustersArray.reduce((collection: Record<string, Record<string, _Style.Metadata>>, fileDatas, index) => {
+		const result = PARSE.CSSBulkScanner(fileDatas);
 		collection[index] = result.indexMetaCollection;
 		if (result.selectorList.length) {
 			clusterChart[`Level ${index}: ${result.selectorList.length} Classes`] = result.selectorList;
@@ -231,10 +227,10 @@ function ReRender() {
 	const LibraryDiagnostics: _Support.Diagnostic[] = [];
 
 
-	Object.values(CACHE.CLASS.Library_Index).forEach((index) => {
-		const InStash = INDEX.FETCH(index);
+	Object.entries(CACHE.CLASS.Library_Index).forEach(([k, v]) => {
+		const InStash = INDEX.FETCH(v);
 		if (InStash.declarations.length > 1) {
-			const E = $$.GenerateError(`Duplicate Declarations: ${InStash.selector}`, InStash.declarations);
+			const E = $$.GenerateError(`Duplicate Declarations: ${k}`, InStash.declarations);
 			LibraryErrors.push(E.error);
 			LibraryDiagnostics.push(E.diagnostic);
 		}
@@ -279,14 +275,17 @@ function ReRender() {
 	CACHE.DELTA.Manifest.PACKAGE = PackageSkeletons;
 	CACHE.DELTA.Manifest.PACBIND = PacbindSkeletons;
 
-	CACHE.DELTA.Lookup.library = LibraryLookupTable;
-	CACHE.DELTA.Lookup.package = PackageLookupTable;
-
+	CACHE.DELTA.Lookup.library = libraryLookup;
+	CACHE.DELTA.Lookup.package = packageLookup;
 }
 
 
 
 function ReDeclare() {
+	Object.values(CACHE.CLASS.Package_Index).forEach((val) => {
+		const value = CACHE.CLASS.Index_to_Data[val];
+		value.metadata.declarations = [...value.declarations];
+	});
 	Object.values(CACHE.CLASS.Library_Index).forEach((val) => {
 		const value = CACHE.CLASS.Index_to_Data[val];
 		value.metadata.declarations = [...value.declarations];

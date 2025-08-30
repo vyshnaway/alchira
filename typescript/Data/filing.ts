@@ -15,25 +15,25 @@ function resolveGroup(
 	hasCluster: boolean,
 	fromPackage: boolean,
 	fromLibrary: boolean,
-): _File.Group {
+): _File._Type {
 	if (fromPackage) {
 		switch (extension) {
 			case "css":
-				return "PACBIND";
+				return _File._Type.PACBIND;
 			case "xcss":
-				return "PACKAGE";
+				return _File._Type.PACKAGE;
 			case "md":
-				return "README";
+				return _File._Type.README;
 			default:
-				return "";
+				return _File._Type.NULL;
 		}
 	}
 
 	if (fromLibrary) {
-		return hasCluster ? "CLUSTER" : "AXIOM";
+		return hasCluster ? _File._Type.CLUSTER : _File._Type.AXIOM;
 	}
 
-	return "TARGET";
+	return _File._Type.TARGET;
 }
 
 export default function FILING(
@@ -48,23 +48,23 @@ export default function FILING(
 	const isPackage = fileGroup === "package";
 	const fromXtylesFolder = fileGroup !== "target";
 
-	const targetPath = target.length ? FILEMAN.path.join(target, filePath) : '';
-	const sourcePath = source.length ? FILEMAN.path.join(source, filePath) : '';
+	const targetPath = FILEMAN.path.join(target, filePath);
+	const sourcePath = FILEMAN.path.join(source, filePath);
 
 	const [extension, packageName, id, cluster]: string[] = FILEMAN.path.basename(filePath).split(".").reverse();
 	const num = Number(id);
 	const idn = isNaN(num) || num < 0 ? 0 : Math.floor(num);
 	const normalFileName = isPackage ? USE.string.normalize(packageName) : CACHE.STATIC.Archive.name;
 
-	const group: _File.Group = resolveGroup(extension, Boolean(cluster), isPackage, isLibrary);
+	const group: _File._Type = resolveGroup(extension, Boolean(cluster), isPackage, isLibrary);
 
 	const classFront =
 		(
-			isPackage ? `/${normalFileName}${group === "PACBIND" ? "/$/" : "/"}` : ""
+			isPackage ? `/${normalFileName}${group === _File._Type.PACBIND ? "/$/" : "/"}` : ""
 		) + (
-			(idn === 0 && extension === "css") ? "" : USE.string.normalize(cluster)
+			((idn > 0) && extension === "css") ? USE.string.normalize(cluster) : ""
 		) + (
-			"$".repeat(idn)
+			isLibrary ? "$".repeat(idn) : ""
 		);
 
 	const result: _File.Storage = {
@@ -79,7 +79,7 @@ export default function FILING(
 		manifest: {
 			refer: {
 				id: isLibrary ? String(idn) : isPackage ? filePath : targetPath,
-				group,
+				type: group,
 			},
 			local: {},
 			global: {},

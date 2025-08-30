@@ -121,6 +121,7 @@ export const DELTA: _Cache.DELTA = {
         elements: Object.values(ROOT.customElements),
         constants: [],
         hashrules: {},
+        errors: [],
         file: {},
         AXIOM: {},
         CLUSTER: {},
@@ -128,7 +129,6 @@ export const DELTA: _Cache.DELTA = {
         GLOBAL: {},
         PACKAGE: {},
         PACBIND: {},
-        errors: []
     },
 };
 

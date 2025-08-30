@@ -13,7 +13,7 @@ const OPEN_CHARS = ["{", "[", "("];
 const CLOSE_CHARS = ["}", "]", ")"];
 const QUOTE_CHARS = ["`", "'", '"'];
 
-export default function parseBlock(content: string, blockArrays = false) {
+export default function parseBlock(content: string, blockInArrays = false) {
 	content += ";";
 	const length = content.length;
 
@@ -79,7 +79,7 @@ export default function parseBlock(content: string, blockArrays = false) {
 							if (key.length > 0) {
 								if (key.startsWith("--")) { result.constants[key] = value; }
 								result.properties[key] = value;
-								if (blockArrays) { result.Xproperties.push([key, value]); }
+								if (blockInArrays) { result.Xproperties.push([key, value]); }
 							} else if (value[0] === "@") {
 								const firstSpaceIndex = value.indexOf(" ");
 								const spaceIndex =
@@ -99,7 +99,7 @@ export default function parseBlock(content: string, blockArrays = false) {
 										break;
 									default:
 										result.atProps[value] = "";
-										if (blockArrays) { result.XatProps.push([value, ""]); }
+										if (blockInArrays) { result.XatProps.push([value, ""]); }
 								}
 							} else {
 								const breaks = Use.string.zeroBreaks(value);
@@ -118,22 +118,22 @@ export default function parseBlock(content: string, blockArrays = false) {
 							switch (key[0]) {
 								case "@":
 									result.atRules[key] = value;
-									if (blockArrays) { result.XatRules.push([key, value]); }
+									if (blockInArrays) { result.XatRules.push([key, value]); }
 									break;
 								case "&":
 									result.nested[key] = value;
-									if (blockArrays) { result.Xnested.push([key, value]); }
+									if (blockInArrays) { result.Xnested.push([key, value]); }
 									break;
 								case ".":
 									result.classes[key] = value;
-									if (blockArrays) { result.Xclasses.push([key, value]); }
+									if (blockInArrays) { result.Xclasses.push([key, value]); }
 									break;
 								default:
 									result.flats[key] = value;
-									if (blockArrays) { result.Xflats.push([key, value]); }
+									if (blockInArrays) { result.Xflats.push([key, value]); }
 							}
 							result.allBlocks[key] = value;
-							if (blockArrays) { result.XallBlocks.push([key, value]); }
+							if (blockInArrays) { result.XallBlocks.push([key, value]); }
 						}
 						keyStart = index + 1;
 						valStart = index + 1;

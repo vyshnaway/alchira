@@ -1,7 +1,6 @@
 import * as _Style from "../type/style.js";
 
 import * as CACHE from "./cache.js";
-import USE from "../utils/main.js";
 
 let NOW = 0;
 const BIN = new Set<number>();
@@ -12,43 +11,41 @@ export function FETCH(index: number) {
 
 export function FIND(classname: string, includeTargets = false, localmap: _Style.ClassIndexMap = {}) {
     let index = 0;
-    let group: _Style.Group = '';
+    let group: _Style._Type = _Style._Type.NULL;
 
-    if (CACHE.CLASS.Package_Index[classname]) {
+    if (localmap[classname]) {
+        index = localmap[classname];
+        group = _Style._Type.LOCAL;
+    } else if (CACHE.CLASS.Package_Index[classname]) {
         index = CACHE.CLASS.Package_Index[classname];
-        group = "PACKAGE";
+        group = _Style._Type.PACKAGE;
     } else if (CACHE.CLASS.Library_Index[classname]) {
         index = CACHE.CLASS.Library_Index[classname];
-        group = "LIBRARY";
+        group = _Style._Type.LIBRARY;
     } else if (CACHE.CLASS.Arcbind_Index[classname]) {
         index = CACHE.CLASS.Arcbind_Index[classname];
-        group = "ARCBIND";
+        group = _Style._Type.ARCBIND;
     } else if (includeTargets) {
         if (CACHE.CLASS.Archive_Index[classname]) {
             index = CACHE.CLASS.Archive_Index[classname];
-            group = "ARCHIVE";
+            group = _Style._Type.ARCHIVE;
         } else if (CACHE.CLASS.Global__Index[classname]) {
             index = CACHE.CLASS.Global__Index[classname];
-            group = "GLOBAL";
+            group = _Style._Type.GLOBAL;
         } else if (CACHE.CLASS.Public__Index[classname]) {
             index = CACHE.CLASS.Public__Index[classname];
-            group = "PUBLIC";
+            group = _Style._Type.PUBLIC;
         }
-    } else if (localmap[classname]) {
-        index = localmap[classname];
-        group = "LOCAL";
     }
+
     return { index, group };
 }
 
 export function DECLARE(object: _Style.Classdata) {
     object.index = BIN.values().next().value || ++NOW;
     if (BIN.has(object.index)) { BIN.delete(object.index); }
-
-    const encounted = USE.string.enCounter(object.index + 768);
-    object.watchclass = "____" + encounted;
     CACHE.CLASS.Index_to_Data[object.index] = object;
-    return { index: object.index, class: object.watchclass };
+    return object.index;
 }
 
 export function DISPOSE(...indexes: number[]) {

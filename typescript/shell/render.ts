@@ -8,7 +8,12 @@ export function backspace(chars: number) {
 	readline.clearLine(process.stdout, 1);
 };
 
-
+/**
+ * Custom Console.log equalent
+ * @param string content to print in console
+ * @param backRows < 0 => clear console
+ * @returns 
+ */
 export function write(string = "", backRows = 0) {
 	if (backRows > 0) {
 		readline.moveCursor(process.stdout, 0, -backRows);

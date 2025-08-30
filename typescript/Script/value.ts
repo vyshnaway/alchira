@@ -1,6 +1,6 @@
 // import * as _Config from "../type/config.js";
 import * as _File from "../type/file.js";
-// import * as _Style from "../type/style.js";
+import * as _Style from "../type/style.js";
 import * as _Script from "../type/script.js";
 // import * as _Cache from "../type/cache.js";
 // import * as _Support from "../type/support.js";
@@ -12,20 +12,20 @@ import * as CACHE from "../data/cache.js";
 
 
 function EvaluateIndexTraces(
-	action: _Script.Actions,
+	action: _Script._Actions,
 	metaFront: string,
 	classList: string[],
 	localClassMap: Record<string, number>
 ): Record<string, string> {
 	let classMap: Record<string, string> = {};
 
-	if (action === "archive") {
+	if (action === _Script._Actions.archive) {
 		classMap = classList.reduce((acc, entry) => {
 			const found = INDEX.FIND(entry, true, localClassMap);
 			if (found.index) {
-				if (found.group === "LIBRARY") {
+				if (found.group === _Style._Type.LIBRARY) {
 					acc[entry] = `/${CACHE.STATIC.Archive.name}/$/${entry}`;
-				} else if (found.group === "PUBLIC") {
+				} else if (found.group === _Style._Type.PUBLIC) {
 					acc[entry] = `/${CACHE.STATIC.Archive.name}/${entry}`;
 				}
 			}
@@ -48,13 +48,13 @@ function EvaluateIndexTraces(
 		});
 		const indexSetback = Use.array.setback(index_array);
 
-		if (action === 'sync') {
+		if (action === _Script._Actions.sync) {
 			classMap = CACHE.CLASS.Sync_ClassDictionary[JSON.stringify(indexSetback)] || {};
 		} else {
-			if (action === "watch") {
+			if (action === _Script._Actions.watch) {
 				classMap = Object.fromEntries(class_trace.map(([_, V], index) => [V, metaFront + index]));
 			}
-			if (action === "monitor") {
+			if (action === _Script._Actions.monitor) {
 				classMap = Object.fromEntries(class_trace.map(([K, V]) => [V, metaFront + INDEX.FETCH(K).debugclass]));
 			}
 
@@ -66,7 +66,7 @@ function EvaluateIndexTraces(
 
 export default function classExtract(
 	string: string,
-	action: _Script.Actions,
+	action: _Script._Actions,
 	fileData: _File.Storage,
 	attachments: Set<string>,
 	FileCursor: _File.Position,
@@ -104,7 +104,7 @@ export default function classExtract(
 		ch = string[++marker];
 	}
 
-	if (action !== "read") {
+	if (action !== _Script._Actions.read) {
 		activeQuote = "";
 		entry = "";
 		scribed = "";
@@ -112,9 +112,9 @@ export default function classExtract(
 		inQuote = false;
 		ch = string[marker];
 
-		const metaFront = action === "monitor"
+		const metaFront = action === _Script._Actions.monitor
 			? `TAG${fileData.debugclassFront}\\:${FileCursor.rowMarker}\\:${FileCursor.colMarker}__`
-			: action === "watch" ? `${fileData.label}_${FileCursor.cycle}_` : '';
+			: action === _Script._Actions.watch ? `${fileData.label}_${FileCursor.cycle}_` : '';
 
 		const classMap = EvaluateIndexTraces(action, metaFront, classList, fileData.styleData.localClasses);
 
@@ -128,7 +128,7 @@ export default function classExtract(
 							entry = entry.slice(1);
 						}
 						scribed += classMap[entry] ?
-							(action === "monitor"
+							(action === _Script._Actions.monitor
 								? Use.string.normalize(classMap[entry], ["/", ".", ":", "|", "$"], ["\\"])
 								: classMap[entry]
 							) : entry;

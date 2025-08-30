@@ -13,9 +13,9 @@ export interface ROOT {
     vendors: string[],
     Commands: Record<string, string>,
     defaultTweaks: _config.Tweaks,
+    customAtrules: Record<string, string>
     customElements: Record<string, string>,
     customOperations: Record<string, string>
-    customAtrules: Record<string, string>
     URL: {
         Cdn: string,
         Site: string,
@@ -111,8 +111,8 @@ export interface CLASS {
     Arcbind_Index: _style.ClassIndexMap,
     Library_Index: _style.ClassIndexMap,
     Package_Index: _style.ClassIndexMap,
-    Sync_PublishIndexMap: _style.ClassIndexMap,
     Sync_ClassDictionary: _style.Dictionary,
+    Sync_PublishIndexMap: _style.ClassIndexMap,
 };
 
 export interface FILES {

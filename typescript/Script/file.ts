@@ -1,6 +1,6 @@
 // import * as _Config from "../type/config.js";
 import * as _File from "../type/file.js";
-// import * as _Style from "../type/style.js";
+import * as _Style from "../type/style.js";
 import * as _Script from "../type/script.js";
 // import * as _Cache from "../type/cache.js";
 // import * as _Support from "../type/support.js";
@@ -10,14 +10,14 @@ import TAGSCAN from './tag.js';
 
 import * as CACHE from '../data/cache.js';
 
-const TagSummonStyle = `<${CACHE.ROOT.customElements["style"]}/>`;
-const TagSummonStaple = `<${CACHE.ROOT.customElements["staple"]}/>`;
+const TagSummonStyle = `<${CACHE.ROOT.customElements["style"]} />`;
+const TagSummonStaple = `<${CACHE.ROOT.customElements["staple"]} />`;
 const CustomTagElements = Object.values(CACHE.ROOT.customElements);
 
 export default function scanner(
 	fileData: _File.Storage,
 	classProps: string[] = [],
-	action: _Script.Actions = "read"
+	action: _Script._Actions = _Script._Actions.read
 ) {
 	fileData.styleData.styleTagReplaces.length = 0;
 	fileData.styleData.stapleTagReplaces.length = 0;
@@ -56,8 +56,8 @@ export default function scanner(
 				}
 
 				subScribed = (
-					action === "archive"
-						? res.styleDeclarations.scope !== "PUBLIC"
+					action === _Script._Actions.archive
+						? res.styleDeclarations.scope !== _Style._Type.PUBLIC
 						: (Object.keys(res.nativeAttributes).length === 0 && Object.keys(res.styleDeclarations.styles).length === 0)
 				) ? fragment :
 					'<' + [

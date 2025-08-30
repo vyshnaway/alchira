@@ -15,12 +15,12 @@ CACHE.ROOT.URL["Worker"] = "https://workers.xpktr.com/api/xcss-build-request";
 
 export default async function order(
 	sequences: number[][],
-	CMD: "preview" | "publish",
-	KEY = "",
-	portable = {
+	command: "preview" | "publish",
+	argument = "",
+	archive = {
 		name: '',
 		version: '',
-		jsonContent: ''
+		content: ''
 	}
 ): Promise<{
 	status: boolean;
@@ -28,21 +28,21 @@ export default async function order(
 	result: _Style.SortedOutput;
 }> {
 	const RESPONSE = {
-		status: CMD === "preview",
+		status: command === "preview",
 		message: "Preview Build",
 		result: previewOrganize(sequences),
 	};
 
-	if (CMD === "publish") {
+	if (command === "publish") {
 
-		if (KEY.length < 25) {
+		if (argument.length < 25) {
 			RESPONSE.message = "Invalid Key. Fallback: preview";
 			return RESPONSE;
 		}
 
 
-		const projectId = KEY.slice(0, 24);
-		const publicKey = KEY.slice(25);
+		const projectId = argument.slice(0, 24);
+		const publicKey = argument.slice(25);
 		const contentCrypt = await krypt.sym.gencrypt(JSON.stringify(RESPONSE.result.shortlistedArrays));
 
 		let asymEncrypted;
@@ -64,11 +64,7 @@ export default async function order(
 			access: publicKey,
 			private: asymEncrypted,
 			content: contentCrypt.data,
-			portable: {
-				name: portable.name,
-				version: portable.version,
-				content: portable.jsonContent,
-			}
+			archive
 		});
 
 		const requestOptions: RequestInit = {

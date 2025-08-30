@@ -1,7 +1,7 @@
 /* eslint-disable no-useless-escape */
 // import * as _Config from "../type/config.js";
 import * as _File from "../type/file.js";
-// import * as _Style from "../type/style.js";
+import * as _Style from "../type/style.js";
 import * as _Script from "../type/script.js";
 // import * as _Cache from "../type/cache.js";
 // import * as _Support from "../type/support.js";
@@ -26,7 +26,7 @@ export const closeBraces = ["]", "}", ")"];
 export default function scanner(
 	fileData: _File.Storage,
 	classProps: string[] = [],
-	action: _Script.Actions = "read",
+	action: _Script._Actions,
 	fileCursor = CURSOR.Initialize(fileData.content),
 ) {
 	const
@@ -38,7 +38,7 @@ export default function scanner(
 			element: "",
 			elvalue: "",
 			selector: "",
-			scope: "PACKAGE",
+			scope: _Style._Type.PACKAGE,
 			tagCount: ++fileCursor.active.cycle,
 			rowIndex: fileCursor.active.rowMarker,
 			colIndex: fileCursor.active.colMarker,
@@ -87,14 +87,14 @@ export default function scanner(
 					styleDeclarations.comments.push(...tr_Value.slice(1, -1).split("\n").map(l => l.trim()));
 				} else if (/^[\w\-]+\$+[\w\-]+$/i.test(tr_Attr)) {
 					styleDeclarations.selector = tr_Attr;
-					if (fileData.manifest.refer.group === "PACKAGE") {
-						styleDeclarations.scope = "PACKAGE";
+					if (fileData.manifest.refer.type === _File._Type.PACKAGE) {
+						styleDeclarations.scope = _Style._Type.PACKAGE;
 					} else if (tr_Attr.includes("$$$")) {
-						styleDeclarations.scope = "PUBLIC";
+						styleDeclarations.scope = _Style._Type.PUBLIC;
 					} else if (tr_Attr.includes("$$")) {
-						styleDeclarations.scope = "GLOBAL";
+						styleDeclarations.scope = _Style._Type.GLOBAL;
 					} else {
-						styleDeclarations.scope = "LOCAL";
+						styleDeclarations.scope = _Style._Type.LOCAL;
 					}
 					if (tr_Value) { styleDeclarations.styles[""] = tr_Value; }
 				} else if (/[\$@#]/.test(tr_Attr) && !"$@".includes(tr_Attr[0]) && !"$@".includes(tr_Attr[tr_Attr.length - 1])) {

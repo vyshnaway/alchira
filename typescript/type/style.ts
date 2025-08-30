@@ -1,3 +1,26 @@
+export enum _Type {
+    NULL = 0,
+    LOCAL = 1,
+    GLOBAL = 2,
+    PUBLIC = 3,
+    PACKAGE = 4,
+    LIBRARY = 5,
+    ARCBIND = 6,
+    ARCHIVE = 7,
+};
+
+export const _Import = [
+    '',
+    'LOCAL',
+    'GLOBAL',
+    'PUBLIC',
+    'PACKAGE',
+    'LIBRARY',
+    'ARCBIND',
+    'ARCHIVE',
+];
+
+
 
 export interface ParsedResult {
     assign: string[],
@@ -25,20 +48,18 @@ export interface Metadata {
     skeleton: object,
     declarations: string[],
     stencil: string,
-    watchclass: string,
 }
 
 export interface Classdata {
     index?: number,
     package: string,
-    scope: string,
     selector: string,
     debugclass: string,
     watchclass: string,
     attachments: string[],
-    object: Record<string, object>,
-    metadata: Metadata,
     declarations: string[],
+    metadata: Metadata,
+    style_object: Record<string, object>,
     attached_style: object,
     attached_staple: string,
     attached_stencil: string
@@ -54,12 +75,3 @@ export interface SortedOutput {
     referenceMap: Dictionary;
     shortlistedArrays: number[][]
 };
-
-export type Group = ""
-    | "PACKAGE"
-    | "LIBRARY"
-    | "ARCBIND"
-    | "ARCHIVE"
-    | "GLOBAL"
-    | "PUBLIC"
-    | "LOCAL";

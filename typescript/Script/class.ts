@@ -1,6 +1,6 @@
 import * as _Config from "../type/config.js";
 import * as _File from "../type/file.js";
-// import * as _Style from "../type/style.js";
+import * as _Style from "../type/style.js";
 import * as _Script from "../type/script.js";
 // import * as _Cache from "../type/cache.js";
 // import * as _Support from "../type/support.js";
@@ -94,23 +94,23 @@ export default class C_Proxy {
 				FILE.manifest.diagnostics.push(E.diagnostic);
 			} else {
 				const IndexMap =
-					tagStyle.scope === "GLOBAL" ? FILE.styleData.globalClasses
-						: tagStyle.scope === "LOCAL" ? FILE.styleData.localClasses
-							: tagStyle.scope === "PUBLIC" ? FILE.styleData.publicClasses
+					tagStyle.scope === _Style._Type.GLOBAL ? FILE.styleData.globalClasses
+						: tagStyle.scope === _Style._Type.LOCAL ? FILE.styleData.localClasses
+							: tagStyle.scope === _Style._Type.PUBLIC ? FILE.styleData.publicClasses
 								: {};
 
 				const skeletonMap =
-					tagStyle.scope === "LOCAL" ? FILE.manifest.local
-						: tagStyle.scope === "GLOBAL" ? FILE.manifest.global
-							: tagStyle.scope === "PUBLIC" ? FILE.manifest.global
+					tagStyle.scope === _Style._Type.LOCAL ? FILE.manifest.local
+						: tagStyle.scope === _Style._Type.GLOBAL ? FILE.manifest.global
+							: tagStyle.scope === _Style._Type.PUBLIC ? FILE.manifest.global
 								: {};
 
-				const response = StyleParse.TAGSTYLE(tagStyle, FILE, IndexMap);
-				const classdata = INDEX.FETCH(response.identity.index);
+				const response = StyleParse.TagStyleScanner(tagStyle, FILE, IndexMap);
+				const classdata = INDEX.FETCH(response.index);
 
 				if (classdata.declarations.length === 1) {
 					skeletonMap[response.classname] = classdata.metadata;
-					FILE.styleData.usedIndexes.add(response.identity.index);
+					FILE.styleData.usedIndexes.add(response.index);
 				}
 
 				FILE.manifest.errors.push(...response.errors);
@@ -119,7 +119,7 @@ export default class C_Proxy {
 		});
 
 		Object.assign(CACHE.CLASS.Global__Index, FILE.styleData.globalClasses);
-		Object.assign(FILE.manifest.refer, { group: "target", id: CACHE.STATIC.WorkPath + FILE.targetPath });
+		Object.assign(FILE.manifest.refer, { group: "target", id: FILE.targetPath });
 	}
 
 	Accumulator() {
@@ -133,10 +133,10 @@ export default class C_Proxy {
 			fileManifests: {}
 		};
 
-		Cumulates.fileManifests[Fileman.path.join(CACHE.STATIC.WorkPath, this.targetStylesheet)] = {
+		Cumulates.fileManifests[this.targetStylesheet] = {
 			refer: {
-				group: "STYLESHEET",
-				id: Fileman.path.join(CACHE.STATIC.WorkPath, this.targetStylesheet),
+				type: _File._Type.STYLESHEET,
+				id: this.targetStylesheet,
 			},
 			public: {},
 			global: {},
@@ -169,11 +169,11 @@ export default class C_Proxy {
 			if (localKeys.length + globalKeys.length + publicKeys.length) {
 				Cumulates.report.push(
 					$.MAKE(
-						$.tag.H5(file.targetPath),
+						$.tag.H5(file.targetPath, $.preset.tertiary),
 						[
-							$.MAKE("", $.list.Catalog(localKeys, 0, $.preset.tertiary)),
-							$.MAKE("", $.list.Catalog(globalKeys, 0, $.preset.tertiary)),
-							$.MAKE("", $.list.Catalog(publicKeys, 0, $.preset.tertiary)),
+							...$.list.Catalog(localKeys, 0, $.preset.text),
+							...$.list.Catalog(globalKeys, 0, $.preset.primary),
+							...$.list.Catalog(publicKeys, 0, $.preset.primary, $.style.AS_Bold),
 						]
 					)
 				);
@@ -233,7 +233,7 @@ export default class C_Proxy {
 	}
 
 
-	RenderFiles(action: _Script.Actions) {
+	RenderFiles(action: _Script._Actions) {
 		Object.values(this.fileCache).forEach((filedata) => {
 			filedata.midway = Seek(
 				filedata,

@@ -13,38 +13,47 @@ import Use from "../utils/main.js";
 import CSSBlockScanner from "./block.js";
 import HASHRULE from "../hash-rules.js";
 
-function classmerge(classList: string[] = [], refpacks = false) {
+function MERGER(classList: string[] = [], refpacks: boolean, flatmerge: boolean) {
 	const
-		result: Record<string, object> = {},
 		attachments: string[] = [],
+		mergables: object[] = [],
 		constants: Record<string, string> = {};
 
-	classList.reduce((res, className) => {
-		const index =
-			(refpacks ? CACHE.CLASS.Package_Index[className] : 0)
-			|| CACHE.CLASS.Archive_Index[className]
-			|| CACHE.CLASS.Library_Index[className]
-			|| 0;
+	classList.forEach((className) => {
+		const found = INDEX.FIND(className);
 
-		if (index) {
-			const found = INDEX.FETCH(index);
-			Object.assign(constants, found.metadata.constants);
-			attachments.push(...found.attachments);
-			res = Use.object.multiMerge([result, found.object], true);
+		if (
+			(refpacks && found.group === _Style._Type.PACKAGE)
+			|| found.group === _Style._Type.ARCHIVE
+			|| found.group === _Style._Type.ARCBIND
+			|| found.group === _Style._Type.LIBRARY
+		) {
+			const classdata = INDEX.FETCH(found.index);
+			Object.assign(constants, classdata.metadata.constants);
+			attachments.push(...classdata.attachments);
+			mergables.push(classdata.style_object);
 		}
-		return res;
-	}, {});
+	});
+	const result = flatmerge ? Use.object.multiMerge(mergables, true) :
+		Object.entries(Use.object.multiMerge(mergables, true)).reduce((a, [k, v]) => {
+			if (k === "") {
+				Object.assign(a, v);
+			} else {
+				a[k] = v;
+			}
+			return a;
+		}, {} as Record<string, string | object>);
 
 	return { result, attachments, constants };
 }
 
-function SCANNER(content: string, initial: string, sourceSelector: string, refpacks = false) {
+function SCANNER(content: string, initial: string, sourceSelector: string, refpacks: boolean, flatmerge: boolean) {
 	const scanned = CSSBlockScanner(content);
-	const assigned = classmerge(scanned.assign, refpacks);
+	const assigned = MERGER(scanned.assign, refpacks, flatmerge);
 	const constants = { ...scanned.constants, ...assigned.constants };
 	const attachments = [...assigned.attachments, ...scanned.attachment.filter(attach => attach[0] !== "/")];
 
-	const object = Use.object.deepMerge(assigned.result, Object.fromEntries([
+	const styles = Use.object.deepMerge(assigned.result, Object.fromEntries([
 		...Object.entries(scanned.atProps).map(([propKey, propValue]) =>
 			[propKey, CACHE.STATIC.DEBUG ? `${propValue}/* ${initial} ${sourceSelector} */` : propValue]
 		),
@@ -54,45 +63,45 @@ function SCANNER(content: string, initial: string, sourceSelector: string, refpa
 	]));
 
 	for (const selector in scanned.allBlocks) {
-		const result = SCANNER(scanned.allBlocks[selector], initial, sourceSelector + " -> " + selector, refpacks);
+		const result = SCANNER(scanned.allBlocks[selector], initial, sourceSelector + " -> " + selector, refpacks, true);
 		Object.assign(constants, result.constants);
 		attachments.push(...result.attachments);
-		object[selector] = result.object;
+		styles[selector] = result.styles;
 	}
 
-	return { object, attachments, constants };
+	return { styles, attachments, constants };
 }
 
 function CSSFileScanner(content: string, initial = "", refpacks = false) {
 	const scanned = CSSBlockScanner(Use.code.uncomment.Script(content), true);
-	const object: [string, string | object][] = scanned.XatProps;
+	const styles: [string, string | object][] = scanned.XatProps;
 
 	const constants: Record<string, string> = {}, attachments: string[] = [];
 	scanned.XallBlocks.forEach(([key, value]) => {
-		const result = SCANNER(value, initial, key, refpacks);
+		const result = SCANNER(value, initial, key, refpacks, true);
 		Object.assign(constants, result.constants);
 		attachments.push(...result.attachments);
-		object.push([key, result.object]);
+		styles.push([key, result.styles]);
 	});
 
-	return { object, attachments, constants };
+	return { styles, attachments, constants };
 }
 
-function CSSCollectionScanner(fileDatas: _File.Storage[] = [], initial = "", forPortable = false) {
+function CSSBulkScanner(fileDatas: _File.Storage[], forPortable = false) {
 	const selectorList: string[] = [],
 		selectors: Record<string, number> = {},
-		indexSkeleton: Record<string, _Style.Metadata> = {};
+		indexMetaCollection: Record<string, _Style.Metadata> = {};
 	const IndexMap = forPortable ? CACHE.CLASS.Package_Index : CACHE.CLASS.Library_Index;
 
 	fileDatas.forEach((source) => {
-		const { classFront: stamp, filePath, debugclassFront: metaFront, content, manifest } = source;
+		const { classFront, filePath, debugclassFront, content, manifest } = source;
 
 		CSSBlockScanner(Use.code.uncomment.Script(content), true).XallBlocks.forEach(([SELECTOR, OBJECT]) => {
 			const declaration = source.sourcePath;
-			const stampSelector = stamp + Use.string.normalize(SELECTOR, [], ["\\", "."]);
-			const scannedStyle = SCANNER(OBJECT, initial + " : " + filePath + " ||", SELECTOR, false);
+			const stampSelector = classFront + Use.string.normalize(SELECTOR, [], ["\\", "."]);
+			const scannedStyle = SCANNER(OBJECT, `${_File._Import[manifest.refer.type]} : ${filePath} ||`, SELECTOR, false, false);
 			const attachments = scannedStyle.attachments;
-			const object = { "": scannedStyle.object };
+			const object = { "": scannedStyle.styles };
 
 			const index = (IndexMap[stampSelector] || 0) + (selectors[stampSelector] || 0);
 			if (index) {
@@ -101,31 +110,28 @@ function CSSCollectionScanner(fileDatas: _File.Storage[] = [], initial = "", for
 			} else {
 				const selectorData: _Style.Classdata = {
 					package: forPortable ? source.packageName : "",
-					scope: manifest.refer.group,
 					selector: SELECTOR,
-					object,
+					style_object: object,
 					watchclass: '',
 					metadata: {
 						info: [],
 						constants: scannedStyle.constants,
 						skeleton: Use.object.skeleton(object),
-						declarations: [], // manifest and cross-check declarations assigned later from parse.js
+						declarations: [declaration],
 						stencil: '',
-						watchclass: '',
 					},
-					attachments: forPortable ? attachments.map(attach => stamp + attach) : attachments,
-					debugclass: metaFront + "_" + Use.string.normalize(stampSelector, [], [], ["$", "/"]),
-					declarations: [declaration], // only library declarations
+					attachments: forPortable ? attachments.map(attach => classFront + attach) : attachments,
+					debugclass: debugclassFront + "_" + Use.string.normalize(stampSelector, [], [], ["$", "/"]),
+					declarations: [declaration],
 					attached_style: { [SELECTOR]: object },
 					attached_staple: '',
 					attached_stencil: '',
 				};
 				const identity = INDEX.DECLARE(selectorData);
 
-				selectorData.metadata.watchclass = identity.class;
-				source.styleData.usedIndexes.add(identity.index);
-				selectors[stampSelector] = identity.index;
-				indexSkeleton[stampSelector] = selectorData.metadata;
+				source.styleData.usedIndexes.add(identity);
+				selectors[stampSelector] = identity;
+				indexMetaCollection[stampSelector] = selectorData.metadata;
 				selectorList.push(stampSelector);
 			}
 		});
@@ -134,16 +140,16 @@ function CSSCollectionScanner(fileDatas: _File.Storage[] = [], initial = "", for
 		IndexMap[selector] = selectors[selector];
 	}
 
-	return { indexMetaCollection: indexSkeleton, selectorList };
+	return { indexMetaCollection, selectorList };
 }
 
-function TAGSTYLE(
+function TagStyleScanner(
 	raw: _Script.RawStyle,
 	file: _File.Storage,
 	IndexMap: Record<string, number> = {},
 ) {
-	const scope = raw.scope === "PACKAGE" ? "" : raw.scope;
-	const forPackage = file.manifest.refer.group === "PACKAGE";
+	const scope = raw.scope === _Style._Type.PACKAGE ? _Style._Type.NULL : raw.scope;
+	const forPackage = file.manifest.refer.type === _File._Type.PACKAGE;
 	const declaration = `${file.targetPath}:${raw.rowIndex}:${raw.colIndex}`;
 
 	const object: Record<string, Record<string, object>> = {};
@@ -152,15 +158,8 @@ function TAGSTYLE(
 	const attachments: string[] = [];
 	const constants = {};
 
-	let identity = { index: 0, class: '' };
 	const classname = raw.selector === "" ? "" : file.classFront + raw.selector.replace(/^-\$/, "$");
-	const debugclass = `${scope}${file.debugclassFront}\\:${raw.rowIndex}\\:${raw.colIndex}_${Use.string.normalize(raw.selector, [], [], forPackage ? ["$", "/"] : ["$"])}`;
-	const index_found =
-		IndexMap[classname]
-		|| CACHE.CLASS.Package_Index[classname]
-		|| CACHE.CLASS.Library_Index[classname]
-		|| CACHE.CLASS.Global__Index[classname]
-		|| 0;
+	const debugclass = `${scope}${file.debugclassFront}\\:${raw.rowIndex}\\:${raw.colIndex}_${Use.string.normalize(classname, [], [], forPackage ? ["$", "/"] : ["$"])}`;
 
 	for (const subSelector in raw.styles) {
 		const query = HASHRULE.RENDER(subSelector, declaration);
@@ -172,7 +171,7 @@ function TAGSTYLE(
 		const styleObj = SCANNER(
 			Use.code.uncomment.Script(raw.styles[subSelector]),
 			`${raw.scope} : ${file.filePath} ||`, `${raw.selector} => ${subSelector}`,
-			false
+			false, subSelector !== ""
 		);
 		attachments.push(...styleObj.attachments);
 		Object.assign(constants, styleObj.constants);
@@ -182,55 +181,59 @@ function TAGSTYLE(
 				object[query.rule] = {};
 			}
 			if (query.subSelector === "") {
-				Object.assign(object[query.rule], styleObj.object);
+				Object.assign(object[query.rule], styleObj.styles);
 			} else {
-				object[query.rule]["&" + query.subSelector] = styleObj.object;
+				object[query.rule]["&" + query.subSelector] = styleObj.styles;
 			}
 		}
 	}
 
-
-	if (index_found) {
-		const InStash = INDEX.FETCH(index_found);
+	let { index, group } = INDEX.FIND(classname, false, IndexMap);
+	console.log({ index, group });
+	if (
+		_Style._Type.PACKAGE === group ||
+		_Style._Type.LIBRARY === group ||
+		_Style._Type.GLOBAL === group ||
+		_Style._Type.LOCAL === group
+	) {
+		const InStash = INDEX.FETCH(index);
 		InStash.metadata.declarations.push(declaration);
 	} else {
-		const declarations = [declaration];
 		const style_snippet = SCANNER(
 			raw.element === CACHE.ROOT.customElements["stencil"] ? Use.code.uncomment.Script(raw.attachstring) : '',
 			`${raw.scope}:ATTACHMENT : ${file.filePath} ||`,
 			`${raw.selector}`,
-			true
+			true, true
 		);
 		attachments.push(...style_snippet.attachments);
 		Object.assign(constants, style_snippet.constants);
 
-		identity = INDEX.DECLARE({
+		group = _Style._Type.NULL;
+		index = INDEX.DECLARE({
 			package: forPackage ? file.packageName : CACHE.STATIC.Archive.name,
-			scope: raw.scope,
 			selector: raw.selector,
-			object,
+			style_object: object,
 			watchclass: '',
 			metadata: {
 				info: raw.comments,
 				constants,
 				skeleton: Use.object.skeleton(object),
-				declarations,
-				watchclass: '',
+				declarations: [declaration],
 				stencil: '',
 			},
 			attachments: forPackage ? attachments.map(attach => file.classFront + "$/" + attach) : attachments,
 			debugclass,
-			declarations,
-			attached_style: style_snippet.object,
+			declarations: [declaration],
+			attached_style: style_snippet.styles,
 			attached_staple: raw.element === CACHE.ROOT.customElements["staple"] ? raw.attachstring : "",
 			attached_stencil: raw.element === CACHE.ROOT.customElements["stencil"] ? raw.attachstring : "",
 		});
-		IndexMap[classname] = identity.index;
+		IndexMap[classname] = index;
 	}
 
 	return {
 		classname,
-		identity,
+		index,
 		attachments,
 		diagnostics,
 		errors,
@@ -238,7 +241,7 @@ function TAGSTYLE(
 }
 
 export default {
-	CSSCLUSTR: CSSCollectionScanner,
-	CSSCANNER: CSSFileScanner,
-	TAGSTYLE
+	TagStyleScanner,
+	CSSBulkScanner,
+	CSSFileScanner,
 };

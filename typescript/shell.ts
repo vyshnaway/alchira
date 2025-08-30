@@ -27,7 +27,7 @@ export function ListRecord(heading: string, record: Record<string, string> = {})
     );
 }
 
-export function BulletCatalog(heading: string, items: string[] = []) {
+export function ListCatalog(heading: string, items: string[] = []) {
     return $.MAKE(
         $.tag.H2(heading, $.preset.primary),
         items,
@@ -85,12 +85,12 @@ export function HashruleReport(
 ) {
     return $.MAKE(ListRecord(
         "Active Hashrules", hashrules),
-        [
+        errors.length ? [
             $.MAKE(
                 $.tag.H4("Invalid Hashrules", $.preset.failed),
                 errors
             )
-        ],
+        ] : [],
     );
 }
 
