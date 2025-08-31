@@ -11,19 +11,19 @@ export interface ROOT {
     version: string,
     website: string,
     vendors: string[],
-    Scripts: Record<string, string>,
-    Commands: Record<string, string>,
+    scripts: Record<string, string>,
+    commands: Record<string, string>,
     defaultTweaks: _config.Tweaks,
     customAtrules: Record<string, string>
     customElements: Record<string, number>,
     customOperations: Record<string, string>
-    URL: {
+    url: {
         Cdn: string,
         Site: string,
         Worker: string,
         Console: string,
         PrefixCdn: string,
-        PackageCdn: string,
+        ArtifactCdn: string,
     }
 }
 
@@ -44,7 +44,7 @@ export interface DELTA {
     ErrorCount: number,
     Report: {
         libraries: string,
-        packages: string,
+        externals: string,
         artifacts: string,
         constants: string,
         hashrules: string,
@@ -54,19 +54,19 @@ export interface DELTA {
     },
     Lookup: {
         libraries: Record<string, _file.Lookup>,
-        packages: Record<string, _file.Lookup>,
+        externals: Record<string, _file.Lookup>,
         artifacts: Record<string, _file.Lookup>,
     },
     Errors: {
         libraries: string[],
-        packages: string[],
+        externals: string[],
         artifacts: string[],
         multiples: string[],
     },
     Diagnostics: {
         libraries: _support.Diagnostic[],
-        packages: _support.Diagnostic[],
-        projects: _support.Diagnostic[],
+        externals: _support.Diagnostic[],
+        artifacts: _support.Diagnostic[],
         multiples: _support.Diagnostic[],
     },
     Manifest: {
@@ -75,13 +75,13 @@ export interface DELTA {
         constants: string[],
         hashrules: Record<string, string>,
         lookuptype: string[],
-        lookup: Record<string, _file.Lookup>,
+        filelookup: Record<string, _file.Lookup>,
         AXIOM: Record<string, _file.ClassMetaMap>,
         CLUSTER: Record<string, _file.ClassMetaMap>,
         LOCAL: Record<string, _file.ClassMetaMap>,
         GLOBAL: Record<string, _file.ClassMetaMap>,
-        PACKAGE: Record<string, _file.ClassMetaMap>,
-        PACBIND: Record<string, _file.ClassMetaMap>,
+        EXTERNAL: Record<string, _file.ClassMetaMap>,
+        EXATTACH: Record<string, _file.ClassMetaMap>,
         diagnostics: _support.Diagnostic[]
     },
 }
@@ -91,17 +91,17 @@ export interface STATIC {
     DEBUG: boolean,
     Command: string,
     Argument: string,
-    Project_Name: string,
-    Project_Version: string,
     RootCSS: string,
     RootPath: string,
     WorkPath: string,
+    ProjectName: string,
+    ProjectVersion: string,
     Artifact: _config.Artifact,
     ProxyMap: _config.ProxyMap[],
     Tweaks: _config.Tweaks,
     Prefix: PREFIX,
     HashRule: Record<string, string>,
-    Package_Saved: Record<string, string>,
+    External_Saved: Record<string, string>,
     Library_Saved: Record<string, string>,
     Targets_Saved: Record<string, _config.ProxyStorage>,
 }
@@ -112,7 +112,7 @@ export interface CLASS {
     Global___Index: _style.ClassIndexMap,
     Public___Index: _style.ClassIndexMap,
     Library__Index: _style.ClassIndexMap,
-    Package__Index: _style.ClassIndexMap,
+    External_Index: _style.ClassIndexMap,
     Arattach_Index: _style.ClassIndexMap,
     Artifact_Index: _style.ClassIndexMap,
     Sync_ClassDictionary: _style.Dictionary,
@@ -121,6 +121,6 @@ export interface CLASS {
 
 export interface FILES {
     LIBRARIES: Record<string, _file.Storage>,
-    PACKAGES: Record<string, _file.Storage>,
-    TARGET: Record<string, C_Target>,
+    EXTERNALS: Record<string, _file.Storage>,
+    TARGETS: Record<string, C_Target>,
 }

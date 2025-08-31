@@ -40,7 +40,7 @@ export default function scanner(
 			element: "",
 			elvalue: "",
 			selector: "",
-			scope: _Style._Type.PACKAGE,
+			scope: _Style._Type.EXTERNAL,
 			tagCount: ++fileCursor.active.cycle,
 			rowIndex: fileCursor.active.rowMarker,
 			colIndex: fileCursor.active.colMarker,
@@ -58,6 +58,7 @@ export default function scanner(
 		ok = false,
 		isVal = false,
 		selfClosed = false,
+		classSynced = false,
 		fallbackAquired = false;
 
 	while (fileCursor.active.marker < fileData.content.length) {
@@ -90,8 +91,8 @@ export default function scanner(
 					styleDeclarations.comments.push(...tr_Value.slice(1, -1).split("\n").map(l => l.trim()));
 				} else if (/^[\w\-]+\$+[\w\-]+$/i.test(tr_Attr)) {
 					styleDeclarations.selector = tr_Attr;
-					if (fileData.manifest.lookup.type === _File._Type.PACKAGE) {
-						styleDeclarations.scope = _Style._Type.PACKAGE;
+					if (fileData.manifest.lookup.type === _File._Type.EXTERNAL) {
+						styleDeclarations.scope = _Style._Type.EXTERNAL;
 					} else if (tr_Attr.includes("$$$")) {
 						styleDeclarations.scope = _Style._Type.PUBLIC;
 					} else if (tr_Attr.includes("$$")) {
@@ -103,6 +104,7 @@ export default function scanner(
 				} else if (/[\$@#]/.test(tr_Attr) && !"$@".includes(tr_Attr[0]) && !"$@".includes(tr_Attr[tr_Attr.length - 1])) {
 					styleDeclarations.styles[tr_Attr] = tr_Value;
 				} else if (classProps.includes(tr_Attr)) {
+					classSynced = true;
 					const result = VALUE(tr_Value, action, fileData, fileCursor.active);
 					if (result.classList.length) { classesList.push(result.classList); }
 					if (result.attachments.length) { attachments.push(...result.attachments); }
@@ -138,6 +140,7 @@ export default function scanner(
 	return {
 		ok,
 		selfClosed,
+		classSynced,
 		classesList,
 		attachments,
 		nativeAttributes,

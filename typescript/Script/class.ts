@@ -72,7 +72,7 @@ export default class C_Proxy {
 			fileContent,
 			this.target,
 			this.source,
-			`_${this.label}_${Use.string.enCounter(fileIndex + 768)}_`);
+			`${this.label}_${Use.string.enCounter(fileIndex)}`);
 		this.fileCache[FILE.filePath] = FILE;
 
 		const ParseResponse = NARRATOR(FILE, this.extnsProps[FILE.extension]);
@@ -134,7 +134,8 @@ export default class C_Proxy {
 			errors: [],
 			diagnostics: [],
 		};
-
+		
+	
 		Cumulates.report.push($.tag.H2(`PROXY : ${this.target} -> ${this.source}`, $.preset.primary));
 
 		Object.values(this.fileCache).forEach((file) => {
@@ -150,7 +151,7 @@ export default class C_Proxy {
 			if (localKeys.length + globalKeys.length + publicKeys.length) {
 				Cumulates.report.push(
 					$.MAKE(
-						$.tag.H5(file.targetPath, $.preset.tertiary),
+						$.tag.H6(file.targetPath, $.preset.tertiary),
 						[
 							...$.list.Catalog(localKeys, 0, $.preset.text),
 							...$.list.Catalog(globalKeys, 0, $.preset.primary),
@@ -207,30 +208,28 @@ export default class C_Proxy {
 	SummonFiles(
 		SaveFiles: Record<string, string> = {},
 		stylesheet: string,
-		StyleBlock: string,
-		StapleBlock: string,
 		SummonBlock: string,
 	) {
-
 		SaveFiles[this.sourceStylesheet] = stylesheet;
+
 		Object.values(this.fileCache).forEach((data) => {
 			if (data.extension !== "xcss") {
 				let fromPos = 0;
 				SaveFiles[data.sourcePath] = data.styleData.tagReplacements.reduce((A, [elid, pos]) => {
 					switch (elid) {
-						case CACHE.ROOT.customElements.style:
-							A += data.scratch.slice(fromPos, Number(pos)) + StyleBlock;
-							break;
 						case CACHE.ROOT.customElements.staple:
-							A += data.scratch.slice(fromPos, Number(pos)) + StapleBlock;
+							A += data.scratch.slice(fromPos, pos) + SummonBlock;
 							break;
 						case CACHE.ROOT.customElements.summon:
-							A += data.scratch.slice(fromPos, Number(pos)) + SummonBlock;
+							A += data.scratch.slice(fromPos, pos) + SummonBlock;
+							break;
+						case CACHE.ROOT.customElements.style:
+							A += data.scratch.slice(fromPos, pos);
 							break;
 						default:
 							A += data.scratch.slice(fromPos);
 					};
-					fromPos = elid;
+					fromPos = pos;
 					return A;
 				}, "");
 				data.scratch = "";

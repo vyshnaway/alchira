@@ -14,29 +14,29 @@ export const ROOT: _Cache.ROOT = {
     version: "0.0.0",
     website: domain,
     vendors: [],
-    URL: {
+    url: {
         Cdn: `https://cdn.${domain}/`,
         Site: `https://www.${domain}/`,
         Worker: `https://worker.${domain}/`,
         Console: `https://console.${domain}/`,
         PrefixCdn: `https://prefix.${domain}/`,
-        PackageCdn: `https://package.${domain}/`,
+        ArtifactCdn: `https://artifact.${domain}/`,
     },
-    Commands: {
+    commands: {
         init: "Initiate or Update & Verify setup.",
         debug: "Live build for developer environment",
         preview: 'Test build. Pass test for "publish" command.',
         publish: "Optimized build, uses web-api.",
-        artifact: "Split and stash project styles to *.xcss files.",
-        install: "Install packages from sources.",
+        // archive: "Split and stash project styles to *.xcss files.",
+        install: "Install external artifacts from sources.",
     },
-    Scripts: {
+    scripts: {
         "init": "xcss init",
         "debug": "xcss debug watch",
         "watch": "xcss preview watch",
         "preview": "xcss preview",
         "publish": "xcss publish",
-        "artifact": "xcss artifact",
+        // "archive": "xcss archive",
         "install": "xcss install",
     },
     defaultTweaks: {
@@ -62,8 +62,8 @@ export const ROOT: _Cache.ROOT = {
 export const STATIC: _Cache.STATIC = {
     WATCH: false,
     DEBUG: false,
-    Project_Name: "",
-    Project_Version: "",
+    ProjectName: "",
+    ProjectVersion: "",
     Command: "",
     Argument: "",
     RootCSS: "",
@@ -89,7 +89,7 @@ export const STATIC: _Cache.STATIC = {
     },
     Library_Saved: {},
     Targets_Saved: {},
-    Package_Saved: {},
+    External_Saved: {},
 };
 
 export const DELTA: _Cache.DELTA = {
@@ -100,7 +100,7 @@ export const DELTA: _Cache.DELTA = {
     ErrorCount: 0,
     Report: {
         libraries: "",
-        packages: "",
+        externals: "",
         artifacts: "",
         constants: "",
         hashrules: "",
@@ -110,35 +110,35 @@ export const DELTA: _Cache.DELTA = {
     },
     Lookup: {
         libraries: {},
-        packages: {},
+        externals: {},
         artifacts: {},
     },
     Errors: {
         libraries: [],
-        packages: [],
+        externals: [],
         artifacts: [],
         multiples: [],
     },
     Diagnostics: {
         libraries: [],
-        projects: [],
-        packages: [],
+        externals: [],
+        artifacts: [],
         multiples: [],
     },
     Manifest: {
         prefix: "",
         elements: Object.keys(ROOT.customElements),
-        lookuptype: _File._Import,
         constants: [],
-        hashrules: {},
         diagnostics: [],
-        lookup: {},
+        hashrules: {},
+        lookuptype: _File._Import,
+        filelookup: {},
         AXIOM: {},
         CLUSTER: {},
         LOCAL: {},
         GLOBAL: {},
-        PACKAGE: {},
-        PACBIND: {},
+        EXTERNAL: {},
+        EXATTACH: {},
     },
 };
 
@@ -147,18 +147,18 @@ export const CLASS: _Cache.CLASS = {
     Index_to_Data: {},
     Global___Index: {},
     Public___Index: {},
+    Library__Index: {},
+    External_Index: {},
     Artifact_Index: {},
     Arattach_Index: {},
-    Library__Index: {},
-    Package__Index: {},
     Sync_PublishIndexMap: {},
     Sync_ClassDictionary: {}
 };
 
 export const FILES: _Cache.FILES = {
     LIBRARIES: {},
-    PACKAGES: {},
-    TARGET: {}
+    EXTERNALS: {},
+    TARGETS: {}
 };
 
 
@@ -216,18 +216,6 @@ export const SYNC: Record<string, Record<string, _File.Sync>> = {
 
 export const PATH: Record<string, Record<string, _File.Path>> = {
     blueprint: {
-        artifact: {
-            frags: ["blueprint", "artifact"],
-            path: "",
-            content: "",
-            essential: true,
-        },
-        libraries: {
-            frags: ["blueprint", "libraries"],
-            path: "",
-            content: "",
-            essential: true,
-        },
         scaffold: {
             frags: ["blueprint", "scaffold"],
             path: "",
@@ -241,14 +229,26 @@ export const PATH: Record<string, Record<string, _File.Path>> = {
             essential: true,
         },
         reference: {
-            frags: ["blueprint", "scaffold", "reference.md"],
+            frags: ["blueprint", "reference.md"],
+            path: "",
+            content: "",
+            essential: true,
+        },
+        artifacts: {
+            frags: ["blueprint", "artifacts"],
+            path: "",
+            content: "",
+            essential: true,
+        },
+        libraries: {
+            frags: ["blueprint", "libraries"],
             path: "",
             content: "",
             essential: true,
         },
     },
     folder: {
-        setup: {
+        scaffold: {
             frags: ["xtyles"],
             path: "",
             content: "",
@@ -260,14 +260,8 @@ export const PATH: Record<string, Record<string, _File.Path>> = {
             content: "",
             essential: false,
         },
-        libraries: {
-            frags: ["xtyles", "libraries"],
-            path: "",
-            content: "",
-            essential: true,
-        },
-        packages: {
-            frags: ["xtyles", "packages"],
+        external: {
+            frags: ["xtyles", "external"],
             path: "",
             content: "",
             essential: true,
@@ -277,6 +271,12 @@ export const PATH: Record<string, Record<string, _File.Path>> = {
             path: "",
             content: "",
             essential: false,
+        },
+        libraries: {
+            frags: ["xtyles", "libraries"],
+            path: "",
+            content: "",
+            essential: true,
         },
     },
     css: {

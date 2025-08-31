@@ -44,7 +44,7 @@ export function H5(content = '', presets: string[] = [], ...styles: string[]) {
 }
 
 export function H6(content = '', presets: string[] = [], ...styles: string[]) {
-  return root.fmt([root.canvas.divider.mid[0].repeat(root.canvas.width() - root.canvas.tab.length - content.length) + root.canvas.tab + content, ""].join("\n"), ...presets, ...styles);
+  return root.fmt([root.canvas.divider.mid[0].repeat(root.canvas.width() - root.canvas.tab.length - content.length) + root.canvas.tab + content].join("\n"), ...presets, ...styles);
 }
 
 export function P(content = '', presets: string[] = [], ...styles: string[]) {

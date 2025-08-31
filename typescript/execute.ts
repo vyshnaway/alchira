@@ -81,7 +81,7 @@ async function execute(chapter: string) {
                 }
             }
             case "ReadPackages": {
-                await FETCH.SavePackages();
+                await FETCH.SaveExternals();
             }
             case "ReadTargets": {
                 await FETCH.SaveTargets();
@@ -135,8 +135,8 @@ async function execute(chapter: string) {
                 }
 
                 if (!stopWatcher) {
-                    targets = Object.keys(CACHE.FILES.TARGET);
-                    const targetFolders = [...targets, CACHE.PATH.folder.setup.path];
+                    targets = Object.keys(CACHE.FILES.TARGETS);
+                    const targetFolders = [...targets, CACHE.PATH.folder.scaffold.path];
                     const ignoreFolders = [
                         CACHE.PATH.folder.autogen.path,
                         CACHE.PATH.folder.artifact.path
@@ -167,7 +167,7 @@ async function execute(chapter: string) {
                     ) {
                         break;
                     } else {
-                        if (event.folder === CACHE.PATH.folder.setup.path) {
+                        if (event.folder === CACHE.PATH.folder.scaffold.path) {
                             if (event.action === "add" || event.action === "change") {
                                 switch (pathFromWork) {
                                     case CACHE.PATH.json.configure.path:
@@ -192,10 +192,10 @@ async function execute(chapter: string) {
                                         ) {
                                             CACHE.STATIC.Library_Saved[pathFromWork] = event.fileContent;
                                         } else if (
-                                            pathFromWork.startsWith(CACHE.PATH.folder.packages.path)
+                                            pathFromWork.startsWith(CACHE.PATH.folder.external.path)
                                             && ["xcss", "css", "md"].includes(event.extension)
                                         ) {
-                                            CACHE.STATIC.Package_Saved[pathFromWork] = event.fileContent;
+                                            CACHE.STATIC.External_Saved[pathFromWork] = event.fileContent;
                                         }
                                         step = "ProcessXtylesFolder";
                                 }
@@ -246,8 +246,8 @@ async function commander({
     CACHE.STATIC.Argument = argument;
     CACHE.STATIC.DEBUG = command === "debug";
     CACHE.STATIC.WATCH = (command === "debug" || command === "preview") && argument === "watch";
-    CACHE.STATIC.Project_Name = Use.string.normalize(projectName);
-    CACHE.STATIC.Project_Version = projectVersion;
+    CACHE.STATIC.ProjectName = Use.string.normalize(projectName);
+    CACHE.STATIC.ProjectVersion = projectVersion;
     ACTION.SetENV(rootPath, workPath, originPackageEssential);
     $.init(!CACHE.STATIC.WATCH);
 
@@ -306,7 +306,7 @@ async function commander({
                     $.tag.H1(APP_VERSION),
                     [
                         CACHE.SYNC.MARKDOWN.alerts.content,
-                        $$.ListRecord("Available Commands", CACHE.ROOT.Commands),
+                        $$.ListRecord("Available Commands", CACHE.ROOT.commands),
                         $$.ListRecord("Agreements", Object.fromEntries(Object.values(CACHE.SYNC.AGREEMENT).map((i) => [i.title, i.path]))),
                         $$.ListRecord("References", Object.fromEntries(Object.values(CACHE.SYNC.MARKDOWN).map((i) => [i.title, i.path]))),
                         $.tag.H4("For more information visit : " + CACHE.ROOT.website, $.preset.tertiary)

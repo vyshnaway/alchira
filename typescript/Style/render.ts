@@ -147,7 +147,6 @@ function _objectCompose(
 
 function ComposePrefixed(array: [string, string | object][], minify = !CACHE.STATIC.DEBUG) {
 	const styleSheet: string[] = [];
-	console.log(array);
 
 	array.forEach(([key, value]) => {
 		if (typeof value === "object") {
@@ -164,7 +163,7 @@ function ComposePrefixed(array: [string, string | object][], minify = !CACHE.STA
 }
 
 
-function ComposeArtifacted(array: [string, object | string][] = [], tab = "  ") {
+function ComposeArtifact(array: [string, object | string][] = [], tab = "  ") {
 	const styleSheet: string[] = [];
 
 	array.forEach(([key, value]) => {
@@ -173,7 +172,7 @@ function ComposeArtifacted(array: [string, object | string][] = [], tab = "  ") 
 				styleSheet.push(
 					key,
 					"{",
-					...ComposeArtifacted(Object.entries(value), tab).map((i) => tab + i),
+					...ComposeArtifact(Object.entries(value), tab).map((i) => tab + i),
 					"}",
 				);
 			}
@@ -195,14 +194,11 @@ function ComposeSwitched(selectorIndexObject: Record<string, number>, minify = !
 			return A;
 		}, {}),
 	);
-	console.log("---");
-	console.log(object);
-	console.log(Object.entries(object));
 	return ComposePrefixed(Object.entries(object), minify);
 }
 
 export default {
-	Artifacted: ComposeArtifacted,
+	Artifact: ComposeArtifact,
 	Prefixed: ComposePrefixed,
 	Switched: ComposeSwitched,
 };

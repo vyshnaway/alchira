@@ -9,7 +9,7 @@ import * as _support from "./type/support.js";
 
 const fallback_project_name = "-";
 const fallback_project_version = "0.0.0";
-const ExposedCommands = Object.keys(CACHE.ROOT.Commands);
+const ExposedCommands = Object.keys(CACHE.ROOT.commands);
 
 
 // --- Initialize ---
@@ -50,7 +50,7 @@ const rootPackageEssential: _support.PackageEssential = {
     version: typeof originPackageJson.data.version === "string" ?
         originPackageJson.data.version : CACHE.ROOT.version,
     website: typeof originPackageJson.data.homepage === "string" ?
-        originPackageJson.data.homepage : CACHE.ROOT.URL.Site,
+        originPackageJson.data.homepage : CACHE.ROOT.url.Site,
 };
 
 
@@ -62,10 +62,10 @@ if (
 ) {
     let addedCommands = 0;
     const scripts = projectPackageJson.data.scripts as Record<string, string>;
-    for (const cmd in CACHE.ROOT.Scripts) {
+    for (const cmd in CACHE.ROOT.scripts) {
         if (!scripts[cmd]) {
             addedCommands++;
-            scripts[`${bin}:${cmd}`] = CACHE.ROOT.Scripts[cmd];
+            scripts[`${bin}:${cmd}`] = CACHE.ROOT.scripts[cmd];
         }
     }
 

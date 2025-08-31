@@ -9,23 +9,23 @@ export function FETCH(index: number) {
     return CACHE.CLASS.Index_to_Data[index];
 }
 
-export function FIND(classname: string, includeTargets = false, localmap: _Style.ClassIndexMap = {}) {
+export function FIND(classname: string, includeArtifacts = false, localmap: _Style.ClassIndexMap = {}) {
     let index = 0;
     let group: _Style._Type = _Style._Type.NULL;
 
     if (localmap[classname]) {
         index = localmap[classname];
         group = _Style._Type.LOCAL;
-    } else if (CACHE.CLASS.Package__Index[classname]) {
-        index = CACHE.CLASS.Package__Index[classname];
-        group = _Style._Type.PACKAGE;
+    } else if (CACHE.CLASS.External_Index[classname]) {
+        index = CACHE.CLASS.External_Index[classname];
+        group = _Style._Type.EXTERNAL;
     } else if (CACHE.CLASS.Library__Index[classname]) {
         index = CACHE.CLASS.Library__Index[classname];
         group = _Style._Type.LIBRARY;
     } else if (CACHE.CLASS.Arattach_Index[classname]) {
         index = CACHE.CLASS.Arattach_Index[classname];
         group = _Style._Type.ARTATTACH;
-    } else if (includeTargets) {
+    } else if (includeArtifacts) {
         if (CACHE.CLASS.Artifact_Index[classname]) {
             index = CACHE.CLASS.Artifact_Index[classname];
             group = _Style._Type.ARTIFACT;

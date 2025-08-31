@@ -21,7 +21,7 @@ export async function FetchDocs() {
 			}
 		});
 	}));
-	await FILEMAN.write.file(CACHE.PATH.scaffold.reference.path, CACHE.SYNC.MARKDOWN.readme.content);
+	await FILEMAN.write.file(CACHE.PATH.blueprint.reference.path, CACHE.SYNC.MARKDOWN.readme.content);
 }
 
 export async function Initialize() {
@@ -29,7 +29,7 @@ export async function Initialize() {
 		$.TASK("Initializing XCSS setup.", 0);
 		$.TASK("Cloning scaffold to Project");
 
-		await FILEMAN.clone.safe(CACHE.PATH.blueprint.scaffold.path, CACHE.PATH.folder.setup.path);
+		await FILEMAN.clone.safe(CACHE.PATH.blueprint.scaffold.path, CACHE.PATH.folder.scaffold.path);
 		await FILEMAN.clone.safe(CACHE.PATH.blueprint.libraries.path, CACHE.PATH.folder.libraries.path);
 
 		$.POST($$.ListSteps(
@@ -55,7 +55,7 @@ export async function Initialize() {
 			],
 		));
 
-		$.POST($$.ListRecord("Available Commands", CACHE.ROOT.Commands));
+		$.POST($$.ListRecord("Available Commands", CACHE.ROOT.commands));
 
 		$.POST($$.ListSteps(
 			"Publish command instructions.",
@@ -63,7 +63,7 @@ export async function Initialize() {
 				? ["This command is not activated."]
 				: [
 					"Create a new project and use its access key. For action visit " +
-					$.FMT(CACHE.ROOT.URL.Console, $.style.AS_Bold, ...$.preset.primary),
+					$.FMT(CACHE.ROOT.url.Console, $.style.AS_Bold, ...$.preset.primary),
 					"For personal projects, you can use the key in " +
 					$.FMT(CACHE.PATH.json.configure.path, $.style.AS_Bold, ...$.preset.primary),
 					"If using in CI/CD workflow, it is suggested to use " +
@@ -71,6 +71,7 @@ export async function Initialize() {
 				]
 		));
 
+		await FetchDocs();
 		return $.tag.H5("Initialized directory", $.preset.success);
 	} catch (err) {
 		return $.MAKE(
@@ -84,9 +85,9 @@ export async function Initialize() {
 export async function VerifySetupStruct() {
 	const result = { started: false, proceed: false, report: "" };
 
-	if (FILEMAN.path.ifFolder(CACHE.PATH.folder.setup.path)) {
+	if (FILEMAN.path.ifFolder(CACHE.PATH.folder.scaffold.path)) {
 		const errors: Record<string, string> = {};
-		await FILEMAN.clone.safe(CACHE.PATH.blueprint.scaffold.path, CACHE.PATH.folder.setup.path);
+		await FILEMAN.clone.safe(CACHE.PATH.blueprint.scaffold.path, CACHE.PATH.folder.scaffold.path);
 
 		$.TASK("Verifying directory status", 0);
 		for (const item of [
@@ -132,17 +133,15 @@ export async function SyncIgnorefiles() {
 	if (modPts) { await FILEMAN.write.file(CACHE.PATH.autogen.ignore.path, manifestIgnores.join("\n")); }
 }
 
+
 export async function FetchStatics(vendorSource: string) {
-
-
-
 	$.TASK("Loading vendor-prefixes");
 
 	const PrefixObtained = await (async function () {
 		const result1 = await FILEMAN.read.json(vendorSource, true);
 		if (result1.status) { return result1.data; };
 
-		const result2 = await FILEMAN.read.json(CACHE.ROOT.URL.PrefixCdn + vendorSource, true);
+		const result2 = await FILEMAN.read.json(CACHE.ROOT.url.PrefixCdn + vendorSource, true);
 		if (result2.status) { return result2.data; };
 
 		const result3 = await FILEMAN.read.json(CACHE.PATH.blueprint.prefixes.path, false);
@@ -218,9 +217,9 @@ export async function VerifyConfigs(loadStatics: boolean) {
 
 		Object.assign(CACHE.STATIC.Artifact, config.data);
 		CACHE.STATIC.Artifact.readme = (await FILEMAN.read.file(CACHE.PATH.md.readme.path)).data;
-		CACHE.STATIC.Artifact.name = CACHE.STATIC.Artifact.name = CONFIG.name || CACHE.STATIC.Project_Name;
-		CACHE.STATIC.Artifact.version = CACHE.STATIC.Artifact.version = CONFIG.version || CACHE.STATIC.Project_Version;
-		CACHE.STATIC.Package_Saved = Object.entries((typeof CONFIG.packages === "object") ? CONFIG.packages : {})
+		CACHE.STATIC.Artifact.name = CACHE.STATIC.Artifact.name = CONFIG.name || CACHE.STATIC.ProjectName;
+		CACHE.STATIC.Artifact.version = CACHE.STATIC.Artifact.version = CONFIG.version || CACHE.STATIC.ProjectVersion;
+		CACHE.STATIC.External_Saved = Object.entries((typeof CONFIG.externals === "object") ? CONFIG.externals : {})
 			.reduce((a: Record<string, string>, [k, v]) => {
 				if (
 					typeof v === "string"
@@ -235,12 +234,12 @@ export async function VerifyConfigs(loadStatics: boolean) {
 		delete CACHE.STATIC.Artifact.proxy;
 		delete CACHE.STATIC.Artifact.tweaks;
 		delete CACHE.STATIC.Artifact.vendors;
-		delete CACHE.STATIC.Artifact.packages;
+		delete CACHE.STATIC.Artifact.externals;
 
-		const results = await VERIFY.proxyMapDependency(CACHE.STATIC.ProxyMap, CACHE.PATH.folder.setup.path);
+		const results = await VERIFY.proxyMapDependency(CACHE.STATIC.ProxyMap, CACHE.PATH.folder.scaffold.path);
 		errors.push(...results.warnings);
 	} else {
-		errors.push(`${CACHE.PATH.json.configure} : Bad json file.`);
+		errors.push(`${CACHE.PATH.json.configure.path} : Bad json file.`);
 	}
 
 	$.TASK("Initialization finished");
@@ -268,9 +267,9 @@ export async function SaveLibraries() {
 	CACHE.STATIC.Library_Saved = await FILEMAN.read.bulk(CACHE.PATH.folder.libraries.path, ["css"]);
 }
 
-export async function SavePackages() {
-	$.TASK("Updating Packages");
-	CACHE.STATIC.Package_Saved = await FILEMAN.read.bulk(CACHE.PATH.folder.packages.path, ["xcss", "css", "md"]);
+export async function SaveExternals() {
+	$.TASK("Updating External Artifacts");
+	CACHE.STATIC.External_Saved = await FILEMAN.read.bulk(CACHE.PATH.folder.external.path, ["xcss", "css", "md"]);
 }
 
 
@@ -285,7 +284,7 @@ export async function SaveHashrules() {
 	$.TASK("Updating Hashrules", 0);
 	const errors: Record<string, string> = {};
 
-	$.STEP("PATH : " + CACHE.PATH.json.hashrules);
+	$.STEP("PATH : " + CACHE.PATH.json.hashrules.path);
 	const hashrule = await FILEMAN.read.json(CACHE.PATH.json.hashrules.path);
 	Object.keys(CACHE.STATIC.HashRule).forEach(key => delete CACHE.STATIC.HashRule[key]);
 	if (hashrule.status) {

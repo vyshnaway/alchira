@@ -39,7 +39,7 @@ export function ClassChart(heading: string, items: Record<string, string[]>) {
         $.tag.H2(heading, $.preset.primary),
         Object.entries(items).map(([heading, entries]) =>
             $.MAKE(
-                $.tag.H5(heading, $.preset.tertiary),
+                $.tag.H6(heading, $.preset.tertiary),
                 entries,
                 [$.list.Catalog, 0, $.preset.primary]
             ),

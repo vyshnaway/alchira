@@ -3,10 +3,10 @@ export enum _Type {
     LOCAL = 1,
     GLOBAL = 2,
     PUBLIC = 3,
-    PACKAGE = 4,
-    LIBRARY = 5,
-    ARTATTACH = 6,
-    ARTIFACT = 7,
+    LIBRARY = 4,
+    EXTERNAL = 5,
+    ARTIFACT = 6,
+    ARTATTACH = 7,
 };
 
 export const _Import = [
@@ -14,10 +14,10 @@ export const _Import = [
     'LOCAL',
     'GLOBAL',
     'PUBLIC',
-    'PACKAGE',
     'LIBRARY',
-    'ARTATTACH',
+    'EXTERNAL',
     'ARTIFACT',
+    'ARTATTACH',
 ];
 
 

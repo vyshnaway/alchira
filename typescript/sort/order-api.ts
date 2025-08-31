@@ -10,7 +10,7 @@ import * as CACHE from "../data/cache.js";
 import previewOrganize from "./organize.js";
 
 
-CACHE.ROOT.URL["Worker"] = "https://workers.xpktr.com/api/xcss-build-request";
+CACHE.ROOT.url["Worker"] = "https://workers.xpktr.com/api/xcss-build-request";
 // APP.URL["Worker"] = APP.Worker + "api/publish";
 
 export default async function order(
@@ -74,7 +74,7 @@ export default async function order(
 			redirect: "follow",
 		};
 
-		fetch(CACHE.ROOT.URL["Worker"], requestOptions)
+		fetch(CACHE.ROOT.url["Worker"], requestOptions)
 			.then((res) => res.json())
 			.then(async (res) => {
 				RESPONSE.status = res.status;

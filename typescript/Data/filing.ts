@@ -13,15 +13,15 @@ import * as CACHE from "./cache.js";
 function resolveGroup(
 	extension: string,
 	hasCluster: boolean,
-	fromPackage: boolean,
-	fromLibrary: boolean,
+	fromExternals: boolean,
+	fromLibraries: boolean,
 ): _File._Type {
-	if (fromPackage) {
+	if (fromExternals) {
 		switch (extension) {
 			case "css":
-				return _File._Type.PACBIND;
+				return _File._Type.EXATTACH;
 			case "xcss":
-				return _File._Type.PACKAGE;
+				return _File._Type.EXTERNAL;
 			case "md":
 				return _File._Type.README;
 			default:
@@ -29,7 +29,7 @@ function resolveGroup(
 		}
 	}
 
-	if (fromLibrary) {
+	if (fromLibraries) {
 		return hasCluster ? _File._Type.CLUSTER : _File._Type.AXIOM;
 	}
 
@@ -37,7 +37,7 @@ function resolveGroup(
 }
 
 export default function FILING(
-	fileGroup: "library" | "package" | "target",
+	fileGroup: "library" | "external" | "target",
 	filePath: string,
 	content: string,
 	target = '',
@@ -45,41 +45,41 @@ export default function FILING(
 	label = '',
 ) {
 	const isLibrary = fileGroup === "library";
-	const isPackage = fileGroup === "package";
+	const iExternal = fileGroup === "external";
 	const fromXtylesFolder = fileGroup !== "target";
 
 	const targetPath = FILEMAN.path.join(target, filePath);
 	const sourcePath = FILEMAN.path.join(source, filePath);
 
-	const [extension, packageName, id, cluster]: string[] = FILEMAN.path.basename(filePath).split(".").reverse();
+	const [extension, artifactName, id, cluster]: string[] = FILEMAN.path.basename(filePath).split(".").reverse();
 	const num = Number(id);
 	const idn = isNaN(num) || num < 0 ? 0 : Math.floor(num);
-	const normalFileName = isPackage ? USE.string.normalize(packageName) : CACHE.STATIC.Artifact.name;
+	const normalFileName = iExternal ? USE.string.normalize(artifactName) : CACHE.STATIC.Artifact.name;
 
-	const group: _File._Type = resolveGroup(extension, Boolean(cluster), isPackage, isLibrary);
+	const group: _File._Type = resolveGroup(extension, Boolean(cluster), iExternal, isLibrary);
 	const normalCluster = USE.string.normalize(cluster);
 
 	const classFront =
 		(
-			isPackage ? `/${normalFileName}${group === _File._Type.PACBIND ? "/$/" : "/"}` : ""
+			iExternal ? `/${normalFileName}${group === _File._Type.EXATTACH ? "/$/" : "/"}` : ""
 		) + (
 			((idn > 0) && (extension === "css") && (normalCluster !== "-")) ? normalCluster : ""
 		) + (
-		isLibrary ? "$".repeat(idn) : ""
-	);
+			isLibrary ? "$".repeat(idn) : ""
+		);
 
 	const result: _File.Storage = {
 		label,
+		artifact: fromXtylesFolder ? artifactName : CACHE.STATIC.Artifact.name,
 		filePath,
 		extension,
 		sourcePath,
 		targetPath,
-		packageName: fromXtylesFolder ? packageName : CACHE.STATIC.Artifact.name,
 		classFront,
 		debugclassFront: `${(fromXtylesFolder) ? group : ""}\\|${USE.string.normalize(filePath, [], [], ["/", "."])}`,
 		manifest: {
 			lookup: {
-				id: isLibrary ? String(idn) : isPackage ? filePath : targetPath,
+				id: isLibrary ? String(idn) : iExternal ? filePath : targetPath,
 				type: group,
 			},
 			local: {},

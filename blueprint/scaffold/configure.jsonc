@@ -14,8 +14,8 @@
       }
     }
   ],
-  "packages": {
-    "package-name": "source-link"
+  "externals": {
+    "artifact-name": "source-link"
   },
   "tweaks": {
     // ---

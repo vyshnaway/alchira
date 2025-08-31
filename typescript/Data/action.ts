@@ -61,7 +61,7 @@ export function SetENV(rootPath: string, workPath: string, packageEssential: _Su
         });
     });
 
-    const CDN = CACHE.ROOT.URL.Cdn + "version/" + CACHE.ROOT.version.split(".")[0] + "/";
+    const CDN = CACHE.ROOT.url.Cdn + "version/" + CACHE.ROOT.version.split(".")[0] + "/";
     Object.values(CACHE.SYNC).forEach((object) => {
         Object.values(object).forEach((entry) => {
             entry.url = CDN + entry.url;
@@ -75,11 +75,11 @@ export function GetCacheUsage(): string[] {
         "Sync": USE.string.stringMem(JSON.stringify(CACHE.SYNC)),
         "Path": USE.string.stringMem(JSON.stringify(CACHE.PATH)),
         "Root": USE.string.stringMem(JSON.stringify(CACHE.ROOT)),
-        "Static": USE.string.stringMem(JSON.stringify(CACHE.STATIC)),
         "Delta": USE.string.stringMem(JSON.stringify(CACHE.DELTA)),
         "Class": USE.string.stringMem(JSON.stringify(CACHE.CLASS)),
         "Files": USE.string.stringMem(JSON.stringify(CACHE.FILES)),
-        "Proxy": Object.values(CACHE.FILES.TARGET).reduce((t: number, c) => {
+        "Static": USE.string.stringMem(JSON.stringify(CACHE.STATIC)),
+        "Proxy": Object.values(CACHE.FILES.TARGETS).reduce((t: number, c) => {
             t += USE.string.stringMem(JSON.stringify(c));
             return t;
         }, 0),

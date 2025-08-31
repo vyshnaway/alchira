@@ -1,6 +1,6 @@
 // import * as _Config from "../type/config.js";
 import * as _File from "../type/file.js";
-import * as _Style from "../type/style.js";
+// import * as _Style from "../type/style.js";
 import * as _Script from "../type/script.js";
 // import * as _Cache from "../type/cache.js";
 // import * as _Support from "../type/support.js";
@@ -43,32 +43,35 @@ export default function scanner(
 		) {
 			let subScribed = '';
 			const tagStart = fileCursor.active.marker;
-			const scribedLen = stream.length;
 			const result = TAGSCAN(fileData, classProps, action, fileCursor);
 			const fragment = content.slice(tagStart, result.styleDeclarations.tagOpenMarker);
 
 			if (result.ok) {
-				if (selfClosingTags[fragment]) {
-					fileData.styleData.tagReplacements.push([selfClosingTags[fragment], scribedLen]);
-				}
-
-				subScribed = (
-					action === _Script._Actions.artifact
-						? result.styleDeclarations.scope !== _Style._Type.PUBLIC
-						: (Object.keys(result.nativeAttributes).length === 0 && Object.keys(result.styleDeclarations.styles).length === 0)
-				) ? fragment :
-					'<' + [
-						result.styleDeclarations.element + (result.styleDeclarations.elvalue.length ? `=${result.styleDeclarations.elvalue}` : ''),
-						...Object.entries(result.nativeAttributes).map(([A, V]) => V === "" ? A : `${A}=${V}`)
-					].join(' ') + '>';
-
 				classesList.push(...result.classesList);
 				attachments.push(...result.attachments);
-				Object.entries(result.styleDeclarations.styles).forEach(([k, v]) => { result.styleDeclarations.styles[k] = v.slice(1, -1); });
 				if (Object.keys(result.styleDeclarations.styles).length > 0) { stylesList.push(result.styleDeclarations); }
+				if (selfClosingTags[fragment]) { fileData.styleData.tagReplacements.push([selfClosingTags[fragment], stream.length]); }
+
+				const styleDeclarations = Object.entries(result.styleDeclarations.styles);
+				styleDeclarations.forEach(([k, v]) => { result.styleDeclarations.styles[k] = v.slice(1, -1); });
+
+
+				if (_Script._Actions.read === action) {
+					subScribed = (result.styleDeclarations.selector.length)
+						? '<' + [
+							result.styleDeclarations.element + (result.styleDeclarations.elvalue.length ? `=${result.styleDeclarations.elvalue}` : ''),
+							...Object.entries(result.nativeAttributes).map(([A, V]) => V === "" ? A : `${A}=${V}`)
+						].join(' ') + '>'
+						: fragment;
+				} else if (!selfClosingTags[fragment]) {
+					subScribed = result.classSynced ? '<' + [
+						result.styleDeclarations.element + (result.styleDeclarations.elvalue.length ? `=${result.styleDeclarations.elvalue}` : ''),
+						...Object.entries(result.nativeAttributes).map(([A, V]) => V === "" ? A : `${A}=${V}`)
+					].join(' ') + '>' : fragment;
+				}
+
 
 				CURSOR.Incremnet(fileCursor);
-
 			} else {
 				subScribed += fragment;
 			}

@@ -4,8 +4,8 @@ import * as _style from "./style.js";
 
 export enum _Type {
     NULL = 0,
-    PACKAGE = 1,
-    PACBIND = 2,
+    EXTERNAL = 1,
+    EXATTACH = 2,
     AXIOM = 3,
     CLUSTER = 4,
     TARGET = 5,
@@ -15,8 +15,8 @@ export enum _Type {
 
 export const _Import = [
     '',
-    'PACKAGE',
-    'PACBIND',
+    'EXTERNAL',
+    'EXATTACH',
     'AXIOM',
     'CLUSTER',
     'TARGET',
@@ -75,18 +75,18 @@ export interface LocalManifest {
 }
 
 export interface Storage {
-    classFront: string,
+    artifact: string,
     filePath: string,
-    packageName: string,
     extension: string,
+    classFront: string,
     sourcePath: string,
     targetPath: string,
-    debugclassFront: string,
     content: string,
     midway: string,
     scratch: string,
     label: string,
     manifest: LocalManifest,
+    debugclassFront: string,
     styleData: {
         attachments: string[],
         classTracks: string[][],
@@ -95,6 +95,6 @@ export interface Storage {
         globalClasses: _style.ClassIndexMap,
         publicClasses: _style.ClassIndexMap,
         styleMap: ClassMetaMap,
-        tagReplacements: [ElementId: number, Position:number][]
+        tagReplacements: [ElementId: number, Position: number][]
     }
 }

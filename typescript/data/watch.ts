@@ -5,7 +5,6 @@
 // import * as _Cache from "../type/cache.js";
 import * as _Support from "../type/support.js";
 
-
 // import FS from "fs";
 import PATH from "path";
 import FILEMAN from "../fileman.js";
@@ -14,18 +13,79 @@ import CHOKIDAR from "chokidar";
 
 export const queue: _Support.Event[] = [];
 
+
 export function add(event: _Support.Event): void {
 	queue.push(event);
 }
-
 export function clear(): void {
 	queue.length = 0;
 }
-
 export function pull(): _Support.Event | null {
 	return queue.length > 0 ? queue.shift()! : null;
 }
 
+
+export function Init(folders: string[] = [], ignores: string[] = []) {
+	const folderMaps = folders.reduce((acc, folder) => {
+		acc[PATH.resolve(folder)] = folder;
+		return acc;
+	}, {} as Record<string, string>);
+	const resolvedFolders = Object.keys(folderMaps);
+	const resolvedIgnores = ignores.map((p) => PATH.resolve(p));
+
+	const handleEventInternal = async (action: string, filePath: string) => {
+		const event: _Support.Event = {
+			timeStamp: '',
+			action: '',
+			folder: '',
+			filePath: '',
+			fileContent: '',
+			extension: PATH.extname(filePath)?.slice(1),
+		};
+
+		const t = new Date();
+		event.timeStamp = t.getHours().toString().padStart(2, "0") + `:` +
+			t.getMinutes().toString().padStart(2, "0") + `:` +
+			t.getSeconds().toString().padStart(2, "0");
+
+		event.action = action;
+		event.folder = folderMaps[resolvedFolders.find((folder) => filePath.startsWith(folder)) || ''];
+		event.filePath = PATH.relative(event.folder, filePath);
+
+		if (action === "add" || action === "change") {
+			const content = await FILEMAN.read.file(filePath);
+			if (content.status) {
+				event.fileContent = content.data;
+			}
+		}
+
+		add(event);
+	};
+
+	const watcher = CHOKIDAR.watch(resolvedFolders, {
+		persistent: true,
+		ignoreInitial: true,
+		alwaysStat: true,
+		awaitWriteFinish: {
+			stabilityThreshold: 200,
+			pollInterval: 100,
+		},
+		ignored: [/(^|[/\\])\../, "**/node_modules/**", ...resolvedIgnores],
+		usePolling: true,
+		interval: 100,
+		binaryInterval: 300,
+	});
+
+	watcher
+		.on("all", (event: string, filePath: string) => handleEventInternal(event, filePath))
+		.on("error", (error: unknown) => {
+			if (error instanceof Error) {
+				console.error(`Watcher error: ${error.message}`);
+			}
+		});
+
+	return () => { watcher.close(); };
+}
 
 
 
@@ -95,66 +155,3 @@ export function pull(): _Support.Event | null {
 // 		watchers.forEach(w => w.close());
 // 	};
 // }
-
-
-export function Init(folders: string[] = [], ignores: string[] = []) {
-	const folderMaps = folders.reduce((acc, folder) => {
-		acc[PATH.resolve(folder)] = folder;
-		return acc;
-	}, {} as Record<string, string>);
-	const resolvedFolders = Object.keys(folderMaps);
-	const resolvedIgnores = ignores.map((p) => PATH.resolve(p));
-
-	const handleEventInternal = async (action: string, filePath: string) => {
-		const event: _Support.Event = {
-			timeStamp: '',
-			action: '',
-			folder: '',
-			filePath: '',
-			fileContent: '',
-			extension: PATH.extname(filePath)?.slice(1),
-		};
-
-		const t = new Date();
-		event.timeStamp = t.getHours().toString().padStart(2, "0") + `:` +
-			t.getMinutes().toString().padStart(2, "0") + `:` +
-			t.getSeconds().toString().padStart(2, "0");
-
-		event.action = action;
-		event.folder = folderMaps[resolvedFolders.find((folder) => filePath.startsWith(folder)) || ''];
-		event.filePath = PATH.relative(event.folder, filePath);
-
-		if (action === "add" || action === "change") {
-			const content = await FILEMAN.read.file(filePath);
-			if (content.status) {
-				event.fileContent = content.data;
-			}
-		}
-
-		add(event);
-	};
-
-	const watcher = CHOKIDAR.watch(resolvedFolders, {
-		persistent: true,
-		ignoreInitial: true,
-		alwaysStat: true,
-		awaitWriteFinish: {
-			stabilityThreshold: 200,
-			pollInterval: 100,
-		},
-		ignored: [/(^|[/\\])\../, "**/node_modules/**", ...resolvedIgnores],
-		usePolling: true,
-		interval: 100,
-		binaryInterval: 300,
-	});
-
-	watcher
-		.on("all", (event: string, filePath: string) => handleEventInternal(event, filePath))
-		.on("error", (error: unknown) => {
-			if (error instanceof Error) {
-				console.error(`Watcher error: ${error.message}`);
-			}
-		});
-
-	return () => { watcher.close(); };
-}

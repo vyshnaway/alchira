@@ -24,10 +24,10 @@ function _DeleteLibraryFile(filePath: string) {
 	}
 }
 
-function _DeletePackageFile(filePath: string) {
-	if (CACHE.FILES.PACKAGES[filePath]) {
-		CACHE.FILES.PACKAGES[filePath].styleData.usedIndexes.forEach(i => INDEX.DISPOSE(i));
-		delete CACHE.FILES.PACKAGES[filePath];
+function _DeleteExternalFile(filePath: string) {
+	if (CACHE.FILES.EXTERNALS[filePath]) {
+		CACHE.FILES.EXTERNALS[filePath].styleData.usedIndexes.forEach(i => INDEX.DISPOSE(i));
+		delete CACHE.FILES.EXTERNALS[filePath];
 	}
 }
 
@@ -37,13 +37,13 @@ function _ClearStash() {
 		INDEX.DISPOSE(index);
 		delete CACHE.CLASS.Library__Index[selector];
 	});
-	Object.entries(CACHE.CLASS.Package__Index).forEach(([selector, index]) => {
+	Object.entries(CACHE.CLASS.External_Index).forEach(([selector, index]) => {
 		INDEX.DISPOSE(index);
-		delete CACHE.CLASS.Package__Index[selector];
+		delete CACHE.CLASS.External_Index[selector];
 	});
 
 	Object.keys(CACHE.FILES.LIBRARIES).forEach((filePath) => _DeleteLibraryFile(filePath));
-	Object.keys(CACHE.FILES.PACKAGES).forEach((filePath) => _DeletePackageFile(filePath));
+	Object.keys(CACHE.FILES.EXTERNALS).forEach((filePath) => _DeleteExternalFile(filePath));
 }
 
 
@@ -52,9 +52,9 @@ function _SaveLibraryFile(filePath: string, fileContent: string) {
 	CACHE.FILES.LIBRARIES[filePath] = FILING("library", filePath, fileContent);
 }
 
-function _SavePackageFile(filePath: string, fileContent: string) {
-	if (CACHE.FILES.PACKAGES[filePath]) { _DeletePackageFile(filePath); }
-	CACHE.FILES.PACKAGES[filePath] = FILING("package", filePath, fileContent);
+function _SaveExternalFile(filePath: string, fileContent: string) {
+	if (CACHE.FILES.EXTERNALS[filePath]) { _DeleteExternalFile(filePath); }
+	CACHE.FILES.EXTERNALS[filePath] = FILING("external", filePath, fileContent);
 }
 
 
@@ -83,24 +83,24 @@ function _StackLibraryFiles() {
 	return { libraryLookup, axiomsArray, clustersArray };
 }
 
-function _StackPackageFiles() {
+function _StackExternalFiles() {
 	const
 		none: _File.Storage[] = [],
-		pacbindsArray: _File.Storage[] = [],
-		packagesArray: _File.Storage[] = [],
-		packageLookup: Record<string, _File.Lookup> = {};
+		exattachArray: _File.Storage[] = [],
+		externalArray: _File.Storage[] = [],
+		externalLookup: Record<string, _File.Lookup> = {};
 
-	Object.entries(CACHE.FILES.PACKAGES).forEach(([path, data]) => {
+	Object.entries(CACHE.FILES.EXTERNALS).forEach(([path, data]) => {
 		const reference = data.manifest.lookup;
-		packageLookup[path] = reference;
+		externalLookup[path] = reference;
 
-		const collection = reference.type === _File._Type.PACBIND ? pacbindsArray
-			: reference.type === _File._Type.PACKAGE ? packagesArray : none;
+		const collection = reference.type === _File._Type.EXATTACH ? exattachArray
+			: reference.type === _File._Type.EXTERNAL ? externalArray : none;
 
 		collection.push(data);
 	});
 
-	return { packageLookup, pacbindsArray, packagesArray };
+	return { externalLookup, exattachArray, externalArray };
 }
 
 
@@ -114,17 +114,17 @@ function ReRender() {
 	Object.entries(CACHE.STATIC.Library_Saved).forEach(([filePath, fileContent]) => {
 		_SaveLibraryFile(filePath, fileContent);
 	});
-	Object.entries(CACHE.STATIC.Package_Saved).forEach(([filePath, fileContent]) => {
-		_SavePackageFile(filePath, fileContent);
+	Object.entries(CACHE.STATIC.External_Saved).forEach(([filePath, fileContent]) => {
+		_SaveExternalFile(filePath, fileContent);
 	});
 
 
 
-	const pacbindChart: Record<string, string[]> = {};
-	const packageChart: Record<string, string[]> = {};
-	const { packageLookup, pacbindsArray, packagesArray } = _StackPackageFiles();
+	const exattachChart: Record<string, string[]> = {};
+	const externalChart: Record<string, string[]> = {};
+	const { externalLookup, exattachArray, externalArray } = _StackExternalFiles();
 
-	const PackageSkeletons = packagesArray.reduce((collection, fileData) => {
+	const ExternalSkeletons = externalArray.reduce((collection, fileData) => {
 		const indexMetaCollection = collection[fileData.filePath] = {} as Record<string, _Style.Metadata>;
 		SCRIPTFILE(fileData).stylesList.forEach((tagStyle) => {
 			if (tagStyle.selector === "") {
@@ -132,7 +132,7 @@ function ReRender() {
 				fileData.manifest.errors.push(E.error);
 				fileData.manifest.diagnostics.push(E.diagnostic);
 			} else {
-				const response = PARSE.TagStyleScanner(tagStyle, fileData, CACHE.CLASS.Package__Index);
+				const response = PARSE.TagStyleScanner(tagStyle, fileData, CACHE.CLASS.External_Index);
 				const styleData = INDEX.FETCH(response.index);
 				if (styleData?.declarations.length === 1) {
 					fileData.styleData.usedIndexes.add(response.index);
@@ -144,43 +144,43 @@ function ReRender() {
 		});
 		const classNames = Object.keys(indexMetaCollection);
 		if (classNames.length) {
-			packageChart[`Package [${fileData.filePath}]: ${classNames.length} Classes`] = classNames;
+			externalChart[`External [${fileData.filePath}]: ${classNames.length} Classes`] = classNames;
 		}
 		return collection;
 	}, {} as Record<string, Record<string, _Style.Metadata>>);
 
-	const PacbindSkeletons = pacbindsArray.reduce((collection, fileData) => {
+	const ExattachSkeletons = exattachArray.reduce((collection, fileData) => {
 		const result = PARSE.CSSBulkScanner([fileData], true);
 		collection[fileData.filePath] = result.indexMetaCollection;
 		if (result.selectorList.length) {
-			pacbindChart[`Pacbind [${fileData.filePath}]: ${result.selectorList.length} Classes`] = result.selectorList;
+			exattachChart[`Exattach [${fileData.filePath}]: ${result.selectorList.length} Classes`] = result.selectorList;
 		}
 		return collection;
 	}, {} as Record<string, Record<string, _Style.Metadata>>);
 
 
-	const PackageErrors: string[] = [];
-	const PackageDiagnostics: _Support.Diagnostic[] = [];
+	const ExternalErrors: string[] = [];
+	const ExternalDiagnostics: _Support.Diagnostic[] = [];
 
-	Object.values(packagesArray).forEach(file => {
-		PackageErrors.push(...file.manifest.errors);
-		PackageDiagnostics.push(...file.manifest.diagnostics);
+	Object.values(externalArray).forEach(file => {
+		ExternalErrors.push(...file.manifest.errors);
+		ExternalDiagnostics.push(...file.manifest.diagnostics);
 	});
 
-	Object.values(pacbindsArray).forEach(file => {
-		PackageErrors.push(...file.manifest.errors);
-		PackageDiagnostics.push(...file.manifest.diagnostics);
+	Object.values(exattachArray).forEach(file => {
+		ExternalErrors.push(...file.manifest.errors);
+		ExternalDiagnostics.push(...file.manifest.diagnostics);
 	});
 
-	const nameCollitions = Object.values(CACHE.FILES.PACKAGES).reduce((A, F) => {
-		if (CACHE.STATIC.Artifact.name === F.packageName) { A.push(F.filePath); }
+	const nameCollitions = Object.values(CACHE.FILES.EXTERNALS).reduce((A, F) => {
+		if (CACHE.STATIC.Artifact.name === F.artifact) { A.push(F.filePath); }
 		return A;
 	}, [] as string[]);
 
 	if (nameCollitions.length) {
-		const E = $$.GenerateError(`Package-name collitions: ${CACHE.STATIC.Artifact.name}`, nameCollitions);
-		PackageErrors.push(E.error);
-		PackageDiagnostics.push(E.diagnostic);
+		const E = $$.GenerateError(`Artifact Name collitions: ${CACHE.STATIC.Artifact.name}`, nameCollitions);
+		ExternalErrors.push(E.error);
+		ExternalDiagnostics.push(E.diagnostic);
 	}
 
 
@@ -208,38 +208,41 @@ function ReRender() {
 	const LibraryDiagnostics: _Support.Diagnostic[] = [];
 
 	const LibraryReport = [
-		$$.ClassChart(`Axioms: ${Object.values(ClusterSkeletons).reduce((a, v) => a += Object.keys(v).length, 0)}`, axiomChart),
-		$$.ClassChart(`Clusters: ${Object.values(PacbindSkeletons).reduce((a, v) => a += Object.keys(v).length, 0)}`, clusterChart),
+		$$.ClassChart(`Axioms: ${Object.values(AxiomSkeletons).reduce((a, v) => a += Object.keys(v).length, 0)}`, axiomChart),
+		$$.ClassChart(`Clusters: ${Object.values(ClusterSkeletons).reduce((a, v) => a += Object.keys(v).length, 0)}`, clusterChart),
 	].join("");
 
-	const PackageReport = [
-		$$.ClassChart(`Pacbinds: ${Object.values(PackageSkeletons).reduce((a, v) => a += Object.keys(v).length, 0)}`, pacbindChart),
-		$$.ClassChart(`Packages: ${Object.values(PacbindSkeletons).reduce((a, v) => a += Object.keys(v).length, 0)}`, packageChart),
+	const ExternalReport = [
+		$$.ClassChart(`Exattach: ${Object.values(ExternalSkeletons).reduce((a, v) => a += Object.keys(v).length, 0)}`, exattachChart),
+		$$.ClassChart(`External: ${Object.values(ExattachSkeletons).reduce((a, v) => a += Object.keys(v).length, 0)}`, externalChart),
 	].join("");
 
-
+	
 	CACHE.DELTA.Report.libraries = LibraryReport;
-	CACHE.DELTA.Report.packages = PackageReport;
+	CACHE.DELTA.Report.externals = ExternalReport;
 
 	CACHE.DELTA.Errors.libraries = LibraryErrors;
-	CACHE.DELTA.Errors.packages = PackageErrors;
+	CACHE.DELTA.Errors.externals = ExternalErrors;
 
 	CACHE.DELTA.Diagnostics.libraries = LibraryDiagnostics;
-	CACHE.DELTA.Diagnostics.packages = PackageDiagnostics;
+	CACHE.DELTA.Diagnostics.externals = ExternalDiagnostics;
 
 	CACHE.DELTA.Manifest.AXIOM = AxiomSkeletons;
 	CACHE.DELTA.Manifest.CLUSTER = ClusterSkeletons;
-	CACHE.DELTA.Manifest.PACKAGE = PackageSkeletons;
-	CACHE.DELTA.Manifest.PACBIND = PacbindSkeletons;
+	CACHE.DELTA.Manifest.EXTERNAL = ExternalSkeletons;
+	CACHE.DELTA.Manifest.EXATTACH = ExattachSkeletons;
 
 	CACHE.DELTA.Lookup.libraries = libraryLookup;
-	CACHE.DELTA.Lookup.packages = packageLookup;
+	CACHE.DELTA.Lookup.externals = externalLookup;
+
+	CACHE.CLASS.Arattach_Index =
+		Object.fromEntries(Object.entries(CACHE.CLASS.Library__Index).map(([k, v]) => [`/${CACHE.STATIC.Artifact.name}/$/${k}`, v]));
 }
 
 
 
 function ReDeclare() {
-	Object.values(CACHE.CLASS.Package__Index).forEach((val) => {
+	Object.values(CACHE.CLASS.External_Index).forEach((val) => {
 		const value = CACHE.CLASS.Index_to_Data[val];
 		value.metadata.declarations = [...value.declarations];
 	});
@@ -251,36 +254,36 @@ function ReDeclare() {
 
 
 
-function Appendix(indexes: number[] = []) {
-	const stash: Record<string, { readme: string[], pacbind: number[], package: number[] }> = {};
+// function Appendix(indexes: number[] = []) {
+// 	const stash: Record<string, { readme: string[], pacbind: number[], external: number[] }> = {};
 
-	if (!CACHE.STATIC.WATCH) {
-		const usedPackages = Object.values(CACHE.CLASS.Package__Index).filter(i => indexes.includes(i))
-			.reduce((a, c) => { a.add(INDEX.FETCH(c).packname); return a; }, new Set());
+// 	if (!CACHE.STATIC.WATCH) {
+// 		const usedExternals = Object.values(CACHE.CLASS.External_Index).filter(i => indexes.includes(i))
+// 			.reduce((a, c) => { a.add(INDEX.FETCH(c).packname); return a; }, new Set());
 
-		Object.values(CACHE.FILES.PACKAGES).forEach((F) => {
-			if (usedPackages.has(F.packageName)) {
-				if (F.extension === "md") {
-					if (stash[F.packageName]) { stash[F.packageName].readme.push(F.content); }
-					else { stash[F.packageName] = { readme: [F.content], pacbind: [], package: [] }; }
-				} else if (F.extension === "xcss") {
-					if (stash[F.packageName]) { F.styleData.usedIndexes.forEach((i: number) => stash[F.packageName].package.push(i)); }
-					else { stash[F.packageName] = { readme: [], pacbind: [], package: Array.from(F.styleData.usedIndexes) }; }
-				} else if (F.extension === "css") {
-					if (stash[F.packageName]) { F.styleData.usedIndexes.forEach((i: number) => stash[F.packageName].pacbind.push(i)); }
-					else { stash[F.packageName] = { readme: [], pacbind: Array.from(F.styleData.usedIndexes), package: [] }; }
-				}
-			}
-		});
-	}
+// 		Object.values(CACHE.FILES.EXTERNALS).forEach((F) => {
+// 			if (usedExternals.has(F.externalName)) {
+// 				if (F.extension === "md") {
+// 					if (stash[F.externalName]) { stash[F.externalName].readme.push(F.content); }
+// 					else { stash[F.externalName] = { readme: [F.content], pacbind: [], external: [] }; }
+// 				} else if (F.extension === "xcss") {
+// 					if (stash[F.externalName]) { F.styleData.usedIndexes.forEach((i: number) => stash[F.externalName].external.push(i)); }
+// 					else { stash[F.externalName] = { readme: [], pacbind: [], external: Array.from(F.styleData.usedIndexes) }; }
+// 				} else if (F.extension === "css") {
+// 					if (stash[F.externalName]) { F.styleData.usedIndexes.forEach((i: number) => stash[F.externalName].pacbind.push(i)); }
+// 					else { stash[F.externalName] = { readme: [], pacbind: Array.from(F.styleData.usedIndexes), external: [] }; }
+// 				}
+// 			}
+// 		});
+// 	}
 
-	return stash;
-}
+// 	return stash;
+// }
 
 
 
 export default {
 	ReRender,
 	ReDeclare,
-	Appendix,
+	// Appendix,
 };

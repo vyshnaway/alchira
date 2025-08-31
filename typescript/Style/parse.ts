@@ -23,8 +23,7 @@ function MERGER(classList: string[] = [], refpacks: boolean, flatmerge: boolean)
 		const found = INDEX.FIND(className);
 
 		if (
-			(refpacks && found.group === _Style._Type.PACKAGE)
-			|| found.group === _Style._Type.ARTIFACT
+			(refpacks && found.group === _Style._Type.EXTERNAL)
 			|| found.group === _Style._Type.ARTATTACH
 			|| found.group === _Style._Type.LIBRARY
 		) {
@@ -91,7 +90,7 @@ function CSSBulkScanner(fileDatas: _File.Storage[], forPortable = false) {
 	const selectorList: string[] = [],
 		selectors: Record<string, number> = {},
 		indexMetaCollection: Record<string, _Style.Metadata> = {};
-	const IndexMap = forPortable ? CACHE.CLASS.Package__Index : CACHE.CLASS.Library__Index;
+	const IndexMap = forPortable ? CACHE.CLASS.External_Index : CACHE.CLASS.Library__Index;
 
 	fileDatas.forEach((source) => {
 		const { classFront, filePath, debugclassFront, content, manifest } = source;
@@ -109,7 +108,7 @@ function CSSBulkScanner(fileDatas: _File.Storage[], forPortable = false) {
 				InStash.metadata.declarations.push(declaration);
 			} else {
 				const selectorData: _Style.Classdata = {
-					packname: forPortable ? source.packageName : "",
+					packname: forPortable ? source.artifact : "",
 					selector: SELECTOR,
 					style_object: object,
 					classname,
@@ -150,8 +149,8 @@ function TagStyleScanner(
 	file: _File.Storage,
 	IndexMap: Record<string, number> = {},
 ) {
-	const scope = raw.scope === _Style._Type.PACKAGE ? _Style._Type.NULL : raw.scope;
-	const forPackage = file.manifest.lookup.type === _File._Type.PACKAGE;
+	const scope = raw.scope === _Style._Type.EXTERNAL ? _Style._Type.NULL : raw.scope;
+	const forExternal = file.manifest.lookup.type === _File._Type.EXTERNAL;
 	const declaration = `${file.targetPath}:${raw.rowIndex}:${raw.colIndex}`;
 
 	const object: Record<string, Record<string, object>> = {};
@@ -161,7 +160,7 @@ function TagStyleScanner(
 	const constants = {};
 
 	const classname = raw.selector === "" ? "" : file.classFront + raw.selector.replace(/^-\$/, "$");
-	const debugclass = `${scope}${file.debugclassFront}\\:${raw.rowIndex}\\:${raw.colIndex}_${Use.string.normalize(classname, [], [], forPackage ? ["$", "/"] : ["$"])}`;
+	const debugclass = `${scope}${file.debugclassFront}\\:${raw.rowIndex}\\:${raw.colIndex}_${Use.string.normalize(classname, [], [], forExternal ? ["$", "/"] : ["$"])}`;
 
 	for (const subSelector in raw.styles) {
 		const query = HASHRULE.RENDER(subSelector, declaration);
@@ -192,7 +191,7 @@ function TagStyleScanner(
 
 	let { index, group } = INDEX.FIND(classname, false, IndexMap);
 	if (
-		_Style._Type.PACKAGE === group ||
+		_Style._Type.EXTERNAL === group ||
 		_Style._Type.LIBRARY === group ||
 		_Style._Type.GLOBAL === group ||
 		_Style._Type.LOCAL === group
@@ -212,7 +211,7 @@ function TagStyleScanner(
 
 		group = _Style._Type.NULL;
 		index = INDEX.DECLARE({
-			packname: forPackage ? file.packageName : CACHE.STATIC.Artifact.name,
+			packname: forExternal ? file.artifact : CACHE.STATIC.Artifact.name,
 			selector: raw.selector,
 			style_object: object,
 			classname,
@@ -225,7 +224,7 @@ function TagStyleScanner(
 				summon: raw.elid === CACHE.ROOT.customElements.summon ? raw.attachstring : "",
 				staple: raw.elid === CACHE.ROOT.customElements.staple ? raw.attachstring : "",
 			},
-			attachments: forPackage ? attachments.map(attach => file.classFront + "$/" + attach) : attachments,
+			attachments: forExternal ? attachments.map(attach => file.classFront + "$/" + attach) : attachments,
 			debugclass,
 			declarations: [declaration],
 			attached_style: style_snippet.styles,

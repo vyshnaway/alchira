@@ -29,7 +29,7 @@ function isInString(input: string, index: number): boolean {
 	return inSingleQuote || inDoubleQuote || inTemplateLiteral;
 }
 
-function stripComments(content: string): string {
+function stripComments(content: string, single = true, multi = true, html = true): string {
 	const result: string[] = [];
 	let i = 0;
 
@@ -38,6 +38,7 @@ function stripComments(content: string): string {
 
 		// Single-line comments (//)
 		if (
+			single &&
 			char === "/" &&
 			i + 1 < content.length &&
 			content[i + 1] === "/" &&
@@ -52,6 +53,7 @@ function stripComments(content: string): string {
 
 		// Multi-line comments (/* */)
 		if (
+			multi &&
 			char === "/" &&
 			i + 1 < content.length &&
 			content[i + 1] === "*" &&
@@ -70,6 +72,7 @@ function stripComments(content: string): string {
 
 		// HTML comments (<!-- -->)
 		if (
+			html &&
 			char === "<" &&
 			i + 3 < content.length &&
 			content.substring(i, i + 4) === "<!--" &&
@@ -163,32 +166,17 @@ function minifyCssLite(content: string): string {
 	);
 }
 
-export interface JSONCHandler {
-	parse: (string: string) => string;
-	build: (object: unknown) => string;
-}
-
-export interface UncommentHandler {
-	Script: (content: string) => string;
-	Css: (content: string) => string;
-}
-
-export interface MinifyHandler {
-	Strict: (content: string) => string;
-	Lite: (content: string) => string;
-}
-
 export default {
 	jsonc: {
 		parse: (string: string) => JSON.parse(stripComments(string)),
 		build: (object: unknown) => JSON.stringify(object, null, 4),
-	} as JSONCHandler,
+	},
 	uncomment: {
 		Script: stripComments,
 		Css: stripCssComments,
-	} as UncommentHandler,
+	},
 	minify: {
 		Strict: minifyCssAggressive,
 		Lite: minifyCssLite,
-	} as MinifyHandler,
+	},
 };

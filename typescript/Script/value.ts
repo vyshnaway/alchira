@@ -19,7 +19,7 @@ function EvaluateIndexTraces(
 ): Record<string, string> {
 	let classMap: Record<string, string> = {};
 
-	if (action === _Script._Actions.artifact) {
+	if (action === _Script._Actions.archive) {
 		classMap = classList.reduce((acc, entry) => {
 			const found = INDEX.FIND(entry, true, localClassMap);
 			if (found.index) {
@@ -125,7 +125,7 @@ export default function classExtract(
 
 		const metaFront = action === _Script._Actions.monitor
 			? `TAG${fileData.debugclassFront}\\:${FileCursor.rowMarker}\\:${FileCursor.colMarker}__`
-			: action === _Script._Actions.watch ? `${fileData.label}_${FileCursor.cycle}_` : '';
+			: action === _Script._Actions.watch ? `_${fileData.label}_${FileCursor.cycle}_` : '';
 
 		const classMap = EvaluateIndexTraces(action, metaFront, classList, fileData.styleData.localClasses);
 
@@ -158,7 +158,6 @@ export default function classExtract(
 					activeQuote = ch;
 				}
 			}
-
 			ch = string[++marker];
 		}
 	}
