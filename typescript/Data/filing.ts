@@ -57,15 +57,16 @@ export default function FILING(
 	const normalFileName = isPackage ? USE.string.normalize(packageName) : CACHE.STATIC.Artifact.name;
 
 	const group: _File._Type = resolveGroup(extension, Boolean(cluster), isPackage, isLibrary);
+	const normalCluster = USE.string.normalize(cluster);
 
 	const classFront =
 		(
 			isPackage ? `/${normalFileName}${group === _File._Type.PACBIND ? "/$/" : "/"}` : ""
 		) + (
-			((idn > 0) && extension === "css") ? USE.string.normalize(cluster) : ""
+			((idn > 0) && (extension === "css") && (normalCluster !== "-")) ? normalCluster : ""
 		) + (
-			isLibrary ? "$".repeat(idn) : ""
-		);
+		isLibrary ? "$".repeat(idn) : ""
+	);
 
 	const result: _File.Storage = {
 		label,

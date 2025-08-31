@@ -147,6 +147,7 @@ function _objectCompose(
 
 function ComposePrefixed(array: [string, string | object][], minify = !CACHE.STATIC.DEBUG) {
 	const styleSheet: string[] = [];
+	console.log(array);
 
 	array.forEach(([key, value]) => {
 		if (typeof value === "object") {
@@ -163,16 +164,16 @@ function ComposePrefixed(array: [string, string | object][], minify = !CACHE.STA
 }
 
 
-function ComposeArtifactd(selectorObjectArray: [string, object | string][] = [], tab = "  ") {
+function ComposeArtifacted(array: [string, object | string][] = [], tab = "  ") {
 	const styleSheet: string[] = [];
 
-	selectorObjectArray.forEach(([key, value]) => {
+	array.forEach(([key, value]) => {
 		if (typeof value === "object") {
 			if (Object.keys(value).length) {
 				styleSheet.push(
 					key,
 					"{",
-					...ComposeArtifactd(Object.entries(value), tab).map((i) => tab + i),
+					...ComposeArtifacted(Object.entries(value), tab).map((i) => tab + i),
 					"}",
 				);
 			}
@@ -188,19 +189,20 @@ function ComposeArtifactd(selectorObjectArray: [string, object | string][] = [],
 
 
 function ComposeSwitched(selectorIndexObject: Record<string, number>, minify = !CACHE.STATIC.DEBUG) {
-	const object = Object.entries(styleSwitch(
+	const object = styleSwitch(
 		Object.entries(selectorIndexObject).reduce((A: Record<string, Record<string, object>>, [selector, index]) => {
-			const imported = INDEX.FETCH(index);
-			A[selector] = imported.style_object;
+			A[selector] = INDEX.FETCH(index).style_object;
 			return A;
 		}, {}),
-	));
-
+	);
+	console.log("---");
+	console.log(object);
+	console.log(Object.entries(object));
 	return ComposePrefixed(Object.entries(object), minify);
 }
 
 export default {
-	Artifactd: ComposeArtifactd,
+	Artifacted: ComposeArtifacted,
 	Prefixed: ComposePrefixed,
 	Switched: ComposeSwitched,
 };

@@ -157,8 +157,6 @@ function SaveClassRefs(stash: _Style.SortedOutput) {
 			return [ref, className];
 		}));
 	}, {} as _Style.ClassIndexMap);
-	console.log(CACHE.CLASS.Sync_PublishIndexMap);
-	console.log(CACHE.CLASS.Sync_ClassDictionary);
 }
 
 async function Synthasize() {
@@ -251,7 +249,7 @@ function GenFinalSheets(ATTACHMENTS: Set<number>) {
 		if (ClassData.attached_staple.length) { ATTACH_STAPLES.push(ClassData.attached_staple); }
 		return ClassData.attached_style;
 	});
-	RENDERFRAGS.Attach = COMPILE.Prefixed(Object.entries(ATTACH_STYLES));
+	RENDERFRAGS.Attach = COMPILE.Prefixed(ATTACH_STYLES);
 
 
 	const targetRenderAction: _Script._Actions = (CACHE.STATIC.Command === "debug") ? _Script._Actions.monitor

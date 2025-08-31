@@ -64,8 +64,8 @@ function EvaluateIndexTraces(
 			if (action === _Script._Actions.monitor) {
 				classMap = Object.fromEntries(valid_class_trace.map(([K, V]) => {
 					const classname = metaFront + INDEX.FETCH(V).debugclass;
-					CACHE.CLASS.Sync_PublishIndexMap["." + Use.string.normalize(classname, ["/", ".", ":", "|", "$"], ["\\"])] = Number(V);
-					return [K, classname];
+					CACHE.CLASS.Sync_PublishIndexMap["." + classname] = Number(V);
+					return [K, Use.string.normalize(classname, ["/", ".", ":", "|", "$"], ["\\"])];
 				}));
 			}
 		}
