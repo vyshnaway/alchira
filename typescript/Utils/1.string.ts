@@ -75,7 +75,7 @@ export default {
 		return result;
 	},
 	enCounter: (number: number) => {
-		const digits = "-_0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+		const digits = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 		const base = digits.length;
 		let result = "",
 			reminder = 0;

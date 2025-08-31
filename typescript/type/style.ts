@@ -47,12 +47,13 @@ export interface Metadata {
     constants: Record<string, string>,
     skeleton: object,
     declarations: string[],
-    snippet: string,
+    summon: string,
+    staple: string,
 }
 
 export interface Classdata {
     index?: number,
-    package: string,
+    packname: string,
     selector: string,
     classname: string,
     debugclass: string,
@@ -63,7 +64,7 @@ export interface Classdata {
     style_object: Record<string, object>,
     attached_style: object,
     attached_staple: string,
-    attached_snippet: string
+    attached_summon: string
 }
 
 export type Dictionary = Record<string, Record<number, string>>;
@@ -71,8 +72,7 @@ export type Dictionary = Record<string, Record<number, string>>;
 export type ClassIndexMap = Record<string, number>;
 
 export interface SortedOutput {
-    classcount: number;
-    indexMap: ClassIndexMap;
-    referenceMap: Dictionary;
+    counted: number;
+    referenceMap: Record<string, Record<number, number>>;
     shortlistedArrays: number[][]
 };

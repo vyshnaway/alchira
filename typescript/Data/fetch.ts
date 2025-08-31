@@ -120,8 +120,7 @@ export async function VerifySetupStruct() {
 	return result;
 }
 
-export async function FetchStatics(vendorSource: string) {
-
+export async function SyncIgnorefiles() {
 	const manifestIgnores = (await FILEMAN.read.file(CACHE.PATH.autogen.ignore.path)).data.split("\n");
 	const modPts = (CACHE.PATH.autogen.ignore.content || "").split("\n").reduce((modPts: number, ign) => {
 		if (!manifestIgnores.includes(ign)) {
@@ -131,6 +130,10 @@ export async function FetchStatics(vendorSource: string) {
 		return modPts;
 	}, 0);
 	if (modPts) { await FILEMAN.write.file(CACHE.PATH.autogen.ignore.path, manifestIgnores.join("\n")); }
+}
+
+export async function FetchStatics(vendorSource: string) {
+
 
 
 	$.TASK("Loading vendor-prefixes");

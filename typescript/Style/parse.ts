@@ -109,7 +109,7 @@ function CSSBulkScanner(fileDatas: _File.Storage[], forPortable = false) {
 				InStash.metadata.declarations.push(declaration);
 			} else {
 				const selectorData: _Style.Classdata = {
-					package: forPortable ? source.packageName : "",
+					packname: forPortable ? source.packageName : "",
 					selector: SELECTOR,
 					style_object: object,
 					classname,
@@ -119,14 +119,15 @@ function CSSBulkScanner(fileDatas: _File.Storage[], forPortable = false) {
 						constants: scannedStyle.constants,
 						skeleton: Use.object.skeleton(object),
 						declarations: [declaration],
-						snippet: '',
+						summon: '',
+						staple: ''
 					},
 					attachments: forPortable ? attachments.map(attach => classFront + attach) : attachments,
 					debugclass: debugclassFront + "_" + Use.string.normalize(classname, [], [], ["$", "/"]),
 					declarations: [declaration],
 					attached_style: { [SELECTOR]: object },
 					attached_staple: '',
-					attached_snippet: '',
+					attached_summon: '',
 				};
 				const identity = INDEX.DECLARE(selectorData);
 
@@ -211,7 +212,7 @@ function TagStyleScanner(
 
 		group = _Style._Type.NULL;
 		index = INDEX.DECLARE({
-			package: forPackage ? file.packageName : CACHE.STATIC.Artifact.name,
+			packname: forPackage ? file.packageName : CACHE.STATIC.Artifact.name,
 			selector: raw.selector,
 			style_object: object,
 			classname,
@@ -221,18 +222,19 @@ function TagStyleScanner(
 				constants,
 				skeleton: Use.object.skeleton(object),
 				declarations: [declaration],
-				snippet: '',
+				summon: raw.elid === CACHE.ROOT.customElements.summon ? raw.attachstring : "",
+				staple: raw.elid === CACHE.ROOT.customElements.staple ? raw.attachstring : "",
 			},
 			attachments: forPackage ? attachments.map(attach => file.classFront + "$/" + attach) : attachments,
 			debugclass,
 			declarations: [declaration],
 			attached_style: style_snippet.styles,
 			attached_staple: raw.elid === CACHE.ROOT.customElements.staple ? raw.attachstring : "",
-			attached_snippet: raw.elid === CACHE.ROOT.customElements.snippet ? raw.attachstring : "",
+			attached_summon: raw.elid === CACHE.ROOT.customElements.summon ? raw.attachstring : "",
 		});
 		IndexMap[classname] = index;
 	}
-	
+
 	return {
 		classname,
 		index,

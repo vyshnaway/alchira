@@ -55,17 +55,6 @@ const rootPackageEssential: _support.PackageEssential = {
 
 
 // --- Script sync with Project ---
-
-const syncscripts: Record<string, string> = {
-    "init": "xcss init",
-    // "debug": "xcss debug watch",
-    "watch": "xcss preview watch",
-    "preview": "xcss preview",
-    "publish": "xcss publish",
-    "artifact": "xcss artifact",
-    "install": "xcss install",
-};
-
 if (
     projectPackageJson.status
     && (typeof projectPackageJson.data.scripts === "object")
@@ -73,10 +62,10 @@ if (
 ) {
     let addedCommands = 0;
     const scripts = projectPackageJson.data.scripts as Record<string, string>;
-    for (const cmd in syncscripts) {
+    for (const cmd in CACHE.ROOT.Scripts) {
         if (!scripts[cmd]) {
             addedCommands++;
-            scripts[`${bin}:${cmd}`] = syncscripts[cmd];
+            scripts[`${bin}:${cmd}`] = CACHE.ROOT.Scripts[cmd];
         }
     }
 

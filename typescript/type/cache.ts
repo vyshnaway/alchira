@@ -11,6 +11,7 @@ export interface ROOT {
     version: string,
     website: string,
     vendors: string[],
+    Scripts: Record<string, string>,
     Commands: Record<string, string>,
     defaultTweaks: _config.Tweaks,
     customAtrules: Record<string, string>

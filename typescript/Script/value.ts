@@ -34,33 +34,43 @@ function EvaluateIndexTraces(
 
 
 	} else {
-
 		const index_array: number[] = [];
-		const class_trace: [number, string][] = [];
-		const string_index_map: Record<string, number> = {};
+		const valid_class_trace: [string, number][] = [];
 
 		classList.forEach((entry) => {
 			const found = INDEX.FIND(entry, true, localClassMap);
 			if (found.index) {
-				class_trace.push([found.index, entry]);
+				valid_class_trace.push([entry, found.index]);
 				index_array.push(found.index);
 			}
 		});
+
 		const indexSetback = Use.array.setback(index_array);
-
 		if (action === _Script._Actions.sync) {
-			classMap = CACHE.CLASS.Sync_ClassDictionary[JSON.stringify(indexSetback)] || {};
+			const dictionary = CACHE.CLASS.Sync_ClassDictionary[JSON.stringify(indexSetback)] || {};
+			valid_class_trace.forEach(([K, V]) => {
+				classMap[K] = dictionary[V];
+			});
 		} else {
+
 			if (action === _Script._Actions.watch) {
-				classMap = Object.fromEntries(class_trace.map(([_, V], index) => [V, metaFront + index]));
-			}
-			if (action === _Script._Actions.monitor) {
-				classMap = Object.fromEntries(class_trace.map(([K, V]) => [V, metaFront + INDEX.FETCH(K).debugclass]));
+				classMap = Object.fromEntries(valid_class_trace.map(([K, V], index) => {
+					const classname = metaFront + index;
+					CACHE.CLASS.Sync_PublishIndexMap["." + classname] = Number(V);
+					return [K, classname];
+				}));
 			}
 
-			Object.entries(string_index_map).forEach(([k, v]) => CACHE.CLASS.Sync_PublishIndexMap["." + k] = v);
+			if (action === _Script._Actions.monitor) {
+				classMap = Object.fromEntries(valid_class_trace.map(([K, V]) => {
+					const classname = metaFront + INDEX.FETCH(V).debugclass;
+					CACHE.CLASS.Sync_PublishIndexMap["." + Use.string.normalize(classname, ["/", ".", ":", "|", "$"], ["\\"])] = Number(V);
+					return [K, classname];
+				}));
+			}
 		}
 	}
+
 	return classMap;
 }
 
@@ -152,6 +162,6 @@ export default function classExtract(
 			ch = string[++marker];
 		}
 	}
-	
+
 	return { classList, attachments, scribed };
 }

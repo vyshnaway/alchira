@@ -256,7 +256,7 @@ function Appendix(indexes: number[] = []) {
 
 	if (!CACHE.STATIC.WATCH) {
 		const usedPackages = Object.values(CACHE.CLASS.Package__Index).filter(i => indexes.includes(i))
-			.reduce((a, c) => { a.add(INDEX.FETCH(c).package); return a; }, new Set());
+			.reduce((a, c) => { a.add(INDEX.FETCH(c).packname); return a; }, new Set());
 
 		Object.values(CACHE.FILES.PACKAGES).forEach((F) => {
 			if (usedPackages.has(F.packageName)) {

@@ -30,17 +30,24 @@ export const ROOT: _Cache.ROOT = {
         artifact: "Split and stash project styles to *.xcss files.",
         install: "Install packages from sources.",
     },
+    Scripts: {
+        "init": "xcss init",
+        "debug": "xcss debug watch",
+        "watch": "xcss preview watch",
+        "preview": "xcss preview",
+        "publish": "xcss publish",
+        "artifact": "xcss artifact",
+        "install": "xcss install",
+    },
     defaultTweaks: {
         IntelGroup: "browser",
-        RapidSense: true,
         Shorthands: true,
-        ShowReport: true,
         CacheUsage: true,
     },
     customElements: {
         style: 1,
         staple: 2,
-        snippet: 3,
+        summon: 3,
     },
     customOperations: {
         attach: "~",

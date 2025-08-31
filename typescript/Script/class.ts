@@ -177,6 +177,7 @@ export default class C_Proxy {
 					const found = INDEX.FIND(className, true, filedata.styleData.localClasses);
 					if (found.index) {
 						indexAcc.push(found.index);
+						attachments.push(found.index);
 						INDEX.FETCH(found.index).attachments.forEach(attchment => {
 							const i = INDEX.FIND(attchment, true, filedata.styleData.localClasses).index;
 							if (i) { attachments.push(i); }
@@ -193,7 +194,7 @@ export default class C_Proxy {
 	}
 
 
-	ReplaceClassnames(action: _Script._Actions) {
+	SyncClassnames(action: _Script._Actions) {
 		Object.values(this.fileCache).forEach((filedata) => {
 			filedata.scratch = NARRATOR(
 				filedata,
@@ -208,28 +209,23 @@ export default class C_Proxy {
 		stylesheet: string,
 		StyleBlock: string,
 		StapleBlock: string,
-		SnippetBlock: string,
+		SummonBlock: string,
 	) {
-		const DeployedFiles = [this.sourceStylesheet];
 
 		SaveFiles[this.sourceStylesheet] = stylesheet;
 		Object.values(this.fileCache).forEach((data) => {
-			console.log(data.content);
-			console.log(data.midway);
-			console.log(data.scratch);
 			if (data.extension !== "xcss") {
 				let fromPos = 0;
-				if ((data.styleData.tagReplacements).length > 1) { DeployedFiles.push(data.sourcePath); }
 				SaveFiles[data.sourcePath] = data.styleData.tagReplacements.reduce((A, [elid, pos]) => {
 					switch (elid) {
-						case CACHE.ROOT.customElements["style"]:
+						case CACHE.ROOT.customElements.style:
 							A += data.scratch.slice(fromPos, Number(pos)) + StyleBlock;
 							break;
-						case CACHE.ROOT.customElements["staple"]:
+						case CACHE.ROOT.customElements.staple:
 							A += data.scratch.slice(fromPos, Number(pos)) + StapleBlock;
 							break;
-						case CACHE.ROOT.customElements["snippet"]:
-							A += data.scratch.slice(fromPos, Number(pos)) + SnippetBlock;
+						case CACHE.ROOT.customElements.summon:
+							A += data.scratch.slice(fromPos, Number(pos)) + SummonBlock;
 							break;
 						default:
 							A += data.scratch.slice(fromPos);
@@ -240,8 +236,6 @@ export default class C_Proxy {
 				data.scratch = "";
 			}
 		});
-
-		return DeployedFiles;
 	}
 
 	UpdateCache() {

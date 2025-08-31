@@ -44,30 +44,27 @@ export default function previewOrganize(arrarr: number[][], merge = false): tSty
 
     const onlyParrentArrays = Object.keys(shorted_arrarr).map(i => JSON.parse(i) as number[]);
 
-    const counter_zero = 768;
-    let counter = counter_zero;
-    const indexMap: Record<string, number> = {};
-    const referenceMap = Object.entries(shorted_arrarr).reduce((acc, [key, arrarr]) => {
+    let counted = 0;
+    const referenceMap: Record<string, Record<number, number>> = {};
+    Object.entries(shorted_arrarr).forEach(([key, arrarr]) => {
         const templateArray = JSON.parse(key) as number[];
 
         const indexMapFragment = templateArray.reduce((map, item) => {
-            map[item] = '_' + USE.string.enCounter(counter++);
-            indexMap[map[item]] = Number(item);
+            map[item] = ++counted;
             return map;
-        }, {} as Record<number, string>);
+        }, {} as Record<number, number>);
 
         arrarr.forEach(arr => {
-            acc[JSON.stringify(arr)] = indexMapFragment;
+            referenceMap[JSON.stringify(arr)] = indexMapFragment;
         });
 
-        return acc;
-    }, {} as Record<string, Record<number, string>>);
+        return referenceMap;
+    });
 
 
     return {
+        counted,
         referenceMap,
-        indexMap,
-        classcount: counter - counter_zero,
         shortlistedArrays: onlyParrentArrays
     };
 }

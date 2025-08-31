@@ -112,6 +112,9 @@ async function execute(chapter: string) {
                     if (SaveAction) {
                         await SaveAction;
                     }
+                    if (CACHE.STATIC.WATCH) {
+                        await FETCH.SyncIgnorefiles();
+                    }
                     SaveAction = fileman.write.bulk(OutFiles);
                 }
                 if (reportNext) {

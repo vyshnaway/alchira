@@ -147,11 +147,18 @@ async function Accumulate() {
 
 
 function SaveClassRefs(stash: _Style.SortedOutput) {
-	CACHE.CLASS.Sync_ClassDictionary = stash.referenceMap;
-	CACHE.CLASS.Sync_PublishIndexMap = Object.entries(stash.indexMap).reduce((A, [classname, index]) => {
-		A["." + classname] = index;
-		return A;
+	CACHE.CLASS.Sync_ClassDictionary = {};
+	CACHE.CLASS.Sync_PublishIndexMap = {};
+
+	Object.entries(stash.referenceMap).forEach(([iArray, iMap]) => {
+		CACHE.CLASS.Sync_ClassDictionary[iArray] = Object.fromEntries(Object.entries(iMap).map(([ref, id]) => {
+			const className = "_" + Use.string.enCounter(id + 512);
+			CACHE.CLASS.Sync_PublishIndexMap[`.${className}`] = Number(ref);
+			return [ref, className];
+		}));
 	}, {} as _Style.ClassIndexMap);
+	console.log(CACHE.CLASS.Sync_PublishIndexMap);
+	console.log(CACHE.CLASS.Sync_ClassDictionary);
 }
 
 async function Synthasize() {
@@ -160,7 +167,6 @@ async function Synthasize() {
 
 	const CLASSESLIST: number[][] = [];
 	const ATTACHMENTS: number[] = [];
-
 	Object.values(CACHE.FILES.TARGET).forEach((cache) => cache.GetTracks(CLASSESLIST, ATTACHMENTS));
 
 	if (CACHE.STATIC.WATCH) {
@@ -220,7 +226,7 @@ function GenFinalSheets(ATTACHMENTS: Set<number>) {
 	CACHE.DELTA.Manifest.constants = Object.keys(indexScanned.constants);
 	CACHE.DELTA.Report.constants = $$.ListCatalog("Root Constants", CACHE.DELTA.Manifest.constants);
 	indexScanned.attachments.forEach((attachment) => ATTACHMENTS.add(INDEX.FIND(attachment, false).index));
-	const INDEXSHEET = RENDERFRAGS.Root = COMPILE.Prefixed(indexScanned.styles);
+	const WATCHINDEX = RENDERFRAGS.Root = COMPILE.Prefixed(indexScanned.styles);
 
 
 	RENDERFRAGS.Appendix = COMPILE.Prefixed(
@@ -245,41 +251,32 @@ function GenFinalSheets(ATTACHMENTS: Set<number>) {
 		if (ClassData.attached_staple.length) { ATTACH_STAPLES.push(ClassData.attached_staple); }
 		return ClassData.attached_style;
 	});
-
-	const STAPLESHEET = CACHE.STATIC.WATCH ? RENDERFRAGS.Attach : "";
 	RENDERFRAGS.Attach = COMPILE.Prefixed(Object.entries(ATTACH_STYLES));
 
 
 	const targetRenderAction: _Script._Actions = (CACHE.STATIC.Command === "debug") ? _Script._Actions.monitor
 		: (CACHE.STATIC.Command === "preview" && CACHE.STATIC.Argument === "watch") ? _Script._Actions.watch : _Script._Actions.sync;
-	Object.values(CACHE.FILES.TARGET).forEach((cache) => cache.ReplaceClassnames(targetRenderAction));
-
-	RENDERFRAGS.Class = COMPILE.Prefixed(Object.entries(CACHE.CLASS.Sync_PublishIndexMap).map(([K, V]) => [K, INDEX.FETCH(V)]));
-
-	// console.log(CACHE.CLASS.Index_to_Data);
-	// console.log(RENDERFRAGS);
+	Object.values(CACHE.FILES.TARGET).forEach((cache) => cache.SyncClassnames(targetRenderAction));
+	RENDERFRAGS.Class = COMPILE.Switched(CACHE.CLASS.Sync_PublishIndexMap);
 
 
 
-
-
-	const WATCHSHEET = `CACHE.STATIC.WATCH
+	const WATCHCLASS = CACHE.STATIC.WATCH
 		? COMPILE.Switched(
-			Object.values(CACHE.CLASS.Index_to_Data).reduce((A, D) => {
-				A.push(['.'+D.watchclass, D.object]);
+			Object.entries(CACHE.CLASS.Index_to_Data).reduce((A, [I, D]) => {
+				if (D.attached_summon.length) {
+					A['.' + D.watchclass] = Number(I);
+				}
 				return A;
-			}, [] as [string, object][])
-		) : ''; Object.entries(D.attached_style)`;
+			}, {} as Record<string, number>)
+		) : '';
 
-
+	const STAPLEBLOCK = RENDERFRAGS.Attach;
 
 	const STYLESHEET = Object.entries(RENDERFRAGS).map(([chapter, content]) =>
 		CACHE.STATIC.DEBUG ? `\n\n/* CHAPTER: ${chapter} */\n${content}\n` : content).join("");
 
-	const STYLETAG = `<style>${STYLESHEET}</style>`;
-
-
-	return { RENDERFRAGS, STYLESHEET, STYLETAG, STAPLESHEET, INDEXSHEET, WATCHSHEET };
+	return { RENDERFRAGS, STAPLEBLOCK, STYLESHEET, WATCHINDEX, WATCHCLASS };
 }
 
 // On target stylesheet edit.
@@ -294,27 +291,21 @@ export async function Generate() {
 		const {
 			RENDERFRAGS,
 			STYLESHEET,
-			STYLETAG,
-			STAPLESHEET,
-			INDEXSHEET,
-			WATCHSHEET
+			STAPLEBLOCK,
+			WATCHINDEX,
+			WATCHCLASS
 		} = GenFinalSheets(new Set(ATTACHMENTS));
 
-
-		const DeployedFiles = Object.values(CACHE.FILES.TARGET).reduce((acc, cache) => {
-			acc.push(...cache.SummonFiles(OUTFILES, STYLESHEET, STYLETAG, STAPLESHEET, `${STYLETAG}\n${STAPLESHEET}`));
-			return acc;
+		const STYLEBLOCK = `<style>${STYLESHEET}</style>`;
+		const SUMMONBLOCK = `${STYLEBLOCK}\n${STAPLEBLOCK}`;
+		Object.values(CACHE.FILES.TARGET).forEach((cache) => {
+			cache.SummonFiles(OUTFILES, STYLESHEET, STYLEBLOCK, STAPLEBLOCK, SUMMONBLOCK);
 		}, [CACHE.DELTA.DeltaPath]);
 
 		if (CACHE.STATIC.WATCH) {
-			if (CACHE.DELTA.DeltaPath.length) {
-				Object.keys(OUTFILES).forEach((filePath) => {
-					if (!DeployedFiles.includes(filePath)) { delete OUTFILES[filePath]; }
-				});
-			}
 			OUTFILES[CACHE.PATH.autogen.manifest.path] = JSON.stringify(CACHE.DELTA.Manifest);
-			OUTFILES[CACHE.PATH.autogen.index.path] = INDEXSHEET;
-			OUTFILES[CACHE.PATH.autogen.styles.path] = WATCHSHEET;
+			OUTFILES[CACHE.PATH.autogen.index.path] = WATCHINDEX;
+			OUTFILES[CACHE.PATH.autogen.styles.path] = WATCHCLASS;
 		} else {
 			const memChart = Object.entries(RENDERFRAGS).reduce((A, [K, V]) => {
 				A[K] = `${Use.string.stringMem(V)} Kb`.padStart(9, " ");
