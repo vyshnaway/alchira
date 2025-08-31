@@ -163,7 +163,7 @@ function ComposePrefixed(array: [string, string | object][], minify = !CACHE.STA
 }
 
 
-function ComposeArchived(selectorObjectArray: [string, object | string][] = [], tab = "  ") {
+function ComposeArtifactd(selectorObjectArray: [string, object | string][] = [], tab = "  ") {
 	const styleSheet: string[] = [];
 
 	selectorObjectArray.forEach(([key, value]) => {
@@ -172,7 +172,7 @@ function ComposeArchived(selectorObjectArray: [string, object | string][] = [], 
 				styleSheet.push(
 					key,
 					"{",
-					...ComposeArchived(Object.entries(value), tab).map((i) => tab + i),
+					...ComposeArtifactd(Object.entries(value), tab).map((i) => tab + i),
 					"}",
 				);
 			}
@@ -200,7 +200,7 @@ function ComposeSwitched(selectorIndexObject: Record<string, number>, minify = !
 }
 
 export default {
-	Archived: ComposeArchived,
+	Artifactd: ComposeArtifactd,
 	Prefixed: ComposePrefixed,
 	Switched: ComposeSwitched,
 };

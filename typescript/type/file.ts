@@ -66,7 +66,7 @@ export interface Lookup {
 }
 
 export interface LocalManifest {
-    refer: Lookup,
+    lookup: Lookup,
     public: ClassMetaMap,
     global: ClassMetaMap,
     local: ClassMetaMap,
@@ -84,17 +84,17 @@ export interface Storage {
     debugclassFront: string,
     content: string,
     midway: string,
+    scratch: string,
     label: string,
     manifest: LocalManifest,
     styleData: {
         attachments: string[],
-        classesList: string[][],
+        classTracks: string[][],
         usedIndexes: Set<number>,
         localClasses: _style.ClassIndexMap,
         globalClasses: _style.ClassIndexMap,
         publicClasses: _style.ClassIndexMap,
         styleMap: ClassMetaMap,
-        styleTagReplaces: number[],
-        stapleTagReplaces: number[],
+        tagReplacements: [ElementId: number, Position:number][]
     }
 }

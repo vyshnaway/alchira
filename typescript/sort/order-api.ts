@@ -17,7 +17,7 @@ export default async function order(
 	sequences: number[][],
 	command: "preview" | "publish",
 	argument = "",
-	archive = {
+	artifact = {
 		name: '',
 		version: '',
 		content: ''
@@ -64,7 +64,7 @@ export default async function order(
 			access: publicKey,
 			private: asymEncrypted,
 			content: contentCrypt.data,
-			archive
+			artifact
 		});
 
 		const requestOptions: RequestInit = {

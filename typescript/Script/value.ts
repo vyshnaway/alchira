@@ -19,14 +19,14 @@ function EvaluateIndexTraces(
 ): Record<string, string> {
 	let classMap: Record<string, string> = {};
 
-	if (action === _Script._Actions.archive) {
+	if (action === _Script._Actions.artifact) {
 		classMap = classList.reduce((acc, entry) => {
 			const found = INDEX.FIND(entry, true, localClassMap);
 			if (found.index) {
 				if (found.group === _Style._Type.LIBRARY) {
-					acc[entry] = `/${CACHE.STATIC.Archive.name}/$/${entry}`;
+					acc[entry] = `/${CACHE.STATIC.Artifact.name}/$/${entry}`;
 				} else if (found.group === _Style._Type.PUBLIC) {
-					acc[entry] = `/${CACHE.STATIC.Archive.name}/${entry}`;
+					acc[entry] = `/${CACHE.STATIC.Artifact.name}/${entry}`;
 				}
 			}
 			return acc;
@@ -68,23 +68,24 @@ export default function classExtract(
 	string: string,
 	action: _Script._Actions,
 	fileData: _File.Storage,
-	attachments: Set<string>,
 	FileCursor: _File.Position,
 ) {
 	const classList: string[] = [], quotes = ["'", "`", '"'];
-	let activeQuote = "",
-		entry = "",
-		scribed = string,
-		marker = 0,
-		ch = string[marker],
-		inQuote = false;
+	const attachments: string[] = [];
+
+	let entry = "";
+	let scribed = string;
+	let activeQuote = "";
+	let marker = 0;
+	let inQuote = false;
+	let ch = string[marker];
 
 	// Classlist
 	while (ch !== undefined) {
 		if (inQuote) {
 			if (ch === " " || ch === activeQuote) {
 				if (entry.startsWith(CACHE.ROOT.customOperations["attach"])) {
-					attachments.add(entry.slice(1));
+					attachments.push(entry.slice(1));
 				} else if (entry.startsWith(CACHE.ROOT.customOperations["assign"])) {
 					classList.push(entry.slice(1));
 				} else {
@@ -105,9 +106,9 @@ export default function classExtract(
 	}
 
 	if (action !== _Script._Actions.read) {
-		activeQuote = "";
 		entry = "";
 		scribed = "";
+		activeQuote = "";
 		marker = 0;
 		inQuote = false;
 		ch = string[marker];
@@ -151,6 +152,6 @@ export default function classExtract(
 			ch = string[++marker];
 		}
 	}
-
+	
 	return { classList, attachments, scribed };
 }

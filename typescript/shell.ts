@@ -48,8 +48,8 @@ export function ClassChart(heading: string, items: Record<string, string[]>) {
 }
 
 export function HashruleError(
-    cause: string,
     primitive: string,
+    cause: string,
     source: string,
     message: string,
     preview: Record<string, string>,
@@ -59,9 +59,9 @@ export function HashruleError(
         $.tag.Li($.FMT(source, ...$.preset.tertiary), $.preset.failed, $.style.AS_Bold)
         + "\n " + $.tag.Tab(1)
         + $.MAKE(
-            $.FMT(primitive, ...$.preset.primary) + " : " + message,
+            $.FMT(primitive, ...$.preset.primary) + " : " + $.FMT(message, ...$.preset.failed),
             ListProps(preview, $.preset.primary, $.preset.tertiary),
-            [$.list.Waterfall, 1, $.preset.failed],
+            [$.list.Waterfall, 1, $.preset.primary],
         );
 
     preview["ERROR BY"] = cause;
@@ -103,9 +103,9 @@ export function GenerateError(
 } {
     return {
         error: $.MAKE(
-            $.tag.H4(message, $.preset.warning),
+            $.tag.Li(message, $.preset.warning),
             declaration,
-            [$.list.Bullets, 0, []]
+            [$.list.Bullets, 1, $.preset.tertiary]
         ),
         diagnostic: {
             message: message,
@@ -122,3 +122,13 @@ export function ReportError(message_pass: string, message_fail: string, items: s
         [$.list.Bullets, 0, Object.keys(items).length === 0 ? $.preset.success : $.preset.failed]
     );
 }
+
+// export function ReportError(message_pass: string, message_fail: string, items: string[]) {
+//     return $.MAKE(
+//         Object.keys(items).length === 0
+//             ? $.FMT(message_pass, ...$.preset.success, $.style.AS_Bold)
+//             : $.FMT(message_fail, ...$.preset.failed, $.style.AS_Bold)
+//         , items,
+//         [$.list.Bullets, 0, Object.keys(items).length === 0 ? $.preset.success : $.preset.failed]
+//     );
+// }

@@ -16,24 +16,24 @@ export function FIND(classname: string, includeTargets = false, localmap: _Style
     if (localmap[classname]) {
         index = localmap[classname];
         group = _Style._Type.LOCAL;
-    } else if (CACHE.CLASS.Package_Index[classname]) {
-        index = CACHE.CLASS.Package_Index[classname];
+    } else if (CACHE.CLASS.Package__Index[classname]) {
+        index = CACHE.CLASS.Package__Index[classname];
         group = _Style._Type.PACKAGE;
-    } else if (CACHE.CLASS.Library_Index[classname]) {
-        index = CACHE.CLASS.Library_Index[classname];
+    } else if (CACHE.CLASS.Library__Index[classname]) {
+        index = CACHE.CLASS.Library__Index[classname];
         group = _Style._Type.LIBRARY;
-    } else if (CACHE.CLASS.Arcbind_Index[classname]) {
-        index = CACHE.CLASS.Arcbind_Index[classname];
-        group = _Style._Type.ARCBIND;
+    } else if (CACHE.CLASS.Arattach_Index[classname]) {
+        index = CACHE.CLASS.Arattach_Index[classname];
+        group = _Style._Type.ARTATTACH;
     } else if (includeTargets) {
-        if (CACHE.CLASS.Archive_Index[classname]) {
-            index = CACHE.CLASS.Archive_Index[classname];
-            group = _Style._Type.ARCHIVE;
-        } else if (CACHE.CLASS.Global__Index[classname]) {
-            index = CACHE.CLASS.Global__Index[classname];
+        if (CACHE.CLASS.Artifact_Index[classname]) {
+            index = CACHE.CLASS.Artifact_Index[classname];
+            group = _Style._Type.ARTIFACT;
+        } else if (CACHE.CLASS.Global___Index[classname]) {
+            index = CACHE.CLASS.Global___Index[classname];
             group = _Style._Type.GLOBAL;
-        } else if (CACHE.CLASS.Public__Index[classname]) {
-            index = CACHE.CLASS.Public__Index[classname];
+        } else if (CACHE.CLASS.Public___Index[classname]) {
+            index = CACHE.CLASS.Public___Index[classname];
             group = _Style._Type.PUBLIC;
         }
     }

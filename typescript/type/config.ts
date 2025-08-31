@@ -24,7 +24,7 @@ export interface Raw extends Base {
     tweaks: Tweaks
 }
 
-export interface Archive extends Base {
+export interface Artifact extends Base {
     readme: string,
     vendors?: string,
     packages?: Record<string, string>,

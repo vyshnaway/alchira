@@ -12,7 +12,7 @@ function Initialize(content: string): _File.Reader {
         active: {
             char: '',
             marker: 0,
-            rowMarker: 0,
+            rowMarker: 1,
             colMarker: 0,
             cycle: 0,
             colFallback: 0,

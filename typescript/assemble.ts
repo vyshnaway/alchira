@@ -1,9 +1,9 @@
 // import * as _Config from "./type/config.js";
-import * as _File from "./type/file.js";
+// import * as _File from "./type/file.js";
 import * as _Style from "./type/style.js";
 import * as _Script from "./type/script.js";
 // import * as _Cache from "./type/cache.js";
-import * as _Support from "./type/support.js";
+// import * as _Support from "./type/support.js";
 
 
 import $ from "./shell/main.js";
@@ -22,25 +22,13 @@ import XTYLES from "./style/stash.js";
 
 export function UpdateXtylesFolder() {
 	INDEX.RESET();
-	CACHE.DELTA.Manifest.prefix = CACHE.STATIC.Archive.name;
-	Object.assign(CACHE.CLASS, {
-		HashRule: {},
-		Index_to_Data: {},
-		Global__Index: {},
-		Public__Index: {},
-		Archive_Index: {},
-		Arcbind_Index: {},
-		Library_Index: {},
-		Package_Index: {},
-		Sync_PublishIndexMap: {},
-		Sync_ClassDictionary: {},
-	});
-	Object.assign(CACHE.FILES, {
-		LIBRARIES: {},
-		PACKAGES: {},
-		TARGET: {},
-	});
+	CACHE.DELTA.Manifest.prefix = CACHE.STATIC.Artifact.name;
+	Object.values(CACHE.CLASS).forEach(V => { for (const v in V) { delete V[v]; } });
+	Object.values(CACHE.FILES).forEach(V => { for (const v in V) { delete V[v]; } });
 	XTYLES.ReRender();
+	Object.entries(CACHE.CLASS.Library__Index).map(([k, v]) => {
+		CACHE.CLASS.Arattach_Index[`/${CACHE.STATIC.Artifact.name}/$/${k}`] = v;
+	});
 }
 
 export function SaveToTarget(
@@ -73,15 +61,11 @@ export function SaveToTarget(
 			}
 			break;
 		default:
-			CACHE.DELTA.Report.hashrule = HASHRULE.UPLOAD();
-			CACHE.DELTA.Manifest.hashrules = CACHE.CLASS.HashRule;
+			HASHRULE.UPLOAD();
 	}
 
 	if (reCache) {
 		XTYLES.ReDeclare();
-
-		CACHE.CLASS.Public__Index = {};
-		CACHE.CLASS.Global__Index = {};
 
 		Object.entries(CACHE.FILES.TARGET).forEach(([key, cache]) => {
 			cache.ClearFiles();
@@ -93,22 +77,12 @@ export function SaveToTarget(
 	}
 }
 
-function SaveClassRefs(stash: _Style.SortedOutput) {
-	CACHE.CLASS.Sync_ClassDictionary = stash.referenceMap;
-	CACHE.CLASS.Sync_PublishIndexMap = Object.entries(stash.indexMap).reduce((A, [classname, index]) => {
-		A["." + classname] = index;
-		return A;
-	}, {} as _Style.ClassIndexMap);
-}
 
 
 async function Accumulate() {
 
-	const CUMULATES: _Script.Cumulates = {
+	const CUMULATED: _Script.Cumulated = {
 		report: [],
-		errors: [],
-		diagnostics: [],
-		usedIndexes: [],
 		globalClasses: {},
 		publicClasses: {},
 		fileManifests: {},
@@ -117,98 +91,102 @@ async function Accumulate() {
 
 	Object.values(CACHE.FILES.TARGET).forEach((cache) => {
 		const C = cache.Accumulator();
-		CUMULATES.report.push(...C.report);
-		CUMULATES.errors.push(...C.errors);
-		CUMULATES.diagnostics.push(...C.diagnostics);
-		CUMULATES.usedIndexes.push(...C.usedIndexes);
-		Object.assign(CUMULATES.globalClasses, C.globalClasses);
-		Object.assign(CUMULATES.publicClasses, C.publicClasses);
-		Object.assign(CUMULATES.fileManifests, C.fileManifests);
+		CUMULATED.report.push(...C.report);
+		Object.assign(CUMULATED.globalClasses, C.globalClasses);
+		Object.assign(CUMULATED.publicClasses, C.publicClasses);
+		Object.assign(CUMULATED.fileManifests, C.fileManifests);
 	});
+	CACHE.DELTA.Report.artifacts = $.MAKE("", CUMULATED.report);
 
-	CACHE.CLASS.Global__Index = CUMULATES.globalClasses;
-	CACHE.CLASS.Public__Index = CUMULATES.publicClasses;
-	CACHE.CLASS.Archive_Index = Object.fromEntries([
-		...Object.entries(CACHE.CLASS.Global__Index).map(([s, i]) => [`/${CACHE.STATIC.Archive.name}/${s}`, i]),
-		...Object.entries(CACHE.CLASS.Public__Index).map(([s, i]) => [`/${CACHE.STATIC.Archive.name}/${s}`, i]),
+	CACHE.CLASS.Global___Index = CUMULATED.globalClasses;
+	CACHE.CLASS.Public___Index = CUMULATED.publicClasses;
+	CACHE.CLASS.Artifact_Index = Object.fromEntries([
+		...Object.entries(CACHE.CLASS.Global___Index).map(([s, i]) => [`/${CACHE.STATIC.Artifact.name}/${s}`, i]),
+		...Object.entries(CACHE.CLASS.Public___Index).map(([s, i]) => [`/${CACHE.STATIC.Artifact.name}/${s}`, i]),
 	]);
-	CACHE.CLASS.Arcbind_Index =
-		Object.fromEntries(Object.entries(CACHE.CLASS.Library_Index).map(([s, i]) => [`/${CACHE.STATIC.Archive.name}/$/${s}`, i]));
 
 
-	CACHE.DELTA.Lookup.project = {};
+	CACHE.DELTA.Lookup.artifacts = {};
 	CACHE.DELTA.Manifest.LOCAL = {};
 	CACHE.DELTA.Manifest.GLOBAL = {};
+	CACHE.DELTA.Errors.artifacts = [];
+	CACHE.DELTA.Diagnostics.projects = [];
 
-	Object.entries(CUMULATES.fileManifests).forEach(([K, V]) => {
+	Object.entries(CUMULATED.fileManifests).forEach(([K, V]) => {
 		CACHE.DELTA.Manifest.GLOBAL[K] = { ...V.public, ...V.global };
 		CACHE.DELTA.Manifest.LOCAL[K] = V.local;
-		CACHE.DELTA.Lookup.project[K] = V.refer;
+		CACHE.DELTA.Lookup.artifacts[K] = V.lookup;
+		CACHE.DELTA.Errors.artifacts.push(...V.errors);
+		CACHE.DELTA.Diagnostics.projects.push(...V.diagnostics);
 	});
 
-	CACHE.DELTA.Manifest.file = Object.values(CACHE.DELTA.Lookup).reduce((A, V) => {
-		Object.assign(A, V);
-		return A;
-	}, {} as Record<string, _File.Lookup>);
+	CACHE.DELTA.Manifest.lookup = {};
+	Object.values(CACHE.DELTA.Lookup).forEach((V) => Object.assign(CACHE.DELTA.Manifest.lookup, V));
 
 
+	CACHE.DELTA.Errors.multiples = [];
+	CACHE.DELTA.Diagnostics.multiples = [];
+	Object.values(CACHE.CLASS.Index_to_Data).forEach((data) => {
+		if (data.metadata.declarations.length > 1) {
+			const E = $$.GenerateError(`Duplicate Declarations: ${data.classname}`, data.metadata.declarations);
+			CACHE.DELTA.Errors.multiples.push(E.error);
+			CACHE.DELTA.Diagnostics.multiples.push(E.diagnostic);
+		}
+	});
 
-	CACHE.DELTA.Errors.project = CUMULATES.errors;
-	CACHE.DELTA.Diagnostics.project = CUMULATES.diagnostics;
-	CACHE.DELTA.Report.project = $.MAKE("", CUMULATES.report);
-
-	CACHE.DELTA.Manifest.errors = Object.values(CACHE.DELTA.Diagnostics).reduce((A, V) => {
-		A.push(...V);
-		return A;
-	}, [] as _Support.Diagnostic[]);
+	CACHE.DELTA.Manifest.diagnostics = [];
+	Object.values(CACHE.DELTA.Diagnostics).forEach((V) => CACHE.DELTA.Manifest.diagnostics.push(...V));
+	CACHE.DELTA.ErrorCount = CACHE.DELTA.Manifest.diagnostics.length;
 
 
-	const ERRORS = Object.values(CACHE.DELTA.Errors).reduce((A, I) => { A.push(...I); return A; }, [] as string[]);
-
-	CACHE.DELTA.ErrorCount = ERRORS.length;
 	CACHE.DELTA.Report.errors = $.MAKE(
 		$.tag.H2(`${CACHE.DELTA.ErrorCount} Errors`, CACHE.DELTA.ErrorCount ? $.preset.failed : $.preset.success),
-		ERRORS
+		Object.values(CACHE.DELTA.Errors).reduce((A, I) => { A.push(...I); return A; }, [] as string[])
 	);
-
-	return CUMULATES;
 }
 
+
+function SaveClassRefs(stash: _Style.SortedOutput) {
+	CACHE.CLASS.Sync_ClassDictionary = stash.referenceMap;
+	CACHE.CLASS.Sync_PublishIndexMap = Object.entries(stash.indexMap).reduce((A, [classname, index]) => {
+		A["." + classname] = index;
+		return A;
+	}, {} as _Style.ClassIndexMap);
+}
 
 async function Synthasize() {
 
 	Accumulate();
 
 	const CLASSESLIST: number[][] = [];
-	const ATTACHMENTS = new Set<number>();
-	const ERRORS = CACHE.DELTA.Errors.project;
+	const ATTACHMENTS: number[] = [];
 
 	Object.values(CACHE.FILES.TARGET).forEach((cache) => cache.GetTracks(CLASSESLIST, ATTACHMENTS));
 
 	if (CACHE.STATIC.WATCH) {
 		CACHE.CLASS.Sync_PublishIndexMap = {};
 		CACHE.CLASS.Sync_ClassDictionary = {};
-		CACHE.DELTA.FinalMessage = ERRORS.length + " Errors.";
+		CACHE.DELTA.FinalMessage = CACHE.DELTA.ErrorCount + " Errors.";
 	} else {
 
 		if (CACHE.STATIC.Command === "preview") {
 			const response = await ORDER(CLASSESLIST, CACHE.STATIC.Command, CACHE.STATIC.Argument);
 			SaveClassRefs(response.result);
 
-			if (CACHE.DELTA.Manifest.errors.length) {
-				CACHE.DELTA.FinalMessage = ERRORS.length + " Unresolved Errors. Rectify them to proceed with 'publish' command.";
+			if (CACHE.DELTA.Manifest.diagnostics.length) {
+				CACHE.DELTA.FinalMessage = CACHE.DELTA.ErrorCount + " Unresolved Errors. Rectify them to proceed with 'publish' command.";
 			} else {
 				CACHE.DELTA.FinalMessage = "Preview verified with no major errors. Procceed to 'publish' using your key.";
 			}
 		}
 
 		if (CACHE.STATIC.Command === "publish") {
-			if (CACHE.DELTA.Manifest.errors.length) {
+			if (CACHE.DELTA.Manifest.diagnostics.length) {
 				const response = await ORDER(CLASSESLIST, "preview", CACHE.STATIC.Argument);
 				CACHE.STATIC.Command = "preview";
 				SaveClassRefs(response.result);
 
-				CACHE.DELTA.FinalMessage = "Errors in " + ERRORS.length + " Tags. Falling back to 'preview' command.";
+				CACHE.DELTA.FinalMessage = "Errors in " + CACHE.DELTA.ErrorCount + " Tags. Falling back to 'preview' command.";
 			} else {
 				// const json = GeneratePortable(CUMULATES.essentials);
 				const response = await ORDER(CLASSESLIST, CACHE.STATIC.Command, CACHE.STATIC.Argument);
@@ -238,46 +216,50 @@ function GenFinalSheets(ATTACHMENTS: Set<number>) {
 	};
 
 
-	const indexScanned = STYLE.CSSFileScanner(Use.code.uncomment.Css(CACHE.STATIC.RootCSS), "INDEX ||");
+	const indexScanned = STYLE.CSSFileScanner(Use.code.uncomment.Css(CACHE.STATIC.RootCSS), "INDEX ||", false);
 	CACHE.DELTA.Manifest.constants = Object.keys(indexScanned.constants);
 	CACHE.DELTA.Report.constants = $$.ListCatalog("Root Constants", CACHE.DELTA.Manifest.constants);
 	indexScanned.attachments.forEach((attachment) => ATTACHMENTS.add(INDEX.FIND(attachment, false).index));
 	const INDEXSHEET = RENDERFRAGS.Root = COMPILE.Prefixed(indexScanned.styles);
 
 
-	const targetRenderAction: _Script._Actions = (CACHE.STATIC.Command === "debug") ? _Script._Actions.monitor
-		: (CACHE.STATIC.Command === "preview" && CACHE.STATIC.Argument === "watch") ? _Script._Actions.watch : _Script._Actions.sync;
-	Object.values(CACHE.FILES.TARGET).forEach((cache) => cache.RenderFiles(targetRenderAction));
-	RENDERFRAGS.Class = COMPILE.Prefixed(Object.entries(CACHE.CLASS.Sync_PublishIndexMap).map(([K, V]) => [K, INDEX.FETCH(V)]));
-
-
 	RENDERFRAGS.Appendix = COMPILE.Prefixed(
 		Object.values(CACHE.FILES.TARGET).reduce((appendix, cache) => {
-			const appendixScanned = STYLE.CSSFileScanner(
-				cache.stylesheetContent,
-				`APPENDIX : ${cache.targetStylesheet} ||`
-			);
+			const appendixScanned = STYLE.CSSFileScanner(cache.stylesheetContent, `APPENDIX : ${cache.targetStylesheet} ||`, true);
 			appendix.push(...appendixScanned.styles);
-			appendixScanned.attachments.forEach((i) => ATTACHMENTS.add(INDEX.FIND(i).index));
+			appendixScanned.attachments.forEach((i) => {
+				const found = INDEX.FIND(i).index;
+				if (found) { ATTACHMENTS.add(INDEX.FIND(i).index); }
+			});
 			return appendix;
 		}, [] as [string, string | object][])
 	);
 
 
 	const ATTACH_STAPLES: string[] = [];
-	const ATTACH_OBJECTS = Array.from(ATTACHMENTS).map(attachment => {
+	const ATTACH_STYLES: [string, object | string][] = [];
+	ATTACHMENTS.forEach(attachment => {
 		const ClassData = INDEX.FETCH(attachment);
-		if (ClassData.attached_staple.length) {
-			ATTACH_STAPLES.push(ClassData.attached_staple);
-		}
+		const AttachedStyle = Object.entries(ClassData.attached_style);
+		if (AttachedStyle.length) { ATTACH_STYLES.push(...AttachedStyle); }
+		if (ClassData.attached_staple.length) { ATTACH_STAPLES.push(ClassData.attached_staple); }
 		return ClassData.attached_style;
 	});
 
-	RENDERFRAGS.Attach = CACHE.STATIC.Command === "publish"
-		? COMPILE.Prefixed(Object.entries(ATTACH_OBJECTS))
-		: COMPILE.Prefixed(Object.values(CACHE.CLASS.Index_to_Data).reduce((A, C) => {
-			return A;
-		}, [] as [string, string | object][]));
+	const STAPLESHEET = CACHE.STATIC.WATCH ? RENDERFRAGS.Attach : "";
+	RENDERFRAGS.Attach = COMPILE.Prefixed(Object.entries(ATTACH_STYLES));
+
+
+	const targetRenderAction: _Script._Actions = (CACHE.STATIC.Command === "debug") ? _Script._Actions.monitor
+		: (CACHE.STATIC.Command === "preview" && CACHE.STATIC.Argument === "watch") ? _Script._Actions.watch : _Script._Actions.sync;
+	Object.values(CACHE.FILES.TARGET).forEach((cache) => cache.ReplaceClassnames(targetRenderAction));
+
+	RENDERFRAGS.Class = COMPILE.Prefixed(Object.entries(CACHE.CLASS.Sync_PublishIndexMap).map(([K, V]) => [K, INDEX.FETCH(V)]));
+
+	// console.log(CACHE.CLASS.Index_to_Data);
+	// console.log(RENDERFRAGS);
+
+
 
 
 
@@ -289,7 +271,6 @@ function GenFinalSheets(ATTACHMENTS: Set<number>) {
 			}, [] as [string, object][])
 		) : ''; Object.entries(D.attached_style)`;
 
-	const STAPLESHEET = CACHE.STATIC.WATCH ? RENDERFRAGS.Attach : "";
 
 
 	const STYLESHEET = Object.entries(RENDERFRAGS).map(([chapter, content]) =>
@@ -317,11 +298,11 @@ export async function Generate() {
 			STAPLESHEET,
 			INDEXSHEET,
 			WATCHSHEET
-		} = GenFinalSheets(ATTACHMENTS);
+		} = GenFinalSheets(new Set(ATTACHMENTS));
 
 
 		const DeployedFiles = Object.values(CACHE.FILES.TARGET).reduce((acc, cache) => {
-			acc.push(...cache.SummonFiles(OUTFILES, STYLESHEET, STYLETAG, STAPLESHEET));
+			acc.push(...cache.SummonFiles(OUTFILES, STYLESHEET, STYLETAG, STAPLESHEET, `${STYLETAG}\n${STAPLESHEET}`));
 			return acc;
 		}, [CACHE.DELTA.DeltaPath]);
 

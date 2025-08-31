@@ -27,7 +27,7 @@ export const ROOT: _Cache.ROOT = {
         debug: "Live build for developer environment",
         preview: 'Test build. Pass test for "publish" command.',
         publish: "Optimized build, uses web-api.",
-        archive: "Split and stash project styles to *.xcss files.",
+        artifact: "Split and stash project styles to *.xcss files.",
         install: "Install packages from sources.",
     },
     defaultTweaks: {
@@ -38,9 +38,9 @@ export const ROOT: _Cache.ROOT = {
         CacheUsage: true,
     },
     customElements: {
-        style: "style",
-        staple: "staple",
-        stencil: "stencil",
+        style: 1,
+        staple: 2,
+        snippet: 3,
     },
     customOperations: {
         attach: "~",
@@ -64,7 +64,7 @@ export const STATIC: _Cache.STATIC = {
     WorkPath: "",
     ProxyMap: [],
     HashRule: {},
-    Archive: {
+    Artifact: {
         name: '',
         version: '',
         readme: '',
@@ -92,37 +92,40 @@ export const DELTA: _Cache.DELTA = {
     PublishError: "",
     ErrorCount: 0,
     Report: {
-        library: "",
-        package: "",
-        project: "",
+        libraries: "",
+        packages: "",
+        artifacts: "",
         constants: "",
-        hashrule: "",
+        hashrules: "",
         errors: "",
         memChart: "",
         footer: "",
     },
     Lookup: {
-        library: {},
-        package: {},
-        project: {},
+        libraries: {},
+        packages: {},
+        artifacts: {},
     },
     Errors: {
-        library: [],
-        package: [],
-        project: []
+        libraries: [],
+        packages: [],
+        artifacts: [],
+        multiples: [],
     },
     Diagnostics: {
-        library: [],
-        project: [],
-        package: []
+        libraries: [],
+        projects: [],
+        packages: [],
+        multiples: [],
     },
     Manifest: {
         prefix: "",
-        elements: Object.values(ROOT.customElements),
+        elements: Object.keys(ROOT.customElements),
+        lookuptype: _File._Import,
         constants: [],
         hashrules: {},
-        errors: [],
-        file: {},
+        diagnostics: [],
+        lookup: {},
         AXIOM: {},
         CLUSTER: {},
         LOCAL: {},
@@ -135,12 +138,12 @@ export const DELTA: _Cache.DELTA = {
 export const CLASS: _Cache.CLASS = {
     HashRule: {},
     Index_to_Data: {},
-    Global__Index: {},
-    Public__Index: {},
-    Archive_Index: {},
-    Arcbind_Index: {},
-    Library_Index: {},
-    Package_Index: {},
+    Global___Index: {},
+    Public___Index: {},
+    Artifact_Index: {},
+    Arattach_Index: {},
+    Library__Index: {},
+    Package__Index: {},
     Sync_PublishIndexMap: {},
     Sync_ClassDictionary: {}
 };
@@ -206,8 +209,8 @@ export const SYNC: Record<string, Record<string, _File.Sync>> = {
 
 export const PATH: Record<string, Record<string, _File.Path>> = {
     blueprint: {
-        archive: {
-            frags: ["blueprint", "archive"],
+        artifact: {
+            frags: ["blueprint", "artifact"],
             path: "",
             content: "",
             essential: true,
@@ -262,8 +265,8 @@ export const PATH: Record<string, Record<string, _File.Path>> = {
             content: "",
             essential: true,
         },
-        archive: {
-            frags: ["xtyles", "archive"],
+        artifact: {
+            frags: ["xtyles", "artifact"],
             path: "",
             content: "",
             essential: false,

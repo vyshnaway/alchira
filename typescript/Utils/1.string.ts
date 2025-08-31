@@ -1,5 +1,6 @@
 const ALPHANUMERIC = /[a-z0-9]/gi;
 const SPACE = /\s+/g;
+const AT = /@+/g;
 
 
 
@@ -13,6 +14,7 @@ export default {
 		let final = "";
 		string
 			.replace(SPACE, "_")
+			.replace(AT, "_")
 			.split("")
 			.forEach((ch) => {
 				if (skipChars.includes(ch)) { return; }

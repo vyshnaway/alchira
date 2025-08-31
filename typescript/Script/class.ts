@@ -5,10 +5,9 @@ import * as _Script from "../type/script.js";
 // import * as _Cache from "../type/cache.js";
 // import * as _Support from "../type/support.js";
 
-
 import $ from "../shell/main.js";
 import Use from "../utils/main.js";
-import Seek from "./file.js";
+import NARRATOR from "./file.js";
 import Filing from "../data/filing.js";
 import Fileman from "../fileman.js";
 import StyleParse from "../style/parse.js";
@@ -17,13 +16,6 @@ import * as $$ from "../shell.js";
 import * as INDEX from "../data/index.js";
 import * as CACHE from "../data/cache.js";
 
-function stringInjections(master_string: string, ranges: number[], replace_with: string) {
-	const result = ranges.reduce((modified, pos) => {
-		modified = master_string.slice(0, pos) + replace_with + master_string.slice(pos);
-		return modified;
-	}, master_string);
-	return result;
-};
 
 export default class C_Proxy {
 	source = "";
@@ -83,8 +75,8 @@ export default class C_Proxy {
 			`_${this.label}_${Use.string.enCounter(fileIndex + 768)}_`);
 		this.fileCache[FILE.filePath] = FILE;
 
-		const ParseResponse = Seek(FILE, this.extnsProps[FILE.extension]);
-		FILE.styleData.classesList.push(...ParseResponse.classesList);
+		const ParseResponse = NARRATOR(FILE, this.extnsProps[FILE.extension]);
+		FILE.styleData.classTracks.push(...ParseResponse.classesList);
 		FILE.styleData.attachments.push(...ParseResponse.attachments);
 
 		ParseResponse.stylesList.forEach((tagStyle) => {
@@ -118,23 +110,21 @@ export default class C_Proxy {
 			}
 		});
 
-		Object.assign(CACHE.CLASS.Global__Index, FILE.styleData.globalClasses);
-		Object.assign(FILE.manifest.refer, { group: "target", id: FILE.targetPath });
+		Object.assign(CACHE.CLASS.Global___Index, FILE.styleData.globalClasses);
+		Object.assign(FILE.manifest.lookup, { group: "target", id: FILE.targetPath });
+		FILE.midway = ParseResponse.stream;
 	}
 
 	Accumulator() {
-		const Cumulates: _Script.Cumulates = {
+		const Cumulates: _Script.Cumulated = {
 			report: [],
-			errors: [],
-			diagnostics: [],
-			usedIndexes: [],
 			globalClasses: {},
 			publicClasses: {},
 			fileManifests: {}
 		};
 
 		Cumulates.fileManifests[this.targetStylesheet] = {
-			refer: {
+			lookup: {
 				type: _File._Type.STYLESHEET,
 				id: this.targetStylesheet,
 			},
@@ -148,23 +138,14 @@ export default class C_Proxy {
 		Cumulates.report.push($.tag.H2(`PROXY : ${this.target} -> ${this.source}`, $.preset.primary));
 
 		Object.values(this.fileCache).forEach((file) => {
-			Cumulates.errors.push(...file.manifest.errors);
-			Cumulates.diagnostics.push(...file.manifest.diagnostics);
-			Cumulates.fileManifests[file.manifest.refer.id] = file.manifest;
+			Cumulates.fileManifests[file.manifest.lookup.id] = file.manifest;
+
 			Object.assign(Cumulates.globalClasses, file.styleData.globalClasses);
 			Object.assign(Cumulates.publicClasses, file.styleData.publicClasses);
-
 
 			const localKeys = Object.keys(file.styleData.localClasses);
 			const publicKeys = Object.keys(file.styleData.publicClasses);
 			const globalKeys = Object.keys(file.styleData.globalClasses);
-			const localIndexes = Object.values(file.styleData.localClasses);
-			const publicIndexes = Object.values(file.styleData.publicClasses);
-			const globalIndexes = Object.values(file.styleData.globalClasses);
-
-			Cumulates.usedIndexes.push(...localIndexes);
-			Cumulates.usedIndexes.push(...publicIndexes);
-			Cumulates.usedIndexes.push(...globalIndexes);
 
 			if (localKeys.length + globalKeys.length + publicKeys.length) {
 				Cumulates.report.push(
@@ -178,41 +159,27 @@ export default class C_Proxy {
 					)
 				);
 			}
-
-
-			[...localIndexes, ...publicIndexes, ...globalIndexes,].forEach(
-				(index) => {
-					const InStash = INDEX.FETCH(index);
-					const E = $$.GenerateError("Multiple declarations: " + InStash.selector, InStash.declarations);
-					if (InStash.declarations.length > 1) {
-						Cumulates.errors.push(E.error);
-						Cumulates.diagnostics.push(E.diagnostic);
-					}
-				}
-			);
-
 		});
-
-
 
 		return Cumulates;
 	}
 
-	GetTracks(classTracks: number[][] = [], attachments = new Set<number>()) {
+	GetTracks(classTracks: number[][] = [], attachments: number[] = []) {
 
-		Object.values(this.fileCache).forEach((file) => {
-			file.styleData.classesList.forEach((group) => {
+		Object.values(this.fileCache).forEach((filedata) => {
+			filedata.styleData.attachments.forEach((attchment) => {
+				const found = INDEX.FIND(attchment, true, filedata.styleData.localClasses);
+				if (found.index) { attachments.push(found.index); }
+			});
 
+			filedata.styleData.classTracks.forEach((group) => {
 				const indexGroup = group.reduce((indexAcc, className) => {
-					const found = INDEX.FIND(className, true, file.styleData.localClasses);
+					const found = INDEX.FIND(className, true, filedata.styleData.localClasses);
 					if (found.index) {
 						indexAcc.push(found.index);
-						attachments.add(found.index);
 						INDEX.FETCH(found.index).attachments.forEach(attchment => {
-							const i = INDEX.FIND(attchment, true, file.styleData.localClasses).index;
-							if (i) {
-								attachments.add(i);
-							}
+							const i = INDEX.FIND(attchment, true, filedata.styleData.localClasses).index;
+							if (i) { attachments.push(i); }
 						});
 					}
 					return indexAcc;
@@ -220,26 +187,19 @@ export default class C_Proxy {
 
 				if (indexGroup.length) { classTracks.push(indexGroup); }
 			});
-
-			file.styleData.attachments.forEach((attchment) => {
-				const found = INDEX.FIND(attchment, true, file.styleData.localClasses);
-				if (found.index) {
-					attachments.add(found.index);
-				}
-			});
 		});
 
 		return { classTracks, attachments };
 	}
 
 
-	RenderFiles(action: _Script._Actions) {
+	ReplaceClassnames(action: _Script._Actions) {
 		Object.values(this.fileCache).forEach((filedata) => {
-			filedata.midway = Seek(
+			filedata.scratch = NARRATOR(
 				filedata,
 				this.extnsProps[filedata.extension],
 				action,
-			).scribed;
+			).stream;
 		});
 	}
 
@@ -247,29 +207,40 @@ export default class C_Proxy {
 		SaveFiles: Record<string, string> = {},
 		stylesheet: string,
 		StyleBlock: string,
-		AttachBlock: string,
+		StapleBlock: string,
+		SnippetBlock: string,
 	) {
 		const DeployedFiles = [this.sourceStylesheet];
 
-		Object.values(this.fileCache).forEach((file) => {
-			if (file.extension !== "xcss") {
-				let fileContent = file.midway;
-				fileContent = stringInjections(
-					fileContent,
-					file.styleData.stapleTagReplaces,
-					AttachBlock
-				);
-				fileContent = stringInjections(
-					fileContent,
-					file.styleData.styleTagReplaces,
-					StyleBlock
-				);
-				DeployedFiles.push(file.sourcePath);
-				SaveFiles[file.sourcePath] = fileContent;
+		SaveFiles[this.sourceStylesheet] = stylesheet;
+		Object.values(this.fileCache).forEach((data) => {
+			console.log(data.content);
+			console.log(data.midway);
+			console.log(data.scratch);
+			if (data.extension !== "xcss") {
+				let fromPos = 0;
+				if ((data.styleData.tagReplacements).length > 1) { DeployedFiles.push(data.sourcePath); }
+				SaveFiles[data.sourcePath] = data.styleData.tagReplacements.reduce((A, [elid, pos]) => {
+					switch (elid) {
+						case CACHE.ROOT.customElements["style"]:
+							A += data.scratch.slice(fromPos, Number(pos)) + StyleBlock;
+							break;
+						case CACHE.ROOT.customElements["staple"]:
+							A += data.scratch.slice(fromPos, Number(pos)) + StapleBlock;
+							break;
+						case CACHE.ROOT.customElements["snippet"]:
+							A += data.scratch.slice(fromPos, Number(pos)) + SnippetBlock;
+							break;
+						default:
+							A += data.scratch.slice(fromPos);
+					};
+					fromPos = elid;
+					return A;
+				}, "");
+				data.scratch = "";
 			}
 		});
 
-		SaveFiles[this.sourceStylesheet] = stylesheet;
 		return DeployedFiles;
 	}
 
@@ -294,7 +265,7 @@ export default class C_Proxy {
 	// 		if (file.extension === "xcss") {
 	// 			if (Object.keys(SavedFiles).includes(file.targetPath)) { SavedFiles[file.targetPath] += "\n\n" + file.content; }
 	// 		} else if (Object.keys(file.styleData.styleGlobals).length) {
-	// 			SavedFiles[file.targetPath] = SCRIPTPARSE(file, this.extnsProps[file.extension], "archive").scribed;
+	// 			SavedFiles[file.targetPath] = SCRIPTPARSE(file, this.extnsProps[file.extension], "artifact").scribed;
 	// 			SavedFiles[file.targetPath + ".xcss"] = Object.entries(file.styleData.styleGlobals).reduce((A, [selector, index]) => {
 	// 				const inStash = INDEX.IMPORT(index);
 	// 				const object = inStash.object;

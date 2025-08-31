@@ -71,11 +71,11 @@ function UPLOAD() {
 	});
 
 	CACHE.CLASS.HashRule = hashrules;
-
-	return $$.HashruleReport(hashrules, errors);
+	CACHE.DELTA.Manifest.hashrules = hashrules;
+	CACHE.DELTA.Report.hashrules = $$.HashruleReport(hashrules, errors);
 }
 
-function RENDER(string: string, sourcePath:string) {
+function RENDER(string: string, sourcePath: string) {
 	const extended = IMPORT(string, true, sourcePath);
 	string = extended.result;
 	const length = string.length;

@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/naming-convention */
-import * as _support from "./support.js";
 import * as _style from "./style.js";
 import * as _file from "./file.js";
 
@@ -8,10 +7,11 @@ export enum _Actions {
     sync = 1,
     watch = 2,
     monitor = 3,
-    archive = 4,
+    artifact = 4,
 };
 
 export interface RawStyle {
+    elid: number,
     element: string,
     elvalue: string,
     tagCount: number,
@@ -25,11 +25,8 @@ export interface RawStyle {
     attachstring: string,
 }
 
-export interface Cumulates {
+export interface Cumulated {
     report: string[],
-    errors: string[],
-    usedIndexes: number[],
-    diagnostics: _support.Diagnostic[],
     globalClasses: Record<string, number>,
     publicClasses: Record<string, number>,
     fileManifests: Record<string, _file.LocalManifest>

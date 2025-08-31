@@ -8,6 +8,7 @@ import * as _Script from "../type/script.js";
 
 import VALUE from "./value.js";
 import CURSOR from "./_cursor.js";
+import * as CACHE from '../data/cache.js';
 
 const bracePair = {
 	"{": "}",
@@ -31,10 +32,11 @@ export default function scanner(
 ) {
 	const
 		classesList: string[][] = [],
-		attachments = new Set<string>(),
+		attachments: string[] = [],
 		braceTrack: OpenBrace[] = [],
 		nativeAttributes: Record<string, string> = {},
 		styleDeclarations: _Script.RawStyle = {
+			elid: 0,
 			element: "",
 			elvalue: "",
 			selector: "",
@@ -81,13 +83,14 @@ export default function scanner(
 				const tr_Attr = attr.trim();
 				const tr_Value = value.trim();
 				if (!styleDeclarations.element.length) {
+					styleDeclarations.elid = CACHE.ROOT.customElements[tr_Attr] || 0;
 					styleDeclarations.element = tr_Attr;
 					styleDeclarations.elvalue = tr_Value;
 				} else if (tr_Attr === "$") {
 					styleDeclarations.comments.push(...tr_Value.slice(1, -1).split("\n").map(l => l.trim()));
 				} else if (/^[\w\-]+\$+[\w\-]+$/i.test(tr_Attr)) {
 					styleDeclarations.selector = tr_Attr;
-					if (fileData.manifest.refer.type === _File._Type.PACKAGE) {
+					if (fileData.manifest.lookup.type === _File._Type.PACKAGE) {
 						styleDeclarations.scope = _Style._Type.PACKAGE;
 					} else if (tr_Attr.includes("$$$")) {
 						styleDeclarations.scope = _Style._Type.PUBLIC;
@@ -100,8 +103,9 @@ export default function scanner(
 				} else if (/[\$@#]/.test(tr_Attr) && !"$@".includes(tr_Attr[0]) && !"$@".includes(tr_Attr[tr_Attr.length - 1])) {
 					styleDeclarations.styles[tr_Attr] = tr_Value;
 				} else if (classProps.includes(tr_Attr)) {
-					const result = VALUE(tr_Value, action, fileData, attachments, fileCursor.active);
-					classesList.push(result.classList);
+					const result = VALUE(tr_Value, action, fileData, fileCursor.active);
+					if (result.classList.length) { classesList.push(result.classList); }
+					if (result.attachments.length) { attachments.push(...result.attachments); }
 					nativeAttributes[tr_Attr] = result.scribed;
 				} else {
 					nativeAttributes[tr_Attr] = tr_Value;
@@ -131,5 +135,12 @@ export default function scanner(
 		Object.assign(fileCursor.active, fileCursor.fallback);
 	}
 
-	return { ok, selfClosed, styleDeclarations, nativeAttributes, classesList, attachments, fileCursor };
+	return {
+		ok,
+		selfClosed,
+		classesList,
+		attachments,
+		nativeAttributes,
+		styleDeclarations,
+	};
 }

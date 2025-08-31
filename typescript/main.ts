@@ -62,7 +62,7 @@ const syncscripts: Record<string, string> = {
     "watch": "xcss preview watch",
     "preview": "xcss preview",
     "publish": "xcss publish",
-    "archive": "xcss archive",
+    "artifact": "xcss artifact",
     "install": "xcss install",
 };
 

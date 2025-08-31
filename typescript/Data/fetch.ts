@@ -213,10 +213,10 @@ export async function VerifyConfigs(loadStatics: boolean) {
 			errors.push($.tag.Li(CACHE.PATH.json.configure.path + ": Workable proxies unavailable."));
 		}
 
-		Object.assign(CACHE.STATIC.Archive, config.data);
-		CACHE.STATIC.Archive.readme = (await FILEMAN.read.file(CACHE.PATH.md.readme.path)).data;
-		CACHE.STATIC.Archive.name = CACHE.STATIC.Archive.name = CONFIG.name || CACHE.STATIC.Project_Name;
-		CACHE.STATIC.Archive.version = CACHE.STATIC.Archive.version = CONFIG.version || CACHE.STATIC.Project_Version;
+		Object.assign(CACHE.STATIC.Artifact, config.data);
+		CACHE.STATIC.Artifact.readme = (await FILEMAN.read.file(CACHE.PATH.md.readme.path)).data;
+		CACHE.STATIC.Artifact.name = CACHE.STATIC.Artifact.name = CONFIG.name || CACHE.STATIC.Project_Name;
+		CACHE.STATIC.Artifact.version = CACHE.STATIC.Artifact.version = CONFIG.version || CACHE.STATIC.Project_Version;
 		CACHE.STATIC.Package_Saved = Object.entries((typeof CONFIG.packages === "object") ? CONFIG.packages : {})
 			.reduce((a: Record<string, string>, [k, v]) => {
 				if (
@@ -229,10 +229,10 @@ export async function VerifyConfigs(loadStatics: boolean) {
 				return a;
 			}, {});
 
-		delete CACHE.STATIC.Archive.proxy;
-		delete CACHE.STATIC.Archive.tweaks;
-		delete CACHE.STATIC.Archive.vendors;
-		delete CACHE.STATIC.Archive.packages;
+		delete CACHE.STATIC.Artifact.proxy;
+		delete CACHE.STATIC.Artifact.tweaks;
+		delete CACHE.STATIC.Artifact.vendors;
+		delete CACHE.STATIC.Artifact.packages;
 
 		const results = await VERIFY.proxyMapDependency(CACHE.STATIC.ProxyMap, CACHE.PATH.folder.setup.path);
 		errors.push(...results.warnings);

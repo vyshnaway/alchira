@@ -43,6 +43,10 @@ export function H5(content = '', presets: string[] = [], ...styles: string[]) {
   return root.fmt([content + root.canvas.tab + root.canvas.divider.mid[0].repeat(root.canvas.width() - root.canvas.tab.length - content.length), ""].join("\n"), ...presets, ...styles);
 }
 
+export function H6(content = '', presets: string[] = [], ...styles: string[]) {
+  return root.fmt([root.canvas.divider.mid[0].repeat(root.canvas.width() - root.canvas.tab.length - content.length) + root.canvas.tab + content, ""].join("\n"), ...presets, ...styles);
+}
+
 export function P(content = '', presets: string[] = [], ...styles: string[]) {
   return root.fmt(root.canvas.tab + content, ...presets, ...styles) + "\n";
 }

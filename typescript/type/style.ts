@@ -5,8 +5,8 @@ export enum _Type {
     PUBLIC = 3,
     PACKAGE = 4,
     LIBRARY = 5,
-    ARCBIND = 6,
-    ARCHIVE = 7,
+    ARTATTACH = 6,
+    ARTIFACT = 7,
 };
 
 export const _Import = [
@@ -16,8 +16,8 @@ export const _Import = [
     'PUBLIC',
     'PACKAGE',
     'LIBRARY',
-    'ARCBIND',
-    'ARCHIVE',
+    'ARTATTACH',
+    'ARTIFACT',
 ];
 
 
@@ -47,13 +47,14 @@ export interface Metadata {
     constants: Record<string, string>,
     skeleton: object,
     declarations: string[],
-    stencil: string,
+    snippet: string,
 }
 
 export interface Classdata {
     index?: number,
     package: string,
     selector: string,
+    classname: string,
     debugclass: string,
     watchclass: string,
     attachments: string[],
@@ -62,7 +63,7 @@ export interface Classdata {
     style_object: Record<string, object>,
     attached_style: object,
     attached_staple: string,
-    attached_stencil: string
+    attached_snippet: string
 }
 
 export type Dictionary = Record<string, Record<number, string>>;

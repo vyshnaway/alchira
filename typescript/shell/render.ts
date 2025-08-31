@@ -29,7 +29,7 @@ export function write(string = "", backRows = 0) {
 
 /**
  * Run animation in terminal from array of strings as frames.
- * @param frames String snippets for frames
+ * @param frames Strings for frames
  * @param duration in milliseconds
  * @param repeat = 0 => infinite loop
  */

@@ -54,7 +54,7 @@ export default function FILING(
 	const [extension, packageName, id, cluster]: string[] = FILEMAN.path.basename(filePath).split(".").reverse();
 	const num = Number(id);
 	const idn = isNaN(num) || num < 0 ? 0 : Math.floor(num);
-	const normalFileName = isPackage ? USE.string.normalize(packageName) : CACHE.STATIC.Archive.name;
+	const normalFileName = isPackage ? USE.string.normalize(packageName) : CACHE.STATIC.Artifact.name;
 
 	const group: _File._Type = resolveGroup(extension, Boolean(cluster), isPackage, isLibrary);
 
@@ -73,11 +73,11 @@ export default function FILING(
 		extension,
 		sourcePath,
 		targetPath,
-		packageName,
+		packageName: fromXtylesFolder ? packageName : CACHE.STATIC.Artifact.name,
 		classFront,
 		debugclassFront: `${(fromXtylesFolder) ? group : ""}\\|${USE.string.normalize(filePath, [], [], ["/", "."])}`,
 		manifest: {
-			refer: {
+			lookup: {
 				id: isLibrary ? String(idn) : isPackage ? filePath : targetPath,
 				type: group,
 			},
@@ -93,13 +93,13 @@ export default function FILING(
 			localClasses: {},
 			publicClasses: {},
 			styleMap: {},
-			classesList: [],
+			classTracks: [],
 			attachments: [],
-			styleTagReplaces: [],
-			stapleTagReplaces: [],
+			tagReplacements: [],
 		},
 		content: content,
 		midway: "",
+		scratch: "",
 	};
 
 	return result;

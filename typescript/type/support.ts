@@ -3,7 +3,7 @@ export type Command = ""
     | "debug"
     | "preview"
     | "publish"
-    | "archive"
+    | "artifact"
     | "install";
 
 export interface PackageEssential {

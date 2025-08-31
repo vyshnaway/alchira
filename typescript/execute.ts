@@ -136,7 +136,7 @@ async function execute(chapter: string) {
                     const targetFolders = [...targets, CACHE.PATH.folder.setup.path];
                     const ignoreFolders = [
                         CACHE.PATH.folder.autogen.path,
-                        CACHE.PATH.folder.archive.path
+                        CACHE.PATH.folder.artifact.path
                     ];
                     process.on("SIGINT", () => {
                         if (stopWatcher) {
@@ -160,7 +160,7 @@ async function execute(chapter: string) {
                     const pathFromWork = `${event.folder}/${event.filePath}`;
                     if (
                         pathFromWork.startsWith(CACHE.PATH.folder.autogen.path) ||
-                        pathFromWork.startsWith(CACHE.PATH.folder.archive.path)
+                        pathFromWork.startsWith(CACHE.PATH.folder.artifact.path)
                     ) {
                         break;
                     } else {
@@ -277,7 +277,7 @@ async function commander({
             await execute(`${APP_VERSION} : Publishing for Production`);
             break;
         }
-        // case "archive": {
+        // case "artifact": {
         //     await execute(CACHE.STATIC_CACHE.PACKAGE + " : Split for Components");
         //     break;
         // }
