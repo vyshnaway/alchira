@@ -149,7 +149,7 @@ function SaveClassRefs(stash: _Style.SortedOutput) {
 
 	Object.entries(stash.referenceMap).forEach(([iArray, iMap]) => {
 		CACHE.CLASS.Sync_ClassDictionary[iArray] = Object.fromEntries(Object.entries(iMap).map(([ref, id]) => {
-			const className = "_" + Use.string.enCounter(id + 512);
+			const className = "_" + Use.string.enCounter(id);
 			CACHE.CLASS.Sync_PublishIndexMap[`.${className}`] = Number(ref);
 			return [ref, className];
 		}));
@@ -259,9 +259,7 @@ function GenFinalSheets(ATTACHMENTS: Set<number>) {
 	const WATCHCLASS = CACHE.STATIC.WATCH
 		? COMPILE.Switched(
 			Object.entries(CACHE.CLASS.Index_to_Data).reduce((A, [I, D]) => {
-				if (D.attached_summon.length) {
-					A['.' + D.watchclass] = Number(I);
-				}
+				A['.__' + D.metadata.watch] = Number(I);
 				return A;
 			}, {} as Record<string, number>)
 		) : '';

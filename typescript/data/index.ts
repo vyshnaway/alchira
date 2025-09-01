@@ -2,6 +2,8 @@ import * as _Style from "../type/style.js";
 
 import * as CACHE from "./cache.js";
 
+import utils from "../utils/main.js";
+
 let NOW = 0;
 const BIN = new Set<number>();
 
@@ -44,6 +46,7 @@ export function FIND(classname: string, includeArtifacts = false, localmap: _Sty
 export function DECLARE(object: _Style.Classdata) {
     object.index = BIN.values().next().value || ++NOW;
     if (BIN.has(object.index)) { BIN.delete(object.index); }
+    object.metadata.watch = utils.string.enCounter(object.index);
     CACHE.CLASS.Index_to_Data[object.index] = object;
     return object.index;
 }

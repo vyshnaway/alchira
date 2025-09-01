@@ -49,18 +49,18 @@ export interface Metadata {
     declarations: string[],
     summon: string,
     staple: string,
+    watch: string,
 }
 
 export interface Classdata {
     index?: number,
+    metadata: Metadata,
     packname: string,
     selector: string,
     classname: string,
     debugclass: string,
-    watchclass: string,
     attachments: string[],
     declarations: string[],
-    metadata: Metadata,
     style_object: Record<string, object>,
     attached_style: object,
     attached_staple: string,

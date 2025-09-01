@@ -80,6 +80,7 @@ export default {
 		let result = "",
 			reminder = 0;
 
+		number += 512;
 		while (number) {
 			reminder = number % base;
 			result = digits[reminder] + result;

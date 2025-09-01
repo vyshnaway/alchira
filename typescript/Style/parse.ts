@@ -112,9 +112,9 @@ function CSSBulkScanner(fileDatas: _File.Storage[], forPortable = false) {
 					selector: SELECTOR,
 					style_object: object,
 					classname,
-					watchclass: '',
 					metadata: {
 						info: [],
+						watch: '',
 						constants: scannedStyle.constants,
 						skeleton: Use.object.skeleton(object),
 						declarations: [declaration],
@@ -215,9 +215,9 @@ function TagStyleScanner(
 			selector: raw.selector,
 			style_object: object,
 			classname,
-			watchclass: '',
 			metadata: {
 				info: raw.comments,
+				watch: '',
 				constants,
 				skeleton: Use.object.skeleton(object),
 				declarations: [declaration],
