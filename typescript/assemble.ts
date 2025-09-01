@@ -243,7 +243,7 @@ function GenFinalSheets(ATTACHMENTS: Set<number>) {
 		const ClassData = INDEX.FETCH(attachment);
 		const AttachedStyle = Object.entries(ClassData.attached_style);
 		if (AttachedStyle.length) { ATTACH_STYLES.push(...AttachedStyle); }
-		if (ClassData.attached_staple.length) { ATTACH_STAPLES.push(ClassData.attached_staple); }
+		if (ClassData.metadata.staple.length) { ATTACH_STAPLES.push(ClassData.metadata.staple); }
 		return ClassData.attached_style;
 	});
 	RENDERFRAGS.Attach = COMPILE.Prefixed(ATTACH_STYLES);
@@ -254,7 +254,7 @@ function GenFinalSheets(ATTACHMENTS: Set<number>) {
 	Object.values(CACHE.FILES.TARGETS).forEach((cache) => cache.SyncClassnames(targetRenderAction));
 	RENDERFRAGS.Class = COMPILE.Switched(CACHE.CLASS.Sync_PublishIndexMap);
 
-
+	// console.log(CACHE.CLASS.Index_to_Data);
 
 	const WATCHCLASS = CACHE.STATIC.WATCH
 		? COMPILE.Switched(

@@ -55,7 +55,7 @@ export interface Metadata {
 export interface Classdata {
     index?: number,
     metadata: Metadata,
-    packname: string,
+    artifact: string,
     selector: string,
     classname: string,
     debugclass: string,
@@ -63,8 +63,6 @@ export interface Classdata {
     declarations: string[],
     style_object: Record<string, object>,
     attached_style: object,
-    attached_staple: string,
-    attached_summon: string
 }
 
 export type Dictionary = Record<string, Record<number, string>>;

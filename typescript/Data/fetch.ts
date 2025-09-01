@@ -21,7 +21,6 @@ export async function FetchDocs() {
 			}
 		});
 	}));
-	await FILEMAN.write.file(CACHE.PATH.blueprint.reference.path, CACHE.SYNC.MARKDOWN.readme.content);
 }
 
 export async function Initialize() {
@@ -72,10 +71,10 @@ export async function Initialize() {
 		));
 
 		await FetchDocs();
-		return $.tag.H5("Initialized directory", $.preset.success);
+		return $.tag.H4("Initialized directory", $.preset.success, $.style.AS_Bold);
 	} catch (err) {
 		return $.MAKE(
-			$.tag.H5("Initialization failed.", $.preset.failed),
+			$.tag.H4("Initialization failed.", $.preset.failed, $.style.AS_Bold),
 			err instanceof Error ? [err.message] : [],
 			[$.list.Bullets, 0, $.preset.failed],
 		);
@@ -87,6 +86,7 @@ export async function VerifySetupStruct() {
 
 	if (FILEMAN.path.ifFolder(CACHE.PATH.folder.scaffold.path)) {
 		const errors: Record<string, string> = {};
+		await FILEMAN.write.file(CACHE.PATH.md.reference.path, CACHE.SYNC.MARKDOWN.readme.content);
 		await FILEMAN.clone.safe(CACHE.PATH.blueprint.scaffold.path, CACHE.PATH.folder.scaffold.path);
 
 		$.TASK("Verifying directory status", 0);
@@ -95,10 +95,9 @@ export async function VerifySetupStruct() {
 			...Object.values(CACHE.PATH.css),
 			...Object.values(CACHE.PATH.md),
 		]) {
-			const path = item.path;
-			$.STEP("Path : " + path);
-			if (!FILEMAN.path.ifFile(path)) {
-				errors[path] = "File not found.";
+			$.STEP("Path : " + item.path);
+			if (item.essential && !FILEMAN.path.ifFile(item.path)) {
+				errors[item.path] = "File not found.";
 			}
 		}
 
@@ -108,11 +107,11 @@ export async function VerifySetupStruct() {
 		result.proceed = Object.keys(errors).length === 0;
 		result.report =
 			Object.keys(errors).length === 0
-				? $.MAKE($.tag.H5("Setup Healthy", $.preset.success))
-				: $.MAKE($.tag.H5("Error Paths", $.preset.failed), $$.ListProps(errors), [$.list.Bullets, 0, $.preset.failed]);
+				? $.MAKE($.tag.H4("Setup Healthy", $.preset.success, $.style.AS_Bold))
+				: $.MAKE($.tag.H4("Error Paths", $.preset.failed), $$.ListProps(errors), [$.list.Bullets, 0, $.preset.failed]);
 	} else {
 		result.report = $.MAKE(
-			$.tag.H5("XCSS is not yet initialized in directory.", $.preset.warning),
+			$.tag.H4("XCSS is not yet initialized in directory.", $.preset.warning, $.style.AS_Bold),
 			[`Use "init" command to initialize.`],
 			[$.list.Bullets, 0, $.preset.warning],
 		);
@@ -188,7 +187,7 @@ export async function VerifyConfigs(loadStatics: boolean) {
 		if (loadStatics) { await FetchStatics(CONFIG.vendors); }
 		ACTION.setTWEAKS(CONFIG.tweaks);
 
-		CACHE.STATIC.ProxyMap = Array.isArray(CONFIG.proxy) ? CONFIG.proxy.reduce((A, I) => {
+		CACHE.STATIC.ProxyMap = Array.isArray(CONFIG.proxymap) ? CONFIG.proxymap.reduce((A, I) => {
 			if (
 				typeof I === "object"
 				&& typeof I.source === "string"
@@ -220,16 +219,10 @@ export async function VerifyConfigs(loadStatics: boolean) {
 		CACHE.STATIC.Artifact.name = CACHE.STATIC.Artifact.name = CONFIG.name || CACHE.STATIC.ProjectName;
 		CACHE.STATIC.Artifact.version = CACHE.STATIC.Artifact.version = CONFIG.version || CACHE.STATIC.ProjectVersion;
 		CACHE.STATIC.External_Saved = Object.entries((typeof CONFIG.externals === "object") ? CONFIG.externals : {})
-			.reduce((a: Record<string, string>, [k, v]) => {
-				if (
-					typeof v === "string"
-					&& v !== '-'
-					&& typeof k === "string"
-				) {
-					a[k] = v;
-				}
+			.reduce((a, [k, v]) => {
+				if (typeof v === "string" && v !== '-') { a[k] = v; }
 				return a;
-			}, {});
+			}, {} as Record<string, string>);
 
 		delete CACHE.STATIC.Artifact.proxy;
 		delete CACHE.STATIC.Artifact.tweaks;
@@ -247,8 +240,8 @@ export async function VerifyConfigs(loadStatics: boolean) {
 		status: Object.keys(errors).length === 0,
 		report: $.MAKE(
 			Object.keys(errors).length === 0
-				? $.tag.H2("Configs Healthy", $.preset.success)
-				: $.tag.H2("Error Paths: " + CACHE.PATH.json.configure.path, $.preset.failed),
+				? $.tag.H4("Configs Healthy", $.preset.success, $.style.AS_Bold)
+				: $.tag.H4("Error Paths: " + CACHE.PATH.json.configure.path, $.preset.failed, $.style.AS_Bold),
 			errors, [$.list.Bullets, 0, $.preset.warning]
 		)
 	};
@@ -299,10 +292,11 @@ export async function SaveHashrules() {
 		errors["ERROR"] = `Bad json file.`;
 	}
 	$.TASK("Analysis complete");
+
 	return {
 		status: Object.keys(errors).length === 0,
 		report: $.MAKE(
-			$.tag.H2("Hashrule error: " + CACHE.PATH.json.hashrules.path, $.preset.failed),
+			$.tag.H4("Hashrule error: " + CACHE.PATH.json.hashrules.path, $.preset.failed),
 			$$.ListProps(errors, $.preset.primary, $.preset.text),
 			[$.list.Blocks, 0, $.preset.text, $.style.AS_Bold],
 			[$.list.Bullets, 0, $.preset.failed, $.style.AS_Bold]

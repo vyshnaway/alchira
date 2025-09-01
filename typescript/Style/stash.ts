@@ -49,12 +49,18 @@ function _ClearStash() {
 
 function _SaveLibraryFile(filePath: string, fileContent: string) {
 	if (CACHE.FILES.LIBRARIES[filePath]) { _DeleteLibraryFile(filePath); }
-	CACHE.FILES.LIBRARIES[filePath] = FILING("library", filePath, fileContent);
+	const filed = FILING("library", filePath, fileContent);
+	if (filed.liblevel < 3) {
+		CACHE.FILES.LIBRARIES[filePath] = filed;
+	}
 }
 
 function _SaveExternalFile(filePath: string, fileContent: string) {
 	if (CACHE.FILES.EXTERNALS[filePath]) { _DeleteExternalFile(filePath); }
-	CACHE.FILES.EXTERNALS[filePath] = FILING("external", filePath, fileContent);
+	const filed = FILING("external", filePath, fileContent);
+	if (filed.liblevel < 3) {
+		CACHE.FILES.EXTERNALS[filePath] = filed;
+	}
 }
 
 
@@ -217,7 +223,7 @@ function ReRender() {
 		$$.ClassChart(`External: ${Object.values(ExattachSkeletons).reduce((a, v) => a += Object.keys(v).length, 0)}`, externalChart),
 	].join("");
 
-	
+
 	CACHE.DELTA.Report.libraries = LibraryReport;
 	CACHE.DELTA.Report.externals = ExternalReport;
 

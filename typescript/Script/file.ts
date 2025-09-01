@@ -45,11 +45,13 @@ export default function scanner(
 			const tagStart = fileCursor.active.marker;
 			const result = TAGSCAN(fileData, classProps, action, fileCursor);
 			const fragment = content.slice(tagStart, result.styleDeclarations.tagOpenMarker);
+			const hasDeclared = Object.keys(result.styleDeclarations.styles).length || result.styleDeclarations.selector.length;
 
 			if (result.ok) {
 				classesList.push(...result.classesList);
 				attachments.push(...result.attachments);
-				if (Object.keys(result.styleDeclarations.styles).length > 0) { stylesList.push(result.styleDeclarations); }
+
+				if (hasDeclared) { stylesList.push(result.styleDeclarations); }
 				if (selfClosingTags[fragment]) { fileData.styleData.tagReplacements.push([selfClosingTags[fragment], stream.length]); }
 
 				const styleDeclarations = Object.entries(result.styleDeclarations.styles);
@@ -57,12 +59,12 @@ export default function scanner(
 
 
 				if (_Script._Actions.read === action) {
-					subScribed = (result.styleDeclarations.selector.length)
-						? '<' + [
-							result.styleDeclarations.element + (result.styleDeclarations.elvalue.length ? `=${result.styleDeclarations.elvalue}` : ''),
-							...Object.entries(result.nativeAttributes).map(([A, V]) => V === "" ? A : `${A}=${V}`)
-						].join(' ') + '>'
-						: fragment;
+					subScribed = !hasDeclared
+						? fragment : result.styleDeclarations.elid
+							? "" : '<' + [
+								result.styleDeclarations.element + (result.styleDeclarations.elvalue.length ? `=${result.styleDeclarations.elvalue}` : ''),
+								...Object.entries(result.nativeAttributes).map(([A, V]) => V === "" ? A : `${A}=${V}`)
+							].join(' ') + '>';
 				} else if (!selfClosingTags[fragment]) {
 					subScribed = result.classSynced ? '<' + [
 						result.styleDeclarations.element + (result.styleDeclarations.elvalue.length ? `=${result.styleDeclarations.elvalue}` : ''),
@@ -89,7 +91,7 @@ export default function scanner(
 							tagTrack.push(watchTrack);
 						}
 					}
-				} else if (CustomTagElements.includes(result.styleDeclarations.element)) {
+				} else if (CustomTagElements.includes(result.styleDeclarations.element) && hasDeclared) {
 					tagTrack.push(result.styleDeclarations);
 				}
 			}

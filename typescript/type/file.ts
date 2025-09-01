@@ -75,6 +75,7 @@ export interface LocalManifest {
 }
 
 export interface Storage {
+    liblevel: number,
     artifact: string,
     filePath: string,
     extension: string,

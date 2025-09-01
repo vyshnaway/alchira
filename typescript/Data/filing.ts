@@ -51,8 +51,8 @@ export default function FILING(
 	const targetPath = FILEMAN.path.join(target, filePath);
 	const sourcePath = FILEMAN.path.join(source, filePath);
 
-	const [extension, artifactName, id, cluster]: string[] = FILEMAN.path.basename(filePath).split(".").reverse();
-	const num = Number(id);
+	const [extension, artifactName, liblevel, cluster]: string[] = FILEMAN.path.basename(filePath).split(".").reverse();
+	const num = Number(liblevel);
 	const idn = isNaN(num) || num < 0 ? 0 : Math.floor(num);
 	const normalFileName = iExternal ? USE.string.normalize(artifactName) : CACHE.STATIC.Artifact.name;
 
@@ -69,6 +69,7 @@ export default function FILING(
 		);
 
 	const result: _File.Storage = {
+		liblevel: idn,
 		label,
 		artifact: fromXtylesFolder ? artifactName : CACHE.STATIC.Artifact.name,
 		filePath,

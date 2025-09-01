@@ -134,9 +134,9 @@ export default class C_Proxy {
 			errors: [],
 			diagnostics: [],
 		};
-		
-	
-		Cumulates.report.push($.tag.H2(`PROXY : ${this.target} -> ${this.source}`, $.preset.primary));
+
+
+		Cumulates.report.push($.tag.H2(`PROXY : ${this.target} -> ${this.source}`, $.preset.primary, $.style.AS_Bold));
 
 		Object.values(this.fileCache).forEach((file) => {
 			Cumulates.fileManifests[file.manifest.lookup.id] = file.manifest;

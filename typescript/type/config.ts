@@ -20,12 +20,13 @@ interface Base {
 export interface Raw extends Base {
     vendors: string,
     externals: Record<string, string>,
-    proxy: ProxyMap[],
+    proxymap: ProxyMap[],
     tweaks: Tweaks
 }
 
 export interface Artifact extends Base {
     readme: string,
+    shorthands: Record<string,string>,
     vendors?: string,
     externals?: Record<string, string>,
     proxy?: ProxyMap[],

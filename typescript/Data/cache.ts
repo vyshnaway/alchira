@@ -28,7 +28,7 @@ export const ROOT: _Cache.ROOT = {
         preview: 'Test build. Pass test for "publish" command.',
         publish: "Optimized build, uses web-api.",
         // archive: "Split and stash project styles to *.xcss files.",
-        install: "Install external artifacts from sources.",
+        // install: "Install external artifacts from sources.",
     },
     scripts: {
         "init": "xcss init",
@@ -37,12 +37,11 @@ export const ROOT: _Cache.ROOT = {
         "preview": "xcss preview",
         "publish": "xcss publish",
         // "archive": "xcss archive",
-        "install": "xcss install",
+        // "install": "xcss install",
     },
     defaultTweaks: {
-        IntelGroup: "browser",
         Shorthands: true,
-        CacheUsage: true,
+        CacheUsage: false,
     },
     customElements: {
         style: 1,
@@ -73,8 +72,9 @@ export const STATIC: _Cache.STATIC = {
     HashRule: {},
     Artifact: {
         name: '',
-        version: '',
         readme: '',
+        version: '',
+        shorthands: {},
     },
     Prefix: {
         atrules: {},
@@ -228,12 +228,6 @@ export const PATH: Record<string, Record<string, _File.Path>> = {
             content: "",
             essential: true,
         },
-        reference: {
-            frags: ["blueprint", "reference.md"],
-            path: "",
-            content: "",
-            essential: true,
-        },
         artifacts: {
             frags: ["blueprint", "artifacts"],
             path: "",
@@ -330,7 +324,7 @@ export const PATH: Record<string, Record<string, _File.Path>> = {
             frags: ["xtyles", "reference.md"],
             path: "",
             content: "",
-            essential: true,
+            essential: false,
         },
     },
     autogen: {

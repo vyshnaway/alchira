@@ -108,7 +108,7 @@ function CSSBulkScanner(fileDatas: _File.Storage[], forPortable = false) {
 				InStash.metadata.declarations.push(declaration);
 			} else {
 				const selectorData: _Style.Classdata = {
-					packname: forPortable ? source.artifact : "",
+					artifact: forPortable ? source.artifact : "",
 					selector: SELECTOR,
 					style_object: object,
 					classname,
@@ -125,8 +125,6 @@ function CSSBulkScanner(fileDatas: _File.Storage[], forPortable = false) {
 					debugclass: debugclassFront + "_" + Use.string.normalize(classname, [], [], ["$", "/"]),
 					declarations: [declaration],
 					attached_style: { [SELECTOR]: object },
-					attached_staple: '',
-					attached_summon: '',
 				};
 				const identity = INDEX.DECLARE(selectorData);
 
@@ -159,7 +157,7 @@ function TagStyleScanner(
 	const attachments: string[] = [];
 	const constants = {};
 
-	const classname = raw.selector === "" ? "" : file.classFront + raw.selector.replace(/^-\$/, "$");
+	const classname = raw.selector === "" ? "" : file.classFront + raw.selector.replace(/^-\$/, "$").replace("$$$", "$");
 	const debugclass = `${scope}${file.debugclassFront}\\:${raw.rowIndex}\\:${raw.colIndex}_${Use.string.normalize(classname, [], [], forExternal ? ["$", "/"] : ["$"])}`;
 
 	for (const subSelector in raw.styles) {
@@ -211,7 +209,7 @@ function TagStyleScanner(
 
 		group = _Style._Type.NULL;
 		index = INDEX.DECLARE({
-			packname: forExternal ? file.artifact : CACHE.STATIC.Artifact.name,
+			artifact: forExternal ? file.artifact : CACHE.STATIC.Artifact.name,
 			selector: raw.selector,
 			style_object: object,
 			classname,
@@ -221,15 +219,14 @@ function TagStyleScanner(
 				constants,
 				skeleton: Use.object.skeleton(object),
 				declarations: [declaration],
-				summon: raw.elid === CACHE.ROOT.customElements.summon ? raw.attachstring : "",
 				staple: raw.elid === CACHE.ROOT.customElements.staple ? raw.attachstring : "",
+				summon: raw.elid === CACHE.ROOT.customElements.summon ? raw.attachstring : "",
 			},
-			attachments: forExternal ? attachments.map(attach => file.classFront + "$/" + attach) : attachments,
+			attachments: forExternal ?
+				attachments.map(a => `${file.classFront}${a.includes("$$$") ? "" : "$/"}${a}`) : attachments,
 			debugclass,
 			declarations: [declaration],
 			attached_style: style_snippet.styles,
-			attached_staple: raw.elid === CACHE.ROOT.customElements.staple ? raw.attachstring : "",
-			attached_summon: raw.elid === CACHE.ROOT.customElements.summon ? raw.attachstring : "",
 		});
 		IndexMap[classname] = index;
 	}
