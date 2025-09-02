@@ -30,7 +30,7 @@ export default async function order(
 	const RESPONSE = {
 		status: command === "preview",
 		message: "Preview Build",
-		result: previewOrganize(sequences),
+		result: previewOrganize(sequences, false),
 	};
 
 	if (command === "publish") {
@@ -43,7 +43,7 @@ export default async function order(
 
 		const projectId = argument.slice(0, 24);
 		const publicKey = argument.slice(25);
-		const contentCrypt = await krypt.sym.gencrypt(JSON.stringify(RESPONSE.result.shortlistedArrays));
+		const contentCrypt = await krypt.sym.gencrypt(JSON.stringify(previewOrganize(sequences, true).shortlistedArrays));
 
 		let asymEncrypted;
 

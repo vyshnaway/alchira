@@ -258,7 +258,7 @@ export const PATH: Record<string, Record<string, _File.Path>> = {
             frags: ["xtyles", "external"],
             path: "",
             content: "",
-            essential: true,
+            essential: false,
         },
         artifact: {
             frags: ["xtyles", "artifact"],
@@ -270,7 +270,7 @@ export const PATH: Record<string, Record<string, _File.Path>> = {
             frags: ["xtyles", "libraries"],
             path: "",
             content: "",
-            essential: true,
+            essential: false,
         },
     },
     css: {
@@ -337,6 +337,12 @@ export const PATH: Record<string, Record<string, _File.Path>> = {
         styles: {
             path: "",
             frags: ["xtyles", "autogen", "watch", "styles.css"],
+            content: "",
+            essential: false,
+        },
+        staple: {
+            path: "",
+            frags: ["xtyles", "autogen", "watch", "staple.htm"],
             content: "",
             essential: false,
         },

@@ -40,6 +40,7 @@ export default function scanner(
 			element: "",
 			elvalue: "",
 			selector: "",
+			styleAttribute: "",
 			scope: _Style._Type.EXTERNAL,
 			tagCount: ++fileCursor.active.cycle,
 			rowIndex: fileCursor.active.rowMarker,
@@ -104,13 +105,7 @@ export default function scanner(
 						styleDeclarations.scope = _Style._Type.LOCAL;
 					}
 					if (tr_Value) { styleDeclarations.styles[""] = tr_Value; }
-				} else if (
-					/[@#]/.test(tr_Attr)
-					&& tr_Attr.includes("{")
-					&& tr_Attr.includes("}")
-					&& tr_Attr.endsWith("&")
-					&& !tr_Attr.startsWith("@")
-				) {
+				} else if (tr_Attr.endsWith("&") && tr_Value.length) {
 					styleDeclarations.styles[tr_Attr] = tr_Value;
 				} else if (classProps.includes(tr_Attr)) {
 					classSynced = true;

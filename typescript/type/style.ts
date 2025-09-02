@@ -50,6 +50,7 @@ export interface Metadata {
     summon: string,
     staple: string,
     watch: string,
+    style: string
 }
 
 export interface Classdata {

@@ -2,7 +2,7 @@ import USE from "../utils/main.js";
 
 import * as tStyle from "../type/style.js";
 
-export default function previewOrganize(arrarr: number[][], merge = false): tStyle.SortedOutput {
+export default function previewOrganize(arrarr: number[][], merge:boolean): tStyle.SortedOutput {
 
     let maxLen = 0;
 

@@ -1,5 +1,6 @@
 import * as $$ from "./shell.js";
 import * as CACHE from "./data/cache.js";
+import Use from "./utils/main.js";
 
 const hashPattern = /#\{[a-z0-9-]+\}/i;
 
@@ -77,70 +78,73 @@ function UPLOAD() {
 
 function RENDER(string: string, sourcePath: string) {
 	const extended = IMPORT(string, true, sourcePath);
-	string = extended.result;
-	const length = string.length;
-	let rule = '', selector = '', Marker = 0, deviance = 0;
+	const snippets = Use.string.zeroBreaks(extended.result, ["&"]);
+	const wrappers: string[] = [];
 
-	for (let i = 0; i < length; i++) {
-		const ch = string[i];
+	snippets.forEach(snippet => {
+		const length = snippet.length;
+		let wrapper = '', deviance = 0, splAtrule = false;
 
-		if (")}".includes(ch)) { deviance--; }
-
-		if (deviance) {
-			rule += ch;
-		} else if (ch === "$") {
-			Marker = i + 1;
-			break;
-		} else {
-			switch (ch) {
-				case "{":
-					rule += "";
-					break;
-				case "}":
-					rule += " ";
-					break;
-				case "@":
-					rule = "@" + rule;
-					rule += " ";
-					break;
-				default:
-					rule += ch;
-			}
-		}
-		if ("({".includes(ch)) { deviance++; }
-	}
-
-	if (Marker > 0) {
-		for (let i = Marker; i < length; i++) {
+		for (let i = 0; i < length; i++) {
 			const ch = string[i];
-			if (ch === "{") {
-				if (i + 1 < string.length && string[i + 1] !== ":") { selector += " "; }
-			} else if (ch !== "}") {
-				selector += ch;
+			if (")}".includes(ch)) { deviance--; }
+
+			if (deviance) {
+				wrapper += ch;
+			} else {
+				switch (ch) {
+					case "{":
+					case "}":
+						wrapper += "";
+						break;
+					case "@":
+						wrapper = "@" + wrapper;
+						if (wrapper.length === 0) { splAtrule = true; }
+						wrapper += " ";
+						break;
+					default:
+						wrapper += ch;
+				}
 			}
+			if ("({".includes(ch)) { deviance++; }
 		}
-	}
 
-	const subSelector = selector.trim();
-	const finalRule = rule.trim()
-		.replace(/width\s*>=/g, "min-width:")
-		.replace(/width\s*<=/g, "max-width:")
-		.replace(/height\s*>=/g, "min-height:")
-		.replace(/height\s*<=/g, "max-height:")
-		.replace(/\s+/g, " ");
+		wrappers.push((splAtrule
+			?  wrapper
+				.replace(/width\s*>=/g, "min-width:")
+				.replace(/width\s*<=/g, "max-width:")
+				.replace(/height\s*>=/g, "min-height:")
+				.replace(/height\s*<=/g, "max-height:")
+			: wrapper).replace(/\s+/g, " "));
+	});
 
-
+	console.log(wrappers);
 	return {
-		rule: (finalRule === "_" || finalRule === "-") ? "" : finalRule,
-		subSelector: (subSelector === "_" || subSelector === "-") ? "" : subSelector,
+		wrappers,
 		status: extended.status,
 		error: extended.error,
 		diagnostic: extended.diagnostic
 	};
 }
 
+function WRAPPER(parentObject: Record<string, object>, keys: string[], childObject: object, inital = true) {
+	const activeKey = keys.pop();
+	if (activeKey) {
+		const modkey = (inital || activeKey.startsWith("@")) ? activeKey : ('&' + activeKey);
+		if (keys.length) {
+			if (!parentObject[modkey]) {
+				parentObject[modkey] = {};
+				WRAPPER(parentObject[modkey] as Record<string, object>, keys, childObject, false);
+			}
+		} else {
+			parentObject[modkey] = childObject;
+		}
+	}
+}
+
 export default {
 	IMPORT,
 	UPLOAD,
 	RENDER,
+	WRAPPER
 };

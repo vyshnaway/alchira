@@ -118,9 +118,11 @@ function bulkMerge(
  * nested objects preserved as empty shells.
  */
 function skeleton(object: Record<string, any> = {}): Record<string, any> {
-	return Object.entries(object).reduce((result, [k, o]) => {
-		if (typeof o === "object" && o !== null) {
-			result[k] = skeleton(o);
+	return Object.entries(object).reduce((result, [k, v]) => {
+		if (typeof v === "object") {
+			result[k] = skeleton(v);
+		} else if (k.startsWith("--") && typeof v === "string") {
+			result[k] = v;
 		}
 		return result;
 	}, {} as Record<string, any>);

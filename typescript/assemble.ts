@@ -36,13 +36,6 @@ export function SaveToTarget(
 	extension = '',
 ) {
 	let reCache = true;
-	console.log({
-		action,
-		targetFolder,
-		filePath,
-		fileContent,
-		extension,
-	})
 	switch (action) {
 		case "add": case "change":
 			if (CACHE.FILES.TARGETS[targetFolder].stylesheet === filePath) {
@@ -245,7 +238,7 @@ function GenFinalSheets(ATTACHMENTS: Set<number>) {
 
 	const ATTACH_STAPLES: string[] = [];
 	const ATTACH_STYLES: [string, object | string][] = [];
-	ATTACHMENTS.forEach(attachment => {
+	(CACHE.STATIC.WATCH ? Object.keys(CACHE.CLASS.Index_to_Data).map(i => Number(i)) : Array.from(ATTACHMENTS)).forEach(attachment => {
 		const ClassData = INDEX.FETCH(attachment);
 		const AttachedStyle = Object.entries(ClassData.attached_style);
 		if (AttachedStyle.length) { ATTACH_STYLES.push(...AttachedStyle); }
@@ -261,11 +254,13 @@ function GenFinalSheets(ATTACHMENTS: Set<number>) {
 	RENDERFRAGS.Class = COMPILE.Switched(CACHE.CLASS.Sync_PublishIndexMap);
 
 	// console.log(CACHE.CLASS.Index_to_Data);
-
+	const WATCHATTACH = RENDERFRAGS.Attach;
 	const WATCHCLASS = CACHE.STATIC.WATCH
 		? COMPILE.Switched(
 			Object.entries(CACHE.CLASS.Index_to_Data).reduce((A, [I, D]) => {
-				A['.__' + D.metadata.watch] = Number(I);
+				if (D.metadata.summon.length) {
+					A['.__' + D.metadata.watch] = Number(I);
+				}
 				return A;
 			}, {} as Record<string, number>)
 		) : '';
@@ -273,7 +268,7 @@ function GenFinalSheets(ATTACHMENTS: Set<number>) {
 		CACHE.STATIC.DEBUG ? `\n\n/* CHAPTER: ${chapter} */\n${content}\n` : content).join("");
 	const STAPLEBLOCK = `<div>${Use.code.uncomment.Script(ATTACH_STAPLES.join(""), false, false, true)}<div`;
 
-	return { RENDERFRAGS, STAPLEBLOCK, STYLESHEET, WATCHINDEX, WATCHCLASS };
+	return { RENDERFRAGS, STAPLEBLOCK, STYLESHEET, WATCHINDEX, WATCHCLASS, WATCHATTACH };
 }
 
 // On target stylesheet edit.
@@ -290,7 +285,8 @@ export async function Generate() {
 			STYLESHEET,
 			STAPLEBLOCK,
 			WATCHINDEX,
-			WATCHCLASS
+			WATCHCLASS,
+			WATCHATTACH
 		} = GenFinalSheets(new Set(ATTACHMENTS));
 
 		const STYLEBLOCK = `<style>${STYLESHEET}</style>`;
@@ -303,6 +299,7 @@ export async function Generate() {
 			OUTFILES[CACHE.PATH.autogen.manifest.path] = JSON.stringify(CACHE.DELTA.Manifest);
 			OUTFILES[CACHE.PATH.autogen.index.path] = WATCHINDEX;
 			OUTFILES[CACHE.PATH.autogen.styles.path] = WATCHCLASS;
+			OUTFILES[CACHE.PATH.autogen.staple.path] = WATCHATTACH;
 		} else {
 			const memChart = Object.entries(RENDERFRAGS).reduce((A, [K, V]) => {
 				A[K] = `${Use.string.stringMem(V)} Kb`.padStart(9, " ");

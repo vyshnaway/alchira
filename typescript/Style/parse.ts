@@ -119,7 +119,8 @@ function CSSBulkScanner(fileDatas: _File.Storage[], forPortable = false) {
 						skeleton: Use.object.skeleton(object),
 						declarations: [declaration],
 						summon: '',
-						staple: ''
+						staple: '',
+						style: ''
 					},
 					attachments: forPortable ? attachments.map(attach => classFront + attach) : attachments,
 					debugclass: debugclassFront + "_" + Use.string.normalize(classname, [], [], ["$", "/"]),
@@ -161,28 +162,25 @@ function TagStyleScanner(
 	const debugclass = `${scope}${file.debugclassFront}\\:${raw.rowIndex}\\:${raw.colIndex}_${Use.string.normalize(classname, [], [], forExternal ? ["$", "/"] : ["$"])}`;
 
 	for (const subSelector in raw.styles) {
-		const query = HASHRULE.RENDER(subSelector, declaration);
-		if (!query.status) {
-			errors.push(query.error);
-			diagnostics.push(query.diagnostic);
-		}
-
-		const styleObj = SCANNER(
+		const styleScanned = SCANNER(
 			Use.code.uncomment.Script(raw.styles[subSelector]),
 			`${raw.scope} : ${file.filePath} ||`, `${raw.selector} => ${subSelector}`,
 			false, subSelector !== ""
 		);
-		attachments.push(...styleObj.attachments);
-		Object.assign(constants, styleObj.constants);
+		attachments.push(...styleScanned.attachments);
+		Object.assign(constants, styleScanned.constants);
 
-		if (Object.keys(styleObj).length) {
-			if (!object[query.rule]) {
-				object[query.rule] = {};
-			}
-			if (query.subSelector === "") {
-				Object.assign(object[query.rule], styleObj.styles);
+		if (Object.keys(styleScanned).length) {
+			if (subSelector === "") {
+				object[""] = styleScanned.styles;
 			} else {
-				object[query.rule]["&" + query.subSelector] = styleObj.styles;
+				const query = HASHRULE.RENDER(subSelector, declaration);
+				if (query.status) {
+					HASHRULE.WRAPPER(object, query.wrappers.reverse(), styleScanned.styles);
+				} else {
+					errors.push(query.error);
+					diagnostics.push(query.diagnostic);
+				}
 			}
 		}
 	}
@@ -221,6 +219,7 @@ function TagStyleScanner(
 				declarations: [declaration],
 				staple: raw.elid === CACHE.ROOT.customElements.staple ? raw.attachstring : "",
 				summon: raw.elid === CACHE.ROOT.customElements.summon ? raw.attachstring : "",
+				style: raw.styleAttribute
 			},
 			attachments: forExternal ?
 				attachments.map(a => file.classFront + (a.includes("$$$") ? a.replace("$$$", "$") : `$/${a}`)) : attachments,
