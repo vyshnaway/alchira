@@ -55,6 +55,8 @@ function stylePartialsArray(object: t_styleSorceTemplate, vendors = LoadVendors(
 	return result;
 }
 
+// Pending to handle states &:* states.
+
 function unNester(selector = "", object: object = {}, cumulates: object = {}) {
 	const siblings: t_styleSorceTemplate = {},
 		children: t_styleSorceTemplate = {},
@@ -65,7 +67,7 @@ function unNester(selector = "", object: object = {}, cumulates: object = {}) {
 		if (typeof subContent === "object") {
 			if (subSelector[0] === "&") {
 				const xelector = selector + subSelector.slice(1);
-				if (subSelector[1] === " " || subSelector[1] === ":") {
+				if (subSelector[1] === " " || subSelector[1] === ":" || subSelector[1] !== ":") {
 					unNester(xelector, subContent, children);
 				} else {
 					unNester(xelector, subContent, siblings);

@@ -87,11 +87,14 @@ export default function scanner(
 					styleDeclarations.elid = CACHE.ROOT.customElements[tr_Attr] || 0;
 					styleDeclarations.element = tr_Attr;
 					styleDeclarations.elvalue = tr_Value;
-				} else if (tr_Attr === "$") {
+				} else if (tr_Attr === "!") {
 					styleDeclarations.comments.push(...tr_Value.slice(1, -1).split("\n").map(l => l.trim()));
 				} else if (/^[\w\-]+\$+[\w\-]+$/i.test(tr_Attr)) {
 					styleDeclarations.selector = tr_Attr;
-					if (fileData.manifest.lookup.type === _File._Type.EXTERNAL) {
+					if (tr_Attr.includes("$$$$")) {
+						styleDeclarations.selector = '';
+						styleDeclarations.scope = _Style._Type.NULL;
+					} else if (fileData.manifest.lookup.type === _File._Type.EXTERNAL) {
 						styleDeclarations.scope = _Style._Type.EXTERNAL;
 					} else if (tr_Attr.includes("$$$")) {
 						styleDeclarations.scope = _Style._Type.PUBLIC;
@@ -101,7 +104,13 @@ export default function scanner(
 						styleDeclarations.scope = _Style._Type.LOCAL;
 					}
 					if (tr_Value) { styleDeclarations.styles[""] = tr_Value; }
-				} else if (/[\$@#]/.test(tr_Attr) && !"$@".includes(tr_Attr[0]) && !"$@".includes(tr_Attr[tr_Attr.length - 1])) {
+				} else if (
+					/[@#]/.test(tr_Attr)
+					&& tr_Attr.includes("{")
+					&& tr_Attr.includes("}")
+					&& tr_Attr.endsWith("&")
+					&& !tr_Attr.startsWith("@")
+				) {
 					styleDeclarations.styles[tr_Attr] = tr_Value;
 				} else if (classProps.includes(tr_Attr)) {
 					classSynced = true;

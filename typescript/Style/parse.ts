@@ -11,7 +11,7 @@ import * as INDEX from "../data/index.js";
 
 import Use from "../utils/main.js";
 import CSSBlockScanner from "./block.js";
-import HASHRULE from "../hash-rules.js";
+import HASHRULE from "../hashrules.js";
 
 function MERGER(classList: string[] = [], refpacks: boolean, flatmerge: boolean) {
 	const
@@ -223,7 +223,7 @@ function TagStyleScanner(
 				summon: raw.elid === CACHE.ROOT.customElements.summon ? raw.attachstring : "",
 			},
 			attachments: forExternal ?
-				attachments.map(a => `${file.classFront}${a.includes("$$$") ? "" : "$/"}${a}`) : attachments,
+				attachments.map(a => file.classFront + (a.includes("$$$") ? a.replace("$$$", "$") : `$/${a}`)) : attachments,
 			debugclass,
 			declarations: [declaration],
 			attached_style: style_snippet.styles,

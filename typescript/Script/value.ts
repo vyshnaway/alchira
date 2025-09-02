@@ -98,8 +98,6 @@ export default function classExtract(
 					attachments.push(entry.slice(1));
 				} else if (entry.startsWith(CACHE.ROOT.customOperations["assign"])) {
 					classList.push(entry.slice(1));
-				} else {
-					classList.push(entry);
 				}
 				entry = "";
 			} else { entry += ch; }

@@ -12,7 +12,7 @@ import * as CACHE from "./data/cache.js";
 import * as INDEX from "./data/index.js";
 
 import Use from "./utils/main.js";
-import HASHRULE from "./hash-rules.js";
+import HASHRULE from "./hashrules.js";
 import STYLE from "./style/parse.js";
 import COMPILE from "./style/render.js";
 import ORDER from "./sort/order-api.js";
@@ -36,10 +36,16 @@ export function SaveToTarget(
 	extension = '',
 ) {
 	let reCache = true;
-
+	console.log({
+		action,
+		targetFolder,
+		filePath,
+		fileContent,
+		extension,
+	})
 	switch (action) {
 		case "add": case "change":
-			if (CACHE.FILES.TARGETS[targetFolder].targetStylesheet === filePath) {
+			if (CACHE.FILES.TARGETS[targetFolder].stylesheet === filePath) {
 				CACHE.STATIC.Targets_Saved[targetFolder].stylesheetContent = fileContent;
 				CACHE.FILES.TARGETS[targetFolder].stylesheetContent = fileContent;
 				reCache = false;
@@ -265,9 +271,7 @@ function GenFinalSheets(ATTACHMENTS: Set<number>) {
 		) : '';
 	const STYLESHEET = Object.entries(RENDERFRAGS).map(([chapter, content]) =>
 		CACHE.STATIC.DEBUG ? `\n\n/* CHAPTER: ${chapter} */\n${content}\n` : content).join("");
-	const STAPLEBLOCK = CACHE.STATIC.DEBUG ? ATTACH_STAPLES.join("\n") :
-		Use.code.uncomment.Script(ATTACH_STAPLES.join(""), false, false, true);
-
+	const STAPLEBLOCK = `<div>${Use.code.uncomment.Script(ATTACH_STAPLES.join(""), false, false, true)}<div`;
 
 	return { RENDERFRAGS, STAPLEBLOCK, STYLESHEET, WATCHINDEX, WATCHCLASS };
 }
@@ -293,7 +297,7 @@ export async function Generate() {
 		const SUMMONBLOCK = `${STYLEBLOCK}\n${STAPLEBLOCK}`;
 		Object.values(CACHE.FILES.TARGETS).forEach((cache) => {
 			cache.SummonFiles(OUTFILES, STYLESHEET, SUMMONBLOCK);
-		}, [CACHE.DELTA.DeltaPath]);
+		});
 
 		if (CACHE.STATIC.WATCH) {
 			OUTFILES[CACHE.PATH.autogen.manifest.path] = JSON.stringify(CACHE.DELTA.Manifest);

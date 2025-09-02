@@ -161,55 +161,49 @@ async function execute(chapter: string) {
                     const event = EVENT.pull();
                     if (!event) { break; }
                     const pathFromWork = `${event.folder}/${event.filePath}`;
-                    if (
-                        pathFromWork.startsWith(CACHE.PATH.folder.autogen.path) ||
-                        pathFromWork.startsWith(CACHE.PATH.folder.artifact.path)
-                    ) {
-                        break;
-                    } else {
-                        if (event.folder === CACHE.PATH.folder.scaffold.path) {
-                            if (event.action === "add" || event.action === "change") {
-                                switch (pathFromWork) {
-                                    case CACHE.PATH.json.configure.path:
-                                        stopWatcher();
-                                        stopWatcher = null;
-                                        step = "VerifyConfigs";
-                                        break;
-                                    case CACHE.PATH.css.atrules.path:
-                                    case CACHE.PATH.css.constants.path:
-                                    case CACHE.PATH.css.elements.path:
-                                    case CACHE.PATH.css.extends.path:
-                                        await FETCH.SaveRootCss();
-                                        step = "GenerateFinals";
-                                        break;
-                                    case CACHE.PATH.json.hashrules.path:
-                                        step = "ReadHashrules";
-                                        break;
-                                    default:
-                                        if (
-                                            pathFromWork.startsWith(CACHE.PATH.folder.libraries.path)
-                                            && event.extension === "css"
-                                        ) {
-                                            CACHE.STATIC.Library_Saved[pathFromWork] = event.fileContent;
-                                        } else if (
-                                            pathFromWork.startsWith(CACHE.PATH.folder.external.path)
-                                            && ["xcss", "css", "md"].includes(event.extension)
-                                        ) {
-                                            CACHE.STATIC.External_Saved[pathFromWork] = event.fileContent;
-                                        }
-                                        step = "ProcessXtylesFolder";
-                                }
-                            } else {
-                                step = "VerifySetupStruct";
+                    
+                    if (event.folder === CACHE.PATH.folder.scaffold.path) {
+                        if (event.action === "add" || event.action === "change") {
+                            switch (pathFromWork) {
+                                case CACHE.PATH.json.configure.path:
+                                    stopWatcher();
+                                    stopWatcher = null;
+                                    step = "VerifyConfigs";
+                                    break;
+                                case CACHE.PATH.css.atrules.path:
+                                case CACHE.PATH.css.constants.path:
+                                case CACHE.PATH.css.elements.path:
+                                case CACHE.PATH.css.extends.path:
+                                    await FETCH.SaveRootCss();
+                                    step = "GenerateFinals";
+                                    break;
+                                case CACHE.PATH.json.hashrules.path:
+                                    step = "ReadHashrules";
+                                    break;
+                                default:
+                                    if (
+                                        pathFromWork.startsWith(CACHE.PATH.folder.libraries.path)
+                                        && event.extension === "css"
+                                    ) {
+                                        CACHE.STATIC.Library_Saved[pathFromWork] = event.fileContent;
+                                    } else if (
+                                        pathFromWork.startsWith(CACHE.PATH.folder.external.path)
+                                        && ["xcss", "css", "md"].includes(event.extension)
+                                    ) {
+                                        CACHE.STATIC.External_Saved[pathFromWork] = event.fileContent;
+                                    }
+                                    step = "ProcessXtylesFolder";
                             }
-                        } else if (event.action === "add" || event.action === "change" || event.action === "unlink") {
-                            SMITH.SaveToTarget(event.action, event.folder, event.filePath, event.fileContent, event.extension);
-                            step = "GenerateFinals";
-                        } else { step = "VerifyConfigs"; }
+                        } else {
+                            step = "VerifySetupStruct";
+                        }
+                    } else if (event.action === "add" || event.action === "change" || event.action === "unlink") {
+                        SMITH.SaveToTarget(event.action, event.folder, event.filePath, event.fileContent, event.extension);
+                        step = "GenerateFinals";
+                    } else { step = "VerifyConfigs"; }
 
-                        heading = `[${event.timeStamp}] | ${event.filePath} | [${event.action}]`;
-                        reportNext = true;
-                    }
+                    heading = `[${event.timeStamp}] | ${event.filePath} | [${event.action}]`;
+                    reportNext = true;
                 }
 
                 await new Promise((resolve) => setTimeout(resolve, 20));

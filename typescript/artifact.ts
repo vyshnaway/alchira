@@ -149,45 +149,45 @@
 //     return { SaveFiles, ConsoleReport: $.MOLD.std.Block(Report) }
 // }
 
-export async function FetchArtifacts(portable = "") {
-    const SaveFiles = {}, Status = [];
+// export async function FetchArtifacts(portable = "") {
+//     const SaveFiles = {}, Status = [];
 
-    let [portableName, portableVersion] = typeof portable === "string" ? portable.split("@") : ["", ""];
-    portableVersion = portableVersion || "latest";
-    const portableLink = `${APP.PortablesCdn}/${portableName}/${portableVersion}`;
-    const references = portableName.length ? { [portableName]: portableLink } : RAW.DEPENDENCIES;
+//     let [portableName, portableVersion] = typeof portable === "string" ? portable.split("@") : ["", ""];
+//     portableVersion = portableVersion || "latest";
+//     const portableLink = `${APP.PortablesCdn}/${portableName}/${portableVersion}`;
+//     const references = portableName.length ? { [portableName]: portableLink } : RAW.DEPENDENCIES;
 
-    await Promise.all(
-        Object.entries(references).map(async ([Name, Link]) => {
-            if (RAW.PACKAGE === Name) {
-                Status[Name] = $.MOLD.failed.Text("Can't install a portable with Native-Portable-Name.")
-            } else {
-                const response = fileman.read.json(Link, true);
-                if ((await response).status) {
-                    const data = (await response).data;
-                    if (typeof data.readme === "string") {
-                        SaveFiles[`${NAV.folder.portables}/${Name}/${Name}.md`] = data.readme || "";
-                        delete data.readme;
-                    }
-                    if (typeof data.xtyling === "string") {
-                        SaveFiles[`${NAV.folder.portables}/${Name}/${Name}.xcss`] = data.xtyling || "";
-                        delete data.xtyling;
-                    }
-                    if (typeof data.bindings === "object") {
-                        Object.entries(data.bindings).forEach(([prefix, content]) => {
-                            if (typeof content === "string")
-                                SaveFiles[`${NAV.folder.portables}/${Name}/${prefix}.${Name}.css`] = content || "";
-                        })
-                        delete data.bindings;
-                    }
-                    SaveFiles[`${NAV.folder.portables}/${Name}/${Name}.json`] = JSON.stringify(data, " ", 2);
-                    Status[Name] = $.MOLD.success.Text("Fetch successfull.")
-                } else {
-                    Status[Name] = $.MOLD.failed.Text("Fetch failed.")
-                }
-            }
-        })
-    );
+//     await Promise.all(
+//         Object.entries(references).map(async ([Name, Link]) => {
+//             if (RAW.PACKAGE === Name) {
+//                 Status[Name] = $.MOLD.failed.Text("Can't install a portable with Native-Portable-Name.")
+//             } else {
+//                 const response = fileman.read.json(Link, true);
+//                 if ((await response).status) {
+//                     const data = (await response).data;
+//                     if (typeof data.readme === "string") {
+//                         SaveFiles[`${NAV.folder.portables}/${Name}/${Name}.md`] = data.readme || "";
+//                         delete data.readme;
+//                     }
+//                     if (typeof data.xtyling === "string") {
+//                         SaveFiles[`${NAV.folder.portables}/${Name}/${Name}.xcss`] = data.xtyling || "";
+//                         delete data.xtyling;
+//                     }
+//                     if (typeof data.bindings === "object") {
+//                         Object.entries(data.bindings).forEach(([prefix, content]) => {
+//                             if (typeof content === "string")
+//                                 SaveFiles[`${NAV.folder.portables}/${Name}/${prefix}.${Name}.css`] = content || "";
+//                         })
+//                         delete data.bindings;
+//                     }
+//                     SaveFiles[`${NAV.folder.portables}/${Name}/${Name}.json`] = JSON.stringify(data, " ", 2);
+//                     Status[Name] = $.MOLD.success.Text("Fetch successfull.")
+//                 } else {
+//                     Status[Name] = $.MOLD.failed.Text("Fetch failed.")
+//                 }
+//             }
+//         })
+//     );
 
-    return { Status, SaveFiles };
-}
+//     return { Status, SaveFiles };
+// }
