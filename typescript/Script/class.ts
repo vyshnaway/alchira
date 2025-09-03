@@ -82,8 +82,8 @@ export default class C_Proxy {
 		ParseResponse.stylesList.forEach((tagStyle) => {
 			if (tagStyle.selector === "") {
 				const E = $$.GenerateError("Classname missing declaration scope.", [`${FILE.targetPath}:${tagStyle.rowIndex}:${tagStyle.colIndex}`]);
-				FILE.manifest.errors.push(E.error);
-				FILE.manifest.diagnostics.push(E.diagnostic);
+				FILE.manifesting.errors.push(E.error);
+				FILE.manifesting.diagnostics.push(E.diagnostic);
 			} else {
 				const IndexMap =
 					tagStyle.scope === _Style._Type.GLOBAL ? FILE.styleData.globalClasses
@@ -92,9 +92,9 @@ export default class C_Proxy {
 								: {};
 
 				const skeletonMap =
-					tagStyle.scope === _Style._Type.LOCAL ? FILE.manifest.local
-						: tagStyle.scope === _Style._Type.GLOBAL ? FILE.manifest.global
-							: tagStyle.scope === _Style._Type.PUBLIC ? FILE.manifest.global
+					tagStyle.scope === _Style._Type.LOCAL ? FILE.manifesting.local
+						: tagStyle.scope === _Style._Type.GLOBAL ? FILE.manifesting.global
+							: tagStyle.scope === _Style._Type.PUBLIC ? FILE.manifesting.global
 								: {};
 
 				const response = StyleParse.TagStyleScanner(tagStyle, FILE, IndexMap);
@@ -105,13 +105,13 @@ export default class C_Proxy {
 					FILE.styleData.usedIndexes.add(response.index);
 				}
 
-				FILE.manifest.errors.push(...response.errors);
-				FILE.manifest.diagnostics.push(...response.diagnostics);
+				FILE.manifesting.errors.push(...response.errors);
+				FILE.manifesting.diagnostics.push(...response.diagnostics);
 			}
 		});
 
 		Object.assign(CACHE.CLASS.Global___Index, FILE.styleData.globalClasses);
-		Object.assign(FILE.manifest.lookup, { group: "target", id: FILE.targetPath });
+		Object.assign(FILE.manifesting.lookup, { group: "target", id: FILE.targetPath });
 		FILE.midway = ParseResponse.stream;
 	}
 
@@ -125,7 +125,7 @@ export default class C_Proxy {
 
 		Cumulates.fileManifests[this.targetStylesheet] = {
 			lookup: {
-				type: _File._Type.STYLESHEET,
+				type: "STYLESHEET",
 				id: this.targetStylesheet,
 			},
 			public: {},
@@ -139,7 +139,7 @@ export default class C_Proxy {
 		Cumulates.report.push($.tag.H2(`PROXY : ${this.target} -> ${this.source}`, $.preset.primary, $.style.AS_Bold));
 
 		Object.values(this.fileCache).forEach((file) => {
-			Cumulates.fileManifests[file.manifest.lookup.id] = file.manifest;
+			Cumulates.fileManifests[file.manifesting.lookup.id] = file.manifesting;
 
 			Object.assign(Cumulates.globalClasses, file.styleData.globalClasses);
 			Object.assign(Cumulates.publicClasses, file.styleData.publicClasses);
@@ -208,7 +208,8 @@ export default class C_Proxy {
 	SummonFiles(
 		SaveFiles: Record<string, string> = {},
 		stylesheet: string,
-		SummonBlock: string,
+		summonBlock: string,
+		stapleBlock: string
 	) {
 		SaveFiles[this.sourceStylesheet] = stylesheet;
 
@@ -218,10 +219,10 @@ export default class C_Proxy {
 				SaveFiles[data.sourcePath] = data.styleData.tagReplacements.reduce((A, [elid, pos]) => {
 					switch (elid) {
 						case CACHE.ROOT.customElements.staple:
-							A += data.scratch.slice(fromPos, pos) + SummonBlock;
+							A += data.scratch.slice(fromPos, pos) + stapleBlock;
 							break;
 						case CACHE.ROOT.customElements.summon:
-							A += data.scratch.slice(fromPos, pos) + SummonBlock;
+							A += data.scratch.slice(fromPos, pos) + summonBlock;
 							break;
 						case CACHE.ROOT.customElements.style:
 							A += data.scratch.slice(fromPos, pos);

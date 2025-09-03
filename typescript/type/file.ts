@@ -2,28 +2,7 @@
 import * as _support from "./support.js";
 import * as _style from "./style.js";
 
-export enum _Type {
-    NULL = 0,
-    EXTERNAL = 1,
-    EXATTACH = 2,
-    AXIOM = 3,
-    CLUSTER = 4,
-    TARGET = 5,
-    STYLESHEET = 6,
-    README = 7,
-};
-
-export const _Import = [
-    '',
-    'EXTERNAL',
-    'EXATTACH',
-    'AXIOM',
-    'CLUSTER',
-    'TARGET',
-    'STYLESHEET',
-    'README',
-];
-
+export type _Type = "NULL" | "EXTERNAL" | "EXATTACH" | "AXIOM" | "CLUSTER" | "TARGET" | "STYLESHEET" | "README";
 
 
 export type ClassMetaMap = Record<string, _style.Metadata>;
@@ -86,7 +65,7 @@ export interface Storage {
     midway: string,
     scratch: string,
     label: string,
-    manifest: LocalManifest,
+    manifesting: LocalManifest,
     debugclassFront: string,
     styleData: {
         attachments: string[],

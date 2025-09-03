@@ -2,7 +2,7 @@
   "-DesignApproach": "#{-MobileFirst}",
   // Values for #DesignApproach
   "-MobileFirst": "min-width",
-  "-DesktopFirst": "max-width",  
+  "-DesktopFirst": "max-width",
   // @media standards
   "Ms4": "@media (#{-DesignApproach}:0320px)",
   "Ms3": "@media (#{-DesignApproach}:0384px)",
@@ -24,5 +24,5 @@
   "Cl3": "@container (#{-DesignApproach}:512px)",
   "Cl4": "@container (#{-DesignApproach}:576px)",
   // Global States
-  "Load": "body[x-loading='true']"
+  "Load": "body[data-loading='true']"
 }

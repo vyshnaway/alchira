@@ -26,6 +26,7 @@ export function UpdateXtylesFolder() {
 	Object.values(CACHE.CLASS).forEach(V => { for (const v in V) { delete V[v]; } });
 	Object.values(CACHE.FILES).forEach(V => { for (const v in V) { delete V[v]; } });
 	XTYLES.ReRender();
+
 }
 
 export function SaveToTarget(
@@ -145,7 +146,7 @@ async function Accumulate() {
 function SaveClassRefs(stash: _Style.SortedOutput) {
 	CACHE.CLASS.Sync_ClassDictionary = {};
 	CACHE.CLASS.Sync_PublishIndexMap = {};
-
+	// console.log(stash);
 	Object.entries(stash.referenceMap).forEach(([iArray, iMap]) => {
 		CACHE.CLASS.Sync_ClassDictionary[iArray] = Object.fromEntries(Object.entries(iMap).map(([ref, id]) => {
 			const className = "_" + Use.string.enCounter(id);
@@ -217,7 +218,7 @@ function GenFinalSheets(ATTACHMENTS: Set<number>) {
 
 
 	const indexScanned = STYLE.CSSFileScanner(Use.code.uncomment.Css(CACHE.STATIC.RootCSS), "INDEX ||", false);
-	CACHE.DELTA.Manifest.constants = Object.keys(indexScanned.constants);
+	CACHE.DELTA.Manifest.constants = Object.keys(indexScanned.variables);
 	CACHE.DELTA.Report.constants = $$.ListCatalog("Root Constants", CACHE.DELTA.Manifest.constants);
 	indexScanned.attachments.forEach((attachment) => ATTACHMENTS.add(INDEX.FIND(attachment, false).index));
 	const WATCHINDEX = RENDERFRAGS.Root = COMPILE.Prefixed(indexScanned.styles);
@@ -240,10 +241,10 @@ function GenFinalSheets(ATTACHMENTS: Set<number>) {
 	const ATTACH_STYLES: [string, object | string][] = [];
 	(CACHE.STATIC.WATCH ? Object.keys(CACHE.CLASS.Index_to_Data).map(i => Number(i)) : Array.from(ATTACHMENTS)).forEach(attachment => {
 		const ClassData = INDEX.FETCH(attachment);
-		const AttachedStyle = Object.entries(ClassData.attached_style);
+		const AttachedStyle = Object.entries(ClassData.snippet_style);
 		if (AttachedStyle.length) { ATTACH_STYLES.push(...AttachedStyle); }
-		if (ClassData.metadata.staple.length) { ATTACH_STAPLES.push(ClassData.metadata.staple); }
-		return ClassData.attached_style;
+		if (ClassData.snippet_staple.length) { ATTACH_STAPLES.push(ClassData.snippet_staple); }
+		return ClassData.snippet_style;
 	});
 	RENDERFRAGS.Attach = COMPILE.Prefixed(ATTACH_STYLES);
 
@@ -253,22 +254,18 @@ function GenFinalSheets(ATTACHMENTS: Set<number>) {
 	Object.values(CACHE.FILES.TARGETS).forEach((cache) => cache.SyncClassnames(targetRenderAction));
 	RENDERFRAGS.Class = COMPILE.Switched(CACHE.CLASS.Sync_PublishIndexMap);
 
-	// console.log(CACHE.CLASS.Index_to_Data);
-	const WATCHATTACH = RENDERFRAGS.Attach;
+	const STAPLEBLOCK = Use.string.minify(Use.code.uncomment.Script(ATTACH_STAPLES.join(""), false, false, true));
+	const STYLESHEET = Object.entries(RENDERFRAGS)
+		.map(([chapter, content]) => CACHE.STATIC.DEBUG ? `\n\n/* CHAPTER: ${chapter} */\n${content}\n` : content).join("");
 	const WATCHCLASS = CACHE.STATIC.WATCH
-		? COMPILE.Switched(
+		? Use.string.minify(Use.code.uncomment.Script(COMPILE.Switched(
 			Object.entries(CACHE.CLASS.Index_to_Data).reduce((A, [I, D]) => {
-				if (D.metadata.summon.length) {
-					A['.__' + D.metadata.watch] = Number(I);
-				}
+				if (D.metadata.summon.length) { A['.__' + D.metadata.watchclass] = Number(I); }
 				return A;
 			}, {} as Record<string, number>)
-		) : '';
-	const STYLESHEET = Object.entries(RENDERFRAGS).map(([chapter, content]) =>
-		CACHE.STATIC.DEBUG ? `\n\n/* CHAPTER: ${chapter} */\n${content}\n` : content).join("");
-	const STAPLEBLOCK = `<div>${Use.code.uncomment.Script(ATTACH_STAPLES.join(""), false, false, true)}<div`;
+		) + RENDERFRAGS.Attach)) : '';
 
-	return { RENDERFRAGS, STAPLEBLOCK, STYLESHEET, WATCHINDEX, WATCHCLASS, WATCHATTACH };
+	return { RENDERFRAGS, STYLESHEET, STAPLEBLOCK, WATCHINDEX, WATCHCLASS };
 }
 
 // On target stylesheet edit.
@@ -285,21 +282,20 @@ export async function Generate() {
 			STYLESHEET,
 			STAPLEBLOCK,
 			WATCHINDEX,
-			WATCHCLASS,
-			WATCHATTACH
+			WATCHCLASS
 		} = GenFinalSheets(new Set(ATTACHMENTS));
 
-		const STYLEBLOCK = `<style>${STYLESHEET}</style>`;
-		const SUMMONBLOCK = `${STYLEBLOCK}\n${STAPLEBLOCK}`;
+		const STYLEBLOCK = `\n<style>${STYLESHEET}</style>`;
+		const SUMMONBLOCK = `${STYLEBLOCK}\n<div>${STAPLEBLOCK}</div>`;
 		Object.values(CACHE.FILES.TARGETS).forEach((cache) => {
-			cache.SummonFiles(OUTFILES, STYLESHEET, SUMMONBLOCK);
+			cache.SummonFiles(OUTFILES, STYLESHEET, SUMMONBLOCK, STAPLEBLOCK);
 		});
 
 		if (CACHE.STATIC.WATCH) {
 			OUTFILES[CACHE.PATH.autogen.manifest.path] = JSON.stringify(CACHE.DELTA.Manifest);
 			OUTFILES[CACHE.PATH.autogen.index.path] = WATCHINDEX;
 			OUTFILES[CACHE.PATH.autogen.styles.path] = WATCHCLASS;
-			OUTFILES[CACHE.PATH.autogen.staple.path] = WATCHATTACH;
+			OUTFILES[CACHE.PATH.autogen.staple.path] = STAPLEBLOCK;
 		} else {
 			const memChart = Object.entries(RENDERFRAGS).reduce((A, [K, V]) => {
 				A[K] = `${Use.string.stringMem(V)} Kb`.padStart(9, " ");

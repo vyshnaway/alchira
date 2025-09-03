@@ -74,7 +74,6 @@ export interface DELTA {
         elements: string[],
         constants: string[],
         hashrules: Record<string, string>,
-        lookuptype: string[],
         filelookup: Record<string, _file.Lookup>,
         AXIOM: Record<string, _file.ClassMetaMap>,
         CLUSTER: Record<string, _file.ClassMetaMap>,

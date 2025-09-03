@@ -25,7 +25,7 @@ export const _Import = [
 export interface ParsedResult {
     assign: string[],
     attachment: string[],
-    constants: Record<string, string>,
+    variables: Record<string, string>,
     XatProps: [string, string][],
     atProps: Record<string, string>,
     Xproperties: [string, string][],
@@ -44,12 +44,11 @@ export interface ParsedResult {
 
 export interface Metadata {
     info: string[],
-    constants: Record<string, string>,
     skeleton: object,
     declarations: string[],
+    watchclass: string,
+    variables: Record<string, string>,
     summon: string,
-    staple: string,
-    watch: string,
     style: string
 }
 
@@ -63,7 +62,8 @@ export interface Classdata {
     attachments: string[],
     declarations: string[],
     style_object: Record<string, object>,
-    attached_style: object,
+    snippet_staple: string,
+    snippet_style: object,
 }
 
 export type Dictionary = Record<string, Record<number, string>>;

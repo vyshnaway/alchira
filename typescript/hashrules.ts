@@ -54,20 +54,18 @@ function IMPORT(rule: string, watchUndef = true, source = CACHE.PATH.json.hashru
 }
 
 function UPLOAD() {
-	const hashrules = CACHE.STATIC.HashRule;
 	const errors: string[] = [];
+	CACHE.CLASS.HashRule = CACHE.STATIC.HashRule;
+	const hashrules = { ...CACHE.STATIC.HashRule };
 
-	CACHE.CLASS.HashRule = { ...hashrules };
 	Object.keys(hashrules).map((key) => {
 		const hash = `#{${key}}`;
 		const response = IMPORT(hash);
-		if (typeof hashrules[key] === "string") {
-			if (response.status) {
-				hashrules[key] = response.result;
-			} else {
-				delete hashrules[key];
-				errors.push(response.error);
-			}
+		if (response.status) {
+			hashrules[key] = response.result;
+		} else {
+			delete hashrules[key];
+			errors.push(response.error);
 		}
 	});
 
@@ -86,7 +84,7 @@ function RENDER(string: string, sourcePath: string) {
 		let wrapper = '', deviance = 0, splAtrule = false;
 
 		for (let i = 0; i < length; i++) {
-			const ch = string[i];
+			const ch = snippet[i];
 			if (")}".includes(ch)) { deviance--; }
 
 			if (deviance) {
@@ -108,33 +106,33 @@ function RENDER(string: string, sourcePath: string) {
 			}
 			if ("({".includes(ch)) { deviance++; }
 		}
-
-		wrappers.push((splAtrule
-			?  wrapper
-				.replace(/width\s*>=/g, "min-width:")
-				.replace(/width\s*<=/g, "max-width:")
-				.replace(/height\s*>=/g, "min-height:")
-				.replace(/height\s*<=/g, "max-height:")
-			: wrapper).replace(/\s+/g, " "));
+		if (wrapper.length) {
+			wrappers.push((splAtrule
+				? wrapper
+					.replace(/width\s*>=/g, "min-width:")
+					.replace(/width\s*<=/g, "max-width:")
+					.replace(/height\s*>=/g, "min-height:")
+					.replace(/height\s*<=/g, "max-height:")
+				: wrapper).replace(/\s+/g, " "));
+		}
 	});
 
-	console.log(wrappers);
 	return {
-		wrappers,
+		wrappers: [wrappers[0]],
 		status: extended.status,
 		error: extended.error,
 		diagnostic: extended.diagnostic
 	};
 }
 
-function WRAPPER(parentObject: Record<string, object>, keys: string[], childObject: object, inital = true) {
-	const activeKey = keys.pop();
+function WRAPPER(parentObject: Record<string, object>, keys: string[], childObject: object, parentAtrule = true) {
+	const activeKey = keys.shift();
 	if (activeKey) {
-		const modkey = (inital || activeKey.startsWith("@")) ? activeKey : ('&' + activeKey);
+		const modkey = (parentAtrule || activeKey.startsWith("@")) ? activeKey : ('&' + activeKey);
 		if (keys.length) {
 			if (!parentObject[modkey]) {
 				parentObject[modkey] = {};
-				WRAPPER(parentObject[modkey] as Record<string, object>, keys, childObject, false);
+				WRAPPER(parentObject[modkey] as Record<string, object>, keys, childObject, activeKey.startsWith("@"));
 			}
 		} else {
 			parentObject[modkey] = childObject;

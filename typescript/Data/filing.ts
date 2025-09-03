@@ -19,21 +19,21 @@ function resolveGroup(
 	if (fromExternals) {
 		switch (extension) {
 			case "css":
-				return _File._Type.EXATTACH;
+				return "EXATTACH";
 			case "xcss":
-				return _File._Type.EXTERNAL;
+				return "EXTERNAL";
 			case "md":
-				return _File._Type.README;
+				return "README";
 			default:
-				return _File._Type.NULL;
+				return "NULL";
 		}
 	}
 
 	if (fromLibraries) {
-		return hasCluster ? _File._Type.CLUSTER : _File._Type.AXIOM;
+		return hasCluster ? "CLUSTER" : "AXIOM";
 	}
 
-	return _File._Type.TARGET;
+	return "TARGET";
 }
 
 export default function FILING(
@@ -45,7 +45,7 @@ export default function FILING(
 	label = '',
 ) {
 	const isLibrary = fileGroup === "library";
-	const iExternal = fileGroup === "external";
+	const isExternal = fileGroup === "external";
 	const fromXtylesFolder = fileGroup !== "target";
 
 	const targetPath = FILEMAN.path.join(target, filePath);
@@ -54,14 +54,14 @@ export default function FILING(
 	const [extension, artifactName, liblevel, cluster]: string[] = FILEMAN.path.basename(filePath).split(".").reverse();
 	const num = Number(liblevel);
 	const idn = isNaN(num) || num < 0 ? 0 : Math.floor(num);
-	const normalFileName = iExternal ? USE.string.normalize(artifactName) : CACHE.STATIC.Artifact.name;
+	const normalFileName = isExternal ? USE.string.normalize(artifactName) : CACHE.STATIC.Artifact.name;
 
-	const group: _File._Type = resolveGroup(extension, Boolean(cluster), iExternal, isLibrary);
+	const group: _File._Type = resolveGroup(extension, Boolean(cluster), isExternal, isLibrary);
 	const normalCluster = USE.string.normalize(cluster);
 
 	const classFront =
 		(
-			iExternal ? `/${normalFileName}${group === _File._Type.EXATTACH ? "/$/" : "/"}` : ""
+			isExternal ? `/${normalFileName}${group === "EXATTACH" ? "/$/" : "/"}` : ""
 		) + (
 			((idn > 0) && (extension === "css") && (normalCluster !== "-")) ? normalCluster : ""
 		) + (
@@ -77,10 +77,10 @@ export default function FILING(
 		sourcePath,
 		targetPath,
 		classFront,
-		debugclassFront: `${(fromXtylesFolder) ? group : ""}\\|${USE.string.normalize(filePath, [], [], ["/", "."])}`,
-		manifest: {
+		debugclassFront: `${(fromXtylesFolder) ? group : ""}\\|${USE.string.normalize(targetPath, [], [], ["/", "."])}`,
+		manifesting: {
 			lookup: {
-				id: isLibrary ? String(idn) : iExternal ? filePath : targetPath,
+				id: isLibrary ? String(idn) : isExternal ? filePath : targetPath,
 				type: group,
 			},
 			local: {},

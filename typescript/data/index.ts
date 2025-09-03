@@ -46,7 +46,7 @@ export function FIND(classname: string, includeArtifacts = false, localmap: _Sty
 export function DECLARE(object: _Style.Classdata) {
     object.index = BIN.values().next().value || ++NOW;
     if (BIN.has(object.index)) { BIN.delete(object.index); }
-    object.metadata.watch = utils.string.enCounter(object.index);
+    object.metadata.watchclass = utils.string.enCounter(object.index);
     CACHE.CLASS.Index_to_Data[object.index] = object;
     return object.index;
 }

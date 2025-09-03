@@ -131,7 +131,6 @@ export const DELTA: _Cache.DELTA = {
         constants: [],
         diagnostics: [],
         hashrules: {},
-        lookuptype: _File._Import,
         filelookup: {},
         AXIOM: {},
         CLUSTER: {},
@@ -178,14 +177,21 @@ export const SYNC: Record<string, Record<string, _File.Sync>> = {
             title: "ALERTS",
             url: "alerts.md",
             path: "",
-            frags: ["alerts.md"],
+            frags: ["documents", "alerts.md"],
             content: "",
         },
         changelog: {
             title: "CHANGELOG",
             url: "changelog.md",
             path: "",
-            frags: ["changelog.md"],
+            frags: ["documents", "changelog.md"],
+            content: "",
+        },
+        agentic: {
+            title: "INSTRUCTIONS TO AI AGENTS",
+            url: "agentic.md",
+            path: "",
+            frags: ["documents", "agentic.md"],
             content: "",
         },
     },
@@ -326,6 +332,12 @@ export const PATH: Record<string, Record<string, _File.Path>> = {
             content: "",
             essential: false,
         },
+        agentic: {
+            frags: ["xtyles", "autogen", "agentic.md"],
+            path: "",
+            content: "",
+            essential: false,
+        },
     },
     autogen: {
         index: {
@@ -348,8 +360,8 @@ export const PATH: Record<string, Record<string, _File.Path>> = {
         },
         ignore: {
             path: "",
-            frags: ["xtyles", "autogen", ".gitignore"],
-            content: "*\n!.gitignore",
+            frags: ["xtyles", ".gitignore"],
+            content: "autogen",
             essential: false,
         },
         manifest: {

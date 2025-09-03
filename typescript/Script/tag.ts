@@ -95,7 +95,7 @@ export default function scanner(
 					if (tr_Attr.includes("$$$$")) {
 						styleDeclarations.selector = '';
 						styleDeclarations.scope = _Style._Type.NULL;
-					} else if (fileData.manifest.lookup.type === _File._Type.EXTERNAL) {
+					} else if (fileData.manifesting.lookup.type === "EXTERNAL") {
 						styleDeclarations.scope = _Style._Type.EXTERNAL;
 					} else if (tr_Attr.includes("$$$")) {
 						styleDeclarations.scope = _Style._Type.PUBLIC;

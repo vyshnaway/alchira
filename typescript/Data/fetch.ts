@@ -63,8 +63,6 @@ export async function Initialize() {
 				: [
 					"Create a new project and use its access key. For action visit " +
 					$.FMT(CACHE.ROOT.url.Console, $.style.AS_Bold, ...$.preset.primary),
-					"For personal projects, you can use the key in " +
-					$.FMT(CACHE.PATH.json.configure.path, $.style.AS_Bold, ...$.preset.primary),
 					"If using in CI/CD workflow, it is suggested to use " +
 					$.FMT("xcss publish {key}", $.style.AS_Bold, ...$.preset.primary),
 				]
@@ -87,6 +85,7 @@ export async function VerifySetupStruct() {
 	if (FILEMAN.path.ifFolder(CACHE.PATH.folder.scaffold.path)) {
 		const errors: Record<string, string> = {};
 		await FILEMAN.write.file(CACHE.PATH.md.reference.path, CACHE.SYNC.MARKDOWN.readme.content);
+		await FILEMAN.write.file(CACHE.PATH.md.agentic.path, CACHE.SYNC.MARKDOWN.agentic.content);
 		await FILEMAN.clone.safe(CACHE.PATH.blueprint.scaffold.path, CACHE.PATH.folder.scaffold.path);
 
 		$.TASK("Verifying directory status", 0);
@@ -118,7 +117,7 @@ export async function VerifySetupStruct() {
 
 export async function SyncIgnorefiles() {
 	const manifestIgnores = (await FILEMAN.read.file(CACHE.PATH.autogen.ignore.path)).data.split("\n");
-	const modPts = (CACHE.PATH.autogen.ignore.content || "").split("\n").reduce((modPts: number, ign) => {
+	const modPts = (CACHE.PATH.autogen.ignore.content.split("\n") || []).reduce((modPts: number, ign) => {
 		if (!manifestIgnores.includes(ign)) {
 			manifestIgnores.push(ign);
 			modPts++;
@@ -272,7 +271,7 @@ export async function SaveTargets() {
 export async function SaveHashrules() {
 	$.TASK("Updating Hashrules", 0);
 	const errors: Record<string, string> = {};
-
+	
 	$.STEP("PATH : " + CACHE.PATH.json.hashrules.path);
 	const hashrule = await FILEMAN.read.json(CACHE.PATH.json.hashrules.path);
 	Object.keys(CACHE.STATIC.HashRule).forEach(key => delete CACHE.STATIC.HashRule[key]);

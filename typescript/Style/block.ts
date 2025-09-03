@@ -27,7 +27,7 @@ export default function parseBlock(content: string, blockInArrays = false) {
 	const result: _Style.ParsedResult = {
 		assign: [],
 		attachment: [],
-		constants: {},
+		variables: {},
 		XatProps: [],
 		atProps: {},
 		Xproperties: [],
@@ -77,7 +77,7 @@ export default function parseBlock(content: string, blockInArrays = false) {
 						const value = Use.string.minify(content.slice(valStart, index));
 						if (isProp) {
 							if (key.length > 0) {
-								if (key.startsWith("--")) { result.constants[key] = value; }
+								if (key.startsWith("--")) { result.variables[key] = value; }
 								result.properties[key] = value;
 								if (blockInArrays) { result.Xproperties.push([key, value]); }
 							} else if (value[0] === "@") {

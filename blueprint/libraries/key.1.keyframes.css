@@ -9,7 +9,7 @@
 }
 
 .fade-in {
-  @bind $$-keyframes_fade-in;
+  @--attach $$_keyframes_fade-in;
   animation-name: fade-in;
 }
 
@@ -24,7 +24,7 @@
 }
 
 .fade-out {
-  @bind $$-keyframes_fade-out;
+  @--attach $$_keyframes_fade-out;
   animation-name: fade-out;
 }
 
@@ -39,7 +39,7 @@
 }
 
 .slide-in-left {
-  @bind $$-keyframes_slide-in-left;
+  @--attach $$_keyframes_slide-in-left;
   animation-name: slide-in-left;
 }
 
@@ -54,7 +54,7 @@
 }
 
 .slide-in-right {
-  @bind $$-keyframes_slide-in-right;
+  @--attach $$_keyframes_slide-in-right;
   animation-name: slide-in-right;
 }
 
@@ -69,7 +69,7 @@
 }
 
 .slide-in-top {
-  @bind $$-keyframes_slide-in-top;
+  @--attach $$_keyframes_slide-in-top;
   animation-name: slide-in-top;
 }
 
@@ -84,7 +84,7 @@
 }
 
 .slide-in-bottom {
-  @bind $$-keyframes_slide-in-bottom;
+  @--attach $$_keyframes_slide-in-bottom;
   animation-name: slide-in-bottom;
 }
 
@@ -99,7 +99,7 @@
 }
 
 .slide-out-left {
-  @bind $$-keyframes_slide-out-left;
+  @--attach $$_keyframes_slide-out-left;
   animation-name: slide-out-left;
 }
 
@@ -114,7 +114,7 @@
 }
 
 .slide-out-right {
-  @bind $$-keyframes_slide-out-right;
+  @--attach $$_keyframes_slide-out-right;
   animation-name: slide-out-right;
 }
 
@@ -129,7 +129,7 @@
 }
 
 .slide-out-top {
-  @bind $$-keyframes_slide-out-top;
+  @--attach $$_keyframes_slide-out-top;
   animation-name: slide-out-top;
 }
 
@@ -144,7 +144,7 @@
 }
 
 .slide-out-bottom {
-  @bind $$-keyframes_slide-out-bottom;
+  @--attach $$_keyframes_slide-out-bottom;
   animation-name: slide-out-bottom;
 }
 
@@ -159,7 +159,7 @@
 }
 
 .scale-in {
-  @bind $$-keyframes_scale-in;
+  @--attach $$_keyframes_scale-in;
   animation-name: scale-in;
 }
 
@@ -174,7 +174,7 @@
 }
 
 .scale-out {
-  @bind $$-keyframes_scale-out;
+  @--attach $$_keyframes_scale-out;
   animation-name: scale-out;
 }
 
@@ -189,7 +189,7 @@
 }
 
 .scale-up {
-  @bind $$-keyframes_scale-up;
+  @--attach $$_keyframes_scale-up;
   animation-name: scale-up;
 }
 
@@ -204,7 +204,7 @@
 }
 
 .scale-down {
-  @bind $$-keyframes_scale-down;
+  @--attach $$_keyframes_scale-down;
   animation-name: scale-down;
 }
 
@@ -219,7 +219,7 @@
 }
 
 .rotate-clockwise {
-  @bind $$-keyframes_rotate-clockwise;
+  @--attach $$_keyframes_rotate-clockwise;
   animation-name: rotate-clockwise;
 }
 
@@ -234,7 +234,7 @@
 }
 
 .rotate-counterclockwise {
-  @bind $$-keyframes_rotate-counterclockwise;
+  @--attach $$_keyframes_rotate-counterclockwise;
   animation-name: rotate-counterclockwise;
 }
 
@@ -249,7 +249,7 @@
 }
 
 .expand-width {
-  @bind $$-keyframes_expand-width;
+  @--attach $$_keyframes_expand-width;
   animation-name: expand-width;
 }
 
@@ -264,7 +264,7 @@
 }
 
 .collapse-width {
-  @bind $$-keyframes_collapse-width;
+  @--attach $$_keyframes_collapse-width;
   animation-name: collapse-width;
 }
 
@@ -279,7 +279,7 @@
 }
 
 .expand-height {
-  @bind $$-keyframes_expand-height;
+  @--attach $$_keyframes_expand-height;
   animation-name: expand-height;
 }
 
@@ -294,7 +294,7 @@
 }
 
 .collapse-height {
-  @bind $$-keyframes_collapse-height;
+  @--attach $$_keyframes_collapse-height;
   animation-name: collapse-height;
 }
 
@@ -309,7 +309,7 @@
 }
 
 .blur-in {
-  @bind $$-keyframes_blur-in;
+  @--attach $$_keyframes_blur-in;
   animation-name: blur-in;
 }
 
@@ -324,6 +324,6 @@
 }
 
 .blur-out {
-  @bind $$-keyframes_blur-out;
+  @--attach $$_keyframes_blur-out;
   animation-name: blur-out;
 }

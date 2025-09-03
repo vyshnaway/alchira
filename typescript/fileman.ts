@@ -344,12 +344,13 @@ const fileman = {
 		 */
 		file: async (url: string, localPath: string): Promise<string> => {
 			const latest = await fileman.read.file(url, true);
-			if (latest.status) {
-				await fileman.write.file(localPath, latest.data);
-				return latest.data;
-			}
+			if (latest.status) { await fileman.write.file(localPath, latest.data); }
+			
 			const current = await fileman.read.file(localPath);
-			return current.status ? current.data : "";
+			if (current.status) { return current.data; }
+
+			await fileman.write.file(localPath, latest.data); 
+			return "";
 		},
 
 		/**

@@ -73,9 +73,9 @@ function _StackLibraryFiles() {
 		libraryLookup: Record<string, _File.Lookup> = {};
 
 	Object.entries(CACHE.FILES.LIBRARIES).forEach(([path, data]) => {
-		const reference = data.manifest.lookup;
-		const collection = reference.type === _File._Type.AXIOM ? axiomArray
-			: reference.type === _File._Type.CLUSTER ? clusterArray : none;
+		const reference = data.manifesting.lookup;
+		const collection = reference.type === "AXIOM" ? axiomArray
+			: reference.type === "CLUSTER" ? clusterArray : none;
 
 		libraryLookup[path] = reference;
 		if (!collection[reference.id]) { collection[reference.id] = [data]; }
@@ -97,11 +97,11 @@ function _StackExternalFiles() {
 		externalLookup: Record<string, _File.Lookup> = {};
 
 	Object.entries(CACHE.FILES.EXTERNALS).forEach(([path, data]) => {
-		const reference = data.manifest.lookup;
+		const reference = data.manifesting.lookup;
 		externalLookup[path] = reference;
 
-		const collection = reference.type === _File._Type.EXATTACH ? exattachArray
-			: reference.type === _File._Type.EXTERNAL ? externalArray : none;
+		const collection = reference.type === "EXATTACH" ? exattachArray
+			: reference.type === "EXTERNAL" ? externalArray : none;
 
 		collection.push(data);
 	});
@@ -135,8 +135,8 @@ function ReRender() {
 		SCRIPTFILE(fileData).stylesList.forEach((tagStyle) => {
 			if (tagStyle.selector === "") {
 				const E = $$.GenerateError(`Missing Declaration: ${tagStyle.selector}`, [`${fileData.filePath}:${tagStyle.rowIndex}:${tagStyle.colIndex}`]);
-				fileData.manifest.errors.push(E.error);
-				fileData.manifest.diagnostics.push(E.diagnostic);
+				fileData.manifesting.errors.push(E.error);
+				fileData.manifesting.diagnostics.push(E.diagnostic);
 			} else {
 				const response = PARSE.TagStyleScanner(tagStyle, fileData, CACHE.CLASS.External_Index);
 				const styleData = INDEX.FETCH(response.index);
@@ -144,8 +144,8 @@ function ReRender() {
 					fileData.styleData.usedIndexes.add(response.index);
 					indexMetaCollection[response.classname] = styleData.metadata;
 				}
-				fileData.manifest.errors.push(...response.errors);
-				fileData.manifest.diagnostics.push(...response.diagnostics);
+				fileData.manifesting.errors.push(...response.errors);
+				fileData.manifesting.diagnostics.push(...response.diagnostics);
 			}
 		});
 		const classNames = Object.keys(indexMetaCollection);
@@ -169,13 +169,13 @@ function ReRender() {
 	const ExternalDiagnostics: _Support.Diagnostic[] = [];
 
 	Object.values(externalArray).forEach(file => {
-		ExternalErrors.push(...file.manifest.errors);
-		ExternalDiagnostics.push(...file.manifest.diagnostics);
+		ExternalErrors.push(...file.manifesting.errors);
+		ExternalDiagnostics.push(...file.manifesting.diagnostics);
 	});
 
 	Object.values(exattachArray).forEach(file => {
-		ExternalErrors.push(...file.manifest.errors);
-		ExternalDiagnostics.push(...file.manifest.diagnostics);
+		ExternalErrors.push(...file.manifesting.errors);
+		ExternalDiagnostics.push(...file.manifesting.diagnostics);
 	});
 
 	const nameCollitions = Object.values(CACHE.FILES.EXTERNALS).reduce((A, F) => {

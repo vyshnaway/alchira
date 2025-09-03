@@ -1,39 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 /**
- * Transposes a nested object structure so inner keys become outer keys.
- *
- * Example:
- * { a: { x: 1, y: 2 }, b: { x: 3 } }
- * => { x: { a: 1, b: 3 }, y: { a: 2 } }
- */
-function objectSwitch(srcObject: Record<string, any>): Record<string, any> {
-	if (!srcObject || typeof srcObject !== "object") {
-		return {};
-	}
-
-	const output: Record<string, any> = {};
-
-	for (const outerKey in srcObject) {
-		if (Object.prototype.hasOwnProperty.call(srcObject, outerKey) && outerKey[0] !== "+") {
-			const innerObject = srcObject[outerKey];
-			if (typeof innerObject === "object" && innerObject !== null) {
-				for (const innerKey in innerObject) {
-					if (Object.prototype.hasOwnProperty.call(innerObject, innerKey)) {
-						if (!output[innerKey]) {
-							output[innerKey] = {};
-						}
-						output[innerKey][outerKey] = innerObject[innerKey];
-					}
-				}
-			}
-		}
-	}
-
-	return output;
-}
-
-/**
  * Deep merges `source` into `target` (recursively for plain objects).
  */
 function deepMerge(target: Record<string, any>, source: Record<string, any>): Record<string, any> {
@@ -166,7 +133,6 @@ function ObjectDelta(
 export interface ObjectUtils {
 	skeleton: typeof skeleton;
 	onlyB: typeof ObjectDelta;
-	switch: typeof objectSwitch;
 	deepMerge: typeof deepMerge;
 	multiMerge: typeof bulkMerge;
 }
@@ -175,7 +141,6 @@ const utils: ObjectUtils = {
 	skeleton,
 	deepMerge,
 	onlyB: ObjectDelta,
-	switch: objectSwitch,
 	multiMerge: bulkMerge,
 };
 

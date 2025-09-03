@@ -1,27 +1,52 @@
-import Use from "../utils/main.js";
-
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import * as INDEX from "../data/index.js";
 import * as CACHE from "../data/cache.js";
 import * as LOADPREFIX from "./prefix.js";
 
 type t_styleSorceTemplate = Record<string, string | object>;
 
-function styleSwitch(object: Record<string, Record<string, object | string>>) {
-	const switched = Use.object.switch(object);
-	const mins: string[] = [], maxs: string[] = [], inits: string[] = [], flats: string[] = [];
+function objectSwitch(srcObject: Record<string, any>): Record<string, any> {
+	if (!srcObject || typeof srcObject !== "object") {
+		return {};
+	}
 
+	const output: Record<string, any> = {};
+
+	for (const outerKey in srcObject) {
+		if (Object.prototype.hasOwnProperty.call(srcObject, outerKey) && outerKey[0] !== "+") {
+			const innerObject = srcObject[outerKey];
+			if (typeof innerObject === "object" && innerObject !== null) {
+				for (const innerKey in innerObject) {
+					if (Object.prototype.hasOwnProperty.call(innerObject, innerKey)) {
+						if (!output[innerKey]) {
+							output[innerKey] = {};
+						}
+						output[innerKey][(innerKey[0] === '@' || innerKey === "") ? outerKey : `& ${outerKey}`] = innerObject[innerKey];
+					}
+				}
+			}
+		}
+	}
+
+	return output;
+}
+
+function styleSwitch(object: Record<string, Record<string, object | string>>) {
+	const result: Record<string, object> = {};
+	const inits: string[] = [], mins: string[] = [], maxs: string[] = [], flats: string[] = [];
+
+	const switched = objectSwitch(object);
 	Object.keys(switched).forEach((key) => {
 		const min = key.indexOf("min");
 		const max = key.indexOf("max");
 		if (key !== "") {
 			if (min === -1 && max === -1) { inits.push(key); }
-			if (min < max) { mins.push(key); }
-			if (min > max) { maxs.push(key); }
-			if (min === max) { flats.push(key); }
+			else if (min < max) { mins.push(key); }
+			else if (min > max) { maxs.push(key); }
+			else if (min === max) { flats.push(key); }
 		}
 	});
 
-	const result: Record<string, object> = {};
 	inits.forEach(key => result[key] = switched[key]);
 	Object.assign(result, switched[""]);
 	[...flats.sort(), ...mins.sort().reverse(), ...maxs.sort()].forEach((key) => (result[key] = switched[key]));

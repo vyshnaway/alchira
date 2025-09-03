@@ -17,7 +17,7 @@ function MERGER(classList: string[] = [], refpacks: boolean, flatmerge: boolean)
 	const
 		attachments: string[] = [],
 		mergables: object[] = [],
-		constants: Record<string, string> = {};
+		variables: Record<string, string> = {};
 
 	classList.forEach((className) => {
 		const found = INDEX.FIND(className);
@@ -28,7 +28,7 @@ function MERGER(classList: string[] = [], refpacks: boolean, flatmerge: boolean)
 			|| found.group === _Style._Type.LIBRARY
 		) {
 			const classdata = INDEX.FETCH(found.index);
-			Object.assign(constants, classdata.metadata.constants);
+			Object.assign(variables, classdata.metadata.variables);
 			attachments.push(...classdata.attachments);
 			mergables.push(classdata.style_object);
 		}
@@ -43,13 +43,13 @@ function MERGER(classList: string[] = [], refpacks: boolean, flatmerge: boolean)
 			return a;
 		}, {} as Record<string, string | object>);
 
-	return { result, attachments, constants };
+	return { result, attachments, variables };
 }
 
 function SCANNER(content: string, initial: string, sourceSelector: string, refpacks: boolean, flatmerge: boolean) {
 	const scanned = CSSBlockScanner(content);
 	const assigned = MERGER(scanned.assign, refpacks, flatmerge);
-	const constants = { ...scanned.constants, ...assigned.constants };
+	const variables = { ...scanned.variables, ...assigned.variables };
 	const attachments = [...assigned.attachments, ...scanned.attachment.filter(attach => attach[0] !== "/")];
 
 	const styles = Use.object.deepMerge(assigned.result, Object.fromEntries([
@@ -63,27 +63,27 @@ function SCANNER(content: string, initial: string, sourceSelector: string, refpa
 
 	for (const selector in scanned.allBlocks) {
 		const result = SCANNER(scanned.allBlocks[selector], initial, sourceSelector + " -> " + selector, refpacks, true);
-		Object.assign(constants, result.constants);
+		Object.assign(variables, result.variables);
 		attachments.push(...result.attachments);
 		styles[selector] = result.styles;
 	}
 
-	return { styles, attachments, constants };
+	return { styles, attachments, variables: variables };
 }
 
 function CSSFileScanner(content: string, initial = "", refpacks: boolean) {
 	const scanned = CSSBlockScanner(Use.code.uncomment.Script(content), true);
 	const styles: [string, string | object][] = scanned.XatProps;
 
-	const constants: Record<string, string> = {}, attachments: string[] = [];
+	const variables: Record<string, string> = {}, attachments: string[] = [];
 	scanned.XallBlocks.forEach(([key, value]) => {
 		const result = SCANNER(value, initial, key, refpacks, true);
-		Object.assign(constants, result.constants);
+		Object.assign(variables, result.variables);
 		attachments.push(...result.attachments);
 		styles.push([key, result.styles]);
 	});
 
-	return { styles, attachments, constants };
+	return { styles, attachments, variables };
 }
 
 function CSSBulkScanner(fileDatas: _File.Storage[], forPortable = false) {
@@ -93,12 +93,12 @@ function CSSBulkScanner(fileDatas: _File.Storage[], forPortable = false) {
 	const IndexMap = forPortable ? CACHE.CLASS.External_Index : CACHE.CLASS.Library__Index;
 
 	fileDatas.forEach((source) => {
-		const { classFront, filePath, debugclassFront, content, manifest } = source;
+		const { classFront, filePath, debugclassFront, content, manifesting: manifest } = source;
 
 		CSSBlockScanner(Use.code.uncomment.Script(content), true).XallBlocks.forEach(([SELECTOR, OBJECT]) => {
 			const declaration = source.sourcePath;
 			const classname = classFront + Use.string.normalize(SELECTOR, [], ["\\", "."]);
-			const scannedStyle = SCANNER(OBJECT, `${_File._Import[manifest.lookup.type]} : ${filePath} ||`, SELECTOR, false, false);
+			const scannedStyle = SCANNER(OBJECT, `${manifest.lookup.type} : ${filePath} ||`, SELECTOR, false, false);
 			const attachments = scannedStyle.attachments;
 			const object = { "": scannedStyle.styles };
 
@@ -110,22 +110,22 @@ function CSSBulkScanner(fileDatas: _File.Storage[], forPortable = false) {
 				const selectorData: _Style.Classdata = {
 					artifact: forPortable ? source.artifact : "",
 					selector: SELECTOR,
-					style_object: object,
 					classname,
 					metadata: {
 						info: [],
-						watch: '',
-						constants: scannedStyle.constants,
+						watchclass: '',
+						variables: scannedStyle.variables,
 						skeleton: Use.object.skeleton(object),
 						declarations: [declaration],
 						summon: '',
-						staple: '',
 						style: ''
 					},
+					style_object: object,
+					snippet_staple: '',
 					attachments: forPortable ? attachments.map(attach => classFront + attach) : attachments,
 					debugclass: debugclassFront + "_" + Use.string.normalize(classname, [], [], ["$", "/"]),
 					declarations: [declaration],
-					attached_style: { [SELECTOR]: object },
+					snippet_style: { [SELECTOR]: object[""] },
 				};
 				const identity = INDEX.DECLARE(selectorData);
 
@@ -149,14 +149,14 @@ function TagStyleScanner(
 	IndexMap: Record<string, number> = {},
 ) {
 	const scope = raw.scope === _Style._Type.EXTERNAL ? _Style._Type.NULL : raw.scope;
-	const forExternal = file.manifest.lookup.type === _File._Type.EXTERNAL;
+	const forExternal = file.manifesting.lookup.type === "EXTERNAL";
 	const declaration = `${file.targetPath}:${raw.rowIndex}:${raw.colIndex}`;
 
 	const object: Record<string, Record<string, object>> = {};
 	const diagnostics: _Support.Diagnostic[] = [];
 	const errors: string[] = [];
 	const attachments: string[] = [];
-	const constants = {};
+	const variables = {};
 
 	const classname = raw.selector === "" ? "" : file.classFront + raw.selector.replace(/^-\$/, "$").replace("$$$", "$");
 	const debugclass = `${scope}${file.debugclassFront}\\:${raw.rowIndex}\\:${raw.colIndex}_${Use.string.normalize(classname, [], [], forExternal ? ["$", "/"] : ["$"])}`;
@@ -168,7 +168,7 @@ function TagStyleScanner(
 			false, subSelector !== ""
 		);
 		attachments.push(...styleScanned.attachments);
-		Object.assign(constants, styleScanned.constants);
+		Object.assign(variables, styleScanned.variables);
 
 		if (Object.keys(styleScanned).length) {
 			if (subSelector === "") {
@@ -203,7 +203,7 @@ function TagStyleScanner(
 		);
 
 		attachments.push(...style_snippet.attachments);
-		Object.assign(constants, style_snippet.constants);
+		Object.assign(variables, style_snippet.variables);
 
 		group = _Style._Type.NULL;
 		index = INDEX.DECLARE({
@@ -213,19 +213,19 @@ function TagStyleScanner(
 			classname,
 			metadata: {
 				info: raw.comments,
-				watch: '',
-				constants,
+				watchclass: '',
+				variables: variables,
 				skeleton: Use.object.skeleton(object),
 				declarations: [declaration],
-				staple: raw.elid === CACHE.ROOT.customElements.staple ? raw.attachstring : "",
 				summon: raw.elid === CACHE.ROOT.customElements.summon ? raw.attachstring : "",
 				style: raw.styleAttribute
 			},
+			snippet_staple: raw.elid === CACHE.ROOT.customElements.staple ? raw.attachstring : "",
 			attachments: forExternal ?
 				attachments.map(a => file.classFront + (a.includes("$$$") ? a.replace("$$$", "$") : `$/${a}`)) : attachments,
 			debugclass,
 			declarations: [declaration],
-			attached_style: style_snippet.styles,
+			snippet_style: style_snippet.styles,
 		});
 		IndexMap[classname] = index;
 	}

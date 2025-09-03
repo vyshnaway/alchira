@@ -1,3 +1,5 @@
+/* eslint-disable @stylistic/semi */
+/* eslint-disable @typescript-eslint/no-unused-expressions */
 // import fileman from "./fileman.js";
 // import { APP, CACHE, NAV, RAW, STACK } from "../data-cache.js";
 // import { INDEX } from "../data-init.js";
@@ -10,11 +12,10 @@
 // function getLibPrifix(string = '') {
 //     let id = 0, lib = '';
 //     const chars = string.split("");
-//     for (let i = 0; i < chars.length; i++) {
-//         const ch = chars[i];
-//         if (ch === "$") id++;
-//         else if (!id) lib += ch;
-//         else break;
+//     for (const ch of chars) {
+//         if (ch === "$") {id++;}
+//         else if (!id) {lib += ch;}
+//         else {break;}
 //     }
 //     return lib.length ? `${lib}.${id}` : `${id}`;
 // }
@@ -121,7 +122,7 @@
 //     return { portable: portable.join("\n"), bindings };
 // }
 
-// export function GeneratePortable(essentials = []) {
+// export function GenerateArtifact() {
 //     const portableName = `${RAW.PACKAGE}@${RAW.VERSION}`;
 //     const content = portableCreator(essentials, portableName)
 //     const json = { ...RAW.PORTABLEFRAME, readme: RAW.ReadMe, xtyling: content.portable, bindings: content.bindings };

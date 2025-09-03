@@ -112,9 +112,6 @@ async function execute(chapter: string) {
                     if (SaveAction) {
                         await SaveAction;
                     }
-                    if (CACHE.STATIC.WATCH) {
-                        await FETCH.SyncIgnorefiles();
-                    }
                     SaveAction = fileman.write.bulk(OutFiles);
                 }
                 if (reportNext) {
@@ -161,7 +158,7 @@ async function execute(chapter: string) {
                     const event = EVENT.pull();
                     if (!event) { break; }
                     const pathFromWork = `${event.folder}/${event.filePath}`;
-                    
+
                     if (event.folder === CACHE.PATH.folder.scaffold.path) {
                         if (event.action === "add" || event.action === "change") {
                             switch (pathFromWork) {
@@ -201,7 +198,7 @@ async function execute(chapter: string) {
                         SMITH.SaveToTarget(event.action, event.folder, event.filePath, event.fileContent, event.extension);
                         step = "GenerateFinals";
                     } else { step = "VerifyConfigs"; }
-
+                    
                     heading = `[${event.timeStamp}] | ${event.filePath} | [${event.action}]`;
                     reportNext = true;
                 }
@@ -279,7 +276,7 @@ async function commander({
         //     break;
         // }
         // case "install": {
-        //     $.POST("\n" + $.MAKE("Installing Portables"));
+        //     $.POST($.tag.H2("Installing Portables"));
 
         //     const verifyStructResult = await FETCH.VerifySetupStruct();
         //     if (verifyStructResult.proceed) {
