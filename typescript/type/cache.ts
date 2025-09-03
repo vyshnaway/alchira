@@ -71,7 +71,6 @@ export interface DELTA {
     },
     Manifest: {
         prefix: string,
-        elements: string[],
         constants: string[],
         hashrules: Record<string, string>,
         filelookup: Record<string, _file.Lookup>,
