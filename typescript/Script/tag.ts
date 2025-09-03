@@ -88,7 +88,7 @@ export default function scanner(
 					styleDeclarations.elid = CACHE.ROOT.customElements[tr_Attr] || 0;
 					styleDeclarations.element = tr_Attr;
 					styleDeclarations.elvalue = tr_Value;
-				} else if (tr_Attr === "!") {
+				} else if (tr_Attr === "&" && tr_Value.length) {
 					styleDeclarations.comments.push(...tr_Value.slice(1, -1).split("\n").map(l => l.trim()));
 				} else if (/^[\w\-]+\$+[\w\-]+$/i.test(tr_Attr)) {
 					styleDeclarations.selector = tr_Attr;

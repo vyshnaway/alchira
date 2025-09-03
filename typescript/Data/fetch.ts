@@ -12,6 +12,7 @@ import * as $$ from "../shell.js";
 import * as CACHE from "./cache.js";
 import * as VERIFY from "./verify.js";
 import * as ACTION from "./action.js";
+import fileman from "../fileman.js";
 
 export async function FetchDocs() {
 	await Promise.all(Object.values(CACHE.SYNC).map(sync => {
@@ -171,6 +172,10 @@ export async function FetchStatics(vendorSource: string) {
 	ACTION.setVendors();
 }
 
+function fixPath(string: string) {
+	return fileman.path.join(...fileman.path.join(...string.split("/")).split("\\"));
+}
+
 export async function VerifyConfigs(loadStatics: boolean) {
 	$.TASK("Initializing configs", 0);
 	const errors: string[] = [];
@@ -201,6 +206,9 @@ export async function VerifyConfigs(loadStatics: boolean) {
 						I.extensions[K] = [];
 					}
 				});
+				I.source = fixPath(I.source);
+				I.target = fixPath(I.target);
+				I.stylesheet = fixPath(I.stylesheet);
 				A.push(I);
 			}
 			return A;
@@ -271,7 +279,7 @@ export async function SaveTargets() {
 export async function SaveHashrules() {
 	$.TASK("Updating Hashrules", 0);
 	const errors: Record<string, string> = {};
-	
+
 	$.STEP("PATH : " + CACHE.PATH.json.hashrules.path);
 	const hashrule = await FILEMAN.read.json(CACHE.PATH.json.hashrules.path);
 	Object.keys(CACHE.STATIC.HashRule).forEach(key => delete CACHE.STATIC.HashRule[key]);

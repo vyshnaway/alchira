@@ -125,8 +125,8 @@ export default class C_Proxy {
 
 		Cumulates.fileManifests[this.targetStylesheet] = {
 			lookup: {
-				type: "STYLESHEET",
 				id: this.targetStylesheet,
+				type: "STYLESHEET",
 			},
 			public: {},
 			global: {},
