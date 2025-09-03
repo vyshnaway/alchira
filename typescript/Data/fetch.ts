@@ -173,7 +173,7 @@ export async function FetchStatics(vendorSource: string) {
 }
 
 function fixPath(string: string) {
-	return fileman.path.join(...fileman.path.join(...string.split("/")).split("\\"));
+	return fileman.path.join(...string.replace(/\\/, "/").split("/"));
 }
 
 export async function VerifyConfigs(loadStatics: boolean) {
