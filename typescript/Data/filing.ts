@@ -18,10 +18,10 @@ function resolveGroup(
 ): _File._Type {
 	if (fromExternals) {
 		switch (extension) {
+			case CACHE.ROOT.extension:
+				return "EXTERNAL";
 			case "css":
 				return "EXATTACH";
-			case "xcss":
-				return "EXTERNAL";
 			case "md":
 				return "README";
 			default:

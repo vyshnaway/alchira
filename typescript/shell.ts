@@ -47,7 +47,7 @@ export function ClassChart(heading: string, items: Record<string, string[]>) {
     ) : "";
 }
 
-export function HashruleError(
+export function ShorthandError(
     primitive: string,
     cause: string,
     source: string,
@@ -79,15 +79,15 @@ export function HashruleError(
         diagnostic
     };
 }
-export function HashruleReport(
-    hashrules: Record<string, string>,
+export function ShorthandReport(
+    shorthand: Record<string, string>,
     errors: string[]
 ) {
     return $.MAKE(ListRecord(
-        "Active Hashrules", hashrules),
+        "Active Shorthand", shorthand),
         errors.length ? [
             $.MAKE(
-                $.tag.H4("Invalid Hashrules", $.preset.failed),
+                $.tag.H4("Invalid Shorthand", $.preset.failed),
                 errors
             )
         ] : [],

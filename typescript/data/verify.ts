@@ -7,6 +7,7 @@
 
 import PATH from "path";
 import FILEMAN from "../fileman.js";
+import * as CACHE from "../data/cache.js";
 
 
 export async function cssImport(filePathArray: string[] = []) {
@@ -132,12 +133,12 @@ export async function proxyMapSync(proxyMaps: _Config.ProxyMap[] = []): Promise<
 
 	await Promise.all(
 		Object.values(ProxyMapStatic).map(async (map) => {
-			map.extensions.xcss = [];
+			map.extensions[CACHE.ROOT.extension] = [];
 			const syncResult = await FILEMAN.sync.bulk(
 				map.target,
 				map.source,
 				Object.keys(map.extensions),
-				["xcss"],
+				[CACHE.ROOT.extension],
 				[map.stylesheet],
 			);
 			if (syncResult.status) {

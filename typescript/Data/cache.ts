@@ -5,14 +5,15 @@ import * as _File from "../type/file.js";
 import * as _Cache from "../type/cache.js";
 // import * as _Support from "../type/support.js";
 
-
-const domain = "xcss.io";
+const id = "xcss";
+const domain = `${id}.io`;
 
 export const ROOT: _Cache.ROOT = {
     bin: "",
     name: "xcss-engine",
     version: "0.0.0",
     website: domain,
+    extension: id,
     vendors: [],
     url: {
         Cdn: `https://cdn.${domain}/`,
@@ -23,24 +24,23 @@ export const ROOT: _Cache.ROOT = {
         ArtifactCdn: `https://artifact.${domain}/`,
     },
     commands: {
-        init: "Initiate or Update & Verify setup.",
-        debug: "Live build for developer environment",
-        preview: 'Test build. Pass test for "publish" command.',
-        publish: "Optimized build, uses web-api.",
-        // archive: "Split and stash project styles to *.xcss files.",
-        // install: "Install external artifacts from sources.",
+        init: `Initiate or Update & Verify setup.`,
+        debug: `Live build for developer environment`,
+        preview: `Test build. Pass test for "publish" command.`,
+        publish: `Optimized build, uses web-api.`,
+        // archive: `Split and stash project styles to *.${id} files.`,
+        // install: `Install external artifacts from sources.`,
     },
     scripts: {
-        "init": "xcss init",
-        "debug": "xcss debug watch",
-        "watch": "xcss preview watch",
-        "preview": "xcss preview",
-        "publish": "xcss publish",
-        // "archive": "xcss archive",
-        // "install": "xcss install",
+        "init": `init`,
+        "debug": `debug watch`,
+        "watch": `preview watch`,
+        "preview": `preview`,
+        "publish": `publish`,
+        // "archive": `archive`,
+        // "install": `install`,
     },
-    defaultTweaks: {
-        Shorthands: true,
+    Tweaks: {
         CacheUsage: false,
     },
     customElements: {
@@ -69,12 +69,12 @@ export const STATIC: _Cache.STATIC = {
     RootPath: "",
     WorkPath: "",
     ProxyMap: [],
-    HashRule: {},
+    Shorthand: {},
     Artifact: {
         name: '',
         readme: '',
         version: '',
-        shorthands: {},
+        shorthand: {},
     },
     Prefix: {
         atrules: {},
@@ -85,7 +85,7 @@ export const STATIC: _Cache.STATIC = {
         values: {},
     },
     Tweaks: {
-        ...ROOT.defaultTweaks
+        ...ROOT.Tweaks
     },
     Library_Saved: {},
     Targets_Saved: {},
@@ -103,7 +103,7 @@ export const DELTA: _Cache.DELTA = {
         externals: "",
         artifacts: "",
         constants: "",
-        hashrules: "",
+        shorthand: "",
         errors: "",
         memChart: "",
         footer: "",
@@ -127,11 +127,10 @@ export const DELTA: _Cache.DELTA = {
     },
     Manifest: {
         prefix: "",
-        elements: Object.keys(ROOT.customElements),
         constants: [],
-        diagnostics: [],
-        hashrules: {},
+        shorthand: {},
         filelookup: {},
+        errors: [],
         AXIOM: {},
         CLUSTER: {},
         LOCAL: {},
@@ -142,7 +141,7 @@ export const DELTA: _Cache.DELTA = {
 };
 
 export const CLASS: _Cache.CLASS = {
-    HashRule: {},
+    Shorthand: {},
     Index_to_Data: {},
     Global___Index: {},
     Public___Index: {},
@@ -187,11 +186,11 @@ export const SYNC: Record<string, Record<string, _File.Sync>> = {
             frags: ["documents", "changelog.md"],
             content: "",
         },
-        agentic: {
-            title: "INSTRUCTIONS TO AI AGENTS",
+        instructions: {
+            title: "INSTRUCTIONS",
             url: "agentic.md",
             path: "",
-            frags: ["documents", "agentic.md"],
+            frags: ["documents", "instructions.md"],
             content: "",
         },
     },
@@ -312,8 +311,8 @@ export const PATH: Record<string, Record<string, _File.Path>> = {
             content: "",
             essential: true,
         },
-        hashrules: {
-            frags: ["xtyles", "hashrules.jsonc"],
+        shorthand: {
+            frags: ["xtyles", "shorthand.jsonc"],
             path: "",
             content: "",
             essential: true,
@@ -324,16 +323,16 @@ export const PATH: Record<string, Record<string, _File.Path>> = {
             frags: ["xtyles", "readme.md"],
             path: "",
             content: "",
-            essential: true,
+            essential: false,
         },
-        reference: {
-            frags: ["xtyles", "reference.md"],
+        documentation: {
+            frags: ["xtyles", "autogen", "documentation.md"],
             path: "",
             content: "",
             essential: false,
         },
-        agentic: {
-            frags: ["xtyles", "autogen", "agentic.md"],
+        instructions: {
+            frags: ["xtyles", "autogen", "instructions.md"],
             path: "",
             content: "",
             essential: false,

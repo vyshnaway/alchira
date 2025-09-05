@@ -41,7 +41,7 @@ export default class C_Proxy {
 		}: _Config.ProxyStorage,
 		label: string
 	) {
-		extensions["xcss"] = [];
+		extensions[CACHE.ROOT.extension] = [];
 
 		this.source = source;
 		this.target = target;
@@ -214,7 +214,7 @@ export default class C_Proxy {
 		SaveFiles[this.sourceStylesheet] = stylesheet;
 
 		Object.values(this.fileCache).forEach((data) => {
-			if (data.extension !== "xcss") {
+			if (data.extension !== CACHE.ROOT.extension) {
 				let fromPos = 0;
 				SaveFiles[data.sourcePath] = data.styleData.tagReplacements.reduce((A, [elid, pos]) => {
 					switch (elid) {
@@ -250,26 +250,4 @@ export default class C_Proxy {
 			delete this.fileCache[filePath];
 		});
 	}
-
-
-	// ComponentSpilt(timeStamp: string) {
-	// 	const SavedFiles: Record<string, string> = {};
-
-	// 	Object.values(this.fileCache).forEach((file) => {
-	// 		if (file.extension === "xcss") {
-	// 			if (Object.keys(SavedFiles).includes(file.targetPath)) { SavedFiles[file.targetPath] += "\n\n" + file.content; }
-	// 		} else if (Object.keys(file.styleData.styleGlobals).length) {
-	// 			SavedFiles[file.targetPath] = SCRIPTPARSE(file, this.extnsProps[file.extension], "artifact").scribed;
-	// 			SavedFiles[file.targetPath + ".xcss"] = Object.entries(file.styleData.styleGlobals).reduce((A, [selector, index]) => {
-	// 				const inStash = INDEX.IMPORT(index);
-	// 				const object = inStash.object;
-	// 				const bindStack = FORGE.bindIndex(new Set(inStash.preBinds), new Set(inStash.postBinds));
-	// 				A.push(...GenerateXtyleBlock(selector, object, bindStack.preBindsList, bindStack.postBindsList));
-	// 				return A;
-	// 			}, [`## ${timeStamp}`]).join("\n");
-	// 		}
-	// 	});
-
-	// 	return SavedFiles;
-	// }
 }

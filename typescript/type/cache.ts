@@ -11,9 +11,10 @@ export interface ROOT {
     version: string,
     website: string,
     vendors: string[],
+    extension: string,
     scripts: Record<string, string>,
     commands: Record<string, string>,
-    defaultTweaks: _config.Tweaks,
+    Tweaks: _config.Tweaks,
     customAtrules: Record<string, string>
     customElements: Record<string, number>,
     customOperations: Record<string, string>
@@ -47,7 +48,7 @@ export interface DELTA {
         externals: string,
         artifacts: string,
         constants: string,
-        hashrules: string,
+        shorthand: string,
         errors: string,
         memChart: string,
         footer: string,
@@ -72,7 +73,7 @@ export interface DELTA {
     Manifest: {
         prefix: string,
         constants: string[],
-        hashrules: Record<string, string>,
+        shorthand: Record<string, string>,
         filelookup: Record<string, _file.Lookup>,
         AXIOM: Record<string, _file.ClassMetaMap>,
         CLUSTER: Record<string, _file.ClassMetaMap>,
@@ -80,7 +81,7 @@ export interface DELTA {
         GLOBAL: Record<string, _file.ClassMetaMap>,
         EXTERNAL: Record<string, _file.ClassMetaMap>,
         EXATTACH: Record<string, _file.ClassMetaMap>,
-        diagnostics: _support.Diagnostic[]
+        errors: _support.Diagnostic[]
     },
 }
 
@@ -98,14 +99,14 @@ export interface STATIC {
     ProxyMap: _config.ProxyMap[],
     Tweaks: _config.Tweaks,
     Prefix: PREFIX,
-    HashRule: Record<string, string>,
+    Shorthand: Record<string, string>,
     External_Saved: Record<string, string>,
     Library_Saved: Record<string, string>,
     Targets_Saved: Record<string, _config.ProxyStorage>,
 }
 
 export interface CLASS {
-    HashRule: Record<string, string>,
+    Shorthand: Record<string, string>,
     Index_to_Data: Record<string, _style.Classdata>,
     Global___Index: _style.ClassIndexMap,
     Public___Index: _style.ClassIndexMap,

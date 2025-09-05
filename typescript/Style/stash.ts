@@ -259,35 +259,6 @@ function ReDeclare() {
 }
 
 
-
-// function Appendix(indexes: number[] = []) {
-// 	const stash: Record<string, { readme: string[], pacbind: number[], external: number[] }> = {};
-
-// 	if (!CACHE.STATIC.WATCH) {
-// 		const usedExternals = Object.values(CACHE.CLASS.External_Index).filter(i => indexes.includes(i))
-// 			.reduce((a, c) => { a.add(INDEX.FETCH(c).packname); return a; }, new Set());
-
-// 		Object.values(CACHE.FILES.EXTERNALS).forEach((F) => {
-// 			if (usedExternals.has(F.externalName)) {
-// 				if (F.extension === "md") {
-// 					if (stash[F.externalName]) { stash[F.externalName].readme.push(F.content); }
-// 					else { stash[F.externalName] = { readme: [F.content], pacbind: [], external: [] }; }
-// 				} else if (F.extension === "xcss") {
-// 					if (stash[F.externalName]) { F.styleData.usedIndexes.forEach((i: number) => stash[F.externalName].external.push(i)); }
-// 					else { stash[F.externalName] = { readme: [], pacbind: [], external: Array.from(F.styleData.usedIndexes) }; }
-// 				} else if (F.extension === "css") {
-// 					if (stash[F.externalName]) { F.styleData.usedIndexes.forEach((i: number) => stash[F.externalName].pacbind.push(i)); }
-// 					else { stash[F.externalName] = { readme: [], pacbind: Array.from(F.styleData.usedIndexes), external: [] }; }
-// 				}
-// 			}
-// 		});
-// 	}
-
-// 	return stash;
-// }
-
-
-
 export default {
 	ReRender,
 	ReDeclare,

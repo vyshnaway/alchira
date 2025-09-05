@@ -23,7 +23,7 @@ export function setVendors() {
 }
 
 export function setTWEAKS(tweaks: _Config.Tweaks) {
-    Object.assign(CACHE.STATIC.Tweaks, CACHE.ROOT.defaultTweaks);
+    Object.assign(CACHE.STATIC.Tweaks, CACHE.ROOT.Tweaks);
     if (typeof tweaks === "object") {
         Object.keys(CACHE.STATIC.Tweaks).forEach(key => {
             if (typeof CACHE.STATIC.Tweaks[key] === typeof tweaks[key]) {

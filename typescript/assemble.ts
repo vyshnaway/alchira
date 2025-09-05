@@ -12,7 +12,7 @@ import * as CACHE from "./data/cache.js";
 import * as INDEX from "./data/index.js";
 
 import Use from "./utils/main.js";
-import HASHRULE from "./hashrules.js";
+import SHORTHAND from "./shorthand.js";
 import STYLE from "./style/parse.js";
 import COMPILE from "./style/render.js";
 import ORDER from "./sort/order-api.js";
@@ -58,7 +58,7 @@ export function SaveToTarget(
 			}
 			break;
 		default:
-			HASHRULE.UPLOAD();
+			SHORTHAND.UPLOAD();
 	}
 
 	if (reCache) {
@@ -131,9 +131,9 @@ async function Accumulate() {
 		}
 	});
 
-	CACHE.DELTA.Manifest.diagnostics = [];
-	Object.values(CACHE.DELTA.Diagnostics).forEach((V) => CACHE.DELTA.Manifest.diagnostics.push(...V));
-	CACHE.DELTA.ErrorCount = CACHE.DELTA.Manifest.diagnostics.length;
+	CACHE.DELTA.Manifest.errors = [];
+	Object.values(CACHE.DELTA.Diagnostics).forEach((V) => CACHE.DELTA.Manifest.errors.push(...V));
+	CACHE.DELTA.ErrorCount = CACHE.DELTA.Manifest.errors.length;
 
 
 	CACHE.DELTA.Report.errors = $.MAKE(
@@ -174,7 +174,7 @@ async function Synthasize() {
 			const response = await ORDER(CLASSESLIST, CACHE.STATIC.Command, CACHE.STATIC.Argument);
 			SaveClassRefs(response.result);
 
-			if (CACHE.DELTA.Manifest.diagnostics.length) {
+			if (CACHE.DELTA.Manifest.errors.length) {
 				CACHE.DELTA.FinalMessage = CACHE.DELTA.ErrorCount + " Unresolved Errors. Rectify them to proceed with 'publish' command.";
 			} else {
 				CACHE.DELTA.FinalMessage = "Preview verified with no major errors. Procceed to 'publish' using your key.";
@@ -182,7 +182,7 @@ async function Synthasize() {
 		}
 
 		if (CACHE.STATIC.Command === "publish") {
-			if (CACHE.DELTA.Manifest.diagnostics.length) {
+			if (CACHE.DELTA.Manifest.errors.length) {
 				const response = await ORDER(CLASSESLIST, "preview", CACHE.STATIC.Argument);
 				CACHE.STATIC.Command = "preview";
 				SaveClassRefs(response.result);

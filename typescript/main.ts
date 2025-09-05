@@ -13,7 +13,6 @@ const ExposedCommands = Object.keys(CACHE.ROOT.commands);
 
 
 // --- Initialize ---
-const bin = process.argv[1];
 const cmd = ExposedCommands.includes(process.argv[2]) ? process.argv[2] : "";
 const arg = ExposedCommands.includes(process.argv[2]) ? process.argv[3] : "";
 
@@ -44,7 +43,8 @@ const projectVersion = typeof projectPackageJson.data.version === "string"
     : fallback_project_version;
 
 const rootPackageEssential: _support.PackageEssential = {
-    bin,
+    bin: typeof originPackageJson.data.bin === "object" ?
+        Object.keys(originPackageJson.data.bin as object)[0] : "",
     name: typeof originPackageJson.data.name === "string" ?
         originPackageJson.data.name : CACHE.ROOT.name,
     version: typeof originPackageJson.data.version === "string" ?
@@ -65,7 +65,7 @@ if (
     for (const cmd in CACHE.ROOT.scripts) {
         if (!scripts[cmd]) {
             addedCommands++;
-            scripts[`${bin}:${cmd}`] = CACHE.ROOT.scripts[cmd];
+            scripts[`${CACHE.ROOT.name}:${cmd}`] = `${rootPackageEssential.bin} ${CACHE.ROOT.scripts[cmd]}`;
         }
     }
 

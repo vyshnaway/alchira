@@ -26,7 +26,7 @@ export interface Raw extends Base {
 
 export interface Artifact extends Base {
     readme: string,
-    shorthands: Record<string,string>,
+    shorthand: Record<string, string>,
     vendors?: string,
     externals?: Record<string, string>,
     proxy?: ProxyMap[],

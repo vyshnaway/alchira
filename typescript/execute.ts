@@ -86,10 +86,10 @@ async function execute(chapter: string) {
             case "ReadTargets": {
                 await FETCH.SaveTargets();
             }
-            case "ReadHashrules": {
-                const hashruleAnalysis = await FETCH.SaveHashrules();
-                if (!hashruleAnalysis.status) {
-                    report = hashruleAnalysis.report;
+            case "ReadShorthand": {
+                const shorthandAnalysis = await FETCH.SaveShorthand();
+                if (!shorthandAnalysis.status) {
+                    report = shorthandAnalysis.report;
                     step = "WatchFolders";
                     break;
                 } else { report = ""; }
@@ -174,8 +174,8 @@ async function execute(chapter: string) {
                                     await FETCH.SaveRootCss();
                                     step = "GenerateFinals";
                                     break;
-                                case CACHE.PATH.json.hashrules.path:
-                                    step = "ReadHashrules";
+                                case CACHE.PATH.json.shorthand.path:
+                                    step = "ReadShorthand";
                                     break;
                                 default:
                                     if (
@@ -185,7 +185,7 @@ async function execute(chapter: string) {
                                         CACHE.STATIC.Library_Saved[pathFromWork] = event.fileContent;
                                     } else if (
                                         pathFromWork.startsWith(CACHE.PATH.folder.external.path)
-                                        && ["xcss", "css", "md"].includes(event.extension)
+                                        && [CACHE.ROOT.extension, "css", "md"].includes(event.extension)
                                     ) {
                                         CACHE.STATIC.External_Saved[pathFromWork] = event.fileContent;
                                     }
@@ -198,7 +198,7 @@ async function execute(chapter: string) {
                         SMITH.SaveToTarget(event.action, event.folder, event.filePath, event.fileContent, event.extension);
                         step = "GenerateFinals";
                     } else { step = "VerifyConfigs"; }
-                    
+
                     heading = `[${event.timeStamp}] | ${event.filePath} | [${event.action}]`;
                     reportNext = true;
                 }

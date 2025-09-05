@@ -26,7 +26,7 @@ export async function FetchDocs() {
 
 export async function Initialize() {
 	try {
-		$.TASK("Initializing XCSS setup.", 0);
+		$.TASK("Initializing setup.", 0);
 		$.TASK("Cloning scaffold to Project");
 
 		await FILEMAN.clone.safe(CACHE.PATH.blueprint.scaffold.path, CACHE.PATH.folder.scaffold.path);
@@ -65,7 +65,7 @@ export async function Initialize() {
 					"Create a new project and use its access key. For action visit " +
 					$.FMT(CACHE.ROOT.url.Console, $.style.AS_Bold, ...$.preset.primary),
 					"If using in CI/CD workflow, it is suggested to use " +
-					$.FMT("xcss publish {key}", $.style.AS_Bold, ...$.preset.primary),
+					$.FMT("{bin} publish {key}", $.style.AS_Bold, ...$.preset.primary),
 				]
 		));
 
@@ -85,8 +85,8 @@ export async function VerifySetupStruct() {
 
 	if (FILEMAN.path.ifFolder(CACHE.PATH.folder.scaffold.path)) {
 		const errors: Record<string, string> = {};
-		await FILEMAN.write.file(CACHE.PATH.md.reference.path, CACHE.SYNC.MARKDOWN.readme.content);
-		await FILEMAN.write.file(CACHE.PATH.md.agentic.path, CACHE.SYNC.MARKDOWN.agentic.content);
+		await FILEMAN.write.file(CACHE.PATH.md.documentation.path, CACHE.SYNC.MARKDOWN.readme.content);
+		await FILEMAN.write.file(CACHE.PATH.md.instructions.path, CACHE.SYNC.MARKDOWN.instructions.content);
 		await FILEMAN.clone.safe(CACHE.PATH.blueprint.scaffold.path, CACHE.PATH.folder.scaffold.path);
 
 		$.TASK("Verifying directory status", 0);
@@ -107,7 +107,7 @@ export async function VerifySetupStruct() {
 				: $.MAKE($.tag.H4("Error Paths", $.preset.failed), $$.ListProps(errors), [$.list.Bullets, 0, $.preset.failed]);
 	} else {
 		result.report = $.MAKE(
-			$.tag.H4("XCSS is not yet initialized in directory.", $.preset.warning, $.style.AS_Bold),
+			$.tag.H4("Setup not initialized in directory.", $.preset.warning, $.style.AS_Bold),
 			[`Use "init" command to initialize.`],
 			[$.list.Bullets, 0, $.preset.warning],
 		);
@@ -265,7 +265,7 @@ export async function SaveLibraries() {
 
 export async function SaveExternals() {
 	$.TASK("Updating External Artifacts");
-	CACHE.STATIC.External_Saved = await FILEMAN.read.bulk(CACHE.PATH.folder.external.path, ["xcss", "css", "md"]);
+	CACHE.STATIC.External_Saved = await FILEMAN.read.bulk(CACHE.PATH.folder.external.path, [CACHE.ROOT.extension, "css", "md"]);
 }
 
 
@@ -276,17 +276,17 @@ export async function SaveTargets() {
 	CACHE.STATIC.Targets_Saved = await VERIFY.proxyMapSync(CACHE.STATIC.ProxyMap);
 }
 
-export async function SaveHashrules() {
-	$.TASK("Updating Hashrules", 0);
+export async function SaveShorthand() {
+	$.TASK("Updating Shorthand", 0);
 	const errors: Record<string, string> = {};
 
-	$.STEP("PATH : " + CACHE.PATH.json.hashrules.path);
-	const hashrule = await FILEMAN.read.json(CACHE.PATH.json.hashrules.path);
-	Object.keys(CACHE.STATIC.HashRule).forEach(key => delete CACHE.STATIC.HashRule[key]);
-	if (hashrule.status) {
-		Object.entries(hashrule.data).forEach(([key, value]) => {
+	$.STEP("PATH : " + CACHE.PATH.json.shorthand.path);
+	const shorthand = await FILEMAN.read.json(CACHE.PATH.json.shorthand.path);
+	Object.keys(CACHE.STATIC.Shorthand).forEach(key => delete CACHE.STATIC.Shorthand[key]);
+	if (shorthand.status) {
+		Object.entries(shorthand.data).forEach(([key, value]) => {
 			if (typeof value === "string") {
-				CACHE.STATIC.HashRule[key] = value;
+				CACHE.STATIC.Shorthand[key] = value;
 			} else {
 				errors[key] = `Value of type "STRING".`;
 			}
@@ -299,7 +299,7 @@ export async function SaveHashrules() {
 	return {
 		status: Object.keys(errors).length === 0,
 		report: $.MAKE(
-			$.tag.H4("Hashrule error: " + CACHE.PATH.json.hashrules.path, $.preset.failed),
+			$.tag.H4("Shorthand error: " + CACHE.PATH.json.shorthand.path, $.preset.failed),
 			$$.ListProps(errors, $.preset.primary, $.preset.text),
 			[$.list.Blocks, 0, $.preset.text, $.style.AS_Bold],
 			[$.list.Bullets, 0, $.preset.failed, $.style.AS_Bold]
