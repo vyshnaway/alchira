@@ -260,7 +260,7 @@ function GenFinalSheets(ATTACHMENTS: Set<number>) {
 	const WATCHCLASS = CACHE.STATIC.WATCH
 		? Use.string.minify(Use.code.uncomment.Script(COMPILE.Switched(
 			Object.entries(CACHE.CLASS.Index_to_Data).reduce((A, [I, D]) => {
-				if (D.metadata.summon.length) { A['.__' + D.metadata.watchclass] = Number(I); }
+				if (D.metadata.summon.length) { A['.' + D.metadata.watchclass] = Number(I); }
 				return A;
 			}, {} as Record<string, number>)
 		) + RENDERFRAGS.Attach)) : '';

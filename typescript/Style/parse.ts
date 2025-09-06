@@ -118,7 +118,7 @@ function CSSBulkScanner(fileDatas: _File.Storage[], forPortable = false) {
 						skeleton: Use.object.skeleton(object),
 						declarations: [declaration],
 						summon: '',
-						style: ''
+						attributes: ''
 					},
 					style_object: object,
 					snippet_staple: '',
@@ -218,7 +218,7 @@ function TagStyleScanner(
 				skeleton: Use.object.skeleton(object),
 				declarations: [declaration],
 				summon: raw.elid === CACHE.ROOT.customElements.summon ? raw.attachstring : "",
-				style: raw.styleAttribute
+				attributes: raw.attributeJson
 			},
 			snippet_staple: raw.elid === CACHE.ROOT.customElements.staple ? raw.attachstring : "",
 			attachments: forExternal ?

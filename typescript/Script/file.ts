@@ -92,7 +92,7 @@ export default function scanner(
 						}
 					}
 				} else if (CustomTagElements.includes(result.styleDeclarations.element) && hasDeclared) {
-					result.styleDeclarations.styleAttribute = result.nativeAttributes["style" ] || "";
+					result.styleDeclarations.attributeJson = JSON.stringify(result.nativeAttributes || "");
 					tagTrack.push(result.styleDeclarations);
 				}
 			}

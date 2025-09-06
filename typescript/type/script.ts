@@ -17,7 +17,7 @@ export interface RawStyle {
     tagCount: number,
     rowIndex: number,
     colIndex: number,
-    styleAttribute: string,
+    attributeJson: string,
     tagOpenMarker: number,
     selector: string,
     scope: _style._Type,

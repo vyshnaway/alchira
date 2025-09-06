@@ -40,7 +40,7 @@ export default function scanner(
 			element: "",
 			elvalue: "",
 			selector: "",
-			styleAttribute: "",
+			attributeJson: "",
 			scope: _Style._Type.EXTERNAL,
 			tagCount: ++fileCursor.active.cycle,
 			rowIndex: fileCursor.active.rowMarker,
