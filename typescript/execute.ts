@@ -86,10 +86,10 @@ async function execute(chapter: string) {
             case "ReadTargets": {
                 await FETCH.SaveTargets();
             }
-            case "ReadShorthand": {
-                const shorthandAnalysis = await FETCH.SaveShorthand();
-                if (!shorthandAnalysis.status) {
-                    report = shorthandAnalysis.report;
+            case "ReadHashrule": {
+                const hashruleAnalysis = await FETCH.SaveHashrule();
+                if (!hashruleAnalysis.status) {
+                    report = hashruleAnalysis.report;
                     step = "WatchFolders";
                     break;
                 } else { report = ""; }
@@ -174,8 +174,8 @@ async function execute(chapter: string) {
                                     await FETCH.SaveRootCss();
                                     step = "GenerateFinals";
                                     break;
-                                case CACHE.PATH.json.shorthand.path:
-                                    step = "ReadShorthand";
+                                case CACHE.PATH.json.hashrule.path:
+                                    step = "ReadHashrule";
                                     break;
                                 default:
                                     if (

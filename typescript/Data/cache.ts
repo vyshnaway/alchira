@@ -69,12 +69,12 @@ export const STATIC: _Cache.STATIC = {
     RootPath: "",
     WorkPath: "",
     ProxyMap: [],
-    Shorthand: {},
+    Hashrule: {},
     Artifact: {
         name: '',
         readme: '',
         version: '',
-        shorthand: {},
+        hashrule: {},
     },
     Prefix: {
         atrules: {},
@@ -103,7 +103,7 @@ export const DELTA: _Cache.DELTA = {
         externals: "",
         artifacts: "",
         constants: "",
-        shorthand: "",
+        hashrule: "",
         errors: "",
         memChart: "",
         footer: "",
@@ -128,7 +128,7 @@ export const DELTA: _Cache.DELTA = {
     Manifest: {
         prefix: "",
         constants: [],
-        shorthand: {},
+        hashrules: {},
         filelookup: {},
         errors: [],
         AXIOM: {},
@@ -141,7 +141,7 @@ export const DELTA: _Cache.DELTA = {
 };
 
 export const CLASS: _Cache.CLASS = {
-    Shorthand: {},
+    Hashrule: {},
     Index_to_Data: {},
     Global___Index: {},
     Public___Index: {},
@@ -186,11 +186,11 @@ export const SYNC: Record<string, Record<string, _File.Sync>> = {
             frags: ["documents", "changelog.md"],
             content: "",
         },
-        instructions: {
-            title: "INSTRUCTIONS",
+        guildelines: {
+            title: "guildelines",
             url: "agentic.md",
             path: "",
-            frags: ["documents", "instructions.md"],
+            frags: ["documents", "guildelines.md"],
             content: "",
         },
     },
@@ -311,8 +311,8 @@ export const PATH: Record<string, Record<string, _File.Path>> = {
             content: "",
             essential: true,
         },
-        shorthand: {
-            frags: ["xtyles", "shorthand.jsonc"],
+        hashrule: {
+            frags: ["xtyles", "hashrules.jsonc"],
             path: "",
             content: "",
             essential: true,
@@ -325,14 +325,14 @@ export const PATH: Record<string, Record<string, _File.Path>> = {
             content: "",
             essential: false,
         },
-        documentation: {
-            frags: ["xtyles", "autogen", "documentation.md"],
+        reference: {
+            frags: ["xtyles", "autogen", "reference.md"],
             path: "",
             content: "",
             essential: false,
         },
-        instructions: {
-            frags: ["xtyles", "autogen", "instructions.md"],
+        guildelines: {
+            frags: ["xtyles", "autogen", "guildelines.md"],
             path: "",
             content: "",
             essential: false,
@@ -341,19 +341,19 @@ export const PATH: Record<string, Record<string, _File.Path>> = {
     autogen: {
         index: {
             path: "",
-            frags: ["xtyles", "autogen", "watch", "index.css"],
+            frags: ["xtyles", "autogen", "preview", "index.css"],
             content: "",
             essential: false,
         },
-        styles: {
+        watch: {
             path: "",
-            frags: ["xtyles", "autogen", "watch", "styles.css"],
+            frags: ["xtyles", "autogen", "preview", "watch.css"],
             content: "",
             essential: false,
         },
         staple: {
             path: "",
-            frags: ["xtyles", "autogen", "watch", "staple.htm"],
+            frags: ["xtyles", "autogen", "preview", "staple.htm"],
             content: "",
             essential: false,
         },

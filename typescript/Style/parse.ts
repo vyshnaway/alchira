@@ -11,7 +11,7 @@ import * as INDEX from "../data/index.js";
 
 import Use from "../utils/main.js";
 import CSSBlockScanner from "./block.js";
-import SHORTHAND from "../shorthand.js";
+import HASHRULE from "../hashrule.js";
 
 function MERGER(classList: string[] = [], refpacks: boolean, flatmerge: boolean) {
 	const
@@ -174,9 +174,9 @@ function TagStyleScanner(
 			if (subSelector === "") {
 				object[""] = styleScanned.styles;
 			} else {
-				const query = SHORTHAND.RENDER(subSelector, declaration);
+				const query = HASHRULE.RENDER(subSelector, declaration);
 				if (query.status) {
-					SHORTHAND.WRAPPER(object, query.wrappers.reverse(), styleScanned.styles);
+					HASHRULE.WRAPPER(object, query.wrappers.reverse(), styleScanned.styles);
 				} else {
 					errors.push(query.error);
 					diagnostics.push(query.diagnostic);

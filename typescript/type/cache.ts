@@ -48,7 +48,7 @@ export interface DELTA {
         externals: string,
         artifacts: string,
         constants: string,
-        shorthand: string,
+        hashrule: string,
         errors: string,
         memChart: string,
         footer: string,
@@ -73,7 +73,7 @@ export interface DELTA {
     Manifest: {
         prefix: string,
         constants: string[],
-        shorthand: Record<string, string>,
+        hashrules: Record<string, string>,
         filelookup: Record<string, _file.Lookup>,
         AXIOM: Record<string, _file.ClassMetaMap>,
         CLUSTER: Record<string, _file.ClassMetaMap>,
@@ -99,14 +99,14 @@ export interface STATIC {
     ProxyMap: _config.ProxyMap[],
     Tweaks: _config.Tweaks,
     Prefix: PREFIX,
-    Shorthand: Record<string, string>,
+    Hashrule: Record<string, string>,
     External_Saved: Record<string, string>,
     Library_Saved: Record<string, string>,
     Targets_Saved: Record<string, _config.ProxyStorage>,
 }
 
 export interface CLASS {
-    Shorthand: Record<string, string>,
+    Hashrule: Record<string, string>,
     Index_to_Data: Record<string, _style.Classdata>,
     Global___Index: _style.ClassIndexMap,
     Public___Index: _style.ClassIndexMap,

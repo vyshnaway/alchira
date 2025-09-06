@@ -12,7 +12,7 @@ import * as CACHE from "./data/cache.js";
 import * as INDEX from "./data/index.js";
 
 import Use from "./utils/main.js";
-import SHORTHAND from "./shorthand.js";
+import HASHRULE from "./hashrule.js";
 import STYLE from "./style/parse.js";
 import COMPILE from "./style/render.js";
 import ORDER from "./sort/order-api.js";
@@ -58,7 +58,7 @@ export function SaveToTarget(
 			}
 			break;
 		default:
-			SHORTHAND.UPLOAD();
+			HASHRULE.UPLOAD();
 	}
 
 	if (reCache) {
@@ -294,7 +294,7 @@ export async function Generate() {
 		if (CACHE.STATIC.WATCH) {
 			OUTFILES[CACHE.PATH.autogen.manifest.path] = JSON.stringify(CACHE.DELTA.Manifest);
 			OUTFILES[CACHE.PATH.autogen.index.path] = WATCHINDEX;
-			OUTFILES[CACHE.PATH.autogen.styles.path] = WATCHCLASS;
+			OUTFILES[CACHE.PATH.autogen.watch.path] = WATCHCLASS;
 			OUTFILES[CACHE.PATH.autogen.staple.path] = STAPLEBLOCK;
 		} else {
 			const memChart = Object.entries(RENDERFRAGS).reduce((A, [K, V]) => {

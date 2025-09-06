@@ -85,8 +85,8 @@ export async function VerifySetupStruct() {
 
 	if (FILEMAN.path.ifFolder(CACHE.PATH.folder.scaffold.path)) {
 		const errors: Record<string, string> = {};
-		await FILEMAN.write.file(CACHE.PATH.md.documentation.path, CACHE.SYNC.MARKDOWN.readme.content);
-		await FILEMAN.write.file(CACHE.PATH.md.instructions.path, CACHE.SYNC.MARKDOWN.instructions.content);
+		await FILEMAN.write.file(CACHE.PATH.md.reference.path, CACHE.SYNC.MARKDOWN.readme.content);
+		await FILEMAN.write.file(CACHE.PATH.md.guildelines.path, CACHE.SYNC.MARKDOWN.guildelines.content);
 		await FILEMAN.clone.safe(CACHE.PATH.blueprint.scaffold.path, CACHE.PATH.folder.scaffold.path);
 
 		$.TASK("Verifying directory status", 0);
@@ -276,17 +276,17 @@ export async function SaveTargets() {
 	CACHE.STATIC.Targets_Saved = await VERIFY.proxyMapSync(CACHE.STATIC.ProxyMap);
 }
 
-export async function SaveShorthand() {
-	$.TASK("Updating Shorthand", 0);
+export async function SaveHashrule() {
+	$.TASK("Updating Hashrule", 0);
 	const errors: Record<string, string> = {};
 
-	$.STEP("PATH : " + CACHE.PATH.json.shorthand.path);
-	const shorthand = await FILEMAN.read.json(CACHE.PATH.json.shorthand.path);
-	Object.keys(CACHE.STATIC.Shorthand).forEach(key => delete CACHE.STATIC.Shorthand[key]);
-	if (shorthand.status) {
-		Object.entries(shorthand.data).forEach(([key, value]) => {
+	$.STEP("PATH : " + CACHE.PATH.json.hashrule.path);
+	const hashrule = await FILEMAN.read.json(CACHE.PATH.json.hashrule.path);
+	Object.keys(CACHE.STATIC.Hashrule).forEach(key => delete CACHE.STATIC.Hashrule[key]);
+	if (hashrule.status) {
+		Object.entries(hashrule.data).forEach(([key, value]) => {
 			if (typeof value === "string") {
-				CACHE.STATIC.Shorthand[key] = value;
+				CACHE.STATIC.Hashrule[key] = value;
 			} else {
 				errors[key] = `Value of type "STRING".`;
 			}
@@ -299,7 +299,7 @@ export async function SaveShorthand() {
 	return {
 		status: Object.keys(errors).length === 0,
 		report: $.MAKE(
-			$.tag.H4("Shorthand error: " + CACHE.PATH.json.shorthand.path, $.preset.failed),
+			$.tag.H4("Hashrule error: " + CACHE.PATH.json.hashrule.path, $.preset.failed),
 			$$.ListProps(errors, $.preset.primary, $.preset.text),
 			[$.list.Blocks, 0, $.preset.text, $.style.AS_Bold],
 			[$.list.Bullets, 0, $.preset.failed, $.style.AS_Bold]

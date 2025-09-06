@@ -2,9 +2,9 @@ import * as $$ from "./shell.js";
 import * as CACHE from "./data/cache.js";
 import Use from "./utils/main.js";
 
-const hashPattern = /\$\{[a-z0-9-]+\}/i;
+const hashPattern = /#\{[a-z0-9-]+\}/i;
 
-function IMPORT(rule: string, watchUndef = true, source = CACHE.PATH.json.shorthand.path) {
+function IMPORT(rule: string, watchUndef = true, source = CACHE.PATH.json.hashrule.path) {
 	const primitive = rule;
 	const recursionSequence: string[] = [];
 	const preview: Record<string, string> = {};
@@ -14,7 +14,7 @@ function IMPORT(rule: string, watchUndef = true, source = CACHE.PATH.json.shorth
 		cause = '',
 		message = '',
 	) => {
-		const E = $$.ShorthandError(
+		const E = $$.HashruleError(
 			primitive,
 			cause,
 			source,
@@ -35,15 +35,15 @@ function IMPORT(rule: string, watchUndef = true, source = CACHE.PATH.json.shorth
 		const match = rgxMatch[0];
 		const key = match.slice(2, -1);
 		const replacement = watchUndef
-			? CACHE.CLASS.Shorthand[key]
-			: (CACHE.CLASS.Shorthand[key] ?? match);
+			? CACHE.CLASS.Hashrule[key]
+			: (CACHE.CLASS.Hashrule[key] ?? match);
 		preview["FROM " + match] = `GETS ${replacement} FROM ${rule}`;
 
 		if (replacement === undefined) {
-			return response('', match, "Undefined Shorthand.");
+			return response('', match, "Undefined Hashrule.");
 		}
 		if (recursionSequence.includes(match)) {
-			return response('', match, "Shorthand recursion loop.");
+			return response('', match, "Hashrule recursion loop.");
 		}
 		rule = rule.replace(hashPattern, replacement);
 
@@ -55,23 +55,23 @@ function IMPORT(rule: string, watchUndef = true, source = CACHE.PATH.json.shorth
 
 function UPLOAD() {
 	const errors: string[] = [];
-	CACHE.CLASS.Shorthand = CACHE.STATIC.Shorthand;
-	const shorthand = { ...CACHE.STATIC.Shorthand };
+	CACHE.CLASS.Hashrule = CACHE.STATIC.Hashrule;
+	const hashrule = { ...CACHE.STATIC.Hashrule };
 
-	Object.keys(shorthand).map((key) => {
-		const hash = `\${${key}}`;
+	Object.keys(hashrule).map((key) => {
+		const hash = `#{${key}}`;
 		const response = IMPORT(hash);
 		if (response.status) {
-			shorthand[key] = response.result;
+			hashrule[key] = response.result;
 		} else {
-			delete shorthand[key];
+			delete hashrule[key];
 			errors.push(response.error);
 		}
 	});
 
-	CACHE.CLASS.Shorthand = shorthand;
-	CACHE.DELTA.Manifest.shorthand = shorthand;
-	CACHE.DELTA.Report.shorthand = $$.ShorthandReport(shorthand, errors);
+	CACHE.CLASS.Hashrule = hashrule;
+	CACHE.DELTA.Manifest.hashrules = hashrule;
+	CACHE.DELTA.Report.hashrule = $$.HashruleReport(hashrule, errors);
 }
 
 function RENDER(string: string, sourcePath: string) {

@@ -3,10 +3,8 @@ import palletes from "./color.js";
 
 import * as CACHE from "../data/cache.js";
 
-const VENDORS = CACHE.ROOT.vendors;
 
-
-function forAttribute(content: string, prefixes = VENDORS) {
+function forAttribute(content: string, prefixes = CACHE.ROOT.vendors) {
 	const attrVals = CACHE.STATIC.Prefix.attributes[content];
 	if (!attrVals) { return { "": content }; }
 
@@ -19,7 +17,7 @@ function forAttribute(content: string, prefixes = VENDORS) {
 	return result;
 }
 
-function forValues(attribute: string, value: string, prefixes = VENDORS) {
+function forValues(attribute: string, value: string, prefixes = CACHE.ROOT.vendors) {
 	const cleanValue = Use.code.uncomment.Css(value);
 	const venVals = CACHE.STATIC.Prefix.values?.[attribute]?.[cleanValue];
 	if (!venVals) { return { "": value }; }
@@ -38,7 +36,7 @@ function forValues(attribute: string, value: string, prefixes = VENDORS) {
 export function LoadProps(
 	attribute = "",
 	value = "",
-	prefixes = VENDORS,
+	prefixes = CACHE.ROOT.vendors,
 ) {
 	const results: [string, string][] = [];
 	const attributes = forAttribute(attribute, prefixes);
@@ -60,7 +58,7 @@ export function LoadProps(
 
 export function forAtRule(
 	content = "",
-	prefixes = VENDORS,
+	prefixes = CACHE.ROOT.vendors,
 ) {
 	let index = content.indexOf(" ");
 	index = index < 0 ? content.length : index;
@@ -79,12 +77,12 @@ export function forAtRule(
 
 export function forPseudos(
 	content = "",
-	prefixes = VENDORS,
+	prefixes = CACHE.ROOT.vendors,
 ) {
 	const stringList = Use.string.zeroBreaks(content, [","]).map((i) => i.trim()), selectors: string[] = [];
 	stringList.forEach((string = "") => {
 
-		const result = Object.fromEntries([...VENDORS, ""].map(ven => [ven, { out: "", score: 0 }]));
+		const result = Object.fromEntries([...CACHE.ROOT.vendors, ""].map(ven => [ven, { out: "", score: 0 }]));
 
 		prefixes.forEach((group) => {
 			result[group].out = string.replace(/:+[\w-]+/g, (selector) => {
