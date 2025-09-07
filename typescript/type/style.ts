@@ -49,7 +49,7 @@ export interface Metadata {
     watchclass: string,
     variables: Record<string, string>,
     summon: string,
-    attributes: string
+    attributes: Record<string,string>
 }
 
 export interface Classdata {

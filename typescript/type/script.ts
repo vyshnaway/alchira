@@ -17,13 +17,13 @@ export interface RawStyle {
     tagCount: number,
     rowIndex: number,
     colIndex: number,
-    attributeJson: string,
     tagOpenMarker: number,
-    selector: string,
+    symclasses: string[],
     scope: _style._Type,
     comments: string[],
-    styles: Record<string, string>
     attachstring: string,
+    styles: Record<string, string>
+    attributes: Record<string, string>,
 }
 
 export interface Cumulated {

@@ -65,7 +65,7 @@ export default function FILING(
 		) + (
 			((idn > 0) && (extension === "css") && (normalCluster !== "-")) ? normalCluster : ""
 		) + (
-			isLibrary ? "$".repeat(idn) : ""
+			(fromXtylesFolder && extension === "css") ? "$".repeat(idn) : ""
 		);
 
 	const result: _File.Storage = {

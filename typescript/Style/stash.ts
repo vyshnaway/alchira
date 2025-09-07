@@ -133,8 +133,12 @@ function ReRender() {
 	const ExternalSkeletons = externalArray.reduce((collection, fileData) => {
 		const indexMetaCollection = collection[fileData.filePath] = {} as Record<string, _Style.Metadata>;
 		SCRIPTFILE(fileData).stylesList.forEach((tagStyle) => {
-			if (tagStyle.selector === "") {
-				const E = $$.GenerateError(`Missing Declaration: ${tagStyle.selector}`, [`${fileData.filePath}:${tagStyle.rowIndex}:${tagStyle.colIndex}`]);
+			if (tagStyle.symclasses.length === 0) {
+				const E = $$.GenerateError("Symclass missing declaration scope.", [`${fileData.filePath}:${tagStyle.rowIndex}:${tagStyle.colIndex}`]);
+				fileData.manifesting.errors.push(E.error);
+				fileData.manifesting.diagnostics.push(E.diagnostic);
+			} else if (tagStyle.symclasses.length > 1) {
+				const E = $$.GenerateError("Multiple Symclasses declaration scope.", [`${fileData.filePath}:${tagStyle.rowIndex}:${tagStyle.colIndex}`]);
 				fileData.manifesting.errors.push(E.error);
 				fileData.manifesting.diagnostics.push(E.diagnostic);
 			} else {

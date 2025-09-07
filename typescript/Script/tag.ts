@@ -39,8 +39,8 @@ export default function scanner(
 			elid: 0,
 			element: "",
 			elvalue: "",
-			selector: "",
-			attributeJson: "",
+			symclasses: [],
+			attributes: {},
 			scope: _Style._Type.EXTERNAL,
 			tagCount: ++fileCursor.active.cycle,
 			rowIndex: fileCursor.active.rowMarker,
@@ -91,20 +91,21 @@ export default function scanner(
 				} else if (tr_Attr === "&" && tr_Value.length) {
 					styleDeclarations.comments.push(...tr_Value.slice(1, -1).split("\n").map(l => l.trim()));
 				} else if (/^[\w\-]+\$+[\w\-]+$/i.test(tr_Attr)) {
-					styleDeclarations.selector = tr_Attr;
-					if (tr_Attr.includes("$$$$")) {
-						styleDeclarations.selector = '';
-						styleDeclarations.scope = _Style._Type.NULL;
-					} else if (fileData.manifesting.lookup.type === "EXTERNAL") {
-						styleDeclarations.scope = _Style._Type.EXTERNAL;
-					} else if (tr_Attr.includes("$$$")) {
-						styleDeclarations.scope = _Style._Type.PUBLIC;
-					} else if (tr_Attr.includes("$$")) {
-						styleDeclarations.scope = _Style._Type.GLOBAL;
-					} else {
-						styleDeclarations.scope = _Style._Type.LOCAL;
+					if (styleDeclarations.symclasses.length === 0) {
+						if (tr_Attr.includes("$$$$")) {
+							styleDeclarations.scope = _Style._Type.NULL;
+						} else if (fileData.manifesting.lookup.type === "EXTERNAL") {
+							styleDeclarations.scope = _Style._Type.EXTERNAL;
+						} else if (tr_Attr.includes("$$$")) {
+							styleDeclarations.scope = _Style._Type.PUBLIC;
+						} else if (tr_Attr.includes("$$")) {
+							styleDeclarations.scope = _Style._Type.GLOBAL;
+						} else {
+							styleDeclarations.scope = _Style._Type.LOCAL;
+						}
+						if (tr_Value) { styleDeclarations.styles[""] = tr_Value; }
 					}
-					if (tr_Value) { styleDeclarations.styles[""] = tr_Value; }
+					styleDeclarations.symclasses.push(tr_Attr);
 				} else if (tr_Attr.endsWith("&") && tr_Value.length) {
 					styleDeclarations.styles[tr_Attr] = tr_Value;
 				} else if (classProps.includes(tr_Attr)) {

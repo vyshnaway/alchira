@@ -45,7 +45,7 @@ export default function scanner(
 			const tagStart = fileCursor.active.marker;
 			const result = TAGSCAN(fileData, classProps, action, fileCursor);
 			const fragment = content.slice(tagStart, result.styleDeclarations.tagOpenMarker);
-			const hasDeclared = Object.keys(result.styleDeclarations.styles).length || result.styleDeclarations.selector.length;
+			const hasDeclared = Object.keys(result.styleDeclarations.styles).length || result.styleDeclarations.symclasses.length;
 
 			if (result.ok) {
 				classesList.push(...result.classesList);
@@ -92,7 +92,7 @@ export default function scanner(
 						}
 					}
 				} else if (CustomTagElements.includes(result.styleDeclarations.element) && hasDeclared) {
-					result.styleDeclarations.attributeJson = JSON.stringify(result.nativeAttributes || "");
+					result.styleDeclarations.attributes = result.nativeAttributes;
 					tagTrack.push(result.styleDeclarations);
 				}
 			}
@@ -104,6 +104,6 @@ export default function scanner(
 
 	} while (fileCursor.active.marker < content.length);
 	fileData.styleData.tagReplacements.push([0, 0]);
-
+	
 	return { stream, classesList, stylesList, attachments };
 }

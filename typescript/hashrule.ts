@@ -80,6 +80,7 @@ function RENDER(string: string, sourcePath: string) {
 	const wrappers: string[] = [];
 
 	snippets.forEach(snippet => {
+		snippet = snippet.trim();
 		const length = snippet.length;
 		let wrapper = '', deviance = 0, splAtrule = false;
 
@@ -96,9 +97,11 @@ function RENDER(string: string, sourcePath: string) {
 						wrapper += "";
 						break;
 					case "@":
+						if (wrapper.length) {
+							wrapper += " ";
+							splAtrule = true;
+						}
 						wrapper = "@" + wrapper;
-						if (wrapper.length === 0) { splAtrule = true; }
-						wrapper += " ";
 						break;
 					default:
 						wrapper += ch;

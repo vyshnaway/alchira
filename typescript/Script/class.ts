@@ -80,8 +80,12 @@ export default class C_Proxy {
 		FILE.styleData.attachments.push(...ParseResponse.attachments);
 
 		ParseResponse.stylesList.forEach((tagStyle) => {
-			if (tagStyle.selector === "") {
-				const E = $$.GenerateError("Classname missing declaration scope.", [`${FILE.targetPath}:${tagStyle.rowIndex}:${tagStyle.colIndex}`]);
+			if (tagStyle.symclasses.length === 0) {
+				const E = $$.GenerateError("Symclass missing declaration scope.", [`${FILE.targetPath}:${tagStyle.rowIndex}:${tagStyle.colIndex}`]);
+				FILE.manifesting.errors.push(E.error);
+				FILE.manifesting.diagnostics.push(E.diagnostic);
+			} else if (tagStyle.symclasses.length > 1) {
+				const E = $$.GenerateError("Multiple Symclasses declaration scope.", [`${FILE.targetPath}:${tagStyle.rowIndex}:${tagStyle.colIndex}`]);
 				FILE.manifesting.errors.push(E.error);
 				FILE.manifesting.diagnostics.push(E.diagnostic);
 			} else {

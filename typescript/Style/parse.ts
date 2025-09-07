@@ -118,7 +118,7 @@ function CSSBulkScanner(fileDatas: _File.Storage[], forPortable = false) {
 						skeleton: Use.object.skeleton(object),
 						declarations: [declaration],
 						summon: '',
-						attributes: ''
+						attributes: {}
 					},
 					style_object: object,
 					snippet_staple: '',
@@ -158,13 +158,14 @@ function TagStyleScanner(
 	const attachments: string[] = [];
 	const variables = {};
 
-	const classname = raw.selector === "" ? "" : file.classFront + raw.selector.replace(/^-\$/, "$").replace("$$$", "$");
+	const symclass = raw.symclasses[0];
+	const classname = symclass === "" ? "" : file.classFront + symclass.replace(/^-\$/, "$").replace("$$$", "$");
 	const debugclass = `${scope}${file.debugclassFront}\\:${raw.rowIndex}\\:${raw.colIndex}_${Use.string.normalize(classname, [], [], forExternal ? ["$", "/"] : ["$"])}`;
 
 	for (const subSelector in raw.styles) {
 		const styleScanned = SCANNER(
 			Use.code.uncomment.Script(raw.styles[subSelector]),
-			`${raw.scope} : ${file.filePath} ||`, `${raw.selector} => ${subSelector}`,
+			`${raw.scope} : ${file.filePath} ||`, `${raw.symclasses} => ${subSelector}`,
 			false, subSelector !== ""
 		);
 		attachments.push(...styleScanned.attachments);
@@ -185,6 +186,7 @@ function TagStyleScanner(
 		}
 	}
 
+	// eslint-disable-next-line prefer-const
 	let { index, group } = INDEX.FIND(classname, false, IndexMap);
 	if (
 		_Style._Type.EXTERNAL === group ||
@@ -198,17 +200,16 @@ function TagStyleScanner(
 		const style_snippet = SCANNER(
 			raw.elid === CACHE.ROOT.customElements.style ? Use.code.uncomment.Script(raw.attachstring) : '',
 			`${raw.scope}:ATTACHMENT : ${file.filePath} ||`,
-			`${raw.selector}`,
+			`${raw.symclasses}`,
 			true, true
 		);
 
 		attachments.push(...style_snippet.attachments);
 		Object.assign(variables, style_snippet.variables);
 
-		group = _Style._Type.NULL;
 		index = INDEX.DECLARE({
 			artifact: forExternal ? file.artifact : CACHE.STATIC.Artifact.name,
-			selector: raw.selector,
+			selector: raw.symclasses[0],
 			style_object: object,
 			classname,
 			metadata: {
@@ -218,7 +219,7 @@ function TagStyleScanner(
 				skeleton: Use.object.skeleton(object),
 				declarations: [declaration],
 				summon: raw.elid === CACHE.ROOT.customElements.summon ? raw.attachstring : "",
-				attributes: raw.attributeJson
+				attributes: raw.elid === CACHE.ROOT.customElements.summon ? raw.attributes : {}
 			},
 			snippet_staple: raw.elid === CACHE.ROOT.customElements.staple ? raw.attachstring : "",
 			attachments: forExternal ?
