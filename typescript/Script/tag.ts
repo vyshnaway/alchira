@@ -88,8 +88,10 @@ export default function scanner(
 					styleDeclarations.elid = CACHE.ROOT.customElements[tr_Attr] || 0;
 					styleDeclarations.element = tr_Attr;
 					styleDeclarations.elvalue = tr_Value;
-				} else if (tr_Attr === "&" && tr_Value.length) {
-					styleDeclarations.comments.push(...tr_Value.slice(1, -1).split("\n").map(l => l.trim()));
+				} else if (tr_Attr === "&") {
+					if (tr_Value.length) {
+						styleDeclarations.comments.push(...tr_Value.slice(1, -1).split("\n").map(l => l.trim()));
+					}
 				} else if (/^[\w\-]+\$+[\w\-]+$/i.test(tr_Attr)) {
 					if (styleDeclarations.symclasses.length === 0) {
 						if (tr_Attr.includes("$$$$")) {
@@ -106,8 +108,10 @@ export default function scanner(
 						if (tr_Value) { styleDeclarations.styles[""] = tr_Value; }
 					}
 					styleDeclarations.symclasses.push(tr_Attr);
-				} else if (tr_Attr.endsWith("&") && tr_Value.length) {
-					styleDeclarations.styles[tr_Attr] = tr_Value;
+				} else if (tr_Attr.endsWith("&")) {
+					if (tr_Value.length) {
+						styleDeclarations.styles[tr_Attr] = tr_Value;
+					}
 				} else if (classProps.includes(tr_Attr)) {
 					classSynced = true;
 					const result = VALUE(tr_Value, action, fileData, fileCursor.active);
