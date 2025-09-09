@@ -254,7 +254,7 @@ function GenFinalSheets(ATTACHMENTS: Set<number>) {
 	Object.values(CACHE.FILES.TARGETS).forEach((cache) => cache.SyncClassnames(targetRenderAction));
 	RENDERFRAGS.Class = COMPILE.Switched(CACHE.CLASS.Sync_PublishIndexMap);
 
-	const STAPLEBLOCK = Use.string.minify(Use.code.uncomment.Script(ATTACH_STAPLES.join(""), false, false, true));
+	const STAPLESHEET = Use.string.minify(Use.code.uncomment.Script(ATTACH_STAPLES.join(""), false, false, true));
 	const STYLESHEET = Object.entries(RENDERFRAGS)
 		.map(([chapter, content]) => CACHE.STATIC.DEBUG ? `\n\n/* CHAPTER: ${chapter} */\n${content}\n` : content).join("");
 	const WATCHCLASS = CACHE.STATIC.WATCH
@@ -265,7 +265,7 @@ function GenFinalSheets(ATTACHMENTS: Set<number>) {
 			}, {} as Record<string, number>)
 		) + RENDERFRAGS.Attach)) : '';
 
-	return { RENDERFRAGS, STYLESHEET, STAPLEBLOCK, WATCHINDEX, WATCHCLASS };
+	return { RENDERFRAGS, STYLESHEET, STAPLESHEET, WATCHINDEX, WATCHCLASS };
 }
 
 // On target stylesheet edit.
@@ -280,22 +280,22 @@ export async function Generate() {
 		const {
 			RENDERFRAGS,
 			STYLESHEET,
-			STAPLEBLOCK,
+			STAPLESHEET,
 			WATCHINDEX,
 			WATCHCLASS
 		} = GenFinalSheets(new Set(ATTACHMENTS));
 
 		const STYLEBLOCK = `\n<style>${STYLESHEET}</style>`;
-		const SUMMONBLOCK = `${STYLEBLOCK}\n<div>${STAPLEBLOCK}</div>`;
+		const STAPLEBLOCK = `<div>${STAPLESHEET}</div>`;
 		Object.values(CACHE.FILES.TARGETS).forEach((cache) => {
-			cache.SummonFiles(OUTFILES, STYLESHEET, SUMMONBLOCK, STAPLEBLOCK);
+			cache.SummonFiles(OUTFILES, STYLESHEET, STYLEBLOCK, STAPLEBLOCK);
 		});
 
 		if (CACHE.STATIC.WATCH) {
 			OUTFILES[CACHE.PATH.autogen.manifest.path] = JSON.stringify(CACHE.DELTA.Manifest);
 			OUTFILES[CACHE.PATH.autogen.index.path] = WATCHINDEX;
 			OUTFILES[CACHE.PATH.autogen.watch.path] = WATCHCLASS;
-			OUTFILES[CACHE.PATH.autogen.staple.path] = STAPLEBLOCK;
+			OUTFILES[CACHE.PATH.autogen.staple.path] = STAPLESHEET;
 		} else {
 			const memChart = Object.entries(RENDERFRAGS).reduce((A, [K, V]) => {
 				A[K] = `${Use.string.stringMem(V)} Kb`.padStart(9, " ");

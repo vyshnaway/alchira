@@ -13,7 +13,7 @@ import Use from "../utils/main.js";
 import CSSBlockScanner from "./block.js";
 import HASHRULE from "../hashrule.js";
 
-function MERGER(classList: string[] = [], refpacks: boolean, flatmerge: boolean) {
+function MERGER(classList: string[] = [], refer_externals: boolean) {
 	const
 		attachments: string[] = [],
 		mergables: object[] = [],
@@ -23,7 +23,7 @@ function MERGER(classList: string[] = [], refpacks: boolean, flatmerge: boolean)
 		const found = INDEX.FIND(className);
 
 		if (
-			(refpacks && found.group === _Style._Type.EXTERNAL)
+			(refer_externals && found.group === _Style._Type.EXTERNAL)
 			|| found.group === _Style._Type.ARTATTACH
 			|| found.group === _Style._Type.LIBRARY
 		) {
@@ -33,51 +33,61 @@ function MERGER(classList: string[] = [], refpacks: boolean, flatmerge: boolean)
 			mergables.push(classdata.style_object);
 		}
 	});
-	const result = flatmerge ? Use.object.multiMerge(mergables, true) :
-		Object.entries(Use.object.multiMerge(mergables, true)).reduce((a, [k, v]) => {
-			if (k === "") {
-				Object.assign(a, v);
-			} else {
-				a[k] = v;
-			}
-			return a;
-		}, {} as Record<string, string | object>);
+	const result = Use.object.multiMerge(mergables, true);
 
 	return { result, attachments, variables };
 }
 
-function SCANNER(content: string, initial: string, sourceSelector: string, refpacks: boolean, flatmerge: boolean) {
+function SCANNER(content: string, initial: string, sourceSelector: string, refer_externals: boolean, merge_n_flatten: boolean) {
 	const scanned = CSSBlockScanner(content);
-	const assigned = MERGER(scanned.assign, refpacks, flatmerge);
-	const variables = { ...scanned.variables, ...assigned.variables };
+	const assigned = MERGER(scanned.assign, refer_externals);
+	const variables = { ...assigned.variables, ...scanned.variables };
 	const attachments = [...assigned.attachments, ...scanned.attachment.filter(attach => attach[0] !== "/")];
 
-	const styles = Use.object.deepMerge(assigned.result, Object.fromEntries([
+	const scannedAst = Object.fromEntries([
+		...Object.keys(assigned.variables).reduce((acc, varkey) => {
+			if (scanned.properties[varkey]) {
+				acc.push([varkey, CACHE.STATIC.DEBUG ? `${scanned.properties[varkey]}/* ${initial} ${sourceSelector} */` : scanned.properties[varkey]]);
+			}
+			return acc;
+		}, [] as [string, string][]),
 		...Object.entries(scanned.atProps).map(([propKey, propValue]) =>
 			[propKey, CACHE.STATIC.DEBUG ? `${propValue}/* ${initial} ${sourceSelector} */` : propValue]
 		),
 		...Object.entries(scanned.properties).map(([propKey, propValue]) =>
 			[propKey, CACHE.STATIC.DEBUG ? `${propValue}/* ${initial} ${sourceSelector} */` : propValue]
 		)
-	]));
+	]);
+
+	const mergedAst = Use.object.multiMerge([assigned.result, { "": scannedAst }], true);
+
+	const styles = merge_n_flatten ? Object.entries(mergedAst).reduce((a, [k, v]) => {
+		if (k === "") {
+			Object.assign(a, v);
+		} else {
+			a[k] = v;
+		}
+		return a;
+	}, {} as Record<string, string | object>) : mergedAst;
+	const target = merge_n_flatten ? styles : styles[""];
 
 	for (const selector in scanned.allBlocks) {
-		const result = SCANNER(scanned.allBlocks[selector], initial, sourceSelector + " -> " + selector, refpacks, true);
+		const result = SCANNER(scanned.allBlocks[selector], initial, sourceSelector + " -> " + selector, refer_externals, true);
 		Object.assign(variables, result.variables);
 		attachments.push(...result.attachments);
-		styles[selector] = result.styles;
+		target[selector] = result.styles;
 	}
 
-	return { styles, attachments, variables: variables };
+	return { styles, attachments, variables };
 }
 
-function CSSFileScanner(content: string, initial = "", refpacks: boolean) {
+function CSSFileScanner(content: string, initial = "", refer_externals = false) {
 	const scanned = CSSBlockScanner(Use.code.uncomment.Script(content), true);
 	const styles: [string, string | object][] = scanned.XatProps;
 
 	const variables: Record<string, string> = {}, attachments: string[] = [];
 	scanned.XallBlocks.forEach(([key, value]) => {
-		const result = SCANNER(value, initial, key, refpacks, true);
+		const result = SCANNER(value, initial, key, refer_externals, true);
 		Object.assign(variables, result.variables);
 		attachments.push(...result.attachments);
 		styles.push([key, result.styles]);
@@ -98,9 +108,9 @@ function CSSBulkScanner(fileDatas: _File.Storage[], forPortable = false) {
 		CSSBlockScanner(Use.code.uncomment.Script(content), true).XallBlocks.forEach(([SELECTOR, OBJECT]) => {
 			const declaration = source.sourcePath;
 			const classname = classFront + Use.string.normalize(SELECTOR, [], ["\\", "."]);
-			const scannedStyle = SCANNER(OBJECT, `${manifest.lookup.type} : ${filePath} ||`, SELECTOR, false, false);
+			const scannedStyle = SCANNER(OBJECT, `${manifest.lookup.type} : ${filePath} | `, SELECTOR, false, false);
 			const attachments = scannedStyle.attachments;
-			const object = { "": scannedStyle.styles };
+			const object = scannedStyle.styles;
 
 			const index = (IndexMap[classname] || 0) + (selectors[classname] || 0);
 			if (index) {
@@ -152,48 +162,47 @@ function TagStyleScanner(
 	const forExternal = file.manifesting.lookup.type === "EXTERNAL";
 	const declaration = `${file.targetPath}:${raw.rowIndex}:${raw.colIndex}`;
 
-	const object: Record<string, Record<string, object>> = {};
 	const diagnostics: _Support.Diagnostic[] = [];
 	const errors: string[] = [];
-	const attachments: string[] = [];
-	const variables = {};
 
 	const symclass = raw.symclasses[0];
 	const classname = symclass === "" ? "" : file.classFront + symclass.replace(/^-\$/, "$").replace("$$$", "$");
-	const debugclass = `${scope}${file.debugclassFront}\\:${raw.rowIndex}\\:${raw.colIndex}_${Use.string.normalize(classname, [], [], forExternal ? ["$", "/"] : ["$"])}`;
+	const debugclass = `${_Style._Import[scope]}${file.debugclassFront}\\:${raw.rowIndex}\\:${raw.colIndex}_${Use.string.normalize(classname, [], [], forExternal ? ["$", "/"] : ["$"])}`;
 
+	const styleScanned = SCANNER(
+		Use.code.uncomment.Script(raw.styles['']),
+		`${raw.scope} : ${file.filePath} ||`, `${raw.symclasses} => []`,
+		false, false
+	);
+	const object: Record<string, Record<string, object>> = styleScanned.styles;
+	const attachments: string[] = styleScanned.attachments;
+	const variables: Record<string, string> = styleScanned.variables;
 	for (const subSelector in raw.styles) {
-		const styleScanned = SCANNER(
-			Use.code.uncomment.Script(raw.styles[subSelector]),
-			`${raw.scope} : ${file.filePath} ||`, `${raw.symclasses} => ${subSelector}`,
-			false, subSelector !== ""
-		);
-		attachments.push(...styleScanned.attachments);
-		Object.assign(variables, styleScanned.variables);
-
-		if (Object.keys(styleScanned).length) {
-			if (subSelector === "") {
-				object[""] = styleScanned.styles;
-			} else {
-				const query = HASHRULE.RENDER(subSelector, declaration);
-				if (query.status) {
-					HASHRULE.WRAPPER(object, query.wrappers.reverse(), styleScanned.styles);
-				} else {
-					errors.push(query.error);
-					diagnostics.push(query.diagnostic);
+		if (subSelector !== "") {
+			const query = HASHRULE.RENDER(subSelector, declaration);
+			if (query.status) {
+				const styleScanned = SCANNER(
+					Use.code.uncomment.Script(raw.styles[subSelector]),
+					`${raw.scope} : ${file.filePath} ||`, `${raw.symclasses} => ${subSelector}`,
+					false, true
+				);
+				attachments.push(...styleScanned.attachments);
+				Object.assign(variables, styleScanned.variables);
+				if (Object.keys(styleScanned).length) {
+					object[query.wrappers[0]] = styleScanned.styles;
+					// HASHRULE.WRAPPER(object, query.wrappers.reverse(), styleScanned.styles);
 				}
+			} else {
+				errors.push(query.error);
+				diagnostics.push(query.diagnostic);
 			}
 		}
 	}
+	// console.log(object);
 
 	// eslint-disable-next-line prefer-const
 	let { index, group } = INDEX.FIND(classname, false, IndexMap);
-	if (
-		_Style._Type.EXTERNAL === group ||
-		_Style._Type.LIBRARY === group ||
-		_Style._Type.GLOBAL === group ||
-		_Style._Type.LOCAL === group
-	) {
+	if (group !== _Style._Type.NULL) {
 		const InStash = INDEX.FETCH(index);
 		InStash.metadata.declarations.push(declaration);
 	} else {

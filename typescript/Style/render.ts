@@ -60,7 +60,7 @@ function LoadVendors(collection = {}, vendor = "") {
 		) : [vendor];
 }
 
-function stylePartialsArray(object: t_styleSorceTemplate, vendors = LoadVendors()) {
+function partialsArrayPrefixer(object: t_styleSorceTemplate, vendors = LoadVendors()) {
 	const result: [string, string | object][] = [];
 	Object.entries(object).forEach(([key, value]) => {
 		if (typeof value === "object") {
@@ -83,7 +83,10 @@ function stylePartialsArray(object: t_styleSorceTemplate, vendors = LoadVendors(
 // Pending to handle states &:* states.
 
 function unNester(selector = "", object: object = {}, cumulates: object = {}) {
-	const siblings: t_styleSorceTemplate = {},
+	const
+		compounds: t_styleSorceTemplate = {},
+		pseudoclass: t_styleSorceTemplate = {},
+		pseudoelement: t_styleSorceTemplate = {},
 		children: t_styleSorceTemplate = {},
 		myself: t_styleSorceTemplate = {};
 	const holder: t_styleSorceTemplate = myself[selector] = {};
@@ -92,10 +95,12 @@ function unNester(selector = "", object: object = {}, cumulates: object = {}) {
 		if (typeof subContent === "object") {
 			if (subSelector[0] === "&") {
 				const xelector = selector + subSelector.slice(1);
-				if (subSelector[1] === " " || subSelector[1] === ":" || subSelector[1] !== ":") {
+				if (subSelector[1] === ":") {
+					unNester(xelector, subContent, subSelector[2] === ":" ? pseudoelement : pseudoclass);
+				} else if (subSelector[1] === " " ) {
 					unNester(xelector, subContent, children);
 				} else {
-					unNester(xelector, subContent, siblings);
+					unNester(xelector, subContent, compounds);
 				}
 			} else {
 				unNester(subSelector, subContent, holder);
@@ -105,7 +110,7 @@ function unNester(selector = "", object: object = {}, cumulates: object = {}) {
 		}
 	});
 
-	Object.assign(cumulates, siblings, myself, children);
+	Object.assign(cumulates, compounds, pseudoclass, myself, pseudoelement, children);
 	return cumulates as t_styleSorceTemplate;
 }
 
@@ -119,7 +124,7 @@ function _objectCompose(
 		space = minify ? "" : " ",
 		styleSheet: string[] = [];
 
-	stylePartialsArray(object, vendors).forEach(([key, value]) => {
+	partialsArrayPrefixer(object, vendors).forEach(([key, value]) => {
 		if (typeof value === "object") {
 			if (Object.keys(value).length) {
 				if (!minify && first) { styleSheet.push(""); }
@@ -178,6 +183,7 @@ function ComposePrefixed(array: [string, string | object][], minify = !CACHE.STA
 	array.forEach(([key, value]) => {
 		if (typeof value === "object") {
 			const unNested = unNester(key, value);
+			console.log(unNested);
 			if (Object.keys(unNested).length) {
 				styleSheet.push(..._objectCompose(unNested, minify));
 			}
@@ -187,6 +193,18 @@ function ComposePrefixed(array: [string, string | object][], minify = !CACHE.STA
 	});
 
 	return styleSheet.join(minify ? "" : "\n");
+}
+
+
+function ComposeSwitched(selectorIndexObject: Record<string, number>, minify = !CACHE.STATIC.DEBUG) {
+	const object = styleSwitch(
+		Object.entries(selectorIndexObject).reduce((A: Record<string, Record<string, object>>, [selector, index]) => {
+			A[selector] = INDEX.FETCH(index).style_object;
+			return A;
+		}, {}),
+	);
+
+	return ComposePrefixed(Object.entries(object), minify);
 }
 
 
@@ -214,18 +232,9 @@ function ComposeArtifact(array: [string, object | string][] = [], tab = "  ") {
 }
 
 
-function ComposeSwitched(selectorIndexObject: Record<string, number>, minify = !CACHE.STATIC.DEBUG) {
-	const object = styleSwitch(
-		Object.entries(selectorIndexObject).reduce((A: Record<string, Record<string, object>>, [selector, index]) => {
-			A[selector] = INDEX.FETCH(index).style_object;
-			return A;
-		}, {}),
-	);
-	return ComposePrefixed(Object.entries(object), minify);
-}
 
 export default {
-	Artifact: ComposeArtifact,
 	Prefixed: ComposePrefixed,
 	Switched: ComposeSwitched,
+	Artifact: ComposeArtifact,
 };

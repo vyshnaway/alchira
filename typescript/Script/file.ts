@@ -25,11 +25,11 @@ export default function scanner(
 	fileData.styleData.tagReplacements = [];
 
 	const stylesList = [];
-	const content = fileData.content;
+	const content = (action === _Script._Actions.read) ? fileData.content : fileData.midway;
 	const tagTrack: _Script.RawStyle[] = [];
 	const classesList: string[][] = [];
 	const attachments: string[] = [];
-	const fileCursor = CURSOR.Initialize(fileData.content);
+	const fileCursor = CURSOR.Initialize(content);
 
 	let stream = "";
 
@@ -59,12 +59,12 @@ export default function scanner(
 
 
 				if (_Script._Actions.read === action) {
-					subScribed = !hasDeclared
-						? fragment : result.styleDeclarations.elid
-							? "" : '<' + [
+					subScribed = !hasDeclared ? fragment
+						: result.styleDeclarations.elid ? ""
+							: ('<' + [
 								result.styleDeclarations.element + (result.styleDeclarations.elvalue.length ? `=${result.styleDeclarations.elvalue}` : ''),
 								...Object.entries(result.nativeAttributes).map(([A, V]) => V === "" ? A : `${A}=${V}`)
-							].join(' ') + '>';
+							].join(' ') + '>');
 				} else if (!selfClosingTags[fragment]) {
 					subScribed = result.classSynced ? '<' + [
 						result.styleDeclarations.element + (result.styleDeclarations.elvalue.length ? `=${result.styleDeclarations.elvalue}` : ''),
@@ -104,6 +104,6 @@ export default function scanner(
 
 	} while (fileCursor.active.marker < content.length);
 	fileData.styleData.tagReplacements.push([0, 0]);
-	
+
 	return { stream, classesList, stylesList, attachments };
 }

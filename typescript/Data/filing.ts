@@ -77,7 +77,7 @@ export default function FILING(
 		sourcePath,
 		targetPath,
 		classFront,
-		debugclassFront: `${(fromXtylesFolder) ? group : ""}\\|${USE.string.normalize(targetPath, [], [], ["/", "."])}`,
+		debugclassFront: `${(fromXtylesFolder) ? (group) : ""}\\|${USE.string.normalize(targetPath, [], [], ["/", "."])}`,
 		manifesting: {
 			lookup: {
 				id: isLibrary ? String(idn) : isExternal ? filePath : targetPath,

@@ -62,7 +62,7 @@ export default function scanner(
 		classSynced = false,
 		fallbackAquired = false;
 
-	while (fileCursor.active.marker < fileData.content.length) {
+	while (fileCursor.active.marker < fileCursor.content.length) {
 		const lastCh = fileCursor.active.char;
 		const liveCh = CURSOR.Incremnet(fileCursor);
 		if (lastCh !== "\\") {
@@ -140,7 +140,7 @@ export default function scanner(
 	};
 
 	if (ok) {
-		selfClosed = fileData.content[fileCursor.active.marker - 1] === '/';
+		selfClosed = fileCursor.content[fileCursor.active.marker - 1] === '/';
 		styleDeclarations.tagOpenMarker = fileCursor.active.marker + 1;
 	} else if (fallbackAquired) {
 		Object.assign(fileCursor.active, fileCursor.fallback);

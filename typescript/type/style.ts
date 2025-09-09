@@ -1,12 +1,12 @@
 export enum _Type {
-    NULL = 0,
-    LOCAL = 1,
-    GLOBAL = 2,
-    PUBLIC = 3,
-    LIBRARY = 4,
-    EXTERNAL = 5,
-    ARTIFACT = 6,
-    ARTATTACH = 7,
+    NULL,
+    LOCAL,
+    GLOBAL,
+    PUBLIC,
+    LIBRARY,
+    EXTERNAL,
+    ARTIFACT,
+    ARTATTACH,
 };
 
 export const _Import = [
