@@ -108,7 +108,7 @@ function CSSBulkScanner(fileDatas: _File.Storage[], forPortable = false) {
 		CSSBlockScanner(Use.code.uncomment.Script(content), true).XallBlocks.forEach(([SELECTOR, OBJECT]) => {
 			const declaration = source.sourcePath;
 			const classname = classFront + Use.string.normalize(SELECTOR, [], ["\\", "."]);
-			const scannedStyle = SCANNER(OBJECT, `${manifest.lookup.type} : ${filePath} | `, SELECTOR, false, false);
+			const scannedStyle = SCANNER(OBJECT, `${manifest.lookup.type} : ${filePath} |`, SELECTOR, false, false);
 			const attachments = scannedStyle.attachments;
 			const object = scannedStyle.styles;
 
@@ -183,7 +183,7 @@ function TagStyleScanner(
 			if (query.status) {
 				const styleScanned = SCANNER(
 					Use.code.uncomment.Script(raw.styles[subSelector]),
-					`${_Style._Import[raw.scope]} : ${file.filePath} ||`, `${raw.symclasses} => ${subSelector}`,
+					`${_Style._Import[raw.scope]} : ${file.filePath} |`, `${raw.symclasses} => ${subSelector}`,
 					false, true
 				);
 				attachments.push(...styleScanned.attachments);
@@ -207,7 +207,7 @@ function TagStyleScanner(
 	} else {
 		const style_snippet = SCANNER(
 			raw.elid === CACHE.ROOT.customElements.style ? Use.code.uncomment.Script(raw.attachstring) : '',
-			`${_Style._Import[raw.scope]}:ATTACHMENT : ${file.filePath} ||`,
+			`${_Style._Import[raw.scope]}:ATTACHMENT : ${file.filePath} |`,
 			`${raw.symclasses}`,
 			true, true
 		);
