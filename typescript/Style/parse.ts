@@ -171,7 +171,7 @@ function TagStyleScanner(
 
 	const styleScanned = SCANNER(
 		Use.code.uncomment.Script(raw.styles['']),
-		`${raw.scope} : ${file.filePath} ||`, `${raw.symclasses} => []`,
+		`${_Style._Import[raw.scope]} : ${file.filePath} ||`, `${raw.symclasses} => []`,
 		false, false
 	);
 	const object: Record<string, Record<string, object>> = styleScanned.styles;
@@ -183,7 +183,7 @@ function TagStyleScanner(
 			if (query.status) {
 				const styleScanned = SCANNER(
 					Use.code.uncomment.Script(raw.styles[subSelector]),
-					`${raw.scope} : ${file.filePath} ||`, `${raw.symclasses} => ${subSelector}`,
+					`${_Style._Import[raw.scope]} : ${file.filePath} ||`, `${raw.symclasses} => ${subSelector}`,
 					false, true
 				);
 				attachments.push(...styleScanned.attachments);
@@ -198,7 +198,6 @@ function TagStyleScanner(
 			}
 		}
 	}
-	// console.log(object);
 
 	// eslint-disable-next-line prefer-const
 	let { index, group } = INDEX.FIND(classname, false, IndexMap);
@@ -208,7 +207,7 @@ function TagStyleScanner(
 	} else {
 		const style_snippet = SCANNER(
 			raw.elid === CACHE.ROOT.customElements.style ? Use.code.uncomment.Script(raw.attachstring) : '',
-			`${raw.scope}:ATTACHMENT : ${file.filePath} ||`,
+			`${_Style._Import[raw.scope]}:ATTACHMENT : ${file.filePath} ||`,
 			`${raw.symclasses}`,
 			true, true
 		);

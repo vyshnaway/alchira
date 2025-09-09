@@ -183,7 +183,6 @@ function ComposePrefixed(array: [string, string | object][], minify = !CACHE.STA
 	array.forEach(([key, value]) => {
 		if (typeof value === "object") {
 			const unNested = unNester(key, value);
-			console.log(unNested);
 			if (Object.keys(unNested).length) {
 				styleSheet.push(..._objectCompose(unNested, minify));
 			}

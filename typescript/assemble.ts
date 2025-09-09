@@ -146,7 +146,6 @@ async function Accumulate() {
 function SaveClassRefs(stash: _Style.SortedOutput) {
 	CACHE.CLASS.Sync_ClassDictionary = {};
 	CACHE.CLASS.Sync_PublishIndexMap = {};
-	// console.log(stash);
 	Object.entries(stash.referenceMap).forEach(([iArray, iMap]) => {
 		CACHE.CLASS.Sync_ClassDictionary[iArray] = Object.fromEntries(Object.entries(iMap).map(([ref, id]) => {
 			const className = "_" + Use.string.enCounter(id);
@@ -302,7 +301,7 @@ export async function Generate() {
 				return A;
 			}, {} as Record<string, string>);
 
-			memChart[`[final.css]`] = `${Use.string.stringMem(STYLESHEET)} Kb`.padStart(9, " ");
+			memChart[`[***.css]`] = `${Use.string.stringMem(STYLESHEET)} Kb`.padStart(9, " ");
 
 			CACHE.DELTA.Report.memChart = $.MAKE(
 				$.tag.H2(CACHE.DELTA.FinalMessage, CACHE.DELTA.ErrorCount ? $.preset.failed : $.preset.success),
