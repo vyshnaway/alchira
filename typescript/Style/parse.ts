@@ -207,7 +207,7 @@ function TagStyleScanner(
 	} else {
 		const style_snippet = SCANNER(
 			raw.elid === CACHE.ROOT.customElements.style ? Use.code.uncomment.Script(raw.attachstring) : '',
-			`${_Style._Import[raw.scope]}:ATTACHMENT : ${file.filePath} |`,
+			`${_Style._Import[raw.scope]}:ATTACHMENT : ${file.filePath}:${raw.rowIndex}:${raw.colIndex} |`,
 			`${raw.symclasses}`,
 			true, true
 		);
