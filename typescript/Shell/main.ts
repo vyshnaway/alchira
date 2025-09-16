@@ -49,10 +49,14 @@ function MAKE(
 
 	if (contents.length) { modContents.push(root.fmt()); }
 
-	return [
-		root.fmt(heading, style.AS_Bold),
-		...modContents
-	].join("\n");
+	return (
+		// heading.length ?
+			[
+				root.fmt(heading, style.AS_Bold),
+				...modContents
+			]
+			// : modContents
+	).join("\n");
 };
 
 export default {

@@ -17,7 +17,6 @@ const cmd = ExposedCommands.includes(process.argv[2]) ? process.argv[2] : "";
 const arg = ExposedCommands.includes(process.argv[2]) ? process.argv[3] : "";
 
 const workPath = ".";
-// const workPath = fileman.path.resolves(".");
 const rootPath = fileman.path.fromOrigin(".");
 const projectPackagePath = "package.json";
 const originPackagePath = fileman.path.fromOrigin("package.json");
@@ -48,9 +47,7 @@ const rootPackageEssential: _support.PackageEssential = {
     name: typeof originPackageJson.data.name === "string" ?
         originPackageJson.data.name : CACHE.ROOT.name,
     version: typeof originPackageJson.data.version === "string" ?
-        originPackageJson.data.version : CACHE.ROOT.version,
-    website: typeof originPackageJson.data.homepage === "string" ?
-        originPackageJson.data.homepage : CACHE.ROOT.url.Site,
+        originPackageJson.data.version : CACHE.ROOT.version
 };
 
 

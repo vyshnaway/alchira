@@ -7,7 +7,6 @@ export enum _Actions {
     sync = 1,
     watch = 2,
     monitor = 3,
-    archive = 4,
 };
 
 export interface RawStyle {

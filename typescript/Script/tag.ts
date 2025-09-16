@@ -41,7 +41,7 @@ export default function scanner(
 			elvalue: "",
 			symclasses: [],
 			attributes: {},
-			scope: _Style._Type.EXTERNAL,
+			scope: _Style._Type.NULL,
 			tagCount: ++fileCursor.active.cycle,
 			rowIndex: fileCursor.active.rowMarker,
 			colIndex: fileCursor.active.colMarker,
@@ -90,14 +90,19 @@ export default function scanner(
 					styleDeclarations.elvalue = tr_Value;
 				} else if (tr_Attr === "&") {
 					if (tr_Value.length) {
-						styleDeclarations.comments.push(...tr_Value.slice(1, -1).split("\n").map(l => l.trim()));
+						tr_Value.slice(1, -1).split("\n").map(l => {
+							const commentTrimmed = l.trim();
+							if (commentTrimmed.length) {
+								styleDeclarations.comments.push(commentTrimmed);
+							}
+						});
 					}
 				} else if (/^[\w\-]+\$+[\w\-]+$/i.test(tr_Attr)) {
 					if (styleDeclarations.symclasses.length === 0) {
 						if (tr_Attr.includes("$$$$")) {
 							styleDeclarations.scope = _Style._Type.NULL;
-						} else if (fileData.manifesting.lookup.type === "EXTERNAL") {
-							styleDeclarations.scope = _Style._Type.EXTERNAL;
+						} else if (fileData.manifesting.lookup.type === "ARTIFACT") {
+							styleDeclarations.scope = _Style._Type.ARTIFACT;
 						} else if (tr_Attr.includes("$$$")) {
 							styleDeclarations.scope = _Style._Type.PUBLIC;
 						} else if (tr_Attr.includes("$$")) {
@@ -105,7 +110,9 @@ export default function scanner(
 						} else {
 							styleDeclarations.scope = _Style._Type.LOCAL;
 						}
-						if (tr_Value) { styleDeclarations.styles[""] = tr_Value; }
+						if (styleDeclarations.scope !== _Style._Type.NULL) {
+							styleDeclarations.styles[""] = tr_Value;
+						}
 					}
 					styleDeclarations.symclasses.push(tr_Attr);
 				} else if (tr_Attr.endsWith("&")) {

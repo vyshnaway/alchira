@@ -1,6 +1,5 @@
 // import * as _Config from "../type/config.js";
 import * as _File from "../type/file.js";
-import * as _Style from "../type/style.js";
 import * as _Script from "../type/script.js";
 // import * as _Cache from "../type/cache.js";
 // import * as _Support from "../type/support.js";
@@ -19,55 +18,39 @@ function EvaluateIndexTraces(
 ): Record<string, string> {
 	let classMap: Record<string, string> = {};
 
-	if (action === _Script._Actions.archive) {
-		classMap = classList.reduce((acc, entry) => {
-			const found = INDEX.FIND(entry, true, localClassMap);
-			if (found.index) {
-				if (found.group === _Style._Type.LIBRARY) {
-					acc[entry] = `/${CACHE.STATIC.Artifact.name}/$/${entry}`;
-				} else if (found.group === _Style._Type.PUBLIC) {
-					acc[entry] = `/${CACHE.STATIC.Artifact.name}/${entry}`;
-				}
-			}
-			return acc;
-		}, {} as Record<string, string>);
+	const index_array: number[] = [];
+	const valid_class_trace: [string, number][] = [];
 
+	classList.forEach((entry) => {
+		const found = INDEX.FIND(entry,  localClassMap);
+		if (found.index) {
+			valid_class_trace.push([entry, found.index]);
+			index_array.push(found.index);
+		}
+	});
 
-	} else {
-		const index_array: number[] = [];
-		const valid_class_trace: [string, number][] = [];
-
-		classList.forEach((entry) => {
-			const found = INDEX.FIND(entry, true, localClassMap);
-			if (found.index) {
-				valid_class_trace.push([entry, found.index]);
-				index_array.push(found.index);
-			}
+	const indexSetback = Use.array.setback(index_array);
+	if (action === _Script._Actions.sync) {
+		const dictionary = CACHE.CLASS.Sync_ClassDictionary[JSON.stringify(indexSetback)] || {};
+		valid_class_trace.forEach(([K, V]) => {
+			classMap[K] = dictionary[V];
 		});
+	} else {
 
-		const indexSetback = Use.array.setback(index_array);
-		if (action === _Script._Actions.sync) {
-			const dictionary = CACHE.CLASS.Sync_ClassDictionary[JSON.stringify(indexSetback)] || {};
-			valid_class_trace.forEach(([K, V]) => {
-				classMap[K] = dictionary[V];
-			});
-		} else {
+		if (action === _Script._Actions.watch) {
+			classMap = Object.fromEntries(valid_class_trace.map(([K, V], index) => {
+				const classname = metaFront + index;
+				CACHE.CLASS.Sync_PublishIndexMap["." + classname] = Number(V);
+				return [K, classname];
+			}));
+		}
 
-			if (action === _Script._Actions.watch) {
-				classMap = Object.fromEntries(valid_class_trace.map(([K, V], index) => {
-					const classname = metaFront + index;
-					CACHE.CLASS.Sync_PublishIndexMap["." + classname] = Number(V);
-					return [K, classname];
-				}));
-			}
-
-			if (action === _Script._Actions.monitor) {
-				classMap = Object.fromEntries(valid_class_trace.map(([K, V]) => {
-					const classname = metaFront + INDEX.FETCH(V).debugclass;
-					CACHE.CLASS.Sync_PublishIndexMap["." + classname] = Number(V);
-					return [K, Use.string.normalize(classname, ["/", ".", ":", "|", "$"], ["\\"])];
-				}));
-			}
+		if (action === _Script._Actions.monitor) {
+			classMap = Object.fromEntries(valid_class_trace.map(([K, V]) => {
+				const classname = metaFront + INDEX.FETCH(V).debugclass;
+				CACHE.CLASS.Sync_PublishIndexMap["." + classname] = Number(V);
+				return [K, Use.string.normalize(classname, ["/", ".", ":", "|", "$"], ["\\"])];
+			}));
 		}
 	}
 
@@ -90,7 +73,6 @@ export default function classExtract(
 	let inQuote = false;
 	let ch = string[marker];
 
-	// Classlist
 	while (ch !== undefined) {
 		if (inQuote) {
 			if (ch === " " || ch === activeQuote) {

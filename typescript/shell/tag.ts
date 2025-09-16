@@ -52,7 +52,7 @@ export function P(content = '', presets: string[] = [], ...styles: string[]) {
 }
 
 export function Span(content = '', presets: string[] = [], ...styles: string[]) {
-  return root.fmt(content, ...presets, ...styles) + "\n";
+  return root.fmt(content, ...presets, ...styles);
 }
 
 export function Li(content = '', presets: string[] = [], ...styles: string[]) {

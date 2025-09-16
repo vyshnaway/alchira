@@ -1,4 +1,4 @@
-// import * as _Config from "../type/config.js";
+import * as _Config from "../type/config.js";
 // import * as _File from "../type/file.js";
 import * as _Style from "../type/style.js";
 // import * as _Script from "../type/script.js";
@@ -17,10 +17,11 @@ export default async function order(
 	sequences: number[][],
 	command: "preview" | "publish",
 	argument = "",
-	artifact = {
+	artifact: _Config.Archive = {
 		name: '',
 		version: '',
-		content: ''
+		readme: '',
+		licence: ''
 	}
 ): Promise<{
 	status: boolean;

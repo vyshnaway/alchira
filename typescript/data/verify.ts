@@ -1,4 +1,4 @@
- import * as _Config from "../type/config.js";
+import * as _Config from "../type/config.js";
 // import * as _File from "../type/file.js";
 // import * as _Style from "../type/style.js";
 // import * as _Script from "../type/script.js";
@@ -11,30 +11,30 @@ import * as CACHE from "../data/cache.js";
 
 
 export async function cssImport(filePathArray: string[] = []) {
-	const processedFiles = new Set(
-		filePathArray
-			.reverse()
-			.map((filePath) => PATH.resolve(filePath))
-			.reverse(),
-	);
-	async function process(pathString: string) {
-		const directory = PATH.dirname(pathString);
-		let result = (await FILEMAN.read.file(pathString)).data;
-		for (const [match, filePath] of result.matchAll(
-			/@import\s+url\(["']?(.*?)["']?\);/g,
-		)) {
-			const resolvedPath = PATH.resolve(directory, filePath);
-			result = result.replace(
-				match,
-				!processedFiles.has(resolvedPath) ? await process(resolvedPath) : "",
-			);
+	const resolvedFiles = new Set(filePathArray.map((filePath) => PATH.resolve(filePath)));
+
+	async function inlineImports(filePath: string): Promise<string> {
+		const baseDir = PATH.dirname(filePath);
+		let content = (await FILEMAN.read.file(filePath)).data;
+
+		const importRegex = /@import\s+(?:url\()?["']?(.*?)["']?\)?\s*;/g;
+
+		for (const [fullMatch, importPath] of content.matchAll(importRegex)) {
+			const absoluteImportPath = PATH.resolve(baseDir, importPath);
+
+			const replacement = resolvedFiles.has(absoluteImportPath)
+				? ""
+				: await inlineImports(absoluteImportPath);
+
+			content = content.replace(fullMatch, replacement);
+			resolvedFiles.add(absoluteImportPath);
 		}
-		return result;
+
+		return content;
 	}
-	const result = await Promise.all(
-		Array.from(processedFiles).map(async (file) => await process(file)),
-	);
-	return result.join("");
+
+	const inlined = await Promise.all([...resolvedFiles].map(inlineImports));
+	return inlined.join("");
 }
 
 
@@ -68,7 +68,6 @@ export async function proxyMapDependency(proxyMap: _Config.ProxyMap[] = [], xtyl
 					);
 				} else {
 					if (!targetStat.exist) {
-						// if (fileman.path.isIndependent(xtylesDirectory, map.source)) {
 						await FILEMAN.clone.safe(map.source, map.target);
 						notifications.push(
 							`[${index}]:"${map.target}" cloned from [${index}]:"${map.source}"`,

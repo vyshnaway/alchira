@@ -10,9 +10,8 @@ const domain = `${id}.io`;
 
 export const ROOT: _Cache.ROOT = {
     bin: "",
-    name: "xcss-engine",
+    name: id,
     version: "0.0.0",
-    website: domain,
     extension: id,
     vendors: [],
     url: {
@@ -20,16 +19,15 @@ export const ROOT: _Cache.ROOT = {
         Site: `https://www.${domain}/`,
         Worker: `https://worker.${domain}/`,
         Console: `https://console.${domain}/`,
-        PrefixCdn: `https://prefix.${domain}/`,
-        ArtifactCdn: `https://artifact.${domain}/`,
+        Prefixes: `https://prefix.${domain}/`,
+        Artifacts: `https://artifact.${domain}/`,
     },
     commands: {
         init: `Initiate or Update & Verify setup.`,
         debug: `Live build for developer environment`,
         preview: `Test build. Pass test for "publish" command.`,
         publish: `Optimized build, uses web-api.`,
-        // archive: `Split and stash project styles to *.${id} files.`,
-        // install: `Install external artifacts from sources.`,
+        install: `Install external artifacts.`,
     },
     scripts: {
         "init": `init`,
@@ -37,8 +35,7 @@ export const ROOT: _Cache.ROOT = {
         "watch": `preview watch`,
         "preview": `preview`,
         "publish": `publish`,
-        // "archive": `archive`,
-        // "install": `install`,
+        "install": `install`,
     },
     Tweaks: {
         CacheUsage: false,
@@ -63,6 +60,12 @@ export const STATIC: _Cache.STATIC = {
     DEBUG: false,
     ProjectName: "",
     ProjectVersion: "",
+    Archive: {
+        name: '',
+        version: '',
+        licence: '',
+        readme: '',
+    },
     Command: "",
     Argument: "",
     RootCSS: "",
@@ -70,12 +73,6 @@ export const STATIC: _Cache.STATIC = {
     WorkPath: "",
     ProxyMap: [],
     Hashrule: {},
-    Artifact: {
-        name: '',
-        readme: '',
-        version: '',
-        hashrule: {},
-    },
     Prefix: {
         atrules: {},
         attributes: {},
@@ -87,9 +84,9 @@ export const STATIC: _Cache.STATIC = {
     Tweaks: {
         ...ROOT.Tweaks
     },
-    Library_Saved: {},
-    Targets_Saved: {},
-    External_Saved: {},
+    Libraries_Saved: {},
+    Targetdir_Saved: {},
+    Artifacts_Saved: {},
 };
 
 export const DELTA: _Cache.DELTA = {
@@ -99,9 +96,9 @@ export const DELTA: _Cache.DELTA = {
     PublishError: "",
     ErrorCount: 0,
     Report: {
-        libraries: "",
-        externals: "",
         artifacts: "",
+        libraries: "",
+        archives: "",
         constants: "",
         hashrule: "",
         errors: "",
@@ -110,23 +107,22 @@ export const DELTA: _Cache.DELTA = {
     },
     Lookup: {
         libraries: {},
-        externals: {},
         artifacts: {},
+        archives: {},
     },
     Errors: {
+        archives: [],
         libraries: [],
-        externals: [],
         artifacts: [],
         multiples: [],
     },
     Diagnostics: {
+        archives: [],
         libraries: [],
-        externals: [],
         artifacts: [],
         multiples: [],
     },
     Manifest: {
-        prefix: "",
         constants: [],
         hashrules: {},
         filelookup: {},
@@ -135,8 +131,8 @@ export const DELTA: _Cache.DELTA = {
         CLUSTER: {},
         LOCAL: {},
         GLOBAL: {},
-        EXTERNAL: {},
-        EXATTACH: {},
+        ARTIFACT: {},
+        ARTATTACH: {},
     },
 };
 
@@ -146,17 +142,15 @@ export const CLASS: _Cache.CLASS = {
     Global___Index: {},
     Public___Index: {},
     Library__Index: {},
-    External_Index: {},
     Artifact_Index: {},
-    Arattach_Index: {},
     Sync_PublishIndexMap: {},
     Sync_ClassDictionary: {}
 };
 
 export const FILES: _Cache.FILES = {
     LIBRARIES: {},
-    EXTERNALS: {},
-    TARGETS: {}
+    ARTIFACTS: {},
+    TARGETDIR: {}
 };
 
 
@@ -233,12 +227,6 @@ export const PATH: Record<string, Record<string, _File.Path>> = {
             content: "",
             essential: true,
         },
-        artifacts: {
-            frags: ["blueprint", "artifacts"],
-            path: "",
-            content: "",
-            essential: true,
-        },
         libraries: {
             frags: ["blueprint", "libraries"],
             path: "",
@@ -259,14 +247,20 @@ export const PATH: Record<string, Record<string, _File.Path>> = {
             content: "",
             essential: false,
         },
-        external: {
-            frags: ["xtyles", "external"],
+        artifacts: {
+            frags: ["xtyles", "artifacts"],
             path: "",
             content: "",
             essential: false,
         },
-        artifact: {
-            frags: ["xtyles", "artifact"],
+        archive: {
+            frags: ["xtyles", "archive"],
+            path: "",
+            content: "",
+            essential: false,
+        },
+        arcversion: {
+            frags: ["xtyles", "archive", "version"],
             path: "",
             content: "",
             essential: false,
@@ -317,10 +311,22 @@ export const PATH: Record<string, Record<string, _File.Path>> = {
             content: "",
             essential: true,
         },
+        archive: {
+            frags: ["xtyles", "archive", "index.json"],
+            path: "",
+            content: "",
+            essential: false,
+        },
     },
     md: {
         readme: {
             frags: ["xtyles", "readme.md"],
+            path: "",
+            content: "",
+            essential: false,
+        },
+        licence: {
+            frags: ["xtyles", "licence.md"],
             path: "",
             content: "",
             essential: false,

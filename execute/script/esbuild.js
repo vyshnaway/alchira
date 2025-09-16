@@ -29,7 +29,7 @@ clearFolder(destination);
 esbuild.build({
     entryPoints: ['typescript/main.ts'],
     bundle: true,
-    minify: true,
+    minify: false,
     outfile: destination + 'main.js',
     target: ['node18'],
     platform: 'node',

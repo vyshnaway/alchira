@@ -17,11 +17,11 @@ export const queue: _Support.Event[] = [];
 export function add(event: _Support.Event): void {
 	queue.push(event);
 }
-export function clear(): void {
-	queue.length = 0;
-}
 export function pull(): _Support.Event | null {
 	return queue.length > 0 ? queue.shift()! : null;
+}
+export function clear(): void {
+	queue.length = 0;
 }
 
 

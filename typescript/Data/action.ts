@@ -40,7 +40,6 @@ export function SetENV(rootPath: string, workPath: string, packageEssential: _Su
 
     CACHE.ROOT.name = packageEssential.name || CACHE.ROOT.name;
     CACHE.ROOT.version = packageEssential.version || CACHE.ROOT.version;
-    CACHE.ROOT.website = packageEssential.website || CACHE.ROOT.website;
     CACHE.ROOT.bin = packageEssential.bin;
 
     Object.entries(CACHE.PATH).forEach(([groupName, groupPaths]) => {
@@ -79,7 +78,7 @@ export function GetCacheUsage(): string[] {
         "Class": USE.string.stringMem(JSON.stringify(CACHE.CLASS)),
         "Files": USE.string.stringMem(JSON.stringify(CACHE.FILES)),
         "Static": USE.string.stringMem(JSON.stringify(CACHE.STATIC)),
-        "Proxy": Object.values(CACHE.FILES.TARGETS).reduce((t: number, c) => {
+        "Proxy": Object.values(CACHE.FILES.TARGETDIR).reduce((t: number, c) => {
             t += USE.string.stringMem(JSON.stringify(c));
             return t;
         }, 0),

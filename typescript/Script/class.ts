@@ -8,8 +8,9 @@ import * as _Script from "../type/script.js";
 import $ from "../shell/main.js";
 import Use from "../utils/main.js";
 import NARRATOR from "./file.js";
-import Filing from "../data/filing.js";
 import Fileman from "../fileman.js";
+import Filing from "../data/filing.js";
+import RENDER from "../style/render.js";
 import StyleParse from "../style/parse.js";
 
 import * as $$ from "../shell.js";
@@ -76,8 +77,10 @@ export default class C_Proxy {
 		this.fileCache[FILE.filePath] = FILE;
 
 		const ParseResponse = NARRATOR(FILE, this.extnsProps[FILE.extension]);
-		FILE.styleData.classTracks.push(...ParseResponse.classesList);
-		FILE.styleData.attachments.push(...ParseResponse.attachments);
+		if (FILE.extension !== CACHE.ROOT.extension) {
+			FILE.styleData.classTracks.push(...ParseResponse.classesList);
+			FILE.styleData.attachments.push(...ParseResponse.attachments);
+		}
 
 		ParseResponse.stylesList.forEach((tagStyle) => {
 			if (tagStyle.symclasses.length === 0) {
@@ -114,7 +117,6 @@ export default class C_Proxy {
 			}
 		});
 
-		Object.assign(CACHE.CLASS.Global___Index, FILE.styleData.globalClasses);
 		Object.assign(FILE.manifesting.lookup, { group: "target", id: FILE.targetPath });
 		FILE.midway = ParseResponse.stream;
 	}
@@ -173,18 +175,18 @@ export default class C_Proxy {
 
 		Object.values(this.fileCache).forEach((filedata) => {
 			filedata.styleData.attachments.forEach((attchment) => {
-				const found = INDEX.FIND(attchment, true, filedata.styleData.localClasses);
+				const found = INDEX.FIND(attchment, filedata.styleData.localClasses);
 				if (found.index) { attachments.push(found.index); }
 			});
 
 			filedata.styleData.classTracks.forEach((group) => {
 				const indexGroup = group.reduce((indexAcc, className) => {
-					const found = INDEX.FIND(className, true, filedata.styleData.localClasses);
+					const found = INDEX.FIND(className, filedata.styleData.localClasses);
 					if (found.index) {
 						indexAcc.push(found.index);
 						attachments.push(found.index);
 						INDEX.FETCH(found.index).attachments.forEach(attchment => {
-							const i = INDEX.FIND(attchment, true, filedata.styleData.localClasses).index;
+							const i = INDEX.FIND(attchment, filedata.styleData.localClasses).index;
 							if (i) { attachments.push(i); }
 						});
 					}
@@ -196,6 +198,26 @@ export default class C_Proxy {
 		});
 
 		return { classTracks, attachments };
+	}
+
+	GetExports() {
+		const exports: Record<string, _Style.ExportStyle> = {};
+
+		Object.values(this.fileCache).forEach((filedata) => {
+			Object.values(filedata.styleData.publicClasses).forEach((pubindex) => {
+				const exporting = RENDER.Artifact(pubindex);
+				exports[exporting.symclass] = exporting;
+				INDEX.FETCH(pubindex).attachments.forEach(attchment => {
+					const subindex = INDEX.FIND(attchment, filedata.styleData.localClasses).index;
+					if (subindex) {
+						const subexporting = RENDER.Artifact(subindex);
+						exporting.attachments.push(subexporting.symclass);
+					}
+				});
+			});
+		});
+
+		return exports;
 	}
 
 

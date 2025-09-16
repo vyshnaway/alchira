@@ -136,7 +136,7 @@ export async function FetchStatics(vendorSource: string) {
 		const result1 = await FILEMAN.read.json(vendorSource, true);
 		if (result1.status) { return result1.data; };
 
-		const result2 = await FILEMAN.read.json(CACHE.ROOT.url.PrefixCdn + vendorSource, true);
+		const result2 = await FILEMAN.read.json(CACHE.ROOT.url.Prefixes + vendorSource, true);
 		if (result2.status) { return result2.data; };
 
 		const result3 = await FILEMAN.read.json(CACHE.PATH.blueprint.prefixes.path, false);
@@ -217,20 +217,16 @@ export async function VerifyConfigs(loadStatics: boolean) {
 			errors.push($.tag.Li(CACHE.PATH.json.configure.path + ": Workable proxies unavailable."));
 		}
 
-		Object.assign(CACHE.STATIC.Artifact, config.data);
-		CACHE.STATIC.Artifact.readme = (await FILEMAN.read.file(CACHE.PATH.md.readme.path)).data;
-		CACHE.STATIC.Artifact.name = CACHE.STATIC.Artifact.name = CONFIG.name || CACHE.STATIC.ProjectName;
-		CACHE.STATIC.Artifact.version = CACHE.STATIC.Artifact.version = CONFIG.version || CACHE.STATIC.ProjectVersion;
-		CACHE.STATIC.External_Saved = Object.entries((typeof CONFIG.externals === "object") ? CONFIG.externals : {})
+		Object.assign(CACHE.STATIC.Archive, config.data);
+		CACHE.STATIC.Archive.name = CACHE.STATIC.Archive.name = CONFIG.name || CACHE.STATIC.ProjectName;
+		CACHE.STATIC.Archive.version = CACHE.STATIC.Archive.version = CONFIG.version || CACHE.STATIC.ProjectVersion;
+		CACHE.STATIC.Archive.readme = (await FILEMAN.read.file(CACHE.PATH.md.readme.path)).data;
+		CACHE.STATIC.Archive.licence = (await FILEMAN.read.file(CACHE.PATH.md.licence.path)).data;
+		CACHE.STATIC.Artifacts_Saved = Object.entries((typeof CONFIG.artifacts === "object") ? CONFIG.artifacts : {})
 			.reduce((a, [k, v]) => {
 				if (typeof v === "string" && v !== '-') { a[k] = v; }
 				return a;
 			}, {} as Record<string, string>);
-
-		delete CACHE.STATIC.Artifact.proxy;
-		delete CACHE.STATIC.Artifact.tweaks;
-		delete CACHE.STATIC.Artifact.vendors;
-		delete CACHE.STATIC.Artifact.externals;
 
 		const results = await VERIFY.proxyMapDependency(CACHE.STATIC.ProxyMap, CACHE.PATH.folder.scaffold.path);
 		errors.push(...results.warnings);
@@ -260,20 +256,20 @@ export async function SaveRootCss() {
 
 export async function SaveLibraries() {
 	$.TASK("Updating Library");
-	CACHE.STATIC.Library_Saved = await FILEMAN.read.bulk(CACHE.PATH.folder.libraries.path, ["css"]);
+	CACHE.STATIC.Libraries_Saved = await FILEMAN.read.bulk(CACHE.PATH.folder.libraries.path, ["css"]);
 }
 
 export async function SaveExternals() {
 	$.TASK("Updating External Artifacts");
-	CACHE.STATIC.External_Saved = await FILEMAN.read.bulk(CACHE.PATH.folder.external.path, [CACHE.ROOT.extension, "css", "md"]);
+	CACHE.STATIC.Artifacts_Saved = await FILEMAN.read.bulk(CACHE.PATH.folder.artifacts.path, [CACHE.ROOT.extension, "css", "md"]);
 }
 
 
 
 export async function SaveTargets() {
 	$.TASK("Syncing proxy folders", 0);
-	Object.keys(CACHE.STATIC.Targets_Saved).forEach((key) => delete CACHE.STATIC.Targets_Saved[key]);
-	CACHE.STATIC.Targets_Saved = await VERIFY.proxyMapSync(CACHE.STATIC.ProxyMap);
+	Object.keys(CACHE.STATIC.Targetdir_Saved).forEach((key) => delete CACHE.STATIC.Targetdir_Saved[key]);
+	CACHE.STATIC.Targetdir_Saved = await VERIFY.proxyMapSync(CACHE.STATIC.ProxyMap);
 }
 
 export async function SaveHashrule() {

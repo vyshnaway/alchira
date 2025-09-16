@@ -19,9 +19,9 @@ function resolveGroup(
 	if (fromExternals) {
 		switch (extension) {
 			case CACHE.ROOT.extension:
-				return "EXTERNAL";
+				return "ARTIFACT";
 			case "css":
-				return "EXATTACH";
+				return "ARTATTACH";
 			case "md":
 				return "README";
 			default:
@@ -37,7 +37,7 @@ function resolveGroup(
 }
 
 export default function FILING(
-	fileGroup: "library" | "external" | "target",
+	fileGroup: "library" | "artifact" | "target",
 	filePath: string,
 	content: string,
 	target = '',
@@ -45,7 +45,7 @@ export default function FILING(
 	label = '',
 ) {
 	const isLibrary = fileGroup === "library";
-	const isExternal = fileGroup === "external";
+	const isExternal = fileGroup === "artifact";
 	const fromXtylesFolder = fileGroup !== "target";
 
 	const targetPath = FILEMAN.path.join(target, filePath);
@@ -53,15 +53,15 @@ export default function FILING(
 
 	const [extension, artifactName, liblevel, cluster]: string[] = FILEMAN.path.basename(filePath).split(".").reverse();
 	const num = Number(liblevel);
-	const idn = isNaN(num) || num < 0 ? 0 : Math.floor(num);
-	const normalFileName = isExternal ? USE.string.normalize(artifactName) : CACHE.STATIC.Artifact.name;
+	const idn = (isNaN(num) || (num < 0) || (num > 2)) ? 0 : Math.floor(num);
+	const normalFileName = isExternal ? USE.string.normalize(artifactName) : CACHE.STATIC.Archive.name;
 
 	const group: _File._Type = resolveGroup(extension, Boolean(cluster), isExternal, isLibrary);
 	const normalCluster = USE.string.normalize(cluster);
 
 	const classFront =
 		(
-			isExternal ? `/${normalFileName}${group === "EXATTACH" ? "/$/" : "/"}` : ""
+			isExternal ? `/${normalFileName}${group === "ARTATTACH" ? "/$/" : "/"}` : ""
 		) + (
 			((idn > 0) && (extension === "css") && (normalCluster !== "-")) ? normalCluster : ""
 		) + (
@@ -71,7 +71,7 @@ export default function FILING(
 	const result: _File.Storage = {
 		liblevel: idn,
 		label,
-		artifact: fromXtylesFolder ? artifactName : CACHE.STATIC.Artifact.name,
+		artifact: fromXtylesFolder ? artifactName : CACHE.STATIC.Archive.name,
 		filePath,
 		extension,
 		sourcePath,

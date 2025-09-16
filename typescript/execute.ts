@@ -9,6 +9,7 @@ import * as _Support from "./type/support.js";
 import $ from "./shell/main.js";
 import Use from "./utils/main.js";
 import fileman from "./fileman.js";
+import ARTIFACT from "./artifact.js";
 
 import * as $$ from "./shell.js";
 import * as SMITH from "./assemble.js";
@@ -17,7 +18,6 @@ import * as CACHE from "./data/cache.js";
 import * as EVENT from "./data/watch.js";
 import * as ACTION from "./data/action.js";
 
-// import { FetchPortables, SplitGlobalForComponents } from "./portable.js";
 
 function reporter(heading: string, targets: string[], report: string) {
     $.render.write(
@@ -34,7 +34,6 @@ function reporter(heading: string, targets: string[], report: string) {
                 [$.list.Catalog, 0, $.preset.tertiary]
             ),
         ])
-        // , CACHE.STATIC.WATCH ? -1 : 0
     );
 }
 
@@ -132,11 +131,11 @@ async function execute(chapter: string) {
                 }
 
                 if (!stopWatcher) {
-                    targets = Object.keys(CACHE.FILES.TARGETS);
+                    targets = Object.keys(CACHE.FILES.TARGETDIR);
                     const targetFolders = [...targets, CACHE.PATH.folder.scaffold.path];
                     const ignoreFolders = [
                         CACHE.PATH.folder.autogen.path,
-                        CACHE.PATH.folder.artifact.path
+                        CACHE.PATH.folder.archive.path,
                     ];
                     process.on("SIGINT", () => {
                         if (stopWatcher) {
@@ -182,12 +181,12 @@ async function execute(chapter: string) {
                                         pathFromWork.startsWith(CACHE.PATH.folder.libraries.path)
                                         && event.extension === "css"
                                     ) {
-                                        CACHE.STATIC.Library_Saved[pathFromWork] = event.fileContent;
+                                        CACHE.STATIC.Libraries_Saved[pathFromWork] = event.fileContent;
                                     } else if (
                                         pathFromWork.startsWith(CACHE.PATH.folder.external.path)
                                         && [CACHE.ROOT.extension, "css", "md"].includes(event.extension)
                                     ) {
-                                        CACHE.STATIC.External_Saved[pathFromWork] = event.fileContent;
+                                        CACHE.STATIC.Artifacts_Saved[pathFromWork] = event.fileContent;
                                     }
                                     step = "ProcessXtylesFolder";
                             }
@@ -271,24 +270,23 @@ async function commander({
             await execute(`${APP_VERSION} : Publishing for Production`);
             break;
         }
-        // case "artifact": {
-        //     await execute(CACHE.STATIC_CACHE.PACKAGE + " : Split for Components");
-        //     break;
-        // }
-        // case "install": {
-        //     $.POST($.tag.H2("Installing Portables"));
-
-        //     const verifyStructResult = await FETCH.VerifySetupStruct();
-        //     if (verifyStructResult.proceed) {
-        //         const verifyConfigsResult = await FETCH.VerifyConfigs(true);
-        //         if (verifyConfigsResult.status) {
-        //             const fetchResult = await FETCH.FetchStatics(argument);
-        //             await fileman.write.bulk(fetchResult.SaveFiles);
-        //             $.POST($.MOLD.secondary.Footer("Installation status", fetchResult.Status));
-        //         } else { $.POST(verifyConfigsResult.report); };
-        //     } else { $.POST(verifyStructResult.report); };
-        //     break;
-        // }
+        case "install": {
+            $.init(false);
+            $.POST($.tag.H3("Installing Artifacts", $.preset.primary, $.style.AS_Bold));
+            const verifyStructResult = await FETCH.VerifySetupStruct();
+            if (!verifyStructResult.proceed) { $.POST(verifyStructResult.report); break; }
+            const verifyConfigsResult = await FETCH.VerifyConfigs(true);
+            if (!verifyConfigsResult.status) { $.POST(verifyConfigsResult.report); break; }
+            const fetched = await ARTIFACT.FETCH();
+            $.POST(fetched.message);
+            if (fetched.status) {
+                await fileman.write.bulk(fetched.outs);
+                $.POST($.tag.H4("Artifacts Updated", $.preset.success, $.style.AS_Bold));
+            } else {
+                $.POST($.tag.H4("Artifacts not updated due to pending errors", $.preset.failed, $.style.AS_Bold));
+            }
+            break;
+        }
         default: {
             await FETCH.FetchDocs();
 
@@ -300,7 +298,7 @@ async function commander({
                         $$.ListRecord("Available Commands", CACHE.ROOT.commands),
                         $$.ListRecord("Agreements", Object.fromEntries(Object.values(CACHE.SYNC.AGREEMENT).map((i) => [i.title, i.path]))),
                         $$.ListRecord("References", Object.fromEntries(Object.values(CACHE.SYNC.MARKDOWN).map((i) => [i.title, i.path]))),
-                        $.tag.H4("For more information visit : " + CACHE.ROOT.website, $.preset.tertiary)
+                        $.tag.H4("For more information visit : " + CACHE.ROOT.url.Site, $.preset.tertiary)
                     ]
                 )
             );

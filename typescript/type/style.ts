@@ -4,9 +4,9 @@ export enum _Type {
     GLOBAL,
     PUBLIC,
     LIBRARY,
-    EXTERNAL,
-    ARTIFACT,
-    ARTATTACH,
+    ARCHIVE,
+    ARCTACH,
+    ARTIFACT
 };
 
 export const _Import = [
@@ -15,12 +15,18 @@ export const _Import = [
     'GLOBAL',
     'PUBLIC',
     'LIBRARY',
-    'EXTERNAL',
-    'ARTIFACT',
-    'ARTATTACH',
+    'ARCHIVE',
+    'ARCTACH',
+    'ARTIFACT'
 ];
 
-
+export interface ExportStyle {
+    element: string,
+    symclass: string,
+    innertext: string,
+    stylesheet: object,
+    attachments: string[]
+}
 
 export interface ParsedResult {
     assign: string[],
@@ -49,7 +55,7 @@ export interface Metadata {
     watchclass: string,
     variables: Record<string, string>,
     summon: string,
-    attributes: Record<string,string>
+    attributes: Record<string, string>
 }
 
 export interface Classdata {
@@ -57,7 +63,7 @@ export interface Classdata {
     metadata: Metadata,
     artifact: string,
     selector: string,
-    classname: string,
+    symclass: string,
     debugclass: string,
     attachments: string[],
     declarations: string[],

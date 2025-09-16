@@ -128,9 +128,6 @@ function RENDER(string: string, sourcePath: string) {
 	};
 }
 
-// Only for mested deploying of hashrules. 
-// Kept unused due to potential tendency to overuse.
-// May cause unpredictable results.
 function WRAPPER(parentObject: Record<string, object>, keys: string[], childObject: object, parentAtrule = true) {
 	const activeKey = keys.shift();
 	if (activeKey) {

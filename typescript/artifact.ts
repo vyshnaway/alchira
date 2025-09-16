@@ -1,193 +1,117 @@
-// import fileman from "./fileman.js";
-// import { APP, CACHE, NAV, RAW, STACK } from "../data-cache.js";
-// import { INDEX } from "../data-init.js";
-// import $ from "./Shell/main.js";
-// import FORGE from "./Style/forge.js";
-// import RENDER from "./Style/render.js";
+import fileman from "./fileman.js";
+import $ from "./shell/main.js";
 
-// const tab = "    ";
+import * as $$ from "./shell.js";
+import * as CACHE from "./data/cache.js";
+import * as _Config from "./type/config.js";
+import * as _Style from "./type/style.js";
 
-// function getLibPrifix(string = '') {
-//     let id = 0, lib = '';
-//     const chars = string.split("");
-//     for (let i = 0; i < chars.length; i++) {
-//         const ch = chars[i];
-//         if (ch === "$") id++;
-//         else if (!id) lib += ch;
-//         else break;
-//     }
-//     return lib.length ? `${lib}.${id}` : `${id}`;
-// }
 
-// export function generateXtyleBlock(selector, object, preBindsList, postBindsList) {
-//     return [
-//         "", `### Selector: \`${selector}\``, "",
-//         "````html",
-//         "<xtyle",
-//         ...Object.entries(object).reduce((accum, [subSelector, block]) => {
-//             if (subSelector === "") {
-//                 accum.push(
-//                     `${selector}="`,
-//                     tab + `@pre-bind ${preBindsList.join(" ")}; `,
-//                     tab + `@post-bind ${postBindsList.join(" ")}; `,
-//                     ...RENDER.forPortable(Object.entries(block), tab).map((line) => tab + line),
-//                     '"',
-//                 );
-//             } else {
-//                 if (subSelector[0] === "@") {
-//                     const ind = subSelector.indexOf(" ");
-//                     const rule = subSelector.slice(1, ind);
-//                     const query = subSelector.slice(ind + 1);
+function ARCHIVE() {
+    delete CACHE.STATIC.Archive.tweaks;
+    delete CACHE.STATIC.Archive.vendors;
+    delete CACHE.STATIC.Archive.proxymap;
+    delete CACHE.STATIC.Archive.artifacts;
 
-//                     subSelector = `${rule}@{${query}}`;
-//                 }
-//                 accum.push(
-//                     `${subSelector}="`,
-//                     ...RENDER.forPortable(Object.entries(block), tab).map(
-//                         (line) => tab + line,
-//                     ),
-//                     '"',
-//                 );
-//             }
-//             return accum;
-//         }, []).map((line) => tab + line),
-//         "/>",
-//         "````",
-//     ]
-// }
 
-// function portableCreator(essentials = [], portableName = `${RAW.PACKAGE}@${RAW.VERSION}`) {
-//     const preBinds = new Set(), postBinds = new Set();
-//     const portable = [`# ${portableName}`];
+    CACHE.STATIC.Archive.exportsheet = Object.values(Object.values(CACHE.FILES.TARGETDIR).reduce((a, i) => {
+        Object.assign(a, i.GetExports()); return a;
+    }, {} as Record<string, _Style.ExportStyle>))
+        .map(i => {
+            if (i.symclass.includes('$$$')) { CACHE.STATIC.Archive.exportclasses?.push(i.symclass); }
 
-//     const classList = Object.keys(CACHE.GlobalsStyle2Index);
-//     portable.push("", `## Xtyle Classes (${classList.length})`, "", ...classList.map((c) => "- `" + c + "`"), "---");
+            return [
+                ('<' + [
+                    i.element,
+                    ...Object.entries(i.stylesheet).map(([A, V]) => {
+                        const attachments = i.attachments.length? `${CACHE.ROOT.customOperations["attach"]} ${i.attachments.join(" ")};`: "";
+                        if (A === "") {
+                            return `${i.symclass}="${attachments}${V}"`;
+                        } else {
+                            return `${"{" + JSON.parse(i.symclass).join("}&{") + "}&"}="${V}"`;
+                        }
+                    })
+                ].join(' ') + '>'),
+                i.innertext,
+                `</${i.element}>`,
+                ``
+            ].join(" ");
+        }).join("\n\n");
 
-//     Object.entries(CACHE.GlobalsStyle2Index).forEach(([selector, index]) => {
-//         const inStash = INDEX.STYLE(index);
-//         const object = inStash.object;
-//         const bindStack = FORGE.attachIndex(new Set(inStash.preBinds), new Set(inStash.postBinds));
-//         inStash.preBinds.forEach(bind => preBinds.add(bind))
-//         inStash.postBinds.forEach(bind => postBinds.add(bind))
+    return CACHE.STATIC.Archive;
+}
 
-//         portable.push(...generateXtyleBlock(selector, object, bindStack.list, bindStack.postBindsList));
-//     });
+function DEPLOY(OUTFILES: Record<string, string> = {}) {
+    const latest = JSON.stringify(CACHE.STATIC.Archive);
+    OUTFILES[fileman.path.join(CACHE.PATH.folder.arcversion.path, `latest.json`)] = latest;
+    OUTFILES[fileman.path.join(CACHE.PATH.folder.arcversion.path, `${CACHE.STATIC.Archive.version}.json`)] = latest;
+    OUTFILES[CACHE.PATH.json.archive.path] = JSON.stringify(fileman.path.listFiles(CACHE.PATH.folder.arcversion.path));
+}
 
-//     // Essentials
-//     portable.push(
-//         "",
-//         "## Portable Essentials",
-//         "",
-//         "````html",
-//         "<xtyle",
-//         ...essentials
-//             .reduce((accum, [subSelector, block]) => {
-//                 if (subSelector[0] === "@") {
-//                     const ind = subSelector.indexOf(" ");
-//                     const rule = subSelector.slice(1, ind);
-//                     const query = subSelector.slice(ind + 1);
+export async function FETCH() {
+    const outs: Record<string, string> = {}, Results: Record<string, string> = {};
+    let message = "", status = true;
 
-//                     subSelector = `${rule}@{${query}}`;
-//                 }
-//                 accum.push(
-//                     `${subSelector}="`,
-//                     ...RENDER.forPortable(Object.entries(block), tab).map((line) => tab + line),
-//                     '"',
-//                 );
-//                 return accum;
-//             }, [])
-//             .map((line) => tab + line),
-//         "/>",
-//         "````",
-//     );
+    if (CACHE.STATIC.Archive.artifacts) {
+        await Promise.all(Object.entries(CACHE.STATIC.Archive.artifacts).map(async ([identifier, source]) => {
 
-//     const bindingStack = {};
-//     preBinds.forEach(bind => {
-//         const prefix = getLibPrifix(bind);
-//         if (bindingStack[prefix]) bindingStack[prefix].add(bind)
-//         else bindingStack[prefix] = new Set([bind])
-//     })
-//     postBinds.forEach(bind => {
-//         const prefix = getLibPrifix(bind);
-//         if (bindingStack[prefix]) bindingStack[prefix].add(bind)
-//         else bindingStack[prefix] = new Set([bind])
-//     })
+            const fetched = await (async function () {
+                const [name, version] = typeof source === "string" ? source.split("@") : ["", ""];
 
-//     const bindings = Object.entries(bindingStack).reduce((A, [key, value]) => {
-//         A[key] = RENDER.forPortable(Object.entries(FORGE.attachIndex(value).object)).join("\n");
-//         return A;
-//     }, {})
+                const result1 = await fileman.read.json(source, true);
+                if (result1.status) { return result1.data; };
 
-//     return { portable: portable.join("\n"), bindings };
-// }
+                const result2 = await fileman.read.json(CACHE.ROOT.url.Artifacts + `${name}/${version || "latest"}`, true);
+                if (result2.status) { return result2.data; };
 
-// export function GeneratePortable(essentials = []) {
-//     const portableName = `${RAW.PACKAGE}@${RAW.VERSION}`;
-//     const content = portableCreator(essentials, portableName)
-//     const json = { ...RAW.PORTABLEFRAME, readme: RAW.ReadMe, xtyling: content.portable, bindings: content.bindings };
-//     const jsonPath = NAV.folder.mybundles + "/" + portableName + ".json";
+                return {};
+            })() as _Config.Archive;
 
-//     return { name: RAW.PACKAGE, version: RAW.VERSION, jsonPath: jsonPath, jsonContent: JSON.stringify(json) };
-// }
+            if (CACHE.STATIC.Archive.name === identifier) {
+                Results[identifier] = $.tag.Span("Artifact identifer collition with project.", $.preset.failed);
+                status = false;
+            } else if (Object.keys(fetched).length === 0) {
+                Results[identifier] = $.tag.Span("Unavailable", $.preset.failed);
+                status = false;
+            } else {
+                if (fetched.libraries) {
+                    Object.entries(fetched.libraries).forEach(([lib, str]) => {
+                        outs[fileman.path.join(CACHE.PATH.folder.artifact.path, identifier, `${lib}.${identifier}.css`)] = str;
+                    });
+                    delete fetched.libraries;
+                }
+                if (fetched.exportsheet) {
+                    outs[fileman.path.join(CACHE.PATH.folder.artifact.path, identifier, `${identifier}.${CACHE.ROOT.extension}`)] = ([
+                        `# ${fetched.name}@${fetched.version}`,
+                        "",
+                        "## Available SymClasses",
+                        "",
+                        ...(fetched.exportclasses ? fetched.exportclasses.map(i => `/${identifier}/${i}`) : []),
+                        "",
+                        "---",
+                        "",
+                        fetched.exportsheet,
+                    ]).join("\n");
+                    delete fetched.exportsheet;
+                }
+                if (fetched.readme) {
+                    outs[fileman.path.join(CACHE.PATH.folder.artifact.path, identifier, `readme.md`)] = fetched.readme;
+                    delete fetched.readme;
+                }
+                if (fetched.licence) {
+                    outs[fileman.path.join(CACHE.PATH.folder.artifact.path, identifier, `licence.md`)] = fetched.licence;
+                    delete fetched.licence;
+                }
+                Results[identifier] = $.tag.Span("Successfull", $.preset.success);
+            }
+        }));
+    }
+    message = $.MAKE("", $$.ListProps(Results), [$.list.Bullets, 0, $.preset.text]);
+    return { status, outs, message };
+}
 
-// export function SplitGlobalForComponents() {
-//     const t = new Date();
-//     const date = `${t.getFullYear()}-${(t.getMonth() + 1).toString().padStart(2, "0")}-${t.getDate().toString().padStart(2, "0")}`;
-//     const time = `${t.getHours().toString().padStart(2, "0")}:${t.getMinutes().toString().padStart(2, "0")}:${t.getSeconds().toString().padStart(2, "0")}`;
-//     const session = `${date} ${time}`;
-
-//     const SaveFiles = {}, Report = [];
-//     Object.values(STACK.PROXYCACHE).forEach((proxy) => {
-//         Object.assign(SaveFiles, proxy.ComponentSpilt(session))
-//     })
-//     const filePaths = Object.keys(SaveFiles);
-//     Report.push(
-//         $.MOLD.std.Block(filePaths, $.list.std.Bullets),
-//         $.MOLD.std.Footer(`${filePaths.length} files were generated.`),
-//     )
-
-//     return { SaveFiles, ConsoleReport: $.MOLD.std.Block(Report) }
-// }
-
-// export async function FetchArtifacts(portable = "") {
-//     const SaveFiles = {}, Status = [];
-
-//     let [portableName, portableVersion] = typeof portable === "string" ? portable.split("@") : ["", ""];
-//     portableVersion = portableVersion || "latest";
-//     const portableLink = `${APP.PortablesCdn}/${portableName}/${portableVersion}`;
-//     const references = portableName.length ? { [portableName]: portableLink } : RAW.DEPENDENCIES;
-
-//     await Promise.all(
-//         Object.entries(references).map(async ([Name, Link]) => {
-//             if (RAW.PACKAGE === Name) {
-//                 Status[Name] = $.MOLD.failed.Text("Can't install a portable with Native-Portable-Name.")
-//             } else {
-//                 const response = fileman.read.json(Link, true);
-//                 if ((await response).status) {
-//                     const data = (await response).data;
-//                     if (typeof data.readme === "string") {
-//                         SaveFiles[`${NAV.folder.portables}/${Name}/${Name}.md`] = data.readme || "";
-//                         delete data.readme;
-//                     }
-//                     if (typeof data.xtyling === "string") {
-//                         SaveFiles[`${NAV.folder.portables}/${Name}/${Name}.xcss`] = data.xtyling || "";
-//                         delete data.xtyling;
-//                     }
-//                     if (typeof data.bindings === "object") {
-//                         Object.entries(data.bindings).forEach(([prefix, content]) => {
-//                             if (typeof content === "string")
-//                                 SaveFiles[`${NAV.folder.portables}/${Name}/${prefix}.${Name}.css`] = content || "";
-//                         })
-//                         delete data.bindings;
-//                     }
-//                     SaveFiles[`${NAV.folder.portables}/${Name}/${Name}.json`] = JSON.stringify(data, " ", 2);
-//                     Status[Name] = $.MOLD.success.Text("Fetch successfull.")
-//                 } else {
-//                     Status[Name] = $.MOLD.failed.Text("Fetch failed.")
-//                 }
-//             }
-//         })
-//     );
-
-//     return { Status, SaveFiles };
-// }
+export default {
+    ARCHIVE,
+    DEPLOY,
+    FETCH,
+};

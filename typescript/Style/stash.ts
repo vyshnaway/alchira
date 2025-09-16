@@ -24,10 +24,10 @@ function _DeleteLibraryFile(filePath: string) {
 	}
 }
 
-function _DeleteExternalFile(filePath: string) {
-	if (CACHE.FILES.EXTERNALS[filePath]) {
-		CACHE.FILES.EXTERNALS[filePath].styleData.usedIndexes.forEach(i => INDEX.DISPOSE(i));
-		delete CACHE.FILES.EXTERNALS[filePath];
+function _DeleteArtifactFile(filePath: string) {
+	if (CACHE.FILES.ARTIFACTS[filePath]) {
+		CACHE.FILES.ARTIFACTS[filePath].styleData.usedIndexes.forEach(i => INDEX.DISPOSE(i));
+		delete CACHE.FILES.ARTIFACTS[filePath];
 	}
 }
 
@@ -37,13 +37,13 @@ function _ClearStash() {
 		INDEX.DISPOSE(index);
 		delete CACHE.CLASS.Library__Index[selector];
 	});
-	Object.entries(CACHE.CLASS.External_Index).forEach(([selector, index]) => {
+	Object.entries(CACHE.CLASS.Artifact_Index).forEach(([selector, index]) => {
 		INDEX.DISPOSE(index);
-		delete CACHE.CLASS.External_Index[selector];
+		delete CACHE.CLASS.Artifact_Index[selector];
 	});
 
 	Object.keys(CACHE.FILES.LIBRARIES).forEach((filePath) => _DeleteLibraryFile(filePath));
-	Object.keys(CACHE.FILES.EXTERNALS).forEach((filePath) => _DeleteExternalFile(filePath));
+	Object.keys(CACHE.FILES.ARTIFACTS).forEach((filePath) => _DeleteArtifactFile(filePath));
 }
 
 
@@ -55,11 +55,11 @@ function _SaveLibraryFile(filePath: string, fileContent: string) {
 	}
 }
 
-function _SaveExternalFile(filePath: string, fileContent: string) {
-	if (CACHE.FILES.EXTERNALS[filePath]) { _DeleteExternalFile(filePath); }
-	const filed = FILING("external", filePath, fileContent);
+function _SaveArtifactFile(filePath: string, fileContent: string) {
+	if (CACHE.FILES.ARTIFACTS[filePath]) { _DeleteArtifactFile(filePath); }
+	const filed = FILING("artifact", filePath, fileContent);
 	if (filed.liblevel < 3) {
-		CACHE.FILES.EXTERNALS[filePath] = filed;
+		CACHE.FILES.ARTIFACTS[filePath] = filed;
 	}
 }
 
@@ -68,45 +68,45 @@ function _StackLibraryFiles() {
 	let length = 0;
 	const
 		none: Record<string, _File.Storage[]> = {},
-		axiomArray: Record<string, _File.Storage[]> = {},
-		clusterArray: Record<string, _File.Storage[]> = {},
-		libraryLookup: Record<string, _File.Lookup> = {};
+		axiomMap: Record<string, _File.Storage[]> = {},
+		clusterMap: Record<string, _File.Storage[]> = {},
+		librariesLookup: Record<string, _File.Lookup> = {};
 
 	Object.entries(CACHE.FILES.LIBRARIES).forEach(([path, data]) => {
 		const reference = data.manifesting.lookup;
-		const collection = reference.type === "AXIOM" ? axiomArray
-			: reference.type === "CLUSTER" ? clusterArray : none;
+		const collection = reference.type === "AXIOM" ? axiomMap
+			: reference.type === "CLUSTER" ? clusterMap : none;
 
-		libraryLookup[path] = reference;
+		librariesLookup[path] = reference;
 		if (!collection[reference.id]) { collection[reference.id] = [data]; }
 		else { collection[reference.id].push(data); }
 
 		if (Number(reference.id) > length) { length = Number(reference.id); }
 	});
 
-	const axiomsArray = Use.array.fromNumberedObject(axiomArray, length);
-	const clustersArray = Use.array.fromNumberedObject(clusterArray, length);
-	return { libraryLookup, axiomsArray, clustersArray };
+	const axiomArray = Use.array.fromNumberedObject(axiomMap, length);
+	const clusterArray = Use.array.fromNumberedObject(clusterMap, length);
+	return { librariesLookup, axiomArray, clusterArray };
 }
 
-function _StackExternalFiles() {
+function _StackArtifactFiles() {
 	const
 		none: _File.Storage[] = [],
-		exattachArray: _File.Storage[] = [],
-		externalArray: _File.Storage[] = [],
-		externalLookup: Record<string, _File.Lookup> = {};
+		artifactArray: _File.Storage[] = [],
+		artattachArray: _File.Storage[] = [],
+		artifactsLookup: Record<string, _File.Lookup> = {};
 
-	Object.entries(CACHE.FILES.EXTERNALS).forEach(([path, data]) => {
+	Object.entries(CACHE.FILES.ARTIFACTS).forEach(([path, data]) => {
 		const reference = data.manifesting.lookup;
-		externalLookup[path] = reference;
+		artifactsLookup[path] = reference;
 
-		const collection = reference.type === "EXATTACH" ? exattachArray
-			: reference.type === "EXTERNAL" ? externalArray : none;
+		const collection = reference.type === "ARTATTACH" ? artattachArray
+			: reference.type === "ARTIFACT" ? artifactArray : none;
 
 		collection.push(data);
 	});
 
-	return { externalLookup, exattachArray, externalArray };
+	return { artifactsLookup, artattachArray, artifactArray };
 }
 
 
@@ -115,22 +115,16 @@ function _StackExternalFiles() {
 
 
 function ReRender() {
-
 	_ClearStash();
-	Object.entries(CACHE.STATIC.Library_Saved).forEach(([filePath, fileContent]) => {
-		_SaveLibraryFile(filePath, fileContent);
-	});
-	Object.entries(CACHE.STATIC.External_Saved).forEach(([filePath, fileContent]) => {
-		_SaveExternalFile(filePath, fileContent);
-	});
+	Object.entries(CACHE.STATIC.Libraries_Saved).forEach(([filePath, fileContent]) => { _SaveLibraryFile(filePath, fileContent); });
+	Object.entries(CACHE.STATIC.Artifacts_Saved).forEach(([filePath, fileContent]) => { _SaveArtifactFile(filePath, fileContent); });
+
+	const { artifactsLookup, artattachArray, artifactArray } = _StackArtifactFiles();
 
 
-
-	const exattachChart: Record<string, string[]> = {};
-	const externalChart: Record<string, string[]> = {};
-	const { externalLookup, exattachArray, externalArray } = _StackExternalFiles();
-
-	const ExternalSkeletons = externalArray.reduce((collection, fileData) => {
+	const artifactChart: Record<string, string[]> = {};
+	const artattachChart: Record<string, string[]> = {};
+	const ArtifactSkeletons = artifactArray.reduce((collection, fileData) => {
 		const indexMetaCollection = collection[fileData.filePath] = {} as Record<string, _Style.Metadata>;
 		SCRIPTFILE(fileData).stylesList.forEach((tagStyle) => {
 			if (tagStyle.symclasses.length === 0) {
@@ -142,7 +136,7 @@ function ReRender() {
 				fileData.manifesting.errors.push(E.error);
 				fileData.manifesting.diagnostics.push(E.diagnostic);
 			} else {
-				const response = PARSE.TagStyleScanner(tagStyle, fileData, CACHE.CLASS.External_Index);
+				const response = PARSE.TagStyleScanner(tagStyle, fileData, CACHE.CLASS.Artifact_Index);
 				const styleData = INDEX.FETCH(response.index);
 				if (styleData?.declarations.length === 1) {
 					fileData.styleData.usedIndexes.add(response.index);
@@ -154,105 +148,116 @@ function ReRender() {
 		});
 		const classNames = Object.keys(indexMetaCollection);
 		if (classNames.length) {
-			externalChart[`External [${fileData.filePath}]: ${classNames.length} Classes`] = classNames;
+			artifactChart[`Artifact [${fileData.filePath}]: ${classNames.length} Classes`] = classNames;
 		}
 		return collection;
 	}, {} as Record<string, Record<string, _Style.Metadata>>);
 
-	const ExattachSkeletons = exattachArray.reduce((collection, fileData) => {
+	const ArtattachSkeletons = artattachArray.reduce((collection, fileData) => {
 		const result = PARSE.CSSBulkScanner([fileData], true);
 		collection[fileData.filePath] = result.indexMetaCollection;
 		if (result.selectorList.length) {
-			exattachChart[`Exattach [${fileData.filePath}]: ${result.selectorList.length} Classes`] = result.selectorList;
+			artattachChart[`Artattach [${fileData.filePath}]: ${result.selectorList.length} Classes`] = result.selectorList;
 		}
 		return collection;
 	}, {} as Record<string, Record<string, _Style.Metadata>>);
 
 
-	const ExternalErrors: string[] = [];
-	const ExternalDiagnostics: _Support.Diagnostic[] = [];
+	const ArtifactsErrors: string[] = [];
+	const ArtifactsDiagnostics: _Support.Diagnostic[] = [];
 
-	Object.values(externalArray).forEach(file => {
-		ExternalErrors.push(...file.manifesting.errors);
-		ExternalDiagnostics.push(...file.manifesting.diagnostics);
-	});
-
-	Object.values(exattachArray).forEach(file => {
-		ExternalErrors.push(...file.manifesting.errors);
-		ExternalDiagnostics.push(...file.manifesting.diagnostics);
-	});
-
-	const nameCollitions = Object.values(CACHE.FILES.EXTERNALS).reduce((A, F) => {
-		if (CACHE.STATIC.Artifact.name === F.artifact) { A.push(F.filePath); }
+	const nameCollitions = Object.values(CACHE.FILES.ARTIFACTS).reduce((A, F) => {
+		if (CACHE.STATIC.Archive.name === F.artifact) { A.push(F.filePath); }
 		return A;
 	}, [] as string[]);
 
 	if (nameCollitions.length) {
-		const E = $$.GenerateError(`Artifact Name collitions: ${CACHE.STATIC.Artifact.name}`, nameCollitions);
-		ExternalErrors.push(E.error);
-		ExternalDiagnostics.push(E.diagnostic);
+		const E = $$.GenerateError(`Artifact Name collitions: ${CACHE.STATIC.Archive.name}`, nameCollitions);
+		ArtifactsErrors.push(E.error);
+		ArtifactsDiagnostics.push(E.diagnostic);
 	}
+
+	Object.values(artifactArray).forEach(file => {
+		ArtifactsErrors.push(...file.manifesting.errors);
+		ArtifactsDiagnostics.push(...file.manifesting.diagnostics);
+	});
+
+	Object.values(artattachArray).forEach(file => {
+		ArtifactsErrors.push(...file.manifesting.errors);
+		ArtifactsDiagnostics.push(...file.manifesting.diagnostics);
+	});
+
+	const artifactReport = [
+		$$.ClassChart(`Artifact: ${Object.values(ArtifactSkeletons).reduce((a, v) => a += Object.keys(v).length, 0)}`, artifactChart),
+		$$.ClassChart(`Artattach: ${Object.values(ArtattachSkeletons).reduce((a, v) => a += Object.keys(v).length, 0)}`, artattachChart),
+	].join("");
 
 
 
 	const axiomChart: Record<string, string[]> = {};
 	const clusterChart: Record<string, string[]> = {};
-	const { libraryLookup, axiomsArray, clustersArray } = _StackLibraryFiles();
+	const { librariesLookup, axiomArray, clusterArray } = _StackLibraryFiles();
 
-	const AxiomSkeletons = axiomsArray.reduce((collection: Record<string, Record<string, _Style.Metadata>>, fileData, index) => {
+	const AxiomSkeletons = axiomArray.reduce((collection: Record<string, Record<string, _Style.Metadata>>, fileData, index) => {
 		const result = PARSE.CSSBulkScanner(fileData);
 		collection[index] = result.indexMetaCollection;
 		if (result.selectorList.length) { axiomChart[`Level ${index}: ${result.selectorList.length} Classes`] = result.selectorList; }
 		return collection;
 	}, {});
 
-	const ClusterSkeletons = clustersArray.reduce((collection: Record<string, Record<string, _Style.Metadata>>, fileDatas, index) => {
+	const ClusterSkeletons = clusterArray.reduce((collection: Record<string, Record<string, _Style.Metadata>>, fileDatas, index) => {
 		const result = PARSE.CSSBulkScanner(fileDatas);
 		collection[index] = result.indexMetaCollection;
 		if (result.selectorList.length) { clusterChart[`Level ${index}: ${result.selectorList.length} Classes`] = result.selectorList; }
 		return collection;
 	}, {});
 
+	const LibrariesErrors: string[] = [];
+	const LibrariesDiagnostics: _Support.Diagnostic[] = [];
 
-	const LibraryErrors: string[] = [];
-	const LibraryDiagnostics: _Support.Diagnostic[] = [];
+	Object.values(axiomArray).forEach(level => {
+		Object.values(level).forEach(file => {
+			LibrariesErrors.push(...file.manifesting.errors);
+			LibrariesDiagnostics.push(...file.manifesting.diagnostics);
+		});
+	});
 
-	const LibraryReport = [
-		$$.ClassChart(`Axioms: ${Object.values(AxiomSkeletons).reduce((a, v) => a += Object.keys(v).length, 0)}`, axiomChart),
-		$$.ClassChart(`Clusters: ${Object.values(ClusterSkeletons).reduce((a, v) => a += Object.keys(v).length, 0)}`, clusterChart),
+	Object.values(clusterArray).forEach(level => {
+		Object.values(level).forEach(file => {
+			LibrariesErrors.push(...file.manifesting.errors);
+			LibrariesDiagnostics.push(...file.manifesting.diagnostics);
+		});
+	});
+
+	const libraryReport = [
+		$$.ClassChart(`Axiom: ${Object.values(AxiomSkeletons).reduce((a, v) => a += Object.keys(v).length, 0)}`, axiomChart),
+		$$.ClassChart(`Cluster: ${Object.values(ClusterSkeletons).reduce((a, v) => a += Object.keys(v).length, 0)}`, clusterChart),
 	].join("");
 
-	const ExternalReport = [
-		$$.ClassChart(`Exattach: ${Object.values(ExternalSkeletons).reduce((a, v) => a += Object.keys(v).length, 0)}`, exattachChart),
-		$$.ClassChart(`External: ${Object.values(ExattachSkeletons).reduce((a, v) => a += Object.keys(v).length, 0)}`, externalChart),
-	].join("");
 
 
-	CACHE.DELTA.Report.libraries = LibraryReport;
-	CACHE.DELTA.Report.externals = ExternalReport;
+	CACHE.DELTA.Report.libraries = libraryReport;
+	CACHE.DELTA.Report.artifacts = artifactReport;
 
-	CACHE.DELTA.Errors.libraries = LibraryErrors;
-	CACHE.DELTA.Errors.externals = ExternalErrors;
+	CACHE.DELTA.Errors.libraries = LibrariesErrors;
+	CACHE.DELTA.Errors.artifacts = ArtifactsErrors;
 
-	CACHE.DELTA.Diagnostics.libraries = LibraryDiagnostics;
-	CACHE.DELTA.Diagnostics.externals = ExternalDiagnostics;
+	CACHE.DELTA.Diagnostics.libraries = LibrariesDiagnostics;
+	CACHE.DELTA.Diagnostics.artifacts = ArtifactsDiagnostics;
 
 	CACHE.DELTA.Manifest.AXIOM = AxiomSkeletons;
 	CACHE.DELTA.Manifest.CLUSTER = ClusterSkeletons;
-	CACHE.DELTA.Manifest.EXTERNAL = ExternalSkeletons;
-	CACHE.DELTA.Manifest.EXATTACH = ExattachSkeletons;
+	CACHE.DELTA.Manifest.ARTIFACT = ArtifactSkeletons;
+	CACHE.DELTA.Manifest.ARTATTACH = ArtattachSkeletons;
 
-	CACHE.DELTA.Lookup.libraries = libraryLookup;
-	CACHE.DELTA.Lookup.externals = externalLookup;
-
-	CACHE.CLASS.Arattach_Index =
-		Object.fromEntries(Object.entries(CACHE.CLASS.Library__Index).map(([k, v]) => [`/${CACHE.STATIC.Artifact.name}/$/${k}`, v]));
+	CACHE.DELTA.Lookup.libraries = librariesLookup;
+	CACHE.DELTA.Lookup.artifacts = artifactsLookup;
 }
 
 
 
 function ReDeclare() {
-	Object.values(CACHE.CLASS.External_Index).forEach((val) => {
+	Object.values(CACHE.CLASS.Artifact_Index).forEach((val) => {
 		const value = CACHE.CLASS.Index_to_Data[val];
 		value.metadata.declarations = [...value.declarations];
 	});
@@ -266,5 +271,4 @@ function ReDeclare() {
 export default {
 	ReRender,
 	ReDeclare,
-	// Appendix,
 };

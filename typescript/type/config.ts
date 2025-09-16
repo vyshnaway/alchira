@@ -19,16 +19,19 @@ interface Base {
 
 export interface Raw extends Base {
     vendors: string,
-    externals: Record<string, string>,
+    artifacts: Record<string, string>,
     proxymap: ProxyMap[],
     tweaks: Tweaks
 }
 
-export interface Artifact extends Base {
-    readme: string,
-    hashrule: Record<string, string>,
+export interface Archive extends Base {
+    tweaks?: Tweaks,
     vendors?: string,
-    externals?: Record<string, string>,
-    proxy?: ProxyMap[],
-    tweaks?: Tweaks
+    proxymap?: ProxyMap[],
+    artifacts?: Record<string, string>,
+    readme?: string,
+    licence?: string,
+    exportsheet?: string,
+    exportclasses?: string[],
+    libraries?: Record<string, string>,
 }

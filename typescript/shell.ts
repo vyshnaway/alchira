@@ -122,13 +122,3 @@ export function ReportError(message_pass: string, message_fail: string, items: s
         [$.list.Bullets, 0, Object.keys(items).length === 0 ? $.preset.success : $.preset.failed]
     );
 }
-
-// export function ReportError(message_pass: string, message_fail: string, items: string[]) {
-//     return $.MAKE(
-//         Object.keys(items).length === 0
-//             ? $.FMT(message_pass, ...$.preset.success, $.style.AS_Bold)
-//             : $.FMT(message_fail, ...$.preset.failed, $.style.AS_Bold)
-//         , items,
-//         [$.list.Bullets, 0, Object.keys(items).length === 0 ? $.preset.success : $.preset.failed]
-//     );
-// }

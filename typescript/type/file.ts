@@ -2,7 +2,7 @@
 import * as _support from "./support.js";
 import * as _style from "./style.js";
 
-export type _Type = "NULL" | "EXTERNAL" | "EXATTACH" | "AXIOM" | "CLUSTER" | "TARGET" | "STYLESHEET" | "README";
+export type _Type = "NULL" | "ARTIFACT" | "ARTATTACH" | "AXIOM" | "CLUSTER" | "TARGET" | "STYLESHEET" | "README";
 
 
 export type ClassMetaMap = Record<string, _style.Metadata>;

@@ -2,6 +2,10 @@
 import * as INDEX from "../data/index.js";
 import * as CACHE from "../data/cache.js";
 import * as LOADPREFIX from "./prefix.js";
+// import HASHRULE from "../hashrule.js";
+import * as _Style from "../type/style.js";
+
+import Use from "../utils/main.js";
 
 type t_styleSorceTemplate = Record<string, string | object>;
 
@@ -13,17 +17,16 @@ function objectSwitch(srcObject: Record<string, any>): Record<string, any> {
 	const output: Record<string, any> = {};
 
 	for (const outerKey in srcObject) {
-		if (Object.prototype.hasOwnProperty.call(srcObject, outerKey) && outerKey[0] !== "+") {
-			const innerObject = srcObject[outerKey];
-			if (typeof innerObject === "object" && innerObject !== null) {
-				for (const innerKey in innerObject) {
-					if (Object.prototype.hasOwnProperty.call(innerObject, innerKey)) {
-						if (!output[innerKey]) {
-							output[innerKey] = {};
-						}
-						output[innerKey][(innerKey[0] === '@' || innerKey === "") ? outerKey : `& ${outerKey}`] = innerObject[innerKey];
-					}
-				}
+		const innerObject = srcObject[outerKey];
+		if (typeof innerObject === "object" && innerObject !== null) {
+			for (const innerKey in innerObject) {
+				if (!output[innerKey]) { output[innerKey] = {}; }
+				output[innerKey][(innerKey[0] === '@' || innerKey === "") ? outerKey : `& ${outerKey}`] = innerObject[innerKey];
+				// if(outerKey === ""){
+				// 	output[innerKey][(innerKey[0] === '@' || innerKey === "") ? outerKey : `& ${outerKey}`] = innerObject[innerKey];
+				// }else{
+				// 	HASHRULE.WRAPPER(output[innerKey], JSON.parse(outerKey), innerObject[innerKey]);
+				// }
 			}
 		}
 	}
@@ -97,7 +100,7 @@ function unNester(selector = "", object: object = {}, cumulates: object = {}) {
 				const xelector = selector + subSelector.slice(1);
 				if (subSelector[1] === ":") {
 					unNester(xelector, subContent, subSelector[2] === ":" ? pseudoelement : pseudoclass);
-				} else if (subSelector[1] === " " ) {
+				} else if (subSelector[1] === " ") {
 					unNester(xelector, subContent, children);
 				} else {
 					unNester(xelector, subContent, compounds);
@@ -207,8 +210,10 @@ function ComposeSwitched(selectorIndexObject: Record<string, number>, minify = !
 }
 
 
-function ComposeArtifact(array: [string, object | string][] = [], tab = "  ") {
+function ArtifactPartial(object: object, minify = true) {
+	const array = Object.entries(object);
 	const styleSheet: string[] = [];
+	const tab = minify ? "" : "  ";
 
 	array.forEach(([key, value]) => {
 		if (typeof value === "object") {
@@ -216,7 +221,7 @@ function ComposeArtifact(array: [string, object | string][] = [], tab = "  ") {
 				styleSheet.push(
 					key,
 					"{",
-					...ComposeArtifact(Object.entries(value), tab).map((i) => tab + i),
+					...ArtifactPartial(value).map((i) => tab + i),
 					"}",
 				);
 			}
@@ -230,7 +235,36 @@ function ComposeArtifact(array: [string, object | string][] = [], tab = "  ") {
 	return styleSheet;
 }
 
+function ComposeArtifact(index: number): _Style.ExportStyle {
+	const style = INDEX.FETCH(index);
 
+	let element = "";
+	if (style.snippet_staple.length) {
+		element = "staple";
+	} else if (style.metadata.summon.length) {
+		element = "summon";
+	} else {
+		element = "style";
+	};
+
+	const symclass = style.symclass.includes("$$")
+		? (style.symclass.startsWith("$") ? `-${style.symclass}` : style.symclass)
+		: `---${Use.string.enCounter(style.index || 0)}`;
+
+	const stylesheet = Object.fromEntries(Object.entries(style.style_object).map(([k, v]) => {
+		return [k, ArtifactPartial(v).join("")];
+	}));
+
+	const innertext = style.snippet_staple || style.metadata.summon || ArtifactPartial(style.snippet_style).join("");
+	
+	return {
+		element,
+		symclass,
+		innertext,
+		stylesheet,
+		attachments: []
+	};
+}
 
 export default {
 	Prefixed: ComposePrefixed,

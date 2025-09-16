@@ -18,15 +18,13 @@ import COMPILE from "./style/render.js";
 import ORDER from "./sort/order-api.js";
 import SCRIPT from "./script/class.js";
 import XTYLES from "./style/stash.js";
-// import { GeneratePortable } from "./portable.js";
+import ARTIFACTS from "./artifact.js";
 
 export function UpdateXtylesFolder() {
 	INDEX.RESET();
-	CACHE.DELTA.Manifest.prefix = CACHE.STATIC.Artifact.name;
 	Object.values(CACHE.CLASS).forEach(V => { for (const v in V) { delete V[v]; } });
 	Object.values(CACHE.FILES).forEach(V => { for (const v in V) { delete V[v]; } });
 	XTYLES.ReRender();
-
 }
 
 export function SaveToTarget(
@@ -39,22 +37,22 @@ export function SaveToTarget(
 	let reCache = true;
 	switch (action) {
 		case "add": case "change":
-			if (CACHE.FILES.TARGETS[targetFolder].stylesheet === filePath) {
-				CACHE.STATIC.Targets_Saved[targetFolder].stylesheetContent = fileContent;
-				CACHE.FILES.TARGETS[targetFolder].stylesheetContent = fileContent;
+			if (CACHE.FILES.TARGETDIR[targetFolder].stylesheet === filePath) {
+				CACHE.STATIC.Targetdir_Saved[targetFolder].stylesheetContent = fileContent;
+				CACHE.FILES.TARGETDIR[targetFolder].stylesheetContent = fileContent;
 				reCache = false;
-			} else if (CACHE.FILES.TARGETS[targetFolder].extensions.includes(extension)) {
-				CACHE.STATIC.Targets_Saved[targetFolder].fileContents[filePath] = fileContent;
-				CACHE.DELTA.DeltaPath = `${CACHE.FILES.TARGETS[targetFolder].source}/${filePath}`;
+			} else if (CACHE.FILES.TARGETDIR[targetFolder].extensions.includes(extension)) {
+				CACHE.STATIC.Targetdir_Saved[targetFolder].fileContents[filePath] = fileContent;
+				CACHE.DELTA.DeltaPath = `${CACHE.FILES.TARGETDIR[targetFolder].source}/${filePath}`;
 			} else {
-				CACHE.DELTA.DeltaPath = `${CACHE.FILES.TARGETS[targetFolder].source}/${filePath}`;
+				CACHE.DELTA.DeltaPath = `${CACHE.FILES.TARGETDIR[targetFolder].source}/${filePath}`;
 				CACHE.DELTA.DeltaContent = fileContent;
 				reCache = false;
 			}
 			break;
 		case "unlink":
-			if (CACHE.STATIC.Targets_Saved[targetFolder]) {
-				delete CACHE.STATIC.Targets_Saved[targetFolder].fileContents[filePath];
+			if (CACHE.STATIC.Targetdir_Saved[targetFolder]) {
+				delete CACHE.STATIC.Targetdir_Saved[targetFolder].fileContents[filePath];
 			}
 			break;
 		default:
@@ -64,58 +62,51 @@ export function SaveToTarget(
 	if (reCache) {
 		XTYLES.ReDeclare();
 
-		Object.entries(CACHE.FILES.TARGETS).forEach(([key, cache]) => {
+		Object.entries(CACHE.FILES.TARGETDIR).forEach(([key, cache]) => {
 			cache.ClearFiles();
-			delete CACHE.FILES.TARGETS[key];
+			delete CACHE.FILES.TARGETDIR[key];
 		});
-		Object.entries(CACHE.STATIC.Targets_Saved).forEach(([key, files], index) => {
-			CACHE.FILES.TARGETS[key] = new SCRIPT(files, Use.string.enCounter(index));
+		Object.entries(CACHE.STATIC.Targetdir_Saved).forEach(([key, files], index) => {
+			CACHE.FILES.TARGETDIR[key] = new SCRIPT(files, Use.string.enCounter(index));
 		});
 	}
+	console.log(CACHE.FILES);
 }
 
 
 
 async function Accumulate() {
-
 	const CUMULATED: _Script.Cumulated = {
 		report: [],
 		globalClasses: {},
 		publicClasses: {},
 		fileManifests: {},
 	};
-
-
-	Object.values(CACHE.FILES.TARGETS).forEach((cache) => {
+	Object.values(CACHE.FILES.TARGETDIR).forEach((cache) => {
 		const C = cache.Accumulator();
 		CUMULATED.report.push(...C.report);
 		Object.assign(CUMULATED.globalClasses, C.globalClasses);
 		Object.assign(CUMULATED.publicClasses, C.publicClasses);
 		Object.assign(CUMULATED.fileManifests, C.fileManifests);
 	});
-	CACHE.DELTA.Report.artifacts = $.MAKE("", CUMULATED.report);
-
 	CACHE.CLASS.Global___Index = CUMULATED.globalClasses;
 	CACHE.CLASS.Public___Index = CUMULATED.publicClasses;
-	CACHE.CLASS.Artifact_Index = Object.fromEntries([
-		...Object.entries(CACHE.CLASS.Global___Index).map(([s, i]) => [`/${CACHE.STATIC.Artifact.name}/${s}`, i]),
-		...Object.entries(CACHE.CLASS.Public___Index).map(([s, i]) => [`/${CACHE.STATIC.Artifact.name}/${s}`, i]),
-	]);
+	CACHE.DELTA.Report.archives = $.MAKE("", CUMULATED.report);
 
 
-	CACHE.DELTA.Lookup.artifacts = {};
 	CACHE.DELTA.Manifest.LOCAL = {};
 	CACHE.DELTA.Manifest.GLOBAL = {};
-	CACHE.DELTA.Errors.artifacts = [];
-	CACHE.DELTA.Diagnostics.artifacts = [];
-
+	CACHE.DELTA.Lookup.archives = {};
+	CACHE.DELTA.Errors.archives = [];
+	CACHE.DELTA.Diagnostics.archives = [];
 	Object.entries(CUMULATED.fileManifests).forEach(([K, V]) => {
-		CACHE.DELTA.Manifest.GLOBAL[K] = { ...V.public, ...V.global };
 		CACHE.DELTA.Manifest.LOCAL[K] = V.local;
-		CACHE.DELTA.Lookup.artifacts[K] = V.lookup;
-		CACHE.DELTA.Errors.artifacts.push(...V.errors);
-		CACHE.DELTA.Diagnostics.artifacts.push(...V.diagnostics);
+		CACHE.DELTA.Manifest.GLOBAL[K] = { ...V.public, ...V.global };
+		CACHE.DELTA.Lookup.archives[K] = V.lookup;
+		CACHE.DELTA.Errors.archives.push(...V.errors);
+		CACHE.DELTA.Diagnostics.archives.push(...V.diagnostics);
 	});
+
 
 	CACHE.DELTA.Manifest.filelookup = {};
 	Object.values(CACHE.DELTA.Lookup).forEach((V) => Object.assign(CACHE.DELTA.Manifest.filelookup, V));
@@ -125,7 +116,7 @@ async function Accumulate() {
 	CACHE.DELTA.Diagnostics.multiples = [];
 	Object.values(CACHE.CLASS.Index_to_Data).forEach((data) => {
 		if (data.metadata.declarations.length > 1) {
-			const E = $$.GenerateError(`Duplicate Declarations: ${data.classname}`, data.metadata.declarations);
+			const E = $$.GenerateError(`Duplicate Declarations: ${data.symclass}`, data.metadata.declarations);
 			CACHE.DELTA.Errors.multiples.push(E.error);
 			CACHE.DELTA.Diagnostics.multiples.push(E.diagnostic);
 		}
@@ -155,13 +146,13 @@ function SaveClassRefs(stash: _Style.SortedOutput) {
 	}, {} as _Style.ClassIndexMap);
 }
 
-async function Synthasize() {
+async function Synthasize(OUTFILES: Record<string, string> = {}) {
 
 	Accumulate();
 
-	const CLASSESLIST: number[][] = [];
 	const ATTACHMENTS: number[] = [];
-	Object.values(CACHE.FILES.TARGETS).forEach((cache) => cache.GetTracks(CLASSESLIST, ATTACHMENTS));
+	const CLASSESLIST: number[][] = [];
+	Object.values(CACHE.FILES.TARGETDIR).forEach((cache) => cache.GetTracks(CLASSESLIST, ATTACHMENTS));
 
 	if (CACHE.STATIC.WATCH) {
 		CACHE.CLASS.Sync_PublishIndexMap = {};
@@ -188,10 +179,11 @@ async function Synthasize() {
 
 				CACHE.DELTA.FinalMessage = "Errors in " + CACHE.DELTA.ErrorCount + " Tags. Falling back to 'preview' command.";
 			} else {
-				// const json = GeneratePortable(CUMULATES.essentials);
-				const response = await ORDER(CLASSESLIST, CACHE.STATIC.Command, CACHE.STATIC.Argument);
+				const archive = ARTIFACTS.ARCHIVE();
+				const response = await ORDER(CLASSESLIST, "publish", CACHE.STATIC.Argument, archive);
 				SaveClassRefs(response.result);
 
+				ARTIFACTS.DEPLOY(OUTFILES);
 				if (response.status) {
 					CACHE.DELTA.FinalMessage = "Build Success.";
 				} else {
@@ -206,7 +198,8 @@ async function Synthasize() {
 }
 
 
-function GenFinalSheets(ATTACHMENTS: Set<number>) {
+async function GenFinalSheets(OUTFILES: Record<string, string> = {}) {
+	const ATTACHMENTS = new Set(await Synthasize(OUTFILES));
 
 	const RENDERFRAGS = {
 		Root: "",
@@ -216,16 +209,16 @@ function GenFinalSheets(ATTACHMENTS: Set<number>) {
 	};
 
 
-	const indexScanned = STYLE.CSSFileScanner(Use.code.uncomment.Css(CACHE.STATIC.RootCSS), "INDEX ||", false);
+	const indexScanned = STYLE.CSSFileScanner(Use.code.uncomment.Css(CACHE.STATIC.RootCSS), "INDEX ||");
 	CACHE.DELTA.Manifest.constants = Object.keys(indexScanned.variables);
 	CACHE.DELTA.Report.constants = $$.ListCatalog("Root Constants", CACHE.DELTA.Manifest.constants);
-	indexScanned.attachments.forEach((attachment) => ATTACHMENTS.add(INDEX.FIND(attachment, false).index));
+	indexScanned.attachments.forEach((attachment) => ATTACHMENTS.add(INDEX.FIND(attachment).index));
 	const WATCHINDEX = RENDERFRAGS.Root = COMPILE.Prefixed(indexScanned.styles);
 
 
 	RENDERFRAGS.Appendix = COMPILE.Prefixed(
-		Object.values(CACHE.FILES.TARGETS).reduce((appendix, cache) => {
-			const appendixScanned = STYLE.CSSFileScanner(cache.stylesheetContent, `APPENDIX : ${cache.targetStylesheet} ||`, true);
+		Object.values(CACHE.FILES.TARGETDIR).reduce((appendix, cache) => {
+			const appendixScanned = STYLE.CSSFileScanner(cache.stylesheetContent, `APPENDIX : ${cache.targetStylesheet} ||`);
 			appendix.push(...appendixScanned.styles);
 			appendixScanned.attachments.forEach((i) => {
 				const found = INDEX.FIND(i).index;
@@ -250,7 +243,7 @@ function GenFinalSheets(ATTACHMENTS: Set<number>) {
 
 	const targetRenderAction: _Script._Actions = (CACHE.STATIC.Command === "debug") ? _Script._Actions.monitor
 		: (CACHE.STATIC.Command === "preview" && CACHE.STATIC.Argument === "watch") ? _Script._Actions.watch : _Script._Actions.sync;
-	Object.values(CACHE.FILES.TARGETS).forEach((cache) => cache.SyncClassnames(targetRenderAction));
+	Object.values(CACHE.FILES.TARGETDIR).forEach((cache) => cache.SyncClassnames(targetRenderAction));
 	RENDERFRAGS.Class = COMPILE.Switched(CACHE.CLASS.Sync_PublishIndexMap);
 
 	const STAPLESHEET = Use.string.minify(Use.code.uncomment.Script(ATTACH_STAPLES.join(""), false, false, true));
@@ -259,7 +252,7 @@ function GenFinalSheets(ATTACHMENTS: Set<number>) {
 	const WATCHCLASS = CACHE.STATIC.WATCH
 		? Use.string.minify(Use.code.uncomment.Script(COMPILE.Switched(
 			Object.entries(CACHE.CLASS.Index_to_Data).reduce((A, [I, D]) => {
-				if (D.metadata.summon.length) { A['.' + D.metadata.watchclass] = Number(I); }
+				A['.' + D.metadata.watchclass] = Number(I);
 				return A;
 			}, {} as Record<string, number>)
 		) + RENDERFRAGS.Attach)) : '';
@@ -267,26 +260,23 @@ function GenFinalSheets(ATTACHMENTS: Set<number>) {
 	return { RENDERFRAGS, STYLESHEET, STAPLESHEET, WATCHINDEX, WATCHCLASS };
 }
 
-// On target stylesheet edit.
 export async function Generate() {
 	const OUTFILES: Record<string, string> = {};
 
 	if (CACHE.DELTA.DeltaContent.length) {
 		OUTFILES[CACHE.DELTA.DeltaPath] = CACHE.DELTA.DeltaContent;
 	} else {
-
-		const ATTACHMENTS = await Synthasize();
 		const {
 			RENDERFRAGS,
 			STYLESHEET,
 			STAPLESHEET,
 			WATCHINDEX,
 			WATCHCLASS
-		} = GenFinalSheets(new Set(ATTACHMENTS));
+		} = await GenFinalSheets(OUTFILES);
 
 		const STYLEBLOCK = `\n<style>${STYLESHEET}</style>`;
 		const STAPLEBLOCK = `<div>${STAPLESHEET}</div>`;
-		Object.values(CACHE.FILES.TARGETS).forEach((cache) => {
+		Object.values(CACHE.FILES.TARGETDIR).forEach((cache) => {
 			cache.SummonFiles(OUTFILES, STYLESHEET, STYLEBLOCK, STAPLEBLOCK);
 		});
 

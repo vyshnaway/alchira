@@ -3,14 +3,12 @@ export type Command = ""
     | "debug"
     | "preview"
     | "publish"
-    | "artifact"
     | "install";
 
 export interface PackageEssential {
     bin: string;
     name: string;
     version: string;
-    website: string;
 }
 
 export interface Event {
