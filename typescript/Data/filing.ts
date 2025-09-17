@@ -13,27 +13,12 @@ import * as CACHE from "./cache.js";
 function resolveGroup(
 	extension: string,
 	hasCluster: boolean,
-	fromExternals: boolean,
+	fromArtifacts: boolean,
 	fromLibraries: boolean,
 ): _File._Type {
-	if (fromExternals) {
-		switch (extension) {
-			case CACHE.ROOT.extension:
-				return "ARTIFACT";
-			case "css":
-				return "ARTATTACH";
-			case "md":
-				return "README";
-			default:
-				return "NULL";
-		}
-	}
-
-	if (fromLibraries) {
-		return hasCluster ? "CLUSTER" : "AXIOM";
-	}
-
-	return "TARGET";
+	if (fromArtifacts) { return (extension === CACHE.ROOT.extension) ? "ARTIFACT" : "NULL"; }
+	else if (fromLibraries) { return hasCluster ? "CLUSTER" : "AXIOM"; }
+	else { return "TARGET"; }
 }
 
 export default function FILING(
@@ -45,7 +30,7 @@ export default function FILING(
 	label = '',
 ) {
 	const isLibrary = fileGroup === "library";
-	const isExternal = fileGroup === "artifact";
+	const isArtifact = fileGroup === "artifact";
 	const fromXtylesFolder = fileGroup !== "target";
 
 	const targetPath = FILEMAN.path.join(target, filePath);
@@ -54,14 +39,14 @@ export default function FILING(
 	const [extension, artifactName, liblevel, cluster]: string[] = FILEMAN.path.basename(filePath).split(".").reverse();
 	const num = Number(liblevel);
 	const idn = (isNaN(num) || (num < 0) || (num > 2)) ? 0 : Math.floor(num);
-	const normalFileName = isExternal ? USE.string.normalize(artifactName) : CACHE.STATIC.Archive.name;
+	const normalFileName = isArtifact ? USE.string.normalize(artifactName) : CACHE.STATIC.Archive.name;
 
-	const group: _File._Type = resolveGroup(extension, Boolean(cluster), isExternal, isLibrary);
+	const group: _File._Type = resolveGroup(extension, Boolean(cluster), isArtifact, isLibrary);
 	const normalCluster = USE.string.normalize(cluster);
 
 	const classFront =
 		(
-			isExternal ? `/${normalFileName}${group === "ARTATTACH" ? "/$/" : "/"}` : ""
+			isArtifact ? `/${normalFileName}/` : ""
 		) + (
 			((idn > 0) && (extension === "css") && (normalCluster !== "-")) ? normalCluster : ""
 		) + (
@@ -80,7 +65,7 @@ export default function FILING(
 		debugclassFront: `${(fromXtylesFolder) ? (group) : ""}\\|${USE.string.normalize(targetPath, [], [], ["/", "."])}`,
 		manifesting: {
 			lookup: {
-				id: isLibrary ? String(idn) : isExternal ? filePath : targetPath,
+				id: isLibrary ? String(idn) : isArtifact ? filePath : targetPath,
 				type: group,
 			},
 			local: {},

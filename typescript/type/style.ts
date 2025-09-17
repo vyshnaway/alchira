@@ -24,8 +24,9 @@ export interface ExportStyle {
     element: string,
     symclass: string,
     innertext: string,
-    stylesheet: object,
-    attachments: string[]
+    stylesheet: [string, string][],
+    attributes: [string, string][],
+    attachments: string[],
 }
 
 export interface ParsedResult {
@@ -62,7 +63,7 @@ export interface Classdata {
     index?: number,
     metadata: Metadata,
     artifact: string,
-    selector: string,
+    definent: string,
     symclass: string,
     debugclass: string,
     attachments: string[],

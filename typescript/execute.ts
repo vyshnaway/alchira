@@ -183,7 +183,7 @@ async function execute(chapter: string) {
                                     ) {
                                         CACHE.STATIC.Libraries_Saved[pathFromWork] = event.fileContent;
                                     } else if (
-                                        pathFromWork.startsWith(CACHE.PATH.folder.external.path)
+                                        pathFromWork.startsWith(CACHE.PATH.folder.artifacts.path)
                                         && [CACHE.ROOT.extension, "css", "md"].includes(event.extension)
                                     ) {
                                         CACHE.STATIC.Artifacts_Saved[pathFromWork] = event.fileContent;

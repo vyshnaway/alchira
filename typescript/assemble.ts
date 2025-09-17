@@ -19,6 +19,7 @@ import ORDER from "./sort/order-api.js";
 import SCRIPT from "./script/class.js";
 import XTYLES from "./style/stash.js";
 import ARTIFACTS from "./artifact.js";
+import fileman from "./fileman.js";
 
 export function UpdateXtylesFolder() {
 	INDEX.RESET();
@@ -43,7 +44,8 @@ export function SaveToTarget(
 				reCache = false;
 			} else if (CACHE.FILES.TARGETDIR[targetFolder].extensions.includes(extension)) {
 				CACHE.STATIC.Targetdir_Saved[targetFolder].fileContents[filePath] = fileContent;
-				CACHE.DELTA.DeltaPath = `${CACHE.FILES.TARGETDIR[targetFolder].source}/${filePath}`;
+				CACHE.DELTA.DeltaPath = fileman.path.join(CACHE.FILES.TARGETDIR[targetFolder].source, filePath);
+				console.log(2);
 			} else {
 				CACHE.DELTA.DeltaPath = `${CACHE.FILES.TARGETDIR[targetFolder].source}/${filePath}`;
 				CACHE.DELTA.DeltaContent = fileContent;
@@ -62,17 +64,28 @@ export function SaveToTarget(
 	if (reCache) {
 		XTYLES.ReDeclare();
 
+		Object.entries(CACHE.CLASS.Public___Index).forEach(([c,i]) =>{
+			INDEX.DISPOSE(i);
+			delete CACHE.CLASS.Public___Index[c];
+		});
+		Object.entries(CACHE.CLASS.Global___Index).forEach(([c,i]) =>{
+			INDEX.DISPOSE(i);
+			delete CACHE.CLASS.Global___Index[c];
+		});
 		Object.entries(CACHE.FILES.TARGETDIR).forEach(([key, cache]) => {
 			cache.ClearFiles();
 			delete CACHE.FILES.TARGETDIR[key];
 		});
+
+		CACHE.FILES.TARGETDIR = {};
+		CACHE.CLASS.Public___Index = {};
+		CACHE.CLASS.Global___Index = {};
+		
 		Object.entries(CACHE.STATIC.Targetdir_Saved).forEach(([key, files], index) => {
 			CACHE.FILES.TARGETDIR[key] = new SCRIPT(files, Use.string.enCounter(index));
 		});
 	}
-	console.log(CACHE.FILES);
 }
-
 
 
 async function Accumulate() {
@@ -183,7 +196,7 @@ async function Synthasize(OUTFILES: Record<string, string> = {}) {
 				const response = await ORDER(CLASSESLIST, "publish", CACHE.STATIC.Argument, archive);
 				SaveClassRefs(response.result);
 
-				ARTIFACTS.DEPLOY(OUTFILES);
+				await ARTIFACTS.DEPLOY(OUTFILES);
 				if (response.status) {
 					CACHE.DELTA.FinalMessage = "Build Success.";
 				} else {
@@ -275,9 +288,8 @@ export async function Generate() {
 		} = await GenFinalSheets(OUTFILES);
 
 		const STYLEBLOCK = `\n<style>${STYLESHEET}</style>`;
-		const STAPLEBLOCK = `<div>${STAPLESHEET}</div>`;
 		Object.values(CACHE.FILES.TARGETDIR).forEach((cache) => {
-			cache.SummonFiles(OUTFILES, STYLESHEET, STYLEBLOCK, STAPLEBLOCK);
+			cache.SummonFiles(OUTFILES, STYLESHEET, STYLEBLOCK, STAPLESHEET);
 		});
 
 		if (CACHE.STATIC.WATCH) {

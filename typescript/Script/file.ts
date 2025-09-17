@@ -51,14 +51,15 @@ export default function scanner(
 				classesList.push(...result.classesList);
 				attachments.push(...result.attachments);
 
-				if (hasDeclared) { stylesList.push(result.styleDeclarations); }
-				if (selfClosingTags[fragment]) { fileData.styleData.tagReplacements.push([selfClosingTags[fragment], stream.length]); }
+				if (hasDeclared) {
+					stylesList.push(result.styleDeclarations);
+				} else if (selfClosingTags[fragment] && (tagTrack.length === 0)) {
+					fileData.styleData.tagReplacements.push([selfClosingTags[fragment], stream.length]);
+				}
 
-				const styleDeclarations = Object.entries(result.styleDeclarations.styles);
-				styleDeclarations.forEach(([k, v]) => { result.styleDeclarations.styles[k] = v.slice(1, -1); });
+				Object.entries(result.styleDeclarations.styles).forEach(([k, v]) => { result.styleDeclarations.styles[k] = v.slice(1, -1); });
 
-
-				if (_Script._Actions.read === action) {
+				if (action === _Script._Actions.read) {
 					subScribed = !hasDeclared ? fragment
 						: result.styleDeclarations.elid ? ""
 							: ('<' + [

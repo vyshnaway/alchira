@@ -1,8 +1,9 @@
-import fileman from "./fileman.js";
 import $ from "./shell/main.js";
+import fileman from "./fileman.js";
 
 import * as $$ from "./shell.js";
 import * as CACHE from "./data/cache.js";
+
 import * as _Config from "./type/config.js";
 import * as _Style from "./type/style.js";
 
@@ -13,7 +14,7 @@ function ARCHIVE() {
     delete CACHE.STATIC.Archive.proxymap;
     delete CACHE.STATIC.Archive.artifacts;
 
-
+    CACHE.STATIC.Archive.exportclasses = [];
     CACHE.STATIC.Archive.exportsheet = Object.values(Object.values(CACHE.FILES.TARGETDIR).reduce((a, i) => {
         Object.assign(a, i.GetExports()); return a;
     }, {} as Record<string, _Style.ExportStyle>))
@@ -23,14 +24,21 @@ function ARCHIVE() {
             return [
                 ('<' + [
                     i.element,
-                    ...Object.entries(i.stylesheet).map(([A, V]) => {
-                        const attachments = i.attachments.length? `${CACHE.ROOT.customOperations["attach"]} ${i.attachments.join(" ")};`: "";
+                    ...i.stylesheet.map(([A, V]) => {
+                        const symclass = i.symclass.startsWith("$") ? `-${i.symclass}` : i.symclass;
+
                         if (A === "") {
-                            return `${i.symclass}="${attachments}${V}"`;
+                            const value = (i.attachments.length
+                                ? `${CACHE.ROOT.customOperations["attach"]} ${i.attachments.join(" ")};`
+                                : "") + V;
+
+                            return `${symclass}${value.length ? `="${value}"` : ''}`;
                         } else {
-                            return `${"{" + JSON.parse(i.symclass).join("}&{") + "}&"}="${V}"`;
+                            return `${"{" + JSON.parse(A).join("}&{") + "}&"}="${V}"`;
                         }
-                    })
+
+                    }),
+                    ...i.attributes.map(([k, v]) => `${k}=${v}`)
                 ].join(' ') + '>'),
                 i.innertext,
                 `</${i.element}>`,
@@ -41,12 +49,30 @@ function ARCHIVE() {
     return CACHE.STATIC.Archive;
 }
 
-function DEPLOY(OUTFILES: Record<string, string> = {}) {
-    const latest = JSON.stringify(CACHE.STATIC.Archive);
-    OUTFILES[fileman.path.join(CACHE.PATH.folder.arcversion.path, `latest.json`)] = latest;
-    OUTFILES[fileman.path.join(CACHE.PATH.folder.arcversion.path, `${CACHE.STATIC.Archive.version}.json`)] = latest;
-    OUTFILES[CACHE.PATH.json.archive.path] = JSON.stringify(fileman.path.listFiles(CACHE.PATH.folder.arcversion.path));
+async function DEPLOY(OUTFILES: Record<string, string> = {}) {
+    const latestverfile = `latest.json`;
+    const currentexport = JSON.stringify(CACHE.STATIC.Archive);
+    const currentverfile = `${CACHE.STATIC.Archive.version}.json`;
+    const availableversions = (await fileman.path.listFiles(CACHE.PATH.folder.arcversion.path)).map(i => fileman.path.basename(i));
+
+    const latestpath = fileman.path.join(CACHE.PATH.folder.arcversion.path, latestverfile);
+    const currentpath = fileman.path.join(CACHE.PATH.folder.arcversion.path, currentverfile);
+
+    if (!availableversions.includes(latestverfile)) { availableversions.push(latestverfile); }
+    if (!availableversions.includes(currentverfile)) { availableversions.push(currentverfile); }
+
+    OUTFILES[latestpath] = currentexport;
+    OUTFILES[currentpath] = currentexport;
+
+    const indexexport = {
+        ...CACHE.STATIC.Archive,
+        versions: availableversions.sort(),
+    };
+    delete indexexport.exportsheet;
+
+    OUTFILES[CACHE.PATH.json.archive.path] = JSON.stringify(indexexport);
 }
+
 
 export async function FETCH() {
     const outs: Record<string, string> = {}, Results: Record<string, string> = {};
@@ -76,30 +102,35 @@ export async function FETCH() {
             } else {
                 if (fetched.libraries) {
                     Object.entries(fetched.libraries).forEach(([lib, str]) => {
-                        outs[fileman.path.join(CACHE.PATH.folder.artifact.path, identifier, `${lib}.${identifier}.css`)] = str;
+                        outs[fileman.path.join(CACHE.PATH.folder.artifacts.path, identifier, `${lib}.${identifier}.css`)] = str;
                     });
                     delete fetched.libraries;
                 }
                 if (fetched.exportsheet) {
-                    outs[fileman.path.join(CACHE.PATH.folder.artifact.path, identifier, `${identifier}.${CACHE.ROOT.extension}`)] = ([
-                        `# ${fetched.name}@${fetched.version}`,
+                    outs[fileman.path.join(CACHE.PATH.folder.artifacts.path, identifier, `${identifier}.${CACHE.ROOT.extension}`)] = ([
+                        `# ${fetched.name}@${fetched.version} : Available SymClasses`,
                         "",
-                        "## Available SymClasses",
+                        ...(fetched.exportclasses ? fetched.exportclasses.map(i => {
+                            if (i.includes("$$$")) {
+                                return `> /${identifier}/${i.replace("$$$", "$")}`;
+                            } else {
+                                return `> /${identifier}/${i}`;
+                            }
+                        }) : []),
                         "",
-                        ...(fetched.exportclasses ? fetched.exportclasses.map(i => `/${identifier}/${i}`) : []),
                         "",
-                        "---",
+                        "# Declarations",
                         "",
                         fetched.exportsheet,
                     ]).join("\n");
                     delete fetched.exportsheet;
                 }
                 if (fetched.readme) {
-                    outs[fileman.path.join(CACHE.PATH.folder.artifact.path, identifier, `readme.md`)] = fetched.readme;
+                    outs[fileman.path.join(CACHE.PATH.folder.artifacts.path, identifier, `readme.md`)] = fetched.readme;
                     delete fetched.readme;
                 }
                 if (fetched.licence) {
-                    outs[fileman.path.join(CACHE.PATH.folder.artifact.path, identifier, `licence.md`)] = fetched.licence;
+                    outs[fileman.path.join(CACHE.PATH.folder.artifacts.path, identifier, `licence.md`)] = fetched.licence;
                     delete fetched.licence;
                 }
                 Results[identifier] = $.tag.Span("Successfull", $.preset.success);

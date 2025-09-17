@@ -108,7 +108,7 @@ export default class C_Proxy {
 				const classdata = INDEX.FETCH(response.index);
 
 				if (classdata.declarations.length === 1) {
-					skeletonMap[response.classname] = classdata.metadata;
+					skeletonMap[response.symclass] = classdata.metadata;
 					FILE.styleData.usedIndexes.add(response.index);
 				}
 
@@ -212,6 +212,7 @@ export default class C_Proxy {
 					if (subindex) {
 						const subexporting = RENDER.Artifact(subindex);
 						exporting.attachments.push(subexporting.symclass);
+						exports[subexporting.symclass] = subexporting;
 					}
 				});
 			});
@@ -251,7 +252,7 @@ export default class C_Proxy {
 							A += data.scratch.slice(fromPos, pos) + summonBlock;
 							break;
 						case CACHE.ROOT.customElements.style:
-							A += data.scratch.slice(fromPos, pos);
+							A += data.scratch.slice(fromPos, pos) + stylesheet;
 							break;
 						default:
 							A += data.scratch.slice(fromPos);

@@ -132,7 +132,6 @@ export const DELTA: _Cache.DELTA = {
         LOCAL: {},
         GLOBAL: {},
         ARTIFACT: {},
-        ARTATTACH: {},
     },
 };
 

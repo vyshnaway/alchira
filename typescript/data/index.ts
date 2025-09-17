@@ -1,6 +1,5 @@
-import * as _Style from "../type/style.js";
-
 import * as CACHE from "./cache.js";
+import * as _Style from "../type/style.js";
 
 import utils from "../utils/main.js";
 
@@ -8,7 +7,7 @@ let NOW = 0;
 const BIN = new Set<number>();
 
 export function FETCH(index: number) {
-    return CACHE.CLASS.Index_to_Data[index];
+    return CACHE.CLASS.Index_to_Data[String(index)];
 }
 
 export function FIND(classname: string, localmap: _Style.ClassIndexMap = {}) {

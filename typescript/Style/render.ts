@@ -236,8 +236,9 @@ function ArtifactPartial(object: object, minify = true) {
 }
 
 function ComposeArtifact(index: number): _Style.ExportStyle {
+	
 	const style = INDEX.FETCH(index);
-
+const isPublic = style.symclass.includes("$$$");
 	let element = "";
 	if (style.snippet_staple.length) {
 		element = "staple";
@@ -247,21 +248,23 @@ function ComposeArtifact(index: number): _Style.ExportStyle {
 		element = "style";
 	};
 
-	const symclass = style.symclass.includes("$$")
-		? (style.symclass.startsWith("$") ? `-${style.symclass}` : style.symclass)
-		: `---${Use.string.enCounter(style.index || 0)}`;
+	const symclass = style.definent.includes("$$$") ? style.definent : `$---${Use.string.enCounter(style.index || 0)}`;
 
-	const stylesheet = Object.fromEntries(Object.entries(style.style_object).map(([k, v]) => {
-		return [k, ArtifactPartial(v).join("")];
-	}));
+	const stylesheet = isPublic
+		? Object.entries(style.style_object).map(([k, v]) => [k, ArtifactPartial(v).join("")] as [string, string])
+		: [["", ""]] as [string, string][];
+	const attributes = isPublic ?
+		Object.entries(style.metadata.attributes).map(([k, v]) => [k, Use.string.minify(v)] as [string, string])
+		: [];
+	const innertext =
+		Use.string.minify(style.snippet_staple || style.metadata.summon || ArtifactPartial(style.snippet_style).join(""));
 
-	const innertext = style.snippet_staple || style.metadata.summon || ArtifactPartial(style.snippet_style).join("");
-	
 	return {
 		element,
 		symclass,
 		innertext,
 		stylesheet,
+		attributes,
 		attachments: []
 	};
 }

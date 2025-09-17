@@ -91,22 +91,19 @@ function _StackLibraryFiles() {
 
 function _StackArtifactFiles() {
 	const
-		none: _File.Storage[] = [],
 		artifactArray: _File.Storage[] = [],
-		artattachArray: _File.Storage[] = [],
 		artifactsLookup: Record<string, _File.Lookup> = {};
 
 	Object.entries(CACHE.FILES.ARTIFACTS).forEach(([path, data]) => {
 		const reference = data.manifesting.lookup;
 		artifactsLookup[path] = reference;
 
-		const collection = reference.type === "ARTATTACH" ? artattachArray
-			: reference.type === "ARTIFACT" ? artifactArray : none;
-
-		collection.push(data);
+		if (reference.type === "ARTIFACT"){
+			artifactArray.push(data);
+		}
 	});
 
-	return { artifactsLookup, artattachArray, artifactArray };
+	return { artifactsLookup, artifactArray };
 }
 
 
@@ -119,11 +116,10 @@ function ReRender() {
 	Object.entries(CACHE.STATIC.Libraries_Saved).forEach(([filePath, fileContent]) => { _SaveLibraryFile(filePath, fileContent); });
 	Object.entries(CACHE.STATIC.Artifacts_Saved).forEach(([filePath, fileContent]) => { _SaveArtifactFile(filePath, fileContent); });
 
-	const { artifactsLookup, artattachArray, artifactArray } = _StackArtifactFiles();
+	const { artifactsLookup, artifactArray } = _StackArtifactFiles();
 
 
 	const artifactChart: Record<string, string[]> = {};
-	const artattachChart: Record<string, string[]> = {};
 	const ArtifactSkeletons = artifactArray.reduce((collection, fileData) => {
 		const indexMetaCollection = collection[fileData.filePath] = {} as Record<string, _Style.Metadata>;
 		SCRIPTFILE(fileData).stylesList.forEach((tagStyle) => {
@@ -140,7 +136,7 @@ function ReRender() {
 				const styleData = INDEX.FETCH(response.index);
 				if (styleData?.declarations.length === 1) {
 					fileData.styleData.usedIndexes.add(response.index);
-					indexMetaCollection[response.classname] = styleData.metadata;
+					indexMetaCollection[response.symclass] = styleData.metadata;
 				}
 				fileData.manifesting.errors.push(...response.errors);
 				fileData.manifesting.diagnostics.push(...response.diagnostics);
@@ -149,15 +145,6 @@ function ReRender() {
 		const classNames = Object.keys(indexMetaCollection);
 		if (classNames.length) {
 			artifactChart[`Artifact [${fileData.filePath}]: ${classNames.length} Classes`] = classNames;
-		}
-		return collection;
-	}, {} as Record<string, Record<string, _Style.Metadata>>);
-
-	const ArtattachSkeletons = artattachArray.reduce((collection, fileData) => {
-		const result = PARSE.CSSBulkScanner([fileData], true);
-		collection[fileData.filePath] = result.indexMetaCollection;
-		if (result.selectorList.length) {
-			artattachChart[`Artattach [${fileData.filePath}]: ${result.selectorList.length} Classes`] = result.selectorList;
 		}
 		return collection;
 	}, {} as Record<string, Record<string, _Style.Metadata>>);
@@ -182,15 +169,7 @@ function ReRender() {
 		ArtifactsDiagnostics.push(...file.manifesting.diagnostics);
 	});
 
-	Object.values(artattachArray).forEach(file => {
-		ArtifactsErrors.push(...file.manifesting.errors);
-		ArtifactsDiagnostics.push(...file.manifesting.diagnostics);
-	});
-
-	const artifactReport = [
-		$$.ClassChart(`Artifact: ${Object.values(ArtifactSkeletons).reduce((a, v) => a += Object.keys(v).length, 0)}`, artifactChart),
-		$$.ClassChart(`Artattach: ${Object.values(ArtattachSkeletons).reduce((a, v) => a += Object.keys(v).length, 0)}`, artattachChart),
-	].join("");
+	const artifactReport = $$.ClassChart(`Artifact: ${Object.values(ArtifactSkeletons).reduce((a, v) => a += Object.keys(v).length, 0)}`, artifactChart);
 
 
 
@@ -248,7 +227,6 @@ function ReRender() {
 	CACHE.DELTA.Manifest.AXIOM = AxiomSkeletons;
 	CACHE.DELTA.Manifest.CLUSTER = ClusterSkeletons;
 	CACHE.DELTA.Manifest.ARTIFACT = ArtifactSkeletons;
-	CACHE.DELTA.Manifest.ARTATTACH = ArtattachSkeletons;
 
 	CACHE.DELTA.Lookup.libraries = librariesLookup;
 	CACHE.DELTA.Lookup.artifacts = artifactsLookup;

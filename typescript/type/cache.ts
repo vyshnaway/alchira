@@ -78,7 +78,6 @@ export interface DELTA {
         LOCAL: Record<string, _file.ClassMetaMap>,
         GLOBAL: Record<string, _file.ClassMetaMap>,
         ARTIFACT: Record<string, _file.ClassMetaMap>,
-        ARTATTACH: Record<string, _file.ClassMetaMap>,
         errors: _support.Diagnostic[]
     },
 }

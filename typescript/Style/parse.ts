@@ -115,7 +115,7 @@ function CSSBulkScanner(fileDatas: _File.Storage[], forArtifact = false) {
 			} else {
 				const selectorData: _Style.Classdata = {
 					artifact: forArtifact ? source.artifact : "",
-					selector: SELECTOR,
+					definent: SELECTOR,
 					symclass: classname,
 					metadata: {
 						info: [],
@@ -127,10 +127,10 @@ function CSSBulkScanner(fileDatas: _File.Storage[], forArtifact = false) {
 						attributes: {}
 					},
 					style_object: object,
-					snippet_staple: '',
 					attachments: forArtifact ? attachments.map(attach => classFront + attach) : attachments,
 					debugclass: debugclassFront + "_" + Use.string.normalize(classname, [], [], ["$", "/"]),
 					declarations: [declaration],
+					snippet_staple: '',
 					snippet_style: { [SELECTOR]: object[""] },
 				};
 				const identity = INDEX.DECLARE(selectorData);
@@ -161,8 +161,10 @@ function TagStyleScanner(
 	const diagnostics: _Support.Diagnostic[] = [];
 	const errors: string[] = [];
 
-	const symclass = raw.symclasses[0] === "" ? "" : file.classFront + raw.symclasses[0].replace(/^-\$/, "$").replace("$$$", "$");
-	const debugclass = `${_Style._Import[scope]}${file.debugclassFront}\\:${raw.rowIndex}\\:${raw.colIndex}_${Use.string.normalize(symclass, [], [], forArtifact ? ["$", "/"] : ["$"])}`;
+	const symzero = raw.symclasses[0].replace(/^-\$/, "$");
+	const symclass = file.classFront + (forArtifact ? symzero.replace("$$$", "$") : symzero);
+	const normalsymclass = Use.string.normalize(symclass, [], [], forArtifact ? ["$", "/"] : ["$"]);
+	const debugclass = `${_Style._Import[scope]}${file.debugclassFront}\\:${raw.rowIndex}\\:${raw.colIndex}_${normalsymclass}`;
 
 	const styleScanned = SCANNER(
 		Use.code.uncomment.Script(raw.styles['']),
@@ -185,7 +187,6 @@ function TagStyleScanner(
 				Object.assign(variables, styleScanned.variables);
 				if (Object.keys(styleScanned).length) {
 					object[JSON.stringify(query.wrappers)] = styleScanned.styles;
-					// HASHRULE.WRAPPER(object, query.wrappers.reverse(), styleScanned.styles);
 				}
 			} else {
 				errors.push(query.error);
@@ -203,18 +204,17 @@ function TagStyleScanner(
 		const style_snippet = SCANNER(
 			raw.elid === CACHE.ROOT.customElements.style ? Use.code.uncomment.Script(raw.attachstring) : '',
 			`${_Style._Import[raw.scope]}:ATTACHMENT : ${file.filePath}:${raw.rowIndex}:${raw.colIndex} |`,
-			`${raw.symclasses}`,
+			`${raw.symclasses[0]}`,
 			true
 		);
 
 		attachments.push(...style_snippet.attachments);
 		Object.assign(variables, style_snippet.variables);
-
 		index = INDEX.DECLARE({
 			artifact: forArtifact ? file.artifact : CACHE.STATIC.Archive.name,
-			selector: raw.symclasses[0],
-			style_object: object,
+			definent: raw.symclasses[0],
 			symclass,
+			style_object: object,
 			metadata: {
 				info: raw.comments,
 				watchclass: '',
@@ -224,18 +224,19 @@ function TagStyleScanner(
 				summon: raw.elid === CACHE.ROOT.customElements.summon ? raw.attachstring : "",
 				attributes: raw.elid === CACHE.ROOT.customElements.summon ? raw.attributes : {}
 			},
-			snippet_staple: raw.elid === CACHE.ROOT.customElements.staple ? raw.attachstring : "",
-			attachments: forArtifact ?
-				attachments.map(a => file.classFront + (a.includes("$$$") ? a.replace("$$$", "$") : `$/${a}`)) : attachments,
+			attachments: forArtifact
+				? attachments.map(a => file.classFront + (a.includes("$$$") ? a.replace("$$$", "$") : `$/${a}`))
+				: attachments,
 			debugclass,
 			declarations: [declaration],
+			snippet_staple: raw.elid === CACHE.ROOT.customElements.staple ? raw.attachstring : "",
 			snippet_style: style_snippet.styles,
 		});
 		IndexMap[symclass] = index;
 	}
 
 	return {
-		classname: symclass,
+		symclass,
 		index,
 		attachments,
 		diagnostics,
