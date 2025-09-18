@@ -33,12 +33,6 @@ export interface Position {
     colFallback: number,
 }
 
-export interface Reader {
-    content: string,
-    active: Position,
-    fallback: Position,
-}
-
 
 
 export interface Lookup {

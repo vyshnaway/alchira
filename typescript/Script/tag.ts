@@ -28,7 +28,7 @@ export default function scanner(
 	fileData: _File.Storage,
 	classProps: string[] = [],
 	action: _Script._Actions,
-	fileCursor = CURSOR.Initialize(fileData.content),
+	fileCursor = new CURSOR(fileData.content),
 ) {
 	const
 		classesList: string[][] = [],
@@ -63,25 +63,24 @@ export default function scanner(
 		fallbackAquired = false;
 
 	while (fileCursor.active.marker < fileCursor.content.length) {
-		const lastCh = fileCursor.active.char;
-		const liveCh = CURSOR.Increment(fileCursor);
-		if (lastCh !== "\\") {
-			if (!fallbackAquired && (fileCursor.active.char !== "\\") && (fileCursor.active.next === "<")) {
+		const ch = fileCursor.increment();
+		if (fileCursor.active.last !== "\\") {
+			if (!fallbackAquired && (fileCursor.active.next === "<")) {
 				fallbackAquired = true;
-				Object.assign(fileCursor.fallback, fileCursor.active);
+				fileCursor.savefallback();
 			}
 
-			if (awaitBrace === liveCh) {
+			if (awaitBrace === ch) {
 				braceTrack.pop();
 				deviance = braceTrack.length;
 				awaitBrace = bracePair[braceTrack[deviance - 1]];
-			} else if (openBraces.includes(liveCh) && !["'", '"', "`"].includes(awaitBrace)) {
-				braceTrack.push(liveCh as OpenBrace);
+			} else if (openBraces.includes(ch) && !["'", '"', "`"].includes(awaitBrace)) {
+				braceTrack.push(ch as OpenBrace);
 				deviance = braceTrack.length;
-				awaitBrace = bracePair[liveCh as OpenBrace];
-			} else if (deviance === 0 && closeBraces.includes(liveCh)) { break; }
+				awaitBrace = bracePair[ch as OpenBrace];
+			} else if (deviance === 0 && closeBraces.includes(ch)) { break; }
 
-			if (deviance === 0 && [" ", "\n", "\r", ">", "\t"].includes(liveCh) && (attr !== "")) {
+			if (deviance === 0 && [" ", "\n", "\r", ">", "\t"].includes(ch) && (attr !== "")) {
 				const tr_Attr = attr.trim();
 				const tr_Value = value.trim();
 				if (!styleDeclarations.element.length) {
@@ -134,23 +133,23 @@ export default function scanner(
 				value = "";
 
 			}
-			if (deviance === 0 && (liveCh === ">" || liveCh === ";" || liveCh === ',' || liveCh === "<")) {
-				ok = liveCh === ">";
+			if (deviance === 0 && (ch === ">" || ch === ";" || ch === ',' || ch === "<")) {
+				ok = ch === ">";
 				break;
 			}
 		}
 
-		if ((deviance === 0 && ![" ", "=", "\n", "\r", "\t", ">"].includes(liveCh)) || deviance !== 0) {
-			if (isVal) { value += liveCh; }
-			else { attr += liveCh; }
-		} else if (deviance === 0 && liveCh === "=") { isVal = true; }
+		if ((deviance === 0 && ![" ", "=", "\n", "\r", "\t", ">"].includes(ch)) || deviance !== 0) {
+			if (isVal) { value += ch; }
+			else { attr += ch; }
+		} else if (deviance === 0 && ch === "=") { isVal = true; }
 	};
 
 	styleDeclarations.endMarker = fileCursor.active.marker + (fileCursor.active.char === "<" ? 0 : 1);
 	if (ok) {
 		selfClosed = fileCursor.content[fileCursor.active.marker - 1] === '/';
 	} else if (fallbackAquired) {
-		Object.assign(fileCursor.active, fileCursor.fallback);
+		fileCursor.loadfallback();
 	}
 
 	return {

@@ -6,10 +6,14 @@ import * as _File from "../type/file.js";
 // import * as _Support from "../type/support.js";
 
 
-function Initialize(content: string): _File.Reader {
-    const fileScanner: _File.Reader = {
-        content,
-        active: {
+export default class Cursor {
+    content: string;
+    active: _File.Position;
+    fallback: _File.Position;
+
+    constructor(content: string) {
+        this.content = content;
+        this.active = {
             last: '',
             char: '',
             next: '',
@@ -18,8 +22,8 @@ function Initialize(content: string): _File.Reader {
             colMarker: 0,
             cycle: 0,
             colFallback: 0,
-        },
-        fallback: {
+        };
+        this.fallback = {
             last: '',
             char: '',
             next: '',
@@ -28,48 +32,48 @@ function Initialize(content: string): _File.Reader {
             colMarker: 0,
             cycle: 0,
             colFallback: 0,
-        },
-    };
-
-    fileScanner.active.char = content[fileScanner.active.marker];
-    if (fileScanner.active.char === "\n") {
-        fileScanner.active.rowMarker++;
-        fileScanner.active.colMarker = 0;
-    } else {
-        fileScanner.active.colMarker++;
+        };
+        this.active.char = this.content[this.active.marker];
+        if (this.active.char === "\n") {
+            this.active.rowMarker++;
+            this.active.colMarker = 0;
+        } else {
+            this.active.colMarker++;
+        }
     }
-    return fileScanner;
-}
 
-function Increment(fileScanner: _File.Reader) {
-    fileScanner.active.last = fileScanner.active.char;
-    fileScanner.active.char = fileScanner.content[++fileScanner.active.marker];
-    fileScanner.active.next = fileScanner.content[fileScanner.active.marker + 1];
-    if (fileScanner.active.char === "\n") {
-        fileScanner.active.rowMarker++;
-        fileScanner.active.colFallback = fileScanner.active.colMarker;
-        fileScanner.active.colMarker = 0;
-    } else {
-        fileScanner.active.colMarker++;
+    increment(): string {
+        this.active.last = this.active.char;
+        this.active.char = this.content[++this.active.marker];
+        this.active.next = this.content[this.active.marker + 1];
+        if (this.active.char === "\n") {
+            this.active.rowMarker++;
+            this.active.colFallback = this.active.colMarker;
+            this.active.colMarker = 0;
+        } else {
+            this.active.colMarker++;
+        }
+        return this.active.char;
     }
-    return fileScanner.active.char;
-}
 
-function Decrement(fileScanner: _File.Reader) {
-    fileScanner.active.next = fileScanner.active.char;
-    fileScanner.active.char = fileScanner.content[--fileScanner.active.marker];
-    fileScanner.active.last = fileScanner.content[fileScanner.active.marker - 1];
-    if (fileScanner.active.char === "\n") {
-        fileScanner.active.rowMarker--;
-        fileScanner.active.colMarker = fileScanner.active.colFallback;
-    } else {
-        fileScanner.active.colMarker--;
+    decrement(): string {
+        this.active.next = this.active.char;
+        this.active.char = this.content[--this.active.marker];
+        this.active.last = this.content[this.active.marker - 1];
+        if (this.active.char === "\n") {
+            this.active.rowMarker--;
+            this.active.colMarker = this.active.colFallback;
+        } else {
+            this.active.colMarker--;
+        }
+        return this.active.char;
     }
-    return fileScanner.active.char;
-}
 
-export default {
-    Initialize,
-    Decrement,
-    Increment
-};
+    savefallback() {
+        Object.assign(this.fallback, this.active);
+    }
+
+    loadfallback() {
+        Object.assign(this.active, this.fallback);
+    }
+}

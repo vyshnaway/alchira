@@ -30,7 +30,7 @@ export default function scanner(
 	const tagTrack: _Script.RawStyle[] = [];
 	const classesList: string[][] = [];
 	const attachments: string[] = [];
-	const fileCursor = CURSOR.Initialize(content);
+	const fileCursor = new CURSOR(content);
 
 	let stream = "";
 
@@ -75,8 +75,7 @@ export default function scanner(
 					].join(' ') + '>' : fragment;
 				}
 
-
-				CURSOR.Increment(fileCursor);
+				fileCursor.increment();
 			} else {
 				subScribed += fragment;
 			}
@@ -101,7 +100,7 @@ export default function scanner(
 			}
 			if (tagTrack.length === 0 && !exitedNow) { stream += subScribed; }
 		} else {
-			CURSOR.Increment(fileCursor);
+			fileCursor.increment();
 			if (tagTrack.length === 0) { stream += char; }
 		}
 
