@@ -45,7 +45,6 @@ export function SaveToTarget(
 			} else if (CACHE.FILES.TARGETDIR[targetFolder].extensions.includes(extension)) {
 				CACHE.STATIC.Targetdir_Saved[targetFolder].fileContents[filePath] = fileContent;
 				CACHE.DELTA.DeltaPath = fileman.path.join(CACHE.FILES.TARGETDIR[targetFolder].source, filePath);
-				console.log(2);
 			} else {
 				CACHE.DELTA.DeltaPath = `${CACHE.FILES.TARGETDIR[targetFolder].source}/${filePath}`;
 				CACHE.DELTA.DeltaContent = fileContent;
@@ -64,11 +63,11 @@ export function SaveToTarget(
 	if (reCache) {
 		XTYLES.ReDeclare();
 
-		Object.entries(CACHE.CLASS.Public___Index).forEach(([c,i]) =>{
+		Object.entries(CACHE.CLASS.Public___Index).forEach(([c, i]) => {
 			INDEX.DISPOSE(i);
 			delete CACHE.CLASS.Public___Index[c];
 		});
-		Object.entries(CACHE.CLASS.Global___Index).forEach(([c,i]) =>{
+		Object.entries(CACHE.CLASS.Global___Index).forEach(([c, i]) => {
 			INDEX.DISPOSE(i);
 			delete CACHE.CLASS.Global___Index[c];
 		});
@@ -80,7 +79,7 @@ export function SaveToTarget(
 		CACHE.FILES.TARGETDIR = {};
 		CACHE.CLASS.Public___Index = {};
 		CACHE.CLASS.Global___Index = {};
-		
+
 		Object.entries(CACHE.STATIC.Targetdir_Saved).forEach(([key, files], index) => {
 			CACHE.FILES.TARGETDIR[key] = new SCRIPT(files, Use.string.enCounter(index));
 		});
@@ -148,31 +147,32 @@ async function Accumulate() {
 
 
 function SaveClassRefs(stash: _Style.SortedOutput) {
-	CACHE.CLASS.Sync_ClassDictionary = {};
-	CACHE.CLASS.Sync_PublishIndexMap = {};
-	Object.entries(stash.referenceMap).forEach(([iArray, iMap]) => {
-		CACHE.CLASS.Sync_ClassDictionary[iArray] = Object.fromEntries(Object.entries(iMap).map(([ref, id]) => {
-			const className = "_" + Use.string.enCounter(id);
-			CACHE.CLASS.Sync_PublishIndexMap[`.${className}`] = Number(ref);
-			return [ref, className];
-		}));
-	}, {} as _Style.ClassIndexMap);
+	CACHE.CLASS.Sync_PublishIndexMap = stash.recompClasslist.reduce((acc, [index, classId]) => {
+		const className = "_" + Use.string.enCounter(classId);
+		acc.push([`.${className}`, index]);
+		return acc;
+	}, [] as _Style.ClassIndexTrace);
+
+	Object.entries(stash.referenceMap).forEach(([jsonArray, iMap]) => {
+		CACHE.CLASS.Sync_ClassDictionary[jsonArray] = Object.entries(iMap).reduce((a, [ref, id]) => {
+			a[ref] = "_" + Use.string.enCounter(id); return a;
+		}, {} as Record<string, string>);
+	});
 }
 
 async function Synthasize(OUTFILES: Record<string, string> = {}) {
-
 	Accumulate();
+	CACHE.CLASS.Sync_ClassDictionary = {};
+	CACHE.CLASS.Sync_PublishIndexMap = [];
 
 	const ATTACHMENTS: number[] = [];
 	const CLASSESLIST: number[][] = [];
 	Object.values(CACHE.FILES.TARGETDIR).forEach((cache) => cache.GetTracks(CLASSESLIST, ATTACHMENTS));
 
+
 	if (CACHE.STATIC.WATCH) {
-		CACHE.CLASS.Sync_PublishIndexMap = {};
-		CACHE.CLASS.Sync_ClassDictionary = {};
 		CACHE.DELTA.FinalMessage = CACHE.DELTA.ErrorCount + " Errors.";
 	} else {
-
 		if (CACHE.STATIC.Command === "preview") {
 			const response = await ORDER(CLASSESLIST, CACHE.STATIC.Command, CACHE.STATIC.Argument);
 			SaveClassRefs(response.result);
@@ -196,8 +196,8 @@ async function Synthasize(OUTFILES: Record<string, string> = {}) {
 				const response = await ORDER(CLASSESLIST, "publish", CACHE.STATIC.Argument, archive);
 				SaveClassRefs(response.result);
 
-				await ARTIFACTS.DEPLOY(OUTFILES);
 				if (response.status) {
+					await ARTIFACTS.DEPLOY(OUTFILES);
 					CACHE.DELTA.FinalMessage = "Build Success.";
 				} else {
 					CACHE.DELTA.PublishError = response.message;
@@ -241,10 +241,17 @@ async function GenFinalSheets(OUTFILES: Record<string, string> = {}) {
 		}, [] as [string, string | object][])
 	);
 
+	const targetRenderAction: _Script._Actions = (CACHE.STATIC.Command === "debug") ? _Script._Actions.monitor
+		: (CACHE.STATIC.Command === "preview" && CACHE.STATIC.Argument === "watch") ? _Script._Actions.watch : _Script._Actions.sync;
+	Object.values(CACHE.FILES.TARGETDIR).forEach((cache) => cache.SyncClassnames(targetRenderAction));
+	RENDERFRAGS.Class = COMPILE.Switched(CACHE.CLASS.Sync_PublishIndexMap);
 
 	const ATTACH_STAPLES: string[] = [];
 	const ATTACH_STYLES: [string, object | string][] = [];
-	(CACHE.STATIC.WATCH ? Object.keys(CACHE.CLASS.Index_to_Data).map(i => Number(i)) : Array.from(ATTACHMENTS)).forEach(attachment => {
+	(CACHE.STATIC.WATCH
+		? Object.keys(CACHE.CLASS.Index_to_Data).map(i => Number(i))
+		: Array.from(ATTACHMENTS)
+	).forEach(attachment => {
 		const ClassData = INDEX.FETCH(attachment);
 		const AttachedStyle = Object.entries(ClassData.snippet_style);
 		if (AttachedStyle.length) { ATTACH_STYLES.push(...AttachedStyle); }
@@ -254,21 +261,19 @@ async function GenFinalSheets(OUTFILES: Record<string, string> = {}) {
 	RENDERFRAGS.Attach = COMPILE.Prefixed(ATTACH_STYLES);
 
 
-	const targetRenderAction: _Script._Actions = (CACHE.STATIC.Command === "debug") ? _Script._Actions.monitor
-		: (CACHE.STATIC.Command === "preview" && CACHE.STATIC.Argument === "watch") ? _Script._Actions.watch : _Script._Actions.sync;
-	Object.values(CACHE.FILES.TARGETDIR).forEach((cache) => cache.SyncClassnames(targetRenderAction));
-	RENDERFRAGS.Class = COMPILE.Switched(CACHE.CLASS.Sync_PublishIndexMap);
 
 	const STAPLESHEET = Use.string.minify(Use.code.uncomment.Script(ATTACH_STAPLES.join(""), false, false, true));
 	const STYLESHEET = Object.entries(RENDERFRAGS)
 		.map(([chapter, content]) => CACHE.STATIC.DEBUG ? `\n\n/* CHAPTER: ${chapter} */\n${content}\n` : content).join("");
 	const WATCHCLASS = CACHE.STATIC.WATCH
-		? Use.string.minify(Use.code.uncomment.Script(COMPILE.Switched(
-			Object.entries(CACHE.CLASS.Index_to_Data).reduce((A, [I, D]) => {
-				A['.' + D.metadata.watchclass] = Number(I);
-				return A;
-			}, {} as Record<string, number>)
-		) + RENDERFRAGS.Attach)) : '';
+		? Use.string.minify(Use.code.uncomment.Script(
+			COMPILE.Switched(
+				Object.entries(CACHE.CLASS.Index_to_Data).reduce((A, [I, D]) => {
+					A.push(['.' + D.metadata.watchclass, Number(I)]);
+					return A;
+				}, [] as [string, number][])
+			) + RENDERFRAGS.Attach
+		)) : '';
 
 	return { RENDERFRAGS, STYLESHEET, STAPLESHEET, WATCHINDEX, WATCHCLASS };
 }
@@ -288,8 +293,9 @@ export async function Generate() {
 		} = await GenFinalSheets(OUTFILES);
 
 		const STYLEBLOCK = `\n<style>${STYLESHEET}</style>`;
+		const SUMMONBLOCK = `\n${STYLEBLOCK}\n<div>${STYLESHEET}</div>`;
 		Object.values(CACHE.FILES.TARGETDIR).forEach((cache) => {
-			cache.SummonFiles(OUTFILES, STYLESHEET, STYLEBLOCK, STAPLESHEET);
+			cache.SummonFiles(OUTFILES, STYLESHEET, STYLEBLOCK, SUMMONBLOCK, STAPLESHEET);
 		});
 
 		if (CACHE.STATIC.WATCH) {

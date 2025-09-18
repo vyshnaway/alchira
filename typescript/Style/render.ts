@@ -2,10 +2,10 @@
 import * as INDEX from "../data/index.js";
 import * as CACHE from "../data/cache.js";
 import * as LOADPREFIX from "./prefix.js";
-// import HASHRULE from "../hashrule.js";
 import * as _Style from "../type/style.js";
 
 import Use from "../utils/main.js";
+import HASHRULE from "../hashrule.js";
 
 type t_styleSorceTemplate = Record<string, string | object>;
 
@@ -14,22 +14,24 @@ function objectSwitch(srcObject: Record<string, any>): Record<string, any> {
 		return {};
 	}
 
-	const output: Record<string, any> = {};
+	const output: Record<string, any> = { "": {} };
 
-	for (const outerKey in srcObject) {
-		const innerObject = srcObject[outerKey];
-		if (typeof innerObject === "object" && innerObject !== null) {
-			for (const innerKey in innerObject) {
-				if (!output[innerKey]) { output[innerKey] = {}; }
-				output[innerKey][(innerKey[0] === '@' || innerKey === "") ? outerKey : `& ${outerKey}`] = innerObject[innerKey];
-				// if(outerKey === ""){
-				// 	output[innerKey][(innerKey[0] === '@' || innerKey === "") ? outerKey : `& ${outerKey}`] = innerObject[innerKey];
-				// }else{
-				// 	HASHRULE.WRAPPER(output[innerKey], JSON.parse(outerKey), innerObject[innerKey]);
-				// }
+	Object.entries(srcObject).forEach(([outerKey, outerObject]) => {
+		Object.entries(outerObject).forEach(([innerKey, innerObject]) => {
+			if (innerKey === "") {
+				output[""][outerKey] = innerObject;
+			} else {
+				const keyseq = ([...JSON.parse(innerKey), outerKey] as string[]).map((key, index, array) => {
+					if ((index === 0) || (array[index - 1].startsWith("@") || key.startsWith("@"))) {
+						return key;
+					} else {
+						return `& ${key}`;
+					}
+				});
+				HASHRULE.WRAPPER(output, keyseq, innerObject as object);
 			}
-		}
-	}
+		});
+	});
 
 	return output;
 }
@@ -198,15 +200,17 @@ function ComposePrefixed(array: [string, string | object][], minify = !CACHE.STA
 }
 
 
-function ComposeSwitched(selectorIndexObject: Record<string, number>, minify = !CACHE.STATIC.DEBUG) {
-	const object = styleSwitch(
-		Object.entries(selectorIndexObject).reduce((A: Record<string, Record<string, object>>, [selector, index]) => {
-			A[selector] = INDEX.FETCH(index).style_object;
-			return A;
-		}, {}),
-	);
+function ComposeSwitched(selectorIndex: [string, number][], minify = !CACHE.STATIC.DEBUG) {
+	const objectMap: Record<string, Record<string, string | object>> = {};
+	const classOrder: string[] = [];
 
-	return ComposePrefixed(Object.entries(object), minify);
+	selectorIndex.forEach(([selector, index]) => {
+		objectMap[selector] = INDEX.FETCH(index).style_object;
+		classOrder.push(selector);
+	});
+	
+	const preped = styleSwitch(objectMap);
+	return ComposePrefixed(Object.entries(preped), minify);
 }
 
 
@@ -236,9 +240,9 @@ function ArtifactPartial(object: object, minify = true) {
 }
 
 function ComposeArtifact(index: number): _Style.ExportStyle {
-	
+
 	const style = INDEX.FETCH(index);
-const isPublic = style.symclass.includes("$$$");
+	const isPublic = style.symclass.includes("$$$");
 	let element = "";
 	if (style.snippet_staple.length) {
 		element = "staple";

@@ -142,8 +142,8 @@ export const CLASS: _Cache.CLASS = {
     Public___Index: {},
     Library__Index: {},
     Artifact_Index: {},
-    Sync_PublishIndexMap: {},
-    Sync_ClassDictionary: {}
+    Sync_ClassDictionary: {},
+    Sync_PublishIndexMap: [],
 };
 
 export const FILES: _Cache.FILES = {

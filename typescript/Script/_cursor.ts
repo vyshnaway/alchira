@@ -10,7 +10,9 @@ function Initialize(content: string): _File.Reader {
     const fileScanner: _File.Reader = {
         content,
         active: {
+            last: '',
             char: '',
+            next: '',
             marker: 0,
             rowMarker: 1,
             colMarker: 0,
@@ -18,7 +20,9 @@ function Initialize(content: string): _File.Reader {
             colFallback: 0,
         },
         fallback: {
+            last: '',
             char: '',
+            next: '',
             marker: 0,
             rowMarker: 0,
             colMarker: 0,
@@ -37,8 +41,10 @@ function Initialize(content: string): _File.Reader {
     return fileScanner;
 }
 
-function Incremnet(fileScanner: _File.Reader) {
+function Increment(fileScanner: _File.Reader) {
+    fileScanner.active.last = fileScanner.active.char;
     fileScanner.active.char = fileScanner.content[++fileScanner.active.marker];
+    fileScanner.active.next = fileScanner.content[fileScanner.active.marker + 1];
     if (fileScanner.active.char === "\n") {
         fileScanner.active.rowMarker++;
         fileScanner.active.colFallback = fileScanner.active.colMarker;
@@ -50,7 +56,9 @@ function Incremnet(fileScanner: _File.Reader) {
 }
 
 function Decrement(fileScanner: _File.Reader) {
+    fileScanner.active.next = fileScanner.active.char;
     fileScanner.active.char = fileScanner.content[--fileScanner.active.marker];
+    fileScanner.active.last = fileScanner.content[fileScanner.active.marker - 1];
     if (fileScanner.active.char === "\n") {
         fileScanner.active.rowMarker--;
         fileScanner.active.colMarker = fileScanner.active.colFallback;
@@ -63,5 +71,5 @@ function Decrement(fileScanner: _File.Reader) {
 export default {
     Initialize,
     Decrement,
-    Incremnet
+    Increment
 };

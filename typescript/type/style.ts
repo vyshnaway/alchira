@@ -76,9 +76,10 @@ export interface Classdata {
 export type Dictionary = Record<string, Record<number, string>>;
 
 export type ClassIndexMap = Record<string, number>;
+export type ClassIndexTrace = [string, number][];
 
 export interface SortedOutput {
     counted: number;
     referenceMap: Record<string, Record<number, number>>;
-    shortlistedArrays: number[][]
+    recompClasslist: [index: number, classId: number][]
 };

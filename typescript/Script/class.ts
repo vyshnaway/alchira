@@ -54,9 +54,7 @@ export default class C_Proxy {
 		this.extnsProps = extensions;
 		this.extensions = Object.keys(extensions);
 		this.stylesheetContent = stylesheetContent || '';
-		Object.entries(fileContents || {}).forEach(([filePath, fileContent], index) => {
-			this.SaveFile(filePath, fileContent, index);
-		});
+		Object.entries(fileContents || {}).forEach(([filePath, fileContent], index) => this.SaveFile(filePath, fileContent, index));
 	}
 
 	SaveFile(filePath: string, fileContent: string, fileIndex: number = Object.keys(this.fileCache).length) {
@@ -158,11 +156,16 @@ export default class C_Proxy {
 				Cumulates.report.push(
 					$.MAKE(
 						$.tag.H6(file.targetPath, $.preset.tertiary),
-						[
-							...$.list.Catalog(localKeys, 0, $.preset.text),
-							...$.list.Catalog(globalKeys, 0, $.preset.primary),
-							...$.list.Catalog(publicKeys, 0, $.preset.primary, $.style.AS_Bold),
-						]
+						// [
+						// 	...$.list.Catalog(localKeys, 0, $.preset.text),
+						// 	...$.list.Catalog(globalKeys, 0, $.preset.primary),
+						// 	...$.list.Catalog(publicKeys, 0, $.preset.primary, $.style.AS_Bold),
+						// ],
+						$.list.Catalog([
+							...localKeys,
+							...globalKeys,
+							...publicKeys
+						], 0, $.preset.primary, $.style.AS_Bold)
 					)
 				);
 			}
@@ -235,8 +238,9 @@ export default class C_Proxy {
 	SummonFiles(
 		SaveFiles: Record<string, string> = {},
 		stylesheet: string,
+		styleBlock: string,
 		summonBlock: string,
-		stapleBlock: string
+		stapleBlock: string,
 	) {
 		SaveFiles[this.sourceStylesheet] = stylesheet;
 
@@ -252,7 +256,7 @@ export default class C_Proxy {
 							A += data.scratch.slice(fromPos, pos) + summonBlock;
 							break;
 						case CACHE.ROOT.customElements.style:
-							A += data.scratch.slice(fromPos, pos) + stylesheet;
+							A += data.scratch.slice(fromPos, pos) + styleBlock;
 							break;
 						default:
 							A += data.scratch.slice(fromPos);

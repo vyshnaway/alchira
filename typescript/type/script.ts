@@ -16,7 +16,7 @@ export interface RawStyle {
     tagCount: number,
     rowIndex: number,
     colIndex: number,
-    tagOpenMarker: number,
+    endMarker: number,
     symclasses: string[],
     scope: _style._Type,
     comments: string[],

@@ -154,17 +154,18 @@ function TagStyleScanner(
 	file: _File.Storage,
 	IndexMap: Record<string, number> = {},
 ) {
-	const scope = raw.scope === _Style._Type.ARTIFACT ? _Style._Type.NULL : raw.scope;
+	const errors: string[] = [];
+	const diagnostics: _Support.Diagnostic[] = [];
+
 	const forArtifact = file.manifesting.lookup.type === "ARTIFACT";
 	const declaration = `${file.targetPath}:${raw.rowIndex}:${raw.colIndex}`;
-
-	const diagnostics: _Support.Diagnostic[] = [];
-	const errors: string[] = [];
 
 	const symzero = raw.symclasses[0].replace(/^-\$/, "$");
 	const symclass = file.classFront + (forArtifact ? symzero.replace("$$$", "$") : symzero);
 	const normalsymclass = Use.string.normalize(symclass, [], [], forArtifact ? ["$", "/"] : ["$"]);
-	const debugclass = `${_Style._Import[scope]}${file.debugclassFront}\\:${raw.rowIndex}\\:${raw.colIndex}_${normalsymclass}`;
+
+	const scope = _Style._Import[raw.scope === _Style._Type.ARTIFACT ? _Style._Type.NULL : raw.scope];
+	const debugclass = `${scope}${file.debugclassFront}\\:${raw.rowIndex}\\:${raw.colIndex}_${normalsymclass}`;
 
 	const styleScanned = SCANNER(
 		Use.code.uncomment.Script(raw.styles['']),
@@ -210,6 +211,7 @@ function TagStyleScanner(
 
 		attachments.push(...style_snippet.attachments);
 		Object.assign(variables, style_snippet.variables);
+		
 		index = INDEX.DECLARE({
 			artifact: forArtifact ? file.artifact : CACHE.STATIC.Archive.name,
 			definent: raw.symclasses[0],

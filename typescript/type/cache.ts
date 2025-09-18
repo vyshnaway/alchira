@@ -110,7 +110,7 @@ export interface CLASS {
     Library__Index: _style.ClassIndexMap,
     Artifact_Index: _style.ClassIndexMap,
     Sync_ClassDictionary: _style.Dictionary,
-    Sync_PublishIndexMap: _style.ClassIndexMap,
+    Sync_PublishIndexMap: _style.ClassIndexTrace,
 };
 
 export interface FILES {

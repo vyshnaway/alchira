@@ -22,7 +22,7 @@ function EvaluateIndexTraces(
 	const valid_class_trace: [string, number][] = [];
 
 	classList.forEach((entry) => {
-		const found = INDEX.FIND(entry,  localClassMap);
+		const found = INDEX.FIND(entry, localClassMap);
 		if (found.index) {
 			valid_class_trace.push([entry, found.index]);
 			index_array.push(found.index);
@@ -40,7 +40,7 @@ function EvaluateIndexTraces(
 		if (action === _Script._Actions.watch) {
 			classMap = Object.fromEntries(valid_class_trace.map(([K, V], index) => {
 				const classname = metaFront + index;
-				CACHE.CLASS.Sync_PublishIndexMap["." + classname] = Number(V);
+				CACHE.CLASS.Sync_PublishIndexMap.push(["." + classname, Number(V)]);
 				return [K, classname];
 			}));
 		}
@@ -48,7 +48,7 @@ function EvaluateIndexTraces(
 		if (action === _Script._Actions.monitor) {
 			classMap = Object.fromEntries(valid_class_trace.map(([K, V]) => {
 				const classname = metaFront + INDEX.FETCH(V).debugclass;
-				CACHE.CLASS.Sync_PublishIndexMap["." + classname] = Number(V);
+				CACHE.CLASS.Sync_PublishIndexMap.push(["." + classname, Number(V)]);
 				return [K, Use.string.normalize(classname, ["/", ".", ":", "|", "$"], ["\\"])];
 			}));
 		}

@@ -128,20 +128,17 @@ function RENDER(string: string, sourcePath: string) {
 	};
 }
 
-function WRAPPER(parentObject: Record<string, object>, keys: string[], childObject: object, parentAtrule = true) {
+function WRAPPER(parentObject: Record<string, object>, keys: string[], childObject: object) {
 	const activeKey = keys.shift();
 	if (activeKey) {
-		const modkey = (parentAtrule || activeKey.startsWith("@")) ? activeKey : ('&' + activeKey);
 		if (keys.length) {
-			if (!parentObject[modkey]) {
-				parentObject[modkey] = {};
-				WRAPPER(parentObject[modkey] as Record<string, object>, keys, childObject, activeKey.startsWith("@"));
-			}
+			if (!parentObject[activeKey]) { parentObject[activeKey] = {}; }
+			WRAPPER(parentObject[activeKey] as Record<string, object>, keys, childObject);
 		} else {
-			parentObject[modkey] = childObject;
+			parentObject[activeKey] = childObject;
 		}
 	}
-}; 
+};
 
 export default {
 	IMPORT,

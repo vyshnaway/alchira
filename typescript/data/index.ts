@@ -10,29 +10,6 @@ export function FETCH(index: number) {
     return CACHE.CLASS.Index_to_Data[String(index)];
 }
 
-export function FIND(classname: string, localmap: _Style.ClassIndexMap = {}) {
-    let index = 0;
-    let group: _Style._Type = _Style._Type.NULL;
-
-    if (localmap[classname]) {
-        index = localmap[classname];
-        group = _Style._Type.LOCAL;
-    } else if (CACHE.CLASS.Global___Index[classname]) {
-        index = CACHE.CLASS.Global___Index[classname];
-        group = _Style._Type.GLOBAL;
-    } else if (CACHE.CLASS.Public___Index[classname]) {
-        index = CACHE.CLASS.Public___Index[classname];
-        group = _Style._Type.PUBLIC;
-    } else if (CACHE.CLASS.Library__Index[classname]) {
-        index = CACHE.CLASS.Library__Index[classname];
-        group = _Style._Type.LIBRARY;
-    } else if (CACHE.CLASS.Artifact_Index[classname]) {
-        index = CACHE.CLASS.Artifact_Index[classname];
-        group = _Style._Type.ARTIFACT;
-    }
-
-    return { index, group };
-}
 
 export function DECLARE(object: _Style.Classdata) {
     object.index = BIN.values().next().value || ++NOW;
@@ -64,4 +41,28 @@ export function RESET(after = 0) {
     });
     NOW = after;
     return removed;
+}
+
+export function FIND(classname: string, localmap: _Style.ClassIndexMap = {}) {
+    let index = 0;
+    let group: _Style._Type = _Style._Type.NULL;
+
+    if (localmap[classname]) {
+        index = localmap[classname];
+        group = _Style._Type.LOCAL;
+    } else if (CACHE.CLASS.Global___Index[classname]) {
+        index = CACHE.CLASS.Global___Index[classname];
+        group = _Style._Type.GLOBAL;
+    } else if (CACHE.CLASS.Public___Index[classname]) {
+        index = CACHE.CLASS.Public___Index[classname];
+        group = _Style._Type.PUBLIC;
+    } else if (CACHE.CLASS.Library__Index[classname]) {
+        index = CACHE.CLASS.Library__Index[classname];
+        group = _Style._Type.LIBRARY;
+    } else if (CACHE.CLASS.Artifact_Index[classname]) {
+        index = CACHE.CLASS.Artifact_Index[classname];
+        group = _Style._Type.ARTIFACT;
+    }
+
+    return { index, group };
 }

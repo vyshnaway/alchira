@@ -45,7 +45,7 @@ export default function scanner(
 			tagCount: ++fileCursor.active.cycle,
 			rowIndex: fileCursor.active.rowMarker,
 			colIndex: fileCursor.active.colMarker,
-			tagOpenMarker: 0,
+			endMarker: 0,
 			comments: [],
 			styles: {},
 			attachstring: "",
@@ -64,9 +64,9 @@ export default function scanner(
 
 	while (fileCursor.active.marker < fileCursor.content.length) {
 		const lastCh = fileCursor.active.char;
-		const liveCh = CURSOR.Incremnet(fileCursor);
+		const liveCh = CURSOR.Increment(fileCursor);
 		if (lastCh !== "\\") {
-			if (!fallbackAquired && liveCh === "<") {
+			if (!fallbackAquired && (fileCursor.active.char !== "\\") && (fileCursor.active.next === "<")) {
 				fallbackAquired = true;
 				Object.assign(fileCursor.fallback, fileCursor.active);
 			}
@@ -146,9 +146,9 @@ export default function scanner(
 		} else if (deviance === 0 && liveCh === "=") { isVal = true; }
 	};
 
+	styleDeclarations.endMarker = fileCursor.active.marker + (fileCursor.active.char === "<" ? 0 : 1);
 	if (ok) {
 		selfClosed = fileCursor.content[fileCursor.active.marker - 1] === '/';
-		styleDeclarations.tagOpenMarker = fileCursor.active.marker + 1;
 	} else if (fallbackAquired) {
 		Object.assign(fileCursor.active, fileCursor.fallback);
 	}

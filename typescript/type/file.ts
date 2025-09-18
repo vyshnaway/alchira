@@ -23,7 +23,9 @@ export interface Path extends Source {
 
 
 export interface Position {
+    last: string | undefined,
     char: string | undefined,
+    next: string | undefined,
     marker: number,
     rowMarker: number,
     colMarker: number,

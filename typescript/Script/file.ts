@@ -11,7 +11,8 @@ import TAGSCAN from './tag.js';
 import * as CACHE from '../data/cache.js';
 
 const CustomTagElements = Object.keys(CACHE.ROOT.customElements);
-const selfClosingTags = Object.entries(CACHE.ROOT.customElements).reduce((A, [K, V]) => {
+const replacementTags = Object.entries(CACHE.ROOT.customElements).reduce((A, [K, V]) => {
+	A[`<!-- ${K} -->`] = V;
 	A[`<${K} />`] = V;
 	return A;
 }, {} as Record<string, number>);
@@ -39,22 +40,23 @@ export default function scanner(
 		if (
 			(content[fileCursor.active.marker - 1] !== "\\")
 			&& (char === "<")
-			&& (/^[/\d\w-]*$/i.test(content[fileCursor.active.marker + 1]))
+			&& (/[!/\d\w-]/i.test(content[fileCursor.active.marker + 1]))
 		) {
 			let subScribed = '';
 			const tagStart = fileCursor.active.marker;
 			const result = TAGSCAN(fileData, classProps, action, fileCursor);
-			const fragment = content.slice(tagStart, result.styleDeclarations.tagOpenMarker);
+			const fragment = content.slice(tagStart, result.styleDeclarations.endMarker);
 			const hasDeclared = Object.keys(result.styleDeclarations.styles).length || result.styleDeclarations.symclasses.length;
-
+			console.log({ tagStart, tagEnd: result.styleDeclarations.endMarker });
+			console.log(fragment);
 			if (result.ok) {
 				classesList.push(...result.classesList);
 				attachments.push(...result.attachments);
 
 				if (hasDeclared) {
 					stylesList.push(result.styleDeclarations);
-				} else if (selfClosingTags[fragment] && (tagTrack.length === 0)) {
-					fileData.styleData.tagReplacements.push([selfClosingTags[fragment], stream.length]);
+				} else if (replacementTags[fragment] && (tagTrack.length === 0)) {
+					fileData.styleData.tagReplacements.push([replacementTags[fragment], stream.length]);
 				}
 
 				Object.entries(result.styleDeclarations.styles).forEach(([k, v]) => { result.styleDeclarations.styles[k] = v.slice(1, -1); });
@@ -66,7 +68,7 @@ export default function scanner(
 								result.styleDeclarations.element + (result.styleDeclarations.elvalue.length ? `=${result.styleDeclarations.elvalue}` : ''),
 								...Object.entries(result.nativeAttributes).map(([A, V]) => V === "" ? A : `${A}=${V}`)
 							].join(' ') + '>');
-				} else if (!selfClosingTags[fragment]) {
+				} else if (!replacementTags[fragment]) {
 					subScribed = result.classSynced ? '<' + [
 						result.styleDeclarations.element + (result.styleDeclarations.elvalue.length ? `=${result.styleDeclarations.elvalue}` : ''),
 						...Object.entries(result.nativeAttributes).map(([A, V]) => V === "" ? A : `${A}=${V}`)
@@ -74,7 +76,7 @@ export default function scanner(
 				}
 
 
-				CURSOR.Incremnet(fileCursor);
+				CURSOR.Increment(fileCursor);
 			} else {
 				subScribed += fragment;
 			}
@@ -86,7 +88,7 @@ export default function scanner(
 					const watchTrack = tagTrack.pop();
 					if (watchTrack !== undefined) {
 						if (watchTrack.element === element) {
-							watchTrack.attachstring = content.slice(watchTrack.tagOpenMarker, tagStart);
+							watchTrack.attachstring = content.slice(watchTrack.endMarker, tagStart);
 							exitedNow = true;
 						} else {
 							tagTrack.push(watchTrack);
@@ -99,7 +101,7 @@ export default function scanner(
 			}
 			if (tagTrack.length === 0 && !exitedNow) { stream += subScribed; }
 		} else {
-			CURSOR.Incremnet(fileCursor);
+			CURSOR.Increment(fileCursor);
 			if (tagTrack.length === 0) { stream += char; }
 		}
 
