@@ -5,8 +5,8 @@ import * as _Script from "../type/script.js";
 // import * as _Cache from "../type/cache.js";
 // import * as _Support from "../type/support.js";
 
-import CURSOR from "./_cursor.js";
 import TAGSCAN from './tag.js';
+import Use from "../utils/main.js";
 
 import * as CACHE from '../data/cache.js';
 
@@ -30,7 +30,7 @@ export default function scanner(
 	const tagTrack: _Script.RawStyle[] = [];
 	const classesList: string[][] = [];
 	const attachments: string[] = [];
-	const fileCursor = new CURSOR(content);
+	const fileCursor = new Use.cursor(content);
 
 	let stream = "";
 
@@ -47,8 +47,6 @@ export default function scanner(
 			const result = TAGSCAN(fileData, classProps, action, fileCursor);
 			const fragment = content.slice(tagStart, result.styleDeclarations.endMarker);
 			const hasDeclared = Object.keys(result.styleDeclarations.styles).length || result.styleDeclarations.symclasses.length;
-			console.log({ tagStart, tagEnd: result.styleDeclarations.endMarker });
-			console.log(fragment);
 			if (result.ok) {
 				classesList.push(...result.classesList);
 				attachments.push(...result.attachments);

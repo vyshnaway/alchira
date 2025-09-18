@@ -22,18 +22,6 @@ export interface Path extends Source {
 }
 
 
-export interface Position {
-    last: string | undefined,
-    char: string | undefined,
-    next: string | undefined,
-    marker: number,
-    rowMarker: number,
-    colMarker: number,
-    cycle: number,
-    colFallback: number,
-}
-
-
 
 export interface Lookup {
     id: string;
@@ -66,7 +54,7 @@ export interface Storage {
     styleData: {
         attachments: string[],
         classTracks: string[][],
-        usedIndexes: Set<number>,
+        usedIndexes: number[],
         localClasses: _style.ClassIndexMap,
         globalClasses: _style.ClassIndexMap,
         publicClasses: _style.ClassIndexMap,

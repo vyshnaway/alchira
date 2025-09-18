@@ -18,7 +18,7 @@ import * as INDEX from "../data/index.js";
 import * as CACHE from "../data/cache.js";
 
 
-export default class C_Proxy {
+export default class C_Target {
 	source = "";
 	target = "";
 	stylesheet = "";
@@ -107,7 +107,7 @@ export default class C_Proxy {
 
 				if (classdata.declarations.length === 1) {
 					skeletonMap[response.symclass] = classdata.metadata;
-					FILE.styleData.usedIndexes.add(response.index);
+					FILE.styleData.usedIndexes.push(response.index);
 				}
 
 				FILE.manifesting.errors.push(...response.errors);

@@ -1,4 +1,4 @@
-import fn from "./1.string.js";
+import fn from "./string.js";
 
 const string = "  g f,d,, \n ghd  gfhsd ghn  g";
 console.log(fn.minify(string) + "4");

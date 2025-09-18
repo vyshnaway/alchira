@@ -1,15 +1,19 @@
-// import * as _Config from "../type/config.js";
-import * as _File from "../type/file.js";
-// import * as _Style from "../type/style.js";
-// import * as _Script from "../type/script.js";
-// import * as _Cache from "../type/cache.js";
-// import * as _Support from "../type/support.js";
+export interface t_Position {
+    last: string | undefined,
+    char: string | undefined,
+    next: string | undefined,
+    marker: number,
+    rowMarker: number,
+    colMarker: number,
+    cycle: number,
+    colFallback: number,
+}
 
 
 export default class Cursor {
     content: string;
-    active: _File.Position;
-    fallback: _File.Position;
+    active: t_Position;
+    fallback: t_Position;
 
     constructor(content: string) {
         this.content = content;

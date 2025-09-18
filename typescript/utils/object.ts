@@ -1,0 +1,147 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+/**
+ * Deep merges `source` into `target` (recursively for plain objects).
+ */
+function deepMerge(target: Record<string, any>, source: Record<string, any>): Record<string, any> {
+	if (!source || typeof source !== "object") { return target; }
+
+	for (const key in source) {
+		const sourceValue = source[key];
+		if (sourceValue === undefined) { continue; }
+
+		const targetValue = target[key];
+
+		if (
+			targetValue &&
+			sourceValue &&
+			typeof targetValue === "object" &&
+			typeof sourceValue === "object" &&
+			!Array.isArray(targetValue)
+		) {
+			target[key] = deepMerge(targetValue, sourceValue);
+		} else {
+			target[key] = sourceValue;
+		}
+	}
+
+	return target;
+}
+
+/**
+ * Merges multiple objects with optional aggressive or array concatenation modes.
+ */
+function bulkMerge(
+	objectArray: Record<string, any>[] = [],
+	aggressive = false,
+	arrayMerge = false
+): Record<string, any> {
+	if (!Array.isArray(objectArray) || objectArray.length === 0) {
+		return {};
+	}
+
+	function innerMerge(target: Record<string, any>, source: Record<string, any>): Record<string, any> {
+		for (const key in source) {
+			if (Object.prototype.hasOwnProperty.call(source, key)) {
+				const srcVal = source[key];
+				const tgtVal = target[key];
+
+				if (
+					typeof srcVal === "object" &&
+					srcVal !== null &&
+					!Array.isArray(srcVal)
+				) {
+					if (
+						typeof tgtVal === "object" &&
+						tgtVal !== null &&
+						!Array.isArray(tgtVal)
+					) {
+						innerMerge(tgtVal, srcVal);
+					} else {
+						target[key] = { ...srcVal };
+					}
+				} else if (
+					Array.isArray(srcVal) &&
+					Array.isArray(tgtVal) &&
+					arrayMerge
+				) {
+					tgtVal.push(...srcVal);
+				} else if (aggressive || !(key in target)) {
+					target[key] = srcVal;
+				}
+			}
+		}
+		return target;
+	}
+
+	return objectArray.reduce(
+		(result, obj) => innerMerge(structuredClone(result), obj),
+		{}
+	);
+}
+
+/**
+ * Creates an object retaining only the structure of the input, with
+ * nested objects preserved as empty shells.
+ */
+function skeleton(object: Record<string, any> = {}): Record<string, any> {
+	return Object.entries(object).reduce((result, [k, v]) => {
+		if (typeof v === "object") {
+			result[k] = skeleton(v);
+		} else if (k.startsWith("--") && typeof v === "string") {
+			result[k] = v;
+		}
+		return result;
+	}, {} as Record<string, any>);
+}
+
+/**
+ * Computes the delta from object A to object B.
+ */
+function ObjectDelta(
+	A: Record<string, any> = {},
+	B: Record<string, any> = {}
+): { result: Partial<Record<string, any>>; score: number } {
+	let score = 0;
+	const result: Partial<Record<string, any>> = {};
+
+	Object.entries(B).forEach(([Bkey, Bvalue]) => {
+		if (typeof Bvalue === "string" || typeof Bvalue === "number" || typeof Bvalue === "boolean" || Bvalue === null) {
+			if (A[Bkey] !== Bvalue) {
+				score++;
+				result[Bkey] = Bvalue;
+			}
+		} else if (typeof Bvalue === "object" && Bvalue !== null) {
+			if (typeof A[Bkey] === "object" && A[Bkey] !== null) {
+				const subobj = ObjectDelta(
+					A[Bkey],
+					Bvalue
+				);
+				if (subobj.score) {
+					result[Bkey] = subobj.result;
+				}
+				score += subobj.score;
+			} else {
+				result[Bkey] = Bvalue;
+			}
+		}
+	});
+
+	return { result, score };
+}
+
+export interface ObjectUtils {
+	skeleton: typeof skeleton;
+	onlyB: typeof ObjectDelta;
+	deepMerge: typeof deepMerge;
+	multiMerge: typeof bulkMerge;
+}
+
+const utils: ObjectUtils = {
+	skeleton,
+	deepMerge,
+	onlyB: ObjectDelta,
+	multiMerge: bulkMerge,
+};
+
+export default utils;

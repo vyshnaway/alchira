@@ -75,7 +75,7 @@ export default function FILING(
 			diagnostics: [],
 		},
 		styleData: {
-			usedIndexes: new Set(),
+			usedIndexes: [],
 			globalClasses: {},
 			localClasses: {},
 			publicClasses: {},

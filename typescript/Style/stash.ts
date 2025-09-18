@@ -135,7 +135,7 @@ function ReRender() {
 				const response = PARSE.TagStyleScanner(tagStyle, fileData, CACHE.CLASS.Artifact_Index);
 				const styleData = INDEX.FETCH(response.index);
 				if (styleData?.declarations.length === 1) {
-					fileData.styleData.usedIndexes.add(response.index);
+					fileData.styleData.usedIndexes.push(response.index);
 					indexMetaCollection[response.symclass] = styleData.metadata;
 				}
 				fileData.manifesting.errors.push(...response.errors);

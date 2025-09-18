@@ -7,7 +7,7 @@ import * as _Script from "../type/script.js";
 // import * as _Support from "../type/support.js";
 
 import VALUE from "./value.js";
-import CURSOR from "./_cursor.js";
+import Use from "../utils/main.js";
 import * as CACHE from '../data/cache.js';
 
 const bracePair = {
@@ -28,7 +28,7 @@ export default function scanner(
 	fileData: _File.Storage,
 	classProps: string[] = [],
 	action: _Script._Actions,
-	fileCursor = new CURSOR(fileData.content),
+	fileCursor = new Use.cursor(fileData.content),
 ) {
 	const
 		classesList: string[][] = [],

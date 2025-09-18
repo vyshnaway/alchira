@@ -6,7 +6,7 @@ export enum _Type {
     LIBRARY,
     ARCHIVE,
     ARCTACH,
-    ARTIFACT
+    ARTIFACT,
 };
 
 export const _Import = [
@@ -17,7 +17,7 @@ export const _Import = [
     'LIBRARY',
     'ARCHIVE',
     'ARCTACH',
-    'ARTIFACT'
+    'ARTIFACT',
 ];
 
 export interface ExportStyle {
@@ -60,7 +60,7 @@ export interface Metadata {
 }
 
 export interface Classdata {
-    index?: number,
+    index: number,
     metadata: Metadata,
     artifact: string,
     definent: string,

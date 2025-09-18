@@ -1,4 +1,4 @@
-export type Tweaks = Record<string, string | boolean>;
+export type Tweaks = Record<string, boolean>;
 
 export interface ProxyMap {
     source: string,

@@ -114,6 +114,7 @@ function CSSBulkScanner(fileDatas: _File.Storage[], forArtifact = false) {
 				InStash.metadata.declarations.push(declaration);
 			} else {
 				const selectorData: _Style.Classdata = {
+					index: 0,
 					artifact: forArtifact ? source.artifact : "",
 					definent: SELECTOR,
 					symclass: classname,
@@ -135,7 +136,7 @@ function CSSBulkScanner(fileDatas: _File.Storage[], forArtifact = false) {
 				};
 				const identity = INDEX.DECLARE(selectorData);
 
-				source.styleData.usedIndexes.add(identity);
+				source.styleData.usedIndexes.push(identity);
 				selectors[classname] = identity;
 				indexMetaCollection[classname] = selectorData.metadata;
 				selectorList.push(classname);
@@ -213,6 +214,7 @@ function TagStyleScanner(
 		Object.assign(variables, style_snippet.variables);
 		
 		index = INDEX.DECLARE({
+			index: 0,
 			artifact: forArtifact ? file.artifact : CACHE.STATIC.Archive.name,
 			definent: raw.symclasses[0],
 			symclass,
