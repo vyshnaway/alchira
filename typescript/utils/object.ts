@@ -1,81 +1,58 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 /**
- * Deep merges `source` into `target` (recursively for plain objects).
+ * Merges multiple objects with optional aggressive or array concatenation modes.
  */
-function deepMerge(target: Record<string, any>, source: Record<string, any>): Record<string, any> {
-	if (!source || typeof source !== "object") { return target; }
-
+function innerMerge(
+	target: Record<string, any>,
+	source: Record<string, any>,
+	aggressive = false,
+	arrayMerge = false
+): Record<string, any> {
 	for (const key in source) {
-		const sourceValue = source[key];
-		if (sourceValue === undefined) { continue; }
+		if (Object.prototype.hasOwnProperty.call(source, key)) {
+			const srcVal = source[key];
+			const tgtVal = target[key];
 
-		const targetValue = target[key];
-
-		if (
-			targetValue &&
-			sourceValue &&
-			typeof targetValue === "object" &&
-			typeof sourceValue === "object" &&
-			!Array.isArray(targetValue)
-		) {
-			target[key] = deepMerge(targetValue, sourceValue);
-		} else {
-			target[key] = sourceValue;
+			if (
+				typeof srcVal === "object" &&
+				srcVal !== null &&
+				!Array.isArray(srcVal)
+			) {
+				if (
+					typeof tgtVal === "object" &&
+					tgtVal !== null &&
+					!Array.isArray(tgtVal)
+				) {
+					innerMerge(tgtVal, srcVal);
+				} else {
+					target[key] = { ...srcVal };
+				}
+			} else if (
+				Array.isArray(srcVal) &&
+				Array.isArray(tgtVal) &&
+				arrayMerge
+			) {
+				tgtVal.push(...srcVal);
+			} else if (aggressive || !(key in target)) {
+				target[key] = srcVal;
+			}
 		}
 	}
-
 	return target;
 }
 
-/**
- * Merges multiple objects with optional aggressive or array concatenation modes.
- */
 function bulkMerge(
 	objectArray: Record<string, any>[] = [],
 	aggressive = false,
-	arrayMerge = false
+	arrayMerge = false,
 ): Record<string, any> {
 	if (!Array.isArray(objectArray) || objectArray.length === 0) {
 		return {};
 	}
 
-	function innerMerge(target: Record<string, any>, source: Record<string, any>): Record<string, any> {
-		for (const key in source) {
-			if (Object.prototype.hasOwnProperty.call(source, key)) {
-				const srcVal = source[key];
-				const tgtVal = target[key];
-
-				if (
-					typeof srcVal === "object" &&
-					srcVal !== null &&
-					!Array.isArray(srcVal)
-				) {
-					if (
-						typeof tgtVal === "object" &&
-						tgtVal !== null &&
-						!Array.isArray(tgtVal)
-					) {
-						innerMerge(tgtVal, srcVal);
-					} else {
-						target[key] = { ...srcVal };
-					}
-				} else if (
-					Array.isArray(srcVal) &&
-					Array.isArray(tgtVal) &&
-					arrayMerge
-				) {
-					tgtVal.push(...srcVal);
-				} else if (aggressive || !(key in target)) {
-					target[key] = srcVal;
-				}
-			}
-		}
-		return target;
-	}
-
 	return objectArray.reduce(
-		(result, obj) => innerMerge(structuredClone(result), obj),
+		(result, obj) => innerMerge(structuredClone(result), obj, aggressive, arrayMerge),
 		{}
 	);
 }
@@ -130,16 +107,12 @@ function ObjectDelta(
 	return { result, score };
 }
 
-export interface ObjectUtils {
+const utils: {
 	skeleton: typeof skeleton;
 	onlyB: typeof ObjectDelta;
-	deepMerge: typeof deepMerge;
 	multiMerge: typeof bulkMerge;
-}
-
-const utils: ObjectUtils = {
+} = {
 	skeleton,
-	deepMerge,
 	onlyB: ObjectDelta,
 	multiMerge: bulkMerge,
 };

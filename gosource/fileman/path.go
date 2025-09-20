@@ -9,9 +9,9 @@ import (
 	"strings"
 )
 
-// Returns basename from a pathstring
-func Path_BaseName(pathstring string) string {
-	return filepath.Base(pathstring);
+// Returns basename from a pathString
+func Path_BaseName(pathString string) string {
+	return filepath.Base(pathString)
 }
 
 // Join joins any number of path elements into a single path.
@@ -35,11 +35,11 @@ func Path_Resolves(pathString string) (string, error) {
 }
 
 // Available checks if a path exists and returns its type ("file", "folder") or an error.
-func Path_Available(pathString string) (exist bool, fileType string, err error) {
+func Path_Check(pathString string) (exist bool, filetype string, err error) {
 	info, err := os.Stat(pathString)
 	if err != nil {
 		if os.IsNotExist(err) {
-			return false, "", nil // Path does not exist
+			return false, "", nil
 		}
 		return false, "", fmt.Errorf("path check error for '%s': %w", pathString, err)
 	}
@@ -51,43 +51,50 @@ func Path_Available(pathString string) (exist bool, fileType string, err error) 
 
 // IfFolder checks if a path exists and is a directory.
 func Path_IfFolder(pathString string) bool {
-	exist, fileType, err := Path_Available(pathString)
-	return err == nil && exist && fileType == "folder"
+	exist, filetype, err := Path_Check(pathString)
+	return err == nil && exist && filetype == "folder"
 }
 
 // IfFile checks if a path exists and is a regular file.
 func Path_IfFile(pathString string) bool {
-	exist, fileType, err := Path_Available(pathString)
-	return err == nil && exist && fileType == "file"
+	exist, filetype, err := Path_Check(pathString)
+	return err == nil && exist && filetype == "file"
 }
 
-// IsIndependent checks if two folders are independent (neither is inside the other).
+// isSubpath returns true if child is a subdirectory of parent, not counting equality.
+func Path_IsSubpath(parent, child string) bool {
+    parent = filepath.Clean(parent)
+    child = filepath.Clean(child)
+    if len(child) <= len(parent) {
+        return false
+    }
+    // Ensure there's a path separator after the parent
+    return strings.HasPrefix(child, parent+string(filepath.Separator))
+}
+
+// Path_IsIndependent checks if two folders are independent (neither is inside the other).
 func Path_IsIndependent(folder1, folder2 string) (bool, error) {
-	abs1, err := filepath.Abs(folder1)
-	if err != nil {
-		return false, fmt.Errorf("could not get absolute path for folder1 '%s': %w", folder1, err)
-	}
-	abs2, err := filepath.Abs(folder2)
-	if err != nil {
-		return false, fmt.Errorf("could not get absolute path for folder2 '%s': %w", folder2, err)
-	}
+    abs1, err := filepath.Abs(folder1)
+    if err != nil {
+        return false, fmt.Errorf("could not get absolute path for folder1 '%s': %w", folder1, err)
+    }
+    abs2, err := filepath.Abs(folder2)
+    if err != nil {
+        return false, fmt.Errorf("could not get absolute path for folder2 '%s': %w", folder2, err)
+    }
+    abs1 = filepath.Clean(abs1)
+    abs2 = filepath.Clean(abs2)
 
-	rel1, err := filepath.Rel(abs1, abs2)
-	if err != nil {
-		// If paths are on different drives/partitions, Rel might return an error.
-		// In such cases, they are independent.
-		return true, nil
-	}
-	rel2, err := filepath.Rel(abs2, abs1)
-	if err != nil {
-		return true, nil
-	}
-
-	// A path is independent if its relative path starts with ".." or is absolute (meaning different roots).
-	notInside := func(rel string) bool {
-		return strings.HasPrefix(rel, "..") || filepath.IsAbs(rel)
-	}
-	return notInside(rel1) && notInside(rel2), nil
+    // If they are the same folder, not independent.
+    if abs1 == abs2 {
+        return false, nil
+    }
+    // If one is a prefix path of the other (with path separator), not independent.
+    if Path_IsSubpath(abs1, abs2) || Path_IsSubpath(abs2, abs1) {
+        return false, nil
+    }
+    // Otherwise, independent.
+    return true, nil
 }
 
 // ListFiles recursively lists all files in a directory.

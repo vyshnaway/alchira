@@ -60,7 +60,7 @@ export function Li(content = '', presets: string[] = [], ...styles: string[]) {
 }
 
 export function Hr(content = root.canvas.divider.mid[0], presets: string[] = [], ...styles: string[]) {
-  return root.fmt("\n" + content.charAt(0).repeat(Math.ceil(root.canvas.width() / content.length)).slice(0, root.canvas.width()), ...presets, ...styles);
+  return root.fmt("\n" + content.repeat(Math.ceil(root.canvas.width() / content.length)).slice(0, root.canvas.width()), ...presets, ...styles);
 }
 
 export function Br(repeat = 1, presets: string[] = [], ...styles: string[]) {

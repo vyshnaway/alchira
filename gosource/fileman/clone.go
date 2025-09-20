@@ -1,6 +1,7 @@
 package fileman
 
 import (
+	"slices"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -30,14 +31,7 @@ func Clone_Hard(source, destination string, ignoreFiles []string) error {
 			srcPath := filepath.Join(source, entry.Name())
 			destPath := filepath.Join(destination, entry.Name())
 
-			// Check if the file/folder should be ignored
-			found := false
-			for _, ignore := range ignoreFiles {
-				if srcPath == ignore {
-					found = true
-					break
-				}
-			}
+			found := slices.Contains(ignoreFiles, srcPath)
 			if found {
 				continue
 			}
@@ -53,7 +47,6 @@ func Clone_Hard(source, destination string, ignoreFiles []string) error {
 			}
 		}
 	} else {
-		// If source is a file, just copy it.
 		if err := helper_CopyFile(source, destination); err != nil {
 			return err
 		}
@@ -72,8 +65,6 @@ func Clone_Safe(source, destination string, ignoreFiles []string) error {
 		}
 	}
 
-	// Convert destination files to relative paths from the source, then to absolute paths
-	// to match the ignoreFiles format expected by Clone.Hard.
 	var existingDestAbsPaths []string
 	for _, destFile := range destinationFiles {
 		relPath, err := filepath.Rel(destination, destFile)

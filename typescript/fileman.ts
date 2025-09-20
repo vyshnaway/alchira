@@ -1,5 +1,6 @@
 import fs from "fs";
 import path from "path";
+import  util from "./utils/main.js"
 import { fileURLToPath } from "url";
 
 // Determine the root directory of the project.
@@ -160,6 +161,9 @@ const fileman = {
 		 * @throws Error if the source path does not exist.
 		 */
 		hard: async (source: string, destination: string, ignoreFiles: string[] = []): Promise<void> => {
+			if (!fs.existsSync(source)) {
+				throw new Error("Target folder does not exist.\n" + source);
+			}
 			const copyRecursiveAsync = async (src: string, dest: string): Promise<void> => {
 				const stats = await fs.promises.stat(src);
 				if (stats.isDirectory()) {
@@ -177,9 +181,6 @@ const fileman = {
 				}
 			};
 
-			if (!fs.existsSync(source)) {
-				throw new Error("Target folder does not exist.\n" + source);
-			}
 			await copyRecursiveAsync(source, destination);
 		},
 
@@ -247,9 +248,7 @@ const fileman = {
 					if (!fs.existsSync(target)) { throw new Error(`File does not exist: ${target}`); }
 					const fileContent = await fs.promises.readFile(target, "utf8");
 					// Remove single-line and multi-line comments from JSON string
-					const cleanedContent = fileContent
-						.replace(/\/\*[\s\S]*?\*\//g, "") // Remove multi-line comments
-						.replace(/^\s*\/\/.*$/gm, ""); // Remove single-line comments
+					const cleanedContent = util.code.uncomment.Script(fileContent)
 					return {
 						status: true,
 						data: JSON.parse(cleanedContent),

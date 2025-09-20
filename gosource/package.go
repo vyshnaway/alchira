@@ -1,192 +1,104 @@
 package main
 
 import (
+	_os_ "os"
 	"fmt"
-	"log"
-	"os"
-	"path/filepath"
-
-	"golang.org/x/term" // For getting console width
+	"encoding/json"
+	_fileman_ "main/fileman"
+	_cache_ "main/cache"
+	_types_ "main/types"
 )
 
-// getConsoleWidth attempts to get the current terminal width.
-// Returns a default of 80 if it cannot determine it.
-func getConsoleWidth() int {
-	width, _, err := term.GetSize(int(os.Stdout.Fd()))
-	if err != nil {
-		return 80 // Default width if unable to determine
-	}
-	return width
-}
-
-// commander is a placeholder function for the actual commander logic.
-// In a real application, this would contain the core logic for your commands.
-func commander(
-	command string,
-	argument string,
-	rootPath string,
-	workPath string,
-	consoleWidth int,
-	rootPackageEssential T_RootPackageEssential,
-	projectName string,
-	projectVersion string,
-) {
-	fmt.Println("\n--- Commander Function Called ---")
-	fmt.Printf("Command: %s\n", command)
-	fmt.Printf("Argument: %s\n", argument)
-	fmt.Printf("Root Path: %s\n", rootPath)
-	fmt.Printf("Work Path: %s\n", workPath)
-	fmt.Printf("Console Width: %d\n", consoleWidth)
-	fmt.Printf("Root Package Name: %s\n", rootPackageEssential.Name)
-	fmt.Printf("Root Package Version: %s\n", rootPackageEssential.Version)
-	fmt.Printf("Root Package Website: %s\n", rootPackageEssential.Website)
-	fmt.Printf("Root Package Commands (bin keys): %v\n", rootPackageEssential.Command)
-	fmt.Printf("Project Name: %s\n", projectName)
-	fmt.Printf("Project Version: %s\n", projectVersion)
-	fmt.Println("--- End Commander Function ---")
-	// Add your actual command execution logic here
-}
-
 func main() {
-	// Calculate paths
-	rootPath := fileman.Path.FromRoot(".") // fileman's init already sets the root
-	workPath, err := filepath.Abs(".")
-	if err != nil {
-		log.Fatalf("Failed to get current working directory: %v", err)
+	// --- Initialize ---
+	exposedCommands := []string{}
+	for k := range _cache_.Root.Commands {
+		exposedCommands = append(exposedCommands, k)
 	}
-	packagePath := "package.json"
-	rootPackagePath := fileman.Path.FromRoot(packagePath)
+	cmd := ""
+	arg := ""
+	if len(_os_.Args) > 2 && contains(exposedCommands, _os_.Args[2]) {
+		cmd = _os_.Args[2]
+	}
+	if len(_os_.Args) > 3 && contains(exposedCommands, _os_.Args[2]) {
+		arg = _os_.Args[3]
+	}
+	workPath := "."
+	rootPath, _ := filepath.Abs(".")
+	projectPackagePath := "package.json"
+	originPackagePath, _ := filepath.Abs("package.json")
 
-	// Parse command-line arguments
-	command := ""
-	argument := ""
-	if len(os.Args) > 1 {
-		command = os.Args[1]
-	}
-	if len(os.Args) > 2 {
-		argument = os.Args[2]
-	}
+	var originPackageJson, projectPackageJson _types_.Support_PackageEssential
+	errChan := make(chan error, 2)
+	go func() { errChan <- _fileman_.Read_Json(originPackagePath, &originPackageJson) }()
+	go func() { errChan <- _fileman_.Read_Json(projectPackagePath, &projectPackageJson) }()
+	<-errChan
+	<-errChan
 
-	consoleWidth := getConsoleWidth()
-
-	commandList := []string{"init", "watch", "split", "preview", "publish", "install"}
-
-	// Read root package.json
-	// Using map[string]interface{} for flexible parsing, then converting to PackageJson struct
-	var rootPackageJsonMap map[string]interface{}
-	status, data, err := fileman.Read.Json(rootPackagePath, false)
-	if err != nil || !status {
-		log.Fatalf("Bad root package.json file at '%s': %v", rootPackagePath, err)
-	}
-	rootPackageJsonMap = data
-
-	// Populate rootPackageEssential
-	rootPackageEssential := T_RootPackageEssential{}
-	if name, ok := rootPackageJsonMap["name"].(string); ok {
-		rootPackageEssential.Name = name
-	}
-	if version, ok := rootPackageJsonMap["version"].(string); ok {
-		rootPackageEssential.Version = version
-	}
-	if scripts, ok := rootPackageJsonMap["scripts"].(map[string]interface{}); ok {
-		rootPackageEssential.Scripts = make(map[string]string)
-		for k, v := range scripts {
-			if s, isString := v.(string); isString {
-				rootPackageEssential.Scripts[k] = s
-			}
-		}
-	}
-	if homepage, ok := rootPackageJsonMap["homepage"].(string); ok {
-		rootPackageEssential.Website = homepage
-	}
-	if bin, ok := rootPackageJsonMap["bin"].(map[string]interface{}); ok {
-		for k := range bin {
-			rootPackageEssential.Command = append(rootPackageEssential.Command, k)
-		}
+	// Validate originPackageJson
+	rawStatus, statusOK := originPackageJson.Data["status"].(bool)
+	if !statusOK || !rawStatus {
+		fmt.Println("Bad root package.json file.")
+		_os_.Exit(1)
 	}
 
-	// Read project package.json
-	var projectPackageJsonMap map[string]interface{}
-	projectPackageStatus, projectPackageData, err := fileman.Read.Json(packagePath, false)
-	if err != nil && !os.IsNotExist(err) { // Only log error if it's not simply "file not found"
-		log.Printf("Warning: Error reading project package.json: %v", err)
+	// Find project name/version
+	projectName, _ := projectPackageJson.Data["name"].(string)
+	if projectName == "" { projectName = "-" }
+	projectVersion, _ := projectPackageJson.Data["version"].(string)
+	if projectVersion == "" { projectVersion = "0.0.0" }
+
+	bin := ""
+	if m, ok := originPackageJson.Data["bin"].(map[string]interface{}); ok {
+		for k := range m { bin = k; break }
 	}
-	if projectPackageStatus {
-		projectPackageJsonMap = projectPackageData
-	} else {
-		// If project package.json doesn't exist, initialize an empty map for it
-		projectPackageJsonMap = make(map[string]interface{})
-		projectPackageJsonMap["name"] = "xtylesheet"                    // Default name if not found
-		projectPackageJsonMap["version"] = "0.0.0"                      // Default version
-		projectPackageJsonMap["scripts"] = make(map[string]interface{}) // Ensure scripts map exists
+	rootPackageEssential := _types_.Support_PackageEssential{
+		Bin:     bin,
+		Name:    getString(originPackageJson.Data["name"], _cache_.Root.Name),
+		Version: getString(originPackageJson.Data["version"], _cache_.Root.Version),
 	}
 
-	// Conditional logic for adding commands to project package.json
-	if projectPackageStatus && contains(commandList, command) {
-		addedCommands := 0
-		projectScripts, ok := projectPackageJsonMap["scripts"].(map[string]interface{})
-		if !ok {
-			projectScripts = make(map[string]interface{})
-			projectPackageJsonMap["scripts"] = projectScripts
-		}
-
-		for _, cmd := range commandList {
-			rootScript, rootScriptExists := rootPackageEssential.Scripts[cmd]
-			projectScriptExists := false
-			if _, ok := projectScripts[cmd]; ok {
-				projectScriptExists = true
-			}
-
-			if rootScriptExists && !projectScriptExists {
-				addedCommands++
-				// Use a default prefix or the root package name
-				prefix := "xcss"
-				if rootPackageEssential.Name != "" {
-					prefix = rootPackageEssential.Name
+	// --- Script sync with Project ---
+	if status, statusOK := projectPackageJson.Data["status"].(bool); statusOK && status {
+		if scriptsData, ok := projectPackageJson.Data["scripts"].(map[string]interface{}); ok && contains(exposedCommands, cmd) {
+			addedCommands := 0
+			for cmdKey, cmdLine := range _cache_.Root.Scripts {
+				if _, exists := scriptsData[cmdKey]; !exists {
+					addedCommands++
+					scriptsData[fmt.Sprintf("%s:%s", _cache_.Root.Name, cmdKey)] = fmt.Sprintf("%s %s", rootPackageEssential.Bin, cmdLine)
 				}
-				projectScripts[fmt.Sprintf("%s:%s", prefix, cmd)] = rootScript
 			}
-		}
-
-		if addedCommands > 0 {
-			if err := fileman.Write.Json(packagePath, projectPackageJsonMap); err != nil {
-				log.Fatalf("Failed to write updated project package.json: %v", err)
+			if addedCommands > 0 {
+				projectPackageJson.Data["scripts"] = scriptsData
+				writeJSON(projectPackagePath, projectPackageJson)
 			}
-			fmt.Println("Updated project package.json with new commands.")
 		}
 	}
 
-	// Determine project name and version for commander call
-	projectName := "xtylesheet"
-	projectVersion := "0.0.0"
-	if projectPackageStatus {
-		if name, ok := projectPackageJsonMap["name"].(string); ok {
-			projectName = name
-		}
-		if version, ok := projectPackageJsonMap["version"].(string); ok {
-			projectVersion = version
-		}
-	}
-
-	// Call the commander function
-	commander(
-		command,
-		argument,
-		rootPath,
-		workPath,
-		consoleWidth,
-		rootPackageEssential,
-		projectName,
-		projectVersion,
-	)
+	// --- Commander logic: Call the command executor ---
+	// commander(cmd, arg, rootPath, workPath, projectName, projectVersion, rootPackageEssential)
 }
 
-// Helper function to check if a string is in a slice.
-func contains(slice []string, item string) bool {
-	for _, a := range slice {
-		if a == item {
+// Helper function
+func contains(list []string, s string) bool {
+	for _, v := range list {
+		if v == s {
 			return true
 		}
 	}
 	return false
 }
+func getString(val interface{}, fallback string) string {
+	if s, ok := val.(string); ok && s != "" {
+		return s
+	}
+	return fallback
+}
+
+// // Placeholder for command execution logic
+// func commander(command, argument, rootPath, workPath, projectName, projectVersion string, pkg PackageEssential) {
+// 	fmt.Printf("Runner: %s %s (Project: %s/%s)\n", command, argument, projectName, projectVersion)
+// 	fmt.Printf("RootPath: %s WorkPath: %s\n", rootPath, workPath)
+// 	fmt.Printf("Bin: %s Name: %s Version: %s\n", pkg.Bin, pkg.Name, pkg.Version)
+// 	// Implement actual logic here
+// }

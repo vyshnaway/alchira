@@ -21,7 +21,16 @@ export interface Path extends Source {
     content: string,
 }
 
-
+export interface Position {
+    last: string | undefined,
+    char: string | undefined,
+    next: string | undefined,
+    marker: number,
+    rowMarker: number,
+    colMarker: number,
+    cycle: number,
+    colFallback: number,
+}
 
 export interface Lookup {
     id: string;

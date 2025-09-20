@@ -6,9 +6,9 @@ import * as _Script from "../type/script.js";
 // import * as _Support from "../type/support.js";
 
 import TAGSCAN from './tag.js';
-import Use from "../utils/main.js";
 
 import * as CACHE from '../data/cache.js';
+import Cursor from "./_cursor.js";
 
 const CustomTagElements = Object.keys(CACHE.ROOT.customElements);
 const replacementTags = Object.entries(CACHE.ROOT.customElements).reduce((A, [K, V]) => {
@@ -30,7 +30,7 @@ export default function scanner(
 	const tagTrack: _Script.RawStyle[] = [];
 	const classesList: string[][] = [];
 	const attachments: string[] = [];
-	const fileCursor = new Use.cursor(content);
+	const fileCursor = new Cursor(content);
 
 	let stream = "";
 

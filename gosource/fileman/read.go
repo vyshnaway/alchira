@@ -61,7 +61,7 @@ func Read_Json(target string, online bool) (status bool, data map[string]interfa
 	commentRegex := regexp.MustCompile(`(?s)/\*.*?\*/|//.*`)
 	cleanContent := commentRegex.ReplaceAllString(rawContent, "")
 
-	var jsonData map[string]interface{}
+	var jsonData map[string]any
 	err = json.Unmarshal([]byte(cleanContent), &jsonData)
 	if err != nil {
 		return false, nil, fmt.Errorf("failed to parse JSON from '%s': %w", target, err)

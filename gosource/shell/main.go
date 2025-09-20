@@ -1,108 +1,55 @@
 package shell
 
-import (
-	"strings"
-
-	"main/shell/list"
-	"main/shell/render"
-	"main/shell/root"
-	"main/shell/tag"
+import(
+	_strings_ "strings"
 )
 
-// task writes a task message to the terminal
-func task(s string, rowshift int) {
-	canvas := root.Canvas
-	if canvas.Config.TaskActive && canvas.Config.PostActive {
-		var parts []string
-		if rowshift >= 0 {
-			parts = append(parts, tag.Br(rowshift, nil))
-		}
-		parts = append(parts,
-			root.Format(">>>", root.Style.AS_Bold),
-			canvas.Tab,
-			root.Format(s+".", root.Style.AS_Bold, root.Style.AS_Italic),
-			tag.Br(1, nil),
-		)
-		if rowshift < 0 {
-			rowshift = -rowshift
-		}
-		render.Write(strings.Join(parts, ""), rowshift)
-	}
+// t_Main_ListDeployment struct to represent the list deployment tuple
+type t_Main_ListDeployment struct {
+    TypeFunc func([]string, int, []string, ...string) []string
+    Intent   int
+    Preset   []string
+    Styles   []string
 }
 
-// step writes a step message to the terminal
-func step(s string, rowshift int) {
-	canvas := root.Canvas
-	if canvas.Config.TaskActive && canvas.Config.PostActive {
-		var parts []string
-		if rowshift >= 0 {
-			parts = append(parts, tag.Br(rowshift, nil))
-		}
-		parts = append(parts,
-			root.Format(">>>", root.Style.AS_Rare),
-			canvas.Tab,
-			root.Format(s+" ...", root.Style.AS_Italic),
-		)
-		if rowshift < 0 {
-			rowshift = -rowshift
-		}
-		render.Write(strings.Join(parts, ""), rowshift)
-	}
+// MAKE constructs output from heading, contents, and deployments
+func MAKE(heading string, contents []string, deployments ...t_Main_ListDeployment) string {
+    modContents := make([]string, len(contents))
+    copy(modContents, contents)
+    for _, dep := range deployments {
+        modContents = dep.TypeFunc(modContents, dep.Intent, dep.Preset, dep.Styles...)
+    }
+    if len(contents) > 0 {
+        modContents = append(modContents, Format("", Preset.None))
+    }
+    outList := []string{Format(heading, Preset.None, Style.AS_Bold)}
+    outList = append(outList, modContents...)
+    return _strings_.Join(outList, "\n")
 }
 
-// make formats content as a list with headings
-func make(heading string, contents []string, listDeployments ...[]interface{}) string {
-	if len(contents) > 0 {
-		contents = append(contents, root.Format(""))
-	}
-
-	result := []string{root.Format(heading, root.Style.AS_Bold)}
-
-	for _, deployment := range listDeployments {
-		if len(deployment) < 3 {
-			continue
-		}
-
-		listType, ok := deployment[0].(list.List)
-		if !ok {
-			continue
-		}
-
-		indent, ok := deployment[1].(int)
-		if !ok {
-			continue
-		}
-
-		preset, ok := deployment[2].([]string)
-		if !ok {
-			continue
-		}
-
-		var styles []string
-		if len(deployment) > 3 {
-			for _, s := range deployment[3:] {
-				if style, ok := s.(string); ok {
-					styles = append(styles, style)
-				}
-			}
-		}
-
-		contents = listType(contents, indent, preset, styles...)
-	}
-
-	result = append(result, contents...)
-	return strings.Join(result, "\n")
+func TASK(str string, rowShift int) {
+    if Canvas.Config.TaskActive && Canvas.Config.PostActive {
+        var b _strings_.Builder
+        if rowShift >= 0 {
+            b.WriteString(tag_Br(rowShift, Preset.None))
+        }
+        b.WriteString(Format(">>>", Preset.Primary, Style.AS_Bold))
+        b.WriteString(Canvas.Tab)
+        b.WriteString(Format(str+".", Preset.Tertiary, Style.AS_Bold, Style.AS_Italic))
+        b.WriteString(tag_Br(1, Preset.None))
+        render_Write(b.String(), util_AbsRowShift(rowShift))
+    }
 }
 
-var MAKE	= make
-var POST	= root.Post
-var TASK	= task
-var STEP	= step
-
-var Tag		= tag.E
-var List	= list.E
-var Render	= render.E
-var Canvas	= root.Canvas
-var Preset	= root.Preset
-var Style	= root.Style
-var Format	= root.Format
+func STEP(str string, rowShift int) {
+    if Canvas.Config.TaskActive && Canvas.Config.PostActive {
+        var b _strings_.Builder
+        if rowShift >= 0 {
+            b.WriteString(tag_Br(rowShift, Preset.None))
+        }
+        b.WriteString(Format(">>>", Preset.Primary, Style.AS_Rare,))
+        b.WriteString(Canvas.Tab)
+        b.WriteString(Format(str+" ...",Preset.Tertiary, Style.AS_Italic))
+        render_Write(b.String(), util_AbsRowShift(rowShift))
+    }
+}
