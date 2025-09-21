@@ -1,10 +1,10 @@
 package fileman
 
 import (
-	"fmt"
-	"os"
-	"path/filepath"
-	"strings"
+	_os_ "os"
+	_fmt_ "fmt"
+	_strings_ "strings"
+	_filepath_ "path/filepath"
 )
 
 // File deletes a file or a directory recursively.
@@ -18,9 +18,9 @@ func Delete_File(pathToDelete string) (success bool, message string, err error) 
 	}
 
 	// os.RemoveAll works for both files and directories
-	err = os.RemoveAll(pathToDelete)
+	err = _os_.RemoveAll(pathToDelete)
 	if err != nil {
-		return false, "Error deleting path.", fmt.Errorf("failed to delete '%s': %w", pathToDelete, err)
+		return false, "Error deleting path.", _fmt_.Errorf("failed to delete '%s': %w", pathToDelete, err)
 	}
 	return true, "Path deleted successfully.", nil
 }
@@ -47,7 +47,7 @@ func Delete_Folder(folderPath string, extensions, ignorePaths []string) (success
 	// Normalize extensions
 	var normalizedExtensions []string
 	for _, ext := range extensions {
-		if !strings.HasPrefix(ext, ".") {
+		if !_strings_.HasPrefix(ext, ".") {
 			normalizedExtensions = append(normalizedExtensions, "."+ext)
 		} else {
 			normalizedExtensions = append(normalizedExtensions, ext)
@@ -57,15 +57,15 @@ func Delete_Folder(folderPath string, extensions, ignorePaths []string) (success
 	// Delete files
 	files, err := Path_ListFiles(folderPath, []string{})
 	if err != nil {
-		return false, "Error listing files for deletion.", fmt.Errorf("failed to list files in '%s': %w", folderPath, err)
+		return false, "Error listing files for deletion.", _fmt_.Errorf("failed to list files in '%s': %w", folderPath, err)
 	}
 	for _, file := range files {
 		if helper_Contains(ignorePaths, file) {
 			continue
 		}
-		if len(normalizedExtensions) == 0 || helper_Contains(normalizedExtensions, filepath.Ext(file)) {
-			if err := os.Remove(file); err != nil && !os.IsNotExist(err) {
-				return false, "Error deleting file.", fmt.Errorf("failed to delete file '%s': %w", file, err)
+		if len(normalizedExtensions) == 0 || helper_Contains(normalizedExtensions, _filepath_.Ext(file)) {
+			if err := _os_.Remove(file); err != nil && !_os_.IsNotExist(err) {
+				return false, "Error deleting file.", _fmt_.Errorf("failed to delete file '%s': %w", file, err)
 			}
 		}
 	}
@@ -75,7 +75,7 @@ func Delete_Folder(folderPath string, extensions, ignorePaths []string) (success
 	// to delete deepest empty folders first.
 	folders, err := Path_ListFolders(folderPath, []string{})
 	if err != nil {
-		return false, "Error listing folders for deletion.", fmt.Errorf("failed to list folders in '%s': %w", folderPath, err)
+		return false, "Error listing folders for deletion.", _fmt_.Errorf("failed to list folders in '%s': %w", folderPath, err)
 	}
 	// Sort folders in reverse order of path length to delete deepest first
 	// This helps ensure parent folders become empty and can be deleted.
@@ -87,12 +87,12 @@ func Delete_Folder(folderPath string, extensions, ignorePaths []string) (success
 		isEmpty, checkErr := helper_IsDirEmpty(subFolder)
 		if checkErr != nil {
 			// Log error but continue
-			fmt.Printf("Warning: Could not check if directory '%s' is empty: %v\n", subFolder, checkErr)
+			_fmt_.Printf("Warning: Could not check if directory '%s' is empty: %v\n", subFolder, checkErr)
 			continue
 		}
 		if isEmpty {
-			if err := os.Remove(subFolder); err != nil && !os.IsNotExist(err) {
-				return false, "Error deleting folder.", fmt.Errorf("failed to delete empty folder '%s': %w", subFolder, err)
+			if err := _os_.Remove(subFolder); err != nil && !_os_.IsNotExist(err) {
+				return false, "Error deleting folder.", _fmt_.Errorf("failed to delete empty folder '%s': %w", subFolder, err)
 			}
 		}
 	}

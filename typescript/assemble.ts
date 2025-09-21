@@ -12,7 +12,7 @@ import * as CACHE from "./data/cache.js";
 import * as INDEX from "./data/index.js";
 
 import Use from "./utils/main.js";
-import HASHRULE from "./hashrule.js";
+import HASHRULE from "./style/hashrule.js";
 import STYLE from "./style/parse.js";
 import COMPILE from "./style/render.js";
 import ORDER from "./sort/order-api.js";

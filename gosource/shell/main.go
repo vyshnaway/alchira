@@ -4,8 +4,8 @@ import(
 	_strings_ "strings"
 )
 
-// t_Main_ListDeployment struct to represent the list deployment tuple
-type t_Main_ListDeployment struct {
+// tMain_ListDeployment struct to represent the list deployment tuple
+type TList struct {
     TypeFunc func([]string, int, []string, ...string) []string
     Intent   int
     Preset   []string
@@ -13,7 +13,7 @@ type t_Main_ListDeployment struct {
 }
 
 // MAKE constructs output from heading, contents, and deployments
-func MAKE(heading string, contents []string, deployments ...t_Main_ListDeployment) string {
+func MAKE(heading string, contents []string, deployments ...TList) string {
     modContents := make([]string, len(contents))
     copy(modContents, contents)
     for _, dep := range deployments {

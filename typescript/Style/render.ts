@@ -5,7 +5,7 @@ import * as LOADPREFIX from "./prefix.js";
 import * as _Style from "../type/style.js";
 
 import Use from "../utils/main.js";
-import HASHRULE from "../hashrule.js";
+import HASHRULE from "./hashrule.js";
 
 type t_styleSorceTemplate = Record<string, string | object>;
 
@@ -208,7 +208,7 @@ function ComposeSwitched(selectorIndex: [string, number][], minify = !CACHE.STAT
 		objectMap[selector] = INDEX.FETCH(index).style_object;
 		classOrder.push(selector);
 	});
-	
+
 	const preped = styleSwitch(objectMap);
 	return ComposePrefixed(Object.entries(preped), minify);
 }

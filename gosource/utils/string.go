@@ -1,28 +1,28 @@
 package utils
 
 import (
-	"slices"
-	"regexp"
-	"strconv"
-	"strings"
+	_slices_ "slices"
+	_regexp_ "regexp"
+	_strconv_ "strconv"
+	_strings_ "strings"
 )
 
 // Regular expressions equivalent
 var (
-	alphanumeric = regexp.MustCompile(`[a-zA-Z0-9]`)
-	space        = regexp.MustCompile(`\s+`)
-	at           = regexp.MustCompile(`@+`)
+	alphanumeric = _regexp_.MustCompile(`[a-zA-Z0-9]`)
+	space        = _regexp_.MustCompile(`\s+`)
+	at           = _regexp_.MustCompile(`@+`)
 )
 
 func String_Pointer(s string) *string { return &s }
 
 func String_HasRune(slice []rune, r rune) bool {
-	return slices.Contains(slice, r)
+	return _slices_.Contains(slice, r)
 }
 
 // Normalize: replaces spaces and '@', then applies filters and replacements
 func String_Filter(s string, keepChars, skipChars, addBackSlashFor []rune) string {
-	final := strings.Builder{}
+	final := _strings_.Builder{}
 	s = space.ReplaceAllString(s, "_")
 	s = at.ReplaceAllString(s, "_")
 	for _, ch := range s {
@@ -107,6 +107,6 @@ func String_EnCounter(number int) string {
 func String_Memory(s string) float64 {
 	// Each Go string char is 1 byte (UTF-8 already handled), so use length/1024
 	sizeKB := float64(len(s)) / 1024
-	f, _ := strconv.ParseFloat(strconv.FormatFloat(sizeKB, 'f', 2, 64), 64)
+	f, _ := _strconv_.ParseFloat(_strconv_.FormatFloat(sizeKB, 'f', 2, 64), 64)
 	return f
 }

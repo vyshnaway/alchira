@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import fileman from "./fileman.js";
-import commander from "./execute.js";
+import commander from "./commander.js";
 
 import * as CACHE from "./data/cache.js";
 import * as _support from "./type/support.js";

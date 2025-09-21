@@ -11,7 +11,7 @@ import * as INDEX from "../data/index.js";
 
 import Use from "../utils/main.js";
 import CSSBlockScanner from "./block.js";
-import HASHRULE from "../hashrule.js";
+import HASHRULE from "./hashrule.js";
 
 function MERGER(classList: string[] = []) {
 	const
@@ -212,7 +212,7 @@ function TagStyleScanner(
 
 		attachments.push(...style_snippet.attachments);
 		Object.assign(variables, style_snippet.variables);
-		
+
 		index = INDEX.DECLARE({
 			index: 0,
 			artifact: forArtifact ? file.artifact : CACHE.STATIC.Archive.name,

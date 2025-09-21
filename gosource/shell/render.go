@@ -1,10 +1,10 @@
 package shell
 
 import (
-    _strings_ "strings"
-	_time_ "time"
-	_fmt_ "fmt"
 	_os_ "os"
+	_fmt_ "fmt"
+	_time_ "time"
+    _strings_ "strings"
 )
 
 // ANSI escape codes for terminal manipulation

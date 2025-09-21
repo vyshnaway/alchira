@@ -1,8 +1,8 @@
 package shell
 
 import (
-	_strings_ "strings"
 	_math_ "math"
+	_strings_ "strings"
 )
 
 func tag_H1(content string, preset []string, styles ...string) string {

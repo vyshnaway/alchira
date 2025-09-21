@@ -82,9 +82,3 @@ type Style_Dictionary map[string]map[int]string
 type Style_ClassIndexMap map[string]int
 
 type Style_ClassIndexTrace [][2]string
-
-type Style_SortedOutput struct {
-	Counted         int
-	ReferenceMap    map[string]map[int]int
-	RecompClasslist [][2]int
-}

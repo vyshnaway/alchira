@@ -1,34 +1,34 @@
 package shell
 
 import (
+	_os_ "os"
 	_term_ "golang.org/x/term"
 	_strings_ "strings"
-	_os_ "os"
 )
 
-// t_Root_Config holds terminal configuration settings
-type t_Root_Config struct {
+// tRoot_Config holds terminal configuration settings
+type tRoot_Config struct {
 	TaskActive bool
 	PostActive bool
 	TabSpace   int
 }
 
-// t_Root_Divider holds characters used for drawing dividers
-type t_Root_Divider struct {
+// tRoot_Divider holds characters used for drawing dividers
+type tRoot_Divider struct {
 	Top string
 	Mid string
 	Btm string
 }
 
-// Canvas holds terminal t_Root_Canvas settings and utilities
-type t_Root_Canvas struct {
-	Config  t_Root_Config
-	Divider t_Root_Divider
+// Canvas holds terminal tRoot_Canvas settings and utilities
+type tRoot_Canvas struct {
+	Config  tRoot_Config
+	Divider tRoot_Divider
 	Tab     string
 }
 
 // Width returns the current terminal width
-func (i *t_Root_Canvas) Width() int {
+func (i *tRoot_Canvas) Width() int {
 	width, _, err := _term_.GetSize(int(_os_.Stdout.Fd()))
 	if err != nil || width <= 0 {
 		return 48 // fallback width
@@ -37,13 +37,13 @@ func (i *t_Root_Canvas) Width() int {
 }
 
 // Global Canvas instance - exported as GetCanvas()
-var Canvas = &t_Root_Canvas{
-	Config: t_Root_Config{
+var Canvas = &tRoot_Canvas{
+	Config: tRoot_Config{
 		TaskActive: true,
 		PostActive: true,
 		TabSpace:   2,
 	},
-	Divider: t_Root_Divider{
+	Divider: tRoot_Divider{
 		Top: "‾",
 		Mid: "─",
 		Btm: "_",
@@ -76,7 +76,7 @@ var Preset = struct {
 	Failed:    []string{Style.TC_Normal_Red},
 }
 
-func (i *t_Root_Canvas) Initialize(taskActive bool, postActive bool, tabWidth int) {
+func (i *tRoot_Canvas) Initialize(taskActive bool, postActive bool, tabWidth int) {
 	width := i.Width()
 
 	// Initialize tab spacing

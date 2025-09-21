@@ -4,8 +4,6 @@ import (
 	_fmt_ "fmt"
 )
 
-type t_ListFunc func(items []string, intent int, preset []string, styles ...string) []string
-
 func list_Bullets(items []string, intent int, preset []string, styles ...string) []string {
 	if intent < 0 {
 		intent = 0
@@ -100,11 +98,11 @@ func list_Catalog(items []string, intent int, preset []string, styles ...string)
 }
 
 var List = struct {
-	Bullets   t_ListFunc
-	Numbers   t_ListFunc
-	Level     t_ListFunc
-	Waterfall t_ListFunc
-	Catalog   t_ListFunc
+	Bullets   func(items []string, intent int, preset []string, styles ...string) []string
+	Numbers   func(items []string, intent int, preset []string, styles ...string) []string
+	Level     func(items []string, intent int, preset []string, styles ...string) []string
+	Waterfall func(items []string, intent int, preset []string, styles ...string) []string
+	Catalog   func(items []string, intent int, preset []string, styles ...string) []string
 }{
 	Bullets:   list_Bullets,
 	Numbers:   list_Numbers,

@@ -30,3 +30,9 @@ type Support_Diagnostic struct {
     Message string   `json:"message"`
     Sources []string `json:"sources"`
 }
+
+type Support_SortedOutput struct {
+	Counted        int                           `json:"counted"`
+	ReferenceMap   map[string]map[int]int        `json:"referenceMap"`
+	RecompClasslist [][2]int                     `json:"recompClasslist"`
+}

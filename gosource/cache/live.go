@@ -2,7 +2,6 @@ package cache
 
 import (
 	_types_ "main/types"
-	_utils_ "main/utils"
 )
 
 var Static = _types_.Cache_Static{
@@ -25,10 +24,10 @@ var Static = _types_.Cache_Static{
 	Archive: _types_.Config_Archive{
 		Name:          "",
 		Version:       "",
-		Vendors:       _utils_.String_Pointer(""),
-		Readme:        _utils_.String_Pointer(""),
-		Licence:       _utils_.String_Pointer(""),
-		ExportSheet:   _utils_.String_Pointer(""),
+		Vendors:       "",
+		Readme:        "",
+		Licence:       "",
+		ExportSheet:   "",
 		Artifacts:     map[string]string{},
 		ProxyMap:      []_types_.Config_ProxyMap{},
 		ExportClasses: []string{},
@@ -72,7 +71,7 @@ var Delta = _types_.Cache_Delta{
 
 var Manifest = _types_.Cache_Manifest{
 	Constants:  []string{},
-	Hashrules:  map[string]string{},
+	Hashrule:   map[string]string{},
 	Filelookup: map[string]_types_.File_Lookup{},
 	AXIOM:      map[string]_types_.File_ClassMetaMap{},
 	CLUSTER:    map[string]_types_.File_ClassMetaMap{},

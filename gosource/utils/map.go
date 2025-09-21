@@ -2,10 +2,7 @@ package utils
 
 import(
 	_strings_ "strings"
-)
-
-import (
-    "reflect"
+    _reflect_ "reflect"
 )
 
 // Deep copy for map[string]any (does not support all types)
@@ -31,15 +28,15 @@ func Map_DeepCopy(src map[string]any) map[string]any {
 func Map_Union(target, source map[string]any, aggressive, arrayMerge bool) map[string]any {
     for key, srcVal := range source {
         tgtVal, hasTgt := target[key]
-        srcType := reflect.TypeOf(srcVal)
-        tgtType := reflect.TypeOf(tgtVal)
+        srcType := _reflect_.TypeOf(srcVal)
+        tgtType := _reflect_.TypeOf(tgtVal)
 
         // If both are non-nil maps
-        if srcType != nil && srcType.Kind() == reflect.Map && srcVal != nil {
+        if srcType != nil && srcType.Kind() == _reflect_.Map && srcVal != nil {
             srcMap, srcOk := srcVal.(map[string]any)
             if srcOk {
                 var tgtMap map[string]any
-                if tgtType != nil && tgtType.Kind() == reflect.Map && tgtVal != nil {
+                if tgtType != nil && tgtType.Kind() == _reflect_.Map && tgtVal != nil {
                     tgtMap, _ = tgtVal.(map[string]any)
                 } else {
                     tgtMap = make(map[string]any)

@@ -97,7 +97,7 @@ type Cache_Delta struct {
 
 type Cache_Manifest struct {
 	Constants  []string
-	Hashrules  map[string]string
+	Hashrule   map[string]string
 	Filelookup map[string]File_Lookup
 	AXIOM      map[string]File_ClassMetaMap
 	CLUSTER    map[string]File_ClassMetaMap
