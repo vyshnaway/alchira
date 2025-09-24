@@ -33,26 +33,6 @@ type Style_ExportStyle struct {
 	Attachments []string
 }
 
-type Style_ParsedResult struct {
-	Assign      []string
-	Attachment  []string
-	Variables   map[string]string
-	XatProps    [][2]string
-	AtProps     map[string]string
-	Xproperties [][2]string
-	Properties  map[string]string
-	XatRules    [][2]string
-	AtRules     map[string]string
-	Xnested     [][2]string
-	Nested      map[string]string
-	Xclasses    [][2]string
-	Classes     map[string]string
-	Xflats      [][2]string
-	Flats       map[string]string
-	XallBlocks  [][2]string
-	AllBlocks   map[string]string
-}
-
 type Style_Metadata struct {
 	Info         []string
 	Skeleton     any
@@ -81,4 +61,7 @@ type Style_Dictionary map[string]map[int]string
 
 type Style_ClassIndexMap map[string]int
 
-type Style_ClassIndexTrace [][2]string
+type Style_ClassIndexTrace struct{
+	ClassName   string
+	ClassIndex  int
+}

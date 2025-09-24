@@ -11,10 +11,7 @@ func Hashrule_Error(
 	source string,
 	message string,
 	preview map[string]string,
-) (
-	Errorstring string,
-	Diagnostic _types_.Support_Diagnostic,
-) {
+) error_return {
 	preview["ERROR BY"] = S.Format(cause, S.Preset.None, S.Style.AS_Bold, S.Style.TC_Normal_Red)
 	var errstring = S.Tag.Li(S.Format(source, S.Preset.Tertiary), S.Preset.Failed, S.Style.AS_Bold) + "\n " + S.Tag.Tab(1, S.Preset.None) + S.MAKE(
 		S.Format(primitive, S.Preset.Primary)+" : "+S.Format(message, S.Preset.Failed),
@@ -32,7 +29,10 @@ func Hashrule_Error(
 		Sources: []string{source},
 	}
 
-	return errstring, diagnostic
+	return error_return{
+		Errorstring: errstring,
+		Diagnostic:  diagnostic,
+	}
 }
 
 func Hashrule_Report(

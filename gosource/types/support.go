@@ -36,3 +36,4 @@ type Support_SortedOutput struct {
 	ReferenceMap   map[string]map[int]int        `json:"referenceMap"`
 	RecompClasslist [][2]int                     `json:"recompClasslist"`
 }
+

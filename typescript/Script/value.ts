@@ -58,7 +58,7 @@ function EvaluateIndexTraces(
 }
 
 export default function classExtract(
-	string: string,
+	value: string,
 	action: _Script._Actions,
 	fileData: _File.Storage,
 	FileCursor: _File.Position,
@@ -67,11 +67,11 @@ export default function classExtract(
 	const attachments: string[] = [];
 
 	let entry = "";
-	let scribed = string;
+	let scribed = value;
 	let activeQuote = "";
 	let marker = 0;
 	let inQuote = false;
-	let ch = string[marker];
+	let ch = value[marker];
 
 	while (ch !== undefined) {
 		if (inQuote) {
@@ -92,7 +92,7 @@ export default function classExtract(
 			activeQuote = ch;
 		}
 
-		ch = string[++marker];
+		ch = value[++marker];
 	}
 
 	if (action !== _Script._Actions.read) {
@@ -101,7 +101,7 @@ export default function classExtract(
 		activeQuote = "";
 		marker = 0;
 		inQuote = false;
-		ch = string[marker];
+		ch = value[marker];
 
 		const metaFront = action === _Script._Actions.monitor
 			? `TAG${fileData.debugclassFront}\\:${FileCursor.rowMarker}\\:${FileCursor.colMarker}__`
@@ -138,7 +138,7 @@ export default function classExtract(
 					activeQuote = ch;
 				}
 			}
-			ch = string[++marker];
+			ch = value[++marker];
 		}
 	}
 

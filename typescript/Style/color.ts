@@ -94,7 +94,7 @@ function stdScanner(
 export default function parser(
     source: string,
     fallback_RGB1_HEX0 = true,
-    fallbackPalettes: string[] = ['oklch', 'oklab', 'lab', 'lch', 'hwb', 'rgsb']
+    fallbackPalettes: string[] = ['oklch', 'oklab', 'lab', 'lch', 'hwb', 'rgba']
 ): string[] {
     let activeMarker = 0, ch = source[activeMarker], capture = '', result = '', score = 0;
     

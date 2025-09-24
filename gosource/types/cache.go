@@ -19,7 +19,7 @@ type Cache_Root struct {
 	Tweaks           Config_Tweaks
 	CustomAtrules    map[string]string
 	CustomElements   map[string]int
-	CustomOperations map[string]string
+	CustomOperations map[string]rune
 	Url              Cache_Url
 }
 
@@ -108,14 +108,14 @@ type Cache_Manifest struct {
 }
 
 type Cache_Class struct {
-	Hashrule             map[string]string
-	Index_to_Data        map[int]Style_ClassData
-	Global___Index       Style_ClassIndexMap
-	Public___Index       Style_ClassIndexMap
-	Library__Index       Style_ClassIndexMap
-	Artifact_Index       Style_ClassIndexMap
-	Sync_ClassDictionary Style_Dictionary
-	Sync_PublishIndexMap Style_ClassIndexTrace
+	Hashrule        map[string]string
+	Index_to_Data   map[int]Style_ClassData
+	Global___Index  Style_ClassIndexMap
+	Public___Index  Style_ClassIndexMap
+	Library__Index  Style_ClassIndexMap
+	Artifact_Index  Style_ClassIndexMap
+	ClassDictionary Style_Dictionary
+	PublishIndexMap []Style_ClassIndexTrace
 }
 
 type Cache_Files struct {

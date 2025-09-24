@@ -45,9 +45,9 @@ var Root = _types_.Cache_Root{
 		"staple": 2,
 		"summon": 3,
 	},
-	CustomOperations: map[string]string{
-		"attach": "~",
-		"assign": "=",
+	CustomOperations: map[string]rune{
+		"attach": '~',
+		"assign": '=',
 	},
 	CustomAtrules: map[string]string{
 		"attach": "@--attach",

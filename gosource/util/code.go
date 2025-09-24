@@ -1,9 +1,9 @@
-package utils
+package util
 
 import (
+	_json_ "encoding/json"
 	_regexp_ "regexp"
 	_strings_ "strings"
-	_json_ "encoding/json"
 )
 
 func code_IsInString(input string, index int) bool {
@@ -73,7 +73,6 @@ func Code_Uncomment(content string, single, multi, html bool) string {
 	}
 	return result.String()
 }
-
 
 // Example: very basic spacings
 var code_Minify_Regex = _regexp_.MustCompile(`\s*([{}:;,])\s*`)

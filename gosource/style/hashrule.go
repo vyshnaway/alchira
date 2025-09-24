@@ -1,10 +1,10 @@
 package style
 
 import (
-	X "main/xhell"
 	_cache_ "main/cache"
 	_types_ "main/types"
-	_utils_ "main/utils"
+	_utils_ "main/util"
+	X "main/xhell"
 	_regexp_ "regexp"
 	_slices_ "slices"
 	_strings_ "strings"
@@ -31,15 +31,15 @@ func Hashrule_Upload() {
 	_cache_.Delta.Report.Hashrule = X.Hashrule_Report(hashrule, errors)
 }
 
-type tHashrule_Import_return struct {
+type hashrule_Import_return struct {
 	Status      bool
 	Result      string
 	Errorstring string
 	Diagnostic  _types_.Support_Diagnostic
 }
 
-func Hashrule_Import(rule string, source string) tHashrule_Import_return {
-	primitive := rule
+func Hashrule_Import(str string, src string) hashrule_Import_return {
+	primitive := str
 	recursionSequence := make([]string, 0, len(_cache_.Class.Hashrule))
 	preview := make(map[string]string, len(_cache_.Class.Hashrule))
 
@@ -47,37 +47,36 @@ func Hashrule_Import(rule string, source string) tHashrule_Import_return {
 		result string,
 		cause string,
 		message string,
-	) tHashrule_Import_return {
-		errorstring, diagnostic := X.Hashrule_Error(
+	) hashrule_Import_return {
+		hashrule_Error_return := X.Hashrule_Error(
 			primitive,
 			cause,
-			source,
+			src,
 			message,
 			preview,
 		)
 
-		status := len(message) == 0
-		return tHashrule_Import_return{
-			Status:      status,
-			Result:      result,
-			Errorstring: errorstring,
-			Diagnostic:  diagnostic,
+		return hashrule_Import_return{
+			Status: len(message) == 0,
+			Result: result,
+			Errorstring: hashrule_Error_return.Errorstring,
+			Diagnostic: hashrule_Error_return.Diagnostic,
 		}
 	}
 
 	var hashpattern = _regexp_.MustCompile(`(?i)#\{[a-z0-9-]+\}`)
 	for {
-		loc := hashpattern.FindStringIndex(rule)
+		loc := hashpattern.FindStringIndex(str)
 		if loc == nil {
 			break
 		}
-		match := rule[loc[0]:loc[1]]
+		match := str[loc[0]:loc[1]]
 		key := match[2 : len(match)-1]
 		replacement, found := _cache_.Class.Hashrule[key]
 		if !found {
 			replacement = match
 		}
-		preview["FROM "+match] = "GETS " + replacement + " FROM " + rule
+		preview["FROM "+match] = "GETS " + replacement + " FROM " + str
 
 		if !found {
 			return response("", match, "Undefined Hashrule.")
@@ -86,24 +85,21 @@ func Hashrule_Import(rule string, source string) tHashrule_Import_return {
 			return response("", match, "Hashrule recursion loop.")
 		}
 
-		rule = hashpattern.ReplaceAllString(rule, replacement)
+		str = hashpattern.ReplaceAllString(str, replacement)
 		recursionSequence = append(recursionSequence, match)
 	}
 
-	return response(rule, "", "")
+	return response(str, "", "")
 }
 
-type tHashrule_Render_return struct {
+type hashrule_Render_return struct {
 	Wrappers    []string
 	Status      bool
 	Errorstring string
 	Diagnostic  _types_.Support_Diagnostic
 }
 
-func Hashrule_Render(
-	str string,
-	src string,
-) tHashrule_Render_return {
+func Hashrule_Render(str string, src string) hashrule_Render_return {
 	const wrapperlimit = 12
 	extended := Hashrule_Import(str, src)
 	snippets := _utils_.String_ZeroBreaks(extended.Result, []rune{'&'})[:wrapperlimit]
@@ -161,7 +157,7 @@ func Hashrule_Render(
 		}
 	}
 
-	return tHashrule_Render_return{
+	return hashrule_Render_return{
 		Wrappers:    wrappers,
 		Status:      extended.Status,
 		Errorstring: extended.Errorstring,

@@ -1,4 +1,4 @@
-package utils
+package util
 
 import (
 	_fmt_ "fmt"
@@ -7,10 +7,10 @@ import (
 	_strings_ "strings"
 )
 
-// ColorResult defines the structure for returned color values,
+// color_return defines the structure for returned color values,
 // including RGB, HSL, LAB, LCH, HWB, OKLAB, OKLCH components, alpha,
 // and a CSS-like string representation.
-type ColorResult struct {
+type color_return struct {
 	R         float64 // Red component (0-255)
 	G         float64 // Green component (0-255)
 	B         float64 // Blue component (0-255)
@@ -24,12 +24,12 @@ type ColorResult struct {
 	W         float64 // Whiteness component for HWB (0-100)
 	Bl        float64 // Blackness component for HWB (0-100)
 	Alpha     float64 // Alpha component (0-1)
-	Converted string  // CSS-like string representation (e.g., "rgb(255, 0, 0)")
+	Converted string  // CSS-like string representation (e.g., "rgba(255, 0, 0, 1)")
 }
 
 // hslToRgb converts HSL color values to RGB.
 // h: Hue (0-360), s: Saturation (0-100), l: Lightness (0-100), alpha: Opacity (0-1).
-func color_HslToRgb(h, s, l, alpha float64) ColorResult {
+func color_HslToRgb(h, s, l, alpha float64) color_return {
 	s /= 100
 	l /= 100
 
@@ -53,12 +53,12 @@ func color_HslToRgb(h, s, l, alpha float64) ColorResult {
 		converted = _fmt_.Sprintf("rgba(%.0f, %.0f, %.0f, %.3f)", r, g, b, a)
 	}
 
-	return ColorResult{R: r, G: g, B: b, Alpha: a, Converted: converted}
+	return color_return{R: r, G: g, B: b, Alpha: a, Converted: converted}
 }
 
 // rgbToHsl converts RGB color values to HSL.
 // r, g, b: Red, Green, Blue components (0-255), alpha: Opacity (0-1).
-func color_RgbToHsl(r, g, b, alpha float64) ColorResult {
+func color_RgbToHsl(r, g, b, alpha float64) color_return {
 	r /= 255
 	g /= 255
 	b /= 255
@@ -106,12 +106,12 @@ func color_RgbToHsl(r, g, b, alpha float64) ColorResult {
 		converted = _fmt_.Sprintf("hsl(%.0f %.0f%% %.0f%% / %.3f)", h, s, l, a)
 	}
 
-	return ColorResult{H: h, S: s, L: l, Alpha: a, Converted: converted}
+	return color_return{H: h, S: s, L: l, Alpha: a, Converted: converted}
 }
 
 // labToRgb converts CIELAB color values to RGB.
 // L: Lightness (0-100), a, b: Chromaticity components (-128 to 127 approx), alpha: Opacity (0-1).
-func color_LabToRgb(L, a, b, alpha float64) ColorResult {
+func color_LabToRgb(L, a, b, alpha float64) color_return {
 	const D65_Xn = 95.047
 	const D65_Yn = 100.0
 	const D65_Zn = 108.883
@@ -158,12 +158,12 @@ func color_LabToRgb(L, a, b, alpha float64) ColorResult {
 		converted = _fmt_.Sprintf("rgba(%.0f, %.0f, %.0f, %.3f)", r, g, b_val, a_val)
 	}
 
-	return ColorResult{R: r, G: g, B: b_val, Alpha: a_val, Converted: converted}
+	return color_return{R: r, G: g, B: b_val, Alpha: a_val, Converted: converted}
 }
 
 // rgbToLab converts RGB color values to CIELAB.
 // r, g, b: Red, Green, Blue components (0-255), alpha: Opacity (0-1).
-func color_RgbToLab(r, g, b, alpha float64) ColorResult {
+func color_RgbToLab(r, g, b, alpha float64) color_return {
 	r /= 255
 	g /= 255
 	b /= 255
@@ -212,12 +212,12 @@ func color_RgbToLab(r, g, b, alpha float64) ColorResult {
 		converted = _fmt_.Sprintf("lab(%.1f %.1f %.1f / %.3f)", L, aComp, bComp, a_val)
 	}
 
-	return ColorResult{L: L, A: aComp, BComp: bComp, Alpha: a_val, Converted: converted}
+	return color_return{L: L, A: aComp, BComp: bComp, Alpha: a_val, Converted: converted}
 }
 
 // lchToRgb converts LCH color values to RGB.
 // L: Lightness (0-100), C: Chroma (0-100+), H: Hue (0-360), alpha: Opacity (0-1).
-func color_LchToRgb(L, C, H, alpha float64) ColorResult {
+func color_LchToRgb(L, C, H, alpha float64) color_return {
 	hRad := H * _math_.Pi / 180
 	_a := C * _math_.Cos(hRad)
 	_b := C * _math_.Sin(hRad)
@@ -229,12 +229,12 @@ func color_LchToRgb(L, C, H, alpha float64) ColorResult {
 		converted = _fmt_.Sprintf("rgba(%.0f, %.0f, %.0f, %.3f)", rgb.R, rgb.G, rgb.B, a_val)
 	}
 
-	return ColorResult{R: rgb.R, G: rgb.G, B: rgb.B, Alpha: a_val, Converted: converted}
+	return color_return{R: rgb.R, G: rgb.G, B: rgb.B, Alpha: a_val, Converted: converted}
 }
 
 // rgbToLch converts RGB color values to LCH.
 // r, g, b: Red, Green, Blue components (0-255), alpha: Opacity (0-1).
-func color_RgbToLch(r, g, b, alpha float64) ColorResult {
+func color_RgbToLch(r, g, b, alpha float64) color_return {
 	lab := color_RgbToLab(r, g, b, alpha)
 	L := lab.L
 	_a := lab.A
@@ -256,12 +256,12 @@ func color_RgbToLch(r, g, b, alpha float64) ColorResult {
 		converted = _fmt_.Sprintf("lch(%.1f %.1f %.1f / %.3f)", L, C, H, a_val)
 	}
 
-	return ColorResult{L: L, C: C, HComp: H, Alpha: a_val, Converted: converted}
+	return color_return{L: L, C: C, HComp: H, Alpha: a_val, Converted: converted}
 }
 
 // hwbToRgb converts HWB color values to RGB.
 // h: Hue (0-360), w: Whiteness (0-100), bl: Blackness (0-100), alpha: Opacity (0-1).
-func color_HwbToRgb(h, w, bl, alpha float64) ColorResult {
+func color_HwbToRgb(h, w, bl, alpha float64) color_return {
 	h = _math_.Mod(h, 360)
 	w /= 100
 	bl /= 100
@@ -283,12 +283,12 @@ func color_HwbToRgb(h, w, bl, alpha float64) ColorResult {
 		converted = _fmt_.Sprintf("rgba(%.0f, %.0f, %.0f, %.3f)", r, g, b, a_val)
 	}
 
-	return ColorResult{R: r, G: g, B: b, Alpha: a_val, Converted: converted}
+	return color_return{R: r, G: g, B: b, Alpha: a_val, Converted: converted}
 }
 
 // rgbToHwb converts RGB color values to HWB.
 // r, g, b: Red, Green, Blue components (0-255), alpha: Opacity (0-1).
-func color_RgbToHwb(r, g, b, alpha float64) ColorResult {
+func color_RgbToHwb(r, g, b, alpha float64) color_return {
 	r /= 255
 	g /= 255
 	b /= 255
@@ -320,12 +320,12 @@ func color_RgbToHwb(r, g, b, alpha float64) ColorResult {
 		converted = _fmt_.Sprintf("hwb(%.1f %.1f%% %.1f%% / %.3f)", h, w, bl, a_val)
 	}
 
-	return ColorResult{H: h, W: w, Bl: bl, Alpha: a_val, Converted: converted}
+	return color_return{H: h, W: w, Bl: bl, Alpha: a_val, Converted: converted}
 }
 
 // rgbToHex converts RGB color values to a hexadecimal string.
 // r, g, b: Red, Green, Blue components (0-255), alpha: Opacity (0-1).
-func color_rgbToHex(r, g, b, alpha float64) string {
+func color_RgbToHex(r, g, b, alpha float64) string {
 	toHex := func(c float64) string {
 		hex := _strconv_.FormatInt(int64(_math_.Round(c)), 16)
 		if len(hex) == 1 {
@@ -346,7 +346,7 @@ func color_rgbToHex(r, g, b, alpha float64) string {
 
 // hexToRgb converts a hexadecimal color string to RGB.
 // hex: Hexadecimal color string (e.g., "#RRGGBB", "#RRGGBBAA", "#RGB", "#RGBA").
-func color_HexToRgb(hex string) (ColorResult, error) {
+func color_HexToRgb(hex string) (color_return, error) {
 	cleanHex := _strings_.TrimPrefix(hex, "#")
 	var r, g, b int64
 	var alpha float64 = 1.0
@@ -373,7 +373,7 @@ func color_HexToRgb(hex string) (ColorResult, error) {
 		g, _ = _strconv_.ParseInt(_strings_.Repeat(string(cleanHex[1]), 2), 16, 64)
 		b, _ = _strconv_.ParseInt(_strings_.Repeat(string(cleanHex[2]), 2), 16, 64)
 	default:
-		return ColorResult{}, _fmt_.Errorf("invalid hex color format: %s", hex)
+		return color_return{}, _fmt_.Errorf("invalid hex color format: %s", hex)
 	}
 
 	alpha = _math_.Round(alpha*1000) / 1000 // ToFixed(3)
@@ -383,12 +383,12 @@ func color_HexToRgb(hex string) (ColorResult, error) {
 		converted = _fmt_.Sprintf("rgba(%.0f, %.0f, %.0f, %.3f)", float64(r), float64(g), float64(b), alpha)
 	}
 
-	return ColorResult{R: float64(r), G: float64(g), B: float64(b), Alpha: alpha, Converted: converted}, nil
+	return color_return{R: float64(r), G: float64(g), B: float64(b), Alpha: alpha, Converted: converted}, nil
 }
 
 // oklabToRgb converts Oklab color values to RGB.
 // L: Lightness (0-1), a, b: Chromaticity components (-0.5 to 0.5 approx), alpha: Opacity (0-1).
-func color_OklabToRgb(L, a, b, alpha float64) ColorResult {
+func color_OklabToRgb(L, a, b, alpha float64) color_return {
 	lPrime := L + a*0.3963377774 + b*0.2158037573
 	mPrime := L - a*0.1055613458 - b*0.0638541728
 	sPrime := L - a*0.0894841775 - b*1.2914855480
@@ -419,12 +419,12 @@ func color_OklabToRgb(L, a, b, alpha float64) ColorResult {
 		converted = _fmt_.Sprintf("rgba(%.0f, %.0f, %.0f, %.3f)", r, g, b_val, a_val)
 	}
 
-	return ColorResult{R: r, G: g, B: b_val, Alpha: a_val, Converted: converted}
+	return color_return{R: r, G: g, B: b_val, Alpha: a_val, Converted: converted}
 }
 
 // rgbToOklab converts RGB color values to Oklab.
 // r, g, b: Red, Green, Blue components (0-255), alpha: Opacity (0-1).
-func color_RgbToOklab(r, g, b, alpha float64) ColorResult {
+func color_RgbToOklab(r, g, b, alpha float64) color_return {
 	srgbInverseOetf := func(val float64) float64 {
 		val /= 255
 		if val <= 0.04045 {
@@ -460,12 +460,12 @@ func color_RgbToOklab(r, g, b, alpha float64) ColorResult {
 		converted = _fmt_.Sprintf("oklab(%.6f %.6f %.6f / %.3f)", L, a_val, b_val, alpha_val)
 	}
 
-	return ColorResult{L: L, A: a_val, BComp: b_val, Alpha: alpha_val, Converted: converted}
+	return color_return{L: L, A: a_val, BComp: b_val, Alpha: alpha_val, Converted: converted}
 }
 
 // oklchToRgb converts Oklch color values to RGB.
 // L: Lightness (0-1), C: Chroma (0-0.5 approx), H: Hue (0-360), alpha: Opacity (0-1).
-func color_OklchToRgb(L, C, H, alpha float64) ColorResult {
+func color_OklchToRgb(L, C, H, alpha float64) color_return {
 	hRad := H * _math_.Pi / 180
 	_a := C * _math_.Cos(hRad)
 	_b := C * _math_.Sin(hRad)
@@ -477,12 +477,12 @@ func color_OklchToRgb(L, C, H, alpha float64) ColorResult {
 		converted = _fmt_.Sprintf("rgba(%.0f, %.0f, %.0f, %.3f)", rgb.R, rgb.G, rgb.B, a_val)
 	}
 
-	return ColorResult{R: rgb.R, G: rgb.G, B: rgb.B, Alpha: a_val, Converted: converted}
+	return color_return{R: rgb.R, G: rgb.G, B: rgb.B, Alpha: a_val, Converted: converted}
 }
 
 // rgbToOklch converts RGB color values to Oklch.
 // r, g, b: Red, Green, Blue components (0-255), alpha: Opacity (0-1).
-func color_RgbToOklch(r, g, b, alpha float64) ColorResult {
+func color_RgbToOklch(r, g, b, alpha float64) color_return {
 	oklab := color_RgbToOklab(r, g, b, alpha)
 	L := oklab.L
 	_a := oklab.A
@@ -504,31 +504,32 @@ func color_RgbToOklch(r, g, b, alpha float64) ColorResult {
 		converted = _fmt_.Sprintf("oklch(%.3f %.3f %.1f / %.3f)", L, C, H, a_val)
 	}
 
-	return ColorResult{L: L, C: C, HComp: H, Alpha: a_val, Converted: converted}
+	return color_return{L: L, C: C, HComp: H, Alpha: a_val, Converted: converted}
 }
 
 type t_color_RGB_From = struct {
-	Lch   func(L, C, H, alpha float64) ColorResult
-	Lab   func(L, a, b, alpha float64) ColorResult
-	Hwb   func(h, w, bl, alpha float64) ColorResult
-	Hsl   func(h, s, l, alpha float64) ColorResult
-	Oklch func(L, C, H, alpha float64) ColorResult
-	Oklab func(L, a, b, alpha float64) ColorResult
+	Lch   func(L, C, H, alpha float64) color_return
+	Lab   func(L, a, b, alpha float64) color_return
+	Hwb   func(h, w, bl, alpha float64) color_return
+	Hsl   func(h, s, l, alpha float64) color_return
+	Oklch func(L, C, H, alpha float64) color_return
+	Oklab func(L, a, b, alpha float64) color_return
 }
 
 type t_color_RGB_To = struct {
-	Lch   func(r, g, b, alpha float64) ColorResult
-	Lab   func(r, g, b, alpha float64) ColorResult
-	Hwb   func(r, g, b, alpha float64) ColorResult
-	Hsl   func(r, g, b, alpha float64) ColorResult
-	Oklch func(r, g, b, alpha float64) ColorResult
-	Oklab func(r, g, b, alpha float64) ColorResult
+	Lch   func(r, g, b, alpha float64) color_return
+	Lab   func(r, g, b, alpha float64) color_return
+	Hwb   func(r, g, b, alpha float64) color_return
+	Hsl   func(r, g, b, alpha float64) color_return
+	Oklch func(r, g, b, alpha float64) color_return
+	Oklab func(r, g, b, alpha float64) color_return
 }
 
 var ColorRGB = struct {
-	From t_color_RGB_From
-	To t_color_RGB_To
-	LoadHex func(hex string) (ColorResult, error)
+	From    t_color_RGB_From
+	To      t_color_RGB_To
+	FromHex func(hex string) (color_return, error)
+	ToHex   func (r, g, b, alpha float64) string
 }{
 	From: t_color_RGB_From{
 		Lch:   color_LchToRgb,
@@ -546,5 +547,6 @@ var ColorRGB = struct {
 		Oklch: color_RgbToOklch,
 		Oklab: color_RgbToOklab,
 	},
-	LoadHex: color_HexToRgb,
+	FromHex: color_HexToRgb,
+	ToHex:   color_RgbToHex,
 }

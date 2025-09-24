@@ -1,9 +1,30 @@
-package utils
+package util
 
-import(
+import (
+	_reflect_ "reflect"
 	_strings_ "strings"
-    _reflect_ "reflect"
 )
+
+
+// // Deep copy for map[string]any (does not support all types)
+// func Map_DeepCopy(v any) any {
+//     switch vv := v.(type) {
+//     case map[string]any:
+//         m := make(map[string]any, len(vv))
+//         for k, val := range vv {
+//             m[k] = Map_DeepCopy(val)
+//         }
+//         return m
+//     case []any:
+//         s := make([]any, len(vv))
+//         for i, val := range vv {
+//             s[i] = Map_DeepCopy(val)
+//         }
+//         return s
+//     default:
+//         return vv
+//     }
+// }
 
 // Deep copy for map[string]any (does not support all types)
 func Map_DeepCopy(src map[string]any) map[string]any {
@@ -23,57 +44,58 @@ func Map_DeepCopy(src map[string]any) map[string]any {
     return b
 }
 
+
 // Recursively merges keys and values from source into target.
 // If aggressive, overwrite non-object values. If arrayMerge, concatenate slices.
 func Map_Union(target, source map[string]any, aggressive, arrayMerge bool) map[string]any {
-    for key, srcVal := range source {
-        tgtVal, hasTgt := target[key]
-        srcType := _reflect_.TypeOf(srcVal)
-        tgtType := _reflect_.TypeOf(tgtVal)
+	for key, srcVal := range source {
+		tgtVal, hasTgt := target[key]
+		srcType := _reflect_.TypeOf(srcVal)
+		tgtType := _reflect_.TypeOf(tgtVal)
 
-        // If both are non-nil maps
-        if srcType != nil && srcType.Kind() == _reflect_.Map && srcVal != nil {
-            srcMap, srcOk := srcVal.(map[string]any)
-            if srcOk {
-                var tgtMap map[string]any
-                if tgtType != nil && tgtType.Kind() == _reflect_.Map && tgtVal != nil {
-                    tgtMap, _ = tgtVal.(map[string]any)
-                } else {
-                    tgtMap = make(map[string]any)
-                }
-                target[key] = Map_Union(tgtMap, srcMap, aggressive, arrayMerge)
-                continue
-            }
-        }
-        // If both are slices (arrays)
-        if arrayMerge {
-            srcSlice, srcOk := srcVal.([]any)
-            tgtSlice, tgtOk := tgtVal.([]any)
-            if srcOk && tgtOk {
-                target[key] = append(tgtSlice, srcSlice...)
-                continue
-            }
-        }
-        // Otherwise: aggressive overwrite or copy if key not present
-        if aggressive || !hasTgt {
-            target[key] = srcVal
-        }
-    }
-    return target
+		// If both are non-nil maps
+		if srcType != nil && srcType.Kind() == _reflect_.Map && srcVal != nil {
+			srcMap, srcOk := srcVal.(map[string]any)
+			if srcOk {
+				var tgtMap map[string]any
+				if tgtType != nil && tgtType.Kind() == _reflect_.Map && tgtVal != nil {
+					tgtMap, _ = tgtVal.(map[string]any)
+				} else {
+					tgtMap = make(map[string]any)
+				}
+				target[key] = Map_Union(tgtMap, srcMap, aggressive, arrayMerge)
+				continue
+			}
+		}
+		// If both are slices (arrays)
+		if arrayMerge {
+			srcSlice, srcOk := srcVal.([]any)
+			tgtSlice, tgtOk := tgtVal.([]any)
+			if srcOk && tgtOk {
+				target[key] = append(tgtSlice, srcSlice...)
+				continue
+			}
+		}
+		// Otherwise: aggressive overwrite or copy if key not present
+		if aggressive || !hasTgt {
+			target[key] = srcVal
+		}
+	}
+	return target
 }
 
 // Merges a slice of map[string]any with options
 func Map_BulkMerge(objectArray []map[string]any, aggressive, arrayMerge bool) map[string]any {
-    if len(objectArray) == 0 {
-        return map[string]any{}
-    }
-    result := make(map[string]any)
-    for _, obj := range objectArray {
-        // deep copy utility for the accumulator
-        accCopy := Map_DeepCopy(result)
-        result = Map_Union(accCopy, obj, aggressive, arrayMerge)
-    }
-    return result
+	if len(objectArray) == 0 {
+		return map[string]any{}
+	}
+	result := make(map[string]any)
+	for _, obj := range objectArray {
+		// deep copy utility for the accumulator
+		accCopy := Map_DeepCopy(result)
+		result = Map_Union(accCopy, obj, aggressive, arrayMerge)
+	}
+	return result
 }
 
 // Generate Object skeletton without normal [string]string values

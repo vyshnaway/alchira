@@ -1,8 +1,8 @@
-package utils
+package util
 
 import (
-	_slices_ "slices"
 	_regexp_ "regexp"
+	_slices_ "slices"
 	_strconv_ "strconv"
 	_strings_ "strings"
 )
@@ -14,27 +14,21 @@ var (
 	at           = _regexp_.MustCompile(`@+`)
 )
 
-func String_Pointer(s string) *string { return &s }
-
-func String_HasRune(slice []rune, r rune) bool {
-	return _slices_.Contains(slice, r)
-}
-
 // Normalize: replaces spaces and '@', then applies filters and replacements
 func String_Filter(s string, keepChars, skipChars, addBackSlashFor []rune) string {
 	final := _strings_.Builder{}
 	s = space.ReplaceAllString(s, "_")
 	s = at.ReplaceAllString(s, "_")
 	for _, ch := range s {
-		if String_HasRune(skipChars, ch) {
+		if _slices_.Contains(skipChars, ch) {
 			continue
-		} else if String_HasRune(addBackSlashFor, ch) {
+		} else if _slices_.Contains(addBackSlashFor, ch) {
 			final.WriteRune('\\')
 			final.WriteRune(ch)
 		} else {
 			if ch == '_' {
 				final.WriteRune('_')
-			} else if String_HasRune(keepChars, ch) {
+			} else if _slices_.Contains(keepChars, ch) {
 				final.WriteRune(ch)
 			} else if alphanumeric.MatchString(string(ch)) {
 				final.WriteRune(ch)

@@ -5,13 +5,15 @@ import (
 	_types_ "main/types"
 )
 
+type error_return struct {
+	Errorstring string
+	Diagnostic  _types_.Support_Diagnostic
+}
+
 func Error_Write(
-    message string,
-    declaration []string,
-) (
-	Errorstring string,
-	Diagnostic _types_.Support_Diagnostic,
-) {
+	message string,
+	declaration []string,
+) error_return {
 	errorstring := S.MAKE(
 		S.Tag.Li(message, S.Preset.Warning),
 		declaration,
@@ -21,16 +23,19 @@ func Error_Write(
 		Message: message,
 		Sources: declaration,
 	}
-    return errorstring, diagnostic
+	return error_return{
+		Errorstring: errorstring,
+		Diagnostic:  diagnostic,
+	}
 }
 
 func Error_Report(
-	message_pass string, 
-	message_fail string, 
+	message_pass string,
+	message_fail string,
 	items []string,
 ) string {
-	var heading string;
-	var itemPreset []string;
+	var heading string
+	var itemPreset []string
 	if len(items) == 0 {
 		heading = S.Tag.H5(message_pass, S.Preset.Success)
 		itemPreset = S.Preset.Success
@@ -38,9 +43,9 @@ func Error_Report(
 		heading = S.Tag.H5(message_fail, S.Preset.Failed)
 		itemPreset = S.Preset.Failed
 	}
-   	return S.MAKE(
-        heading, 
+	return S.MAKE(
+		heading,
 		items,
-        S.TList{TypeFunc: S.List.Bullets, Preset: itemPreset},
-    )
+		S.TList{TypeFunc: S.List.Bullets, Preset: itemPreset},
+	)
 }

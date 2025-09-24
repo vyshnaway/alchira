@@ -89,5 +89,5 @@ func Index_Find(classname string, localMap _types_.Style_ClassIndexMap) (index i
 		index = idx
 		group = _types_.Style_Type_Artifact
 	}
-	return
+	return index, group
 }

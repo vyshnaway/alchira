@@ -1,4 +1,4 @@
-package utils
+package util
 
 func Array_Setback[T comparable](array []T) []T {
 	lastSeen := make(map[T]int)
@@ -14,7 +14,6 @@ func Array_Setback[T comparable](array []T) []T {
 	return out
 }
 
-
 func Array_FromNumberedObject[T any](obj map[int][]T, maxKey int) [][]T {
 	result := make([][]T, maxKey+1)
 	for i := 0; i <= maxKey; i++ {
@@ -26,7 +25,6 @@ func Array_FromNumberedObject[T any](obj map[int][]T, maxKey int) [][]T {
 	}
 	return result
 }
-
 
 func Array_LongestSubChain[T comparable](parent, child []T) []T {
 	if len(parent) == 0 || len(child) == 0 {

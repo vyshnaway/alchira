@@ -22,8 +22,8 @@ type tRoot_Divider struct {
 
 // Canvas holds terminal tRoot_Canvas settings and utilities
 type tRoot_Canvas struct {
-	Config  tRoot_Config
-	Divider tRoot_Divider
+	Config  *tRoot_Config
+	Divider *tRoot_Divider
 	Tab     string
 }
 
@@ -38,12 +38,12 @@ func (i *tRoot_Canvas) Width() int {
 
 // Global Canvas instance - exported as GetCanvas()
 var Canvas = &tRoot_Canvas{
-	Config: tRoot_Config{
+	Config: &tRoot_Config{
 		TaskActive: true,
 		PostActive: true,
 		TabSpace:   2,
 	},
-	Divider: tRoot_Divider{
+	Divider: &tRoot_Divider{
 		Top: "‾",
 		Mid: "─",
 		Btm: "_",

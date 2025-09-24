@@ -82,14 +82,14 @@ var Manifest = _types_.Cache_Manifest{
 }
 
 var Class = _types_.Cache_Class{
-	Hashrule:             map[string]string{},
-	Index_to_Data:        map[int]_types_.Style_ClassData{},
-	Global___Index:       _types_.Style_ClassIndexMap{},
-	Public___Index:       _types_.Style_ClassIndexMap{},
-	Library__Index:       _types_.Style_ClassIndexMap{},
-	Artifact_Index:       _types_.Style_ClassIndexMap{},
-	Sync_ClassDictionary: _types_.Style_Dictionary{},
-	Sync_PublishIndexMap: _types_.Style_ClassIndexTrace{},
+	Hashrule:        map[string]string{},
+	Index_to_Data:   map[int]_types_.Style_ClassData{},
+	Global___Index:  _types_.Style_ClassIndexMap{},
+	Public___Index:  _types_.Style_ClassIndexMap{},
+	Library__Index:  _types_.Style_ClassIndexMap{},
+	Artifact_Index:  _types_.Style_ClassIndexMap{},
+	ClassDictionary: _types_.Style_Dictionary{},
+	PublishIndexMap: []_types_.Style_ClassIndexTrace{},
 }
 
 var Files = _types_.Cache_Files{

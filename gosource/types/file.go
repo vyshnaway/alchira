@@ -4,12 +4,12 @@ package types
 type File_Type string
 
 const (
-	Null       File_Type = "NULL"
-	Artifact   File_Type = "ARTIFACT"
-	Axiom      File_Type = "AXIOM"
-	Cluster    File_Type = "CLUSTER"
-	Target     File_Type = "TARGET"
-	Stylesheet File_Type = "STYLESHEET"
+	File_Type_Null       File_Type = "NULL"
+	File_Type_Artifact   File_Type = "ARTIFACT"
+	File_Type_Axiom      File_Type = "AXIOM"
+	File_Type_Cluster    File_Type = "CLUSTER"
+	File_Type_Target     File_Type = "TARGET"
+	File_Type_Stylesheet File_Type = "STYLESHEET"
 )
 
 
@@ -25,9 +25,9 @@ type File_Source struct {
 }
 
 type File_Position struct {
-	Last        *string `json:"last"`
-	Char        *string `json:"char"`
-	Next        *string `json:"next"`
+	Last        rune   `json:"last"`
+	Char        rune   `json:"char"`
+	Next        rune   `json:"next"`
 	Marker      int     `json:"marker"`
 	RowMarker   int     `json:"rowMarker"`
 	ColMarker   int     `json:"colMarker"`
@@ -49,6 +49,11 @@ type File_LocalManifest struct {
 	Diagnostics []Support_Diagnostic `json:"diagnostics"`
 }
 
+type File_TagReplacement struct{
+	Loc int
+	Elid int
+}
+
 type File_Storage struct {
 	LibLevel        int                `json:"liblevel"`
 	Artifact        string             `json:"artifact"`
@@ -64,13 +69,13 @@ type File_Storage struct {
 	Manifesting     File_LocalManifest `json:"manifesting"`
 	DebugClassFront string             `json:"debugclassFront"`
 	StyleData       struct {
-		Attachments     []string            `json:"attachments"`
-		ClassTracks     [][]string          `json:"classTracks"`
-		UsedIndexes     []int			    `json:"usedIndexes"` 
-		LocalClasses    Style_ClassIndexMap `json:"localClasses"`
-		GlobalClasses   Style_ClassIndexMap `json:"globalClasses"`
-		PublicClasses   Style_ClassIndexMap `json:"publicClasses"`
-		StyleMap        File_ClassMetaMap   `json:"styleMap"`
-		TagReplacements [][2]int            `json:"tagReplacements"` 
+		Attachments     []string              `json:"attachments"`
+		ClassTracks     [][]string            `json:"classTracks"`
+		UsedIndexes     []int			      `json:"usedIndexes"` 
+		LocalClasses    Style_ClassIndexMap   `json:"localClasses"`
+		GlobalClasses   Style_ClassIndexMap   `json:"globalClasses"`
+		PublicClasses   Style_ClassIndexMap   `json:"publicClasses"`
+		StyleMap        File_ClassMetaMap     `json:"styleMap"`
+		TagReplacements []File_TagReplacement `json:"tagReplacements"` 
 	} `json:"styleData"`
 }
