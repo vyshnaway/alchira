@@ -11,11 +11,11 @@ var NOW = 0
 var BIN = make(map[int]struct{})
 var mu _sync_.Mutex
 
-// Index_Fetch: Retrieve data by index.
-func Index_Fetch(index int) _types_.Style_ClassData {
+func Index_Fetch(index int) *_types_.Style_ClassData {
 	mu.Lock()
 	defer mu.Unlock()
-	return Style.Index_to_Data[index]
+	data := Style.Index_to_Data[index]
+	return &data
 }
 
 // Index_Declare: Assigns and registers a new index
