@@ -3,7 +3,7 @@ package style
 import (
 	_cache_ "main/cache"
 	_types_ "main/types"
-	_utils_ "main/util"
+	_utils_ "main/utils"
 	X "main/xhell"
 	_regexp_ "regexp"
 	_slices_ "slices"
@@ -11,7 +11,7 @@ import (
 )
 
 func Hashrule_Upload() {
-	_cache_.Class.Hashrule = _cache_.Static.Hashrule
+	_cache_.Style.Hashrule = _cache_.Static.Hashrule
 	hashrule := _cache_.Static.Hashrule
 	errors := make([]string, len(hashrule))
 
@@ -26,7 +26,7 @@ func Hashrule_Upload() {
 		}
 	}
 
-	_cache_.Class.Hashrule = hashrule
+	_cache_.Style.Hashrule = hashrule
 	_cache_.Manifest.Hashrule = hashrule
 	_cache_.Delta.Report.Hashrule = X.Hashrule_Report(hashrule, errors)
 }
@@ -40,8 +40,8 @@ type hashrule_Import_return struct {
 
 func Hashrule_Import(str string, src string) hashrule_Import_return {
 	primitive := str
-	recursionSequence := make([]string, 0, len(_cache_.Class.Hashrule))
-	preview := make(map[string]string, len(_cache_.Class.Hashrule))
+	recursionSequence := make([]string, 0, len(_cache_.Style.Hashrule))
+	preview := make(map[string]string, len(_cache_.Style.Hashrule))
 
 	var response = func(
 		result string,
@@ -57,10 +57,10 @@ func Hashrule_Import(str string, src string) hashrule_Import_return {
 		)
 
 		return hashrule_Import_return{
-			Status: len(message) == 0,
-			Result: result,
+			Status:      len(message) == 0,
+			Result:      result,
 			Errorstring: hashrule_Error_return.Errorstring,
-			Diagnostic: hashrule_Error_return.Diagnostic,
+			Diagnostic:  hashrule_Error_return.Diagnostic,
 		}
 	}
 
@@ -72,7 +72,7 @@ func Hashrule_Import(str string, src string) hashrule_Import_return {
 		}
 		match := str[loc[0]:loc[1]]
 		key := match[2 : len(match)-1]
-		replacement, found := _cache_.Class.Hashrule[key]
+		replacement, found := _cache_.Style.Hashrule[key]
 		if !found {
 			replacement = match
 		}
@@ -162,28 +162,5 @@ func Hashrule_Render(str string, src string) hashrule_Render_return {
 		Status:      extended.Status,
 		Errorstring: extended.Errorstring,
 		Diagnostic:  extended.Diagnostic,
-	}
-}
-
-func Hashrule_Wrapper(parentObject map[string]any, keys []string, childObject any) {
-	if len(keys) == 0 {
-		return
-	}
-
-	activeKey := keys[0]
-	keys = keys[1:]
-
-	if len(keys) > 0 {
-		sub, ok := parentObject[activeKey]
-		if !ok {
-			sub = make(map[string]any)
-			parentObject[activeKey] = sub
-		}
-
-		if m, ok := sub.(map[string]any); ok {
-			Hashrule_Wrapper(m, keys, childObject)
-		}
-	} else {
-		parentObject[activeKey] = childObject
 	}
 }

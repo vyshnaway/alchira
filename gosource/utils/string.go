@@ -1,4 +1,4 @@
-package util
+package utils
 
 import (
 	_regexp_ "regexp"
@@ -7,18 +7,15 @@ import (
 	_strings_ "strings"
 )
 
-// Regular expressions equivalent
-var (
-	alphanumeric = _regexp_.MustCompile(`[a-zA-Z0-9]`)
-	space        = _regexp_.MustCompile(`\s+`)
-	at           = _regexp_.MustCompile(`@+`)
-)
-
 // Normalize: replaces spaces and '@', then applies filters and replacements
 func String_Filter(s string, keepChars, skipChars, addBackSlashFor []rune) string {
 	final := _strings_.Builder{}
-	s = space.ReplaceAllString(s, "_")
-	s = at.ReplaceAllString(s, "_")
+	regex_alphanumeric := _regexp_.MustCompile(`[a-zA-Z0-9]`)
+	regex_space        := _regexp_.MustCompile(`\s+`)
+	regex_at           := _regexp_.MustCompile(`@+`)
+
+	s = regex_space.ReplaceAllString(s, "_")
+	s = regex_at.ReplaceAllString(s, "_")
 	for _, ch := range s {
 		if _slices_.Contains(skipChars, ch) {
 			continue
@@ -30,7 +27,7 @@ func String_Filter(s string, keepChars, skipChars, addBackSlashFor []rune) strin
 				final.WriteRune('_')
 			} else if _slices_.Contains(keepChars, ch) {
 				final.WriteRune(ch)
-			} else if alphanumeric.MatchString(string(ch)) {
+			} else if regex_alphanumeric.MatchString(string(ch)) {
 				final.WriteRune(ch)
 			} else {
 				final.WriteRune('-')

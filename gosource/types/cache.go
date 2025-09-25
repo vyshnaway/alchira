@@ -23,15 +23,6 @@ type Cache_Root struct {
 	Url              Cache_Url
 }
 
-type Cache_Prefix struct {
-	Atrules    map[string]map[string]string            `json:"atrules"`
-	Attributes map[string]map[string]string            `json:"attributes"`
-	Pseudos    map[string]map[string]string            `json:"pseudos"`
-	Classes    map[string]map[string]string            `json:"classes"`
-	Elements   map[string]map[string]string            `json:"elements"`
-	Values     map[string]map[string]map[string]string `json:"values"`
-}
-
 type Cache_Static struct {
 	WATCH           bool
 	DEBUG           bool
@@ -107,7 +98,7 @@ type Cache_Manifest struct {
 	Errors     []Support_Diagnostic
 }
 
-type Cache_Class struct {
+type Cache_Style struct {
 	Hashrule        map[string]string
 	Index_to_Data   map[int]Style_ClassData
 	Global___Index  Style_ClassIndexMap

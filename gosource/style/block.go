@@ -1,11 +1,11 @@
 package style
 
 import (
-	_Cursor_ "main/Cursor"
+	_Cursor_ "main/class/Cursor"
 	_cache_ "main/cache"
-	_util_ "main/util"
+	_utils_ "main/utils"
 	_slices_ "slices"
-	"strings"
+	_strings_ "strings"
 )
 
 type block_Parse_retype struct{
@@ -65,7 +65,7 @@ func block_Parse(content string, blockInArrays bool) block_Parse_retype {
 			cursor.Increment()
 			continue
 		}
-		if _slices_.Contains(_cache_.Refer.WatchQuotes, ch) {
+		if _slices_.Contains(_utils_.Refer.WatchQuotes, ch) {
 			switch quote {
 			case ' ':
 				quote = ch
@@ -75,7 +75,7 @@ func block_Parse(content string, blockInArrays bool) block_Parse_retype {
 		}
 
 		if quote == ' ' {
-			if _slices_.Contains(_cache_.Refer.CloseBraces, ch) {
+			if _slices_.Contains(_utils_.Refer.CloseBraces, ch) {
 				deviance--
 			}
 
@@ -83,19 +83,19 @@ func block_Parse(content string, blockInArrays bool) block_Parse_retype {
 				switch ch {
 				case '{':
 					isProp = false
-					key = _util_.String_Minify(content[keyStart:cursor.Active.Marker])
+					key = _utils_.String_Minify(content[keyStart:cursor.Active.Marker])
 					valStart = cursor.Active.Marker + 1
 				case ':':
-					key = _util_.String_Minify(content[keyStart:cursor.Active.Marker])
+					key = _utils_.String_Minify(content[keyStart:cursor.Active.Marker])
 					valStart = cursor.Active.Marker + 1
 				case '}':
 					fallthrough
 				case ';':
 					{
-						value := _util_.String_Minify(content[valStart:cursor.Active.Marker])
+						value := _utils_.String_Minify(content[valStart:cursor.Active.Marker])
 						if isProp {
 							if len(key) > 0 {
-								if strings.HasPrefix(key, "--") {
+								if _strings_.HasPrefix(key, "--") {
 									result.Variables[key] = value
 								}
 								result.Properties[key] = value
@@ -103,7 +103,7 @@ func block_Parse(content string, blockInArrays bool) block_Parse_retype {
 									result.Xproperties = append(result.Xproperties, [2]string{key, value})
 								}
 							} else if value[0] == '@' {
-								spaceIndex := strings.Index(value, " ")
+								spaceIndex := _strings_.Index(value, " ")
 								if spaceIndex < 0 {
 									spaceIndex = len(value)
 								}
@@ -111,10 +111,10 @@ func block_Parse(content string, blockInArrays bool) block_Parse_retype {
 
 								switch directive {
 								case _cache_.Root.CustomAtrules["attach"]:
-									breaks := _util_.String_ZeroBreaks(value[spaceIndex:], []rune{' ', '\n', ','})
+									breaks := _utils_.String_ZeroBreaks(value[spaceIndex:], []rune{' ', '\n', ','})
 									result.Attachment = append(result.Attachment, breaks...)
 								case _cache_.Root.CustomAtrules["assign"]:
-									breaks := _util_.String_ZeroBreaks(value[spaceIndex:], []rune{' ', '\n', ','})
+									breaks := _utils_.String_ZeroBreaks(value[spaceIndex:], []rune{' ', '\n', ','})
 									result.Assign = append(result.Assign, breaks...)
 								default:
 									result.AtProps[value] = ""
@@ -123,7 +123,7 @@ func block_Parse(content string, blockInArrays bool) block_Parse_retype {
 									}
 								}
 							} else {
-								breaks := _util_.String_ZeroBreaks(value, []rune{' ', '\n', ','})
+								breaks := _utils_.String_ZeroBreaks(value, []rune{' ', '\n', ','})
 								if breaks[0] == string(_cache_.Root.CustomOperations["attach"]) {
 									result.Attachment = append(result.Attachment, breaks[1:]...)
 								} else if (breaks[0]) == string(_cache_.Root.CustomOperations["assign"]) {
@@ -166,7 +166,7 @@ func block_Parse(content string, blockInArrays bool) block_Parse_retype {
 				}
 			}
 
-			if _slices_.Contains(_cache_.Refer.OpenBraces, ch) {
+			if _slices_.Contains(_utils_.Refer.OpenBraces, ch) {
 				deviance++
 			}
 		}

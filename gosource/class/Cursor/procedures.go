@@ -1,17 +1,14 @@
 package Cursor
 
-// Restore fallback state into active.
-func (This *Class) LoadFallback() {
+func (This *Type) LoadFallback() {
 	This.Active = This.Fallback
 }
 
-// Save current active state as fallback (deep copy/value copy)
-func (This *Class) SaveFallback() {
+func (This *Type) SaveFallback() {
 	This.Fallback = This.Active
 }
 
-// Helper to set active.Char (pointer to rune at Marker), safely
-func (This *Class) setCurrent() {
+func (This *Type) setCurrent() {
 	if This.Active.Marker < len(This.Runes) {
 		This.Active.Char = This.Runes[This.Active.Marker]
 
@@ -33,8 +30,7 @@ func (This *Class) setCurrent() {
 	}
 }
 
-// Updates row/column markers based on current character
-func (This *Class) _UpdateIncPosition() {
+func (This *Type) _UpdateIncPosition() {
 	if This.Active.Char == '\n' {
 		This.Active.RowMarker++
 		This.Active.ColFallback = This.Active.ColMarker
@@ -44,8 +40,7 @@ func (This *Class) _UpdateIncPosition() {
 	}
 }
 
-// Increment advances the marker and updates navigation.
-func (This *Class) Increment() (Char rune, Streaming bool) {
+func (This *Type) Increment() (Char rune, Streaming bool) {
 	This.Active.Last = This.Active.Char
 	This.Active.Marker++
 	This.setCurrent()
@@ -57,8 +52,7 @@ func (This *Class) Increment() (Char rune, Streaming bool) {
 	return ' ', This.Streaming
 }
 
-// Updates row/column markers based on current character
-func (This *Class) updateDecPosition() {
+func (This *Type) updateDecPosition() {
 	if This.Active.Char == '\n' {
 		This.Active.RowMarker--
 		This.Active.ColMarker = This.Active.ColFallback
@@ -67,8 +61,7 @@ func (This *Class) updateDecPosition() {
 	}
 }
 
-// Decrement moves the marker back and updates navigation.
-func (This *Class) Decrement() (Char rune, Streaming bool) {
+func (This *Type) Decrement() (Char rune, Streaming bool) {
 	if This.Active.Marker > 0 {
 		This.Active.Marker--
 	}

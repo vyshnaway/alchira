@@ -24,19 +24,8 @@ type File_Source struct {
 	Essential bool     `json:"essential"`
 }
 
-type File_Position struct {
-	Last        rune   `json:"last"`
-	Char        rune   `json:"char"`
-	Next        rune   `json:"next"`
-	Marker      int     `json:"marker"`
-	RowMarker   int     `json:"rowMarker"`
-	ColMarker   int     `json:"colMarker"`
-	Cycle       int     `json:"cycle"`
-	ColFallback int     `json:"colFallback"`
-}
-
 type File_Lookup struct {
-	ID   string    `json:"id"`
+	Id   string    `json:"id"`
 	Type File_Type `json:"type"`
 }
 
@@ -54,6 +43,16 @@ type File_TagReplacement struct{
 	Elid int
 }
 
+type File_StyleData struct {
+	Attachments     []string              `json:"attachments"`
+	ClassTracks     [][]string            `json:"classTracks"`
+	UsedIndexes     []int			      `json:"usedIndexes"` 
+	LocalClasses    Style_ClassIndexMap   `json:"localClasses"`
+	GlobalClasses   Style_ClassIndexMap   `json:"globalClasses"`
+	PublicClasses   Style_ClassIndexMap   `json:"publicClasses"`
+	StyleMap        File_ClassMetaMap     `json:"styleMap"`
+	TagReplacements []File_TagReplacement `json:"tagReplacements"` 
+}
 type File_Storage struct {
 	LibLevel        int                `json:"liblevel"`
 	Artifact        string             `json:"artifact"`
@@ -68,14 +67,5 @@ type File_Storage struct {
 	Label           string             `json:"label"`
 	Manifesting     File_LocalManifest `json:"manifesting"`
 	DebugClassFront string             `json:"debugclassFront"`
-	StyleData       struct {
-		Attachments     []string              `json:"attachments"`
-		ClassTracks     [][]string            `json:"classTracks"`
-		UsedIndexes     []int			      `json:"usedIndexes"` 
-		LocalClasses    Style_ClassIndexMap   `json:"localClasses"`
-		GlobalClasses   Style_ClassIndexMap   `json:"globalClasses"`
-		PublicClasses   Style_ClassIndexMap   `json:"publicClasses"`
-		StyleMap        File_ClassMetaMap     `json:"styleMap"`
-		TagReplacements []File_TagReplacement `json:"tagReplacements"` 
-	} `json:"styleData"`
+	StyleData       File_StyleData     `json:"styleData"`
 }

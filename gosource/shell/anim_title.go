@@ -5,26 +5,27 @@ import (
 	_strings_ "strings"
 )
 
-func frames_Title_ModifyString(str string) string {
-	if len(str) <= 2 {
-		return str
-	}
-	str = str[1 : len(str)-1]
-	if _strings_.HasPrefix(str, " ") {
+func anim_Title_frames(input string) []string {
+
+	modifyString := func(str string) string {
 		if len(str) <= 2 {
 			return str
 		}
 		str = str[1 : len(str)-1]
-	} else {
-		if len(str) <= 2 {
-			return str
+		if _strings_.HasPrefix(str, " ") {
+			if len(str) <= 2 {
+				return str
+			}
+			str = str[1 : len(str)-1]
+		} else {
+			if len(str) <= 2 {
+				return str
+			}
+			str = str[:len(str)-2]
 		}
-		str = str[:len(str)-2]
+		return ">" + str + "<"
 	}
-	return ">" + str + "<"
-}
 
-func frames_Title(input string) []string {
 	framecount := int(_math_.Ceil(float64(len(input)) / 16.0))
 	var preview []string
 	width := Canvas.Width()
@@ -57,7 +58,7 @@ func frames_Title(input string) []string {
 	rendered := []string{}
 	str := "   " + input + "   "
 	for len(str) != 1 && len(str) != 2 {
-		str = frames_Title_ModifyString(str)
+		str = modifyString(str)
 		rendered = append([]string{Format(tag_H1(str, []string{}), Preset.Title, Style.AS_Bold)}, rendered...)
 	}
 

@@ -81,7 +81,7 @@ var Manifest = _types_.Cache_Manifest{
 	Errors:     []_types_.Support_Diagnostic{},
 }
 
-var Class = _types_.Cache_Class{
+var Style = _types_.Cache_Style{
 	Hashrule:        map[string]string{},
 	Index_to_Data:   map[int]_types_.Style_ClassData{},
 	Global___Index:  _types_.Style_ClassIndexMap{},

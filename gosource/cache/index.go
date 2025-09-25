@@ -15,7 +15,7 @@ var mu _sync_.Mutex
 func Index_Fetch(index int) _types_.Style_ClassData {
 	mu.Lock()
 	defer mu.Unlock()
-	return Class.Index_to_Data[index]
+	return Style.Index_to_Data[index]
 }
 
 // Index_Declare: Assigns and registers a new index
@@ -34,7 +34,7 @@ func Index_Declare(object _types_.Style_ClassData) int {
 	object.Index = idx
 	delete(BIN, idx)
 	object.Metadata.WatchClass = "__" + _strconv_.Itoa(idx)
-	Class.Index_to_Data[idx] = object
+	Style.Index_to_Data[idx] = object
 	return idx
 }
 
@@ -45,7 +45,7 @@ func Index_Dispose(indexes ...int) {
 	for _, idx := range indexes {
 		if idx > 0 {
 			BIN[idx] = struct{}{}
-			delete(Class.Index_to_Data, idx)
+			delete(Style.Index_to_Data, idx)
 		}
 	}
 }
@@ -58,10 +58,10 @@ func Index_Reset(after int) int {
 		after = 0
 	}
 	removed := 0
-	for idx := range Class.Index_to_Data {
+	for idx := range Style.Index_to_Data {
 		if idx > after {
 			delete(BIN, idx)
-			delete(Class.Index_to_Data, idx)
+			delete(Style.Index_to_Data, idx)
 			removed++
 		}
 	}
@@ -69,25 +69,34 @@ func Index_Reset(after int) int {
 	return removed
 }
 
-func Index_Find(classname string, localMap _types_.Style_ClassIndexMap) (index int, group _types_.Style_Type) {
+type index_Find_retrun struct {
+	Index int
+	Group _types_.Style_Type
+}
+
+func Index_Find(classname string, localMap _types_.Style_ClassIndexMap) index_Find_retrun {
 	mu.Lock()
 	defer mu.Unlock()
-	group = _types_.Style_Type_Null
+	index := 0
+	group := _types_.Style_Type_Null
 	if idx, found := localMap[classname]; found {
 		index = idx
 		group = _types_.Style_Type_Local
-	} else if idx, found := Class.Global___Index[classname]; found {
+	} else if idx, found := Style.Global___Index[classname]; found {
 		index = idx
 		group = _types_.Style_Type_Global
-	} else if idx, found := Class.Public___Index[classname]; found {
+	} else if idx, found := Style.Public___Index[classname]; found {
 		index = idx
 		group = _types_.Style_Type_Public
-	} else if idx, found := Class.Library__Index[classname]; found {
+	} else if idx, found := Style.Library__Index[classname]; found {
 		index = idx
 		group = _types_.Style_Type_Library
-	} else if idx, found := Class.Artifact_Index[classname]; found {
+	} else if idx, found := Style.Artifact_Index[classname]; found {
 		index = idx
 		group = _types_.Style_Type_Artifact
 	}
-	return index, group
+	return index_Find_retrun{
+		Index: index,
+		Group: group,
+	}
 }

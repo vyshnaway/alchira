@@ -1,15 +1,14 @@
 package compose
 
 import (
-	_cache_ "main/cache"
-	_util_ "main/util"
+	_utils_ "main/utils"
 	_regexp_ "regexp"
 	_slices_ "slices"
 	_strings_ "strings"
 )
 
 func prefix_ForAttribute(content string, prefixes []string) map[string]string {
-	attrVals, attrStat := _cache_.Prefix.Attributes[content]
+	attrVals, attrStat := vendor_Refer.Attributes[content]
 	if !attrStat {
 		return map[string]string{"": content}
 	}
@@ -26,10 +25,10 @@ func prefix_ForAttribute(content string, prefixes []string) map[string]string {
 }
 
 func prefix_ForValues(attribute string, value string, prefixes []string) map[string]string {
-	cleanValue := _util_.Code_Uncomment(value, false, true, false)
+	cleanValue := _utils_.Code_Uncomment(value, false, true, false)
 	var venVals map[string]string
 	var venStat = false
-	if attrMap, ok := _cache_.Prefix.Values[attribute]; ok {
+	if attrMap, ok := vendor_Refer.Values[attribute]; ok {
 		venVals, venStat = attrMap[cleanValue]
 	}
 	if !venStat {
@@ -77,7 +76,7 @@ func prefix_ForAtRule(content string, prefixes []string) map[string]string {
 
 	result := map[string]string{}
 	for _, group := range prefixes {
-		if rval, rbool := _cache_.Prefix.Atrules[rule]; rbool {
+		if rval, rbool := vendor_Refer.Atrules[rule]; rbool {
 			if gval, gbool := rval[group]; gbool {
 				result[group] = gval + data
 			}
@@ -90,7 +89,7 @@ func prefix_ForAtRule(content string, prefixes []string) map[string]string {
 
 func prefix_ForPseudos(content string, prefixes []string) []string {
 	selectors := []string{}
-	stringList := _util_.String_ZeroBreaks(content, []rune{','})
+	stringList := _utils_.String_ZeroBreaks(content, []rune{','})
 	for i, br := range stringList {
 		stringList[i] = _strings_.Trim(br, "\n\t \r")
 	}
@@ -107,14 +106,14 @@ func prefix_ForPseudos(content string, prefixes []string) []string {
 		for _, group := range prefixes {
 			score := 0
 			value := re.ReplaceAllStringFunc(str, func(selector string) string {
-				if sVal, sStat := _cache_.Prefix.Pseudos[selector]; sStat {
+				if sVal, sStat := vendor_Refer.Pseudos[selector]; sStat {
 					if gVal, gStat := sVal[group]; gStat {
 						score++
 						return gVal
 					}
 				}
 
-				if _, stat := _cache_.Prefix.Pseudos[selector]; stat {
+				if _, stat := vendor_Refer.Pseudos[selector]; stat {
 					return selector
 				}
 

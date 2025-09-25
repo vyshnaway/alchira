@@ -157,6 +157,8 @@ function TagStyleScanner(
 ) {
 	const errors: string[] = [];
 	const diagnostics: _Support.Diagnostic[] = [];
+	const attachments: string[] = [];
+	const variables: Record<string, string> = {};
 
 	const forArtifact = file.manifesting.lookup.type === "ARTIFACT";
 	const declaration = `${file.targetPath}:${raw.rowIndex}:${raw.colIndex}`;
@@ -165,44 +167,44 @@ function TagStyleScanner(
 	const symclass = file.classFront + (forArtifact ? symzero.replace("$$$", "$") : symzero);
 	const normalsymclass = Use.string.normalize(symclass, [], [], forArtifact ? ["$", "/"] : ["$"]);
 
-	const scope = _Style._Import[raw.scope === _Style._Type.ARTIFACT ? _Style._Type.NULL : raw.scope];
-	const debugclass = `${scope}${file.debugclassFront}\\:${raw.rowIndex}\\:${raw.colIndex}_${normalsymclass}`;
-
-	const styleScanned = SCANNER(
-		Use.code.uncomment.Script(raw.styles['']),
-		`${_Style._Import[raw.scope]} : ${file.filePath} ||`, `${raw.symclasses} => []`,
-		false
-	);
-	const object: Record<string, Record<string, object>> = styleScanned.styles;
-	const attachments: string[] = styleScanned.attachments;
-	const variables: Record<string, string> = styleScanned.variables;
-	for (const subSelector in raw.styles) {
-		if (subSelector !== "") {
-			const query = HASHRULE.RENDER(subSelector, declaration);
-			if (query.status) {
-				const styleScanned = SCANNER(
-					Use.code.uncomment.Script(raw.styles[subSelector]),
-					`${_Style._Import[raw.scope]} : ${file.filePath} |`, `${raw.symclasses} => ${subSelector}`,
-					true
-				);
-				attachments.push(...styleScanned.attachments);
-				Object.assign(variables, styleScanned.variables);
-				if (Object.keys(styleScanned).length) {
-					object[JSON.stringify(query.wrappers)] = styleScanned.styles;
-				}
-			} else {
-				errors.push(query.error);
-				diagnostics.push(query.diagnostic);
-			}
-		}
-	}
-
 	// eslint-disable-next-line prefer-const
 	let { index, group } = INDEX.FIND(symclass, IndexMap);
 	if (group !== _Style._Type.NULL) {
 		const InStash = INDEX.FETCH(index);
 		InStash.metadata.declarations.push(declaration);
 	} else {
+		const scope = _Style._Import[raw.scope === _Style._Type.ARTIFACT ? _Style._Type.NULL : raw.scope];
+		const debugclass = `${scope}${file.debugclassFront}\\:${raw.rowIndex}\\:${raw.colIndex}_${normalsymclass}`;
+
+		const styleScanned = SCANNER(
+			Use.code.uncomment.Script(raw.styles['']),
+			`${_Style._Import[raw.scope]} : ${file.filePath} ||`, `${raw.symclasses} => []`,
+			false
+		);
+		const object: Record<string, Record<string, object>> = styleScanned.styles;
+		attachments.push(...styleScanned.attachments);
+		Object.assign(variables, styleScanned.variables);
+		for (const subSelector in raw.styles) {
+			if (subSelector !== "") {
+				const query = HASHRULE.RENDER(subSelector, declaration);
+				if (query.status) {
+					const styleScanned = SCANNER(
+						Use.code.uncomment.Script(raw.styles[subSelector]),
+						`${_Style._Import[raw.scope]} : ${file.filePath} |`, `${raw.symclasses} => ${subSelector}`,
+						true
+					);
+					attachments.push(...styleScanned.attachments);
+					Object.assign(variables, styleScanned.variables);
+					if (Object.keys(styleScanned).length) {
+						object[JSON.stringify(query.wrappers)] = styleScanned.styles;
+					}
+				} else {
+					errors.push(query.error);
+					diagnostics.push(query.diagnostic);
+				}
+			}
+		}
+
 		const style_snippet = SCANNER(
 			raw.elid === CACHE.ROOT.customElements.style ? Use.code.uncomment.Script(raw.attachstring) : '',
 			`${_Style._Import[raw.scope]}:ATTACHMENT : ${file.filePath}:${raw.rowIndex}:${raw.colIndex} |`,

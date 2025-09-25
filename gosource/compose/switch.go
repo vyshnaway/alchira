@@ -2,11 +2,34 @@ package compose
 
 import (
 	_json_ "encoding/json"
-	_cache_ "main/cache"
-	_style_ "main/style"
 	_slices_ "slices"
 	_strings_ "strings"
 )
+
+
+func wrapper(parentObject map[string]any, keys []string, childObject any) {
+	if len(keys) == 0 {
+		return
+	}
+
+	activeKey := keys[0]
+	keys = keys[1:]
+
+	if len(keys) > 0 {
+		sub, ok := parentObject[activeKey]
+		if !ok {
+			sub = make(map[string]any)
+			parentObject[activeKey] = sub
+		}
+
+		if m, ok := sub.(map[string]any); ok {
+			wrapper(m, keys, childObject)
+		}
+	} else {
+		parentObject[activeKey] = childObject
+	}
+}
+
 
 func switch_ObjectReorder(object map[string]map[string]any) map[string]any {
 	output := map[string]any{"": map[string]any{}}
@@ -26,7 +49,7 @@ func switch_ObjectReorder(object map[string]map[string]any) map[string]any {
 							keyseq = append(keyseq, "& "+wrapper)
 						}
 					}
-					_style_.Hashrule_Wrapper(output, keyseq, innerObject)
+					wrapper(output, keyseq, innerObject)
 				}
 			}
 		}
@@ -35,15 +58,15 @@ func switch_ObjectReorder(object map[string]map[string]any) map[string]any {
 	return output
 }
 
-func styleSwitch(object map[string]map[string]any) [][2]any {
+func ComposeSwitched(classObjectMap map[string]map[string]any, minify bool) string {
 	
-	result := [][2]any{}
+	prepared := [][2]any{}
 	inits := []string{}
 	mins := []string{}
 	maxs := []string{}
 	flats := []string{}
 
-	switched := switch_ObjectReorder(object)
+	switched := switch_ObjectReorder(classObjectMap)
 	for key := range switched {
 		min := _strings_.Index(key, "min")
 		max := _strings_.Index(key, "max")
@@ -61,18 +84,18 @@ func styleSwitch(object map[string]map[string]any) [][2]any {
 	}
 
 	for _, key := range inits {
-		result = append(result, [2]any{key, switched[key]})
+		prepared = append(prepared, [2]any{key, switched[key]})
 	}
 
 	defaults_typed, defaults_ok := switched[""].(map[string]any)
 	if defaults_ok {
 		for key := range defaults_typed {
-			result = append(result, [2]any{key, switched[key]})
+			prepared = append(prepared, [2]any{key, switched[key]})
 		}
 	}
 
 	for _, key := range inits {
-		result = append(result, [2]any{key, switched[key]})
+		prepared = append(prepared, [2]any{key, switched[key]})
 	}
 
 	_slices_.Sort(flats)
@@ -85,25 +108,26 @@ func styleSwitch(object map[string]map[string]any) [][2]any {
 	allkeys = append(allkeys, maxs...)
 
 	for _, key := range allkeys {
-		result = append(result, [2]any{key, switched[key]})
+		prepared = append(prepared, [2]any{key, switched[key]})
 	}
 
-	return result
+	return Render(prepared, minify)
 }
 
-func ComposeSwitched(selectorIndex [][2]any, minify bool) string {
-	objectMap := map[string]map[string]any{}
-	// classOrder := []string{}
 
-	for _, si := range selectorIndex {
-		selector_typed, selector_ok := si[0].(string)
-		index_typed, index_ok := si[1].(int)
-		if selector_ok && index_ok {
-			objectMap[selector_typed] = _cache_.Index_Fetch(index_typed).StyleObject
-			// classOrder = append(classOrder, selector_typed)
-		}
-	}
+// func ComposeSwitched(selectorIndex [][2]any, minify bool) string {
+// 	objectMap := map[string]map[string]any{}
+// 	// classOrder := []string{}
 
-	preped := styleSwitch(objectMap)
-	return Render(preped, minify)
-}
+// 	for _, si := range selectorIndex {
+// 		selector_typed, selector_ok := si[0].(string)
+// 		index_typed, index_ok := si[1].(int)
+// 		if selector_ok && index_ok {
+// 			objectMap[selector_typed] = _cache_.Index_Fetch(index_typed).StyleObject
+// 			// classOrder = append(classOrder, selector_typed)
+// 		}
+// 	}
+
+// 	preped := styleSwitch(objectMap)
+// 	return Render(preped, minify)
+// }

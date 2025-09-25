@@ -1,4 +1,4 @@
-package util
+package utils
 
 import (
 	_math_ "math"
@@ -15,7 +15,7 @@ type number_IsInteger_return struct {
 	Status   bool
 }
 
-func Number_IsInteger(val float64) number_IsInteger_return {
+func Number_FloatIsInteger(val float64) number_IsInteger_return {
 	Integer := int(val)
 	Reminder := _math_.Mod(val, 1.0)
 	Status := Reminder == 0

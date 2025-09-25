@@ -48,18 +48,10 @@ var Root = _types_.Cache_Root{
 	CustomOperations: map[string]rune{
 		"attach": '~',
 		"assign": '=',
+		"locale": '-',
 	},
 	CustomAtrules: map[string]string{
 		"attach": "@--attach",
 		"assign": "@--assign",
 	},
-}
-
-var Prefix = _types_.Cache_Prefix{
-	Atrules:    map[string]map[string]string{},
-	Attributes: map[string]map[string]string{},
-	Pseudos:    map[string]map[string]string{},
-	Classes:    map[string]map[string]string{},
-	Elements:   map[string]map[string]string{},
-	Values:     map[string]map[string]map[string]string{},
 }

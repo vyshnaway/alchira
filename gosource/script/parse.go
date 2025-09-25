@@ -1,8 +1,8 @@
 package script
 
 import (
-	_Cursor_ "main/Cursor"
 	_cache_ "main/cache"
+	_Cursor_ "main/class/Cursor"
 	_types_ "main/types"
 	_regexp_ "regexp"
 	_slices_ "slices"
@@ -14,9 +14,9 @@ var customElements []string
 var replacementTags map[string]int
 
 type parse_return struct {
-	Scribed string
+	Scribed     string
 	ClassesList [][]string
-	StylesList []_types_.Script_RawStyle
+	StylesList  []_types_.Script_RawStyle
 	Attachments []string
 }
 
@@ -48,7 +48,6 @@ func Parse(
 	} else {
 		content = fileData.Midway
 	}
-
 
 	cursor := _Cursor_.Construct(content)
 	for ch, streaming := cursor.Active.Char, cursor.Streaming; streaming; ch, streaming = cursor.Increment() {
@@ -135,7 +134,7 @@ func Parse(
 						track := tagTrack[len(tagTrack)-1]
 						tagTrack = tagTrack[:len(tagTrack)-1]
 						if track.Element == element {
-							track.Attachstring = content[track.EndMarker:tagStart]
+							track.Innertext = content[track.EndMarker:tagStart]
 							exitedNow = true
 						} else {
 							tagTrack = append(tagTrack, track)
@@ -161,9 +160,9 @@ func Parse(
 	fileData.StyleData.TagReplacements = append(fileData.StyleData.TagReplacements, _types_.File_TagReplacement{Loc: 0, Elid: 0})
 
 	return parse_return{
-		Scribed: stream.String(), 
-		ClassesList: classesList, 
-		StylesList: stylesList, 
+		Scribed:     stream.String(),
+		ClassesList: classesList,
+		StylesList:  stylesList,
 		Attachments: attachments,
 	}
 }

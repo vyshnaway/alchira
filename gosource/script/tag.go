@@ -2,8 +2,9 @@ package script
 
 import (
 	_cache_ "main/cache"
-	_Cursor_ "main/Cursor"
+	_Cursor_ "main/class/Cursor"
 	_types_ "main/types"
+	_utils_ "main/utils"
 	_regexp_ "regexp"
 	_slices_ "slices"
 	_strings_ "strings"
@@ -23,7 +24,7 @@ func tag_Scanner(
 	fileData _types_.File_Storage,
 	classProps []string,
 	action _types_.Script_Action,
-	cursor *_Cursor_.Class,
+	cursor *_Cursor_.Type,
 ) tag_Parse_retype {
 	classesList := make([][]string, 0)
 	attachments := make([]string, 0)
@@ -41,19 +42,19 @@ func tag_Scanner(
 	fallbackAquired := false
 
 	styleDeclarations := _types_.Script_RawStyle{
-		Elid:         0,
-		EndMarker:    0,
-		Element:      "",
-		Elvalue:      "",
-		Attachstring: "",
-		Scope:        _types_.Style_Type_Null,
-		TagCount:     cursor.Active.Cycle + 1,
-		RowIndex:     cursor.Active.RowMarker,
-		ColIndex:     cursor.Active.ColMarker,
-		Symclasses:   make([]string, 0),
-		Attributes:   make(map[string]string),
-		Comments:     make([]string, 0),
-		Styles:       make(map[string]string),
+		Elid:       0,
+		EndMarker:  0,
+		Element:    "",
+		Elvalue:    "",
+		Innertext:  "",
+		Scope:      _types_.Style_Type_Null,
+		TagCount:   cursor.Active.Cycle + 1,
+		RowIndex:   cursor.Active.RowMarker,
+		ColIndex:   cursor.Active.ColMarker,
+		Symclasses: make([]string, 0),
+		Attributes: make(map[string]string),
+		Comments:   make([]string, 0),
+		Styles:     make(map[string]string),
 	}
 
 	for ch, streaming := cursor.Increment(); streaming; ch, streaming = cursor.Increment() {
@@ -72,17 +73,17 @@ func tag_Scanner(
 
 				if deviance > 0 {
 					last := braceTrack[deviance-1]
-					awaitBrace = _cache_.Refer.BracePair[last]
+					awaitBrace = _utils_.Refer.BracePair[last]
 				} else {
 					awaitBrace = 0
 				}
 
-			} else if _slices_.Contains(_cache_.Refer.OpenBraces, ch) && _slices_.Contains(_cache_.Refer.WatchQuotes, awaitBrace) {
+			} else if _slices_.Contains(_utils_.Refer.OpenBraces, ch) && _slices_.Contains(_utils_.Refer.WatchQuotes, awaitBrace) {
 				braceTrack = append(braceTrack, ch)
 				deviance = len(braceTrack)
-				awaitBrace = _cache_.Refer.BracePair[ch]
+				awaitBrace = _utils_.Refer.BracePair[ch]
 
-			} else if len(braceTrack) == 0 && _slices_.Contains(_cache_.Refer.WatchQuotes, ch) {
+			} else if len(braceTrack) == 0 && _slices_.Contains(_utils_.Refer.WatchQuotes, ch) {
 				break
 			}
 
@@ -134,7 +135,7 @@ func tag_Scanner(
 						tr_Value,
 						action,
 						fileData,
-						cursor.Active,
+						*cursor,
 					)
 					if len(value_Parse_return.Classlist) > 0 {
 						classesList = append(classesList, value_Parse_return.Classlist)

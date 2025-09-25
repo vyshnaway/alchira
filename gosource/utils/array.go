@@ -1,4 +1,8 @@
-package util
+package utils
+
+import (
+	_slices_ "slices"
+)
 
 func Array_Setback[T comparable](array []T) []T {
 	lastSeen := make(map[T]int)
@@ -14,7 +18,7 @@ func Array_Setback[T comparable](array []T) []T {
 	return out
 }
 
-func Array_FromNumberedObject[T any](obj map[int][]T, maxKey int) [][]T {
+func Array_FromNumberMap[T any](obj map[int][]T, maxKey int) [][]T {
 	result := make([][]T, maxKey+1)
 	for i := 0; i <= maxKey; i++ {
 		if arr, ok := obj[i]; ok {
@@ -59,11 +63,8 @@ func Array_LongestSubChain[T comparable](parent, child []T) []T {
 				currentChain = append(currentChain, child[index])
 				parentInLast = parentInNow
 			} else {
-				for _, val := range remainingChild {
-					if val == child[index] {
-						remainingChildNext = append(remainingChildNext, child[index])
-						break
-					}
+				if _slices_.Contains(remainingChild, child[index]) {
+					remainingChildNext = append(remainingChildNext, child[index])
 				}
 			}
 		}

@@ -1,51 +1,34 @@
-package util
+package utils
 
 import (
 	_reflect_ "reflect"
 	_strings_ "strings"
 )
 
-
-// // Deep copy for map[string]any (does not support all types)
-// func Map_DeepCopy(v any) any {
-//     switch vv := v.(type) {
-//     case map[string]any:
-//         m := make(map[string]any, len(vv))
-//         for k, val := range vv {
-//             m[k] = Map_DeepCopy(val)
-//         }
-//         return m
-//     case []any:
-//         s := make([]any, len(vv))
-//         for i, val := range vv {
-//             s[i] = Map_DeepCopy(val)
-//         }
-//         return s
-//     default:
-//         return vv
-//     }
-// }
-
-// Deep copy for map[string]any (does not support all types)
-func Map_DeepCopy(src map[string]any) map[string]any {
-    b := make(map[string]any, len(src))
-    for k, v := range src {
-        switch vv := v.(type) {
-        case map[string]any:
-            b[k] = Map_DeepCopy(vv)
-        case []any:
-            c := make([]any, len(vv))
-            copy(c, vv)
-            b[k] = c
-        default:
-            b[k] = v
-        }
-    }
-    return b
+// Aggressive deepcopy with flattened pointer values
+func Map_DeepCopy(v any) any {
+	switch vv := v.(type) {
+	case map[string]any:
+		m := make(map[string]any, len(vv))
+		for k, val := range vv {
+			m[k] = Map_DeepCopy(val)
+		}
+		return m
+	case []any:
+		s := make([]any, len(vv))
+		for i, val := range vv {
+			s[i] = Map_DeepCopy(val)
+		}
+		return s
+	default:
+		rv := _reflect_.ValueOf(vv)
+		if rv.Kind() == _reflect_.Ptr && !rv.IsNil() {
+			return Map_DeepCopy(rv.Elem().Interface())
+		}
+		return vv
+	}
 }
 
-
-// Recursively merges keys and values from source into target.
 // If aggressive, overwrite non-object values. If arrayMerge, concatenate slices.
 func Map_Union(target, source map[string]any, aggressive, arrayMerge bool) map[string]any {
 	for key, srcVal := range source {
@@ -53,7 +36,6 @@ func Map_Union(target, source map[string]any, aggressive, arrayMerge bool) map[s
 		srcType := _reflect_.TypeOf(srcVal)
 		tgtType := _reflect_.TypeOf(tgtVal)
 
-		// If both are non-nil maps
 		if srcType != nil && srcType.Kind() == _reflect_.Map && srcVal != nil {
 			srcMap, srcOk := srcVal.(map[string]any)
 			if srcOk {
@@ -67,7 +49,7 @@ func Map_Union(target, source map[string]any, aggressive, arrayMerge bool) map[s
 				continue
 			}
 		}
-		// If both are slices (arrays)
+
 		if arrayMerge {
 			srcSlice, srcOk := srcVal.([]any)
 			tgtSlice, tgtOk := tgtVal.([]any)
@@ -76,7 +58,7 @@ func Map_Union(target, source map[string]any, aggressive, arrayMerge bool) map[s
 				continue
 			}
 		}
-		// Otherwise: aggressive overwrite or copy if key not present
+		
 		if aggressive || !hasTgt {
 			target[key] = srcVal
 		}
@@ -91,9 +73,10 @@ func Map_BulkMerge(objectArray []map[string]any, aggressive, arrayMerge bool) ma
 	}
 	result := make(map[string]any)
 	for _, obj := range objectArray {
-		// deep copy utility for the accumulator
-		accCopy := Map_DeepCopy(result)
-		result = Map_Union(accCopy, obj, aggressive, arrayMerge)
+		copy_typed, copy_ok := Map_DeepCopy(result).(map[string]any)
+		if copy_ok {
+			result = Map_Union(copy_typed, obj, aggressive, arrayMerge)
+		}
 	}
 	return result
 }
@@ -113,7 +96,12 @@ func Map_Skeleton(object map[string]any) map[string]any {
 	return result
 }
 
-func Map_Difference(A, B map[string]any) (map[string]any, int) {
+type map_Difference_return struct {
+	Result map[string]any
+	Score int
+}
+
+func Map_Difference(A, B map[string]any) map_Difference_return {
 	score := 0
 	result := make(map[string]any)
 	for Bkey, Bvalue := range B {
@@ -125,10 +113,10 @@ func Map_Difference(A, B map[string]any) (map[string]any, int) {
 			}
 		case map[string]any:
 			if Asub, ok := A[Bkey].(map[string]any); ok {
-				subobj, subscore := Map_Difference(Asub, Btyped)
-				if subscore > 0 {
-					result[Bkey] = subobj
-					score += subscore
+				Map_Difference_ := Map_Difference(Asub, Btyped)
+				if Map_Difference_.Score > 0 {
+					result[Bkey] = Map_Difference_.Result
+					score += Map_Difference_.Score
 				}
 			} else {
 				result[Bkey] = Bvalue
@@ -136,5 +124,8 @@ func Map_Difference(A, B map[string]any) (map[string]any, int) {
 			}
 		}
 	}
-	return result, score
+	return map_Difference_return{
+		Result: result, 
+		Score: score,
+	}
 }

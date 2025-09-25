@@ -1,28 +1,17 @@
 package types
 
-type Style_Type int
+type Style_Type string
 
 const (
-	Style_Type_Null Style_Type = iota
-	Style_Type_Local
-	Style_Type_Global
-	Style_Type_Public
-	Style_Type_Library
-	Style_Type_Archive
-	Style_Type_Arctach
-	Style_Type_Artifact
+	Style_Type_Null     Style_Type = ""
+	Style_Type_Local    Style_Type = "LOCAL"
+	Style_Type_Global   Style_Type = "GLOBAL"
+	Style_Type_Public   Style_Type = "PUBLIC"
+	Style_Type_Library  Style_Type = "LIBRARY"
+	Style_Type_Archive  Style_Type = "ARCHIVE"
+	Style_Type_Arctach  Style_Type = "ARCTACH"
+	Style_Type_Artifact Style_Type = "ARTIFACT"
 )
-
-var Style_TypeImport = []string{
-	"",
-	"LOCAL",
-	"GLOBAL",
-	"PUBLIC",
-	"LIBRARY",
-	"ARCHIVE",
-	"ARCTACH",
-	"ARTIFACT",
-}
 
 type Style_ExportStyle struct {
 	Element     string
@@ -52,7 +41,7 @@ type Style_ClassData struct {
 	DebugClass    string
 	Attachments   []string
 	Declarations  []string
-	StyleObject   map[string]any
+	StyleObject   map[string]map[string]any
 	SnippetStaple string
 	SnippetStyle  any
 }
@@ -61,7 +50,7 @@ type Style_Dictionary map[string]map[int]string
 
 type Style_ClassIndexMap map[string]int
 
-type Style_ClassIndexTrace struct{
-	ClassName   string
-	ClassIndex  int
+type Style_ClassIndexTrace struct {
+	ClassName  string
+	ClassIndex int
 }

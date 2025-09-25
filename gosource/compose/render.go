@@ -1,23 +1,22 @@
 package compose
 
 import (
-	_cache_ "main/cache"
 	_strings_ "strings"
 )
 
-func render_LoadVendors(collection map[string]string, vendor string) []string {
-	result := []string{}
-	if vendor == "" {
-		for _, ven := range _cache_.Static.Vendors {
-			if _, stat := collection[ven]; stat {
-				result = append(result, ven)
-			}
-		}
-	} else {
-		result = append(result, vendor)
-	}
-	return result
-}
+// func render_LoadVendors(collection map[string]string, vendor string) []string {
+// 	result := []string{}
+// 	if vendor == "" {
+// 		for _, ven := range vendor_Providers {
+// 			if _, stat := collection[ven]; stat {
+// 				result = append(result, ven)
+// 			}
+// 		}
+// 	} else {
+// 		result = append(result, vendor)
+// 	}
+// 	return result
+// }
 
 func render_PartialsArrayPrefixer(object map[string]any, vendors []string) [][2]any {
 	var result [][2]any
@@ -171,7 +170,7 @@ func Render(array [][2]any, minify bool)string {
 				flattened = map[string]any{ key_typed: val_typed }
 			}
 
-			composed := render_ObjectCompose(flattened, minify, _cache_.Static.Vendors, true)
+			composed := render_ObjectCompose(flattened, minify, vendor_Providers, true)
 			stylesheet = append(stylesheet, composed...)
 		}
 	}

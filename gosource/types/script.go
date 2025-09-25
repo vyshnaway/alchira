@@ -10,19 +10,19 @@ const (
 )
 
 type Script_RawStyle struct {
-	Elid         int
-	Element      string
-	Elvalue      string
-	TagCount     int
-	RowIndex     int
-	ColIndex     int
-	EndMarker    int
-	Symclasses   []string
-	Scope        Style_Type
-	Comments     []string
-	Attachstring string
-	Styles       map[string]string
-	Attributes   map[string]string
+	Elid       int
+	Element    string
+	Elvalue    string
+	TagCount   int
+	RowIndex   int
+	ColIndex   int
+	EndMarker  int
+	Symclasses []string
+	Scope      Style_Type
+	Comments   []string
+	Innertext  string
+	Styles     map[string]string
+	Attributes map[string]string
 }
 
 type Script_Cumulated struct {
