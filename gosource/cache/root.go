@@ -6,7 +6,8 @@ import (
 
 const (
 	id     = "xcss"
-	domain = id + ".io"
+	tld    = "io"
+	domain = id + "." + tld
 )
 
 var Root = _types_.Cache_Root{

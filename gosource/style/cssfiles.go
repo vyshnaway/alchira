@@ -39,14 +39,14 @@ func Cssfile_Parse(content string, initial string, verbose bool) cssfile_Parse_r
 }
 
 type cssfile_Collection_return struct {
-	IndexMetaCollection map[string]_types_.Style_Metadata
-	SelectorList        []string
+	MetadataCollection _types_.File_SymclassMetadataMap
+	SelectorList       []string
 }
 
-func Cssfile_Collection(files []_types_.File_Storage, forArtifact bool, verbose bool) cssfile_Collection_return {
+func Cssfile_Collection(files *[]_types_.File_Stash, forArtifact bool, verbose bool) cssfile_Collection_return {
 	selectorList := []string{}
 	selectors := map[string]int{}
-	indexMetaCollection := map[string]_types_.Style_Metadata{}
+	indexMetaCollection := _types_.File_SymclassMetadataMap{}
 	var IndexMap map[string]int
 	if forArtifact {
 		IndexMap = _cache_.Style.Artifact_Index
@@ -54,7 +54,7 @@ func Cssfile_Collection(files []_types_.File_Storage, forArtifact bool, verbose 
 		IndexMap = _cache_.Style.Library__Index
 	}
 
-	for _, file := range files {
+	for _, file := range *files {
 		// 		{ classFront, filePath, debugclassFront, content, manifesting: manifest } = source;
 		for _, so := range block_Parse(_utils_.Code_Uncomment(file.Content, false, true, false), true).XallBlocks {
 			selector := so[0]
@@ -77,7 +77,7 @@ func Cssfile_Collection(files []_types_.File_Storage, forArtifact bool, verbose 
 			} else {
 				stylescanned := parse_CssSnippet(
 					value,
-					string(file.Manifesting.Lookup.Type)+" : "+file.FilePath+" |",
+					string(file.Manifest.Lookup.Type)+" : "+file.FilePath+" |",
 					selector,
 					false,
 					verbose,
@@ -125,16 +125,16 @@ func Cssfile_Collection(files []_types_.File_Storage, forArtifact bool, verbose 
 					},
 					StyleObject:   object,
 					Attachments:   attachments,
-					DebugClass:    file.DebugClassFront + "_" + _utils_.String_Filter(classname, []rune{}, []rune{}, []rune{'$', '/'}),
+					DebugClass:    file.DebugFront + "_" + _utils_.String_Filter(classname, []rune{}, []rune{}, []rune{'$', '/'}),
 					Declarations:  []string{declaration},
 					SnippetStaple: "",
 					SnippetStyle:  map[string]any{selector: object[""]},
 				}
 				index := _cache_.Index_Declare(classdata)
-				file.StyleData.UsedIndexes = append(file.StyleData.UsedIndexes, index);
-				selectors[classname] = index;
-				indexMetaCollection[classname] = classdata.Metadata;
-				selectorList = append(selectorList, classname);
+				file.StyleData.UsedIndexes = append(file.StyleData.UsedIndexes, index)
+				selectors[classname] = index
+				indexMetaCollection[classname] = &classdata.Metadata
+				selectorList = append(selectorList, classname)
 			}
 		}
 	}
@@ -144,7 +144,7 @@ func Cssfile_Collection(files []_types_.File_Storage, forArtifact bool, verbose 
 	}
 
 	return cssfile_Collection_return{
-		IndexMetaCollection: indexMetaCollection,
-		SelectorList:        selectorList,
+		MetadataCollection: indexMetaCollection,
+		SelectorList:       selectorList,
 	}
 }

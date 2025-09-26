@@ -1,11 +1,10 @@
 package order_test
 
 import (
-	"testing"
-	"main/types"
 	"main/order"
+	"main/types"
+	"testing"
 )
-
 
 // TestOrderPreview tests the preview operation
 func TestOrderPreview(t *testing.T) {
@@ -44,12 +43,12 @@ func TestOrderPreview(t *testing.T) {
 		t.Fatal("Expected result to be non-nil")
 	}
 
-	if result.Result.Counted <= 0 {
-		t.Errorf("Expected result count to be greater than 0, got: %d", result.Result.Counted)
+	if result.Result.Count <= 0 {
+		t.Errorf("Expected result count to be greater than 0, got: %d", result.Result.Count)
 	}
 
-	t.Logf("Preview test passed - Status: %t, Message: %s, Count: %d", 
-		result.Status, result.Message, result.Result.Counted)
+	t.Logf("Preview test passed - Status: %t, Message: %s, Count: %d",
+		result.Status, result.Message, result.Result.Count)
 }
 
 // TestOrderPublishInvalidKey tests publish operation with invalid key
@@ -95,7 +94,7 @@ func TestOrderPublishValidKeyFormat(t *testing.T) {
 	}
 
 	artifact := types.Config_Archive{
-		Name:    "test-project", 
+		Name:    "test-project",
 		Version: "1.0.0",
 		Readme:  "Test readme",
 		Licence: "MIT",
@@ -111,7 +110,7 @@ func TestOrderPublishValidKeyFormat(t *testing.T) {
 
 	// This will likely fail on actual encryption/request, but should pass key validation
 	t.Logf("Valid key format test - Status: %t, Message: %s", result.Status, result.Message)
-	
+
 	// The result should either succeed or fail gracefully with a proper error message
 	if result.Status {
 		t.Logf("Publish succeeded unexpectedly")
@@ -133,7 +132,7 @@ func TestOrderPublishValidKeyFormat(t *testing.T) {
 
 // 	artifact := types.Config_Archive{
 // 		Name:    "async-project",
-// 		Version: "2.0.0", 
+// 		Version: "2.0.0",
 // 		Readme:  "Async test readme",
 // 		Licence: "Apache-2.0",
 // 	}
@@ -176,7 +175,7 @@ func TestOrderPublishValidKeyFormat(t *testing.T) {
 // 		t.Errorf("Expected async message '%s', got: '%s'", expectedMessage, asyncResult.Message)
 // 	}
 
-// 	t.Logf("Async test passed - Status: %t, Message: %s", 
+// 	t.Logf("Async test passed - Status: %t, Message: %s",
 // 		asyncResult.Status, asyncResult.Message)
 // }
 
@@ -185,7 +184,7 @@ func TestOrderEdgeCases(t *testing.T) {
 	artifact := types.Config_Archive{
 		Name:    "edge-case-project",
 		Version: "1.0.0",
-		Readme:  "Edge case testing", 
+		Readme:  "Edge case testing",
 		Licence: "MIT",
 	}
 
@@ -193,11 +192,11 @@ func TestOrderEdgeCases(t *testing.T) {
 	t.Run("EmptySequences", func(t *testing.T) {
 		emptySequences := [][]int{}
 		result, err := order.Order(emptySequences, "preview", "", artifact)
-		
+
 		if err != nil {
 			t.Fatalf("Expected no error with empty sequences, got: %v", err)
 		}
-		
+
 		if !result.Status {
 			t.Errorf("Expected status true for empty sequences preview, got: %t", result.Status)
 		}
@@ -207,11 +206,11 @@ func TestOrderEdgeCases(t *testing.T) {
 	t.Run("SingleSequence", func(t *testing.T) {
 		singleSequence := [][]int{{1, 2, 3}}
 		result, err := order.Order(singleSequence, "preview", "", artifact)
-		
+
 		if err != nil {
 			t.Fatalf("Expected no error with single sequence, got: %v", err)
 		}
-		
+
 		if !result.Status {
 			t.Errorf("Expected status true for single sequence preview, got: %t", result.Status)
 		}
@@ -221,11 +220,11 @@ func TestOrderEdgeCases(t *testing.T) {
 	t.Run("InvalidCommand", func(t *testing.T) {
 		sequences := [][]int{{1, 2}}
 		result, err := order.Order(sequences, "invalid", "", artifact)
-		
+
 		if err != nil {
 			t.Fatalf("Expected no error with invalid command, got: %v", err)
 		}
-		
+
 		// Should default to preview behavior (status false for non-preview commands)
 		if result.Status {
 			t.Errorf("Expected status false for invalid command, got: %t", result.Status)
@@ -264,27 +263,27 @@ func TestOrderCommands(t *testing.T) {
 	artifact := types.Config_Archive{Name: "test", Version: "1.0.0", Readme: "test", Licence: "MIT"}
 
 	tests := []struct {
-		name     string
-		command  string
-		argument string
+		name       string
+		command    string
+		argument   string
 		wantStatus bool
 	}{
 		{
-			name:     "Preview Command",
-			command:  "preview", 
-			argument: "",
+			name:       "Preview Command",
+			command:    "preview",
+			argument:   "",
 			wantStatus: true,
 		},
 		{
-			name:     "Publish Short Key",
-			command:  "publish",
-			argument: "short",
+			name:       "Publish Short Key",
+			command:    "publish",
+			argument:   "short",
 			wantStatus: false,
 		},
 		{
-			name:     "Empty Command",
-			command:  "",
-			argument: "", 
+			name:       "Empty Command",
+			command:    "",
+			argument:   "",
 			wantStatus: false,
 		},
 	}
@@ -295,7 +294,7 @@ func TestOrderCommands(t *testing.T) {
 			if err != nil {
 				t.Fatalf("Expected no error, got: %v", err)
 			}
-			
+
 			if result.Status != tt.wantStatus {
 				t.Errorf("Expected status %t, got %t", tt.wantStatus, result.Status)
 			}

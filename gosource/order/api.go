@@ -1,14 +1,14 @@
 package order
 
 import (
-	_io_ "io"
-	_time_ "time"
 	_bytes_ "bytes"
 	_context_ "context"
-	_http_ "net/http"
+	_json_ "encoding/json"
+	_io_ "io"
 	_cache_ "main/cache"
 	_types_ "main/types"
-	_json_ "encoding/json"
+	_http_ "net/http"
+	_time_ "time"
 )
 
 // tApi_Request represents the request payload sent to the worker API
@@ -30,7 +30,7 @@ type tApi_Response struct {
 type tApi_Result struct {
 	Status  bool                        `json:"status"`
 	Message string                      `json:"message"`
-	Result  *_types_.Support_SortedOutput `json:"result"`
+	Result  *_types_.Refer_SortedOutput `json:"result"`
 }
 
 // Order processes sequences for either preview or publish operations
@@ -168,7 +168,7 @@ func Order(
 		}
 
 		// Parse the decrypted result
-		var sortedOutput _types_.Support_SortedOutput
+		var sortedOutput _types_.Refer_SortedOutput
 		if err := _json_.Unmarshal([]byte(decryptedResult), &sortedOutput); err != nil {
 			response.Message = "Failed to parse decrypted result. Fallback: preview"
 			return response, nil

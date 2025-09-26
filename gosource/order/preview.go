@@ -1,13 +1,13 @@
 package order
 
 import (
-	_sort_ "sort"
+	_json_ "encoding/json"
 	_types_ "main/types"
 	_utils_ "main/utils"
-	_json_ "encoding/json"
+	_sort_ "sort"
 )
 
-func preview_Organize(arrarr [][]int, merge bool) *_types_.Support_SortedOutput {
+func preview_Organize(arrarr [][]int, merge bool) *_types_.Refer_SortedOutput {
 	maxLen := 0
 
 	// Group arrays by length (equivalent to lenmap_arrarr)
@@ -81,8 +81,8 @@ func preview_Organize(arrarr [][]int, merge bool) *_types_.Support_SortedOutput 
 		}
 	}
 
-	return &_types_.Support_SortedOutput{
-		Counted:         counted,
+	return &_types_.Refer_SortedOutput{
+		Count:           counted,
 		ReferenceMap:    referenceMap,
 		RecompClasslist: recompClasslist,
 	}

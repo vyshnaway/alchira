@@ -12,7 +12,7 @@ import (
 )
 
 func value_EvaluateIndexTraces(
-	action _type_.Script_Action,
+	action _type_.Target_Action,
 	metaFront string,
 	classList []string,
 	localClassMap _type_.Style_ClassIndexMap,
@@ -30,7 +30,7 @@ func value_EvaluateIndexTraces(
 	}
 
 	indexSetback := _utils_.Array_Setback(indexArray)
-	if action == _type_.Script_Action_Sync {
+	if action == _type_.Target_Action_Sync {
 		json_Return, json_Error := _json_.Marshal(indexSetback)
 		if json_Error == nil {
 			dict_Return, dict_Status := _cache_.Style.ClassDictionary[string(json_Return)]
@@ -41,7 +41,7 @@ func value_EvaluateIndexTraces(
 			}
 		}
 	} else {
-		if action == _type_.Script_Action_Watch {
+		if action == _type_.Target_Action_Watch {
 			for index, item := range classTrace {
 				classname := _fmt_.Sprintf("%s%d", metaFront, index)
 				_cache_.Style.PublishIndexMap = append(_cache_.Style.PublishIndexMap, _type_.Style_ClassIndexTrace{
@@ -52,7 +52,7 @@ func value_EvaluateIndexTraces(
 			}
 		}
 
-		if action == _type_.Script_Action_Monitor {
+		if action == _type_.Target_Action_Monitor {
 			for _, item := range classTrace {
 				classdata := _cache_.Index_Fetch(item.ClassIndex)
 				classname := _fmt_.Sprintf("%s%s", metaFront, classdata.DebugClass)
@@ -81,8 +81,8 @@ type value_Parse_retype struct {
 
 func value_Parse(
 	value string,
-	action _type_.Script_Action,
-	fileData _type_.File_Storage,
+	action _type_.Target_Action,
+	fileData *_type_.File_Stash,
 	FileCursor _Cursor_.Type,
 ) value_Parse_retype {
 	classlist := []string{}
@@ -121,7 +121,7 @@ func value_Parse(
 		}
 	}
 
-	if action != _type_.Script_Action_Read {
+	if action != _type_.Target_Action_Read {
 		var scriber _strings_.Builder
 
 		entry.Reset()
@@ -130,14 +130,14 @@ func value_Parse(
 
 		var metafront string
 		switch action {
-		case _type_.Script_Action_Monitor:
+		case _type_.Target_Action_Monitor:
 			metafront = _fmt_.Sprintf(
 				"TAG%s\\:%d\\:%d__",
-				fileData.DebugClassFront,
+				fileData.DebugFront,
 				FileCursor.Active.RowMarker,
 				FileCursor.Active.ColMarker,
 			)
-		case _type_.Script_Action_Watch:
+		case _type_.Target_Action_Watch:
 			metafront = _fmt_.Sprintf(
 				"_%s_%d",
 				fileData.Label,
@@ -157,7 +157,7 @@ func value_Parse(
 					entrystring := entry.String()
 					if rune(entrystring[0]) != _cache_.Root.CustomOperations["attach"] {
 						if rune(entrystring[0]) == _cache_.Root.CustomOperations["locale"] {
-							scriber.WriteString(_fmt_.Sprintf("_%s_%s",fileData.Label, entrystring))
+							scriber.WriteString(_fmt_.Sprintf("_%s_%s", fileData.Label, entrystring))
 						} else if rune(entrystring[0]) == _cache_.Root.CustomOperations["assign"] {
 							entrystring := entrystring[1:]
 							found_Entry, found_Status := classMap[entrystring]

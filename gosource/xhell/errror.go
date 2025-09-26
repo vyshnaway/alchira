@@ -7,7 +7,7 @@ import (
 
 type error_return struct {
 	Errorstring string
-	Diagnostic  _types_.Support_Diagnostic
+	Diagnostic  _types_.Refer_Diagnostic
 }
 
 func Error_Write(
@@ -19,7 +19,7 @@ func Error_Write(
 		declaration,
 		S.TList{TypeFunc: S.List.Bullets, Intent: 1, Preset: S.Preset.Tertiary},
 	)
-	diagnostic := _types_.Support_Diagnostic{
+	diagnostic := _types_.Refer_Diagnostic{
 		Message: message,
 		Sources: declaration,
 	}

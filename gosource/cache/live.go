@@ -14,13 +14,12 @@ var Static = _types_.Cache_Static{
 	RootCSS:         "",
 	RootPath:        "",
 	WorkPath:        "",
-	Vendors:         []string{},
 	ProxyMap:        []_types_.Config_ProxyMap{},
 	Hashrule:        map[string]string{},
 	Tweaks:          _types_.Config_Tweaks{},
 	Artifacts_Saved: map[string]string{},
 	Libraries_Saved: map[string]string{},
-	Targetdir_Saved: map[string]_types_.Config_ProxyStorage{},
+	TargetDir_Saved: map[string]_types_.Config_ProxyStorage{},
 	Archive: _types_.Config_Archive{
 		Name:          "",
 		Version:       "",
@@ -42,8 +41,9 @@ var Delta = _types_.Cache_Delta{
 	PublishError: "",
 	Report: _types_.Cache_Delta_Report{
 		Artifacts: "",
-		Libraries: "",
-		Archives:  "",
+		Axioms:    "",
+		Clusters:  "",
+		TargetDir: "",
 		Constants: "",
 		Hashrule:  "",
 		Errors:    "",
@@ -51,34 +51,24 @@ var Delta = _types_.Cache_Delta{
 		Footer:    "",
 	},
 	Lookup: _types_.Cache_Delta_Lookup{
-		Libraries: map[string]_types_.File_Lookup{},
 		Artifacts: map[string]_types_.File_Lookup{},
-		Archives:  map[string]_types_.File_Lookup{},
+		Libraries: map[string]_types_.File_Lookup{},
+		TargetDir: map[string]_types_.File_Lookup{},
 	},
 	Errors: _types_.Cache_Delta_Errors{
-		Archives:  []string{},
-		Libraries: []string{},
 		Artifacts: []string{},
+		Axioms:    []string{},
+		Clusters:  []string{},
 		Multiples: []string{},
+		TargetDir: []string{},
 	},
 	Diagnostics: _types_.Cache_Delta_Diagnostics{
-		Archives:  []_types_.Support_Diagnostic{},
-		Libraries: []_types_.Support_Diagnostic{},
-		Artifacts: []_types_.Support_Diagnostic{},
-		Multiples: []_types_.Support_Diagnostic{},
+		Artifacts: []_types_.Refer_Diagnostic{},
+		Axioms:    []_types_.Refer_Diagnostic{},
+		Clusters:  []_types_.Refer_Diagnostic{},
+		Targets:   []_types_.Refer_Diagnostic{},
+		Multiples: []_types_.Refer_Diagnostic{},
 	},
-}
-
-var Manifest = _types_.Cache_Manifest{
-	Constants:  []string{},
-	Hashrule:   map[string]string{},
-	Filelookup: map[string]_types_.File_Lookup{},
-	AXIOM:      map[string]_types_.File_ClassMetaMap{},
-	CLUSTER:    map[string]_types_.File_ClassMetaMap{},
-	LOCAL:      map[string]_types_.File_ClassMetaMap{},
-	GLOBAL:     map[string]_types_.File_ClassMetaMap{},
-	ARTIFACT:   map[string]_types_.File_ClassMetaMap{},
-	Errors:     []_types_.Support_Diagnostic{},
 }
 
 var Style = _types_.Cache_Style{
@@ -93,7 +83,19 @@ var Style = _types_.Cache_Style{
 }
 
 var Files = _types_.Cache_Files{
-	LIBRARIES: map[string]_types_.File_Storage{},
-	ARTIFACTS: map[string]_types_.File_Storage{},
-	TARGETDIR: map[string]_types_.Script_Target{},
+	Libraries: map[string]_types_.File_Stash{},
+	Artifacts: map[string]_types_.File_Stash{},
+	Targetdir: map[string]_types_.Target_Stash{},
+}
+
+var Manifest = _types_.Cache_Manifest{
+	Constants:   []string{},
+	Hashrules:   map[string]string{},
+	Diagnostics: []_types_.Refer_Diagnostic{},
+	Lookup:      map[string]_types_.File_Lookup{},
+	Axiom:       map[string]_types_.File_SymclassMetadataMap{},
+	Cluster:     map[string]_types_.File_SymclassMetadataMap{},
+	Local:       map[string]_types_.File_SymclassMetadataMap{},
+	Global:      map[string]_types_.File_SymclassMetadataMap{},
+	Artifact:    map[string]_types_.File_SymclassMetadataMap{},
 }

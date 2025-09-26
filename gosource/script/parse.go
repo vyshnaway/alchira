@@ -21,9 +21,9 @@ type parse_return struct {
 }
 
 func Parse(
-	fileData _types_.File_Storage,
+	fileData *_types_.File_Stash,
 	classProps []string,
-	action _types_.Script_Action,
+	action _types_.Target_Action,
 ) parse_return {
 	if !initStatus {
 		for k, v := range _cache_.Root.CustomElements {
@@ -43,7 +43,7 @@ func Parse(
 
 	var content string
 	var stream _strings_.Builder
-	if action == _types_.Script_Action_Read {
+	if action == _types_.Target_Action_Read {
 		content = fileData.Content
 	} else {
 		content = fileData.Midway
@@ -81,7 +81,7 @@ func Parse(
 					}
 				}
 
-				if action == _types_.Script_Action_Read {
+				if action == _types_.Target_Action_Read {
 					if hasDeclared {
 						if result.StyleDeclarations.Elid == 0 {
 							var stash _strings_.Builder

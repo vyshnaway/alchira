@@ -1,6 +1,5 @@
 package types
 
-
 type File_Type string
 
 const (
@@ -12,8 +11,7 @@ const (
 	File_Type_Stylesheet File_Type = "STYLESHEET"
 )
 
-
-type File_ClassMetaMap map[string]Style_Metadata
+type File_SymclassMetadataMap map[string]*Style_Metadata
 
 type File_Source struct {
 	Title     string   `json:"title"`
@@ -25,47 +23,50 @@ type File_Source struct {
 }
 
 type File_Lookup struct {
-	Id   string    `json:"id"`
-	Type File_Type `json:"type"`
+	Id     string    `json:"id"`
+	Type   File_Type `json:"type"`
+	Assign []string  `json:"assign"`
+	Attach []string  `json:"attach"`
+	Locale []string  `json:"locale"`
 }
 
-type File_LocalManifest struct {
-	Lookup      File_Lookup          `json:"lookup"`
-	Public      File_ClassMetaMap    `json:"public"`
-	Global      File_ClassMetaMap    `json:"global"`
-	Local       File_ClassMetaMap    `json:"local"`
-	Errors      []string             `json:"errors"`
-	Diagnostics []Support_Diagnostic `json:"diagnostics"`
-}
-
-type File_TagReplacement struct{
-	Loc int
+type File_TagReplacement struct {
+	Loc  int
 	Elid int
 }
 
 type File_StyleData struct {
-	Attachments     []string              `json:"attachments"`
-	ClassTracks     [][]string            `json:"classTracks"`
-	UsedIndexes     []int			      `json:"usedIndexes"` 
-	LocalClasses    Style_ClassIndexMap   `json:"localClasses"`
-	GlobalClasses   Style_ClassIndexMap   `json:"globalClasses"`
-	PublicClasses   Style_ClassIndexMap   `json:"publicClasses"`
-	StyleMap        File_ClassMetaMap     `json:"styleMap"`
-	TagReplacements []File_TagReplacement `json:"tagReplacements"` 
+	UsedIndexes     []int
+	Attachments     []string
+	ClassTracks     [][]string
+	LocalClasses    Style_ClassIndexMap
+	GlobalClasses   Style_ClassIndexMap
+	PublicClasses   Style_ClassIndexMap
+	TagReplacements []File_TagReplacement
 }
-type File_Storage struct {
-	LibLevel        int                `json:"liblevel"`
-	Artifact        string             `json:"artifact"`
-	FilePath        string             `json:"filePath"`
-	Extension       string             `json:"extension"`
-	ClassFront      string             `json:"classFront"`
-	SourcePath      string             `json:"sourcePath"`
-	TargetPath      string             `json:"targetPath"`
-	Content         string             `json:"content"`
-	Midway          string             `json:"midway"`
-	Scratch         string             `json:"scratch"`
-	Label           string             `json:"label"`
-	Manifesting     File_LocalManifest `json:"manifesting"`
-	DebugClassFront string             `json:"debugclassFront"`
-	StyleData       File_StyleData     `json:"styleData"`
+
+type File_LocalManifest struct {
+	Local       File_SymclassMetadataMap `json:"local"`
+	Global      File_SymclassMetadataMap `json:"global"`
+	Public      File_SymclassMetadataMap `json:"public"`
+	Lookup      File_Lookup              `json:"lookup"`
+	Errors      []string                 `json:"errors"`
+	Diagnostics []Refer_Diagnostic       `json:"diagnostics"`
+}
+
+type File_Stash struct {
+	LibLevel   int
+	Artifact   string
+	FilePath   string
+	Extension  string
+	ClassFront string
+	SourcePath string
+	TargetPath string
+	Content    string
+	Midway     string
+	Scratch    string
+	Label      string
+	DebugFront string
+	StyleData  File_StyleData
+	Manifest   File_LocalManifest
 }

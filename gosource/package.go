@@ -1,12 +1,12 @@
 package main
 
 import (
-	"slices"
-	_os_ "os"
 	_fmt_ "fmt"
 	_cache_ "main/cache"
-	_types_ "main/types"
 	_fileman_ "main/fileman"
+	_types_ "main/types"
+	_os_ "os"
+	"slices"
 )
 
 func main() {
@@ -26,10 +26,10 @@ func main() {
 	workPath := "."
 	rootPath, _ := _fileman_.Path_FromRoot(".")
 	projectPackagePath := "package.json"
-	rootPackagePath, _ := _fileman_.Path_Resolves("package.json");
+	rootPackagePath, _ := _fileman_.Path_Resolves("package.json")
 
-	var rootPackageData, rootPackageErr = _fileman_.Read_Json(rootPackagePath, false);
-	var projectPackageData, projectPackageErr = _fileman_.Read_Json(projectPackagePath, false);
+	var rootPackageData, rootPackageErr = _fileman_.Read_Json(rootPackagePath, false)
+	var projectPackageData, projectPackageErr = _fileman_.Read_Json(projectPackagePath, false)
 
 	// Validate originPackageJson
 	if rootPackageErr == nil {
@@ -38,15 +38,22 @@ func main() {
 	}
 
 	projectName, _ := projectPackageData["name"].(string)
-	if projectName == "" { projectName = "-" }
+	if projectName == "" {
+		projectName = "-"
+	}
 	projectVersion, _ := projectPackageData["version"].(string)
-	if projectVersion == "" { projectVersion = "0.0.0" }
+	if projectVersion == "" {
+		projectVersion = "0.0.0"
+	}
 
 	bin := ""
 	if m, ok := rootPackageData["bin"].(map[string]any); ok {
-		for k := range m { bin = k; break }
+		for k := range m {
+			bin = k
+			break
+		}
 	}
-	rootPackageEssential := _types_.Support_PackageEssential{
+	rootPackageEssential := _types_.Refer_PackageEssential{
 		Bin:     bin,
 		Name:    helper_ResolveStringFallback(rootPackageData["name"], _cache_.Root.Name),
 		Version: helper_ResolveStringFallback(rootPackageData["version"], _cache_.Root.Version),
@@ -81,7 +88,7 @@ func helper_ResolveStringFallback(val any, fallback string) string {
 }
 
 // // Placeholder for command execution logic
-func commander(command, argument, rootPath, workPath, projectName, projectVersion string, pkg _types_.Support_PackageEssential) {
+func commander(command, argument, rootPath, workPath, projectName, projectVersion string, pkg _types_.Refer_PackageEssential) {
 	_fmt_.Printf("Runner: %s %s (Project: %s@%s)\n", command, argument, projectName, projectVersion)
 	_fmt_.Printf("RootPath: %s WorkPath: %s\n", rootPath, workPath)
 	_fmt_.Printf("Bin: %s Name: %s Version: %s\n", pkg.Bin, pkg.Name, pkg.Version)

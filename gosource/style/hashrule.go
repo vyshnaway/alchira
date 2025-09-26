@@ -27,7 +27,7 @@ func Hashrule_Upload() {
 	}
 
 	_cache_.Style.Hashrule = hashrule
-	_cache_.Manifest.Hashrule = hashrule
+	_cache_.Manifest.Hashrules = hashrule
 	_cache_.Delta.Report.Hashrule = X.Hashrule_Report(hashrule, errors)
 }
 
@@ -35,7 +35,7 @@ type hashrule_Import_return struct {
 	Status      bool
 	Result      string
 	Errorstring string
-	Diagnostic  _types_.Support_Diagnostic
+	Diagnostic  _types_.Refer_Diagnostic
 }
 
 func Hashrule_Import(str string, src string) hashrule_Import_return {
@@ -96,7 +96,7 @@ type hashrule_Render_return struct {
 	Wrappers    []string
 	Status      bool
 	Errorstring string
-	Diagnostic  _types_.Support_Diagnostic
+	Diagnostic  _types_.Refer_Diagnostic
 }
 
 func Hashrule_Render(str string, src string) hashrule_Render_return {

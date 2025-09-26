@@ -23,14 +23,16 @@ type Style_ExportStyle struct {
 }
 
 type Style_Metadata struct {
-	Info         []string
-	Skeleton     any
-	Declarations []string
-	WatchClass   string
-	Variables    map[string]string
-	Summon       string
-	Attributes   map[string]string
+	Info         []string  			`json:"info"`
+	Skeleton     any  				`json:"skeleton"`
+	Declarations []string  			`json:"declarations"`
+	WatchClass   string  			`json:"watchclass"`
+	Variables    map[string]string  `json:"variables"`
+	Summon       string  			`json:"summon"`
+	Attributes   map[string]string  `json:"attributes"`
 }
+
+type Style_Object map[string]map[string]any
 
 type Style_ClassData struct {
 	Index         int
@@ -41,7 +43,7 @@ type Style_ClassData struct {
 	DebugClass    string
 	Attachments   []string
 	Declarations  []string
-	StyleObject   map[string]map[string]any
+	StyleObject   Style_Object
 	SnippetStaple string
 	SnippetStyle  any
 }

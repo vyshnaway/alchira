@@ -1,28 +1,31 @@
 package style
 
 import (
+	_fmt_ "fmt"
 	_action_ "main/action"
 	_cache_ "main/cache"
+	_script_ "main/script"
 	_types_ "main/types"
 	_utils_ "main/utils"
+	X "main/xhell"
 	_strconv_ "strconv"
 )
 
 func stash_DeleteLibraryFile(filepath string) {
-	if file, ok := _cache_.Files.LIBRARIES[filepath]; ok {
+	if file, ok := _cache_.Files.Libraries[filepath]; ok {
 		for _, i := range file.StyleData.UsedIndexes {
 			_cache_.Index_Dispose(i)
 		}
-		delete(_cache_.Files.LIBRARIES, filepath)
+		delete(_cache_.Files.Libraries, filepath)
 	}
 }
 
 func stash_DeleteArtifactFile(filepath string) {
-	if file, ok := _cache_.Files.ARTIFACTS[filepath]; ok {
+	if file, ok := _cache_.Files.Artifacts[filepath]; ok {
 		for _, i := range file.StyleData.UsedIndexes {
 			_cache_.Index_Dispose(i)
 		}
-		delete(_cache_.Files.ARTIFACTS, filepath)
+		delete(_cache_.Files.Artifacts, filepath)
 	}
 }
 
@@ -36,10 +39,10 @@ func stash_Clear() {
 		delete(_cache_.Style.Library__Index, s)
 	}
 
-	for k, _ := range _cache_.Files.LIBRARIES {
+	for k, _ := range _cache_.Files.Libraries {
 		stash_DeleteLibraryFile(k)
 	}
-	for k, _ := range _cache_.Files.ARTIFACTS {
+	for k, _ := range _cache_.Files.Artifacts {
 		stash_DeleteLibraryFile(k)
 	}
 }
@@ -48,7 +51,7 @@ func stash_SaveLibraryFile(filepath string, content string) {
 	stash_DeleteLibraryFile(filepath)
 	stored := _action_.Store(_action_.Store_FileGroup_Library, filepath, content, "", "", "")
 	if stored.LibLevel < 3 {
-		_cache_.Files.LIBRARIES[filepath] = stored
+		_cache_.Files.Libraries[filepath] = stored
 	}
 }
 
@@ -56,39 +59,39 @@ func stash_SaveArtifactFile(filepath string, content string) {
 	stash_DeleteArtifactFile(filepath)
 	stored := _action_.Store(_action_.Store_FileGroup_Artifact, filepath, content, "", "", "")
 	if stored.LibLevel < 3 {
-		_cache_.Files.ARTIFACTS[filepath] = stored
+		_cache_.Files.Artifacts[filepath] = stored
 	}
 }
 
 type stash_StackLibraryFiles_return struct {
-	Cluster [][]*_types_.File_Storage
-	Axiom   [][]*_types_.File_Storage
-	Lookup  map[string]*_types_.File_Lookup
+	Cluster [][]_types_.File_Stash
+	Axiom   [][]_types_.File_Stash
+	Lookup  map[string]_types_.File_Lookup
 }
 
 func stash_StackLibraryFiles() stash_StackLibraryFiles_return {
 	length := 0
-	axiomMap := map[int][]*_types_.File_Storage{}
-	clusterMap := map[int][]*_types_.File_Storage{}
-	lookup := map[string]*_types_.File_Lookup{}
+	axiom_map := map[int][]_types_.File_Stash{}
+	cluster_map := map[int][]_types_.File_Stash{}
+	lookup := map[string]_types_.File_Lookup{}
 
-	for path, data := range _cache_.Files.LIBRARIES {
-		var collection *map[int][]*_types_.File_Storage
-		switch data.Manifesting.Lookup.Type {
+	for path, data := range _cache_.Files.Libraries {
+		var collection *map[int][]_types_.File_Stash
+		switch data.Manifest.Lookup.Type {
 		case _types_.File_Type_Axiom:
-			collection = &axiomMap
+			collection = &axiom_map
 		case _types_.File_Type_Cluster:
-			collection = &clusterMap
+			collection = &cluster_map
 		}
-		lookup[path] = &data.Manifesting.Lookup
-		id, er := _strconv_.Atoi(data.Manifesting.Lookup.Id)
+		lookup[path] = data.Manifest.Lookup
+		id, er := _strconv_.Atoi(data.Manifest.Lookup.Id)
 
 		if er == nil {
 
 			if _, exists := (*collection)[id]; !exists {
-				(*collection)[id] = []*_types_.File_Storage{&data}
+				(*collection)[id] = []_types_.File_Stash{data}
 			} else {
-				(*collection)[id] = append((*collection)[id], &data)
+				(*collection)[id] = append((*collection)[id], data)
 			}
 
 			if id > length {
@@ -97,153 +100,141 @@ func stash_StackLibraryFiles() stash_StackLibraryFiles_return {
 		}
 	}
 
-	axiom := _utils_.Array_FromNumberMap(axiomMap, length)
-	cluster := _utils_.Array_FromNumberMap(clusterMap, length)
-	
+	axiom := _utils_.Array_FromNumberMap(axiom_map, length)
+	cluster := _utils_.Array_FromNumberMap(cluster_map, length)
+
 	return stash_StackLibraryFiles_return{
 		Cluster: cluster,
-		Axiom: axiom,
-		Lookup: lookup,
+		Axiom:   axiom,
+		Lookup:  lookup,
 	}
 }
 
 type stash_StackArtifactFiles_return struct {
-	Artifacts []*_types_.File_Storage
-	Lookup    map[string]_types_.File_Lookup
+	Files  []_types_.File_Stash
+	Lookup map[string]_types_.File_Lookup
 }
 
 func stash_StackArtifactFiles() stash_StackArtifactFiles_return {
-	artifacts := []*_types_.File_Storage{}
+	files := []_types_.File_Stash{}
 	lookup := map[string]_types_.File_Lookup{}
 
-	for path, data := range _cache_.Files.ARTIFACTS {
-		reference := data.Manifesting.Lookup
+	for path, data := range _cache_.Files.Artifacts {
+		reference := data.Manifest.Lookup
 		lookup[path] = reference
 
 		if reference.Type == _types_.File_Type_Artifact {
-			artifacts = append(artifacts, &data)
+			files = append(files, data)
 		}
 	}
 
 	return stash_StackArtifactFiles_return{
-		Artifacts: artifacts,
-		Lookup:    lookup,
+		Files:  files,
+		Lookup: lookup,
 	}
 }
 
-func Stash_Update() {
-// 	_ClearStash();
-// 	Object.entries(CACHE.STATIC.Libraries_Saved).forEach(([filePath, fileContent]) => { _SaveLibraryFile(filePath, fileContent); });
-// 	Object.entries(CACHE.STATIC.Artifacts_Saved).forEach(([filePath, fileContent]) => { _SaveArtifactFile(filePath, fileContent); });
+func Stash_Update(verbose bool) {
+	stash_Clear()
+	for filepath, content := range _cache_.Static.Libraries_Saved {
+		stash_SaveLibraryFile(filepath, content)
+	}
+	for filepath, content := range _cache_.Static.Artifacts_Saved {
+		stash_SaveArtifactFile(filepath, content)
+	}
 
-// 	{ artifactsLookup, artifactArray } = _StackArtifactFiles();
+	// Artifacts update actions
+	SaveArtifactFile_ := stash_StackArtifactFiles()
+	_cache_.Delta.Lookup.Artifacts = SaveArtifactFile_.Lookup
+	_cache_.Manifest.Artifact = map[string]_types_.File_SymclassMetadataMap{}
+	_cache_.Delta.Errors.Artifacts = []string{}
+	_cache_.Delta.Diagnostics.Artifacts = []_types_.Refer_Diagnostic{}
+	artifact_chart := map[string][]string{}
+	artifact_counter := 0
+	for _, file := range SaveArtifactFile_.Files {
 
-// 	artifactChart: Record<string, string[]> = {};
-// 	ArtifactSkeletons = artifactArray.reduce((collection, fileData) => {
-// 		indexMetaCollection = collection[fileData.filePath] = {} as Record<string, _Style.Metadata>;
-// 		SCRIPTFILE(fileData).stylesList.forEach((tagStyle) => {
-// 			if (tagStyle.symclasses.length === 0) {
-// 				E = $$.GenerateError("Symclass missing declaration scope.", [`${fileData.filePath}:${tagStyle.rowIndex}:${tagStyle.colIndex}`]);
-// 				fileData.manifesting.errors.push(E.error);
-// 				fileData.manifesting.diagnostics.push(E.diagnostic);
-// 			} else if (tagStyle.symclasses.length > 1) {
-// 				E = $$.GenerateError("Multiple Symclasses declaration scope.", [`${fileData.filePath}:${tagStyle.rowIndex}:${tagStyle.colIndex}`]);
-// 				fileData.manifesting.errors.push(E.error);
-// 				fileData.manifesting.diagnostics.push(E.diagnostic);
-// 			} else {
-// 				response = PARSE.TagStyleScanner(tagStyle, fileData, CACHE.CLASS.Artifact_Index);
-// 				styleData = INDEX.FETCH(response.index);
-// 				if (styleData?.declarations.length === 1) {
-// 					fileData.styleData.usedIndexes.push(response.index);
-// 					indexMetaCollection[response.symclass] = styleData.metadata;
-// 				}
-// 				fileData.manifesting.errors.push(...response.errors);
-// 				fileData.manifesting.diagnostics.push(...response.diagnostics);
-// 			}
-// 		});
-// 		classNames = Object.keys(indexMetaCollection);
-// 		if (classNames.length) {
-// 			artifactChart[`Artifact [${fileData.filePath}]: ${classNames.length} Classes`] = classNames;
-// 		}
-// 		return collection;
-// 	}, {} as Record<string, Record<string, _Style.Metadata>>);
+		symclasses := []string{}
+		metadatas := map[string]*_types_.Style_Metadata{}
+		for _, tagstyle := range _script_.Parse(&file, []string{}, _types_.Target_Action_Read).StylesList {
 
-// 	ArtifactsErrors: string[] = [];
-// 	ArtifactsDiagnostics: _Support.Diagnostic[] = [];
+			if len(tagstyle.Symclasses) == 0 {
+				E := X.Error_Write(
+					"Symclass missing declaration scope.", 
+					[]string{_fmt_.Sprint(file.FilePath, ":", tagstyle.RowIndex, ":", tagstyle.ColIndex)},
+				)
+				file.Manifest.Errors = append(file.Manifest.Errors, E.Errorstring)
+				file.Manifest.Diagnostics = append(file.Manifest.Diagnostics, E.Diagnostic)
+			} else if len(tagstyle.Symclasses) > 1 {
+				E := X.Error_Write(
+					"Multiple Symclasses declaration scope.", 
+					[]string{_fmt_.Sprint(file.FilePath, ":", tagstyle.RowIndex, ":", tagstyle.ColIndex)},
+				)
+				file.Manifest.Errors = append(file.Manifest.Errors, E.Errorstring)
+				file.Manifest.Diagnostics = append(file.Manifest.Diagnostics, E.Diagnostic)
+			} else {
+				artifact_counter++
+				Rawtag_Upload_ := Rawtag_Upload(&tagstyle, &file, &_cache_.Style.Artifact_Index, verbose)
+				styledata := _cache_.Index_Fetch(Rawtag_Upload_.Index)
+				if len(styledata.Declarations) == 1 {
+					file.StyleData.UsedIndexes = append(file.StyleData.UsedIndexes, Rawtag_Upload_.Index)
+					metadatas[Rawtag_Upload_.Symclass] = &styledata.Metadata
+					symclasses = append(symclasses, Rawtag_Upload_.Symclass)
+				}
+				file.Manifest.Errors = append(file.Manifest.Errors, Rawtag_Upload_.Errors...)
+				file.Manifest.Diagnostics = append(file.Manifest.Diagnostics, Rawtag_Upload_.Diagnostics...)
+			}
+		}
+		if len(symclasses) > 0 {
+			artifact_chart[_fmt_.Sprint("Artifact [", file.FilePath, "]: ", len(symclasses), " Symclasses")] = symclasses
+		}
+		_cache_.Manifest.Artifact[file.FilePath] = metadatas
+		_cache_.Delta.Errors.Artifacts = append(_cache_.Delta.Errors.Artifacts, file.Manifest.Errors...)
+		_cache_.Delta.Diagnostics.Artifacts = append(_cache_.Delta.Diagnostics.Artifacts, file.Manifest.Diagnostics...)
+	}
+	_cache_.Delta.Report.Artifacts = X.List_Chart(_fmt_.Sprint("Artifact: ", artifact_counter), artifact_chart)
 
-// 	nameCollitions = Object.values(CACHE.FILES.ARTIFACTS).reduce((A, F) => {
-// 		if (CACHE.STATIC.Archive.name === F.artifact) { A.push(F.filePath); }
-// 		return A;
-// 	}, [] as string[]);
+	// Library update actions
+	StackLibraryFiles_ := stash_StackLibraryFiles()
+	_cache_.Delta.Lookup.Libraries = StackLibraryFiles_.Lookup
+	// Axiom update actions
+	_cache_.Manifest.Axiom = map[string]_types_.File_SymclassMetadataMap{}
+	_cache_.Delta.Errors.Axioms = []string{}
+	_cache_.Delta.Diagnostics.Axioms = []_types_.Refer_Diagnostic{}
+	axiomChart := map[string][]string{}
+	axiom_counter := 0
+	for index, files := range StackLibraryFiles_.Axiom {
+		Cssfile_Collection_ := Cssfile_Collection(&files, false, verbose)
+		_cache_.Manifest.Axiom[_strconv_.Itoa(index)] = Cssfile_Collection_.MetadataCollection
+		if count := len(Cssfile_Collection_.SelectorList); count > 0 {
+			axiom_counter += count
+			axiomChart[_fmt_.Sprint("Level ", index, ": ", count, " Classes")] = Cssfile_Collection_.SelectorList
+		}
+		for _, file := range files {
+			_cache_.Delta.Errors.Axioms = append(_cache_.Delta.Errors.Axioms, file.Manifest.Errors...)
+			_cache_.Delta.Diagnostics.Axioms = append(_cache_.Delta.Diagnostics.Axioms, file.Manifest.Diagnostics...)
+		}
+	}
+	_cache_.Delta.Report.Axioms += X.List_Chart(_fmt_.Sprintf("Axiom: %d", axiom_counter), axiomChart)
 
-// 	if (nameCollitions.length) {
-// 		E = $$.GenerateError(`Artifact Name collitions: ${CACHE.STATIC.Archive.name}`, nameCollitions);
-// 		ArtifactsErrors.push(E.error);
-// 		ArtifactsDiagnostics.push(E.diagnostic);
-// 	}
-
-// 	Object.values(artifactArray).forEach(file => {
-// 		ArtifactsErrors.push(...file.manifesting.errors);
-// 		ArtifactsDiagnostics.push(...file.manifesting.diagnostics);
-// 	});
-
-// 	artifactReport = $$.ClassChart(`Artifact: ${Object.values(ArtifactSkeletons).reduce((a, v) => a += Object.keys(v).length, 0)}`, artifactChart);
-
-// 	axiomChart: Record<string, string[]> = {};
-// 	clusterChart: Record<string, string[]> = {};
-// 	{ librariesLookup, axiomArray, clusterArray } = _StackLibraryFiles();
-
-// 	AxiomSkeletons = axiomArray.reduce((collection: Record<string, Record<string, _Style.Metadata>>, fileData, index) => {
-// 		result = PARSE.CSSBulkScanner(fileData);
-// 		collection[index] = result.indexMetaCollection;
-// 		if (result.selectorList.length) { axiomChart[`Level ${index}: ${result.selectorList.length} Classes`] = result.selectorList; }
-// 		return collection;
-// 	}, {});
-
-// 	ClusterSkeletons = clusterArray.reduce((collection: Record<string, Record<string, _Style.Metadata>>, fileDatas, index) => {
-// 		result = PARSE.CSSBulkScanner(fileDatas);
-// 		collection[index] = result.indexMetaCollection;
-// 		if (result.selectorList.length) { clusterChart[`Level ${index}: ${result.selectorList.length} Classes`] = result.selectorList; }
-// 		return collection;
-// 	}, {});
-
-// 	LibrariesErrors: string[] = [];
-// 	LibrariesDiagnostics: _Support.Diagnostic[] = [];
-
-// 	Object.values(axiomArray).forEach(level => {
-// 		Object.values(level).forEach(file => {
-// 			LibrariesErrors.push(...file.manifesting.errors);
-// 			LibrariesDiagnostics.push(...file.manifesting.diagnostics);
-// 		});
-// 	});
-
-// 	Object.values(clusterArray).forEach(level => {
-// 		Object.values(level).forEach(file => {
-// 			LibrariesErrors.push(...file.manifesting.errors);
-// 			LibrariesDiagnostics.push(...file.manifesting.diagnostics);
-// 		});
-// 	});
-
-// 	libraryReport = [
-// 		$$.ClassChart(`Axiom: ${Object.values(AxiomSkeletons).reduce((a, v) => a += Object.keys(v).length, 0)}`, axiomChart),
-// 		$$.ClassChart(`Cluster: ${Object.values(ClusterSkeletons).reduce((a, v) => a += Object.keys(v).length, 0)}`, clusterChart),
-// 	].join("");
-
-// 	CACHE.DELTA.Report.libraries = libraryReport;
-// 	CACHE.DELTA.Report.artifacts = artifactReport;
-
-// 	CACHE.DELTA.Errors.libraries = LibrariesErrors;
-// 	CACHE.DELTA.Errors.artifacts = ArtifactsErrors;
-
-// 	CACHE.DELTA.Diagnostics.libraries = LibrariesDiagnostics;
-// 	CACHE.DELTA.Diagnostics.artifacts = ArtifactsDiagnostics;
-
-// 	CACHE.DELTA.Manifest.AXIOM = AxiomSkeletons;
-// 	CACHE.DELTA.Manifest.CLUSTER = ClusterSkeletons;
-// 	CACHE.DELTA.Manifest.ARTIFACT = ArtifactSkeletons;
-
-// 	CACHE.DELTA.Lookup.libraries = librariesLookup;
-// 	CACHE.DELTA.Lookup.artifacts = artifactsLookup;
+	// Cluster update actions
+	_cache_.Manifest.Cluster = map[string]_types_.File_SymclassMetadataMap{}
+	_cache_.Delta.Errors.Clusters = []string{}
+	_cache_.Delta.Diagnostics.Clusters = []_types_.Refer_Diagnostic{}
+	clusterChart := map[string][]string{}
+	cluster_counter := 0
+	for index, files := range StackLibraryFiles_.Cluster {
+		Cssfile_Collection_ := Cssfile_Collection(&files, false, verbose)
+		_cache_.Manifest.Cluster[_strconv_.Itoa(index)] = Cssfile_Collection_.MetadataCollection
+		if count := len(Cssfile_Collection_.SelectorList); count > 0 {
+			cluster_counter += count
+			clusterChart[_fmt_.Sprint("Level ", index, ": ", count, " Classes")] = Cssfile_Collection_.SelectorList
+		}
+		for _, file := range files {
+			_cache_.Delta.Errors.Clusters = append(_cache_.Delta.Errors.Clusters, file.Manifest.Errors...)
+			_cache_.Delta.Diagnostics.Clusters = append(_cache_.Delta.Diagnostics.Clusters, file.Manifest.Diagnostics...)
+		}
+	}
+	_cache_.Delta.Report.Clusters += X.List_Chart(_fmt_.Sprintf("Cluster: %d", cluster_counter), clusterChart)
 }
 
 func ReDeclare() {

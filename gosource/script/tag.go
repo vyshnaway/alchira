@@ -21,9 +21,9 @@ type tag_Parse_retype struct {
 }
 
 func tag_Scanner(
-	fileData _types_.File_Storage,
+	fileData *_types_.File_Stash,
 	classProps []string,
-	action _types_.Script_Action,
+	action _types_.Target_Action,
 	cursor *_Cursor_.Type,
 ) tag_Parse_retype {
 	classesList := make([][]string, 0)
@@ -111,7 +111,7 @@ func tag_Scanner(
 					if len(styleDeclarations.Symclasses) == 0 {
 						if _strings_.Contains(tr_Attr, "$$$$") {
 							styleDeclarations.Scope = _types_.Style_Type_Null
-						} else if fileData.Manifesting.Lookup.Type == _types_.File_Type_Artifact {
+						} else if fileData.Manifest.Lookup.Type == _types_.File_Type_Artifact {
 							styleDeclarations.Scope = _types_.Style_Type_Artifact
 						} else if _strings_.Contains(tr_Attr, "$$$") {
 							styleDeclarations.Scope = _types_.Style_Type_Public

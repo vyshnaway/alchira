@@ -13,9 +13,9 @@ import (
 type store_FileGroup_param int
 
 const (
-	Store_FileGroup_Library store_FileGroup_param = 1
+	Store_FileGroup_Library  store_FileGroup_param = 1
 	Store_FileGroup_Artifact store_FileGroup_param = 2
-	Store_FileGroup_Target store_FileGroup_param = 3
+	Store_FileGroup_Target   store_FileGroup_param = 3
 )
 
 func Store(
@@ -25,7 +25,7 @@ func Store(
 	target string,
 	source string,
 	label string,
-) _types_.File_Storage {
+) _types_.File_Stash {
 	isLibrary := fileGroup == Store_FileGroup_Library
 	isArtifact := fileGroup == Store_FileGroup_Artifact
 	fromXtylesFolder := fileGroup == Store_FileGroup_Target
@@ -63,20 +63,20 @@ func Store(
 	}
 
 	var lookupType _types_.File_Type
-	if isArtifact { 
+	if isArtifact {
 		if extension == _cache_.Root.Extension {
 			lookupType = _types_.File_Type_Artifact
 		} else {
-			lookupType = _types_.File_Type_Null 
+			lookupType = _types_.File_Type_Null
 		}
 	} else if isLibrary {
-			if cluster != "" {
-				lookupType = _types_.File_Type_Cluster
-			} else {
-				lookupType = _types_.File_Type_Artifact
-			}
+		if cluster != "" {
+			lookupType = _types_.File_Type_Cluster
+		} else {
+			lookupType = _types_.File_Type_Artifact
+		}
 	} else {
-		 lookupType = _types_.File_Type_Target
+		lookupType = _types_.File_Type_Target
 	}
 
 	normalCluster := _utils_.String_Filter(cluster, []rune{}, []rune{}, []rune{})
@@ -101,7 +101,7 @@ func Store(
 
 	debugClassfront := "\\|" + _utils_.String_Filter(targetPath, []rune{}, []rune{}, []rune{'/', '.'})
 	if fromXtylesFolder {
-		debugClassfront = string(lookupType)+debugClassfront
+		debugClassfront = string(lookupType) + debugClassfront
 	}
 
 	var lookupId string
@@ -113,41 +113,44 @@ func Store(
 		lookupId = targetPath
 	}
 
-	result :=  _types_.File_Storage{
-		LibLevel: idn,
-		Label: label,
-		Artifact: artifact,
-		FilePath: filePath,
-		Extension: extension,
+	result := _types_.File_Stash{
+		LibLevel:   idn,
+		Label:      label,
+		Artifact:   artifact,
+		FilePath:   filePath,
+		Extension:  extension,
 		SourcePath: sourcePath,
 		TargetPath: targetPath,
 		ClassFront: classFront,
-		DebugClassFront: debugClassfront,
-		Manifesting: _types_.File_LocalManifest{
+		DebugFront: debugClassfront,
+		Manifest: _types_.File_LocalManifest{
 			Lookup: _types_.File_Lookup{
-				Id: lookupId,
-				Type: lookupType,
+				Id:     lookupId,
+				Type:   lookupType,
+				Assign: []string{},
+				Attach: []string{},
+				Locale: []string{},
 			},
-			Local: _types_.File_ClassMetaMap{},
-			Global: _types_.File_ClassMetaMap{},
-			Public: _types_.File_ClassMetaMap{},
-			Errors: []string{},
-			Diagnostics: []_types_.Support_Diagnostic{},
+			Local:       _types_.File_SymclassMetadataMap{},
+			Global:      _types_.File_SymclassMetadataMap{},
+			Public:      _types_.File_SymclassMetadataMap{},
+			Errors:      []string{},
+			Diagnostics: []_types_.Refer_Diagnostic{},
 		},
 		StyleData: _types_.File_StyleData{
-			Attachments: []string{},
-			ClassTracks: [][]string{},
-			UsedIndexes: []int{},
-			LocalClasses: _types_.Style_ClassIndexMap{},
+			Attachments:   []string{},
+			ClassTracks:   [][]string{},
+			UsedIndexes:   []int{},
+			LocalClasses:  _types_.Style_ClassIndexMap{},
 			GlobalClasses: _types_.Style_ClassIndexMap{},
 			PublicClasses: _types_.Style_ClassIndexMap{},
-			StyleMap: _types_.File_ClassMetaMap{},
+			// MetadataMap:     _types_.File_SymclassMetadataMap{},
 			TagReplacements: []_types_.File_TagReplacement{},
 		},
 		Content: content,
-		Midway: "",
+		Midway:  "",
 		Scratch: "",
-	};
+	}
 
-	return result;
+	return result
 }

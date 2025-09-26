@@ -16,11 +16,11 @@ type Cache_Root struct {
 	Extension        string
 	Scripts          map[string]string
 	Commands         map[string]string
-	Tweaks           Config_Tweaks
 	CustomAtrules    map[string]string
 	CustomElements   map[string]int
 	CustomOperations map[string]rune
 	Url              Cache_Url
+	Tweaks           Config_Tweaks
 }
 
 type Cache_Static struct {
@@ -33,20 +33,20 @@ type Cache_Static struct {
 	WorkPath        string
 	ProjectName     string
 	ProjectVersion  string
-	Vendors         []string
-	ProxyMap        []Config_ProxyMap
-	Tweaks          Config_Tweaks
 	Hashrule        map[string]string
 	Artifacts_Saved map[string]string
 	Libraries_Saved map[string]string
-	Targetdir_Saved map[string]Config_ProxyStorage
+	TargetDir_Saved map[string]Config_ProxyStorage
+	Tweaks          Config_Tweaks
 	Archive         Config_Archive
+	ProxyMap        []Config_ProxyMap
 }
 
 type Cache_Delta_Report struct {
 	Artifacts string
-	Libraries string
-	Archives  string
+	Axioms    string
+	Clusters  string
+	TargetDir string
 	Constants string
 	Hashrule  string
 	Errors    string
@@ -55,23 +55,25 @@ type Cache_Delta_Report struct {
 }
 
 type Cache_Delta_Lookup struct {
-	Libraries map[string]File_Lookup
 	Artifacts map[string]File_Lookup
-	Archives  map[string]File_Lookup
+	Libraries map[string]File_Lookup
+	TargetDir map[string]File_Lookup
 }
 
 type Cache_Delta_Errors struct {
 	Artifacts []string
-	Libraries []string
-	Archives  []string
+	Axioms    []string
+	Clusters  []string
 	Multiples []string
+	TargetDir []string
 }
 
 type Cache_Delta_Diagnostics struct {
-	Multiples []Support_Diagnostic
-	Artifacts []Support_Diagnostic
-	Libraries []Support_Diagnostic
-	Archives  []Support_Diagnostic
+	Artifacts []Refer_Diagnostic
+	Axioms    []Refer_Diagnostic
+	Clusters  []Refer_Diagnostic
+	Targets   []Refer_Diagnostic
+	Multiples []Refer_Diagnostic
 }
 
 type Cache_Delta struct {
@@ -86,16 +88,10 @@ type Cache_Delta struct {
 	Diagnostics  Cache_Delta_Diagnostics
 }
 
-type Cache_Manifest struct {
-	Constants  []string
-	Hashrule   map[string]string
-	Filelookup map[string]File_Lookup
-	AXIOM      map[string]File_ClassMetaMap
-	CLUSTER    map[string]File_ClassMetaMap
-	LOCAL      map[string]File_ClassMetaMap
-	GLOBAL     map[string]File_ClassMetaMap
-	ARTIFACT   map[string]File_ClassMetaMap
-	Errors     []Support_Diagnostic
+type Cache_Files struct {
+	Libraries map[string]File_Stash
+	Artifacts map[string]File_Stash
+	Targetdir map[string]Target_Stash
 }
 
 type Cache_Style struct {
@@ -109,8 +105,14 @@ type Cache_Style struct {
 	PublishIndexMap []Style_ClassIndexTrace
 }
 
-type Cache_Files struct {
-	LIBRARIES map[string]File_Storage
-	ARTIFACTS map[string]File_Storage
-	TARGETDIR map[string]Script_Target
+type Cache_Manifest struct {
+	Constants   []string                             `json:"constants"`
+	Hashrules   map[string]string                    `json:"hashrules"`
+	Diagnostics []Refer_Diagnostic                   `json:"diagnostics"`
+	Lookup      map[string]File_Lookup              `json:"lookup"`
+	Axiom       map[string]File_SymclassMetadataMap `json:"AXIOM"`
+	Cluster     map[string]File_SymclassMetadataMap `json:"CLUSTER"`
+	Local       map[string]File_SymclassMetadataMap `json:"LOCAL"`
+	Global      map[string]File_SymclassMetadataMap `json:"GLOBAL"`
+	Artifact    map[string]File_SymclassMetadataMap `json:"ARTIFACT"`
 }

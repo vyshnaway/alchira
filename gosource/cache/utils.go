@@ -17,7 +17,7 @@ func UtilsGetUsage() string {
 		"Static": _utils_.String_Memory(_utils_.Code_JsonBuild(Static)),
 		"Proxy": func() float64 {
 			total := 0.0
-			for _, c := range Static.Targetdir_Saved {
+			for _, c := range Static.TargetDir_Saved {
 				total += _utils_.String_Memory(_utils_.Code_JsonBuild(c))
 			}
 			return total
