@@ -18,6 +18,7 @@ type parse_return struct {
 	ClassesList [][]string
 	StylesList  []_types_.Script_RawStyle
 	Attachments []string
+	Locales     []string
 }
 
 func Parse(
@@ -39,6 +40,7 @@ func Parse(
 	tagTrack := []*_types_.Script_RawStyle{}
 	classesList := [][]string{}
 	attachments := []string{}
+	locales := []string{}
 	stylesList := []_types_.Script_RawStyle{}
 
 	var content string
@@ -58,11 +60,12 @@ func Parse(
 			tagStart := cursor.Active.Marker
 			result := tag_Scanner(fileData, classProps, action, &cursor)
 			fragment := string(cursor.Runes[tagStart:result.StyleDeclarations.EndMarker])
-			hasDeclared := len(result.StyleDeclarations.Styles) > 0 || len(result.StyleDeclarations.Symclasses) > 0
+			hasDeclared := len(result.StyleDeclarations.Styles) > 0 || len(result.StyleDeclarations.SymClasses) > 0
 
 			if result.Ok {
 				classesList = append(classesList, result.ClassesList...)
 				attachments = append(attachments, result.Attachments...)
+				locales = append(locales, result.Locales...)
 
 				if hasDeclared {
 					stylesList = append(stylesList, result.StyleDeclarations)
@@ -164,5 +167,6 @@ func Parse(
 		ClassesList: classesList,
 		StylesList:  stylesList,
 		Attachments: attachments,
+		Locales:     locales,
 	}
 }

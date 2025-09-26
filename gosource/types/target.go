@@ -17,7 +17,7 @@ type Script_RawStyle struct {
 	RowIndex   int
 	ColIndex   int
 	EndMarker  int
-	Symclasses []string
+	SymClasses []string
 	Scope      Style_Type
 	Comments   []string
 	Innertext  string
@@ -29,7 +29,7 @@ type Target_Accumulate struct {
 	Report        []string
 	GlobalClasses map[string]int
 	PublicClasses map[string]int
-	FileManifests map[string]*File_LocalManifest
+	FileManifests map[string]File_LocalManifest
 }
 
 type Target_Stash struct {

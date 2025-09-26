@@ -11,7 +11,7 @@ const (
 	File_Type_Stylesheet File_Type = "STYLESHEET"
 )
 
-type File_SymclassMetadataMap map[string]*Style_Metadata
+type File_MetadataMap map[string]*Style_Metadata
 
 type File_Source struct {
 	Title     string   `json:"title"`
@@ -25,8 +25,6 @@ type File_Source struct {
 type File_Lookup struct {
 	Id     string    `json:"id"`
 	Type   File_Type `json:"type"`
-	Assign []string  `json:"assign"`
-	Attach []string  `json:"attach"`
 	Locale []string  `json:"locale"`
 }
 
@@ -36,7 +34,8 @@ type File_TagReplacement struct {
 }
 
 type File_StyleData struct {
-	UsedIndexes     []int
+	UsedIn          []int
+	Locales         []string
 	Attachments     []string
 	ClassTracks     [][]string
 	LocalClasses    Style_ClassIndexMap
@@ -46,12 +45,12 @@ type File_StyleData struct {
 }
 
 type File_LocalManifest struct {
-	Local       File_SymclassMetadataMap `json:"local"`
-	Global      File_SymclassMetadataMap `json:"global"`
-	Public      File_SymclassMetadataMap `json:"public"`
-	Lookup      File_Lookup              `json:"lookup"`
-	Errors      []string                 `json:"errors"`
-	Diagnostics []Refer_Diagnostic       `json:"diagnostics"`
+	Local       File_MetadataMap   `json:"local"`
+	Global      File_MetadataMap   `json:"global"`
+	Public      File_MetadataMap   `json:"public"`
+	Lookup      File_Lookup        `json:"lookup"`
+	Errors      []string           `json:"errors"`
+	Diagnostics []Refer_Diagnostic `json:"diagnostics"`
 }
 
 type File_Stash struct {

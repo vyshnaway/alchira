@@ -27,8 +27,8 @@ func Rawtag_Upload(
 
 	re := _regexp_.MustCompile(`^-\$`)
 	symzero := ""
-	if len(raw.Symclasses) > 0 {
-		symzero = re.ReplaceAllString(raw.Symclasses[0], "$")
+	if len(raw.SymClasses) > 0 {
+		symzero = re.ReplaceAllString(raw.SymClasses[0], "$")
 	}
 	var normalsymclass string
 	symclass := file.ClassFront
@@ -57,7 +57,7 @@ func Rawtag_Upload(
 		stylescanned := parse_CssSnippet(
 			_utils_.Code_Uncomment(raw.Styles[""], true, true, false),
 			_fmt_.Sprint(raw.Scope, " : ", file.FilePath, " |"),
-			_fmt_.Sprint(raw.Symclasses),
+			_fmt_.Sprint(raw.SymClasses),
 			false,
 			verbose,
 		)
@@ -81,7 +81,7 @@ func Rawtag_Upload(
 					stylescanned = parse_CssSnippet(
 						_utils_.Code_Uncomment(val, true, true, false),
 						_fmt_.Sprint(raw.Scope, " : ", file.FilePath, " |"),
-						_fmt_.Sprint(raw.Symclasses, " => ", key),
+						_fmt_.Sprint(raw.SymClasses, " => ", key),
 						true,
 						verbose,
 					)
@@ -108,7 +108,7 @@ func Rawtag_Upload(
 		inner_style := parse_CssSnippet(
 			_utils_.Code_Uncomment(raw.Innertext, true, true, false),
 			_fmt_.Sprint(raw.Scope, ":ATTACHMENT : ", file.FilePath, ":", raw.RowIndex, ":", raw.ColIndex, " |"),
-			raw.Symclasses[0],
+			raw.SymClasses[0],
 			true,
 			verbose,
 		)
@@ -151,7 +151,7 @@ func Rawtag_Upload(
 		index = _cache_.Index_Declare(_types_.Style_ClassData{
 			Index:       0,
 			Artifact:    artifact,
-			Definent:    raw.Symclasses[0],
+			Definent:    raw.SymClasses[0],
 			SymClass:    symclass,
 			StyleObject: object,
 			Metadata: _types_.Style_Metadata{

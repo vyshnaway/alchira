@@ -39,14 +39,14 @@ func Cssfile_Parse(content string, initial string, verbose bool) cssfile_Parse_r
 }
 
 type cssfile_Collection_return struct {
-	MetadataCollection _types_.File_SymclassMetadataMap
+	MetadataCollection _types_.File_MetadataMap
 	SelectorList       []string
 }
 
 func Cssfile_Collection(files *[]_types_.File_Stash, forArtifact bool, verbose bool) cssfile_Collection_return {
 	selectorList := []string{}
 	selectors := map[string]int{}
-	indexMetaCollection := _types_.File_SymclassMetadataMap{}
+	indexMetaCollection := _types_.File_MetadataMap{}
 	var IndexMap map[string]int
 	if forArtifact {
 		IndexMap = _cache_.Style.Artifact_Index
@@ -131,7 +131,7 @@ func Cssfile_Collection(files *[]_types_.File_Stash, forArtifact bool, verbose b
 					SnippetStyle:  map[string]any{selector: object[""]},
 				}
 				index := _cache_.Index_Declare(classdata)
-				file.StyleData.UsedIndexes = append(file.StyleData.UsedIndexes, index)
+				file.StyleData.UsedIn = append(file.StyleData.UsedIn, index)
 				selectors[classname] = index
 				indexMetaCollection[classname] = &classdata.Metadata
 				selectorList = append(selectorList, classname)

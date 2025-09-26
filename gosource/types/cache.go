@@ -106,13 +106,13 @@ type Cache_Style struct {
 }
 
 type Cache_Manifest struct {
-	Constants   []string                             `json:"constants"`
-	Hashrules   map[string]string                    `json:"hashrules"`
-	Diagnostics []Refer_Diagnostic                   `json:"diagnostics"`
-	Lookup      map[string]File_Lookup              `json:"lookup"`
-	Axiom       map[string]File_SymclassMetadataMap `json:"AXIOM"`
-	Cluster     map[string]File_SymclassMetadataMap `json:"CLUSTER"`
-	Local       map[string]File_SymclassMetadataMap `json:"LOCAL"`
-	Global      map[string]File_SymclassMetadataMap `json:"GLOBAL"`
-	Artifact    map[string]File_SymclassMetadataMap `json:"ARTIFACT"`
+	Constants   []string                    `json:"constants"`
+	Hashrules   map[string]string           `json:"hashrules"`
+	Diagnostics []Refer_Diagnostic          `json:"diagnostics"`
+	Lookup      map[string]File_Lookup      `json:"lookup"`
+	Axiom       map[string]File_MetadataMap `json:"AXIOM"`
+	Cluster     map[string]File_MetadataMap `json:"CLUSTER"`
+	Local       map[string]File_MetadataMap `json:"LOCAL"`
+	Global      map[string]File_MetadataMap `json:"GLOBAL"`
+	Artifact    map[string]File_MetadataMap `json:"ARTIFACT"`
 }

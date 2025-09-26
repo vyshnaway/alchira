@@ -15,6 +15,7 @@ type tag_Parse_retype struct {
 	SelfClosed        bool
 	ClassSynced       bool
 	ClassesList       [][]string
+	Locales           []string
 	Attachments       []string
 	NativeAttributes  map[string]string
 	StyleDeclarations _types_.Script_RawStyle
@@ -26,9 +27,10 @@ func tag_Scanner(
 	action _types_.Target_Action,
 	cursor *_Cursor_.Type,
 ) tag_Parse_retype {
-	classesList := make([][]string, 0)
-	attachments := make([]string, 0)
-	braceTrack := make([]rune, 0)
+	classesList := [][]string{}
+	attachments := []string{}
+	locales := []string{}
+	braceTrack := []rune{}
 	nativeAttributes := make(map[string]string)
 
 	deviance := 0
@@ -51,7 +53,7 @@ func tag_Scanner(
 		TagCount:   cursor.Active.Cycle + 1,
 		RowIndex:   cursor.Active.RowMarker,
 		ColIndex:   cursor.Active.ColMarker,
-		Symclasses: make([]string, 0),
+		SymClasses: make([]string, 0),
 		Attributes: make(map[string]string),
 		Comments:   make([]string, 0),
 		Styles:     make(map[string]string),
@@ -108,7 +110,7 @@ func tag_Scanner(
 						}
 					}
 				} else if symclass_regex.MatchString(tr_Attr) {
-					if len(styleDeclarations.Symclasses) == 0 {
+					if len(styleDeclarations.SymClasses) == 0 {
 						if _strings_.Contains(tr_Attr, "$$$$") {
 							styleDeclarations.Scope = _types_.Style_Type_Null
 						} else if fileData.Manifest.Lookup.Type == _types_.File_Type_Artifact {
@@ -124,7 +126,7 @@ func tag_Scanner(
 							styleDeclarations.Styles[""] = tr_Value
 						}
 					}
-					styleDeclarations.Symclasses = append(styleDeclarations.Symclasses, tr_Attr)
+					styleDeclarations.SymClasses = append(styleDeclarations.SymClasses, tr_Attr)
 				} else if tr_Attr[0] == '&' {
 					if len(tr_Value) > 0 {
 						styleDeclarations.Styles[tr_Attr] = tr_Value
@@ -142,6 +144,9 @@ func tag_Scanner(
 					}
 					if len(value_Parse_return.Attachments) > 0 {
 						attachments = append(attachments, value_Parse_return.Attachments...)
+					}
+					if len(value_Parse_return.Locales) > 0 {
+						locales = append(locales, value_Parse_return.Attachments...)
 					}
 					nativeAttributes[tr_Attr] = value_Parse_return.Scribed
 				} else {
@@ -186,6 +191,7 @@ func tag_Scanner(
 		SelfClosed:        selfClosed,
 		ClassSynced:       classSynced,
 		ClassesList:       classesList,
+		Locales:           locales,
 		Attachments:       attachments,
 		NativeAttributes:  nativeAttributes,
 		StyleDeclarations: styleDeclarations,

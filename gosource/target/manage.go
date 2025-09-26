@@ -1,76 +1,107 @@
 package target
 
 import (
+	_fmt_ "fmt"
+	_action_ "main/action"
 	_cache_ "main/cache"
-	// _fileman_ "main/fileman"
-	// _types_ "main/types"
-	// _maps_ "maps"
+	_script_ "main/script"
+	_style_ "main/style"
+	_types_ "main/types"
+	_utils_ "main/utils"
+	X "main/xhell"
+	_slices_ "slices"
 )
 
-func (This *Class)Savefile(filepath string, filecontent string, fileindex int) {
+func (This *Class) Savefile(filepath string, content string, hashindex int) {
+	if file, ok := This.FileCache[filepath]; ok {
+		_cache_.Index_Dispose(file.StyleData.UsedIn...)
+		for key := range This.FileCache[filepath].StyleData.GlobalClasses {
+			delete(_cache_.Style.Global___Index, key)
+		}
+		for key := range This.FileCache[filepath].StyleData.GlobalClasses {
+			delete(_cache_.Style.Public___Index, key)
+		}
+		delete(This.FileCache, filepath)
+	}
 
-	// if (This.fileCache[filePath]) {
-	// 	This.fileCache[filePath].styleData.usedIndexes.forEach((index) => INDEX.DISPOSE(index));
-	// 	Object.keys(This.fileCache[filePath].styleData.globalClasses).forEach(key => INDEX.DISPOSE(Number(key)));
-	// 	delete This.fileCache[filePath];
-	// }
+	file := _action_.Store(
+		_action_.Store_FileGroup_Target,
+		filepath,
+		content,
+		This.Target,
+		This.Source,
+		_fmt_.Sprint(This.Label, "_", _utils_.String_EnCounter(hashindex)),
+	)
 
-	// const FILE = Filing(
-	// 	"target",
-	// 	filePath,
-	// 	fileContent,
-	// 	This.target,
-	// 	This.source,
-	// 	`${This.label}_${Use.string.enCounter(fileIndex)}`);
-	// This.fileCache[FILE.filePath] = FILE;
+	watchprops := []string{}
+	if props, ok := This.ExtnsProps[file.Extension]; ok && file.Extension != _cache_.Root.Extension {
+		watchprops = props
+	}
+	parse_response := _script_.Parse(&file, watchprops, _types_.Target_Action_Read)
+	file.Midway = parse_response.Scribed
+	locales := []string{}
+	for _, locale := range parse_response.Locales {
+		if _slices_.Contains(locales, locale) {
+			locales = append(locales, locale)
+		}
+	}
+	file.StyleData.Locales = locales
+	file.Manifest.Lookup = _types_.File_Lookup{
+		Id:     file.TargetPath,
+		Type:   _types_.File_Type_Target,
+		Locale: locales,
+	}
 
-	// const ParseResponse = NARRATOR(FILE, This.extnsProps[FILE.extension]);
-	// if (FILE.extension !== CACHE.ROOT.extension) {
-	// 	FILE.styleData.classTracks.push(...ParseResponse.classesList);
-	// 	FILE.styleData.attachments.push(...ParseResponse.attachments);
-	// }
+	for _, tagdata := range parse_response.StylesList {
+		if len(tagdata.SymClasses) == 0 {
+			E := X.Error_Write(
+				"Symclass missing declaration scope.",
+				[]string{_fmt_.Sprint(file.TargetPath, ":", tagdata.RowIndex, ":", tagdata.ColIndex)},
+			)
+			file.Manifest.Errors = append(file.Manifest.Errors, E.Errorstring)
+			file.Manifest.Diagnostics = append(file.Manifest.Diagnostics, E.Diagnostic)
+		} else if len(tagdata.SymClasses) > 1 {
+			E := X.Error_Write(
+				"Multiple SymClasses declaration scope.",
+				[]string{_fmt_.Sprint(file.TargetPath, ":", tagdata.RowIndex, ":", tagdata.ColIndex)},
+			)
+			file.Manifest.Errors = append(file.Manifest.Errors, E.Errorstring)
+			file.Manifest.Diagnostics = append(file.Manifest.Diagnostics, E.Diagnostic)
+		} else {
+			var index_map *_types_.Style_ClassIndexMap
+			var medatata_map *_types_.File_MetadataMap
+			switch tagdata.Scope {
+			case _types_.Style_Type_Local:
+				medatata_map = &file.Manifest.Local
+				index_map = &file.StyleData.LocalClasses
+			case _types_.Style_Type_Global:
+				medatata_map = &file.Manifest.Global
+				index_map = &file.StyleData.GlobalClasses
+			case _types_.Style_Type_Public:
+				medatata_map = &file.Manifest.Public
+				index_map = &file.StyleData.PublicClasses
+			default:
+				index_map = &_types_.Style_ClassIndexMap{}
+				medatata_map = &_types_.File_MetadataMap{}
+			}
 
-	// ParseResponse.stylesList.forEach((tagStyle) => {
-	// 	if (tagStyle.symclasses.length === 0) {
-	// 		const E = $$.GenerateError("Symclass missing declaration scope.", [`${FILE.targetPath}:${tagStyle.rowIndex}:${tagStyle.colIndex}`]);
-	// 		FILE.manifesting.errors.push(E.error);
-	// 		FILE.manifesting.diagnostics.push(E.diagnostic);
-	// 	} else if (tagStyle.symclasses.length > 1) {
-	// 		const E = $$.GenerateError("Multiple Symclasses declaration scope.", [`${FILE.targetPath}:${tagStyle.rowIndex}:${tagStyle.colIndex}`]);
-	// 		FILE.manifesting.errors.push(E.error);
-	// 		FILE.manifesting.diagnostics.push(E.diagnostic);
-	// 	} else {
-	// 		const IndexMap =
-	// 			tagStyle.scope === _Style._Type.GLOBAL ? FILE.styleData.globalClasses
-	// 				: tagStyle.scope === _Style._Type.LOCAL ? FILE.styleData.localClasses
-	// 					: tagStyle.scope === _Style._Type.PUBLIC ? FILE.styleData.publicClasses
-	// 						: {};
+			response := _style_.Rawtag_Upload(&tagdata, &file, index_map, _cache_.Static.DEBUG)
+			classdata := _cache_.Index_Fetch(response.Index)
 
-	// 		const skeletonMap =
-	// 			tagStyle.scope === _Style._Type.LOCAL ? FILE.manifesting.local
-	// 				: tagStyle.scope === _Style._Type.GLOBAL ? FILE.manifesting.global
-	// 					: tagStyle.scope === _Style._Type.PUBLIC ? FILE.manifesting.global
-	// 						: {};
+			if len(classdata.Metadata.Declarations) == 1 {
+				file.StyleData.UsedIn = append(file.StyleData.UsedIn, response.Index)
+				(*medatata_map)[response.Symclass] = &classdata.Metadata
+			}
 
-	// 		const response = StyleParse.TagStyleScanner(tagStyle, FILE, IndexMap);
-	// 		const classdata = INDEX.FETCH(response.index);
+			file.Manifest.Errors = append(file.Manifest.Errors, response.Errors...)
+			file.Manifest.Diagnostics = append(file.Manifest.Diagnostics, response.Diagnostics...)
+		}
+	}
 
-	// 		if (classdata.declarations.length === 1) {
-	// 			skeletonMap[response.symclass] = classdata.metadata;
-	// 			FILE.styleData.usedIndexes.push(response.index);
-	// 		}
-
-	// 		FILE.manifesting.errors.push(...response.errors);
-	// 		FILE.manifesting.diagnostics.push(...response.diagnostics);
-	// 	}
-	// });
-
-	// Object.assign(FILE.manifesting.lookup, { group: "target", id: FILE.targetPath });
-	// FILE.midway = ParseResponse.stream;
+	This.FileCache[filepath] = file
 }
 
-
-func (This *Class)UpdateCache() {
+func (This *Class) UpdateCache() {
 	index := 1
 	for filepath, filedata := range This.FileCache {
 		This.Savefile(filepath, filedata.Content, index)
@@ -78,11 +109,9 @@ func (This *Class)UpdateCache() {
 	}
 }
 
-func (This *Class)ClearFiles() {
+func (This *Class) ClearFiles() {
 	for filepath, filedata := range This.FileCache {
-		for i := range filedata.StyleData.UsedIndexes {
-			_cache_.Index_Dispose(i)
-		}
+		_cache_.Index_Dispose(filedata.StyleData.UsedIn...)
 		delete(This.FileCache, filepath)
 	}
 }

@@ -76,6 +76,7 @@ func value_EvaluateIndexTraces(
 type value_Parse_retype struct {
 	Classlist   []string
 	Attachments []string
+	Locales     []string
 	Scribed     string
 }
 
@@ -88,6 +89,7 @@ func value_Parse(
 	classlist := []string{}
 	quotes := []rune{'\'', '`', '"'}
 	attachments := []string{}
+	locales := []string{}
 
 	var entry _strings_.Builder
 	scribed := value
@@ -106,6 +108,8 @@ func value_Parse(
 					attachments = append(attachments, entrystring[1:])
 				} else if rune(entrystring[0]) == _cache_.Root.CustomOperations["assign"] {
 					classlist = append(classlist, entrystring[1:])
+				} else if rune(entrystring[0]) == _cache_.Root.CustomOperations["locale"] {
+					locales = append(locales, entrystring)
 				}
 				entry.Reset()
 			} else {
@@ -194,6 +198,7 @@ func value_Parse(
 	return value_Parse_retype{
 		Classlist:   classlist,
 		Attachments: attachments,
+		Locales:     locales,
 		Scribed:     scribed,
 	}
 }

@@ -13,18 +13,14 @@ import (
 
 func stash_DeleteLibraryFile(filepath string) {
 	if file, ok := _cache_.Files.Libraries[filepath]; ok {
-		for _, i := range file.StyleData.UsedIndexes {
-			_cache_.Index_Dispose(i)
-		}
+		_cache_.Index_Dispose(file.StyleData.UsedIn...)
 		delete(_cache_.Files.Libraries, filepath)
 	}
 }
 
 func stash_DeleteArtifactFile(filepath string) {
 	if file, ok := _cache_.Files.Artifacts[filepath]; ok {
-		for _, i := range file.StyleData.UsedIndexes {
-			_cache_.Index_Dispose(i)
-		}
+		_cache_.Index_Dispose(file.StyleData.UsedIn...)
 		delete(_cache_.Files.Artifacts, filepath)
 	}
 }
@@ -32,17 +28,17 @@ func stash_DeleteArtifactFile(filepath string) {
 func stash_Clear() {
 	for s, i := range _cache_.Style.Library__Index {
 		_cache_.Index_Dispose(i)
-		delete(_cache_.Style.Library__Index, s)
+		delete(_cache_.Style.Artifact_Index, s)
 	}
 	for s, i := range _cache_.Style.Artifact_Index {
 		_cache_.Index_Dispose(i)
 		delete(_cache_.Style.Library__Index, s)
 	}
 
-	for k, _ := range _cache_.Files.Libraries {
+	for k := range _cache_.Files.Libraries {
 		stash_DeleteLibraryFile(k)
 	}
-	for k, _ := range _cache_.Files.Artifacts {
+	for k := range _cache_.Files.Artifacts {
 		stash_DeleteLibraryFile(k)
 	}
 }
@@ -134,7 +130,7 @@ func stash_StackArtifactFiles() stash_StackArtifactFiles_return {
 	}
 }
 
-func Stash_Update(verbose bool) {
+func Stash_Update() {
 	stash_Clear()
 	for filepath, content := range _cache_.Static.Libraries_Saved {
 		stash_SaveLibraryFile(filepath, content)
@@ -146,7 +142,7 @@ func Stash_Update(verbose bool) {
 	// Artifacts update actions
 	SaveArtifactFile_ := stash_StackArtifactFiles()
 	_cache_.Delta.Lookup.Artifacts = SaveArtifactFile_.Lookup
-	_cache_.Manifest.Artifact = map[string]_types_.File_SymclassMetadataMap{}
+	_cache_.Manifest.Artifact = map[string]_types_.File_MetadataMap{}
 	_cache_.Delta.Errors.Artifacts = []string{}
 	_cache_.Delta.Diagnostics.Artifacts = []_types_.Refer_Diagnostic{}
 	artifact_chart := map[string][]string{}
@@ -157,26 +153,26 @@ func Stash_Update(verbose bool) {
 		metadatas := map[string]*_types_.Style_Metadata{}
 		for _, tagstyle := range _script_.Parse(&file, []string{}, _types_.Target_Action_Read).StylesList {
 
-			if len(tagstyle.Symclasses) == 0 {
+			if len(tagstyle.SymClasses) == 0 {
 				E := X.Error_Write(
-					"Symclass missing declaration scope.", 
+					"Symclass missing declaration scope.",
 					[]string{_fmt_.Sprint(file.FilePath, ":", tagstyle.RowIndex, ":", tagstyle.ColIndex)},
 				)
 				file.Manifest.Errors = append(file.Manifest.Errors, E.Errorstring)
 				file.Manifest.Diagnostics = append(file.Manifest.Diagnostics, E.Diagnostic)
-			} else if len(tagstyle.Symclasses) > 1 {
+			} else if len(tagstyle.SymClasses) > 1 {
 				E := X.Error_Write(
-					"Multiple Symclasses declaration scope.", 
+					"Multiple SymClasses declaration scope.",
 					[]string{_fmt_.Sprint(file.FilePath, ":", tagstyle.RowIndex, ":", tagstyle.ColIndex)},
 				)
 				file.Manifest.Errors = append(file.Manifest.Errors, E.Errorstring)
 				file.Manifest.Diagnostics = append(file.Manifest.Diagnostics, E.Diagnostic)
 			} else {
 				artifact_counter++
-				Rawtag_Upload_ := Rawtag_Upload(&tagstyle, &file, &_cache_.Style.Artifact_Index, verbose)
+				Rawtag_Upload_ := Rawtag_Upload(&tagstyle, &file, &_cache_.Style.Artifact_Index, _cache_.Static.DEBUG)
 				styledata := _cache_.Index_Fetch(Rawtag_Upload_.Index)
 				if len(styledata.Declarations) == 1 {
-					file.StyleData.UsedIndexes = append(file.StyleData.UsedIndexes, Rawtag_Upload_.Index)
+					file.StyleData.UsedIn = append(file.StyleData.UsedIn, Rawtag_Upload_.Index)
 					metadatas[Rawtag_Upload_.Symclass] = &styledata.Metadata
 					symclasses = append(symclasses, Rawtag_Upload_.Symclass)
 				}
@@ -185,7 +181,7 @@ func Stash_Update(verbose bool) {
 			}
 		}
 		if len(symclasses) > 0 {
-			artifact_chart[_fmt_.Sprint("Artifact [", file.FilePath, "]: ", len(symclasses), " Symclasses")] = symclasses
+			artifact_chart[_fmt_.Sprint("Artifact [", file.FilePath, "]: ", len(symclasses), " SymClasses")] = symclasses
 		}
 		_cache_.Manifest.Artifact[file.FilePath] = metadatas
 		_cache_.Delta.Errors.Artifacts = append(_cache_.Delta.Errors.Artifacts, file.Manifest.Errors...)
@@ -197,13 +193,13 @@ func Stash_Update(verbose bool) {
 	StackLibraryFiles_ := stash_StackLibraryFiles()
 	_cache_.Delta.Lookup.Libraries = StackLibraryFiles_.Lookup
 	// Axiom update actions
-	_cache_.Manifest.Axiom = map[string]_types_.File_SymclassMetadataMap{}
+	_cache_.Manifest.Axiom = map[string]_types_.File_MetadataMap{}
 	_cache_.Delta.Errors.Axioms = []string{}
 	_cache_.Delta.Diagnostics.Axioms = []_types_.Refer_Diagnostic{}
 	axiomChart := map[string][]string{}
 	axiom_counter := 0
 	for index, files := range StackLibraryFiles_.Axiom {
-		Cssfile_Collection_ := Cssfile_Collection(&files, false, verbose)
+		Cssfile_Collection_ := Cssfile_Collection(&files, false, _cache_.Static.DEBUG)
 		_cache_.Manifest.Axiom[_strconv_.Itoa(index)] = Cssfile_Collection_.MetadataCollection
 		if count := len(Cssfile_Collection_.SelectorList); count > 0 {
 			axiom_counter += count
@@ -217,13 +213,13 @@ func Stash_Update(verbose bool) {
 	_cache_.Delta.Report.Axioms += X.List_Chart(_fmt_.Sprintf("Axiom: %d", axiom_counter), axiomChart)
 
 	// Cluster update actions
-	_cache_.Manifest.Cluster = map[string]_types_.File_SymclassMetadataMap{}
+	_cache_.Manifest.Cluster = map[string]_types_.File_MetadataMap{}
 	_cache_.Delta.Errors.Clusters = []string{}
 	_cache_.Delta.Diagnostics.Clusters = []_types_.Refer_Diagnostic{}
 	clusterChart := map[string][]string{}
 	cluster_counter := 0
 	for index, files := range StackLibraryFiles_.Cluster {
-		Cssfile_Collection_ := Cssfile_Collection(&files, false, verbose)
+		Cssfile_Collection_ := Cssfile_Collection(&files, false, _cache_.Static.DEBUG)
 		_cache_.Manifest.Cluster[_strconv_.Itoa(index)] = Cssfile_Collection_.MetadataCollection
 		if count := len(Cssfile_Collection_.SelectorList); count > 0 {
 			cluster_counter += count
