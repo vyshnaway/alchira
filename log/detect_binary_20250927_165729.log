@@ -1,0 +1,49 @@
+Binary detection log
+Generated on Sat Sep 27 04:57:29 PM UTC 2025
+----------------------------------------
+Testing binary: darwin-amd64
+Exit code: 126
+Output: ./run/detect.sh: line 62: ./bin/darwin-amd64: cannot execute binary file: Exec format error
+Failure: Incompatible binary - darwin-amd64
+----------------------------------------
+Testing binary: darwin-arm64
+Exit code: 126
+Output: ./run/detect.sh: line 62: ./bin/darwin-arm64: cannot execute binary file: Exec format error
+Failure: Incompatible binary - darwin-arm64
+----------------------------------------
+Testing binary: linux-amd64
+Exit code: 0
+Output: Runner:   (Project: -@0.0.0)
+RootPath: /workspaces/xcss-engine WorkPath: .
+Bin:  Name: xcss Version: 0.0.0
+Success: Compatible binary found - linux-amd64
+----------------------------------------
+Testing binary: linux-arm64
+Exit code: 0
+Output: Runner:   (Project: -@0.0.0)
+RootPath: /workspaces/xcss-engine WorkPath: .
+Bin:  Name: xcss Version: 0.0.0
+Success: Compatible binary found - linux-arm64
+----------------------------------------
+Testing binary: linux-armv7
+Exit code: 255
+Output: qemu-arm: /workspaces/xcss-engine/bin/linux-armv7: Invalid ELF image for this architecture
+Failure: Incompatible binary - linux-armv7
+----------------------------------------
+Testing binary: win-386.exe
+Exit code: 1
+Output: <3>WSL (70016 - ) ERROR: UtilBindVsockAnyPort:307: socket failed 38
+Failure: Incompatible binary - win-386.exe
+----------------------------------------
+Testing binary: win-amd64.exe
+Exit code: 1
+Output: <3>WSL (70019 - ) ERROR: UtilBindVsockAnyPort:307: socket failed 38
+Failure: Incompatible binary - win-amd64.exe
+----------------------------------------
+Testing binary: win-arm64.exe
+Exit code: 1
+Output: <3>WSL (70022 - ) ERROR: UtilBindVsockAnyPort:307: socket failed 38
+Failure: Incompatible binary - win-arm64.exe
+----------------------------------------
+Detection complete. Saved to ./bin/run.txt: BINARY_FILENAME=linux-amd64
+Note: 2 compatible binaries found, using the first one (linux-amd64)

@@ -183,7 +183,7 @@ export default class C_Target {
 			});
 
 			filedata.styleData.classTracks.forEach((group) => {
-				const indexGroup = group.reduce((indexAcc, className) => {
+				const indextraces = group.reduce((indexAcc, className) => {
 					const found = INDEX.FIND(className, filedata.styleData.localClasses);
 					if (found.index) {
 						indexAcc.push(found.index);
@@ -196,7 +196,7 @@ export default class C_Target {
 					return indexAcc;
 				}, [] as number[]);
 
-				if (indexGroup.length) { classTracks.push(indexGroup); }
+				if (indextraces.length) { classTracks.push(indextraces); }
 			});
 		});
 

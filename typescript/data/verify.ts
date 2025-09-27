@@ -11,7 +11,7 @@ import * as CACHE from "../data/cache.js";
 
 
 export async function cssImport(filePathArray: string[] = []) {
-	const resolvedFiles = new Set(filePathArray.map((filePath) => PATH.resolve(filePath)));
+	const resolvedFiles = new Set(filePathArray.map((filePath) => FILEMAN.path.resolves(filePath)));
 
 	async function inlineImports(filePath: string): Promise<string> {
 		const baseDir = PATH.dirname(filePath);
@@ -33,7 +33,7 @@ export async function cssImport(filePathArray: string[] = []) {
 		return content;
 	}
 
-	const inlined = await Promise.all([...resolvedFiles].map(inlineImports));
+	const inlined = [...resolvedFiles].map((i) => inlineImports(i));
 	return inlined.join("");
 }
 
@@ -99,8 +99,8 @@ export async function proxyMapDependency(proxyMap: _Config.ProxyMap[] = [], xtyl
 	for (let i = 0; i < proxyMap.length; i++) {
 		for (let j = i + 1; j < proxyMap.length; j++) {
 			if (
-				FILEMAN.path.isIndependent(proxyMap[i].target, proxyMap[j].source) ||
-				FILEMAN.path.isIndependent(proxyMap[j].source, proxyMap[i].target)
+				FILEMAN.path.isIndependent(proxyMap[i].source, proxyMap[j].source) ||
+				FILEMAN.path.isIndependent(proxyMap[j].target, proxyMap[i].target)
 			) {
 				warnings.push(
 					`[${i}]:target::"${proxyMap[i].target}" & [${j}]:source::"${proxyMap[j].source}" are not independent.`,
@@ -108,7 +108,7 @@ export async function proxyMapDependency(proxyMap: _Config.ProxyMap[] = [], xtyl
 			}
 			if (
 				FILEMAN.path.isIndependent(proxyMap[i].source, proxyMap[j].target) ||
-				FILEMAN.path.isIndependent(proxyMap[j].target, proxyMap[i].source)
+				FILEMAN.path.isIndependent(proxyMap[i].target, proxyMap[j].source)
 			) {
 				warnings.push(
 					`[${i}]:source::"${proxyMap[i].source}" & [${j}]:target::"${proxyMap[j].target}" are not independent.`,

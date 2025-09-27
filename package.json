@@ -8,16 +8,21 @@
   },
   "bin": {
     "xdev": "./execute/javascript/main.js",
-    "xcss": "./execute/xcss.js"
+    "xrun": "./run/gorun.js",
+    "xbin": "./bin/run",
+    "xcss": "./run/script.js"
   },
   "funding": {
     "type": "individual",
     "url": "https://yshell.dev/xcss/funding/"
   },
   "scripts": {
+    "data": "chmod +x ./run/data.sh && ./run/data.sh go",
+    "install": "chmod +x ./run/detect.sh && ./run/detect.sh",
     "init": "chmod +x ./execute/script/chmod.sh && ./execute/script/chmod.sh && xcss init",
     "ts:compile": "tsc -p ./typescript",
     "es:compile": "node ./execute/script/esbuild.js",
+    "dev:gobuild": "go build -o ./bin/run ./go/main.go",
     "dev:package": "chmod +x ./execute/script/build.sh && ./execute/script/build.sh",
     "dev:publish": "node ./execute/script/publish.js"
   },
