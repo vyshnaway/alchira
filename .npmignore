@@ -2,6 +2,8 @@
 .gitignore
 .npmignore
 
+bin/_run_
+bin/_test_
 gosource/
 javascript/
 node_module/
