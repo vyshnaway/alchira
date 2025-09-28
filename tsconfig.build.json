@@ -1,0 +1,10 @@
+{
+    "extends": "./ts/tsconfig.json",
+    "compilerOptions": {
+        "removeComments": true
+    },
+    "exclude": [
+        "node_modules",
+        ".vscode-test"
+    ]
+}

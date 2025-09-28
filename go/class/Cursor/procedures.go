@@ -1,0 +1,75 @@
+package Cursor
+
+func (This *Type) LoadFallback() {
+	This.Active = This.Fallback
+}
+
+func (This *Type) SaveFallback() {
+	This.Fallback = This.Active
+}
+
+func (This *Type) setCurrent() {
+	if This.Active.Marker < len(This.Runes) {
+		This.Active.Char = This.Runes[This.Active.Marker]
+
+		if This.Active.Marker+1 < len(This.Runes) {
+			This.Active.Next = This.Runes[This.Active.Marker+1]
+		} else {
+			This.Active.Next = ' '
+		}
+
+		if This.Active.Marker > 0 {
+			This.Active.Last = This.Runes[This.Active.Marker-1]
+		} else {
+			This.Active.Last = ' '
+		}
+
+	} else {
+		This.Active.Char = ' '
+		This.Streaming = false
+	}
+}
+
+func (This *Type) _UpdateIncPosition() {
+	if This.Active.Char == '\n' {
+		This.Active.RowMarker++
+		This.Active.ColFallback = This.Active.ColMarker
+		This.Active.ColMarker = 0
+	} else {
+		This.Active.ColMarker++
+	}
+}
+
+func (This *Type) Increment() (Char rune, Streaming bool) {
+	This.Active.Last = This.Active.Char
+	This.Active.Marker++
+	This.setCurrent()
+	This._UpdateIncPosition()
+
+	if This.Streaming {
+		return This.Active.Char, This.Streaming
+	}
+	return ' ', This.Streaming
+}
+
+func (This *Type) updateDecPosition() {
+	if This.Active.Char == '\n' {
+		This.Active.RowMarker--
+		This.Active.ColMarker = This.Active.ColFallback
+	} else if This.Active.ColMarker > 0 {
+		This.Active.ColMarker--
+	}
+}
+
+func (This *Type) Decrement() (Char rune, Streaming bool) {
+	if This.Active.Marker > 0 {
+		This.Active.Marker--
+	}
+	This.setCurrent()
+	This.updateDecPosition()
+
+	if This.Streaming {
+		return This.Active.Char, This.Streaming
+	}
+	return ' ', This.Streaming
+}

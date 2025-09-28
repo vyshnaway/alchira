@@ -1,5 +1,8 @@
+bin/**
+
 # Logs
 
+log
 logs
 _.log
 npm-debug.log_
@@ -91,5 +94,3 @@ web_modules/
 # Output of 'npm pack'
 
 *.tgz
-
-execute/bin/**

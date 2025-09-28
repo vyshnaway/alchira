@@ -1,0 +1,36 @@
+{
+    "compilerOptions": {
+        "module": "nodenext",
+        "target": "es2020",
+        "lib": [
+            "ES2020",
+            "DOM"
+        ],
+        "types": [
+            "node"
+        ],
+        "moduleResolution": "nodenext",
+        "paths": {
+            "chokidar": [
+                "../node_modules/chokidar"
+            ]
+        },
+        "outDir": "../dev/js",
+        "sourceMap": true,
+        "strict": true,
+        "noImplicitReturns": true,
+        "noFallthroughCasesInSwitch": true,
+        "noUnusedParameters": true,
+        "noUnusedLocals": true,
+        "esModuleInterop": true,
+        // "forceConsistentCasingInFileNames": true, // Good practice
+        // "skipLibCheck": true, // Skips type checking of declaration files, can speed up compilation
+        // "allowJs": true, // Allow JavaScript files to be compiled
+        // "checkJs": true, // Type-check .js files
+        // "resolveJsonModule": true, // Allows importing .json files
+        // "noEmitOnError": true, //
+    },
+    "include": [
+        "**/*.ts"
+    ]
+}
