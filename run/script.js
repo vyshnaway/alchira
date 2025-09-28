@@ -1,11 +1,9 @@
 #!/usr/bin/env node
 
-import { readFileSync, existsSync } from 'fs';
-import { join } from 'path';
+import { existsSync } from 'fs';
 import { spawnSync } from 'child_process';
 
-import { getBinaryPath } from "./detect.js";
-
+import { getBinaryPath } from "./sense.js";
 
 const binaryPath = getBinaryPath()
 

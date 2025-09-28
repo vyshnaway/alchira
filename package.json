@@ -8,7 +8,7 @@
   },
   "bin": {
     "xdev": "./execute/javascript/main.js",
-    "xrun": "./run/gorun.js",
+    "xrun": "./run/_gorun.js",
     "xbin": "./bin/_test_",
     "xcss": "./run/script.js"
   },

@@ -1,5 +1,5 @@
 #!/usr/bin/env node
 
-import { detectCompatibleBinary } from "./detect.js";
+import { detectCompatibleBinary } from "./sense.js";
 
 detectCompatibleBinary()
