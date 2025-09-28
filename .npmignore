@@ -1,7 +1,6 @@
 .git
 .gitignore
 .gitmodules
-.npmignore
 
 eslint.config.mjs
 package-lock.json
@@ -11,7 +10,6 @@ tsconfig.build.json
 .trash/
 
 build/
-exec/_**_
 go/
 node_modules/
 ts/

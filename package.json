@@ -8,9 +8,9 @@
   },
   "bin": {
     "xdev": "./build/js/main.js",
-    "xrun": "./build/gorun.js",
     "xcss": "./run/script.js",
-    "xbin": "./exec/_test_"
+    "xmake": "./build/_now_.sh",
+    "xtest": "./exec/_run_"
   },
   "funding": {
     "type": "individual",
@@ -19,11 +19,9 @@
   "scripts": {
     "install": "node ./run/install.js",
     "ts:compile": "tsc -p ./ts",
-    "es:compile": "node ./build/esbuild.js",
-    "go:test": "chmod +x ./build/_test_.sh && ./build/_test_.sh go",
+    "es:compile": "node ./build/tsbuild.js",
     "go:stat": "chmod +x ./build/_stat_.sh && ./build/_stat_.sh go",
-    "package": "chmod +x ./build/_pub_.sh && ./build/_pub_.sh",
-    "publish": "node ./build/publish.js"
+    "package": "chmod +x ./build/core.sh && ./build/core.sh"
   },
   "bugs": {
     "url": "https://github.com/yshell-dev/xcss-online/issues"
