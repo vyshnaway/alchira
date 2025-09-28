@@ -1,0 +1,117 @@
+/* Anchor/Transform-Origin Utilities */
+.anchor-top-left { transform-origin: top left; }
+.anchor-top-center { transform-origin: top center; }
+.anchor-top-right { transform-origin: top right; }
+.anchor-center-left { transform-origin: center left; }
+.anchor-center { transform-origin: center center; }
+.anchor-center-right { transform-origin: center right; }
+.anchor-bottom-left { transform-origin: bottom left; }
+.anchor-bottom-center { transform-origin: bottom center; }
+.anchor-bottom-right { transform-origin: bottom right; }
+
+/* Variable-powered origin for advanced use (optional, overrides above) */
+.anchor-custom { 
+    --anchor-x: 50%; 
+    --anchor-y: 50%;
+    transform-origin: var(--anchor-x) var(--anchor-y);
+}
+
+/* Positioning */
+.position-static { position: static; }
+.position-relative { position: relative; }
+.position-absolute { position: absolute; }
+.position-fixed { position: fixed; }
+.position-sticky { position: sticky; }
+
+/* Top/Right/Bottom/Left Offsets with CSS Variables */
+.top-0    { top: 0; }
+.top-xs   { top: var(---pos-top-xs, 0.25rem); }
+.top-sm   { top: var(---pos-top-sm, 0.5rem); }
+.top-md   { top: var(---pos-top-md, 1rem); }
+.top-lg   { top: var(---pos-top-lg, 2rem); }
+.top-xl   { top: var(---pos-top-xl, 4rem); }
+
+.bottom-0  { bottom: 0; }
+.bottom-xs { bottom: var(---pos-top-xs, 0.25rem); }
+.bottom-sm { bottom: var(---pos-top-sm, 0.5rem); }
+.bottom-md { bottom: var(---pos-top-md, 1rem); }
+.bottom-lg { bottom: var(---pos-top-lg, 2rem); }
+.bottom-xl { bottom: var(---pos-top-xl, 4rem); }
+
+.left-0   { left: 0; }
+.left-xs  { left: var(---pos-top-xs, 0.25rem); }
+.left-sm  { left: var(---pos-top-sm, 0.5rem); }
+.left-md  { left: var(---pos-top-md, 1rem); }
+.left-lg  { left: var(---pos-top-lg, 2rem); }
+.left-xl  { left: var(---pos-top-xl, 4rem); }
+
+.right-0  { right: 0; }
+.right-xs { right: var(---pos-top-xs, 0.25rem); }
+.right-sm { right: var(---pos-top-sm, 0.5rem); }
+.right-md { right: var(---pos-top-md, 1rem); }
+.right-lg { right: var(---pos-top-lg, 2rem); }
+.right-xl { right: var(---pos-top-xl, 4rem); }
+
+/* Centering Utilities (absolute/fixed with translate) */
+.top-center {
+  left: 50%;
+  transform: translateX(-50%);
+}
+.bottom-center {
+  left: 50%;
+  transform: translateX(-50%);
+}
+.left-center {
+  top: 50%;
+  transform: translateY(-50%);
+}
+.right-center {
+  top: 50%;
+  transform: translateY(-50%);
+}
+.center-center {
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* Z-Index Utilities */
+.layer-auto { z-index: auto; }
+.layer-0 { z-index: 0; }
+
+.layer-1 { z-index: 1; }
+.layer-2 { z-index: 2; }
+.layer-3 { z-index: 3; }
+.layer-4 { z-index: 4; }
+.layer-5 { z-index: 5; }
+.layer-10 { z-index: 10; }
+.layer-20 { z-index: 20; }
+.layer-30 { z-index: 30; }
+.layer-40 { z-index: 40; }
+.layer-50 { z-index: 50; }
+.layer-100 { z-index: 100; }
+
+.layer-neg-1 { z-index: -1; }
+.layer-neg-2 { z-index: -2; }
+.layer-neg-3 { z-index: -3; }
+.layer-neg-4 { z-index: -4; }
+.layer-neg-5 { z-index: -5; }
+.layer-neg-10 { z-index: -10; }
+.layer-neg-20 { z-index: -20; }
+.layer-neg-30 { z-index: -30; }
+.layer-neg-40 { z-index: -40; }
+.layer-neg-50 { z-index: -50; }
+.layer-neg-100 { z-index: -100; }
+
+/* Full Stretch Utilities */
+.inset-0    { top: 0; right: 0; bottom: 0; left: 0; }
+.inset-auto { top: auto; right: auto; bottom: auto; left: auto; }
+.inset-x-0  { left: 0; right: 0; }
+.inset-y-0  { top: 0; bottom: 0; }
+
+.inset-x-center { left: 50%; right: auto; transform: translateX(-50%); }
+.inset-y-center { top: 50%; bottom: auto; transform: translateY(-50%); }
+
+/* Isolation */
+.isolate { isolation: isolate; }
+.isolate-auto { isolation: auto; }

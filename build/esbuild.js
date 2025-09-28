@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import esbuild from 'esbuild';
 
-const destination ='./dev/js/';
+const destination ='./build/js/';
 
 function clearFolder(folderPath) {
     if (!fs.existsSync(folderPath)) {

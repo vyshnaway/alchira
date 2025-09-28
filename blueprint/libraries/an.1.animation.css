@@ -1,0 +1,90 @@
+@import url("../#constants.css");
+
+/* Transition Property Utilities */
+.transition-none { transition: none; }
+.transition-all { transition: all 300ms ease; }
+.transition-transform { transition: transform 300ms ease; }
+.transition-opacity { transition: opacity 300ms ease; }
+.transition-background { transition: background 300ms ease; }
+.transition-color { transition: color 300ms ease; }
+.transition-shadow { transition: box-shadow 300ms ease; }
+.transition-border { transition: border 300ms ease; }
+.transition-height { transition: height 300ms ease; }
+.transition-width { transition: width 300ms ease; }
+.transition-filter { transition: filter 300ms ease; }
+
+/* Duration Utilities */
+.transition-duration-75 { transition-duration: 75ms; }
+.transition-duration-100 { transition-duration: 100ms; }
+.transition-duration-150 { transition-duration: 150ms; }
+.transition-duration-200 { transition-duration: 200ms; }
+.transition-duration-250 { transition-duration: 250ms; }
+.transition-duration-300 { transition-duration: 300ms; }
+.transition-duration-400 { transition-duration: 400ms; }
+.transition-duration-500 { transition-duration: 500ms; }
+.transition-duration-700 { transition-duration: 700ms; }
+.transition-duration-1000 { transition-duration: 1000ms; }
+
+/* Delay Utilities */
+.transition-delay-75 { transition-delay: 75ms; }
+.transition-delay-100 { transition-delay: 100ms; }
+.transition-delay-150 { transition-delay: 150ms; }
+.transition-delay-200 { transition-delay: 200ms; }
+.transition-delay-250 { transition-delay: 250ms; }
+.transition-delay-300 { transition-delay: 300ms; }
+.transition-delay-400 { transition-delay: 400ms; }
+.transition-delay-500 { transition-delay: 500ms; }
+.transition-delay-700 { transition-delay: 700ms; }
+.transition-delay-1000 { transition-delay: 1000ms; }
+
+/* Timing Functions */
+.transition-ease { transition-timing-function: ease; }
+.transition-linear { transition-timing-function: linear; }
+.transition-ease-in { transition-timing-function: ease-in; }
+.transition-ease-out { transition-timing-function: ease-out; }
+.transition-ease-in-out { transition-timing-function: ease-in-out; }
+.transition-ease-elastic { transition-timing-function: cubic-bezier(.68,-0.55,.27,1.55); }
+.transition-ease-spring { transition-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1); }
+.transition-ease-bounce { transition-timing-function: cubic-bezier(.53,2,.36,.85); }
+.transition-steps-2 { transition-timing-function: steps(2); }
+.transition-steps-4 { transition-timing-function: steps(4); }
+.transition-steps-end { transition-timing-function: steps(1,end); }
+.transition-steps-start { transition-timing-function: steps(1,start); }
+
+/* Animation Shortcuts */
+.animated { animation-duration: 300ms; animation-fill-mode: both; }
+.infinite { animation-iteration-count: infinite; }
+.reverse { animation-direction: reverse; }
+.alternate { animation-direction: alternate; }
+
+/* Animation Duration Utilities */
+.animation-duration-std { animation-duration: var(---animation-duration); }
+.animation-duration-75 { animation-duration: 75ms; }
+.animation-duration-100 { animation-duration: 100ms; }
+.animation-duration-200 { animation-duration: 200ms; }
+.animation-duration-300 { animation-duration: 300ms; }
+.animation-duration-500 { animation-duration: 500ms; }
+.animation-duration-1000 { animation-duration: 1000ms; }
+
+/* Animation Delay Utilities */
+.animation-delay-75 { animation-delay: 75ms; }
+.animation-delay-100 { animation-delay: 100ms; }
+.animation-delay-150 { animation-delay: 150ms; }
+.animation-delay-200 { animation-delay: 200ms; }
+.animation-delay-300 { animation-delay: 300ms; }
+.animation-delay-500 { animation-delay: 500ms; }
+.animation-delay-1000 { animation-delay: 1000ms; }
+
+/* Animation Timing Function Utilities */
+.animation-ease { animation-timing-function: ease; }
+.animation-linear { animation-timing-function: linear; }
+.animation-ease-in { animation-timing-function: ease-in; }
+.animation-ease-out { animation-timing-function: ease-out; }
+.animation-ease-in-out { animation-timing-function: ease-in-out; }
+.animation-elastic { animation-timing-function: cubic-bezier(.68,-0.55,.27,1.55); }
+.animation-spring { animation-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1); }
+.animation-bounce { animation-timing-function: cubic-bezier(.53,2,.36,.85); }
+.animation-steps-2 { animation-timing-function: steps(2); }
+.animation-steps-4 { animation-timing-function: steps(4); }
+.animation-steps-end { animation-timing-function: steps(1,end); }
+.animation-steps-start { animation-timing-function: steps(1,start); }

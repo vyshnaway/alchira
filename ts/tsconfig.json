@@ -15,7 +15,7 @@
                 "../node_modules/chokidar"
             ]
         },
-        "outDir": "../dev/js",
+        "outDir": "../build/js",
         "sourceMap": true,
         "strict": true,
         "noImplicitReturns": true,

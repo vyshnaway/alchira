@@ -1,0 +1,6 @@
+import order from "./order-api.js";
+order([
+    [1, 2, 3],
+    [2, 9, 4],
+], "preview", "000000000000000000000000=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAv1k1PPzSDxDCi0O6GPy/HkYA8H3gtFLDzrGEfeaOwXSTPT49muNSGiRso4lTuSfn+p+z7lRfUZxPxt7oM0C52ZQGjavxOqUS6lBWzR2DHmYqfPBtpjDJNmlbMMyJH9Ro6CTDhTDIduSQcbUDppjQZ8ad2tqqiSyLfIKhgfFFuZKwZpIi9Yg4BFKKngPndNVe4GZmpXPa7k6vclAFtHmPSSyv63Nr113IJ85IC2ZJfLnzj7/wZm0gBsfyFhLtIP6RlPI6IwuNk5uADxue6x55FpIc3pO0OYJW61Wkr3RsE8jSvA+2UOiD2FIoYyEFm1EMMQ3oCFqhexMyZbrkeyPjgwIDAQAB").then(console.log);
+//# sourceMappingURL=order-api.test.js.map

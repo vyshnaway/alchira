@@ -1,0 +1,496 @@
+@import url("../#constants.css");
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+.fade-in {
+  @--attach kf$_keyframes_fade-in;
+  animation-name: fade-in;
+}
+
+@keyframes fade-out {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
+}
+
+.fade-out {
+  @--attach kf$_keyframes_fade-out;
+  animation-name: fade-out;
+}
+
+@keyframes slide-in-left {
+  from {
+    transform: translateX(-100%);
+  }
+
+  to {
+    transform: translateX(0);
+  }
+}
+
+.slide-in-left {
+  @--attach kf$_keyframes_slide-in-left;
+  animation-name: slide-in-left;
+}
+
+@keyframes slide-in-right {
+  from {
+    transform: translateX(100%);
+  }
+
+  to {
+    transform: translateX(0);
+  }
+}
+
+.slide-in-right {
+  @--attach kf$_keyframes_slide-in-right;
+  animation-name: slide-in-right;
+}
+
+@keyframes slide-in-top {
+  from {
+    transform: translateY(-100%);
+  }
+
+  to {
+    transform: translateY(0);
+  }
+}
+
+.slide-in-top {
+  @--attach kf$_keyframes_slide-in-top;
+  animation-name: slide-in-top;
+}
+
+@keyframes slide-in-bottom {
+  from {
+    transform: translateY(100%);
+  }
+
+  to {
+    transform: translateY(0);
+  }
+}
+
+.slide-in-bottom {
+  @--attach kf$_keyframes_slide-in-bottom;
+  animation-name: slide-in-bottom;
+}
+
+@keyframes slide-out-left {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-100%);
+  }
+}
+
+.slide-out-left {
+  @--attach kf$_keyframes_slide-out-left;
+  animation-name: slide-out-left;
+}
+
+@keyframes slide-out-right {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(100%);
+  }
+}
+
+.slide-out-right {
+  @--attach kf$_keyframes_slide-out-right;
+  animation-name: slide-out-right;
+}
+
+@keyframes slide-out-top {
+  from {
+    transform: translateY(0);
+  }
+
+  to {
+    transform: translateY(-100%);
+  }
+}
+
+.slide-out-top {
+  @--attach kf$_keyframes_slide-out-top;
+  animation-name: slide-out-top;
+}
+
+@keyframes slide-out-bottom {
+  from {
+    transform: translateY(0);
+  }
+
+  to {
+    transform: translateY(100%);
+  }
+}
+
+.slide-out-bottom {
+  @--attach kf$_keyframes_slide-out-bottom;
+  animation-name: slide-out-bottom;
+}
+
+@keyframes scale-in {
+  from {
+    transform: scale(0);
+  }
+
+  to {
+    transform: scale(1);
+  }
+}
+
+.scale-in {
+  @--attach kf$_keyframes_scale-in;
+  animation-name: scale-in;
+}
+
+@keyframes scale-out {
+  from {
+    transform: scale(1);
+  }
+
+  to {
+    transform: scale(0);
+  }
+}
+
+.scale-out {
+  @--attach kf$_keyframes_scale-out;
+  animation-name: scale-out;
+}
+
+@keyframes scale-up {
+  from {
+    transform: scale(1);
+  }
+
+  to {
+    transform: scale(1.1);
+  }
+}
+
+.scale-up {
+  @--attach kf$_keyframes_scale-up;
+  animation-name: scale-up;
+}
+
+@keyframes scale-down {
+  from {
+    transform: scale(1);
+  }
+
+  to {
+    transform: scale(0.9);
+  }
+}
+
+.scale-down {
+  @--attach kf$_keyframes_scale-down;
+  animation-name: scale-down;
+}
+
+@keyframes rotate-clockwise {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.rotate-clockwise {
+  @--attach kf$_keyframes_rotate-clockwise;
+  animation-name: rotate-clockwise;
+}
+
+@keyframes rotate-counterclockwise {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(-360deg);
+  }
+}
+
+.rotate-counterclockwise {
+  @--attach kf$_keyframes_rotate-counterclockwise;
+  animation-name: rotate-counterclockwise;
+}
+
+@keyframes expand-width {
+  from {
+    width: 0;
+  }
+
+  to {
+    width: 100%;
+  }
+}
+
+.expand-width {
+  @--attach kf$_keyframes_expand-width;
+  animation-name: expand-width;
+}
+
+@keyframes collapse-width {
+  from {
+    width: 100%;
+  }
+
+  to {
+    width: 0;
+  }
+}
+
+.collapse-width {
+  @--attach kf$_keyframes_collapse-width;
+  animation-name: collapse-width;
+}
+
+@keyframes expand-height {
+  from {
+    height: 0;
+  }
+
+  to {
+    height: 100%;
+  }
+}
+
+.expand-height {
+  @--attach kf$_keyframes_expand-height;
+  animation-name: expand-height;
+}
+
+@keyframes collapse-height {
+  from {
+    height: 100%;
+  }
+
+  to {
+    height: 0;
+  }
+}
+
+.collapse-height {
+  @--attach kf$_keyframes_collapse-height;
+  animation-name: collapse-height;
+}
+
+@keyframes blur-in {
+  from {
+    filter: blur(10px);
+  }
+
+  to {
+    filter: blur(0px);
+  }
+}
+
+.blur-in {
+  @--attach kf$_keyframes_blur-in;
+  animation-name: blur-in;
+}
+
+@keyframes blur-out {
+  from {
+    filter: blur(0px);
+  }
+
+  to {
+    filter: blur(10px);
+  }
+}
+
+.blur-out {
+  @--attach kf$_keyframes_blur-out;
+  animation-name: blur-out;
+}
+
+@keyframes shadow-in {
+  from {
+    box-shadow: none;
+  }
+
+  to {
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.15);
+  }
+}
+
+.shadow-in {
+  @--attach kf$_keyframes_shadow-in;
+  animation-name: shadow-in;
+}
+
+@keyframes shadow-out {
+  from {
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.15);
+  }
+
+  to {
+    box-shadow: none;
+  }
+}
+
+.shadow-out {
+  @--attach kf$_keyframes_shadow-out;
+  animation-name: shadow-out;
+}
+
+@keyframes round-in {
+  from {
+    border-radius: 0;
+  }
+
+  to {
+    border-radius: 50%;
+  }
+}
+
+.round-in {
+  @--attach kf$_keyframes_round-in;
+  animation-name: round-in;
+}
+
+@keyframes round-out {
+  from {
+    border-radius: 50%;
+  }
+
+  to {
+    border-radius: 0;
+  }
+}
+
+.round-out {
+  @--attach kf$_keyframes_round-out;
+  animation-name: round-out;
+}
+
+@keyframes border-thicken {
+  from {
+    border-width: 1px;
+  }
+
+  to {
+    border-width: 8px;
+  }
+}
+
+.border-thicken {
+  @--attach kf$_keyframes_border-thicken;
+  animation-name: border-thicken;
+}
+
+@keyframes border-thin {
+  from {
+    border-width: 8px;
+  }
+
+  to {
+    border-width: 1px;
+  }
+}
+
+.border-thin {
+  @--attach kf$_keyframes_border-thin;
+  animation-name: border-thin;
+}
+
+@keyframes color-invert {
+  from {
+    filter: invert(0);
+  }
+
+  to {
+    filter: invert(1);
+  }
+}
+
+.color-invert {
+  @--attach kf$_keyframes_color-invert;
+  animation-name: color-invert;
+}
+
+@keyframes grayscale-in {
+  from {
+    filter: grayscale(0);
+  }
+
+  to {
+    filter: grayscale(1);
+  }
+}
+
+.grayscale-in {
+  @--attach kf$_keyframes_grayscale-in;
+  animation-name: grayscale-in;
+}
+
+@keyframes grayscale-out {
+  from {
+    filter: grayscale(1);
+  }
+
+  to {
+    filter: grayscale(0);
+  }
+}
+
+.grayscale-out {
+  @--attach kf$_keyframes_grayscale-out;
+  animation-name: grayscale-out;
+}
+
+@keyframes bg-fade-in {
+  from {
+    background-color: transparent;
+  }
+
+  to {
+    background-color: var(---background);
+  }
+}
+
+.bg-fade-in {
+  @--attach kf$_keyframes_bg-fade-in;
+  animation-name: bg-fade-in;
+}
+
+@keyframes bg-fade-out {
+  from {
+    background-color: var(---background);
+  }
+
+  to {
+    background-color: transparent;
+  }
+}
+
+.bg-fade-out {
+  @--attach kf$_keyframes_bg-fade-out;
+  animation-name: bg-fade-out;
+}

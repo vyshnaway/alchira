@@ -11,11 +11,11 @@ import stylistic from '@stylistic/eslint-plugin';
 export default tseslint.config(
 	{
 		ignores: [
-			'.vscode-test',
-			'execute',
-			'notebook',
-			'javascript',
-			'run'
+			'.dumb',
+			'.vscode',
+			'build',
+			'run',
+			'eslint.config.mjs'
 		]
 	},
 	js.configs.recommended,

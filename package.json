@@ -1,5 +1,5 @@
 {
-  "name": "xcss-engine",
+  "name": "xcss-core",
   "description": "A future-proof CSS-DSL abtration layer with native AI-support.",
   "version": "0.1.0",
   "repository": {
@@ -7,9 +7,9 @@
     "url": "https://github.com/yshell-dev/xcss"
   },
   "bin": {
-    "xdev": "./dev/js/main.js",
+    "xdev": "./build/js/main.js",
+    "xrun": "./build/gorun.js",
     "xcss": "./run/script.js",
-    "xrun": "./dev/gorun.js",
     "xbin": "./exec/_test_"
   },
   "funding": {
@@ -19,12 +19,11 @@
   "scripts": {
     "install": "node ./run/install.js",
     "ts:compile": "tsc -p ./ts",
-    "es:compile": "node ./dev/esbuild.js",
-    "ts:stats": "chmod +x ./dev/_stats.sh && ./dev/_stats.sh ts",
-    "go:build": "go build -o ./bin/_test_ ./go/package.go",
-    "go:stats": "chmod +x ./dev/_stats.sh && ./dev/_stats.sh go",
-    "go:package": "chmod +x ./dev/_build.sh && ./dev/_build.sh",
-    "dev:publish": "node ./dev/script/publish.js"
+    "es:compile": "node ./build/esbuild.js",
+    "go:test": "chmod +x ./build/_test_.sh && ./build/_test_.sh go",
+    "go:stat": "chmod +x ./build/_stat_.sh && ./build/_stat_.sh go",
+    "package": "chmod +x ./build/_pub_.sh && ./build/_pub_.sh",
+    "publish": "node ./build/publish.js"
   },
   "bugs": {
     "url": "https://github.com/yshell-dev/xcss-online/issues"
