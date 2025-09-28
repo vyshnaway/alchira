@@ -1,6 +1,0 @@
-[submodule "core"]
-	path = core
-	url = https://github.com/yshell-dev/xcss-core.git
-[submodule "cdn"]
-	path = cdn
-	url = https://github.com/yshell-dev/xcss-cdn.git

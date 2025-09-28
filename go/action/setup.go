@@ -55,7 +55,7 @@ func Setup_Environment(rootpath string, workpath string, package_essential types
 		}
 	}
 
-	cdn := cache.Root.Url.Cdn + "version/" + strings.Split(cache.Root.Version, ".")[0] + "/"
+	cdn := cache.Root.Url.Docs + "version/" + strings.Split(cache.Root.Version, ".")[0] + "/"
 	for group_name, group_sources := range cache.Sync {
 		for id, source := range group_sources {
 			source.Url = cdn + source.Url

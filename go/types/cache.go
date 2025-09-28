@@ -1,11 +1,11 @@
 package types
 
 type Cache_Url struct {
-	Cdn       string
+	Docs      string
 	Site      string
 	Worker    string
 	Console   string
-	Prefixes  string
+	Vendors   string
 	Artifacts string
 }
 

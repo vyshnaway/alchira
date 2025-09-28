@@ -16,11 +16,11 @@ var Root = _types_.Cache_Root{
 	Version:   "0.0.0",
 	Extension: id,
 	Url: _types_.Cache_Url{
-		Cdn:       "https://cdn." + domain + "/",
 		Site:      "https://www." + domain + "/",
+		Docs:      "https://docs." + domain + "/",
 		Worker:    "https://worker." + domain + "/",
 		Console:   "https://console." + domain + "/",
-		Prefixes:  "https://prefix." + domain + "/",
+		Vendors:   "https://vendors." + domain + "/",
 		Artifacts: "https://artifact." + domain + "/",
 	},
 	Commands: map[string]string{
