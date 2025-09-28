@@ -1,3 +1,6 @@
 [submodule ".xcss"]
 	path = .xcss
 	url = https://github.com/xpktr-labs/xcss-package.git
+[submodule "blueprint"]
+	path = blueprint
+	url = https://github.com/yshell-dev/xcss-blueprint.git

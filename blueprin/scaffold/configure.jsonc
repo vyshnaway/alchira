@@ -1,0 +1,18 @@
+{
+  "name": "",
+  "version": "",
+  "vendors": "none",
+  "proxymap": [
+    {
+      "source": "src",
+      "target": "xrc",
+      "stylesheet": "styles.css",
+      "extensions": {
+        "html": [
+          "class"
+        ]
+      }
+    }
+  ],
+  "enviroment": "browser"
+}

@@ -7,10 +7,10 @@
     "url": "https://github.com/yshell-dev/xcss"
   },
   "bin": {
-    "xdev": "./execute/javascript/main.js",
-    "xrun": "./run/_gorun.js",
-    "xbin": "./bin/_test_",
-    "xcss": "./run/script.js"
+    "xdev": "./dev/js/main.js",
+    "xcss": "./run/script.js",
+    "xrun": "./dev/gorun.js",
+    "xbin": "./exec/_test_"
   },
   "funding": {
     "type": "individual",
@@ -18,12 +18,13 @@
   },
   "scripts": {
     "install": "node ./run/install.js",
-    "ts:compile": "tsc -p ./typescript",
-    "es:compile": "node ./execute/script/esbuild.js",
-    "go:test": "go build -o ./bin/_test_ ./go/package.go",
-    "go:stats": "chmod +x ./run/_data.sh && ./run/_data.sh go",
-    "go:package": "chmod +x ./run/_build.sh && ./run/_build.sh",
-    "dev:publish": "node ./execute/script/publish.js"
+    "ts:compile": "tsc -p ./ts",
+    "es:compile": "node ./dev/esbuild.js",
+    "ts:stats": "chmod +x ./dev/_stats.sh && ./dev/_stats.sh ts",
+    "go:build": "go build -o ./bin/_test_ ./go/package.go",
+    "go:stats": "chmod +x ./dev/_stats.sh && ./dev/_stats.sh go",
+    "go:package": "chmod +x ./dev/_build.sh && ./dev/_build.sh",
+    "dev:publish": "node ./dev/script/publish.js"
   },
   "bugs": {
     "url": "https://github.com/yshell-dev/xcss-online/issues"

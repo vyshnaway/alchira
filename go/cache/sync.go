@@ -5,7 +5,7 @@ import (
 )
 
 var Sync = map[string]map[string]_types_.File_Source{
-	"MARKDOWN": {
+	"DOCUMENTS": {
 		"readme": {
 			Title:   "README",
 			Url:     "readme.md",
@@ -17,21 +17,21 @@ var Sync = map[string]map[string]_types_.File_Source{
 			Title:   "ALERTS",
 			Url:     "alerts.md",
 			Path:    "",
-			Frags:   []string{"documents", "alerts.md"},
+			Frags:   []string{"doc", "alerts.md"},
 			Content: "",
 		},
 		"changelog": {
 			Title:   "CHANGELOG",
 			Url:     "changelog.md",
 			Path:    "",
-			Frags:   []string{"documents", "changelog.md"},
+			Frags:   []string{"doc", "changelog.md"},
 			Content: "",
 		},
 		"guildelines": {
-			Title:   "guildelines",
+			Title:   "GUIDELINES",
 			Url:     "agentic.md",
 			Path:    "",
-			Frags:   []string{"documents", "guildelines.md"},
+			Frags:   []string{"doc", "guildelines.md"},
 			Content: "",
 		},
 	},
@@ -40,21 +40,21 @@ var Sync = map[string]map[string]_types_.File_Source{
 			Title:   "LICENSE",
 			Url:     "agreements-txt/license.txt",
 			Path:    "",
-			Frags:   []string{"agreements", "license.txt"},
+			Frags:   []string{"license.txt"},
 			Content: "",
 		},
 		"terms": {
 			Title:   "TERMS & CONDITIONS",
 			Url:     "agreements-txt/terms.txt",
 			Path:    "",
-			Frags:   []string{"agreements", "terms.txt"},
+			Frags:   []string{"terms.txt"},
 			Content: "",
 		},
 		"privacy": {
 			Title:   "PRIVACY POLICY",
 			Url:     "agreements-txt/privacy.txt",
 			Path:    "",
-			Frags:   []string{"agreements", "privacy.txt"},
+			Frags:   []string{"privacy.txt"},
 			Content: "",
 		},
 	},

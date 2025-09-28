@@ -7,19 +7,13 @@ import (
 var Path = map[string]map[string]_types_.File_Source{
 	"blueprint": {
 		"scaffold": {
-			Frags:     []string{"blueprint", "scaffold"},
-			Path:      "",
-			Content:   "",
-			Essential: true,
-		},
-		"prefixes": {
-			Frags:     []string{"blueprint", "prefixes.json"},
+			Frags:     []string{"template", "scaffold"},
 			Path:      "",
 			Content:   "",
 			Essential: true,
 		},
 		"libraries": {
-			Frags:     []string{"blueprint", "libraries"},
+			Frags:     []string{"template", "libraries"},
 			Path:      "",
 			Content:   "",
 			Essential: true,

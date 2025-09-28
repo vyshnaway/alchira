@@ -1,0 +1,124 @@
+@import url("../#constants.css");
+
+.none {background: none;}
+
+/* Background Colors */
+.color {background-color: var(--background);}
+.color-alt {background-color: var(--background-alt);}
+.color-body {background-color: var(--background-body);}
+
+.color-primary-100 {background-color: var(---primary-100);}
+.color-primary-300 {background-color: var(---primary-300);}
+.color-primary-500 {background-color: var(---primary-500);}
+.color-primary-700 {background-color: var(---primary-700);}
+.color-primary-900 {background-color: var(---primary-900);}
+
+.color-secondary-100 {background-color: var(---secondary-100);}
+.color-secondary-300 {background-color: var(---secondary-300);}
+.color-secondary-500 {background-color: var(---secondary-500);}
+.color-secondary-700 {background-color: var(---secondary-700);}
+.color-secondary-900 {background-color: var(---secondary-900);}
+
+.color-tertiary-100 {background-color: var(---tertiary-100);}
+.color-tertiary-300 {background-color: var(---tertiary-300);}
+.color-tertiary-500 {background-color: var(---tertiary-500);}
+.color-tertiary-700 {background-color: var(---tertiary-700);}
+.color-tertiary-900 {background-color: var(---tertiary-900);}
+
+.pattern-diagonal-stripes {
+  --pattern-stripes-bg1: var(---tertiary-300, #e0e0e0);
+  --pattern-stripes-bg2: var(---background, #fafafa);
+  --pattern-stripes-width: 10px;
+  background: repeating-linear-gradient(45deg,
+      var(--pattern-stripes-bg1),
+      var(--pattern-stripes-bg1) var(--pattern-stripes-width),
+      var(--pattern-stripes-bg2) var(--pattern-stripes-width),
+      var(--pattern-stripes-bg2) calc(2 * var(--pattern-stripes-width)));
+}
+
+.pattern-checkerboard {
+  --pattern-checker-bg1: var(---tertiary-300, #e0e0e0);
+  --pattern-checker-bg2: transparent;
+  --pattern-checker-size: 40px;
+  background:
+    linear-gradient(45deg, var(--pattern-checker-bg1) 25%, var(--pattern-checker-bg2) 25%, var(--pattern-checker-bg2) 75%, var(--pattern-checker-bg1) 75%, var(--pattern-checker-bg1)),
+    linear-gradient(45deg, var(--pattern-checker-bg1) 25%, var(--pattern-checker-bg2) 25%, var(--pattern-checker-bg2) 75%, var(--pattern-checker-bg1) 75%, var(--pattern-checker-bg1));
+  background-size: var(--pattern-checker-size) var(--pattern-checker-size);
+  background-position: 0 0, calc(var(--pattern-checker-size) / 2) calc(var(--pattern-checker-size) / 2);
+}
+
+.pattern-polka-dots {
+  --pattern-polka-dot: var(---tertiary-300, #e0e0e0);
+  --pattern-polka-size: 24px;
+  --pattern-polka-radius: 15%;
+  background: radial-gradient(circle, var(--pattern-polka-dot) var(--pattern-polka-radius), transparent calc(var(--pattern-polka-radius) + 1%));
+  background-size: var(--pattern-polka-size) var(--pattern-polka-size);
+}
+
+.pattern-diagonal-lines {
+  --pattern-diag-line: var(---tertiary-500, #a0a0a0);
+  --pattern-diag-bg: var(---background, #fafafa);
+  --pattern-diag-thickness: 2px;
+  --pattern-diag-space: 10px;
+  background: repeating-linear-gradient(135deg,
+      var(--pattern-diag-line),
+      var(--pattern-diag-line) var(--pattern-diag-thickness),
+      var(--pattern-diag-bg) var(--pattern-diag-thickness),
+      var(--pattern-diag-bg) var(--pattern-diag-space));
+}
+
+.pattern-vertical-lines {
+  --pattern-vline: var(---tertiary-300, #e0e0e0);
+  --pattern-vbg: var(---background, #fafafa);
+  --pattern-v-thickness: 2px;
+  --pattern-v-spacing: 10px;
+  background: repeating-linear-gradient(to right,
+      var(--pattern-vline),
+      var(--pattern-vline) var(--pattern-v-thickness),
+      var(--pattern-vbg) var(--pattern-v-thickness),
+      var(--pattern-vbg) var(--pattern-v-spacing));
+}
+
+.pattern-horizontal-lines {
+  --pattern-hline: var(---tertiary-300, #e0e0e0);
+  --pattern-hbg: var(---background, #fafafa);
+  --pattern-h-thickness: 2px;
+  --pattern-h-spacing: 10px;
+  background: repeating-linear-gradient(to bottom,
+      var(--pattern-hline),
+      var(--pattern-hline) var(--pattern-h-thickness),
+      var(--pattern-hbg) var(--pattern-h-thickness),
+      var(--pattern-hbg) var(--pattern-h-spacing));
+}
+
+.pattern-dotted-grid {
+  --pattern-dot: var(---tertiary-300, #e0e0e0);
+  --pattern-dot-size: 1px;
+  --pattern-dot-spacing: 10px;
+  background: radial-gradient(circle, var(--pattern-dot) var(--pattern-dot-size), transparent var(--pattern-dot-size));
+  background-size: var(--pattern-dot-spacing) var(--pattern-dot-spacing);
+}
+
+.pattern-noise {
+  --pattern-noise: rgba(255, 255, 255, 0.1);
+  --pattern-noise-size: 40px;
+  background: linear-gradient(135deg,
+      var(--pattern-noise) 25%,
+      transparent 25%,
+      transparent 75%,
+      var(--pattern-noise) 75%,
+      var(--pattern-noise));
+  background-size: var(--pattern-noise-size) var(--pattern-noise-size);
+}
+
+.pattern-pinstripe {
+  --pattern-stripe: var(---background-alt, #f4f4f4);
+  --pattern-stripe-bg: var(---background, #ffffff);
+  --pattern-stripe-thickness: 1px;
+  --pattern-stripe-spacing: 4px;
+  background: repeating-linear-gradient(135deg,
+      var(--pattern-stripe),
+      var(--pattern-stripe) var(--pattern-stripe-thickness),
+      var(--pattern-stripe-bg) var(--pattern-stripe-thickness),
+      var(--pattern-stripe-bg) var(--pattern-stripe-spacing));
+}

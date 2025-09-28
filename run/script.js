@@ -3,7 +3,7 @@
 import { existsSync } from 'fs';
 import { spawnSync } from 'child_process';
 
-import { getBinaryPath } from "./sense.js";
+import { getBinaryPath } from "./detect.js";
 
 // Get path of valid binary
 const binaryPath = getBinaryPath()

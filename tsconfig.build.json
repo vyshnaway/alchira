@@ -1,5 +1,5 @@
 {
-    "extends": "./typescript/tsconfig.json",
+    "extends": "./ts/tsconfig.json",
     "compilerOptions": {
         "removeComments": true
     },
