@@ -1,10 +1,17 @@
 .git
 .gitignore
+.gitmodules
 .npmignore
 
-bin/_run_
-run/_*
-bin/_test_
-gosource/
-javascript/
-node_module/
+eslint.config.mjs
+package-lock.json
+tsconfig.build.json
+
+.vscode/
+.trash/
+
+build/
+exec/_**_
+go/
+node_modules/
+ts/
