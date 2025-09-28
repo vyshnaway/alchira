@@ -10,12 +10,12 @@ import { spawnSync } from 'child_process';
 // ---------------------------------------------------------------------
 
 // Since the script runs from './run/', paths are relative to the parent directory (project root).
-const ROOT_DIR = resolve(fileURLToPath(import.meta.url), "..", "..");
+const BIN_DIR = resolve(fileURLToPath(import.meta.url), "..", "..", 'exec');
 const ENV_FILENAME = '_run_';
+const LOG_FILENAME = '_log_';
 
-const BIN_DIR = join(ROOT_DIR, 'exec');
-const LOG_DIR = join(BIN_DIR, 'log');
 const ENV_FILE = join(BIN_DIR, ENV_FILENAME);
+const LOG_FILE = join(BIN_DIR, LOG_FILENAME);
 const TEST_ARG = 'test';
 
 // ---------------------------------------------------------------------
@@ -30,12 +30,9 @@ const TEST_ARG = 'test';
 export function detectCompatibleBinary() {
     let foundBinary = null;
     let detectedCount = 0;
-    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-    const LOG_FILE = join(LOG_DIR, `detect_binary_${timestamp}.log`);
 
     // 1. Setup Log Directory
     try {
-        mkdirSync(LOG_DIR, { recursive: true });
         writeFileSync(LOG_FILE, `Binary detection log\nGenerated on ${new Date()}\n----------------------------------------\n`);
     } catch (e) {
         console.error(`Error: Could not create log directory or file: ${e.message}`);
@@ -55,7 +52,7 @@ export function detectCompatibleBinary() {
 
     // 3. Test Each Binary
     for (const binaryName of binFiles) {
-        if (binaryName === ENV_FILENAME) continue;
+        if ((binaryName === ENV_FILENAME) || (binaryName == LOG_FILENAME)) continue;
 
         const binaryPath = join(BIN_DIR, binaryName);
         let fileStat;

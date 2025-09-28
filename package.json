@@ -7,10 +7,9 @@
     "url": "https://github.com/yshell-dev/xcss"
   },
   "bin": {
-    "xdev": "./build/js/main.js",
+    "xtsc": "./build/js/main.js",
     "xcss": "./run/script.js",
-    "xmake": "./build/_now_.sh",
-    "xtest": "./exec/_run_"
+    "xdev": "./build/dev.sh"
   },
   "funding": {
     "type": "individual",
@@ -18,9 +17,8 @@
   },
   "scripts": {
     "install": "node ./run/install.js",
-    "ts:compile": "tsc -p ./ts",
-    "es:compile": "node ./build/tsbuild.js",
-    "go:stat": "chmod +x ./build/_stat_.sh && ./build/_stat_.sh go",
+    "ts:build": "tsc -p ./ts",
+    "go:stats": "chmod +x ./build/stats.sh && ./build/stats.sh go",
     "package": "chmod +x ./build/core.sh && ./build/core.sh"
   },
   "bugs": {
@@ -44,7 +42,6 @@
     "@eslint/js": "^9.13.0",
     "@stylistic/eslint-plugin": "^2.9.0",
     "@types/node": "^22.16.3",
-    "esbuild": "^0.25.8",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.26.0"
   },
