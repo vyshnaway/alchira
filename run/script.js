@@ -5,6 +5,7 @@ import { spawnSync } from 'child_process';
 
 import { getBinaryPath } from "./sense.js";
 
+// Get path of valid binary
 const binaryPath = getBinaryPath()
 
 // Check if binary exists (safety check)

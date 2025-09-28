@@ -18,11 +18,11 @@
   },
   "scripts": {
     "install": "node ./run/install.js",
-    "data": "chmod +x ./run/data.sh && ./run/data.sh go",
     "ts:compile": "tsc -p ./typescript",
     "es:compile": "node ./execute/script/esbuild.js",
-    "dev:gobuild": "go build -o ./bin/_ ./go/package.go",
-    "dev:package": "chmod +x ./execute/script/build.sh && ./execute/script/build.sh",
+    "go:test": "go build -o ./bin/_test_ ./go/package.go",
+    "go:stats": "chmod +x ./run/_data.sh && ./run/_data.sh go",
+    "go:package": "chmod +x ./run/_build.sh && ./run/_build.sh",
     "dev:publish": "node ./execute/script/publish.js"
   },
   "bugs": {
