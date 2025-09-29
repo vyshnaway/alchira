@@ -1,7 +1,5 @@
 import fs from "fs";
 import path from "path";
-import { execSync } from "child_process";
-import readline from "readline";
 import fg from "fast-glob";
 import ignore from "ignore";
 
@@ -9,8 +7,16 @@ import ignore from "ignore";
 const coreDir = path.resolve("../core");
 
 // Helper to recursively delete dir (modern Node.js)
-function rmrf(dir) {
-  if (fs.existsSync(dir)) fs.rmSync(dir, { recursive: true, force: true });
+function rmrfExceptGit(dir) {
+  fs.readdirSync(dir).forEach(item => {
+    if (item === '.git') return; // Skip .git
+    const fullPath = path.join(dir, item);
+    if (fs.lstatSync(fullPath).isDirectory()) {
+      fs.rmSync(fullPath, { recursive: true, force: true });
+    } else {
+      fs.unlinkSync(fullPath);
+    }
+  });
 }
 
 // Helper to copy file, preserving relative directory
@@ -20,36 +26,15 @@ function copyFilePreserveDir(src, destRoot) {
   fs.copyFileSync(src, dest);
 }
 
-/**
- * Wraps readline.question in a Promise for cleaner async/await usage.
- * @param {string} promptText
- * @returns {Promise<string>}
- */
-function askCommitMessage(promptText) {
-  const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout,
-  });
-
-  return new Promise((resolve) => {
-    rl.question(promptText, (answer) => {
-      rl.close();
-      resolve(answer);
-    });
-  });
-}
-
 // Main workflow
 (async () => {
 
   // --- Core Publishing Logic ---
   try {
-    // 2. Load and Apply Ignore Rules
     let ig = ignore();
     for (const ignoreFile of [".npmignore"]) {
       const filePath = path.join(process.cwd(), ignoreFile);
       if (fs.existsSync(filePath)) {
-        // IMPORTANT: Add all rules to ignore instance
         ig.add(fs.readFileSync(filePath, "utf8"));
       }
     }
@@ -62,13 +47,12 @@ function askCommitMessage(promptText) {
       followSymbolicLinks: true,
       ignore: ["core/**/*"], // Explicitly ignore the target directory
     });
-
+    
     // 4. Filter with ignore rules
     const filtered = ig.filter(allFiles);
 
     // 5. Prepare and Copy Files
-    // rmrf(coreDir);
-    fs.mkdirSync(coreDir);
+    rmrfExceptGit(coreDir);
     filtered.forEach(file => copyFilePreserveDir(file, coreDir));
     console.log(`Copied ${filtered.length} files to ${coreDir}`);
   } catch (error) {
