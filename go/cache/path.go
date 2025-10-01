@@ -7,13 +7,13 @@ import (
 var Path = map[string]map[string]_types_.File_Source{
 	"blueprint": {
 		"scaffold": {
-			Frags:     []string{"template", "scaffold"},
+			Frags:     []string{"blueprint", "scaffold"},
 			Path:      "",
 			Content:   "",
 			Essential: true,
 		},
 		"libraries": {
-			Frags:     []string{"template", "libraries"},
+			Frags:     []string{"blueprint", "libraries"},
 			Path:      "",
 			Content:   "",
 			Essential: true,
@@ -92,6 +92,12 @@ var Path = map[string]map[string]_types_.File_Source{
 		},
 		"hashrule": {
 			Frags:     []string{"xtyles", "hashrules.jsonc"},
+			Path:      "",
+			Content:   "",
+			Essential: true,
+		},
+		"vendors": {
+			Frags:     []string{"xtyles", "vendors.jsonc"},
 			Path:      "",
 			Content:   "",
 			Essential: true,

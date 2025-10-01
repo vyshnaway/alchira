@@ -17,7 +17,7 @@ func Error_Write(
 	errorstring := S.MAKE(
 		S.Tag.Li(message, S.Preset.Warning),
 		declaration,
-		S.TList{TypeFunc: S.List.Bullets, Intent: 1, Preset: S.Preset.Tertiary},
+		S.MakeList{TypeFunc: S.List.Bullets, Intent: 1, Preset: S.Preset.Tertiary},
 	)
 	diagnostic := _types_.Refer_Diagnostic{
 		Message: message,
@@ -46,6 +46,6 @@ func Error_Report(
 	return S.MAKE(
 		heading,
 		items,
-		S.TList{TypeFunc: S.List.Bullets, Preset: itemPreset},
+		S.MakeList{TypeFunc: S.List.Bullets, Preset: itemPreset},
 	)
 }

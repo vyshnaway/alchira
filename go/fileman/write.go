@@ -23,7 +23,7 @@ func Write_File(filePath string, content string) error {
 }
 
 // Json writes a JSON object to a file, pretty-printing it.
-func Write_Json(pathString string, object map[string]any) error {
+func Write_Json(pathString string, object any) error {
 	dir := _filepath_.Dir(pathString)
 	if !Path_IfDir(dir) {
 		if err := _os_.MkdirAll(dir, 0755); err != nil {

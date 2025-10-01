@@ -1,4 +1,4 @@
-package target
+package stash
 
 import (
 	_fmt_ "fmt"
@@ -37,7 +37,7 @@ func (This *Class) Savefile(filepath string, content string, hashindex int) {
 	if props, ok := This.ExtnsProps[file.Extension]; ok && file.Extension != _cache_.Root.Extension {
 		watchprops = props
 	}
-	parse_response := _script_.Rider(&file, watchprops, _types_.Target_Action_Read)
+	parse_response := _script_.Rider(&file, watchprops, _types_.Script_Action_Read)
 	file.Midway = parse_response.Scribed
 	locales := []string{}
 	for _, locale := range parse_response.Locales {

@@ -11,7 +11,7 @@ import (
 )
 
 func Hashrule_Upload() {
-	_cache_.Style.Hashrule = _cache_.Static.Hashrule
+	_cache_.Style.Hashrules = _cache_.Static.Hashrule
 	hashrule := _cache_.Static.Hashrule
 	errors := make([]string, len(hashrule))
 
@@ -26,7 +26,7 @@ func Hashrule_Upload() {
 		}
 	}
 
-	_cache_.Style.Hashrule = hashrule
+	_cache_.Style.Hashrules = hashrule
 	_cache_.Manifest.Hashrules = hashrule
 	_cache_.Delta.Report.Hashrule = X.Hashrule_Report(hashrule, errors)
 }
@@ -40,8 +40,8 @@ type hashrule_Import_return struct {
 
 func Hashrule_Import(str string, src string) hashrule_Import_return {
 	primitive := str
-	recursionSequence := make([]string, 0, len(_cache_.Style.Hashrule))
-	preview := make(map[string]string, len(_cache_.Style.Hashrule))
+	recursionSequence := make([]string, 0, len(_cache_.Style.Hashrules))
+	preview := make(map[string]string, len(_cache_.Style.Hashrules))
 
 	var response = func(
 		result string,
@@ -72,7 +72,7 @@ func Hashrule_Import(str string, src string) hashrule_Import_return {
 		}
 		match := str[loc[0]:loc[1]]
 		key := match[2 : len(match)-1]
-		replacement, found := _cache_.Style.Hashrule[key]
+		replacement, found := _cache_.Style.Hashrules[key]
 		if !found {
 			replacement = match
 		}

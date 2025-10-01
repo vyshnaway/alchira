@@ -16,7 +16,7 @@ func Hashrule_Error(
 	var errstring = S.Tag.Li(S.Format(source, S.Preset.Tertiary), S.Preset.Failed, S.Style.AS_Bold) + "\n " + S.Tag.Tab(1, S.Preset.None) + S.MAKE(
 		S.Format(primitive, S.Preset.Primary)+" : "+S.Format(message, S.Preset.Failed),
 		List_Props(preview, S.Preset.Primary, S.Preset.Tertiary),
-		S.TList{TypeFunc: S.List.Waterfall, Intent: 1, Preset: S.Preset.Primary},
+		S.MakeList{TypeFunc: S.List.Waterfall, Intent: 1, Preset: S.Preset.Primary},
 	)
 
 	preview["ERROR BY"] = cause
@@ -24,7 +24,7 @@ func Hashrule_Error(
 		Message: S.MAKE(
 			primitive+" : "+message,
 			List_Props(preview, S.Preset.None, S.Preset.None),
-			S.TList{TypeFunc: S.List.Waterfall, Intent: 1, Preset: S.Preset.None},
+			S.MakeList{TypeFunc: S.List.Waterfall, Intent: 1, Preset: S.Preset.None},
 		),
 		Sources: []string{source},
 	}

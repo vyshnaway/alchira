@@ -1,12 +1,12 @@
 package types
 
-type Target_Action int
+type Script_Action int
 
 const (
-	Target_Action_Read Target_Action = iota
-	Target_Action_Sync
-	Target_Action_Watch
-	Target_Action_Monitor
+	Script_Action_Read Script_Action = iota
+	Script_Action_Sync
+	Script_Action_Watch
+	Script_Action_Monitor
 )
 
 type Script_RawStyle struct {
@@ -23,25 +23,4 @@ type Script_RawStyle struct {
 	Innertext  string
 	Styles     map[string]string
 	Attributes map[string]string
-}
-
-type Target_Accumulate struct {
-	Report        []string
-	GlobalClasses map[string]int
-	PublicClasses map[string]int
-	FileManifests map[string]File_LocalManifest
-}
-
-type Target_Stash struct {
-	Source            string
-	Target            string
-	Stylesheet        string
-	SourceStylesheet  string
-	TargetStylesheet  string
-	StylesheetContent string
-
-	Label      string
-	Extensions []string
-	ExtnsProps map[string][]string
-	FileCache  map[string]File_Stash
 }

@@ -25,7 +25,7 @@ func Sync_File(url, path string) (string, error) {
 }
 
 // Json synchronizes a JSON file from a URL or local path.
-func Sync_Json(url, path string) (map[string]interface{}, error) {
+func Sync_Json(url, path string) (any, error) {
 	latestData, err := Read_Json(url, true)
 	if err == nil {
 		if writeErr := Write_Json(path, latestData); writeErr != nil {

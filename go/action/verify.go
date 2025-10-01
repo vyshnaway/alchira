@@ -12,15 +12,15 @@ import (
 )
 
 type Verify_ProxyMapDependency_return struct {
-	Warnings     []string
-	Notification []string
+	Warnings []string
+	Messages []string
 }
 
 // ProxyMapDependency validates and processes proxy map dependencies
-func Verify_ProxyMapDependency(proxymap []_types_.Config_ProxyMap, configdir string) (Verify_ProxyMapDependency_return, error) {
+func Verify_ProxyMapDependency(proxymap []_types_.Config_ProxyMap, configdir string) Verify_ProxyMapDependency_return {
 	result := Verify_ProxyMapDependency_return{
-		Warnings:     []string{},
-		Notification: []string{},
+		Warnings: []string{},
+		Messages: []string{},
 	}
 
 	var wg _sync_.WaitGroup
@@ -117,10 +117,10 @@ func Verify_ProxyMapDependency(proxymap []_types_.Config_ProxyMap, configdir str
 		result.Warnings = append(result.Warnings, w)
 	}
 	for n := range notification_channel {
-		result.Notification = append(result.Notification, n)
+		result.Messages = append(result.Messages, n)
 	}
 
-	return result, nil
+	return result
 }
 
 type verify_Setup_Status_enum int
@@ -132,8 +132,8 @@ const (
 )
 
 func Verify_Setup() (Status verify_Setup_Status_enum, Report string) {
-	status := verify_Setup_Status_Uninitialized
-	report := ""
+	Status = verify_Setup_Status_Uninitialized
+	Report = ""
 
 	if _fileman_.Path_IfDir(_cache_.Path["blueprint"]["scaffold"].Path) {
 		_fileman_.Write_File(_cache_.Path["md"]["reference"].Path, _cache_.Sync["MARKDOWN"]["readme"].Content)
@@ -164,93 +164,126 @@ func Verify_Setup() (Status verify_Setup_Status_enum, Report string) {
 		}
 
 		if len(errors) == 0 {
-			status = verify_Setup_Status_Verified
-			report = S.Tag.H4("Setup Healthy", S.Preset.Success, S.Style.AS_Bold)
+			Status = verify_Setup_Status_Verified
+			Report = S.Tag.H4("Setup Healthy", S.Preset.Success, S.Style.AS_Bold)
 		} else {
-			status = verify_Setup_Status_Inialized
-			report = S.MAKE(
+			Status = verify_Setup_Status_Inialized
+			Report = S.MAKE(
 				S.Tag.H4("Error Paths", S.Preset.Failed),
 				X.List_Props(errors, []string{}, []string{}),
-				S.TList{TypeFunc: S.List.Bullets, Intent: 0, Preset: S.Preset.Failed, Styles: []string{}},
+				S.MakeList{TypeFunc: S.List.Bullets, Intent: 0, Preset: S.Preset.Failed, Styles: []string{}},
 			)
 		}
 	} else {
-		report = S.MAKE(
+		Report = S.MAKE(
 			S.Tag.H4("Setup not initialized in directory.", S.Preset.Warning, S.Style.AS_Bold),
 			[]string{`Use "init" command to initialize.`},
-			S.TList{TypeFunc: S.List.Bullets, Intent: 0, Preset: S.Preset.Warning, Styles: []string{}},
+			S.MakeList{TypeFunc: S.List.Bullets, Intent: 0, Preset: S.Preset.Warning, Styles: []string{}},
 		)
 	}
 
-	return status, report
+	return Status, Report
 }
 
-func Verify_Configs(loadStatics: boolean) {
-	$.TASK("Initializing configs", 0);
-	const errors: string[] = [];
+func Verify_Configs(loadStatics bool) (Report string, Status bool) {
+	S.TASK("Initializing configs", 0)
+	errors := []string{}
 
-	$.STEP("PATH : " + CACHE.PATH.json.configure.path);
-	const config = await FILEMAN.read.json(CACHE.PATH.json.configure.path);
-	if (config.status) {
-		const CONFIG = config.data as _Config.Raw;
-		if (loadStatics) { await FetchStatics(CONFIG.vendors); }
-		ACTION.setTWEAKS(CONFIG.tweaks);
-
-		CACHE.STATIC.ProxyMap = Array.isArray(CONFIG.proxymap) ? CONFIG.proxymap.reduce((A, I) => {
-			if (
-				typeof I === "object"
-				&& typeof I.source === "string"
-				&& typeof I.target === "string"
-				&& typeof I.stylesheet === "string"
-				&& typeof I.extensions === "object"
-				&& I.source !== ""
-				&& I.target !== ""
-				&& I.stylesheet !== ""
-				&& Object.keys(I.extensions).length !== 0
-			) {
-				Object.entries(I.extensions).forEach(([K, V]) => {
-					if (Array.isArray(V)) {
-						I.extensions[K] = V.filter(e => typeof e === "string");
-					} else {
-						I.extensions[K] = [];
-					}
-				});
-				I.source = fixPath(I.source);
-				I.target = fixPath(I.target);
-				I.stylesheet = fixPath(I.stylesheet);
-				A.push(I);
-			}
-			return A;
-		}, [] as _Config.ProxyMap[]) : [];
-		if (CACHE.STATIC.ProxyMap.length === 0) {
-			errors.push($.tag.Li(CACHE.PATH.json.configure.path + ": Workable proxies unavailable."));
+	config_path := _cache_.Path["json"]["configure"].Path
+	S.STEP("PATH : "+config_path, 0)
+	config_data, config_err := _fileman_.Read_Json(config_path, false)
+	if config_err == nil {
+		CONFIG := config_data.(_types_.Config_Raw)
+		if loadStatics {
+			Fetch_Statics(CONFIG.Vendors)
+		}
+		if CONFIG.Tweaks != nil {
+			Setup_Tweaks(CONFIG.Tweaks)
 		}
 
-		Object.assign(CACHE.STATIC.Archive, config.data);
-		CACHE.STATIC.Archive.name = CACHE.STATIC.Archive.name = CONFIG.name || CACHE.STATIC.ProjectName;
-		CACHE.STATIC.Archive.version = CACHE.STATIC.Archive.version = CONFIG.version || CACHE.STATIC.ProjectVersion;
-		CACHE.STATIC.Archive.readme = (await FILEMAN.read.file(CACHE.PATH.md.readme.path)).data;
-		CACHE.STATIC.Archive.licence = (await FILEMAN.read.file(CACHE.PATH.md.licence.path)).data;
-		CACHE.STATIC.Artifacts_Saved = Object.entries((typeof CONFIG.artifacts === "object") ? CONFIG.artifacts : {})
-			.reduce((a, [k, v]) => {
-				if (typeof v === "string" && v !== '-') { a[k] = v; }
-				return a;
-			}, {} as Record<string, string>);
+		for _, I := range CONFIG.ProxyMap {
+			// Simplified validation based on TypeScript checks
+			isValid := (I.Source != "" && I.Target != "" && I.Stylesheet != "")
 
-		const results = await VERIFY.proxyMapDependency(CACHE.STATIC.ProxyMap, CACHE.PATH.folder.scaffold.path);
-		errors.push(...results.warnings);
+			if len(I.Extensions) == 0 {
+				isValid = false
+			}
+
+			if isValid {
+
+				I.Source = _fileman_.PathFix(I.Source)
+				I.Target = _fileman_.PathFix(I.Target)
+				I.Stylesheet = _fileman_.PathFix(I.Stylesheet)
+
+				_cache_.Static.ProxyMap = append(_cache_.Static.ProxyMap, I)
+			}
+		}
+
+		// CACHE.STATIC.ProxyMap = Array.isArray(CONFIG.proxymap) ? CONFIG.proxymap.reduce((A, I) => {
+		// 	if (
+		// 		typeof I === "object"
+		// 		&& typeof I.source === "string"
+		// 		&& typeof I.target === "string"
+		// 		&& typeof I.stylesheet === "string"
+		// 		&& typeof I.extensions === "object"
+		// 		&& I.source !== ""
+		// 		&& I.target !== ""
+		// 		&& I.stylesheet !== ""
+		// 		&& Object.keys(I.extensions).length !== 0
+		// 	) {
+		// 		Object.entries(I.extensions).forEach(([K, V]) => {
+		// 			if (Array.isArray(V)) {
+		// 				I.extensions[K] = V.filter(e => typeof e === "string");
+		// 			} else {
+		// 				I.extensions[K] = [];
+		// 			}
+		// 		});
+		// 		I.source = fixPath(I.source);
+		// 		I.target = fixPath(I.target);
+		// 		I.stylesheet = fixPath(I.stylesheet);
+		// 		A.push(I);
+		// 	}
+		// 	return A;
+		// }, [] as _Config.ProxyMap[]) : [];
+		// if (CACHE.STATIC.ProxyMap.length === 0) {
+		// 	errors.push($.tag.Li(CACHE.PATH.json.configure.path + ": Workable proxies unavailable."));
+		// }
+
+		// Object.assign(CACHE.STATIC.Archive, config.data);
+		// CACHE.STATIC.Archive.name = CACHE.STATIC.Archive.name = CONFIG.name || CACHE.STATIC.ProjectName;
+		// CACHE.STATIC.Archive.version = CACHE.STATIC.Archive.version = CONFIG.version || CACHE.STATIC.ProjectVersion;
+		// CACHE.STATIC.Archive.readme = (await FILEMAN.read.file(CACHE.PATH.md.readme.path)).data;
+		// CACHE.STATIC.Archive.licence = (await FILEMAN.read.file(CACHE.PATH.md.licence.path)).data;
+		// CACHE.STATIC.Artifacts_Saved = Object.entries((typeof CONFIG.artifacts === "object") ? CONFIG.artifacts : {})
+		// 	.reduce((a, [k, v]) => {
+		// 		if (typeof v === "string" && v !== '-') { a[k] = v; }
+		// 		return a;
+		// 	}, {} as Record<string, string>);
+
+		dependancy_response := Verify_ProxyMapDependency(_cache_.Static.ProxyMap, _cache_.Path["folder"]["scafffold"].Path)
+		errors = append(errors, dependancy_response.Warnings...)
 	} else {
-		errors.push(`${CACHE.PATH.json.configure.path} : Bad json file.`);
+		errors = append(errors, config_path+" : Bad json file.")
 	}
 
-	$.TASK("Initialization finished");
-	return {
-		status: Object.keys(errors).length === 0,
-		report: $.MAKE(
-			Object.keys(errors).length === 0
-				? $.tag.H4("Configs Healthy", $.preset.success, $.style.AS_Bold)
-				: $.tag.H4("Error Paths: " + CACHE.PATH.json.configure.path, $.preset.failed, $.style.AS_Bold),
-			errors, [$.list.Bullets, 0, $.preset.warning]
+	S.TASK("Initialization finished", 0)
+	Status = len(errors) == 0
+	if Status {
+		Report = S.MAKE(
+			S.Tag.H4("Configs Healthy", S.Preset.Success, S.Style.AS_Bold),
+			errors,
+			S.MakeList{TypeFunc: S.List.Bullets, Intent: 0, Preset: S.Preset.Warning},
 		)
-	};
+
+		return Report, Status
+	} else {
+		Report = S.MAKE(
+			S.Tag.H4("Error path : "+config_path, S.Preset.Failed, S.Style.AS_Bold),
+			errors,
+			S.MakeList{TypeFunc: S.List.Bullets, Intent: 0, Preset: S.Preset.Warning},
+		)
+
+		return Report, Status
+	}
+
 }

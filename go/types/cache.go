@@ -72,7 +72,7 @@ type Cache_Delta_Diagnostics struct {
 	Artifacts []Refer_Diagnostic
 	Axioms    []Refer_Diagnostic
 	Clusters  []Refer_Diagnostic
-	Targets   []Refer_Diagnostic
+	TargetDir []Refer_Diagnostic
 	Multiples []Refer_Diagnostic
 }
 
@@ -88,14 +88,8 @@ type Cache_Delta struct {
 	Diagnostics  Cache_Delta_Diagnostics
 }
 
-type Cache_Files struct {
-	Libraries map[string]File_Stash
-	Artifacts map[string]File_Stash
-	Targetdir map[string]Target_Stash
-}
-
 type Cache_Style struct {
-	Hashrule        map[string]string
+	Hashrules       map[string]string
 	Index_to_Data   map[int]Style_ClassData
 	Global___Index  Style_ClassIndexMap
 	Public___Index  Style_ClassIndexMap

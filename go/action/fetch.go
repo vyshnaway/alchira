@@ -182,47 +182,47 @@ func ProxyMapSync(proxyMaps []_types_.Config_ProxyMap) (map[string]_types_.Confi
 // 	if (modPts) { await FILEMAN.write.file(CACHE.PATH.autogen.ignore.path, manifestIgnores.join("\n")); }
 // }
 
-// export async function FetchStatics(vendorSource: string) {
-// 	$.TASK("Loading vendor-prefixes");
+func Fetch_Statics(vendor_source string) {
+	// $.TASK("Loading vendor-prefixes");
 
-// 	const PrefixObtained = await (async function () {
-// 		const result1 = await FILEMAN.read.json(vendorSource, true);
-// 		if (result1.status) { return result1.data; };
+	// const PrefixObtained = await (async function () {
+	// 	const result1 = await FILEMAN.read.json(vendorSource, true);
+	// 	if (result1.status) { return result1.data; };
 
-// 		const result2 = await FILEMAN.read.json(CACHE.ROOT.url.Prefixes + vendorSource, true);
-// 		if (result2.status) { return result2.data; };
+	// 	const result2 = await FILEMAN.read.json(CACHE.ROOT.url.Prefixes + vendorSource, true);
+	// 	if (result2.status) { return result2.data; };
 
-// 		const result3 = await FILEMAN.read.json(CACHE.PATH.blueprint.prefixes.path, false);
-// 		if (result3.status) { return result3.data; };
+	// 	const result3 = await FILEMAN.read.json(CACHE.PATH.blueprint.prefixes.path, false);
+	// 	if (result3.status) { return result3.data; };
 
-// 		return {};
-// 	})() as _Cache.PREFIX;
-// 	await FILEMAN.write.json(CACHE.PATH.blueprint.prefixes.path, PrefixObtained);
+	// 	return {};
+	// })() as _Cache.PREFIX;
+	// await FILEMAN.write.json(CACHE.PATH.blueprint.prefixes.path, PrefixObtained);
 
-// 	const PrefixRead: _Cache.PREFIX = {
-// 		attributes: {},
-// 		pseudos: {},
-// 		values: {},
-// 		atrules: {},
-// 		classes: {},
-// 		elements: {}
-// 	};
+	// const PrefixRead: _Cache.PREFIX = {
+	// 	attributes: {},
+	// 	pseudos: {},
+	// 	values: {},
+	// 	atrules: {},
+	// 	classes: {},
+	// 	elements: {}
+	// };
 
-// 	for (const key in PrefixRead) {
-// 		const typedKey = key as keyof _Cache.PREFIX;
-// 		const valueFromObtained = PrefixObtained[typedKey];
-// 		if (typedKey === 'values') {
-// 			PrefixRead[typedKey] = valueFromObtained as Record<string, Record<string, Record<string, string>>>;
-// 		} else {
-// 			PrefixRead[typedKey] = valueFromObtained as Record<string, Record<string, string>>;
-// 		}
-// 	}
-// 	CACHE.STATIC.Prefix.pseudos = { ...PrefixRead.classes, ...PrefixRead.elements, ...PrefixRead.pseudos };
-// 	CACHE.STATIC.Prefix.attributes = { ...PrefixRead.attributes };
-// 	CACHE.STATIC.Prefix.atrules = { ...PrefixRead.atrules };
-// 	CACHE.STATIC.Prefix.values = { ...PrefixRead.values };
-// 	ACTION.setVendors();
-// }
+	// for (const key in PrefixRead) {
+	// 	const typedKey = key as keyof _Cache.PREFIX;
+	// 	const valueFromObtained = PrefixObtained[typedKey];
+	// 	if (typedKey === 'values') {
+	// 		PrefixRead[typedKey] = valueFromObtained as Record<string, Record<string, Record<string, string>>>;
+	// 	} else {
+	// 		PrefixRead[typedKey] = valueFromObtained as Record<string, Record<string, string>>;
+	// 	}
+	// }
+	// CACHE.STATIC.Prefix.pseudos = { ...PrefixRead.classes, ...PrefixRead.elements, ...PrefixRead.pseudos };
+	// CACHE.STATIC.Prefix.attributes = { ...PrefixRead.attributes };
+	// CACHE.STATIC.Prefix.atrules = { ...PrefixRead.atrules };
+	// CACHE.STATIC.Prefix.values = { ...PrefixRead.values };
+	// ACTION.setVendors();
+}
 
 // export async function SaveRootCss() {
 // 	$.TASK("Updating Index");

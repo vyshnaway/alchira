@@ -42,7 +42,7 @@ func Read_File(target string, online bool) (data string, err error) {
 }
 
 // Json reads a JSON file from disk or fetches it from a URL, stripping comments.
-func Read_Json(target string, online bool) (data map[string]any, err error) {
+func Read_Json(target string, online bool) (data any, err error) {
 	var rawContent string
 	var readErr error
 

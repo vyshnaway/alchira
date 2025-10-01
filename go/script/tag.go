@@ -24,7 +24,7 @@ type tag_Parse_retype struct {
 func tag_Scanner(
 	fileData *_types_.File_Stash,
 	classProps []string,
-	action _types_.Target_Action,
+	action _types_.Script_Action,
 	cursor *_Cursor_.Type,
 ) tag_Parse_retype {
 	classesList := [][]string{}

@@ -28,8 +28,10 @@ func main() {
 	projectPackagePath := "package.json"
 	rootPackagePath, _ := _fileman_.Path_Resolves("package.json")
 
-	var rootPackageData, rootPackageErr = _fileman_.Read_Json(rootPackagePath, false)
-	var projectPackageData, projectPackageErr = _fileman_.Read_Json(projectPackagePath, false)
+	rootPackageData, rootPackageErr := _fileman_.Read_Json(rootPackagePath, false)
+	projectPackageData, projectPackageErr := _fileman_.Read_Json(projectPackagePath, false)
+	rootPackageData_ := rootPackageData.(_types_.Refer_PackageEssential)
+	projectPackageData_ := projectPackageData.(_types_.Refer_PackageEssential)
 
 	// Validate originPackageJson
 	if rootPackageErr == nil {
@@ -37,31 +39,31 @@ func main() {
 		_os_.Exit(1)
 	}
 
-	projectName, _ := projectPackageData["name"].(string)
+	projectName := projectPackageData_.Name
 	if projectName == "" {
 		projectName = "-"
 	}
-	projectVersion, _ := projectPackageData["version"].(string)
+	projectVersion := projectPackageData_.Version
 	if projectVersion == "" {
 		projectVersion = "0.0.0"
 	}
 
 	bin := ""
-	if m, ok := rootPackageData["bin"].(map[string]any); ok {
-		for k := range m {
-			bin = k
-			break
-		}
-	}
+	// if m, ok := rootPackageData_.Bin.(map[string]any); ok {
+	// 	for k := range m {
+	// 		bin = k
+	// 		break
+	// 	}
+	// }
 	rootPackageEssential := _types_.Refer_PackageEssential{
 		Bin:     bin,
-		Name:    helper_ResolveStringFallback(rootPackageData["name"], _cache_.Root.Name),
-		Version: helper_ResolveStringFallback(rootPackageData["version"], _cache_.Root.Version),
+		Name:    helper_ResolveStringFallback(rootPackageData_.Name, _cache_.Root.Name),
+		Version: helper_ResolveStringFallback(rootPackageData_.Version, _cache_.Root.Version),
 	}
 
 	// --- Script sync with Project ---
 	if projectPackageErr == nil && rootPackageErr == nil {
-		if scriptsData, ok := projectPackageData["scripts"].(map[string]any); ok && slices.Contains(exposedCommands, cmd) {
+		if scriptsData, ok := projectPackageData_.Scripts.(map[string]any); ok && slices.Contains(exposedCommands, cmd) {
 			addedCommands := 0
 			for cmdKey, cmdLine := range _cache_.Root.Scripts {
 				if _, exists := scriptsData[cmdKey]; !exists {

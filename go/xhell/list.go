@@ -25,7 +25,7 @@ func List_Steps(heading string, steps []string) string {
 	return S.MAKE(
 		S.Tag.H2(heading, S.Preset.Primary),
 		steps,
-		S.TList{TypeFunc: S.List.Bullets},
+		S.MakeList{TypeFunc: S.List.Bullets},
 	)
 }
 
@@ -33,7 +33,7 @@ func List_Record(heading string, record map[string]string) string {
 	return S.MAKE(
 		S.Tag.H2(heading, S.Preset.Primary),
 		List_Props(record, S.Preset.Primary, S.Preset.Text),
-		S.TList{TypeFunc: S.List.Bullets, Preset: S.Preset.Primary},
+		S.MakeList{TypeFunc: S.List.Bullets, Preset: S.Preset.Primary},
 	)
 }
 
@@ -41,7 +41,7 @@ func List_Catalog(heading string, items []string) string {
 	return S.MAKE(
 		S.Tag.H2(heading, S.Preset.Primary),
 		items,
-		S.TList{TypeFunc: S.List.Catalog},
+		S.MakeList{TypeFunc: S.List.Catalog},
 	)
 }
 
@@ -52,7 +52,7 @@ func List_Chart(heading string, items map[string][]string) string {
 			sections = append(sections, S.MAKE(
 				S.Tag.H6(head, S.Preset.Tertiary),
 				entries,
-				S.TList{TypeFunc: S.List.Bullets, Preset: S.Preset.Primary},
+				S.MakeList{TypeFunc: S.List.Bullets, Preset: S.Preset.Primary},
 			))
 		}
 		return S.MAKE(

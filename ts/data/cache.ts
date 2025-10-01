@@ -154,7 +154,7 @@ export const FILES: _Cache.FILES = {
 
 
 
-// --- Path Declare --- 
+// --- Path Declare ---     
 
 export const SYNC: Record<string, Record<string, _File.Sync>> = {
     MARKDOWN: {

@@ -21,9 +21,10 @@ type Refer_WatchEvent struct {
 }
 
 type Refer_PackageEssential struct {
-	Bin     string `json:"bin"`
-	Name    string `json:"name"`
-	Version string `json:"version"`
+	Bin     map[string]string `json:"bin"`
+	Scripts map[string]string `json:"bin"`
+	Name    string            `json:"name"`
+	Version string            `json:"version"`
 }
 
 type Refer_Diagnostic struct {

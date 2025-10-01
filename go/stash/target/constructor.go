@@ -1,4 +1,4 @@
-package target
+package stash
 
 import (
 	_cache_ "main/cache"
@@ -7,9 +7,21 @@ import (
 	_maps_ "maps"
 )
 
-type Class _types_.Target_Stash
+type Class struct {
+	Source            string
+	Target            string
+	Stylesheet        string
+	SourceStylesheet  string
+	TargetStylesheet  string
+	StylesheetContent string
 
-func Constructor(storage _types_.Config_ProxyStorage, label string) Class {
+	Label      string
+	Extensions []string
+	ExtnsProps map[string][]string
+	FileCache  map[string]_types_.File_Stash
+}
+
+func New(storage _types_.Config_ProxyStorage, label string) Class {
 	storage.Extensions[_cache_.Root.Extension] = []string{}
 	extentions := []string{}
 
