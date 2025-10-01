@@ -26,7 +26,7 @@ func Accumulate() {
 
 	for key, val := range accumulated.FileManifests {
 		_cache_.Manifest.Local[key] = val.Local
-		_cache_.Delta.Lookup.TargetDir[K] = val.Lookup
+		_cache_.Delta.Lookup.TargetDir[key] = val.Lookup
 		_cache_.Delta.Errors.TargetDir = append(_cache_.Delta.Errors.TargetDir, val.Errors...)
 		_cache_.Delta.Diagnostics.TargetDir = append(_cache_.Delta.Diagnostics.TargetDir, val.Diagnostics...)
 
