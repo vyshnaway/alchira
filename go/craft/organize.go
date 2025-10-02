@@ -1,17 +1,20 @@
 package craft
 
 import (
-	// S "main/shell"
-	// S "main/shell"
-	// S "main/shell"
+	_artifact_ "main/artifact"
 	_cache_ "main/cache"
+	_order_ "main/order"
 	S "main/shell"
 	_stash_ "main/stash"
 	_types_ "main/types"
-	"maps"
+	_utils_ "main/utils"
+	X "main/xhell"
+	_maps_ "maps"
+	_slices_ "slices"
+	_strconv_ "strconv"
 )
 
-func Accumulate() {
+func accumulate() {
 	accumulated := _stash_.Target_Accumulate()
 	_cache_.Style.Global___Index = accumulated.GlobalClasses
 	_cache_.Style.Public___Index = accumulated.PublicClasses
@@ -41,92 +44,107 @@ func Accumulate() {
 	}
 
 	_cache_.Manifest.Lookup = map[string]_types_.File_Lookup{}
-	maps.Copy(_cache_.Manifest.Lookup, _cache_.Delta.Lookup.Artifacts)
-	maps.Copy(_cache_.Manifest.Lookup, _cache_.Delta.Lookup.Libraries)
-	maps.Copy(_cache_.Manifest.Lookup, _cache_.Delta.Lookup.TargetDir)
+	_maps_.Copy(_cache_.Manifest.Lookup, _cache_.Delta.Lookup.Artifacts)
+	_maps_.Copy(_cache_.Manifest.Lookup, _cache_.Delta.Lookup.Libraries)
+	_maps_.Copy(_cache_.Manifest.Lookup, _cache_.Delta.Lookup.TargetDir)
 
 	_cache_.Delta.Errors.Multiples = []string{}
 	_cache_.Delta.Diagnostics.Multiples = []_types_.Refer_Diagnostic{}
-	// Object.values(CACHE.CLASS.Index_to_Data).forEach((data) => {
-	// 	if (data.metadata.declarations.length > 1) {
-	// 		 E = $$.GenerateError(`Duplicate Declarations: ${data.symclass}`, data.metadata.declarations);
-	// 		_cache_.Delta.Errors.multiples.push(E.error);
-	// 		_cache_.Delta.Diagnostics.multiples.push(E.diagnostic);
-	// 	}
-	// });
+	for _, val := range _cache_.Style.Index_to_Data {
+		if len(val.Metadata.Declarations) > 1 {
+			error_ := X.Error_Write("Duplicate Declarations: "+val.SymClass, val.Metadata.Declarations)
+			_cache_.Delta.Errors.Multiples = append(_cache_.Delta.Errors.Multiples, error_.Errorstring)
+			_cache_.Delta.Diagnostics.Multiples = append(_cache_.Delta.Diagnostics.Multiples, error_.Diagnostic)
+		}
+	}
 
-	// _cache_.Delta.Manifest.errors = [];
-	// Object.values(_cache_.Delta.Diagnostics).forEach((V) => _cache_.Delta.Manifest.errors.push(...V));
-	// _cache_.Delta.ErrorCount = _cache_.Delta.Manifest.errors.length;
+	_cache_.Manifest.Diagnostics = []_types_.Refer_Diagnostic{}
+	_slices_.Concat(_cache_.Manifest.Diagnostics, _cache_.Delta.Diagnostics.Artifacts)
+	_slices_.Concat(_cache_.Manifest.Diagnostics, _cache_.Delta.Diagnostics.Axioms)
+	_slices_.Concat(_cache_.Manifest.Diagnostics, _cache_.Delta.Diagnostics.Clusters)
+	_slices_.Concat(_cache_.Manifest.Diagnostics, _cache_.Delta.Diagnostics.Multiples)
+	_slices_.Concat(_cache_.Manifest.Diagnostics, _cache_.Delta.Diagnostics.TargetDir)
+	_cache_.Delta.ErrorCount = len(_cache_.Manifest.Diagnostics)
 
-	// _cache_.Delta.Report.errors = $.MAKE(
-	// 	$.tag.H2(`${_cache_.Delta.ErrorCount} Errors`, _cache_.Delta.ErrorCount ? $.preset.failed : $.preset.success),
-	// 	Object.values(_cache_.Delta.Errors).reduce((A, I) => { A.push(...I); return A; }, [] as string[])
-	// );
+	errorlist := []string{}
+	_slices_.Concat(errorlist, _cache_.Delta.Errors.Artifacts)
+	_slices_.Concat(errorlist, _cache_.Delta.Errors.Axioms)
+	_slices_.Concat(errorlist, _cache_.Delta.Errors.Clusters)
+	_slices_.Concat(errorlist, _cache_.Delta.Errors.Multiples)
+	_slices_.Concat(errorlist, _cache_.Delta.Errors.TargetDir)
+	_cache_.Delta.Report.Errors = ""
+
+	if _cache_.Delta.ErrorCount > 0 {
+		S.MAKE(
+			S.Tag.H2(_strconv_.Itoa(_cache_.Delta.ErrorCount)+" Errors", S.Preset.Failed),
+			errorlist,
+		)
+	}
 }
 
-// function SaveClassRefs(stash: _Style.SortedOutput) {
-// 	CACHE.CLASS.Sync_PublishIndexMap = stash.recompClasslist.reduce((acc, [index, classId]) => {
-// 		 className = "_" + Use.string.enCounter(classId);
-// 		acc.push([`.${className}`, index]);
-// 		return acc;
-// 	}, [] as _Style.ClassIndexTrace);
+func Organize() (AritfactFiles map[string]string, Attachments []int) {
 
-// 	Object.entries(stash.referenceMap).forEach(([jsonArray, iMap]) => {
-// 		CACHE.CLASS.Sync_ClassDictionary[jsonArray] = Object.entries(iMap).reduce((a, [ref, id]) => {
-// 			a[ref] = "_" + Use.string.enCounter(id); return a;
-// 		}, {} as Record<string, string>);
-// 	});
-// }
+	_cache_.Style.ClassDictionary = _types_.Style_Dictionary{}
+	_cache_.Style.PublishIndexMap = []_types_.Style_ClassIndexTrace{}
 
-// async function Synthasize(OUTFILES: Record<string, string> = {}) {
-// 	Accumulate();
-// 	CACHE.CLASS.Sync_ClassDictionary = {};
-// 	CACHE.CLASS.Sync_PublishIndexMap = [];
+	SaveClassRefs := func(stash _types_.Refer_SortedOutput) {
+		for _, val := range stash.RecompClasslist {
+			index := val[0]
+			classid := val[1]
+			classname := "_" + _utils_.String_EnCounter(classid)
+			_cache_.Style.PublishIndexMap = append(_cache_.Style.PublishIndexMap, _types_.Style_ClassIndexTrace{
+				ClassName:  classname,
+				ClassIndex: index,
+			})
+		}
 
-// 	 ATTACHMENTS: number[] = [];
-// 	 CLASSESLIST: number[][] = [];
-// 	Object.values(_cache_.Static.TargetDir_Saved).forEach((cache) => cache.GetTracks(CLASSESLIST, ATTACHMENTS));
+		for json_array, imap := range stash.ReferenceMap {
+			_cache_.Style.ClassDictionary[json_array] = map[int]string{}
+			for ref, id := range imap {
+				_cache_.Style.ClassDictionary[json_array][ref] = "_" + _utils_.String_EnCounter(id)
+			}
+		}
+	}
 
-// 	if (_cache_.Static.WATCH) {
-// 		_cache_.Delta.FinalMessage = _cache_.Delta.ErrorCount + " Errors.";
-// 	} else {
-// 		if (_cache_.Static.Command == "preview") {
-// 			 response = await ORDER(CLASSESLIST, _cache_.Static.Command, _cache_.Static.Argument);
-// 			SaveClassRefs(response.result);
+	accumulate()
+	artifact_files := map[string]string{}
+	tracks_ := _stash_.Target_GetTracks()
 
-// 			if (_cache_.Delta.Manifest.errors.length) {
-// 				_cache_.Delta.FinalMessage = _cache_.Delta.ErrorCount + " Unresolved Errors. Rectify them to proceed with 'publish' command.";
-// 			} else {
-// 				_cache_.Delta.FinalMessage = "Preview verified with no major errors. Procceed to 'publish' using your key.";
-// 			}
-// 		}
+	if _cache_.Static.WATCH {
+		_cache_.Delta.FinalMessage = _strconv_.Itoa(_cache_.Delta.ErrorCount) + " Errors."
+	} else if _cache_.Static.Command == "preview" {
+		res, _ := _order_.Order(tracks_.ClassTracks, "preview", _cache_.Static.Argument, _types_.Config_Archive{})
+		SaveClassRefs(*res.Result)
 
-// 		if (_cache_.Static.Command == "publish") {
-// 			if (_cache_.Delta.Manifest.errors.length) {
-// 				 response = await ORDER(CLASSESLIST, "preview", _cache_.Static.Argument);
-// 				_cache_.Static.Command = "preview";
-// 				SaveClassRefs(response.result);
+		if _cache_.Delta.ErrorCount > 0 {
+			_cache_.Delta.FinalMessage = _strconv_.Itoa(_cache_.Delta.ErrorCount) + " Unresolved Errors. Rectify them to proceed with 'publish' command."
+		} else {
+			_cache_.Delta.FinalMessage = "Preview verified with no major errors. Procceed to 'publish' using your key."
+		}
+	} else if _cache_.Static.Command == "publish" {
+		if _cache_.Delta.ErrorCount > 0 {
+			res, _ := _order_.Order(tracks_.ClassTracks, "preview", _cache_.Static.Argument, _types_.Config_Archive{})
+			SaveClassRefs(*res.Result)
 
-// 				_cache_.Delta.FinalMessage = "Errors in " + _cache_.Delta.ErrorCount + " Tags. Falling back to 'preview' command.";
-// 			} else {
-// 				 archive = ARTIFACTS.ARCHIVE();
-// 				 response = await ORDER(CLASSESLIST, "publish", _cache_.Static.Argument, archive);
-// 				SaveClassRefs(response.result);
+			_cache_.Delta.FinalMessage = "Errors in " + _strconv_.Itoa(_cache_.Delta.ErrorCount) + " Tags. Falling back to 'preview' command."
+			_cache_.Static.Command = "preview"
+		} else {
+			archive := _artifact_.Archive()
+			res, _ := _order_.Order(tracks_.ClassTracks, "publish", _cache_.Static.Argument, archive)
+			SaveClassRefs(*res.Result)
 
-// 				if (response.status) {
-// 					await ARTIFACTS.DEPLOY(OUTFILES);
-// 					_cache_.Delta.FinalMessage = "Build Success.";
-// 				} else {
-// 					_cache_.Delta.PublishError = response.message;
-// 					_cache_.Delta.FinalMessage = "Build Atttempt Failed. Fallback with Preview.";
-// 				}
-// 			}
-// 		}
-// 	}
+			if res.Status {
+				artifact_files = _artifact_.Deploy()
+				_cache_.Delta.FinalMessage = "Build Success."
+			} else {
+				_cache_.Delta.PublishError = res.Message
+				_cache_.Delta.FinalMessage = "Build Atttempt Failed. Fallback with Preview."
+			}
+		}
+	}
 
-// 	return ATTACHMENTS;
-// }
+	return artifact_files, tracks_.Attachments
+}
 
 // async function GenFinalSheets(OUTFILES: Record<string, string> = {}) {
 // 	 ATTACHMENTS = new Set(await Synthasize(OUTFILES));

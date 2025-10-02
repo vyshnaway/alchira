@@ -221,7 +221,6 @@ async function GenFinalSheets(OUTFILES: Record<string, string> = {}) {
 		Appendix: "",
 	};
 
-
 	const indexScanned = STYLE.CSSFileScanner(Use.code.uncomment.Css(CACHE.STATIC.RootCSS), "INDEX ||");
 	CACHE.DELTA.Manifest.constants = Object.keys(indexScanned.variables);
 	CACHE.DELTA.Report.constants = $$.ListCatalog("Root Constants", CACHE.DELTA.Manifest.constants);

@@ -140,7 +140,7 @@ export const FILES = {
     ARTIFACTS: {},
     TARGETDIR: {}
 };
-// --- Path Declare --- 
+// --- Path Declare ---     
 export const SYNC = {
     MARKDOWN: {
         readme: {

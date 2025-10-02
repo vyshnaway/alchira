@@ -54,3 +54,19 @@ func Target_Accumulate() _target_.Accumulator_return {
 
 	return accumulated
 }
+
+func Target_GetTracks() _target_.GetTracks_return {
+	classtracks := [][]int{}
+	attachments := []int{}
+
+	for _, target := range Cache.Targetdir {
+		tracks_ := target.GetTracks()
+		classtracks = append(classtracks, tracks_.ClassTracks...)
+		attachments = append(attachments, tracks_.Attachments...)
+	}
+
+	return _target_.GetTracks_return{
+		Attachments: attachments,
+		ClassTracks: classtracks,
+	}
+}

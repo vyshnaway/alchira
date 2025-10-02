@@ -10,7 +10,7 @@ tsconfig.build.json
 .vscode/
 .trash/
 
-build/
+dev/
 go/
 cdn/
 node_modules/

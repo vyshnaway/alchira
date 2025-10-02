@@ -7,9 +7,9 @@
     "url": "https://github.com/yshell-dev/xcss"
   },
   "bin": {
-    "xtsc": "./build/js/main.js",
+    "xtsc": "./dev/js/main.js",
     "xcss": "./run/script.js",
-    "xdev": "./build/dev.sh"
+    "xdev": "./dev/run.sh"
   },
   "funding": {
     "type": "individual",
@@ -18,8 +18,8 @@
   "scripts": {
     "install": "node ./run/install.js",
     "ts:build": "tsc -p ./ts",
-    "go:stats": "chmod +x ./build/stats.sh && ./build/stats.sh go",
-    "package": "chmod +x ./build/core.sh && ./build/core.sh"
+    "go:build": "chmod +x ./dev/exec.sh && ./dev/exec.sh go",
+    "go:stats": "chmod +x ./dev/stats.sh && ./dev/stats.sh go"
   },
   "bugs": {
     "url": "https://github.com/yshell-dev/xcss-online/issues"
