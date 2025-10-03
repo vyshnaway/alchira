@@ -1,14 +1,14 @@
 package fileman
 
 import (
-	_os_ "os"
-	_io_ "io"
-	_fmt_ "fmt"
-	_http_ "net/http"
-	_regexp_ "regexp"
-	_strings_ "strings"
 	_json_ "encoding/json"
+	_fmt_ "fmt"
+	_io_ "io"
+	_utils_ "main/utils"
+	_http_ "net/http"
+	_os_ "os"
 	_filepath_ "path/filepath"
+	_strings_ "strings"
 )
 
 // File reads a file from disk or fetches it from a URL.
@@ -47,7 +47,7 @@ func Read_Json(target string, online bool) (data any, err error) {
 	var readErr error
 
 	if online {
-		 rawContent, readErr = Read_File(target, true)
+		rawContent, readErr = Read_File(target, true)
 	} else {
 		rawContent, readErr = Read_File(target, false)
 	}
@@ -56,10 +56,7 @@ func Read_Json(target string, online bool) (data any, err error) {
 		return nil, readErr
 	}
 
-	// Remove C-style comments (/* ... */) and single-line comments (// ...)
-	// This regex is a simplified version and might not handle all edge cases perfectly.
-	commentRegex := _regexp_.MustCompile(`(?s)/\*.*?\*/|//.*`)
-	cleanContent := commentRegex.ReplaceAllString(rawContent, "")
+	cleanContent := _utils_.Code_Uncomment(rawContent, true, true, false)
 
 	var jsonData map[string]any
 	err = _json_.Unmarshal([]byte(cleanContent), &jsonData)

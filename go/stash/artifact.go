@@ -102,7 +102,7 @@ func Artifact_Update() {
 				file.Manifest.Diagnostics = append(file.Manifest.Diagnostics, E.Diagnostic)
 			} else {
 				artifact_counter++
-				Rawtag_Upload_ := _style_.Rawtag_Upload(&tagstyle, &file, &_cache_.Style.Artifact_Index, _cache_.Static.DEBUG)
+				Rawtag_Upload_ := _style_.Rawtag_Upload(&tagstyle, &file, &_cache_.Style.Artifact_Index, _cache_.Static.VERBOSE)
 				styledata := _cache_.Index_Fetch(Rawtag_Upload_.Index)
 				if len(styledata.Declarations) == 1 {
 					file.StyleData.UsedIn = append(file.StyleData.UsedIn, Rawtag_Upload_.Index)

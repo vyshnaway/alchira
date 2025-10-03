@@ -19,18 +19,18 @@ type Config_ProxyStorage struct {
 }
 
 type Config_Raw struct {
-	Name      string            `json:"name"`
-	Version   string            `json:"version"`
-	Vendors   string            `json:"vendors"`
-	Artifacts map[string]string `json:"artifacts"`
-	ProxyMap  []Config_ProxyMap `json:"proxymap"`
-	Tweaks    Config_Tweaks     `json:"tweaks"`
+	Name      string            `json:"name,omitempty"`
+	Version   string            `json:"version,omitempty"`
+	Vendors   string            `json:"vendors,omitempty"`
+	Artifacts map[string]string `json:"artifacts,omitempty"`
+	ProxyMap  []Config_ProxyMap `json:"proxymap,omitempty"`
+	Tweaks    Config_Tweaks     `json:"tweaks,omitempty"`
 }
 
 type Config_Archive struct {
-	Name          string            `json:"name"`
-	Version       string            `json:"version"`
-	Versions      []string          `json:"versions"`
+	Name          string            `json:"name,omitempty"`
+	Version       string            `json:"version,omitempty"`
+	Versions      []string          `json:"versions,omitempty"`
 	Tweaks        Config_Tweaks     `json:"tweaks,omitempty"`
 	Vendors       string            `json:"vendors,omitempty"`
 	Readme        string            `json:"readme,omitempty"`

@@ -25,7 +25,7 @@ type Cache_Root struct {
 
 type Cache_Static struct {
 	WATCH           bool
-	DEBUG           bool
+	VERBOSE         bool
 	Command         string
 	Argument        string
 	RootCSS         string

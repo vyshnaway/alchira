@@ -102,7 +102,7 @@ func Generate() (Files map[string]string, Report string) {
 		style_sheet := func() string {
 			frags := []string{}
 			for k, v := range render_frags {
-				if _cache_.Static.DEBUG {
+				if _cache_.Static.VERBOSE {
 					frags = append(frags, "\n\n/* Section: "+k+" */\n"+v+"\n")
 				} else {
 					frags = append(frags, v)

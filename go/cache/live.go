@@ -6,7 +6,7 @@ import (
 
 var Static = _types_.Cache_Static{
 	WATCH:           false,
-	DEBUG:           false,
+	VERBOSE:         false,
 	ProjectName:     "",
 	ProjectVersion:  "",
 	Command:         "",

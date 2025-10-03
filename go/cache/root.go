@@ -29,7 +29,7 @@ var Root = _types_.Cache_Root{
 		"preview": "Test build. Pass test for \"publish\" command.",
 		"publish": "Optimized build, uses web-api.",
 		"install": "Install external artifacts.",
-		"manifest": "Dryrun to not update source folders.",
+		"version": "Returns version.",
 	},
 	Scripts: map[string]string{
 		"init":     "init",

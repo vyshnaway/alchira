@@ -128,7 +128,7 @@ func Library_Update() {
 				file.Manifest.Diagnostics = append(file.Manifest.Diagnostics, E.Diagnostic)
 			} else {
 				artifact_counter++
-				Rawtag_Upload_ := _style_.Rawtag_Upload(&tagstyle, &file, &_cache_.Style.Artifact_Index, _cache_.Static.DEBUG)
+				Rawtag_Upload_ := _style_.Rawtag_Upload(&tagstyle, &file, &_cache_.Style.Artifact_Index, _cache_.Static.VERBOSE)
 				styledata := _cache_.Index_Fetch(Rawtag_Upload_.Index)
 				if len(styledata.Declarations) == 1 {
 					file.StyleData.UsedIn = append(file.StyleData.UsedIn, Rawtag_Upload_.Index)
@@ -158,7 +158,7 @@ func Library_Update() {
 	axiomChart := map[string][]string{}
 	axiom_counter := 0
 	for index, files := range StackLibraryFiles_.Axiom {
-		Cssfile_Collection_ := _style_.Cssfile_Collection(&files, false, _cache_.Static.DEBUG)
+		Cssfile_Collection_ := _style_.Cssfile_Collection(&files, false, _cache_.Static.VERBOSE)
 		_cache_.Manifest.Axiom[_strconv_.Itoa(index)] = Cssfile_Collection_.MetadataCollection
 		if count := len(Cssfile_Collection_.SelectorList); count > 0 {
 			axiom_counter += count
@@ -178,7 +178,7 @@ func Library_Update() {
 	clusterChart := map[string][]string{}
 	cluster_counter := 0
 	for index, files := range StackLibraryFiles_.Cluster {
-		Cssfile_Collection_ := _style_.Cssfile_Collection(&files, false, _cache_.Static.DEBUG)
+		Cssfile_Collection_ := _style_.Cssfile_Collection(&files, false, _cache_.Static.VERBOSE)
 		_cache_.Manifest.Cluster[_strconv_.Itoa(index)] = Cssfile_Collection_.MetadataCollection
 		if count := len(Cssfile_Collection_.SelectorList); count > 0 {
 			cluster_counter += count

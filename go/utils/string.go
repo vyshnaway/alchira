@@ -101,3 +101,10 @@ func String_Memory(s string) float64 {
 	f, _ := _strconv_.ParseFloat(_strconv_.FormatFloat(sizeKB, 'f', 2, 64), 64)
 	return f
 }
+
+func String_Fallback(val any, fallback string) string {
+	if s, ok := val.(string); ok && s != "" {
+		return s
+	}
+	return fallback
+}

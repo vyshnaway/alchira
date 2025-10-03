@@ -61,7 +61,7 @@ cd "$SRC_PATH"
 # Execute the build command
 # -ldflags='-s -w' strips debugging info for smaller size.
 # The executable is placed at the absolute path $EXEC_PATH
-go build -ldflags='-s -w' -o "$EXEC_PATH"
+go build -gcflags='all=-l -N' -ldflags='-s -w' -o "$EXEC_PATH"
 
 # Return to the original execution directory
 cd $PROJECT_DIR

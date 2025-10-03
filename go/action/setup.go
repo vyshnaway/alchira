@@ -30,9 +30,12 @@ func Setup_Environment(rootpath string, workpath string, package_essential types
 	if len(package_essential.Version) > 0 {
 		cache.Root.Version = package_essential.Version
 	}
-	// if len(package_essential.Bin) > 0 {
-	// 	cache.Root.Bin = package_essential.Bin
-	// }
+	if len(package_essential.Bin) > 0 {
+		for k := range package_essential.Bin {
+			cache.Root.Bin  = k
+			break
+		}
+	}
 
 	for group_name, group_sources := range cache.Path {
 		if group_name == "blueprint" {
