@@ -32,7 +32,7 @@ type Style_Metadata struct {
 	Attributes   map[string]string  `json:"attributes"`
 }
 
-type Style_Object map[string]map[string]any
+type Style_Object map[string]any
 
 type Style_ClassData struct {
 	Index         int
@@ -45,7 +45,7 @@ type Style_ClassData struct {
 	Declarations  []string
 	StyleObject   Style_Object
 	SnippetStaple string
-	SnippetStyle  any
+	SnippetStyle  Style_Object
 }
 
 type Style_Dictionary map[string]map[int]string

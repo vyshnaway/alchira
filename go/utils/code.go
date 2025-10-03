@@ -78,9 +78,23 @@ func Code_Minify(content string) string {
 	return _strings_.TrimSpace(out)
 }
 
-func Code_JsonBuild(obj any) string {
-	b, _ := _json_.MarshalIndent(obj, "", "    ")
-	return string(b)
+func Code_Strip(content string, single, multi, html, minify bool) string {
+	uncommented := Code_Uncomment(content, single, multi, html)
+	if minify {
+		return Code_Minify(uncommented)
+	} else {
+		return uncommented
+	}
+}
+
+func Code_JsonBuild(obj any, gap string) string {
+	if gap == "" {
+		b, _ := _json_.Marshal(obj)
+		return string(b)
+	} else {
+		b, _ := _json_.MarshalIndent(obj, "", "  ")
+		return string(b)
+	}
 }
 
 func Code_JsonParse(str string) (map[string]any, error) {

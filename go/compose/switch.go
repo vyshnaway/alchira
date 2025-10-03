@@ -6,7 +6,6 @@ import (
 	_strings_ "strings"
 )
 
-
 func wrapper(parentObject map[string]any, keys []string, childObject any) {
 	if len(keys) == 0 {
 		return
@@ -29,7 +28,6 @@ func wrapper(parentObject map[string]any, keys []string, childObject any) {
 		parentObject[activeKey] = childObject
 	}
 }
-
 
 func switch_ObjectReorder(object map[string]map[string]any) map[string]any {
 	output := map[string]any{"": map[string]any{}}
@@ -58,8 +56,8 @@ func switch_ObjectReorder(object map[string]map[string]any) map[string]any {
 	return output
 }
 
-func ComposeSwitched(classObjectMap map[string]map[string]any, minify bool) string {
-	
+func Switched(classObjectMap map[string]map[string]any, minify bool) string {
+
 	prepared := [][2]any{}
 	inits := []string{}
 	mins := []string{}
@@ -102,7 +100,7 @@ func ComposeSwitched(classObjectMap map[string]map[string]any, minify bool) stri
 	_slices_.Sort(maxs)
 	_slices_.Sort(mins)
 	_slices_.Reverse(mins)
-	
+
 	allkeys := flats
 	allkeys = append(allkeys, mins...)
 	allkeys = append(allkeys, maxs...)
@@ -113,7 +111,6 @@ func ComposeSwitched(classObjectMap map[string]map[string]any, minify bool) stri
 
 	return Render(prepared, minify)
 }
-
 
 // func ComposeSwitched(selectorIndex [][2]any, minify bool) string {
 // 	objectMap := map[string]map[string]any{}

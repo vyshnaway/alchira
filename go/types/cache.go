@@ -77,8 +77,8 @@ type Cache_Delta_Diagnostics struct {
 }
 
 type Cache_Delta struct {
-	DeltaPath    string
-	DeltaContent string
+	Path         string
+	Content      string
 	PublishError string
 	FinalMessage string
 	ErrorCount   int

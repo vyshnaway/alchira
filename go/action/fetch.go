@@ -1,13 +1,11 @@
 package action
 
 import (
-	_fmt_ "fmt"
 	_cache_ "main/cache"
 	_fileman_ "main/fileman"
 	_types_ "main/types"
 	_maps_ "maps"
 	_os_ "os"
-	_filepath_ "path/filepath"
 	_regexp_ "regexp"
 	_slices_ "slices"
 	_strings_ "strings"

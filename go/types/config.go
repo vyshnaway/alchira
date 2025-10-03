@@ -10,12 +10,12 @@ type Config_ProxyMap struct {
 }
 
 type Config_ProxyStorage struct {
-	Source              string              
-	Target              string              
-	Stylesheet          string              
-	Extensions          map[string][]string 
-	StylesheetContent   string              
-	Filepath_to_Content map[string]string   
+	Source              string
+	Target              string
+	Stylesheet          string
+	Extensions          map[string][]string
+	StylesheetContent   string
+	Filepath_to_Content map[string]string
 }
 
 type Config_Raw struct {
@@ -30,11 +30,13 @@ type Config_Raw struct {
 type Config_Archive struct {
 	Name          string            `json:"name"`
 	Version       string            `json:"version"`
+	Versions      []string          `json:"versions"`
 	Tweaks        Config_Tweaks     `json:"tweaks,omitempty"`
 	Vendors       string            `json:"vendors,omitempty"`
 	Readme        string            `json:"readme,omitempty"`
 	Licence       string            `json:"licence,omitempty"`
 	ExportSheet   string            `json:"exportsheet,omitempty"`
+	Constants     []string          `json:"constants,omitempty"`
 	Artifacts     map[string]string `json:"artifacts,omitempty"`
 	ProxyMap      []Config_ProxyMap `json:"proxymap,omitempty"`
 	ExportClasses []string          `json:"exportclasses,omitempty"`

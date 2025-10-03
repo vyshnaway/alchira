@@ -1,148 +1,129 @@
-import $ from "./shell/main.js";
-import fileman from "./fileman.js";
+package craft
 
-import * as $$ from "./shell.js";
-import * as CACHE from "./data/cache.js";
+import (
+	_fmt_ "fmt"
+	_cache_ "main/cache"
+	_fileman_ "main/fileman"
+	S "main/shell"
+	_types_ "main/types"
+	X "main/xhell"
+	_maps_ "maps"
+	_strings_ "strings"
+	_sync_ "sync"
+)
 
-import * as _Config from "./type/config.js";
-import * as _Style from "./type/style.js";
+func artifact_Fetch(identifier string, source string) (Files map[string]string, Status bool) {
+	files := map[string]string{}
+	artifactspath := _cache_.Path["folder"]["artifacts"].Path
 
+	status, fetched := func() (Ok bool, result _types_.Config_Archive) {
+		var res_nil _types_.Config_Archive
 
-function ARCHIVE() {
-    delete CACHE.STATIC.Archive.tweaks;
-    delete CACHE.STATIC.Archive.vendors;
-    delete CACHE.STATIC.Archive.proxymap;
-    delete CACHE.STATIC.Archive.artifacts;
+		if res, err := _fileman_.Read_Json(source, true); err == nil {
+			if r, ok := res.(_types_.Config_Archive); ok {
+				return true, r
+			}
+			return false, res_nil
+		}
 
-    CACHE.STATIC.Archive.exportclasses = [];
-    CACHE.STATIC.Archive.exportsheet = Object.values(Object.values(CACHE.FILES.TARGETDIR).reduce((a, i) => {
-        Object.assign(a, i.GetExports()); return a;
-    }, {} as Record<string, _Style.ExportStyle>))
-        .map(i => {
-            if (i.symclass.includes('$$$')) { CACHE.STATIC.Archive.exportclasses?.push(i.symclass); }
+		parts := _strings_.Split(source, "@")
+		name := parts[0]
+		var version string
+		if len(parts) > 1 {
+			version = parts[1]
+		} else {
+			version = "latest"
+		}
+		official_src := _cache_.Root.Url.Artifacts + name + "/" + version
 
-            return [
-                ('<' + [
-                    i.element,
-                    ...i.stylesheet.map(([A, V]) => {
-                        const symclass = i.symclass.startsWith("$") ? `-${i.symclass}` : i.symclass;
+		if res, err := _fileman_.Read_Json(official_src, true); err == nil {
+			if r, ok := res.(_types_.Config_Archive); ok {
+				return ok, r
+			}
+		}
 
-                        if (A === "") {
-                            const value = (i.attachments.length
-                                ? `${CACHE.ROOT.customOperations["attach"]} ${i.attachments.join(" ")};`
-                                : "") + V;
+		return false, res_nil
+	}()
 
-                            return `${symclass}${value.length ? `="${value}"` : ''}`;
-                        } else {
-                            return `${"{" + JSON.parse(A).join("}&{") + "}&"}="${V}"`;
-                        }
+	if status {
+		if fetched.Artifacts != nil {
+			for lib, str := range fetched.Artifacts {
+				files[_fileman_.Path_Join(artifactspath, identifier, lib+"."+identifier+"."+"css")] = str
+			}
+			fetched.Artifacts = nil
+		}
 
-                    }),
-                    ...i.attributes.map(([k, v]) => `${k}=${v}`)
-                ].join(' ') + '>'),
-                i.innertext,
-                `</${i.element}>`,
-                ``
-            ].join(" ");
-        }).join("\n\n");
+		if fetched.Readme != "" {
+			files[_fileman_.Path_Join(artifactspath, identifier, `readme.md`)] = fetched.Readme
+			fetched.Readme = ""
+		}
 
-    return CACHE.STATIC.Archive;
+		if fetched.Licence != "" {
+			files[_fileman_.Path_Join(artifactspath, identifier, `licence.md`)] = fetched.Licence
+			fetched.Licence = ""
+		}
+
+		if fetched.ExportSheet != "" {
+			lines := []string{
+				_fmt_.Sprintf("# %s@%s : Available SymClasses", fetched.Name, fetched.Version),
+				"",
+			}
+
+			// If there are ExportClasses, map to lines
+			if len(fetched.ExportClasses) > 0 {
+				for _, i := range fetched.ExportClasses {
+					if _strings_.Contains(i, "$$$") {
+						lines = append(lines, _fmt_.Sprintf("> /%s/%s", identifier, _strings_.Replace(i, "$$$", "$", 1)))
+					} else {
+						lines = append(lines, _fmt_.Sprintf("> /%s/%s", identifier, i))
+					}
+				}
+			}
+
+			lines = append(lines, "")
+			lines = append(lines, "")
+			lines = append(lines, "# Declarations")
+			lines = append(lines, "")
+			lines = append(lines, fetched.ExportSheet)
+
+			files[_fileman_.Path_Join(artifactspath, identifier, identifier+"."+_cache_.Root.Extension)] = _strings_.Join(lines, "\n")
+			fetched.ExportSheet = ""
+		}
+	}
+
+	return files, status
 }
 
-async function DEPLOY(OUTFILES: Record<string, string> = {}) {
-    const latestverfile = `latest.json`;
-    const currentexport = JSON.stringify(CACHE.STATIC.Archive);
-    const currentverfile = `${CACHE.STATIC.Archive.version}.json`;
-    const availableversions = (await fileman.path.listFiles(CACHE.PATH.folder.arcversion.path)).map(i => fileman.path.basename(i));
+func artifact_Update() (Files map[string]string, Report string, Status bool) {
+	files := map[string]string{}
+	responses := map[string]string{}
+	status := false
+	report := ""
 
-    const latestpath = fileman.path.join(CACHE.PATH.folder.arcversion.path, latestverfile);
-    const currentpath = fileman.path.join(CACHE.PATH.folder.arcversion.path, currentverfile);
+	if _cache_.Static.Archive.Artifacts != nil {
+		var wg _sync_.WaitGroup
 
-    if (!availableversions.includes(latestverfile)) { availableversions.push(latestverfile); }
-    if (!availableversions.includes(currentverfile)) { availableversions.push(currentverfile); }
+		for identifier, source := range _cache_.Static.Archive.Artifacts {
+			wg.Add(1)
 
-    OUTFILES[latestpath] = currentexport;
-    OUTFILES[currentpath] = currentexport;
+			func() {
+				defer wg.Done()
+				if f, s := artifact_Fetch(identifier, source); s {
+					_maps_.Copy(files, f)
+					responses[identifier] = S.Tag.Span("Successfull", S.Preset.Success)
+				} else {
+					responses[identifier] = S.Tag.Span("Unavailable", S.Preset.Failed)
+				}
+			}()
+		}
 
-    const indexexport = {
-        ...CACHE.STATIC.Archive,
-        versions: availableversions.sort(),
-    };
-    delete indexexport.exportsheet;
+		wg.Wait()
+	}
 
-    OUTFILES[CACHE.PATH.json.archive.path] = JSON.stringify(indexexport);
+	report = S.MAKE(
+		"",
+		X.List_Props(responses, S.Preset.None, S.Preset.None),
+		S.MakeList{Intent: 0, TypeFunc: S.List.Bullets, Preset: S.Preset.Text},
+	)
+	return files, report, status
 }
-
-
-export async function FETCH() {
-    const outs: Record<string, string> = {}, Results: Record<string, string> = {};
-    let message = "", status = true;
-
-    if (CACHE.STATIC.Archive.artifacts) {
-        await Promise.all(Object.entries(CACHE.STATIC.Archive.artifacts).map(async ([identifier, source]) => {
-
-            const fetched = await (async function () {
-                const [name, version] = typeof source === "string" ? source.split("@") : ["", ""];
-
-                const result1 = await fileman.read.json(source, true);
-                if (result1.status) { return result1.data; };
-
-                const result2 = await fileman.read.json(CACHE.ROOT.url.Artifacts + `${name}/${version || "latest"}`, true);
-                if (result2.status) { return result2.data; };
-
-                return {};
-            })() as _Config.Archive;
-
-            if (CACHE.STATIC.Archive.name === identifier) {
-                Results[identifier] = $.tag.Span("Artifact identifer collition with project.", $.preset.failed);
-                status = false;
-            } else if (Object.keys(fetched).length === 0) {
-                Results[identifier] = $.tag.Span("Unavailable", $.preset.failed);
-                status = false;
-            } else {
-                if (fetched.libraries) {
-                    Object.entries(fetched.libraries).forEach(([lib, str]) => {
-                        outs[fileman.path.join(CACHE.PATH.folder.artifacts.path, identifier, `${lib}.${identifier}.css`)] = str;
-                    });
-                    delete fetched.libraries;
-                }
-                if (fetched.exportsheet) {
-                    outs[fileman.path.join(CACHE.PATH.folder.artifacts.path, identifier, `${identifier}.${CACHE.ROOT.extension}`)] = ([
-                        `# ${fetched.name}@${fetched.version} : Available SymClasses`,
-                        "",
-                        ...(fetched.exportclasses ? fetched.exportclasses.map(i => {
-                            if (i.includes("$$$")) {
-                                return `> /${identifier}/${i.replace("$$$", "$")}`;
-                            } else {
-                                return `> /${identifier}/${i}`;
-                            }
-                        }) : []),
-                        "",
-                        "",
-                        "# Declarations",
-                        "",
-                        fetched.exportsheet,
-                    ]).join("\n");
-                    delete fetched.exportsheet;
-                }
-                if (fetched.readme) {
-                    outs[fileman.path.join(CACHE.PATH.folder.artifacts.path, identifier, `readme.md`)] = fetched.readme;
-                    delete fetched.readme;
-                }
-                if (fetched.licence) {
-                    outs[fileman.path.join(CACHE.PATH.folder.artifacts.path, identifier, `licence.md`)] = fetched.licence;
-                    delete fetched.licence;
-                }
-                Results[identifier] = $.tag.Span("Successfull", $.preset.success);
-            }
-        }));
-    }
-    message = $.MAKE("", $$.ListProps(Results), [$.list.Bullets, 0, $.preset.text]);
-    return { status, outs, message };
-}
-
-export default {
-    ARCHIVE,
-    DEPLOY,
-    FETCH,
-};

@@ -49,10 +49,10 @@ func Update_Target(
 			}
 		} else if _, ok := _cache_.Static.TargetDir_Saved[targetfolder].Extensions[extension]; ok {
 			_cache_.Static.TargetDir_Saved[targetfolder].Filepath_to_Content[filepath] = filecontent
-			_cache_.Delta.DeltaPath = _fileman_.Path_Join(_cache_.Static.TargetDir_Saved[targetfolder].Source, filepath)
+			_cache_.Delta.Path = _fileman_.Path_Join(_cache_.Static.TargetDir_Saved[targetfolder].Source, filepath)
 		} else {
-			_cache_.Delta.DeltaPath = _fileman_.Path_Join(_cache_.Static.TargetDir_Saved[targetfolder].Source, filepath)
-			_cache_.Delta.DeltaContent = filecontent
+			_cache_.Delta.Path = _fileman_.Path_Join(_cache_.Static.TargetDir_Saved[targetfolder].Source, filepath)
+			_cache_.Delta.Content = filecontent
 			reCache = false
 		}
 	case Update_Target_action_Removed:

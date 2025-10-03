@@ -31,17 +31,17 @@ func Reset() {
 
 func UtilsGetUsage() string {
 	chart := map[string]float64{
-		"Files":  _utils_.String_Memory(_utils_.Code_JsonBuild(Cache)),
-		"Sync":   _utils_.String_Memory(_utils_.Code_JsonBuild(_cache_.Sync)),
-		"Path":   _utils_.String_Memory(_utils_.Code_JsonBuild(_cache_.Path)),
-		"Root":   _utils_.String_Memory(_utils_.Code_JsonBuild(_cache_.Root)),
-		"Delta":  _utils_.String_Memory(_utils_.Code_JsonBuild(_cache_.Delta)),
-		"Class":  _utils_.String_Memory(_utils_.Code_JsonBuild(_cache_.Style)),
-		"Static": _utils_.String_Memory(_utils_.Code_JsonBuild(_cache_.Static)),
+		"Files":  _utils_.String_Memory(_utils_.Code_JsonBuild(Cache,"")),
+		"Sync":   _utils_.String_Memory(_utils_.Code_JsonBuild(_cache_.Sync,"")),
+		"Path":   _utils_.String_Memory(_utils_.Code_JsonBuild(_cache_.Path,"")),
+		"Root":   _utils_.String_Memory(_utils_.Code_JsonBuild(_cache_.Root,"")),
+		"Delta":  _utils_.String_Memory(_utils_.Code_JsonBuild(_cache_.Delta,"")),
+		"Class":  _utils_.String_Memory(_utils_.Code_JsonBuild(_cache_.Style,"")),
+		"Static": _utils_.String_Memory(_utils_.Code_JsonBuild(_cache_.Static,"")),
 		"Proxy": func() float64 {
 			total := 0.0
 			for _, c := range _cache_.Static.TargetDir_Saved {
-				total += _utils_.String_Memory(_utils_.Code_JsonBuild(c))
+				total += _utils_.String_Memory(_utils_.Code_JsonBuild(c, ""))
 			}
 			return total
 		}(),

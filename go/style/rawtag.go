@@ -61,7 +61,7 @@ func Rawtag_Upload(
 			verbose,
 		)
 
-		object := map[string]map[string]any{}
+		object := map[string]any{}
 		for k, v := range stylescanned.Result {
 			v_typed, v_ok := v.(map[string]any)
 			if v_ok {
@@ -139,13 +139,7 @@ func Rawtag_Upload(
 			staple = raw.Innertext
 		}
 
-		skeleton := map[string]any{}
-		for k, v := range object {
-			s := _utils_.Map_Skeleton(v)
-			if len(s) > 0 {
-				skeleton[k] = s
-			}
-		}
+		skeleton :=_utils_.Map_Skeleton(object)
 
 		index = _cache_.Index_Declare(_types_.Style_ClassData{
 			Index:       0,

@@ -255,7 +255,6 @@ async function GenFinalSheets(OUTFILES: Record<string, string> = {}) {
 		const AttachedStyle = Object.entries(ClassData.snippet_style);
 		if (AttachedStyle.length) { ATTACH_STYLES.push(...AttachedStyle); }
 		if (ClassData.snippet_staple.length) { ATTACH_STAPLES.push(ClassData.snippet_staple); }
-		return ClassData.snippet_style;
 	});
 	RENDERFRAGS.Attach = COMPILE.Prefixed(ATTACH_STYLES);
 

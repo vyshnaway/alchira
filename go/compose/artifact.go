@@ -2,10 +2,9 @@ package compose
 
 import (
 	_cache_ "main/cache"
-	_utils_ "main/utils"
 	_types_ "main/types"
+	_utils_ "main/utils"
 	_strings_ "strings"
-
 )
 
 func artifact_Partial(object map[string]any, minify bool) []string {
@@ -39,7 +38,7 @@ func artifact_Partial(object map[string]any, minify bool) []string {
 }
 
 func Artifact(index int) _types_.Style_ExportStyle {
-	
+
 	element := ""
 	innertext := ""
 	symclass := ""
@@ -47,10 +46,12 @@ func Artifact(index int) _types_.Style_ExportStyle {
 	attributes := [][2]string{}
 	styleobject := map[string]any{}
 
-	if style := _cache_.Index_Fetch(index); _strings_.Contains(style.SymClass, "$$$") && style != nil{
+	if style := _cache_.Index_Fetch(index); _strings_.Contains(style.SymClass, "$$$") && style != nil {
 		for k, v := range style.StyleObject {
 			styleobject[k] = v
-			stylesheet = append(stylesheet, [2]string{k, _strings_.Join(artifact_Partial(v, true), "")})
+			if v_mod, v_ok := v.(map[string]any); v_ok {
+				stylesheet = append(stylesheet, [2]string{k, _strings_.Join(artifact_Partial(v_mod, true), "")})
+			}
 		}
 
 		if len(style.SnippetStaple) > 0 {

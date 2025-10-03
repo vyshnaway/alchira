@@ -1,0 +1,36 @@
+const { exec } = require('child_process');
+
+// Define the command to run. Since your executable is available via npx,
+// the command is simply 'npx xcss manifest'.
+const command = 'npx xcss manifest';
+
+console.log(`Invoking command: ${command}`);
+
+exec(command, (error, stdout, stderr) => {
+    if (error) {
+        console.error(`Execution Failed. Error code: ${error.code}`);
+        console.error(`Details: ${stderr.trim()}`);
+        return;
+    }
+
+    // 1. Check for unexpected output on the error stream
+    if (stderr) {
+        console.warn(`Warning/Non-fatal errors from executable: ${stderr.trim()}`);
+    }
+
+    // 2. Parse the STDOUT as JSON
+    try {
+        const manifestJson = stdout.trim();
+        const manifestObject = JSON.parse(manifestJson);
+
+        console.log('✅ Manifest successfully received and parsed!');
+        console.log(`Manifest Version: ${manifestObject.version}`);
+        // Now you can work with the 'manifestObject' in your JS code
+        // e.log(manifestObject);
+
+    } catch (e) {
+        console.error("❌ Failed to parse JSON output from executable.");
+        console.error("Received STDOUT:", stdout);
+        console.error("JSON Parsing Error:", e.message);
+    }
+});

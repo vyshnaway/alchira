@@ -1,114 +1,169 @@
 package craft
 
-func generate_FinalSheets(OUTFILES: Record<string, string> = {}) {
-	 ATTACHMENTS = new Set(await Synthasize(OUTFILES));
+import (
+	_fmt_ "fmt"
+	_cache_ "main/cache"
+	_compose_ "main/compose"
+	S "main/shell"
+	_stash_ "main/stash"
+	_style_ "main/style"
+	_types_ "main/types"
+	_utils_ "main/utils"
+	X "main/xhell"
+	_maps_ "maps"
+	_slices_ "slices"
+	_strings_ "strings"
+)
 
-	 RENDERFRAGS = {
-		Root: "",
-		Class: "",
-		Attach: "",
-		Appendix: "",
-	};
+func Generate() (Files map[string]string, Report string) {
+	files := map[string]string{}
+	report := ""
 
-	 indexScanned = STYLE.CSSFileScanner(Use.code.uncomment.Css(_cache_.Static.RootCSS), "INDEX ||");
-	_cache_.Delta.Manifest.ants = Object.keys(indexScanned.variables);
-	_cache_.Delta.Report.ants = $$.ListCatalog("Root ants", _cache_.Delta.Manifest.ants);
-	indexScanned.attachments.forEach((attachment) => ATTACHMENTS.add(INDEX.FIND(attachment).index));
-	 WATCHINDEX = RENDERFRAGS.Root = COMPILE.Prefixed(indexScanned.styles);
+	if len(_cache_.Delta.Content) > 0 {
+		files[_cache_.Delta.Path] = _cache_.Delta.Content
+	} else {
 
-	RENDERFRAGS.Appendix = COMPILE.Prefixed(
-		Object.values(_cache_.Static.TargetDir_Saved).reduce((appendix, cache) => {
-			 appendixScanned = STYLE.CSSFileScanner(cache.StylesheetContent, `APPENDIX : ${cache.targetStylesheet} ||`);
-			appendix.push(...appendixScanned.styles);
-			appendixScanned.attachments.forEach((i) => {
-				 found = INDEX.FIND(i).index;
-				if (found) { ATTACHMENTS.add(INDEX.FIND(i).index); }
-			});
-			return appendix;
-		}, [] as [string, string | object][])
-	);
+		artifact_files, attachments := Organize()
+		_maps_.Copy(files, artifact_files)
 
-	 targetRenderAction: _Script._Actions = (_cache_.Static.Command == "debug") ? _Script._Actions.monitor
-		: (_cache_.Static.Command == "preview" && _cache_.Static.Argument == "watch") ? _Script._Actions.watch : _Script._Actions.sync;
-	Object.values(_cache_.Static.TargetDir_Saved).forEach((cache) => cache.SyncClassnames(targetRenderAction));
-	RENDERFRAGS.Class = COMPILE.Switched(CACHE.CLASS.Sync_PublishIndexMap);
+		index_scanned := _style_.Cssfile_Parse(
+			_utils_.Code_Uncomment(_cache_.Static.RootCSS, false, true, false),
+			"INDEX ||",
+			_cache_.Static.WATCH,
+		)
+		_cache_.Manifest.Constants = _slices_.Collect(_maps_.Keys(index_scanned.Variables))
+		_cache_.Delta.Report.Constants = X.List_Catalog("Root Constants", _cache_.Manifest.Constants)
+		for _, attachment := range index_scanned.Attachments {
+			if res := _cache_.Index_Find(attachment, _types_.Style_ClassIndexMap{}); res.Index > 0 {
+				attachments = append(attachments, res.Index)
+			}
+		}
+		watch_index := _compose_.Render(index_scanned.Result, _cache_.Static.WATCH)
 
-	 ATTACH_STAPLES: string[] = [];
-	 ATTACH_STYLES: [string, object | string][] = [];
-	(_cache_.Static.WATCH
-		? Object.keys(CACHE.CLASS.Index_to_Data).map(i => Number(i))
-		: Array.from(ATTACHMENTS)
-	).forEach(attachment => {
-		 ClassData = INDEX.FETCH(attachment);
-		 AttachedStyle = Object.entries(ClassData.snippet_style);
-		if (AttachedStyle.length) { ATTACH_STYLES.push(...AttachedStyle); }
-		if (ClassData.snippet_staple.length) { ATTACH_STAPLES.push(ClassData.snippet_staple); }
-		return ClassData.snippet_style;
-	});
-	RENDERFRAGS.Attach = COMPILE.Prefixed(ATTACH_STYLES);
+		var render_action _types_.Script_Action
+		if _cache_.Static.Command == "debug" {
+			render_action = _types_.Script_Action_Monitor
+		} else if _cache_.Static.Command == "preview" && _cache_.Static.WATCH {
+			render_action = _types_.Script_Action_Watch
+		} else {
+			render_action = _types_.Script_Action_Sync
+		}
+		for _, target := range _stash_.Cache.Targetdir {
+			target.SyncClassnames(render_action)
+		}
 
-	 STAPLESHEET = Use.string.minify(Use.code.uncomment.Script(ATTACH_STAPLES.join(""), false, false, true));
-	 STYLESHEET = Object.entries(RENDERFRAGS)
-		.map(([chapter, content]) => _cache_.Static.DEBUG ? `\n\n/* CHAPTER: ${chapter} */\n${content}\n` : content).join("");
-	 WATCHCLASS = _cache_.Static.WATCH
-		? Use.string.minify(Use.code.uncomment.Script(
-			COMPILE.Switched(
-				Object.entries(CACHE.CLASS.Index_to_Data).reduce((A, [I, D]) => {
-					A.push(['.' + D.metadata.watchclass, Number(I)]);
-					return A;
-				}, [] as [string, number][])
-			) + RENDERFRAGS.Attach
-		)) : '';
+		attach_staples := []string{}
+		attach_styles := [][2]any{}
+		attachment_list := []int{}
+		if _cache_.Static.WATCH {
+			attachment_list = _slices_.Collect(_maps_.Keys(_cache_.Style.Index_to_Data))
+		} else {
+			attachment_list = _utils_.Array_Setback(attachments)
+		}
+		for _, a := range attachment_list {
+			data := _cache_.Index_Fetch(a)
+			for k, v := range data.SnippetStyle {
+				attach_styles = append(attach_styles, [2]any{k, v})
+			}
+			if len(data.SnippetStaple) > 0 {
+				attach_staples = append(attach_staples, data.SnippetStaple)
+			}
+		}
+		staple_sheet := _utils_.Code_Minify(_utils_.Code_Uncomment(_strings_.Join(attach_staples, ""), false, false, true))
 
-	return { RENDERFRAGS, STYLESHEET, STAPLESHEET, WATCHINDEX, WATCHCLASS };
+		render_frags := map[string]string{
+			"Root": watch_index,
+			"Class": _compose_.Switched(func() map[string]map[string]any {
+				result := map[string]map[string]any{}
+				for _, i := range _cache_.Style.PublishIndexMap {
+					result[i.ClassName] = _cache_.Index_Fetch(i.ClassIndex).StyleObject
+				}
+				return result
+			}(), _cache_.Static.WATCH),
+			"Attach": _compose_.Render(attach_styles, _cache_.Static.WATCH),
+			"Appendix": _compose_.Render(
+				func() [][2]any {
+					appendix_styles := [][2]any{}
+					for _, cache := range _stash_.Cache.Targetdir {
+						scanned := _style_.Cssfile_Parse(cache.StylesheetContent, `APPENDIX : ${cache.targetStylesheet} ||`, _cache_.Static.WATCH)
+						appendix_styles = append(appendix_styles, scanned.Result...)
+						for _, attachment := range scanned.Attachments {
+							if res := _cache_.Index_Find(attachment, _types_.Style_ClassIndexMap{}); res.Index > 0 {
+								attachments = append(attachments, res.Index)
+							}
+						}
+					}
+					return appendix_styles
+				}(),
+				_cache_.Static.WATCH,
+			),
+		}
+
+		style_sheet := func() string {
+			frags := []string{}
+			for k, v := range render_frags {
+				if _cache_.Static.DEBUG {
+					frags = append(frags, "\n\n/* Section: "+k+" */\n"+v+"\n")
+				} else {
+					frags = append(frags, v)
+				}
+			}
+
+			return _strings_.Join(frags, "")
+		}()
+
+		watch_class := ""
+		if _cache_.Static.WATCH {
+			watch_class = _utils_.Code_Strip(_compose_.Switched(
+				func() map[string]map[string]any {
+					res := map[string]map[string]any{}
+					for i, d := range _cache_.Style.Index_to_Data {
+						res["."+d.Metadata.WatchClass] = _cache_.Index_Fetch(i).StyleObject
+					}
+					return res
+				}(), _cache_.Static.WATCH,
+			)+render_frags["Attach"], true, true, false, true)
+		}
+
+		block_style := "<style>" + style_sheet + "</style>"
+		block_summon := block_style + block_style
+		for _, target := range _stash_.Cache.Targetdir {
+			_maps_.Copy(files, target.SummonFiles(style_sheet, block_style, block_summon, staple_sheet))
+		}
+
+		if _cache_.Static.WATCH {
+			files[_cache_.Path["autogen"]["manifest"].Path] = _utils_.Code_JsonBuild(_cache_.Manifest, "")
+			files[_cache_.Path["autogen"]["index"].Path] = watch_index
+			files[_cache_.Path["autogen"]["watch"].Path] = watch_class
+			files[_cache_.Path["autogen"]["staple"].Path] = staple_sheet
+		} else {
+			memchart := map[string]string{}
+			for key, val := range render_frags {
+				memchart[key] = _fmt_.Sprintf("%9s", _fmt_.Sprintf("%v Kb", _utils_.String_Memory(val)))
+			}
+			memchart["[***.css]"] = _fmt_.Sprintf("%9s", _fmt_.Sprintf("%v Kb", _utils_.String_Memory(style_sheet)))
+
+			_cache_.Delta.Report.MemChart = func() string {
+				var heading string
+				if _cache_.Delta.ErrorCount > 0 {
+					heading = S.Tag.H2(_cache_.Delta.FinalMessage, S.Preset.Failed)
+				} else {
+					heading = S.Tag.H2(_cache_.Delta.FinalMessage, S.Preset.Success)
+				}
+				return S.MAKE(
+					heading,
+					X.List_Props(
+						memchart,
+						append([]string{S.Style.AS_Bold}, S.Preset.Primary...),
+						append([]string{S.Style.AS_Bold}, S.Preset.Tertiary...),
+					),
+				)
+			}()
+		}
+	}
+
+	_cache_.Delta.Path = ""
+	_cache_.Delta.Content = ""
+
+	return files, report
 }
-
-// export async function Generate() {
-// 	 OUTFILES: Record<string, string> = {};
-
-// 	if (_cache_.Delta.DeltaContent.length) {
-// 		OUTFILES[_cache_.Delta.DeltaPath] = _cache_.Delta.DeltaContent;
-// 	} else {
-// 		 {
-// 			RENDERFRAGS,
-// 			STYLESHEET,
-// 			STAPLESHEET,
-// 			WATCHINDEX,
-// 			WATCHCLASS
-// 		} = await GenFinalSheets(OUTFILES);
-
-// 		 STYLEBLOCK = `\n<style>${STYLESHEET}</style>`;
-// 		 SUMMONBLOCK = `\n${STYLEBLOCK}\n<div>${STYLESHEET}</div>`;
-// 		Object.values(_cache_.Static.TargetDir_Saved).forEach((cache) => {
-// 			cache.SummonFiles(OUTFILES, STYLESHEET, STYLEBLOCK, SUMMONBLOCK, STAPLESHEET);
-// 		});
-
-// 		if (_cache_.Static.WATCH) {
-// 			OUTFILES[CACHE.PATH.autogen.manifest.path] = JSON.stringify(_cache_.Delta.Manifest);
-// 			OUTFILES[CACHE.PATH.autogen.index.path] = WATCHINDEX;
-// 			OUTFILES[CACHE.PATH.autogen.watch.path] = WATCHCLASS;
-// 			OUTFILES[CACHE.PATH.autogen.staple.path] = STAPLESHEET;
-// 		} else {
-// 			 memChart = Object.entries(RENDERFRAGS).reduce((A, [K, V]) => {
-// 				A[K] = `${Use.string.stringMem(V)} Kb`.padStart(9, " ");
-// 				return A;
-// 			}, {} as Record<string, string>);
-
-// 			memChart[`[***.css]`] = `${Use.string.stringMem(STYLESHEET)} Kb`.padStart(9, " ");
-
-// 			_cache_.Delta.Report.memChart = $.MAKE(
-// 				$.tag.H2(_cache_.Delta.FinalMessage, _cache_.Delta.ErrorCount ? $.preset.failed : $.preset.success),
-// 				$$.ListProps(memChart, [...$.preset.primary, $.style.AS_Bold], [...$.preset.tertiary, $.style.AS_Bold])
-// 			);
-
-// 		}
-// 	}
-
-// 	_cache_.Delta.DeltaPath = "";
-// 	_cache_.Delta.DeltaContent = "";
-
-// 	return {
-// 		SaveFiles: OUTFILES,
-// 		ConsoleReport: $.MAKE("", Object.values(_cache_.Delta.Report).filter((string) => string !== "")),
-// 	};
-// }

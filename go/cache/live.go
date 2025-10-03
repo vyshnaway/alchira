@@ -30,13 +30,14 @@ var Static = _types_.Cache_Static{
 		Artifacts:     map[string]string{},
 		ProxyMap:      []_types_.Config_ProxyMap{},
 		ExportClasses: []string{},
+		Versions:      []string{},
 	},
 }
 
 var Delta = _types_.Cache_Delta{
 	ErrorCount:   0,
-	DeltaPath:    "",
-	DeltaContent: "",
+	Path:         "",
+	Content:      "",
 	FinalMessage: "",
 	PublishError: "",
 	Report: _types_.Cache_Delta_Report{
@@ -74,8 +75,8 @@ var Delta = _types_.Cache_Delta{
 func Delta_Reset() {
 	Delta = _types_.Cache_Delta{
 		ErrorCount:   0,
-		DeltaPath:    "",
-		DeltaContent: "",
+		Path:         "",
+		Content:      "",
 		FinalMessage: "",
 		PublishError: "",
 		Report: _types_.Cache_Delta_Report{

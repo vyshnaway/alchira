@@ -25,14 +25,15 @@ function ARCHIVE() {
                 ('<' + [
                     i.element,
                     ...i.stylesheet.map(([A, V]) => {
-                        const symclass = i.symclass.startsWith("$") ? `-${i.symclass}` : i.symclass;
 
                         if (A === "") {
+                            const symclass = i.symclass.startsWith("$") ? `-${i.symclass}` : i.symclass;
+
                             const value = (i.attachments.length
                                 ? `${CACHE.ROOT.customOperations["attach"]} ${i.attachments.join(" ")};`
                                 : "") + V;
 
-                            return `${symclass}${value.length ? `="${value}"` : ''}`;
+                            return symclass + (value.length ? `="${value}"` : '')
                         } else {
                             return `${"{" + JSON.parse(A).join("}&{") + "}&"}="${V}"`;
                         }
