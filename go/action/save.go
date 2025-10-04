@@ -1,6 +1,7 @@
 package action
 
 import (
+	"encoding/json"
 	_cache_ "main/cache"
 	_fileman_ "main/fileman"
 	S "main/shell"
@@ -55,11 +56,11 @@ func save_CssImport(filepath_array []string) string {
 		}
 	}
 
-	return _strings_.Join(inlined, "")
+	return _strings_.Join(inlined, "\n")
 }
 
 func Save_RootCss() {
-	S.TASK("Updating Index", 0)
+	S.STEP("Updating Index", 1)
 	_cache_.Static.RootCSS = save_CssImport([]string{
 		_cache_.Path_Css["atrules"].Path,
 		_cache_.Path_Css["constants"].Path,
@@ -69,15 +70,15 @@ func Save_RootCss() {
 }
 
 func Save_Libraries() {
-	S.TASK("Updating Library", 0)
+	S.STEP("Updating Library", 1)
 	_cache_.Static.Libraries_Saved, _ = _fileman_.Read_Bulk(
 		_cache_.Path_Folder["libraries"].Path,
 		[]string{"css"},
 	)
 }
 
-func Save_Externals() {
-	S.TASK("Updating External Artifacts", 0)
+func Save_Artifacts() {
+	S.STEP("Updating External Artifacts", 1)
 	_cache_.Static.Artifacts_Saved, _ = _fileman_.Read_Bulk(
 		_cache_.Path_Folder["artifacts"].Path,
 		[]string{_cache_.Root.Extension},
@@ -85,35 +86,36 @@ func Save_Externals() {
 }
 
 func Save_Targets() {
-	S.TASK("Syncing proxy folders", 0)
+	S.STEP("Syncing proxy folders", 1)
 	_cache_.Static.TargetDir_Saved = Sync_ProxyMapDirs(_cache_.Static.ProxyMap)
 }
 
-func SaveHashrule() (Report string, Ok bool) {
-	hashrule_path := _cache_.Path_Json["hashrule"].Path
+func SaveHashrule() (Report string, Status bool) {
 
-	S.TASK("Updating Hashrule", 0)
-	S.STEP("PATH : "+hashrule_path, 0)
+	S.STEP("Updating Hashrule", 1)
 
-	content, err := _fileman_.Read_Json(hashrule_path, false)
+	status := true
 	errors := []string{}
+	hashrules := map[string]string{}
 	_cache_.Static.Hashrule = map[string]string{}
-	if err == nil {
-		if content_, ok := content.(map[string]string); ok {
-			_cache_.Static.Hashrule = content_
+	hashrule_path := _cache_.Path_Json["hashrule"].Path
+	if content, err := _fileman_.Read_File(hashrule_path, false); err == nil {
+		if e := json.Unmarshal([]byte(content), &hashrules); e == nil {
+			_cache_.Static.Hashrule = hashrules
 		} else {
-			errors = append(errors, hashrule_path)
+			status = false
+			errors = append(errors, "Bad "+hashrule_path+" file data.")
 		}
 	} else {
-		errors = append(errors, err.Error())
+		status = false
+		errors = append(errors, "Failed to read "+hashrule_path+".")
 	}
 
-	ok := len(errors) == 0
 	report := S.MAKE(
 		S.Tag.H4("Hashrule error: "+hashrule_path, S.Preset.Failed),
 		errors,
 		S.MakeList{TypeFunc: S.List.Bullets, Intent: 0, Preset: S.Preset.Failed, Styles: []string{S.Style.AS_Bold}},
 	)
 
-	return report, ok
+	return report, status
 }

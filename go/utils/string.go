@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"fmt"
 	_regexp_ "regexp"
 	_slices_ "slices"
 	_strconv_ "strconv"
@@ -108,8 +107,4 @@ func String_Fallback(val any, fallback string) string {
 		return s
 	}
 	return fallback
-}
-
-func String_PrintAny(content any) {
-	fmt.Println(Code_JsonBuild(content, "  "))
 }

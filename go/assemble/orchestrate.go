@@ -1,8 +1,10 @@
 package assemble
 
 import (
+	_action_ "main/action"
 	_cache_ "main/cache"
 	S "main/shell"
+	X "main/xhell"
 )
 
 type execute_Step_enum int
@@ -13,7 +15,7 @@ const (
 	execute_Step_ReadRootCss
 	execute_Step_ReadLibraries
 	execute_Step_VerifyConfigs
-	execute_Step_ReadPackages
+	execute_Step_ReadArtifacts
 	execute_Step_ReadTargets
 	execute_Step_ReadHashrule
 	execute_Step_ProcessXtylesFolder
@@ -25,184 +27,174 @@ const (
 
 func orchestrate(heading string) {
 	step := execute_Step_Initialize
+	report := ""
+	targets := []string{}
+	report_next := false
+	cycle_one := false
 	// initial_heading := "Initial Build"
 	// save_files = map[string]string{}
-	// report := ""
-	// targets := []string{}
-	// report_next := false
-	// statics_fetched = false
 	// stopWatcher: null | (() => void) = null
 	// SaveAction: Promise<void> | null = null
 
 	for {
 		switch step {
 		case execute_Step_Initialize:
-			{
-				S.Post(S.MAKE(S.Tag.H1(heading, S.Preset.None), []string{}))
-			}
+			S.Post(S.MAKE(S.Tag.H1(heading, S.Preset.Title), []string{}))
+			fallthrough
+
 		case execute_Step_VerifySetupStruct:
-			{
-				//                 const verifyStructResult = await FETCH.VerifySetupStruct();
-				//                 if (!verifyStructResult.proceed) {
-				//                     report = verifyStructResult.report;
-				//                     step = "WatchFolders";
-				//                     break;
-				//                 } else {
-				//                     report = "";
-				//                 }
+			if res_status, res_report := _action_.Verify_Setup(); res_status != _action_.Verify_Setup_Status_Verified {
+				report = res_report
+				step = execute_Step_WatchFolders
+			} else {
+				report = ""
 			}
+			fallthrough
+
 		case execute_Step_ReadRootCss:
-			{
-				//                 await FETCH.SaveRootCss();
-			}
+			_action_.Save_RootCss()
+			fallthrough
+
 		case execute_Step_ReadLibraries:
-			{
-				//                 await FETCH.SaveLibraries();
-			}
+			_action_.Save_Libraries()
+			fallthrough
+
 		case execute_Step_VerifyConfigs:
-			{
-				//                 const verifyConfigsResult = await FETCH.VerifyConfigs(!staticsFetched);
-				//                 if (!verifyConfigsResult.status) {
-				//                     report = verifyConfigsResult.report;
-				//                     step = "WatchFolders";
-				//                     break;
-				//                 } else {
-				//                     staticsFetched = true;
-				//                     report = "";
-				//                 }
+			if res_report, res_status := _action_.Verify_Configs(cycle_one); !res_status {
+				report = res_report
+				step = execute_Step_WatchFolders
+				break
+			} else {
+				cycle_one = false
+				report = ""
 			}
-		case execute_Step_ReadPackages:
-			{
-				//                 await FETCH.SaveExternals();
-			}
+			fallthrough
+
+		case execute_Step_ReadArtifacts:
+			_action_.Save_Artifacts()
+			fallthrough
+
 		case execute_Step_ReadTargets:
-			{
-				//                 await FETCH.SaveTargets();
-			}
+			_action_.Save_Targets()
+			fallthrough
+
 		case execute_Step_ReadHashrule:
-			{
-				//                 const hashruleAnalysis = await FETCH.SaveHashrule();
-				//                 if (!hashruleAnalysis.status) {
-				//                     report = hashruleAnalysis.report;
-				//                     step = "WatchFolders";
-				//                     break;
-				//                 } else { report = ""; }
+			if res_report, res_status := _action_.SaveHashrule(); res_status {
+				report = res_report
+				step = execute_Step_WatchFolders
+				break
+			} else {
+				report = ""
 			}
+			fallthrough
 
 		case execute_Step_ProcessXtylesFolder:
-			{
-				//                 SMITH.UpdateXtylesFolder();
-			}
+			//                 SMITH.UpdateXtylesFolder();
 		case execute_Step_ProcessProxyFolders:
-			{
-				//                 SMITH.SaveToTarget();
-			}
+			//                 SMITH.SaveToTarget();
 		case execute_Step_GenerateFinals:
-			{
-				//                 const response = await SMITH.Generate();
-				//                 save_files = response.SaveFiles;
-				//                 report = response.ConsoleReport;
-			}
+
+			//                 const response = await SMITH.Generate();
+			//                 save_files = response.SaveFiles;
+			//                 report = response.ConsoleReport;
 		case execute_Step_Publish:
-			{
-				//                 if (Object.keys(save_files).length) {
-				//                     if (SaveAction) {
-				//                         await SaveAction;
-				//                     }
-				//                     SaveAction = fileman.write.bulk(save_files);
-				//                 }
-				//                 if (reportNext) {
-				//                     reporter(heading, targets, report);
-				//                     reportNext = false;
-				//                 };
+
+			//                 if (Object.keys(save_files).length) {
+			//                     if (SaveAction) {
+			//                         await SaveAction;
+			//                     }
+			//                     SaveAction = fileman.write.bulk(save_files);
+			//                 }
+			if report_next {
+				X.Report(heading, targets, report, []string{})
+				report_next = false
 			}
 
 		case execute_Step_WatchFolders:
-			{
-				//                 if (CACHE.STATIC.WATCH) {
-				//                     step = "WatchFolders";
-				//                 } else {
-				//                     if (stopWatcher) {
-				//                         stopWatcher();
-				//                         stopWatcher = null;
-				//                     }
-				//                     break;
-				//                 }
 
-				//                 if (!stopWatcher) {
-				//                     targets = Object.keys(CACHE.FILES.TARGETDIR);
-				//                     const targetFolders = [...targets, CACHE.PATH.folder.scaffold.path];
-				//                     const ignoreFolders = [
-				//                         CACHE.PATH.folder.autogen.path,
-				//                         CACHE.PATH.folder.archive.path,
-				//                     ];
-				//                     process.on("SIGINT", () => {
-				//                         if (stopWatcher) {
-				//                             stopWatcher();
-				//                             stopWatcher = null;
-				//                             $.render.write("\n", 2);
-				//                         }
-				//                         process.exit();
-				//                     });
-				//                     stopWatcher = EVENT.Init(targetFolders, ignoreFolders);
-				//                     reporter(heading, targets, report);
-				//                 }
+			//                 if (CACHE.STATIC.WATCH) {
+			//                     step = "WatchFolders";
+			//                 } else {
+			//                     if (stopWatcher) {
+			//                         stopWatcher();
+			//                         stopWatcher = null;
+			//                     }
+			//                     break;
+			//                 }
 
-				//                 if (EVENT.queue.length > 8) {
-				//                     step = "Initialize";
-				//                     EVENT.queue.length = 0;
-				//                 }
-				//                 else if (EVENT.queue.length) {
-				//                     const event = EVENT.pull();
-				//                     if (!event) { break; }
-				//                     const pathFromWork = `${event.folder}/${event.filePath}`;
+			//                 if (!stopWatcher) {
+			//                     targets = Object.keys(CACHE.FILES.TARGETDIR);
+			//                     const targetFolders = [...targets, CACHE.PATH.folder.scaffold.path];
+			//                     const ignoreFolders = [
+			//                         CACHE.PATH.folder.autogen.path,
+			//                         CACHE.PATH.folder.archive.path,
+			//                     ];
+			//                     process.on("SIGINT", () => {
+			//                         if (stopWatcher) {
+			//                             stopWatcher();
+			//                             stopWatcher = null;
+			//                             $.render.write("\n", 2);
+			//                         }
+			//                         process.exit();
+			//                     });
+			//                     stopWatcher = EVENT.Init(targetFolders, ignoreFolders);
+			//                     reporter(heading, targets, report);
+			//                 }
 
-				//                     if (event.folder === CACHE.PATH.folder.scaffold.path) {
-				//                         if (event.action === "add" || event.action === "change") {
-				//                             switch (pathFromWork) {
-				//                                 case CACHE.PATH.json.configure.path:
-				//                                     stopWatcher();
-				//                                     stopWatcher = null;
-				//                                     step = "VerifyConfigs";
-				//                                     break;
-				//                                 case CACHE.PATH.css.atrules.path:
-				//                                 case CACHE.PATH.css.constants.path:
-				//                                 case CACHE.PATH.css.elements.path:
-				//                                 case CACHE.PATH.css.extends.path:
-				//                                     await FETCH.SaveRootCss();
-				//                                     step = "GenerateFinals";
-				//                                     break;
-				//                                 case CACHE.PATH.json.hashrule.path:
-				//                                     step = "ReadHashrule";
-				//                                     break;
-				//                                 default:
-				//                                     if (
-				//                                         pathFromWork.startsWith(CACHE.PATH.folder.libraries.path)
-				//                                         && event.extension === "css"
-				//                                     ) {
-				//                                         CACHE.STATIC.Libraries_Saved[pathFromWork] = event.fileContent;
-				//                                     } else if (
-				//                                         pathFromWork.startsWith(CACHE.PATH.folder.artifacts.path)
-				//                                         && [CACHE.ROOT.extension, "css", "md"].includes(event.extension)
-				//                                     ) {
-				//                                         CACHE.STATIC.Artifacts_Saved[pathFromWork] = event.fileContent;
-				//                                     }
-				//                                     step = "ProcessXtylesFolder";
-				//                             }
-				//                         } else {
-				//                             step = "VerifySetupStruct";
-				//                         }
-				//                     } else if (event.action === "add" || event.action === "change" || event.action === "unlink") {
-				//                         SMITH.SaveToTarget(event.action, event.folder, event.filePath, event.fileContent, event.extension);
-				//                         step = "GenerateFinals";
-				//                     } else { step = "VerifyConfigs"; }
+			//                 if (EVENT.queue.length > 8) {
+			//                     step = "Initialize";
+			//                     EVENT.queue.length = 0;
+			//                 }
+			//                 else if (EVENT.queue.length) {
+			//                     const event = EVENT.pull();
+			//                     if (!event) { break; }
+			//                     const pathFromWork = `${event.folder}/${event.filePath}`;
 
-				//                     heading = `[${event.timeStamp}] | ${event.filePath} | [${event.action}]`;
-				//                     reportNext = true;
-				//                 }
+			//                     if (event.folder === CACHE.PATH.folder.scaffold.path) {
+			//                         if (event.action === "add" || event.action === "change") {
+			//                             switch (pathFromWork) {
+			//                                 case CACHE.PATH.json.configure.path:
+			//                                     stopWatcher();
+			//                                     stopWatcher = null;
+			//                                     step = "VerifyConfigs";
+			//                                     break;
+			//                                 case CACHE.PATH.css.atrules.path:
+			//                                 case CACHE.PATH.css.constants.path:
+			//                                 case CACHE.PATH.css.elements.path:
+			//                                 case CACHE.PATH.css.extends.path:
+			//                                     await FETCH.SaveRootCss();
+			//                                     step = "GenerateFinals";
+			//                                     break;
+			//                                 case CACHE.PATH.json.hashrule.path:
+			//                                     step = "ReadHashrule";
+			//                                     break;
+			//                                 default:
+			//                                     if (
+			//                                         pathFromWork.startsWith(CACHE.PATH.folder.libraries.path)
+			//                                         && event.extension === "css"
+			//                                     ) {
+			//                                         CACHE.STATIC.Libraries_Saved[pathFromWork] = event.fileContent;
+			//                                     } else if (
+			//                                         pathFromWork.startsWith(CACHE.PATH.folder.artifacts.path)
+			//                                         && [CACHE.ROOT.extension, "css", "md"].includes(event.extension)
+			//                                     ) {
+			//                                         CACHE.STATIC.Artifacts_Saved[pathFromWork] = event.fileContent;
+			//                                     }
+			//                                     step = "ProcessXtylesFolder";
+			//                             }
+			//                         } else {
+			//                             step = "VerifySetupStruct";
+			//                         }
+			//                     } else if (event.action === "add" || event.action === "change" || event.action === "unlink") {
+			//                         SMITH.SaveToTarget(event.action, event.folder, event.filePath, event.fileContent, event.extension);
+			//                         step = "GenerateFinals";
+			//                     } else { step = "VerifyConfigs"; }
 
-				//                 await new Promise((resolve) => setTimeout(resolve, 20));
-			}
+			//                     heading = `[${event.timeStamp}] | ${event.filePath} | [${event.action}]`;
+			//                     reportNext = true;
+			//                 }
+
+			//                 await new Promise((resolve) => setTimeout(resolve, 20));
 		}
 
 		if !_cache_.Static.WATCH {

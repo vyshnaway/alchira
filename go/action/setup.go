@@ -4,7 +4,6 @@ import (
 	_cache_ "main/cache"
 	_fileman_ "main/fileman"
 	_types_ "main/types"
-	_maps_ "maps"
 	_reflect_ "reflect"
 	_slices_ "slices"
 	_strings_ "strings"
@@ -71,11 +70,13 @@ func Setup_Ignorefiles() {
 }
 
 func Setup_Tweaks(tweaks map[string]any) {
-	_maps_.Copy(_cache_.Static.Tweaks, _cache_.Root.Tweaks)
+	_cache_.Static.Tweaks = _cache_.Root.Tweaks
 
-	for key, val := range _cache_.Root.Tweaks {
-		if _reflect_.TypeOf(tweaks[key]) == _reflect_.TypeOf(val) {
-			_cache_.Static.Tweaks[key] = tweaks[key]
+	if tweaks != nil {
+		for key, val := range _cache_.Root.Tweaks {
+			if _reflect_.TypeOf(tweaks[key]) == _reflect_.TypeOf(val) {
+				_cache_.Static.Tweaks[key] = tweaks[key]
+			}
 		}
 	}
 }

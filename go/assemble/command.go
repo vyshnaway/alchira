@@ -26,7 +26,7 @@ func Commander(
 	_cache_.Static.ProjectVersion = projectversion
 
 	S.Canvas.Initialize(!_cache_.Static.WATCH || command == "install", true, 2)
-	core_at_version := _strings_.ToUpper(_cache_.Root.Name) + " @ " + _cache_.Root.Version
+	corecaps := _strings_.ToUpper(_cache_.Root.Name)
 
 	var flagmode string
 	if _cache_.Static.WATCH {
@@ -38,14 +38,14 @@ func Commander(
 	switch _cache_.Static.Command {
 	case "version":
 		{
-			S.Post(core_at_version)
+			S.Post(_cache_.Root.Name + "@" + _cache_.Root.Version)
 		}
 	case "init":
 		{
 			var wg _sync_.WaitGroup
 			wg.Add(2)
 			go func() { _action_.Sync_RootDocs(); wg.Done() }()
-			go func() { S.Animate.Title(core_at_version+" : Initialize", 1000, 1); wg.Done() }()
+			go func() { S.Animate.Title(corecaps+" : Initialize", 1000, 1); wg.Done() }()
 			wg.Wait()
 			status, setup_report := _action_.Verify_Setup()
 			switch status {
@@ -60,15 +60,15 @@ func Commander(
 		}
 	case "debug":
 		{
-			orchestrate(core_at_version + " : Debug " + flagmode)
+			orchestrate(corecaps + " : Debug " + flagmode)
 		}
 	case "preview":
 		{
-			orchestrate(core_at_version + " : Preview " + flagmode)
+			orchestrate(corecaps + " : Preview " + flagmode)
 		}
 	case "publish":
 		{
-			orchestrate(core_at_version + " : " + "Publishing for Production")
+			orchestrate(corecaps + " : " + "Publishing for Production")
 		}
 	case "install":
 		{
@@ -99,7 +99,7 @@ func Commander(
 			_action_.Sync_RootDocs()
 
 			S.Post(S.MAKE(
-				S.Tag.H1(core_at_version, S.Preset.Title),
+				S.Tag.H1(corecaps, S.Preset.Title),
 				[]string{_strings_.Trim(_cache_.Sync_References["alerts"].Content, "\t\r\n ")},
 			))
 

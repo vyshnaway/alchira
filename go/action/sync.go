@@ -9,6 +9,7 @@ import (
 	_maps_ "maps"
 	_os_ "os"
 	_slices_ "slices"
+	"sync"
 	_sync_ "sync"
 )
 
@@ -47,45 +48,6 @@ func Sync_RootDocs() {
 	wg.Wait()
 }
 
-func Sync_ProxyMapDirs(proxyMaps []_types_.Config_ProxyMap) map[string]_types_.Config_ProxyStorage {
-	static_proxystorage := make(map[string]_types_.Config_ProxyStorage)
-	for _, p := range proxyMaps {
-		static_proxystorage[p.Target] = _types_.Config_ProxyStorage{
-			Source:              p.Source,
-			Target:              p.Target,
-			Stylesheet:          p.Stylesheet,
-			Extensions:          p.Extensions,
-			Filepath_to_Content: make(map[string]string),
-			StylesheetContent:   "",
-		}
-	}
-
-	var wg _sync_.WaitGroup
-	for _, p := range static_proxystorage {
-		wg.Add(1)
-		go func(proxystorage _types_.Config_ProxyStorage) {
-			proxystorage.Extensions[_cache_.Root.Extension] = []string{}
-			fileContents, err := _fileman_.Sync_Bulk(
-				proxystorage.Target,
-				proxystorage.Source,
-				_slices_.Collect(_maps_.Keys(proxystorage.Extensions)),
-				[]string{_cache_.Root.Extension},
-				[]string{proxystorage.Stylesheet},
-			)
-			if err == nil && len(fileContents) > 0 {
-				proxystorage.Filepath_to_Content = fileContents
-				if content, err := _os_.ReadFile(_fileman_.Path_Join(proxystorage.Target, proxystorage.Stylesheet)); err == nil {
-					proxystorage.StylesheetContent = string(content)
-				}
-			}
-			defer wg.Done()
-		}(p)
-	}
-
-	wg.Wait()
-	return static_proxystorage
-}
-
 func Sync_SaveVendors(vendor_source string) {
 
 	newdata := false
@@ -115,4 +77,48 @@ func Sync_SaveVendors(vendor_source string) {
 			_fileman_.Write_File(vendor_path, content)
 		}
 	}
+}
+
+func Sync_ProxyMapDirs(proxyMaps []_types_.Config_ProxyMap) map[string]_types_.Config_ProxyStorage {
+	static_proxystorage := make(map[string]_types_.Config_ProxyStorage)
+	for _, p := range proxyMaps {
+		static_proxystorage[p.Target] = _types_.Config_ProxyStorage{
+			Source:              p.Source,
+			Target:              p.Target,
+			Stylesheet:          p.Stylesheet,
+			Extensions:          p.Extensions,
+			Filepath_to_Content: make(map[string]string),
+			StylesheetContent:   "",
+		}
+	}
+	var mut sync.Mutex
+
+	var wg _sync_.WaitGroup
+	for id, pm := range static_proxystorage {
+		wg.Add(1)
+		go func(proxyid string, proxystorage _types_.Config_ProxyStorage) {
+			proxystorage.Extensions[_cache_.Root.Extension] = []string{}
+			fileContents, err := _fileman_.Sync_Bulk(
+				proxystorage.Target,
+				proxystorage.Source,
+				_slices_.Collect(_maps_.Keys(proxystorage.Extensions)),
+				[]string{_cache_.Root.Extension},
+				[]string{proxystorage.Stylesheet},
+			)
+			if err == nil && len(fileContents) > 0 {
+				proxystorage.Filepath_to_Content = fileContents
+				if content, err := _os_.ReadFile(_fileman_.Path_Join(proxystorage.Target, proxystorage.Stylesheet)); err == nil {
+					proxystorage.StylesheetContent = string(content)
+				}
+
+			}
+			mut.Lock()
+			static_proxystorage[proxyid] = proxystorage
+			mut.Unlock()
+			defer wg.Done()
+		}(id, pm)
+	}
+
+	wg.Wait()
+	return static_proxystorage
 }

@@ -8,8 +8,8 @@ import (
 )
 
 func Initialize() {
-	S.TASK("Initializing setup.", 0)
-	S.TASK("Cloning scaffold to Project", 1)
+	S.STEP("Cloning scaffold to Project", 1)
+	S.TASK("Initialized setup.", 1)
 
 	err1 := _fileman_.Clone_Safe(_cache_.Sync_Blueprint["scaffold"].Path, _cache_.Path_Folder["scaffold"].Path, []string{})
 	err2 := _fileman_.Clone_Safe(_cache_.Sync_Blueprint["libraries"].Path, _cache_.Path_Folder["libraries"].Path, []string{})

@@ -1,6 +1,7 @@
 package shell
 
 import (
+	_json_ "encoding/json"
 	_fmt_ "fmt"
 	// _os_ "os"
 	_strings_ "strings"
@@ -81,84 +82,20 @@ func render_Animate(frames []string, duration int, iterations int) error {
 	}
 }
 
+func render_Raw(content any) {
+	json, _ := _json_.MarshalIndent(content, "", "  ")
+	_fmt_.Println(string(json))
+}
+
 // E provides package-level access to render functions
 var Render = struct {
+	Raw       func(content any)
 	Write     func(str string, backRows int) int
 	Backspace func(chars int)
 	Animate   func(frames []string, duration int, iterations int) error
 }{
+	Raw:       render_Raw,
 	Write:     render_Write,
 	Backspace: render_Backspace,
 	Animate:   render_Animate,
 }
-
-// --- vs ---
-
-// // Backspace moves the cursor back by `chars` places and clears that line.
-// func render_Backspace(chars int) {
-// 	if chars <= 0 {
-// 		return
-// 	}
-// 	_fmt_.Fprintf(_os_.Stdout, ansi_MoveLeft, chars)
-// 	_fmt_.Fprint(_os_.Stdout, ansi_EraseAfterLine)
-// }
-
-// // Write prints a string to the console and handles line clearing/rewinding.
-// func render_Write(str string, backRows int) int {
-//     str = _strings_.ReplaceAll(str, "‾", "\\u203E") // Unicode for OVERLINE
-// 	str = _strings_.ReplaceAll(str, "─", "\\u2500")
-// 	if backRows > 0 {
-// 		_fmt_.Fprintf(_os_.Stdout, ansi_MoveUp, backRows)
-// 		_fmt_.Fprint(_os_.Stdout, ansi_ClearToBottom)
-// 	} else if backRows < 0 {
-// 		_fmt_.Fprint(_os_.Stdout, ansi_ClearConsole)
-// 		_fmt_.Fprint(_os_.Stdout, ansi_MoveToHome)
-// 	}
-// 	rowsCreated := _strings_.Count(str, "\n") + 1
-// 	_fmt_.Println(str)
-// 	return rowsCreated
-// }
-
-// // Animate displays frames in terminal for a given duration and repeat count.
-// func render_Animate(frames []string, duration int, repeat int) error {
-// 	var duration_ms = _time_.Duration(duration)
-// 	if len(frames) == 0 {
-// 		return nil
-// 	}
-// 	totalFrames := len(frames) * func() int {
-// 		if repeat > 0 {
-// 			return repeat
-// 		} else {
-// 			return 1
-// 		}
-// 	}()
-// 	interval := duration_ms / _time_.Duration(totalFrames)
-// 	if interval == 0 {
-// 		interval = _time_.Millisecond
-// 	}
-
-// 	iteration, backRows, frameIdx := 0, 0, 0
-// 	for {
-// 		if frameIdx == len(frames) {
-// 			frameIdx = 0
-// 			iteration++
-// 		}
-// 		if repeat > 0 && iteration >= repeat && frameIdx == 0 {
-// 			break
-// 		}
-// 		backRows = render_Write(frames[frameIdx], backRows)
-// 		frameIdx++
-// 		_time_.Sleep(interval)
-// 	}
-// 	return nil
-// }
-
-// var Render = struct {
-// 	Write     func(str string, backRows int) int
-// 	Backspace func(chars int)
-// 	Animate   func(frames []string, duration int, repeat int) error
-// }{
-// 	Write:     render_Write,
-// 	Backspace: render_Backspace,
-// 	Animate:   render_Animate,
-// }
