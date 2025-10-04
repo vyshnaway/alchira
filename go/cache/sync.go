@@ -5,7 +5,7 @@ import (
 )
 
 var Sync = map[string]map[string]_types_.File_Source{
-	"DOCUMENTS": {
+	"references": {
 		"readme": {
 			Title:   "README",
 			Url:     "readme.md",
@@ -35,7 +35,7 @@ var Sync = map[string]map[string]_types_.File_Source{
 			Content: "",
 		},
 	},
-	"AGREEMENTS": {
+	"agreements": {
 		"license": {
 			Title:   "LICENSE",
 			Url:     "agreements-txt/license.md",

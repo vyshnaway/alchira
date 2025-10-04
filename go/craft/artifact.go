@@ -46,12 +46,12 @@ func artifact_Fetch(identifier string, source string) (Files map[string]string, 
 	}()
 
 	if status {
-		if fetched.Artifacts != nil {
-			for lib, str := range fetched.Artifacts {
-				files[_fileman_.Path_Join(artifactspath, identifier, lib+"."+identifier+"."+"css")] = str
-			}
-			fetched.Artifacts = nil
-		}
+		// if fetched.Artifacts != nil {
+		// 	for lib, str := range fetched.Artifacts {
+		// 		files[_fileman_.Path_Join(artifactspath, identifier, lib+"."+identifier+"."+"css")] = str
+		// 	}
+		// 	fetched.Artifacts = nil
+		// }
 
 		if fetched.Readme != "" {
 			files[_fileman_.Path_Join(artifactspath, identifier, `readme.md`)] = fetched.Readme
@@ -100,10 +100,10 @@ func artifact_Update() (Files map[string]string, Report string, Status bool) {
 	status := false
 	report := ""
 
-	if _cache_.Static.Archive.Artifacts != nil {
+	if _cache_.Static.Artifacts_Sources != nil {
 		var wg _sync_.WaitGroup
 
-		for identifier, source := range _cache_.Static.Archive.Artifacts {
+		for identifier, source := range _cache_.Static.Artifacts_Sources {
 			wg.Add(1)
 
 			func() {

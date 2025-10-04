@@ -1,54 +1,119 @@
 package action
 
+import (
+	_cache_ "main/cache"
+	_fileman_ "main/fileman"
+	S "main/shell"
+	_regexp_ "regexp"
+	_strings_ "strings"
+)
 
-// export async function SaveRootCss() {
-// 	$.TASK("Updating Index");
-// 	CACHE.STATIC.RootCSS = await VERIFY.cssImport(Object.values(CACHE.PATH.css).map(css => css.path));
-// }
+// save_CssInlineImports recursively processes CSS imports
+func save_CssInlineImports(filePath string, resolvedFiles *map[string]bool) (string, error) {
 
-// export async function SaveLibraries() {
-// 	$.TASK("Updating Library");
-// 	CACHE.STATIC.Libraries_Saved = await FILEMAN.read.bulk(CACHE.PATH.folder.libraries.path, ["css"]);
-// }
+	content, err := _fileman_.Read_File(filePath, false)
+	if err != nil {
+		return "", err
+	}
+	basedir := _fileman_.Path_Basedir(filePath)
 
-// export async function SaveExternals() {
-// 	$.TASK("Updating External Artifacts");
-// 	CACHE.STATIC.Artifacts_Saved = await FILEMAN.read.bulk(CACHE.PATH.folder.artifacts.path, [CACHE.ROOT.extension, "css", "md"]);
-// }
+	content_string := string(content)
+	import_regex := _regexp_.MustCompile(`@import\s+(?:url\()?["']?(.*?)["']?\)?\s*;`)
+	for _, match := range import_regex.FindAllStringSubmatch(content_string, -1) {
+		fullmatch := match[0]
+		importpath := match[1]
 
-// export async function SaveTargets() {
-// 	$.TASK("Syncing proxy folders", 0);
-// 	Object.keys(CACHE.STATIC.Targetdir_Saved).forEach((key) => delete CACHE.STATIC.Targetdir_Saved[key]);
-// 	CACHE.STATIC.Targetdir_Saved = await VERIFY.proxyMapSync(CACHE.STATIC.ProxyMap);
-// }
+		absolute_importpath, err := _fileman_.Path_Resolves(_fileman_.Path_Join(basedir, importpath))
+		if err == nil && _fileman_.Path_IfFile(absolute_importpath) && !(*resolvedFiles)[absolute_importpath] {
 
-// export async function SaveHashrule() {
-// 	$.TASK("Updating Hashrule", 0);
-// 	const errors: Record<string, string> = {};
+			replacement, err := save_CssInlineImports(absolute_importpath, resolvedFiles)
+			if err != nil {
+				replacement = fullmatch
+			}
+			content_string = _strings_.Replace(content_string, fullmatch, replacement, 1)
+		}
+		(*resolvedFiles)[absolute_importpath] = true
+	}
 
-// 	$.STEP("PATH : " + CACHE.PATH.json.hashrule.path);
-// 	const hashrule = await FILEMAN.read.json(CACHE.PATH.json.hashrule.path);
-// 	Object.keys(CACHE.STATIC.Hashrule).forEach(key => delete CACHE.STATIC.Hashrule[key]);
-// 	if (hashrule.status) {
-// 		Object.entries(hashrule.data).forEach(([key, value]) => {
-// 			if (typeof value === "string") {
-// 				CACHE.STATIC.Hashrule[key] = value;
-// 			} else {
-// 				errors[key] = `Value of type "STRING".`;
-// 			}
-// 		});
-// 	} else {
-// 		errors["ERROR"] = `Bad json file.`;
-// 	}
-// 	$.TASK("Analysis complete");
+	return content_string, nil
+}
 
-// 	return {
-// 		status: Object.keys(errors).length === 0,
-// 		report: $.MAKE(
-// 			$.tag.H4("Hashrule error: " + CACHE.PATH.json.hashrule.path, $.preset.failed),
-// 			$$.ListProps(errors, $.preset.primary, $.preset.text),
-// 			[$.list.Blocks, 0, $.preset.text, $.style.AS_Bold],
-// 			[$.list.Bullets, 0, $.preset.failed, $.style.AS_Bold]
-// 		),
-// 	};
-// }
+// CssImport processes CSS files and inlines @import statements
+func save_CssImport(filepath_array []string) string {
+	resolved_files := make(map[string]bool)
+	for _, filepath := range filepath_array {
+		if abspath, err := _fileman_.Path_Resolves(filepath); err == nil && _fileman_.Path_IfFile(abspath) {
+			resolved_files[abspath] = true
+		}
+	}
+
+	inlined := make([]string, 0, len(resolved_files))
+	for filePath := range resolved_files {
+		content, err := save_CssInlineImports(filePath, &resolved_files)
+		if err == nil {
+			inlined = append(inlined, content)
+		}
+	}
+
+	return _strings_.Join(inlined, "")
+}
+
+func Save_RootCss() {
+	S.TASK("Updating Index", 0)
+	_cache_.Static.RootCSS = save_CssImport([]string{
+		_cache_.Path["css"]["atrules"].Path,
+		_cache_.Path["css"]["constants"].Path,
+		_cache_.Path["css"]["elements"].Path,
+		_cache_.Path["css"]["extends"].Path,
+	})
+}
+
+func Save_Libraries() {
+	S.TASK("Updating Library", 0)
+	_cache_.Static.Libraries_Saved, _ = _fileman_.Read_Bulk(
+		_cache_.Path["folder"]["libraries"].Path,
+		[]string{"css"},
+	)
+}
+
+func Save_Externals() {
+	S.TASK("Updating External Artifacts", 0)
+	_cache_.Static.Artifacts_Saved, _ = _fileman_.Read_Bulk(
+		_cache_.Path["folder"]["artifacts"].Path,
+		[]string{_cache_.Root.Extension},
+	)
+}
+
+func Save_Targets() {
+	S.TASK("Syncing proxy folders", 0)
+	_cache_.Static.TargetDir_Saved = ProxyMapSync(_cache_.Static.ProxyMap)
+}
+
+func SaveHashrule() (Report string, Ok bool) {
+	hashrule_path := _cache_.Path["json"]["hashrule"].Path
+
+	S.TASK("Updating Hashrule", 0)
+	S.STEP("PATH : "+hashrule_path, 0)
+
+	content, err := _fileman_.Read_Json(hashrule_path, false)
+	errors := []string{}
+	_cache_.Static.Hashrule = map[string]string{}
+	if err == nil {
+		if content_, ok := content.(map[string]string); ok {
+			_cache_.Static.Hashrule = content_
+		} else {
+			errors = append(errors, hashrule_path)
+		}
+	} else {
+		errors = append(errors, err.Error())
+	}
+
+	ok := len(errors) == 0
+	report := S.MAKE(
+		S.Tag.H4("Hashrule error: "+hashrule_path, S.Preset.Failed),
+		errors,
+		S.MakeList{TypeFunc: S.List.Bullets, Intent: 0, Preset: S.Preset.Failed, Styles: []string{S.Style.AS_Bold}},
+	)
+
+	return report, ok
+}

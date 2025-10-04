@@ -5,7 +5,9 @@ import (
 	_cache_ "main/cache"
 	_fileman_ "main/fileman"
 	_stash_ "main/stash"
+	_style_ "main/style"
 	_types_ "main/types"
+	_utils_ "main/utils"
 	_maps_ "maps"
 	_slices_ "slices"
 	_sort_ "sort"
@@ -13,7 +15,7 @@ import (
 )
 
 func archive_Build() _types_.Config_Archive {
-	archive := _cache_.Static.Archive
+	archive := _cache_.Archive
 	archive.ExportClasses = []string{}
 
 	exportdata := map[string]_types_.Style_ExportStyle{}
@@ -92,13 +94,15 @@ func archive_Deploy() map[string]string {
 	}
 	_sort_.Strings(availableversions)
 
-	indexexport := _cache_.Static.Archive
+	indexexport := _cache_.Archive
 	indexexport.ExportSheet = ""
 	indexexport.Versions = availableversions
-	indexexport.Constants = _cache_.Manifest.Constants
+	indexexport.Constants = _style_.Cssfile_Parse(
+		_utils_.Code_Uncomment(_cache_.Static.RootCSS, false, true, false),
+		"", false).Variables
 
 	indexexportjson, _ := _json_.Marshal(indexexport)
-	exportjson, _ := _json_.Marshal(_cache_.Static.Archive)
+	exportjson, _ := _json_.Marshal(_cache_.Archive)
 	latestpath := _fileman_.Path_Join(_cache_.Path["folder"]["arcversion"].Path, latestverfile)
 	currentpath := _fileman_.Path_Join(_cache_.Path["folder"]["arcversion"].Path, currentverfile)
 	artifact_files := map[string]string{

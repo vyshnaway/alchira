@@ -6,64 +6,34 @@ import (
 	_types_ "main/types"
 	_maps_ "maps"
 	_os_ "os"
-	_regexp_ "regexp"
 	_slices_ "slices"
-	_strings_ "strings"
 	_sync_ "sync"
 )
 
-// verify_InlineImports recursively processes CSS imports
-func verify_InlineImports(filePath string, resolvedFiles *map[string]bool) (string, error) {
+func Fetch_Docs() {
+	var wg _sync_.WaitGroup
+	var mut _sync_.Mutex
 
-	content, err := _fileman_.Read_File(filePath, false)
-	if err != nil {
-		return "", err
-	}
-	basedir := _fileman_.Path_Basedir(filePath)
-
-	content_string := string(content)
-	import_regex := _regexp_.MustCompile(`@import\s+(?:url\()?["']?(.*?)["']?\)?\s*;`)
-	for _, match := range import_regex.FindAllStringSubmatch(content_string, -1) {
-		fullmatch := match[0]
-		importpath := match[1]
-
-		absolute_importpath, err := _fileman_.Path_Resolves(_fileman_.Path_Join(basedir, importpath))
-		if err == nil && _fileman_.Path_IfFile(absolute_importpath) && !(*resolvedFiles)[absolute_importpath] {
-
-			replacement, err := verify_InlineImports(absolute_importpath, resolvedFiles)
-			if err != nil {
-				replacement = fullmatch
+	for group_name, group := range _cache_.Sync {
+		wg.Add(1)
+		func() {
+			for item_name, item := range group {
+				content, err := _fileman_.Sync_File(item.Url, item.Path)
+				mut.Lock()
+				item.Content = content
+				if err == nil {
+					_cache_.Sync[group_name][item_name] = item
+				}
+				mut.Unlock()
 			}
-			content_string = _strings_.Replace(content_string, fullmatch, replacement, 1)
-		}
-		(*resolvedFiles)[absolute_importpath] = true
+			wg.Done()
+		}()
 	}
-
-	return content_string, nil
-}
-
-// CssImport processes CSS files and inlines @import statements
-func Verify_CssImport(filepath_array []string) (string, error) {
-	resolved_files := make(map[string]bool)
-	for _, filepath := range filepath_array {
-		if abspath, err := _fileman_.Path_Resolves(filepath); err == nil && _fileman_.Path_IfFile(abspath) {
-			resolved_files[abspath] = true
-		}
-	}
-
-	inlined := make([]string, 0, len(resolved_files))
-	for filePath := range resolved_files {
-		content, err := verify_InlineImports(filePath, &resolved_files)
-		if err == nil {
-			inlined = append(inlined, content)
-		}
-	}
-
-	return _strings_.Join(inlined, ""), nil
+	wg.Wait()
 }
 
 // ProxyMapSync synchronizes proxy map data
-func ProxyMapSync(proxyMaps []_types_.Config_ProxyMap) (map[string]_types_.Config_ProxyStorage, error) {
+func ProxyMapSync(proxyMaps []_types_.Config_ProxyMap) (map[string]_types_.Config_ProxyStorage) {
 	static_proxystorage := make(map[string]_types_.Config_ProxyStorage)
 	for _, p := range proxyMaps {
 		static_proxystorage[p.Target] = _types_.Config_ProxyStorage{
@@ -99,74 +69,8 @@ func ProxyMapSync(proxyMaps []_types_.Config_ProxyMap) (map[string]_types_.Confi
 	}
 
 	wg.Wait()
-	return static_proxystorage, nil
+	return static_proxystorage
 }
-
-// export async function FetchDocs() {
-// 	await Promise.all(Object.values(CACHE.SYNC).map(sync => {
-// 		Object.values(sync).map(async s => {
-// 			if (s.url && s.path) {
-// 				s.content = await FILEMAN.sync.file(s.url, s.path);
-// 			}
-// 		});
-// 	}));
-// }
-
-// export async function Initialize() {
-// 	try {
-// 		$.TASK("Initializing setup.", 0);
-// 		$.TASK("Cloning scaffold to Project");
-
-// 		await FILEMAN.clone.safe(CACHE.PATH.blueprint.scaffold.path, CACHE.PATH.folder.scaffold.path);
-// 		await FILEMAN.clone.safe(CACHE.PATH.blueprint.libraries.path, CACHE.PATH.folder.libraries.path);
-
-// 		$.POST($$.ListSteps(
-// 			"Next Steps",
-// 			[
-// 				"Adjust " +
-// 				$.FMT(CACHE.PATH.json.configure.path, $.style.AS_Bold, ...$.preset.primary) +
-// 				" according to the requirements of your project.",
-// 				"Execute " +
-// 				$.FMT('"init"', $.style.AS_Bold, ...$.preset.primary) +
-// 				" again to generate the necessary configuration folders.",
-// 				"During execution " +
-// 				$.FMT("{target}", $.style.AS_Bold, ...$.preset.primary) +
-// 				" folder will be cloned from " +
-// 				$.FMT("{source}", $.style.AS_Bold, ...$.preset.primary) +
-// 				" folder.",
-// 				"This folder will act as proxy for " + CACHE.ROOT.name + ".",
-// 				"In the " +
-// 				$.FMT("{target}/{stylesheet}", $.style.AS_Bold, ...$.preset.primary) +
-// 				", content from " +
-// 				$.FMT("{target}/{stylesheet}", $.style.AS_Bold, ...$.preset.primary) +
-// 				" will be appended.",
-// 			],
-// 		));
-
-// 		$.POST($$.ListRecord("Available Commands", CACHE.ROOT.commands));
-
-// 		$.POST($$.ListSteps(
-// 			"Publish command instructions.",
-// 			CACHE.ROOT.version === "0"
-// 				? ["This command is not activated."]
-// 				: [
-// 					"Create a new project and use its access key. For action visit " +
-// 					$.FMT(CACHE.ROOT.url.Console, $.style.AS_Bold, ...$.preset.primary),
-// 					"If using in CI/CD workflow, it is suggested to use " +
-// 					$.FMT("{bin} publish {key}", $.style.AS_Bold, ...$.preset.primary),
-// 				]
-// 		));
-
-// 		await FetchDocs();
-// 		return $.tag.H4("Initialized directory", $.preset.success, $.style.AS_Bold);
-// 	} catch (err) {
-// 		return $.MAKE(
-// 			$.tag.H4("Initialization failed.", $.preset.failed, $.style.AS_Bold),
-// 			err instanceof Error ? [err.message] : [],
-// 			[$.list.Bullets, 0, $.preset.failed],
-// 		);
-// 	}
-// }
 
 // export async function SyncIgnorefiles() {
 // 	const manifestIgnores = (await FILEMAN.read.file(CACHE.PATH.autogen.ignore.path)).data.split("\n");

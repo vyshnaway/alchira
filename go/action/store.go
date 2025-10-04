@@ -59,7 +59,7 @@ func Store(
 	if isArtifact {
 		normalFileName = _utils_.String_Filter(artifactName, []rune{}, []rune{}, []rune{})
 	} else {
-		normalFileName = _cache_.Static.Archive.Name
+		normalFileName = _cache_.Archive.Name
 	}
 
 	var lookupType _types_.File_Type
@@ -96,7 +96,7 @@ func Store(
 	if fromXtylesFolder {
 		artifact = artifactName
 	} else {
-		artifact = _cache_.Static.Archive.Name
+		artifact = _cache_.Archive.Name
 	}
 
 	debugClassfront := "\\|" + _utils_.String_Filter(targetPath, []rune{}, []rune{}, []rune{'/', '.'})

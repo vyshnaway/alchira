@@ -29,15 +29,17 @@ type Config_Raw struct {
 
 type Config_Archive struct {
 	Name          string            `json:"name,omitempty"`
+	Author        string            `json:"author,omitempty"`
 	Version       string            `json:"version,omitempty"`
-	Versions      []string          `json:"versions,omitempty"`
-	Tweaks        Config_Tweaks     `json:"tweaks,omitempty"`
+	
 	Vendors       string            `json:"vendors,omitempty"`
+	Environment   string            `json:"environment,omitempty"`
+	
 	Readme        string            `json:"readme,omitempty"`
 	Licence       string            `json:"licence,omitempty"`
+
 	ExportSheet   string            `json:"exportsheet,omitempty"`
-	Constants     []string          `json:"constants,omitempty"`
-	Artifacts     map[string]string `json:"artifacts,omitempty"`
-	ProxyMap      []Config_ProxyMap `json:"proxymap,omitempty"`
+	Versions      []string          `json:"versions,omitempty"`
+	Constants     map[string]string `json:"constants,omitempty"`
 	ExportClasses []string          `json:"exportclasses,omitempty"`
 }

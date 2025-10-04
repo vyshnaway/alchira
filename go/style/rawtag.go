@@ -115,7 +115,7 @@ func Rawtag_Upload(
 		attachments = append(attachments, inner_style.Attachments...)
 		_maps_.Copy(variables, inner_style.Variables)
 
-		artifact := _cache_.Static.Archive.Name
+		artifact := _cache_.Archive.Name
 		if forArtifact {
 			artifact = file.Artifact
 			for i, v := range attachments {

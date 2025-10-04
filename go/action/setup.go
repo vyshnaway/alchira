@@ -30,11 +30,9 @@ func Setup_Environment(rootpath string, workpath string, package_essential types
 	if len(package_essential.Version) > 0 {
 		cache.Root.Version = package_essential.Version
 	}
-	if len(package_essential.Bin) > 0 {
-		for k := range package_essential.Bin {
-			cache.Root.Bin  = k
-			break
-		}
+	for k := range package_essential.Bin {
+		cache.Root.Bin = k
+		break
 	}
 
 	for group_name, group_sources := range cache.Path {
@@ -54,7 +52,7 @@ func Setup_Environment(rootpath string, workpath string, package_essential types
 	for group_name, group_sources := range cache.Sync {
 		for id, source := range group_sources {
 			source.Path = fileman.Path_Join(append([]string{rootpath}, source.Frags...)...)
-			cache.Path[group_name][id] = source
+			cache.Sync[group_name][id] = source
 		}
 	}
 
@@ -63,7 +61,7 @@ func Setup_Environment(rootpath string, workpath string, package_essential types
 		for id, source := range group_sources {
 			source.Url = cdn + source.Url
 			source.Path = fileman.Path_Join(append([]string{rootpath}, source.Frags...)...)
-			cache.Path[group_name][id] = source
+			cache.Sync[group_name][id] = source
 		}
 	}
 }

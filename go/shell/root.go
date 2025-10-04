@@ -2,8 +2,9 @@ package shell
 
 import (
 	_os_ "os"
-	_term_ "golang.org/x/term"
 	_strings_ "strings"
+
+	_term_ "golang.org/x/term"
 )
 
 // tRoot_Config holds terminal configuration settings
@@ -13,17 +14,24 @@ type tRoot_Config struct {
 	TabSpace   int
 }
 
-// tRoot_Divider holds characters used for drawing dividers
+// tRoot_Divider used for drawing dividers
 type tRoot_Divider struct {
 	Top string
 	Mid string
 	Btm string
 }
 
+// tRoot_DivRune holds characters used for drawing dividers
+type tRoot_DivRune struct {
+	Top rune
+	Mid rune
+	Btm rune
+}
+
 // Canvas holds terminal tRoot_Canvas settings and utilities
 type tRoot_Canvas struct {
 	Config  *tRoot_Config
-	Divider *tRoot_Divider
+	DivRune *tRoot_DivRune
 	Tab     string
 }
 
@@ -43,10 +51,10 @@ var Canvas = &tRoot_Canvas{
 		PostActive: true,
 		TabSpace:   2,
 	},
-	Divider: &tRoot_Divider{
-		Top: "‾",
-		Mid: "─",
-		Btm: "_",
+	DivRune: &tRoot_DivRune{
+		Top: '‾',
+		Mid: '─',
+		Btm: '_',
 	},
 	Tab: " ",
 }
@@ -77,19 +85,16 @@ var Preset = struct {
 }
 
 func (i *tRoot_Canvas) Initialize(taskActive bool, postActive bool, tabWidth int) {
-	width := i.Width()
-
 	// Initialize tab spacing
 	i.Tab = _strings_.Repeat(string(i.Tab[0]), tabWidth)
 
 	// Set configuration
 	i.Config.TaskActive = taskActive
 	i.Config.PostActive = postActive
+}
 
-	// Initialize dividers with proper width
-	i.Divider.Btm = _strings_.Repeat(string(i.Divider.Btm[0]), width)
-	i.Divider.Mid = _strings_.Repeat(string(i.Divider.Mid[0]), width)
-	i.Divider.Top = _strings_.Repeat(string(i.Divider.Top[0]), width)
+func Divider(ch rune) string {
+	return _strings_.Repeat(string(ch), Canvas.Width())
 }
 
 // Format applies ANSI styles to a string

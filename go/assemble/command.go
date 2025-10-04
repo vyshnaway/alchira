@@ -6,6 +6,9 @@ import (
 	S "main/shell"
 	_types_ "main/types"
 	_utils_ "main/utils"
+	X "main/xhell"
+	_strings_ "strings"
+	_sync_ "sync"
 )
 
 func Orchestrate(
@@ -26,7 +29,7 @@ func Orchestrate(
 	_action_.Setup_Environment(rootpath, workpath, package_essential)
 	S.Canvas.Initialize(!_cache_.Static.WATCH, true, 2)
 
-	core_at_version := _cache_.Root.Name + " @ " + _cache_.Root.Version
+	core_at_version := _strings_.ToUpper(_cache_.Root.Name) + " @ " + _cache_.Root.Version
 	var flagmode string
 	if _cache_.Static.WATCH {
 		flagmode = "Watch"
@@ -37,17 +40,21 @@ func Orchestrate(
 	switch _cache_.Static.Command {
 	case "init":
 		{
-			S.Animate.Title(`${APP_VERSION} : Initialize`, 500, 16)
-			//             await FETCH.FetchDocs();
-			//             await title;
-			//             const setupInit = await FETCH.VerifySetupStruct();
-			//             if (!setupInit.started) {
-			//                 $.POST(await FETCH.Initialize());
-			//             } else if (setupInit.proceed) {
-			//                 $.POST((await FETCH.VerifyConfigs(true)).report);
-			//             } else {
-			//                 $.POST(setupInit.report);
-			//             }
+			var wg _sync_.WaitGroup
+			wg.Add(2)
+			go func() { _action_.Fetch_Docs(); wg.Done() }()
+			go func() { S.Animate.Title(core_at_version+" : Initialize", 1000, 1); wg.Done() }()
+			wg.Wait()
+			status, setup_report := _action_.Verify_Setup()
+			switch status {
+			case _action_.Verify_Setup_Status_Uninitialized:
+				_action_.Initialize()
+			case _action_.Verify_Setup_Status_Initialized:
+				report, _ := _action_.Verify_Configs(true)
+				S.Post(report)
+			case _action_.Verify_Setup_Status_Verified:
+				S.Post(setup_report)
+			}
 		}
 	case "debug":
 		{
@@ -62,38 +69,53 @@ func Orchestrate(
 			orchestrate(core_at_version + " : " + "Publishing for Production")
 		}
 	case "install":
-		//             $.init(false);
-		//             $.POST($.tag.H3("Installing Artifacts", $.preset.primary, $.style.AS_Bold));
-		//             const verifyStructResult = await FETCH.VerifySetupStruct();
-		//             if (!verifyStructResult.proceed) { $.POST(verifyStructResult.report); break; }
-		//             const verifyConfigsResult = await FETCH.VerifyConfigs(true);
-		//             if (!verifyConfigsResult.status) { $.POST(verifyConfigsResult.report); break; }
-		//             const fetched = await ARTIFACT.FETCH();
-		//             $.POST(fetched.message);
-		//             if (fetched.status) {
-		//                 await fileman.write.bulk(fetched.outs);
-		//                 $.POST($.tag.H4("Artifacts Updated", $.preset.success, $.style.AS_Bold));
-		//             } else {
-		//                 $.POST($.tag.H4("Artifacts not updated due to pending errors", $.preset.failed, $.style.AS_Bold));
-		//             }
+		{
+			//             $.init(false);
+			//             $.POST($.tag.H3("Installing Artifacts", $.preset.primary, $.style.AS_Bold));
+			//             const verifyStructResult = await FETCH.VerifySetupStruct();
+			//             if (!verifyStructResult.proceed) { $.POST(verifyStructResult.report); break; }
+			//             const verifyConfigsResult = await FETCH.VerifyConfigs(true);
+			//             if (!verifyConfigsResult.status) { $.POST(verifyConfigsResult.report); break; }
+			//             const fetched = await ARTIFACT.FETCH();
+			//             $.POST(fetched.message);
+			//             if (fetched.status) {
+			//                 await fileman.write.bulk(fetched.outs);
+			//                 $.POST($.tag.H4("Artifacts Updated", $.preset.success, $.style.AS_Bold));
+			//             } else {
+			//                 $.POST($.tag.H4("Artifacts not updated due to pending errors", $.preset.failed, $.style.AS_Bold));
+			//             }
+		}
 	case "version":
 		{
 			S.Post(core_at_version)
 		}
 	default:
 		{
-			// _action_.()
+			_action_.Fetch_Docs()
 
 			S.Post(S.MAKE(
 				S.Tag.H1(core_at_version, S.Preset.None),
-				[]string{
-					_cache_.Sync["Markdown"]["Alerts"].Content,
-					// $$.ListRecord("Available Commands", CACHE.ROOT.commands),
-					// $$.ListRecord("Agreements", Object.fromEntries(Object.values(CACHE.SYNC.AGREEMENT).map((i) => [i.title, i.path]))),
-					// $$.ListRecord("References", Object.fromEntries(Object.values(CACHE.SYNC.MARKDOWN).map((i) => [i.title, i.path]))),
-					// $.tag.H4("For more information visit : " + CACHE.ROOT.url.Site, $.preset.tertiary)
-				},
+				[]string{_strings_.Trim(_cache_.Sync["references"]["alerts"].Content, "\t\r\n ")},
 			))
+
+			S.Post(S.MAKE("", []string{
+				X.List_Record("Available Commands", _cache_.Root.Commands),
+				X.List_Record("Agreements", func() map[string]string {
+					res := map[string]string{}
+					for _, data := range _cache_.Sync["agreements"] {
+						res[data.Title] = data.Path
+					}
+					return res
+				}()),
+				X.List_Record("References", func() map[string]string {
+					res := map[string]string{}
+					for _, data := range _cache_.Sync["references"] {
+						res[data.Title] = data.Path
+					}
+					return res
+				}()),
+				S.Tag.H4("For more information visit : "+_cache_.Root.Url.Site, S.Preset.Tertiary),
+			}))
 		}
 	}
 }

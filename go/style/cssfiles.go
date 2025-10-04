@@ -94,7 +94,7 @@ func Cssfile_Collection(files *[]_types_.File_Stash, forArtifact bool, verbose b
 					}
 				}
 
-				artifact := _cache_.Static.Archive.Name
+				artifact := _cache_.Archive.Name
 				if forArtifact {
 					artifact = file.Artifact
 					for i, v := range attachments {

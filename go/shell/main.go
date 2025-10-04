@@ -22,7 +22,10 @@ func MAKE(heading string, contents []string, deployments ...MakeList) string {
 	if len(contents) > 0 {
 		modContents = append(modContents, Format("", Preset.None))
 	}
-	outList := []string{Format(heading, Preset.None, Style.AS_Bold)}
+	outList := []string{}
+	if len(heading) > 0 {
+		outList = append(outList, Format(heading, Preset.None, Style.AS_Bold))
+	}
 	outList = append(outList, modContents...)
 	return _strings_.Join(outList, "\n")
 }
@@ -30,9 +33,6 @@ func MAKE(heading string, contents []string, deployments ...MakeList) string {
 func TASK(str string, rowShift int) {
 	if Canvas.Config.TaskActive && Canvas.Config.PostActive {
 		var b _strings_.Builder
-		if rowShift >= 0 {
-			b.WriteString(tag_Br(rowShift, Preset.None))
-		}
 		b.WriteString(Format(">>>", Preset.Primary, Style.AS_Bold))
 		b.WriteString(Canvas.Tab)
 		b.WriteString(Format(str+".", Preset.Tertiary, Style.AS_Bold, Style.AS_Italic))
@@ -44,9 +44,6 @@ func TASK(str string, rowShift int) {
 func STEP(str string, rowShift int) {
 	if Canvas.Config.TaskActive && Canvas.Config.PostActive {
 		var b _strings_.Builder
-		if rowShift >= 0 {
-			b.WriteString(tag_Br(rowShift, Preset.None))
-		}
 		b.WriteString(Format(">>>", Preset.Primary, Style.AS_Rare))
 		b.WriteString(Canvas.Tab)
 		b.WriteString(Format(str+" ...", Preset.Tertiary, Style.AS_Italic))

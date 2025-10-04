@@ -31,22 +31,22 @@ func tag_H1(content string, preset []string, styles ...string) string {
 		rightPad := _strings_.Repeat(" ", (padding+1)/2)
 		paddedLines = append(paddedLines, ">>>"+leftPad+line+rightPad+"<<<")
 	}
-	s := "\n" + Canvas.Divider.Mid + "\n" + _strings_.Join(paddedLines, "\n") + "\n" + Canvas.Divider.Mid + "\n"
+	s := "\n" + Divider(Canvas.DivRune.Mid) + "\n" + _strings_.Join(paddedLines, "\n") + "\n" + Divider(Canvas.DivRune.Mid) + "\n"
 	return Format(s, preset, styles...)
 }
 
 func tag_H2(content string, preset []string, styles ...string) string {
-	s := Canvas.Divider.Mid + "\n" + content + "\n" + Canvas.Divider.Mid + "\n"
+	s := Divider(Canvas.DivRune.Mid) + "\n" + content + "\n" + Divider(Canvas.DivRune.Mid) + "\n"
 	return Format(s, preset, styles...)
 }
 
 func tag_H3(content string, preset []string, styles ...string) string {
-	s := "\n" + content + "\n" + Canvas.Divider.Mid
+	s := "\n" + content + "\n" + Divider(Canvas.DivRune.Mid)
 	return Format(s, preset, styles...)
 }
 
 func tag_H4(content string, preset []string, styles ...string) string {
-	s := Canvas.Divider.Mid + "\n" + content + "\n"
+	s := Divider(Canvas.DivRune.Mid) + "\n" + content + "\n"
 	return Format(s, preset, styles...)
 }
 
@@ -54,7 +54,7 @@ func tag_H5(content string, preset []string, styles ...string) string {
 	width := Canvas.Width()
 	tabLen := len(Canvas.Tab)
 	remain := width - tabLen - len(content)
-	s := content + Canvas.Tab + _strings_.Repeat(string(Canvas.Divider.Mid[0]), remain) + "\n"
+	s := content + Canvas.Tab + _strings_.Repeat(string(Canvas.DivRune.Mid), remain) + "\n"
 	return Format(s, preset, styles...)
 }
 
@@ -62,7 +62,7 @@ func tag_H6(content string, preset []string, styles ...string) string {
 	width := Canvas.Width()
 	tabLen := len(Canvas.Tab)
 	remain := width - tabLen - len(content)
-	s := _strings_.Repeat(string(Canvas.Divider.Mid[0]), remain) + Canvas.Tab + content
+	s := _strings_.Repeat(string(Divider(Canvas.DivRune.Mid)[0]), remain) + Canvas.Tab + content
 	return Format(s, preset, styles...)
 }
 
@@ -83,10 +83,10 @@ func tag_Li(content string, preset []string, styles ...string) string {
 func tag_Hr(content string, preset []string, styles ...string) string {
 	width := Canvas.Width()
 	n := int(_math_.Ceil(float64(width) / float64(len(content))))
-    repeated := _strings_.Repeat(content, n)
-    if len(repeated) > width {
-        repeated = repeated[:width]
-    }
+	repeated := _strings_.Repeat(content, n)
+	if len(repeated) > width {
+		repeated = repeated[:width]
+	}
 	s := "\n" + repeated + "\n"
 	return Format(s, preset, styles...)
 }

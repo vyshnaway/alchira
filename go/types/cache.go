@@ -24,22 +24,22 @@ type Cache_Root struct {
 }
 
 type Cache_Static struct {
-	WATCH           bool
-	VERBOSE         bool
-	Command         string
-	Argument        string
-	RootCSS         string
-	RootPath        string
-	WorkPath        string
-	ProjectName     string
-	ProjectVersion  string
-	Hashrule        map[string]string
-	Artifacts_Saved map[string]string
-	Libraries_Saved map[string]string
-	TargetDir_Saved map[string]Config_ProxyStorage
-	Tweaks          Config_Tweaks
-	Archive         Config_Archive
-	ProxyMap        []Config_ProxyMap
+	WATCH             bool
+	VERBOSE           bool
+	Command           string
+	Argument          string
+	RootCSS           string
+	RootPath          string
+	WorkPath          string
+	ProjectName       string
+	ProjectVersion    string
+	Hashrule          map[string]string
+	Artifacts_Sources map[string]string
+	Artifacts_Saved   map[string]string
+	Libraries_Saved   map[string]string
+	TargetDir_Saved   map[string]Config_ProxyStorage
+	Tweaks            Config_Tweaks
+	ProxyMap          []Config_ProxyMap
 }
 
 type Cache_Delta_Report struct {
