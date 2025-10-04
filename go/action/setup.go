@@ -1,7 +1,6 @@
 package action
 
 import (
-	"fmt"
 	_cache_ "main/cache"
 	_fileman_ "main/fileman"
 	_types_ "main/types"
@@ -66,7 +65,6 @@ func Setup_Ignorefiles() {
 			project_ignores = append(project_ignores, ignore)
 		}
 	}
-	fmt.Println(ignorepath)
 	if points > 0 {
 		_fileman_.Write_File(ignorepath, _strings_.Join(project_ignores, "\n"))
 	}
