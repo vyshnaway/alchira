@@ -11,7 +11,6 @@ const (
 )
 
 var Root = _types_.Cache_Root{
-	Bin:       "",
 	Name:      id,
 	Version:   "0.0.0",
 	Extension: id,
@@ -30,14 +29,6 @@ var Root = _types_.Cache_Root{
 		"publish": "Optimized build, uses web-api.",
 		"install": "Install external artifacts.",
 		"version": "Returns version.",
-	},
-	Scripts: map[string]string{
-		"init":     "init",
-		"debug":    "debug",
-		"preview":  "preview",
-		"publish":  "publish",
-		"install":  "install",
-		"manifest":  "manifest",
 	},
 	Tweaks: _types_.Config_Tweaks{
 		"CacheUsage": false,

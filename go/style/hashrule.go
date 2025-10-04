@@ -17,7 +17,7 @@ func Hashrule_Upload() {
 
 	for key := range hashrule {
 		var hash = "#{" + key + "}"
-		response := Hashrule_Import(hash, _cache_.Path["json"]["hashrule"].Path)
+		response := Hashrule_Import(hash, _cache_.Path_Json["hashrule"].Path)
 		if response.Status {
 			hashrule[key] = response.Result
 		} else {

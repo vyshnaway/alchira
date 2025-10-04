@@ -11,8 +11,8 @@ func Initialize() {
 	S.TASK("Initializing setup.", 0)
 	S.TASK("Cloning scaffold to Project", 1)
 
-	err1 := _fileman_.Clone_Safe(_cache_.Path["blueprint"]["scaffold"].Path, _cache_.Path["folder"]["scaffold"].Path, []string{})
-	err2 := _fileman_.Clone_Safe(_cache_.Path["blueprint"]["libraries"].Path, _cache_.Path["folder"]["libraries"].Path, []string{})
+	err1 := _fileman_.Clone_Safe(_cache_.Sync_Blueprint["scaffold"].Path, _cache_.Path_Folder["scaffold"].Path, []string{})
+	err2 := _fileman_.Clone_Safe(_cache_.Sync_Blueprint["libraries"].Path, _cache_.Path_Folder["libraries"].Path, []string{})
 
 	if err1 != nil {
 		S.Post(S.MAKE(
@@ -35,7 +35,7 @@ func Initialize() {
 		"Next Steps",
 		[]string{
 			"Modify " +
-				S.Format(_cache_.Path["json"]["configure"].Path, S.Preset.Primary, S.Style.AS_Bold) +
+				S.Format(_cache_.Path_Json["configure"].Path, S.Preset.Primary, S.Style.AS_Bold) +
 				" according to the requirements of your project.",
 			"Execute " +
 				S.Format("\"init\"", S.Preset.Primary, S.Style.AS_Bold) +
@@ -56,22 +56,19 @@ func Initialize() {
 
 	S.Post(X.List_Record("Available Commands", _cache_.Root.Commands))
 
-	S.Post(X.List_Steps(
-		"Publish command instructions.",
-		func() []string {
-			if _cache_.Archive.Version[0] == '0' {
-				return []string{"This command is not released."}
-			} else {
-				return []string{
-					"Create a new project and use its access key. For action visit " +
-						S.Format(_cache_.Root.Url.Console, S.Preset.Primary, S.Style.AS_Bold),
-					"If using in CI/CD workflow, it is suggested to use " +
-						S.Format("{bin} publish {key}", S.Preset.Primary, S.Style.AS_Bold),
-				}
-			}
-		}(),
-	))
+	if len(_cache_.Root.Version) > 0 && _cache_.Root.Version[0] == '0' {
+		S.Post(
+			X.List_Steps("Publish command instructions.",
+				[]string{"This command is not released."},
+			))
+	} else {
+		S.Post(X.List_Steps("Publish command instructions.", []string{
+			"Create a new project and use its access key. For action visit " +
+				S.Format(_cache_.Root.Url.Console, S.Preset.Primary, S.Style.AS_Bold),
+			"If using in CI/CD workflow, it is suggested to use " +
+				S.Format("{bin} publish {key}", S.Preset.Primary, S.Style.AS_Bold),
+		}))
+	}
 
-	Fetch_Docs()
 	S.Post(S.Tag.H4("Initialized setup", S.Preset.Success, S.Style.AS_Bold))
 }

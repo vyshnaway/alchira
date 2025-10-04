@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"fmt"
 	_regexp_ "regexp"
 	_slices_ "slices"
 	_strconv_ "strconv"
@@ -11,8 +12,8 @@ import (
 func String_Filter(s string, keepChars, skipChars, addBackSlashFor []rune) string {
 	final := _strings_.Builder{}
 	regex_alphanumeric := _regexp_.MustCompile(`[a-zA-Z0-9]`)
-	regex_space        := _regexp_.MustCompile(`\s+`)
-	regex_at           := _regexp_.MustCompile(`@+`)
+	regex_space := _regexp_.MustCompile(`\s+`)
+	regex_at := _regexp_.MustCompile(`@+`)
 
 	s = regex_space.ReplaceAllString(s, "_")
 	s = regex_at.ReplaceAllString(s, "_")
@@ -107,4 +108,8 @@ func String_Fallback(val any, fallback string) string {
 		return s
 	}
 	return fallback
+}
+
+func String_PrintAny(content any) {
+	fmt.Println(Code_JsonBuild(content, "  "))
 }

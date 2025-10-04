@@ -136,30 +136,31 @@ func Verify_Setup() (Status verify_Setup_Status_enum, Report string) {
 	status := Verify_Setup_Status_Uninitialized
 	report := ""
 
-	if _fileman_.Path_IfDir(_cache_.Path["folder"]["scaffold"].Path) {
-		_fileman_.Write_File(_cache_.Path["md"]["reference"].Path, _cache_.Sync["MARKDOWN"]["readme"].Content)
-		_fileman_.Write_File(_cache_.Path["md"]["guildelines"].Path, _cache_.Sync["MARKDOWN"]["guildelines"].Content)
-		_fileman_.Clone_Safe(_cache_.Path["blueprint"]["scaffold"].Path, _cache_.Sync["folder"]["scaffold"].Path, []string{})
+	if _fileman_.Path_IfDir(_cache_.Path_Folder["scaffold"].Path) {
+		_fileman_.Write_File(_cache_.Path_Files["reference"].Path, _cache_.Sync_References["readme"].Content)
+		_fileman_.Write_File(_cache_.Path_Files["guildelines"].Path, _cache_.Sync_References["guildelines"].Content)
+		_fileman_.Clone_Safe(_cache_.Sync_Blueprint["scaffold"].Path, _cache_.Path_Folder["scaffold"].Path, []string{})
 
 		errors := map[string]string{}
 		S.TASK("Verifying directory status", 0)
 
-		for key, val := range _cache_.Path {
-			if key != "blueprint" {
-				if key == "folder" {
-					for _, v := range val {
-						if v.Essential && !_fileman_.Path_IfDir(v.Path) {
-							S.STEP("Path: "+v.Path, 1)
-							errors[v.Path] = "Path not found."
-						}
-					}
-				} else {
-					for _, v := range val {
-						if v.Essential && !_fileman_.Path_IfFile(v.Path) {
-							S.STEP("Path: "+v.Path, 1)
-							errors[v.Path] = "Path not found."
-						}
-					}
+		for _, v := range _cache_.Path_Folder {
+			if v.Essential && !_fileman_.Path_IfDir(v.Path) {
+				S.STEP("Path: "+v.Path, 1)
+				errors[v.Path] = "Path not found."
+			}
+		}
+		
+		for _, val := range []map[string]_types_.File_Source{
+			_cache_.Path_Autogen,
+			_cache_.Path_Css,
+			_cache_.Path_Files,
+			_cache_.Path_Json,
+		} {
+			for _, v := range val {
+				if v.Essential && !_fileman_.Path_IfFile(v.Path) {
+					S.STEP("Path: "+v.Path, 1)
+					errors[v.Path] = "Path not found."
 				}
 			}
 		}
@@ -192,7 +193,7 @@ func Verify_Configs(loadStatics bool) (Report string, Ok bool) {
 	S.TASK("Initializing configs", 0)
 	errors := []string{}
 
-	config_path := _cache_.Path["json"]["configure"].Path
+	config_path := _cache_.Path_Json["configure"].Path
 	S.STEP("PATH : "+config_path, 0)
 	config_data, config_err := _fileman_.Read_Json(config_path, false)
 
@@ -243,16 +244,16 @@ func Verify_Configs(loadStatics bool) (Report string, Ok bool) {
 			_cache_.Static.Artifacts_Sources = map[string]string{}
 		}
 
-		dependancy_response := Verify_ProxyMapDependency(_cache_.Static.ProxyMap, _cache_.Path["folder"]["scafffold"].Path)
+		dependancy_response := Verify_ProxyMapDependency(_cache_.Static.ProxyMap, _cache_.Path_Folder["scafffold"].Path)
 		errors = append(errors, dependancy_response.Warnings...)
 	} else {
 		errors = append(errors, config_path+" : Bad json/ Incomplete schema.")
 	}
 
-	if data, err := _fileman_.Read_File(_cache_.Path["md"]["readme"].Path, false); err == nil {
+	if data, err := _fileman_.Read_File(_cache_.Path_Files["readme"].Path, false); err == nil {
 		_cache_.Archive.Readme = data
 	}
-	if data, err := _fileman_.Read_File(_cache_.Path["md"]["licence"].Path, false); err == nil {
+	if data, err := _fileman_.Read_File(_cache_.Path_Files["licence"].Path, false); err == nil {
 		_cache_.Archive.Licence = data
 	}
 

@@ -14,26 +14,39 @@ func Fetch_Docs() {
 	var wg _sync_.WaitGroup
 	var mut _sync_.Mutex
 
-	for group_name, group := range _cache_.Sync {
+	for item_name, item := range _cache_.Sync_Agreements {
 		wg.Add(1)
 		func() {
-			for item_name, item := range group {
-				content, err := _fileman_.Sync_File(item.Url, item.Path)
-				mut.Lock()
-				item.Content = content
-				if err == nil {
-					_cache_.Sync[group_name][item_name] = item
-				}
-				mut.Unlock()
+			content, err := _fileman_.Sync_File(item.Url, item.Path)
+			mut.Lock()
+			item.Content = content
+			if err == nil {
+				_cache_.Sync_References[item_name] = item
 			}
+			mut.Unlock()
 			wg.Done()
 		}()
 	}
+
+	for item_name, item := range _cache_.Sync_References {
+		wg.Add(1)
+		func() {
+			content, err := _fileman_.Sync_File(item.Url, item.Path)
+			mut.Lock()
+			item.Content = content
+			if err == nil {
+				_cache_.Sync_References[item_name] = item
+			}
+			mut.Unlock()
+			wg.Done()
+		}()
+	}
+	
 	wg.Wait()
 }
 
 // ProxyMapSync synchronizes proxy map data
-func ProxyMapSync(proxyMaps []_types_.Config_ProxyMap) (map[string]_types_.Config_ProxyStorage) {
+func ProxyMapSync(proxyMaps []_types_.Config_ProxyMap) map[string]_types_.Config_ProxyStorage {
 	static_proxystorage := make(map[string]_types_.Config_ProxyStorage)
 	for _, p := range proxyMaps {
 		static_proxystorage[p.Target] = _types_.Config_ProxyStorage{

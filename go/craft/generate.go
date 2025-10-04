@@ -132,10 +132,10 @@ func Generate() (Files map[string]string, Report string) {
 		}
 
 		if _cache_.Static.WATCH {
-			files[_cache_.Path["autogen"]["manifest"].Path] = _utils_.Code_JsonBuild(_cache_.Manifest, "")
-			files[_cache_.Path["autogen"]["index"].Path] = watch_index
-			files[_cache_.Path["autogen"]["watch"].Path] = watch_class
-			files[_cache_.Path["autogen"]["staple"].Path] = staple_sheet
+			files[_cache_.Path_Autogen["manifest"].Path] = _utils_.Code_JsonBuild(_cache_.Manifest, "")
+			files[_cache_.Path_Autogen["index"].Path] = watch_index
+			files[_cache_.Path_Autogen["watch"].Path] = watch_class
+			files[_cache_.Path_Autogen["staple"].Path] = staple_sheet
 		} else {
 			memchart := map[string]string{}
 			for key, val := range render_frags {

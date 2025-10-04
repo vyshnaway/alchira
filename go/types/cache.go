@@ -10,11 +10,9 @@ type Cache_Url struct {
 }
 
 type Cache_Root struct {
-	Bin              string
 	Name             string
 	Version          string
 	Extension        string
-	Scripts          map[string]string
 	Commands         map[string]string
 	CustomAtrules    map[string]string
 	CustomElements   map[string]int

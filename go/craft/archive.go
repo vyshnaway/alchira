@@ -81,7 +81,7 @@ func archive_Deploy() map[string]string {
 	latestverfile := "latest.json"
 	currentverfile := archive_Build().Version + ".json"
 	availableversions := []string{}
-	if items, err := _fileman_.Path_ListFiles(_cache_.Path["folder"]["arcversion"].Path, []string{}); err == nil {
+	if items, err := _fileman_.Path_ListFiles(_cache_.Path_Folder["arcversion"].Path, []string{}); err == nil {
 		for _, item := range items {
 			availableversions = append(availableversions, item)
 		}
@@ -103,12 +103,12 @@ func archive_Deploy() map[string]string {
 
 	indexexportjson, _ := _json_.Marshal(indexexport)
 	exportjson, _ := _json_.Marshal(_cache_.Archive)
-	latestpath := _fileman_.Path_Join(_cache_.Path["folder"]["arcversion"].Path, latestverfile)
-	currentpath := _fileman_.Path_Join(_cache_.Path["folder"]["arcversion"].Path, currentverfile)
+	latestpath := _fileman_.Path_Join(_cache_.Path_Folder["arcversion"].Path, latestverfile)
+	currentpath := _fileman_.Path_Join(_cache_.Path_Folder["arcversion"].Path, currentverfile)
 	artifact_files := map[string]string{
-		latestpath:                           string(exportjson),
-		currentpath:                          string(exportjson),
-		_cache_.Path["json"]["archive"].Path: string(indexexportjson),
+		latestpath:                        string(exportjson),
+		currentpath:                       string(exportjson),
+		_cache_.Path_Json["archive"].Path: string(indexexportjson),
 	}
 
 	return artifact_files

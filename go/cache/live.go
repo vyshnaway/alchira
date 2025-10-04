@@ -37,6 +37,22 @@ var Archive = _types_.Config_Archive{
 	ExportClasses: []string{},
 }
 
+func Archive_Reset() {
+	Archive = _types_.Config_Archive{
+		Name:          "",
+		Author:        "",
+		Version:       "",
+		Vendors:       "",
+		Readme:        "",
+		Environment:   "",
+		Licence:       "",
+		ExportSheet:   "",
+		Versions:      []string{},
+		Constants:     map[string]string{},
+		ExportClasses: []string{},
+	}
+}
+
 var Delta = _types_.Cache_Delta{
 	ErrorCount:   0,
 	Path:         "",

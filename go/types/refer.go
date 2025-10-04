@@ -20,12 +20,6 @@ type Refer_WatchEvent struct {
 	Extension   string
 }
 
-type Refer_PackageEssential struct {
-	Name    string            `json:"name"`
-	Version string            `json:"version"`
-	Bin     map[string]string `json:"bin"`
-}
-
 type Refer_Diagnostic struct {
 	Message string   `json:"message"`
 	Sources []string `json:"sources"`

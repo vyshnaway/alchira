@@ -61,17 +61,17 @@ func save_CssImport(filepath_array []string) string {
 func Save_RootCss() {
 	S.TASK("Updating Index", 0)
 	_cache_.Static.RootCSS = save_CssImport([]string{
-		_cache_.Path["css"]["atrules"].Path,
-		_cache_.Path["css"]["constants"].Path,
-		_cache_.Path["css"]["elements"].Path,
-		_cache_.Path["css"]["extends"].Path,
+		_cache_.Path_Css["atrules"].Path,
+		_cache_.Path_Css["constants"].Path,
+		_cache_.Path_Css["elements"].Path,
+		_cache_.Path_Css["extends"].Path,
 	})
 }
 
 func Save_Libraries() {
 	S.TASK("Updating Library", 0)
 	_cache_.Static.Libraries_Saved, _ = _fileman_.Read_Bulk(
-		_cache_.Path["folder"]["libraries"].Path,
+		_cache_.Path_Folder["libraries"].Path,
 		[]string{"css"},
 	)
 }
@@ -79,7 +79,7 @@ func Save_Libraries() {
 func Save_Externals() {
 	S.TASK("Updating External Artifacts", 0)
 	_cache_.Static.Artifacts_Saved, _ = _fileman_.Read_Bulk(
-		_cache_.Path["folder"]["artifacts"].Path,
+		_cache_.Path_Folder["artifacts"].Path,
 		[]string{_cache_.Root.Extension},
 	)
 }
@@ -90,7 +90,7 @@ func Save_Targets() {
 }
 
 func SaveHashrule() (Report string, Ok bool) {
-	hashrule_path := _cache_.Path["json"]["hashrule"].Path
+	hashrule_path := _cache_.Path_Json["hashrule"].Path
 
 	S.TASK("Updating Hashrule", 0)
 	S.STEP("PATH : "+hashrule_path, 0)

@@ -14,7 +14,7 @@ import (
 
 func artifact_Fetch(identifier string, source string) (Files map[string]string, Status bool) {
 	files := map[string]string{}
-	artifactspath := _cache_.Path["folder"]["artifacts"].Path
+	artifactspath := _cache_.Path_Folder["artifacts"].Path
 
 	status, fetched := func() (Ok bool, result _types_.Config_Archive) {
 		var res_nil _types_.Config_Archive
@@ -94,7 +94,7 @@ func artifact_Fetch(identifier string, source string) (Files map[string]string, 
 	return files, status
 }
 
-func artifact_Update() (Files map[string]string, Report string, Status bool) {
+func Artifact_Update() (Status bool, Report string, Files map[string]string) {
 	files := map[string]string{}
 	responses := map[string]string{}
 	status := false
@@ -125,5 +125,5 @@ func artifact_Update() (Files map[string]string, Report string, Status bool) {
 		X.List_Props(responses, S.Preset.None, S.Preset.None),
 		S.MakeList{Intent: 0, TypeFunc: S.List.Bullets, Preset: S.Preset.Text},
 	)
-	return files, report, status
+	return status, report, files
 }

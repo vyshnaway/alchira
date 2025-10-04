@@ -32,8 +32,6 @@ func Reset() {
 func UtilsGetUsage() string {
 	chart := map[string]float64{
 		"Files":  _utils_.String_Memory(_utils_.Code_JsonBuild(Cache,"")),
-		"Sync":   _utils_.String_Memory(_utils_.Code_JsonBuild(_cache_.Sync,"")),
-		"Path":   _utils_.String_Memory(_utils_.Code_JsonBuild(_cache_.Path,"")),
 		"Root":   _utils_.String_Memory(_utils_.Code_JsonBuild(_cache_.Root,"")),
 		"Delta":  _utils_.String_Memory(_utils_.Code_JsonBuild(_cache_.Delta,"")),
 		"Class":  _utils_.String_Memory(_utils_.Code_JsonBuild(_cache_.Style,"")),

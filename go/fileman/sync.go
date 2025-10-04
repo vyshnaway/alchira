@@ -16,11 +16,18 @@ func Sync_File(url, path string) (string, error) {
 		}
 		return latestData, nil
 	}
-	// If online fetch fails, try reading local file
-	currentData, err := Read_File(path, false)
-	if err == nil {
-		return currentData, nil
+
+	if t, k := Path_Check(path); k == nil {
+		switch t {
+		case Path_Check_Type_Txt:
+			if currentData, err := Read_File(path, false); err == nil {
+				return currentData, nil
+			}
+		case Path_Check_Type_Nil:
+			Write_File(path, "")
+		}
 	}
+
 	return "", _fmt_.Errorf("failed to sync file from URL '%s' and local path '%s': %w", url, path, err)
 }
 
@@ -38,6 +45,7 @@ func Sync_Json(url, path string) (any, error) {
 	if err == nil {
 		return currentData, nil
 	}
+
 	return nil, _fmt_.Errorf("failed to sync JSON from URL '%s' and local path '%s': %w", url, path, err)
 }
 
