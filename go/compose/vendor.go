@@ -1,17 +1,20 @@
 package compose
 
 import (
+	"maps"
 	_slices_ "slices"
 )
 
-var vendor_Refer = struct {
-	Atrules    map[string]map[string]string
-	Attributes map[string]map[string]string
-	Pseudos    map[string]map[string]string
-	Classes    map[string]map[string]string
-	Elements   map[string]map[string]string
-	Values     map[string]map[string]map[string]string
-}{
+type Type_VendorTable struct {
+	Atrules    map[string]map[string]string            `json:"atrules"`
+	Attributes map[string]map[string]string            `json:"attributes"`
+	Pseudos    map[string]map[string]string            `json:"pseudos"`
+	Classes    map[string]map[string]string            `json:"classes"`
+	Elements   map[string]map[string]string            `json:"elements"`
+	Values     map[string]map[string]map[string]string `json:"values"`
+}
+
+var Vendor_Refer = Type_VendorTable{
 	Atrules:    map[string]map[string]string{},
 	Attributes: map[string]map[string]string{},
 	Pseudos:    map[string]map[string]string{},
@@ -22,8 +25,7 @@ var vendor_Refer = struct {
 
 var vendor_Providers = []string{}
 
-
-func collectStringTypeKeys(object any)[]string {
+func collectStringTypeKeys(object any) []string {
 	collected := []string{}
 	switch obj := object.(type) {
 	case map[string]string:
@@ -38,28 +40,54 @@ func collectStringTypeKeys(object any)[]string {
 	return collected
 }
 
-func Vendor_Save(
-	atrules map[string]map[string]string,
-	attributes map[string]map[string]string,
-	pseudos map[string]map[string]string,
-	classes map[string]map[string]string,
-	elements map[string]map[string]string,
-	values map[string]map[string]map[string]string,
-) {
-	vendor_Refer.Atrules = atrules
-	vendor_Refer.Attributes = attributes
-	vendor_Refer.Pseudos = pseudos
-	vendor_Refer.Classes = classes
-	vendor_Refer.Elements = elements
-	vendor_Refer.Values = values
+func Vendor_Save(table Type_VendorTable) {
+
+	if table.Values == nil {
+		Vendor_Refer.Values = map[string]map[string]map[string]string{}
+	} else {
+		Vendor_Refer.Values = table.Values
+	}
+
+	if table.Atrules == nil {
+		Vendor_Refer.Atrules = map[string]map[string]string{}
+	} else {
+		Vendor_Refer.Atrules = table.Atrules
+	}
+
+	if table.Attributes == nil {
+		Vendor_Refer.Attributes = map[string]map[string]string{}
+	} else {
+		Vendor_Refer.Attributes = table.Attributes
+	}
+
+	if table.Elements == nil {
+		Vendor_Refer.Elements = map[string]map[string]string{}
+	} else {
+		Vendor_Refer.Elements = table.Elements
+	}
+
+	if table.Classes == nil {
+		Vendor_Refer.Classes = map[string]map[string]string{}
+	} else {
+		Vendor_Refer.Classes = table.Classes
+	}
+
+	if table.Pseudos == nil {
+		Vendor_Refer.Pseudos = map[string]map[string]string{}
+	} else {
+		Vendor_Refer.Pseudos = table.Pseudos
+	}
+
+	maps.Copy(Vendor_Refer.Pseudos, Vendor_Refer.Elements)
+	maps.Copy(Vendor_Refer.Pseudos, Vendor_Refer.Pseudos)
 
 	collected := []string{}
-	collected = append(collected, collectStringTypeKeys(atrules)...)
-	collected = append(collected, collectStringTypeKeys(attributes)...)
-	collected = append(collected, collectStringTypeKeys(pseudos)...)
-	collected = append(collected, collectStringTypeKeys(classes)...)
-	collected = append(collected, collectStringTypeKeys(elements)...)
-	collected = append(collected, collectStringTypeKeys(values)...)
+	collected = append(collected, collectStringTypeKeys(table.Atrules)...)
+	collected = append(collected, collectStringTypeKeys(table.Attributes)...)
+	collected = append(collected, collectStringTypeKeys(table.Pseudos)...)
+	collected = append(collected, collectStringTypeKeys(table.Classes)...)
+	collected = append(collected, collectStringTypeKeys(table.Elements)...)
+	collected = append(collected, collectStringTypeKeys(table.Atrules)...)
 
 	vendor_Providers = []string{}
 	for _, v := range collected {

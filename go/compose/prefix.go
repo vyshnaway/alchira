@@ -8,7 +8,7 @@ import (
 )
 
 func prefix_ForAttribute(content string, prefixes []string) map[string]string {
-	attrVals, attrStat := vendor_Refer.Attributes[content]
+	attrVals, attrStat := Vendor_Refer.Attributes[content]
 	if !attrStat {
 		return map[string]string{"": content}
 	}
@@ -28,7 +28,7 @@ func prefix_ForValues(attribute string, value string, prefixes []string) map[str
 	cleanValue := _utils_.Code_Uncomment(value, false, true, false)
 	var venVals map[string]string
 	var venStat = false
-	if attrMap, ok := vendor_Refer.Values[attribute]; ok {
+	if attrMap, ok := Vendor_Refer.Values[attribute]; ok {
 		venVals, venStat = attrMap[cleanValue]
 	}
 	if !venStat {
@@ -76,7 +76,7 @@ func prefix_ForAtRule(content string, prefixes []string) map[string]string {
 
 	result := map[string]string{}
 	for _, group := range prefixes {
-		if rval, rbool := vendor_Refer.Atrules[rule]; rbool {
+		if rval, rbool := Vendor_Refer.Atrules[rule]; rbool {
 			if gval, gbool := rval[group]; gbool {
 				result[group] = gval + data
 			}
@@ -106,14 +106,14 @@ func prefix_ForPseudos(content string, prefixes []string) []string {
 		for _, group := range prefixes {
 			score := 0
 			value := re.ReplaceAllStringFunc(str, func(selector string) string {
-				if sVal, sStat := vendor_Refer.Pseudos[selector]; sStat {
+				if sVal, sStat := Vendor_Refer.Pseudos[selector]; sStat {
 					if gVal, gStat := sVal[group]; gStat {
 						score++
 						return gVal
 					}
 				}
 
-				if _, stat := vendor_Refer.Pseudos[selector]; stat {
+				if _, stat := Vendor_Refer.Pseudos[selector]; stat {
 					return selector
 				}
 

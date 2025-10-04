@@ -44,7 +44,7 @@ func Commander(
 		{
 			var wg _sync_.WaitGroup
 			wg.Add(2)
-			go func() { _action_.Fetch_Docs(); wg.Done() }()
+			go func() { _action_.Sync_RootDocs(); wg.Done() }()
 			go func() { S.Animate.Title(core_at_version+" : Initialize", 1000, 1); wg.Done() }()
 			wg.Wait()
 			status, setup_report := _action_.Verify_Setup()
@@ -96,7 +96,7 @@ func Commander(
 		}
 	default:
 		{
-			_action_.Fetch_Docs()
+			_action_.Sync_RootDocs()
 
 			S.Post(S.MAKE(
 				S.Tag.H1(core_at_version, S.Preset.Title),

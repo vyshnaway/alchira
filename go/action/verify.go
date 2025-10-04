@@ -35,7 +35,7 @@ func Verify_Setup() (Status verify_Setup_Status_enum, Report string) {
 		for _, v := range _cache_.Path_Folder {
 			if v.Essential && !_fileman_.Path_IfDir(v.Path) {
 				S.STEP("Path: "+v.Path, 1)
-				errors[v.Path] = "Path not found."
+				errors[v.Path] = "Folder not found."
 			}
 		}
 
@@ -48,7 +48,7 @@ func Verify_Setup() (Status verify_Setup_Status_enum, Report string) {
 			for _, v := range val {
 				if v.Essential && !_fileman_.Path_IfFile(v.Path) {
 					S.STEP("Path: "+v.Path, 1)
-					errors[v.Path] = "Path not found."
+					errors[v.Path] = "File not found."
 				}
 			}
 		}
@@ -93,15 +93,15 @@ func verify_ConflictsAndSync() Verify_ProxyMapDependency_return {
 	}
 
 	var wg _sync_.WaitGroup
-	warning_channel := make(chan string, len(proxymap)*8)
-	notification_channel := make(chan string, len(proxymap))
+	warning_channel := make(chan string, len(proxymap)*12)
+	notification_channel := make(chan string, len(proxymap)*3)
 
 	for index, ip := range proxymap {
 		wg.Add(1)
 
 		go func(i int, m _types_.Config_ProxyMap) {
 			defer wg.Done()
-			
+
 			if ok, err := _fileman_.Path_IsIndependent(ip.Source, configdir); !ok {
 				if err == nil {
 					warning_channel <- _fmt_.Sprintf("[%d]:source:\"%s\" should not depend on \"%s\".", i, m.Source, configdir)
@@ -120,13 +120,14 @@ func verify_ConflictsAndSync() Verify_ProxyMapDependency_return {
 			source_type, source_err := _fileman_.Path_Check(m.Source)
 			target_type, target_err := _fileman_.Path_Check(m.Target)
 
-			if source_type == _fileman_.Path_Check_Type_Dir && target_type != _fileman_.Path_Check_Type_Nil {
-				if err := _fileman_.Clone_Safe(m.Source, m.Target, []string{}); err == nil {
-					notification_channel <- _fmt_.Sprintf("[%d]:\"%s\" cloned from [%d]:\"%s\"", i, m.Target, i, m.Source)
-				}
-			} else if source_type == _fileman_.Path_Check_Type_Nil && target_type != _fileman_.Path_Check_Type_Dir {
+			if target_type == _fileman_.Path_Check_Type_Dir && (source_type == _fileman_.Path_Check_Type_Nil || source_type == _fileman_.Path_Check_Type_Dir) {
 				if err := _fileman_.Clone_Safe(m.Target, m.Source, []string{}); err == nil {
 					notification_channel <- _fmt_.Sprintf("[%d]:\"%s\" cloned from [%d]:\"%s\"", i, m.Source, i, m.Target)
+				}
+			}
+			if source_type == _fileman_.Path_Check_Type_Dir && (target_type == _fileman_.Path_Check_Type_Nil || target_type == _fileman_.Path_Check_Type_Dir) {
+				if err := _fileman_.Clone_Safe(m.Source, m.Target, []string{}); err == nil {
+					notification_channel <- _fmt_.Sprintf("[%d]:\"%s\" cloned from [%d]:\"%s\"", i, m.Target, i, m.Source)
 				}
 			}
 
@@ -207,7 +208,7 @@ func verify_ConflictsAndSync() Verify_ProxyMapDependency_return {
 	return result
 }
 
-func Verify_Configs(loadStatics bool) (Report string, status bool) {
+func Verify_Configs(loadvendors bool) (Report string, status bool) {
 	Setup_Ignorefiles()
 	if data, err := _fileman_.Read_File(_cache_.Path_Files["readme"].Path, false); err == nil {
 		_cache_.Archive.Readme = data
@@ -229,8 +230,9 @@ func Verify_Configs(loadStatics bool) (Report string, status bool) {
 		if err := json.Unmarshal([]byte(config_data), &config); err != nil {
 			errors = append(errors, config_path+" : Bad json/ Incomplete schema.")
 		} else {
-			if loadStatics {
-				Fetch_Statics(config.Vendors)
+			if loadvendors {
+				S.TASK("Updating vendor-prefixes", 1)
+				Sync_SaveVendors(config.Vendors)
 			}
 
 			if config.Tweaks != nil {

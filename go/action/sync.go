@@ -1,7 +1,9 @@
 package action
 
 import (
+	_json_ "encoding/json"
 	_cache_ "main/cache"
+	_compose_ "main/compose"
 	_fileman_ "main/fileman"
 	_types_ "main/types"
 	_maps_ "maps"
@@ -10,7 +12,7 @@ import (
 	_sync_ "sync"
 )
 
-func Fetch_Docs() {
+func Sync_RootDocs() {
 	var wg _sync_.WaitGroup
 	var mut _sync_.Mutex
 
@@ -45,8 +47,7 @@ func Fetch_Docs() {
 	wg.Wait()
 }
 
-// ProxyMapSync synchronizes proxy map data
-func ProxyMapSync(proxyMaps []_types_.Config_ProxyMap) map[string]_types_.Config_ProxyStorage {
+func Sync_ProxyMapDirs(proxyMaps []_types_.Config_ProxyMap) map[string]_types_.Config_ProxyStorage {
 	static_proxystorage := make(map[string]_types_.Config_ProxyStorage)
 	for _, p := range proxyMaps {
 		static_proxystorage[p.Target] = _types_.Config_ProxyStorage{
@@ -85,44 +86,33 @@ func ProxyMapSync(proxyMaps []_types_.Config_ProxyMap) map[string]_types_.Config
 	return static_proxystorage
 }
 
-func Fetch_Statics(vendor_source string) {
-	// $.TASK("Loading vendor-prefixes");
+func Sync_SaveVendors(vendor_source string) {
 
-	// const PrefixObtained = await (async function () {
-	// 	const result1 = await FILEMAN.read.json(vendorSource, true);
-	// 	if (result1.status) { return result1.data; };
+	newdata := false
+	vendor_path := _cache_.Path_Json["vendors"].Path
 
-	// 	const result2 = await FILEMAN.read.json(CACHE.ROOT.url.Prefixes + vendorSource, true);
-	// 	if (result2.status) { return result2.data; };
+	content := func() string {
 
-	// 	const result3 = await FILEMAN.read.json(CACHE.PATH.blueprint.prefixes.path, false);
-	// 	if (result3.status) { return result3.data; };
+		if r, e := _fileman_.Read_File(vendor_source, true); e == nil {
+			newdata = true
+			return r
+		}
+		if r, e := _fileman_.Read_File(_cache_.Root.Url.Vendors+vendor_source, true); e == nil {
+			newdata = true
+			return r
+		}
+		if r, e := _fileman_.Read_File(vendor_path, false); e == nil {
+			return r
+		}
 
-	// 	return {};
-	// })() as _Cache.PREFIX;
-	// await FILEMAN.write.json(CACHE.PATH.blueprint.prefixes.path, PrefixObtained);
+		return ""
+	}()
 
-	// const PrefixRead: _Cache.PREFIX = {
-	// 	attributes: {},
-	// 	pseudos: {},
-	// 	values: {},
-	// 	atrules: {},
-	// 	classes: {},
-	// 	elements: {}
-	// };
-
-	// for (const key in PrefixRead) {
-	// 	const typedKey = key as keyof _Cache.PREFIX;
-	// 	const valueFromObtained = PrefixObtained[typedKey];
-	// 	if (typedKey === 'values') {
-	// 		PrefixRead[typedKey] = valueFromObtained as Record<string, Record<string, Record<string, string>>>;
-	// 	} else {
-	// 		PrefixRead[typedKey] = valueFromObtained as Record<string, Record<string, string>>;
-	// 	}
-	// }
-	// CACHE.STATIC.Prefix.pseudos = { ...PrefixRead.classes, ...PrefixRead.elements, ...PrefixRead.pseudos };
-	// CACHE.STATIC.Prefix.attributes = { ...PrefixRead.attributes };
-	// CACHE.STATIC.Prefix.atrules = { ...PrefixRead.atrules };
-	// CACHE.STATIC.Prefix.values = { ...PrefixRead.values };
-	// ACTION.setVendors();
+	vendor_table := _compose_.Type_VendorTable{}
+	if err := _json_.Unmarshal([]byte(content), &vendor_table); err == nil {
+		_compose_.Vendor_Save(vendor_table)
+		if newdata {
+			_fileman_.Write_File(vendor_path, content)
+		}
+	}
 }

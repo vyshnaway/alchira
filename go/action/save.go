@@ -86,7 +86,7 @@ func Save_Externals() {
 
 func Save_Targets() {
 	S.TASK("Syncing proxy folders", 0)
-	_cache_.Static.TargetDir_Saved = ProxyMapSync(_cache_.Static.ProxyMap)
+	_cache_.Static.TargetDir_Saved = Sync_ProxyMapDirs(_cache_.Static.ProxyMap)
 }
 
 func SaveHashrule() (Report string, Ok bool) {
