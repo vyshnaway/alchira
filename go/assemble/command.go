@@ -52,10 +52,10 @@ func Commander(
 			case _action_.Verify_Setup_Status_Uninitialized:
 				_action_.Initialize()
 			case _action_.Verify_Setup_Status_Initialized:
+				S.Post(setup_report)
+			case _action_.Verify_Setup_Status_Verified:
 				report, _ := _action_.Verify_Configs(true)
 				S.Post(report)
-			case _action_.Verify_Setup_Status_Verified:
-				S.Post(setup_report)
 			}
 		}
 	case "debug":
@@ -99,7 +99,7 @@ func Commander(
 			_action_.Fetch_Docs()
 
 			S.Post(S.MAKE(
-				S.Tag.H1(core_at_version, S.Preset.None),
+				S.Tag.H1(core_at_version, S.Preset.Title),
 				[]string{_strings_.Trim(_cache_.Sync_References["alerts"].Content, "\t\r\n ")},
 			))
 

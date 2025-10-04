@@ -1,11 +1,13 @@
 package action
 
 import (
+	"fmt"
 	_cache_ "main/cache"
-	_types_ "main/types"
 	_fileman_ "main/fileman"
+	_types_ "main/types"
 	_maps_ "maps"
 	_reflect_ "reflect"
+	_slices_ "slices"
 	_strings_ "strings"
 )
 
@@ -41,7 +43,32 @@ func Setup_Environment(rootpath string, workpath string) {
 	for id, source := range _cache_.Sync_References {
 		source.Url = cdn + source.Url
 		source.Path = _fileman_.Path_Join(append([]string{rootpath}, source.Frags...)...)
-		_cache_.Sync_Agreements[id] = source
+		_cache_.Sync_References[id] = source
+	}
+}
+
+func Setup_Ignorefiles() {
+	ignorepath := _cache_.Path_Autogen["ignore"].Path
+
+	project_ignores := []string{}
+	if result, err := _fileman_.Read_File(ignorepath, false); err == nil {
+		for ig := range _strings_.SplitSeq(result, "\n") {
+			project_ignores = append(project_ignores, _strings_.Trim(ig, "\r\t "))
+		}
+
+	}
+
+	points := 0
+	default_ignores := _strings_.SplitSeq(_cache_.Path_Autogen["ignore"].Content, "\n")
+	for ignore := range default_ignores {
+		if !_slices_.Contains(project_ignores, ignore) {
+			points++
+			project_ignores = append(project_ignores, ignore)
+		}
+	}
+	fmt.Println(ignorepath)
+	if points > 0 {
+		_fileman_.Write_File(ignorepath, _strings_.Join(project_ignores, "\n"))
 	}
 }
 

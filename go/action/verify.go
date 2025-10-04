@@ -150,7 +150,7 @@ func Verify_Setup() (Status verify_Setup_Status_enum, Report string) {
 				errors[v.Path] = "Path not found."
 			}
 		}
-		
+
 		for _, val := range []map[string]_types_.File_Source{
 			_cache_.Path_Autogen,
 			_cache_.Path_Css,
@@ -190,11 +190,11 @@ func Verify_Setup() (Status verify_Setup_Status_enum, Report string) {
 }
 
 func Verify_Configs(loadStatics bool) (Report string, Ok bool) {
-	S.TASK("Initializing configs", 0)
+	S.TASK("Verifying configs", 0)
 	errors := []string{}
-
+	
 	config_path := _cache_.Path_Json["configure"].Path
-	S.STEP("PATH : "+config_path, 0)
+	S.STEP("PATH : "+config_path, 1)
 	config_data, config_err := _fileman_.Read_Json(config_path, false)
 
 	_cache_.Static.ProxyMap = []_types_.Config_ProxyMap{}
@@ -257,7 +257,7 @@ func Verify_Configs(loadStatics bool) (Report string, Ok bool) {
 		_cache_.Archive.Licence = data
 	}
 
-	S.TASK("Initialization finished", 0)
+	S.TASK("Verification finished", 1)
 	Ok = len(errors) == 0
 	if Ok {
 		Report = S.MAKE(

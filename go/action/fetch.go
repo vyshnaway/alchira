@@ -21,7 +21,7 @@ func Fetch_Docs() {
 			mut.Lock()
 			item.Content = content
 			if err == nil {
-				_cache_.Sync_References[item_name] = item
+				_cache_.Sync_Agreements[item_name] = item
 			}
 			mut.Unlock()
 			wg.Done()
@@ -41,7 +41,7 @@ func Fetch_Docs() {
 			wg.Done()
 		}()
 	}
-	
+
 	wg.Wait()
 }
 
@@ -84,18 +84,6 @@ func ProxyMapSync(proxyMaps []_types_.Config_ProxyMap) map[string]_types_.Config
 	wg.Wait()
 	return static_proxystorage
 }
-
-// export async function SyncIgnorefiles() {
-// 	const manifestIgnores = (await FILEMAN.read.file(CACHE.PATH.autogen.ignore.path)).data.split("\n");
-// 	const modPts = (CACHE.PATH.autogen.ignore.content.split("\n") || []).reduce((modPts: number, ign) => {
-// 		if (!manifestIgnores.includes(ign)) {
-// 			manifestIgnores.push(ign);
-// 			modPts++;
-// 		}
-// 		return modPts;
-// 	}, 0);
-// 	if (modPts) { await FILEMAN.write.file(CACHE.PATH.autogen.ignore.path, manifestIgnores.join("\n")); }
-// }
 
 func Fetch_Statics(vendor_source string) {
 	// $.TASK("Loading vendor-prefixes");

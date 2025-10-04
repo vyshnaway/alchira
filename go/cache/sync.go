@@ -6,52 +6,52 @@ import (
 
 var Sync_References = map[string]_types_.File_Source{
 	"readme": {
-		Title:   "README",
+		Title:   "Documentation",
 		Url:     "readme.md",
 		Path:    "",
 		Frags:   []string{"readme.md"},
 		Content: "",
 	},
 	"alerts": {
-		Title:   "ALERTS",
+		Title:   "Notifications",
 		Url:     "alerts.md",
 		Path:    "",
 		Frags:   []string{"alerts.md"},
 		Content: "",
 	},
 	"changelog": {
-		Title:   "CHANGELOG",
+		Title:   "Changelog",
 		Url:     "changelog.md",
 		Path:    "",
 		Frags:   []string{"changelog.md"},
 		Content: "",
 	},
-	"guildelines": {
-		Title:   "GUIDELINES",
-		Url:     "agentic.md",
+	"agentnote": {
+		Title:   "Ai Agent Note",
+		Url:     "agentnote.md",
 		Path:    "",
-		Frags:   []string{"guildelines.md"},
+		Frags:   []string{"agentnote.md"},
 		Content: "",
 	},
 }
 
 var Sync_Agreements = map[string]_types_.File_Source{
 	"license": {
-		Title:   "LICENSE",
+		Title:   "License",
 		Url:     "license.md",
 		Path:    "",
 		Frags:   []string{"license.md"},
 		Content: "",
 	},
 	"terms": {
-		Title:   "TERMS & CONDITIONS",
+		Title:   "Terms & Conditions",
 		Url:     "terms.md",
 		Path:    "",
 		Frags:   []string{"terms.md"},
 		Content: "",
 	},
 	"privacy": {
-		Title:   "PRIVACY POLICY",
+		Title:   "Privacy Policy",
 		Url:     "privacy.md",
 		Path:    "",
 		Frags:   []string{"privacy.md"},

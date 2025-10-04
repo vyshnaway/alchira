@@ -110,12 +110,6 @@ var Path_Files = map[string]_types_.File_Source{
 		Content:   "",
 		Essential: false,
 	},
-	"ignore": {
-		Path:      "",
-		Frags:     []string{id, ".gitignore"},
-		Content:   "autogen",
-		Essential: false,
-	},
 }
 
 var Path_Autogen = map[string]_types_.File_Source{
@@ -153,6 +147,12 @@ var Path_Autogen = map[string]_types_.File_Source{
 		Frags:     []string{id, "autogen", "guildelines.md"},
 		Path:      "",
 		Content:   "",
+		Essential: false,
+	},
+	"ignore": {
+		Path:      "",
+		Frags:     []string{id, "autogen", ".gitignore"},
+		Content:   "*",
 		Essential: false,
 	},
 }
