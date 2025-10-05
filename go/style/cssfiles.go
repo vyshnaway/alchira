@@ -2,7 +2,9 @@ package style
 
 import (
 	_cache_ "main/cache"
-	"main/shell"
+	blockmap "main/class/Blockmap"
+
+	// "main/shell"
 	_types_ "main/types"
 	_utils_ "main/utils"
 	_maps_ "maps"
@@ -15,18 +17,18 @@ type cssfile_Parse_return struct {
 }
 
 func Cssfile_Parse(content string, initial string, verbose bool) cssfile_Parse_return {
-	scanned := Block_Parse(_utils_.Code_Uncomment(content, false, true, false), true)
+	scanned := Block_Parse(_utils_.Code_Uncomment(content, false, true, false))
 	styles := [][2]any{}
-	for _, kv := range scanned.XatProps {
+	for _, kv := range scanned.AtProps {
 		styles = append(styles, [2]any{kv[0], kv[1]})
 	}
 
 	variables := map[string]string{}
 	attachments := []string{}
-	for _, kv := range scanned.XallBlocks {
+	for _, kv := range scanned.AllBlocks {
 		key := kv[0]
 		value := kv[1]
-		result := parse_CssSnippet(value, initial, key, true, verbose)
+		result := Parse_CssSnippet(value, initial, key, true, verbose)
 		_maps_.Copy(variables, result.Variables)
 		attachments = append(attachments, result.Attachments...)
 		styles = append(styles, [2]any{key, result.Result})
@@ -57,9 +59,7 @@ func Cssfile_Collection(files []_types_.File_Stash, forArtifact bool, verbose bo
 	}
 
 	for _, file := range files {
-		shell.Render.Raw(Block_Parse(_utils_.Code_Uncomment(file.Content, false, true, false), true))
-
-		for _, so := range Block_Parse(_utils_.Code_Uncomment(file.Content, false, true, false), true).XallBlocks {
+		for _, so := range Block_Parse(_utils_.Code_Uncomment(file.Content, false, true, false)).AllBlocks {
 			selector := so[0]
 			value := so[1]
 
@@ -68,17 +68,17 @@ func Cssfile_Collection(files []_types_.File_Stash, forArtifact bool, verbose bo
 
 			index := 0
 			if v, ok := IndexMap[classname]; ok {
-				index += v
+				index = v
 			}
 			if v, ok := selectors[classname]; ok {
-				index += v
+				index = v
 			}
 
 			if index > 0 {
 				classdata := _cache_.Index_Fetch(index)
 				classdata.Metadata.Declarations = append(classdata.Metadata.Declarations, declaration)
 			} else {
-				stylescanned := parse_CssSnippet(
+				stylescanned := Parse_CssSnippet(
 					value,
 					string(file.Manifest.Lookup.Type)+" : "+file.FilePath+" |",
 					selector,
@@ -86,16 +86,7 @@ func Cssfile_Collection(files []_types_.File_Stash, forArtifact bool, verbose bo
 					verbose,
 				)
 				attachments := stylescanned.Attachments
-
-				object := map[string]any{}
-				for k, v := range stylescanned.Result {
-					v_typed, v_ok := v.(map[string]any)
-					if v_ok {
-						object[k] = v_typed
-					} else {
-						object[""] = stylescanned.Result
-					}
-				}
+				object := stylescanned.Result
 
 				artifact := _cache_.Archive.Name
 				if forArtifact {
@@ -104,8 +95,6 @@ func Cssfile_Collection(files []_types_.File_Stash, forArtifact bool, verbose bo
 						attachments[i] = file.ClassFront + v
 					}
 				}
-
-				skeleton := _utils_.Map_Skeleton(object)
 
 				classdata := _types_.Style_ClassData{
 					Index:    0,
@@ -116,7 +105,7 @@ func Cssfile_Collection(files []_types_.File_Stash, forArtifact bool, verbose bo
 						Info:         []string{},
 						WatchClass:   "",
 						Variables:    stylescanned.Variables,
-						Skeleton:     skeleton,
+						Skeleton:     object.Skeleton(),
 						Declarations: []string{declaration},
 						Summon:       "",
 						Attributes:   map[string]string{},
@@ -126,7 +115,15 @@ func Cssfile_Collection(files []_types_.File_Stash, forArtifact bool, verbose bo
 					DebugClass:    file.DebugFront + "_" + _utils_.String_Filter(classname, []rune{}, []rune{}, []rune{'$', '/'}),
 					Declarations:  []string{declaration},
 					SnippetStaple: "",
-					SnippetStyle:  map[string]any{selector: object[""]},
+					SnippetStyle: func() blockmap.Class {
+						var r blockmap.Class
+						if v, k := object.GetBlock(""); k {
+							r = *v
+						} else {
+							r = *blockmap.New()
+						}
+						return *blockmap.New().SetBlock(selector, r)
+					}(),
 				}
 				index := _cache_.Index_Declare(classdata)
 				file.StyleData.UsedIn = append(file.StyleData.UsedIn, index)

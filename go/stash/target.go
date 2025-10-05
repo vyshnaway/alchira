@@ -2,7 +2,7 @@ package stash
 
 import (
 	_cache_ "main/cache"
-	_target_ "main/stash/target"
+	_target_ "main/class/Target"
 	_types_ "main/types"
 	_utils_ "main/utils"
 	_maps_ "maps"

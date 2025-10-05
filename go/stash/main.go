@@ -3,7 +3,7 @@ package stash
 import (
 	_fmt_ "fmt"
 	_cache_ "main/cache"
-	_target_ "main/stash/target"
+	_target_ "main/class/Target"
 	_types_ "main/types"
 	_utils_ "main/utils"
 	_strings_ "strings"

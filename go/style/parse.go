@@ -2,126 +2,126 @@ package style
 
 import (
 	_cache_ "main/cache"
+	_Blockmap_ "main/class/Blockmap"
+	"main/shell"
 	_types_ "main/types"
-	_utils_ "main/utils"
 	_maps_ "maps"
 )
 
-type parse_AssignMerge_return struct {
-	Result      map[string]any
+type Parse_return struct {
+	Result      _Blockmap_.Class
 	Attachments []string
 	Variables   map[string]string
 }
 
-func parse_AssignMerge(classlist []string) parse_AssignMerge_return {
+func parse_AssignMerge(classlist []string) Parse_return {
 	attachments := []string{}
-	mergables := []map[string]any{}
+	result := _Blockmap_.Class{}
 	variables := map[string]string{}
 
 	for _, classname := range classlist {
 		found := _cache_.Index_Find(classname, _types_.Style_ClassIndexMap{})
 		if found.Group == _types_.Style_Type_Library {
 			classdata := _cache_.Index_Fetch(found.Index)
-
-			for k, v := range classdata.Metadata.Variables {
-				variables[k] = v
-			}
-
+			_maps_.Copy(variables, classdata.Metadata.Variables)
 			attachments = append(attachments, classdata.Attachments...)
-			retyped := make(map[string]any)
-			for k, v := range classdata.StyleObject {
-				retyped[k] = v
-			}
-			mergables = append(mergables, retyped)
+			result.Mixin(classdata.StyleObject)
 		}
 	}
 
-	result := _utils_.Map_BulkMerge(mergables, true, true)
-
-	return parse_AssignMerge_return{
+	return Parse_return{
 		Result:      result,
 		Attachments: attachments,
 		Variables:   variables,
 	}
 }
 
-type parse_Scanner_return parse_AssignMerge_return
+type Parse_Scanner_return Parse_return
 
-func parse_CssSnippet(
+func Parse_CssSnippet(
 	content string,
 	initial string,
 	srcselector string,
 	merge_n_flatten bool,
 	verbose bool,
-) parse_Scanner_return {
-	scanned := Block_Parse(content, true)
-	assigned := parse_AssignMerge(scanned.Assign)
+) Parse_Scanner_return {
 
+	scanned := Block_Parse(content)
+	assigned := parse_AssignMerge(scanned.Assign)
 	variables := assigned.Variables
 	_maps_.Copy(variables, scanned.Variables)
+	shell.Render.Raw("scanned")
+	shell.Render.Raw(scanned)
+	shell.Render.Raw("assigned")
+	shell.Render.Raw(assigned)
+	shell.Render.Raw("variables")
+	shell.Render.Raw(variables)
+	shell.Render.Raw("---")
+
 
 	attachments := assigned.Attachments
-	for _, v := range scanned.Attachment {
+	for _, v := range scanned.Attach {
 		if v[0] == '/' {
 			attachments = append(attachments, v)
 		}
 	}
 
-	ast_scanned := map[string]any{}
+	blockmap := _Blockmap_.Class{}
 
-	for k := range assigned.Variables {
-		if v, ok := scanned.Properties[k]; ok {
-			ast_scanned[k] = v
-		}
+	for k, v := range assigned.Variables {
+		blockmap.SetProp(k, v)
 	}
-	for k, v := range scanned.AtProps {
-		ast_scanned[k] = v
+	for _, kv := range scanned.AtProps {
+		blockmap.SetProp(kv[0], kv[1])
 	}
-	for k, v := range scanned.Properties {
-		ast_scanned[k] = v
+	for _, kv := range scanned.Properties {
+		blockmap.SetProp(kv[0], kv[1])
 	}
 
 	if verbose {
-		for k, v := range ast_scanned {
-			v_typed, v_ok := v.(string)
-			if v_ok {
-				ast_scanned[k] = v_typed + "/* " + initial + srcselector + " */"
-			}
+		for k, v := range blockmap.PropRange() {
+			blockmap.SetProp(k, v+"/* "+initial+srcselector+" */")
 		}
 	}
 
-	ast_merged := _utils_.Map_BulkMerge([]map[string]any{assigned.Result, {"": ast_scanned}}, true, true)
+	ast_merged := assigned.Result.Mixin(*_Blockmap_.New().SetBlock("", blockmap))
 
-	result := map[string]any{}
+	var result _Blockmap_.Class
 	if merge_n_flatten {
-		for k, v := range ast_merged {
-			if v_typed, v_ok := v.(map[string]any); v_ok && k == "" {
-				_maps_.Copy(result, v_typed)
-			} else {
-				result[k] = v
+		defer ast_merged.DelBlock("")
+		if bm, ok := ast_merged.GetBlock(""); ok {
+
+			for k, v := range bm.PropRange() {
+				ast_merged.SetProp(k, v)
+			}
+			for k, v := range bm.BlockRange() {
+				ast_merged.SetBlock(k, *v.Clone())
 			}
 		}
+		result = *ast_merged
 	} else {
-		result = ast_merged
-
+		result = *ast_merged
 	}
 
-	if typed, ok := ast_merged[""].(map[string]any); ok {
-		_maps_.Copy(result, typed)
+	var target _Blockmap_.Class
+	if merge_n_flatten {
+		target = result
+	} else {
+		if v, k := ast_merged.GetBlock(""); k {
+			target = *v
+		}
 	}
 
-	for k, v := range scanned.AllBlocks {
-		sub_result := parse_CssSnippet(v, initial, srcselector+" -> "+k, true, true)
+	for _, kv := range scanned.AllBlocks {
+		k := kv[0]
+		v := kv[1]
+		sub_result := Parse_CssSnippet(v, initial, srcselector+" -> "+k, true, true)
 		_maps_.Copy(variables, sub_result.Variables)
 		attachments = append(attachments, sub_result.Attachments...)
-		if merge_n_flatten {
-			result[k] = sub_result.Result
-		} else if typed, ok := result[""].(map[string]any); ok {
-			_maps_.Copy(typed, sub_result.Result)
-		}
+		target.Mixin(sub_result.Result)
 	}
 
-	return parse_Scanner_return{
+	return Parse_Scanner_return{
 		Result:      result,
 		Attachments: attachments,
 		Variables:   variables,

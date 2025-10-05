@@ -53,7 +53,7 @@ func Rawtag_Upload(
 		}
 		debugclass := _fmt_.Sprint(scope, file.DebugFront, "\\:", raw.RowIndex, "\\:", raw.ColIndex, "_", normalsymclass)
 
-		stylescanned := parse_CssSnippet(
+		stylescanned := Parse_CssSnippet(
 			_utils_.Code_Uncomment(raw.Styles[""], true, true, false),
 			_fmt_.Sprint(raw.Scope, " : ", file.FilePath, " |"),
 			_fmt_.Sprint(raw.SymClasses),
@@ -61,15 +61,7 @@ func Rawtag_Upload(
 			verbose,
 		)
 
-		object := map[string]any{}
-		for k, v := range stylescanned.Result {
-			v_typed, v_ok := v.(map[string]any)
-			if v_ok {
-				object[k] = v_typed
-			} else {
-				object[""] = stylescanned.Result
-			}
-		}
+		object := stylescanned.Result
 
 		attachments := append(attachments, stylescanned.Attachments...)
 		variables := stylescanned.Variables
@@ -77,7 +69,7 @@ func Rawtag_Upload(
 			if key != "" {
 				query := Hashrule_Render(key, declaration)
 				if query.Status {
-					stylescanned = parse_CssSnippet(
+					stylescanned = Parse_CssSnippet(
 						_utils_.Code_Uncomment(val, true, true, false),
 						_fmt_.Sprint(raw.Scope, " : ", file.FilePath, " |"),
 						_fmt_.Sprint(raw.SymClasses, " => ", key),
@@ -86,15 +78,15 @@ func Rawtag_Upload(
 					)
 					attachments = append(attachments, stylescanned.Attachments...)
 					_maps_.Copy(variables, stylescanned.Variables)
-					if len(stylescanned.Result) > 0 {
+					if stylescanned.Result.Len() > 0 {
 						res, err := _json_.Marshal(query.Wrappers)
 						if err == nil {
 							res_typed := string(res)
 							re := _regexp_.MustCompile(`.()` + string(_cache_.Root.CustomOperations["locale"]))
 							if !forArtifact {
 								re.ReplaceAllString(res_typed, _fmt_.Sprintf("_%s_$1", file.Label))
-							} // Untested
-							object[res_typed] = stylescanned.Result
+							}
+							object.SetBlock(res_typed, stylescanned.Result)
 						}
 					}
 				} else {
@@ -104,7 +96,7 @@ func Rawtag_Upload(
 			}
 		}
 
-		inner_style := parse_CssSnippet(
+		inner_style := Parse_CssSnippet(
 			_utils_.Code_Uncomment(raw.Innertext, true, true, false),
 			_fmt_.Sprint(raw.Scope, ":ATTACHMENT : ", file.FilePath, ":", raw.RowIndex, ":", raw.ColIndex, " |"),
 			raw.SymClasses[0],
@@ -139,8 +131,6 @@ func Rawtag_Upload(
 			staple = raw.Innertext
 		}
 
-		skeleton :=_utils_.Map_Skeleton(object)
-
 		index = _cache_.Index_Declare(_types_.Style_ClassData{
 			Index:       0,
 			Artifact:    artifact,
@@ -151,7 +141,7 @@ func Rawtag_Upload(
 				Info:         raw.Comments,
 				WatchClass:   "",
 				Variables:    variables,
-				Skeleton:     skeleton,
+				Skeleton:     object.Skeleton(),
 				Declarations: []string{declaration},
 				Summon:       summon,
 				Attributes:   attributes,

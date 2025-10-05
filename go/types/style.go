@@ -1,5 +1,9 @@
 package types
 
+import (
+	_blockmap_ "main/class/Blockmap"
+)
+
 type Style_Type string
 
 const (
@@ -23,16 +27,15 @@ type Style_ExportStyle struct {
 }
 
 type Style_Metadata struct {
-	Info         []string  			`json:"info"`
-	Skeleton     any  				`json:"skeleton"`
-	Declarations []string  			`json:"declarations"`
-	WatchClass   string  			`json:"watchclass"`
-	Variables    map[string]string  `json:"variables"`
-	Summon       string  			`json:"summon"`
-	Attributes   map[string]string  `json:"attributes"`
+	Info         []string          `json:"info"`
+	Skeleton     any               `json:"skeleton"`
+	Declarations []string          `json:"declarations"`
+	WatchClass   string            `json:"watchclass"`
+	Variables    map[string]string `json:"variables"`
+	Summon       string            `json:"summon"`
+	Attributes   map[string]string `json:"attributes"`
 }
 
-type Style_Object map[string]any
 
 type Style_ClassData struct {
 	Index         int
@@ -43,9 +46,9 @@ type Style_ClassData struct {
 	DebugClass    string
 	Attachments   []string
 	Declarations  []string
-	StyleObject   Style_Object
+	StyleObject   _blockmap_.Class
 	SnippetStaple string
-	SnippetStyle  Style_Object
+	SnippetStyle  _blockmap_.Class
 }
 
 type Style_Dictionary map[string]map[int]string

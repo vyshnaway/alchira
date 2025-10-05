@@ -28,5 +28,5 @@ func TestBlock(t *testing.T) {
 	.m-20 { margin: 5rem; }
 	.m-24 { margin: 6rem; }
 	.m-32 { margin: 8rem;".m-32 { margin: 8rem; }" }
-	`, true))
+	`))
 }

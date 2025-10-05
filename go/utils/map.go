@@ -22,7 +22,7 @@ func Map_DeepCopy(v any) any {
 		return s
 	default:
 		rv := _reflect_.ValueOf(vv)
-		if rv.Kind() == _reflect_.Ptr && !rv.IsNil() {
+		if rv.Kind() == _reflect_.Pointer && !rv.IsNil() {
 			return Map_DeepCopy(rv.Elem().Interface())
 		}
 		return vv

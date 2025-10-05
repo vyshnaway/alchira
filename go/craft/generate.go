@@ -3,6 +3,7 @@ package craft
 import (
 	_fmt_ "fmt"
 	_cache_ "main/cache"
+	_Blockmap_ "main/class/Blockmap"
 	_compose_ "main/compose"
 	S "main/shell"
 	_stash_ "main/stash"
@@ -73,8 +74,8 @@ func Generate_Finals() (Files map[string]string, Report string) {
 
 		render_frags := map[string]string{
 			"Root": watch_index,
-			"Class": _compose_.Switched(func() map[string]map[string]any {
-				result := map[string]map[string]any{}
+			"Class": _compose_.Switched(func() map[string]_Blockmap_.Class {
+				result := map[string]_Blockmap_.Class{}
 				for _, i := range _cache_.Style.PublishIndexMap {
 					result[i.ClassName] = _cache_.Index_Fetch(i.ClassIndex).StyleObject
 				}
@@ -116,7 +117,7 @@ func Generate_Finals() (Files map[string]string, Report string) {
 		if _cache_.Static.WATCH {
 			watch_class = _utils_.Code_Strip(_compose_.Switched(
 				func() map[string]map[string]any {
-					res := map[string]map[string]any{}
+					res := map[string]_Blockmap_.Class{}
 					for i, d := range _cache_.Style.Index_to_Data {
 						res["."+d.Metadata.WatchClass] = _cache_.Index_Fetch(i).StyleObject
 					}
