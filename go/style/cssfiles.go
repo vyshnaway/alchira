@@ -117,7 +117,7 @@ func Cssfile_Collection(files []_types_.File_Stash, forArtifact bool, verbose bo
 					SnippetStaple: "",
 					SnippetStyle: func() blockmap.Class {
 						var r blockmap.Class
-						if v, k := object.GetBlock(""); k {
+						if k, v := object.GetBlock(""); k {
 							r = *v
 						} else {
 							r = *blockmap.New()

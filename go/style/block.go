@@ -68,14 +68,14 @@ func Block_Parse(content string) block_Parse_retype {
 		if deviance == 1 && cursor.Active.Char == '{' {
 			isProp = false
 			key = _utils_.String_Minify(content[keyStart : cursor.Active.Marker-1])
-			valStart = cursor.Active.Marker + 1
+			valStart = cursor.Active.Marker
 		} else if deviance != 0 {
 			continue
 		} else {
 			switch cursor.Active.Char {
 			case ':':
 				key = _utils_.String_Minify(content[keyStart : cursor.Active.Marker-1])
-				valStart = cursor.Active.Marker + 1
+				valStart = cursor.Active.Marker
 			case '}':
 				fallthrough
 			case ';':

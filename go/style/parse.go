@@ -3,7 +3,7 @@ package style
 import (
 	_cache_ "main/cache"
 	_Blockmap_ "main/class/Blockmap"
-	"main/shell"
+	// "main/shell"
 	_types_ "main/types"
 	_maps_ "maps"
 )
@@ -36,93 +36,74 @@ func parse_AssignMerge(classlist []string) Parse_return {
 	}
 }
 
-type Parse_Scanner_return Parse_return
-
 func Parse_CssSnippet(
 	content string,
 	initial string,
 	srcselector string,
-	merge_n_flatten bool,
+	flatten bool,
 	verbose bool,
-) Parse_Scanner_return {
+) Parse_return {
 
 	scanned := Block_Parse(content)
 	assigned := parse_AssignMerge(scanned.Assign)
 	variables := assigned.Variables
 	_maps_.Copy(variables, scanned.Variables)
-	shell.Render.Raw("scanned")
-	shell.Render.Raw(scanned)
-	shell.Render.Raw("assigned")
-	shell.Render.Raw(assigned)
-	shell.Render.Raw("variables")
-	shell.Render.Raw(variables)
-	shell.Render.Raw("---")
-
 
 	attachments := assigned.Attachments
 	for _, v := range scanned.Attach {
-		if v[0] == '/' {
+		if v[0] != '/' {
 			attachments = append(attachments, v)
 		}
 	}
 
-	blockmap := _Blockmap_.Class{}
-
+	propmap := _Blockmap_.Class{}
 	for k, v := range assigned.Variables {
-		blockmap.SetProp(k, v)
-	}
-	for _, kv := range scanned.AtProps {
-		blockmap.SetProp(kv[0], kv[1])
-	}
-	for _, kv := range scanned.Properties {
-		blockmap.SetProp(kv[0], kv[1])
+		propmap.SetProp(k, v)
 	}
 
-	if verbose {
-		for k, v := range blockmap.PropRange() {
-			blockmap.SetProp(k, v+"/* "+initial+srcselector+" */")
+	savprop := func(proplist [][2]string) {
+		if verbose {
+			for _, kv := range proplist {
+				propmap.SetProp(kv[0], kv[1]+"/* "+initial+srcselector+" */")
+			}
+		} else {
+			for _, kv := range proplist {
+				propmap.SetProp(kv[0], kv[1])
+			}
 		}
 	}
+	savprop(scanned.AtProps)
+	savprop(scanned.Properties)
 
-	ast_merged := assigned.Result.Mixin(*_Blockmap_.New().SetBlock("", blockmap))
-
-	var result _Blockmap_.Class
-	if merge_n_flatten {
-		defer ast_merged.DelBlock("")
-		if bm, ok := ast_merged.GetBlock(""); ok {
+	blockmap := *assigned.Result.Mixin(*_Blockmap_.New().SetBlock("", propmap))
+	if flatten {
+		if ok, bm := blockmap.GetBlock(""); ok {
 
 			for k, v := range bm.PropRange() {
-				ast_merged.SetProp(k, v)
+				blockmap.SetProp(k, v)
 			}
 			for k, v := range bm.BlockRange() {
-				ast_merged.SetBlock(k, *v.Clone())
+				blockmap.SetBlock(k, *v.Clone())
 			}
 		}
-		result = *ast_merged
-	} else {
-		result = *ast_merged
-	}
-
-	var target _Blockmap_.Class
-	if merge_n_flatten {
-		target = result
-	} else {
-		if v, k := ast_merged.GetBlock(""); k {
-			target = *v
-		}
+		blockmap.DelBlock("")
 	}
 
 	for _, kv := range scanned.AllBlocks {
-		k := kv[0]
-		v := kv[1]
-		sub_result := Parse_CssSnippet(v, initial, srcselector+" -> "+k, true, true)
+		key := kv[0]
+		val := kv[1]
+		sub_result := Parse_CssSnippet(val, initial, srcselector+" -> "+key, true, verbose)
 		_maps_.Copy(variables, sub_result.Variables)
 		attachments = append(attachments, sub_result.Attachments...)
-		target.Mixin(sub_result.Result)
+		if flatten {
+			blockmap.SetBlock(key, sub_result.Result)
+		} else if ok, bm := blockmap.GetBlock(""); ok {
+			bm.SetBlock(key, sub_result.Result)
+		}
 	}
 
-	return Parse_Scanner_return{
-		Result:      result,
+	return Parse_return{
+		Result:      blockmap,
 		Attachments: attachments,
 		Variables:   variables,
 	}

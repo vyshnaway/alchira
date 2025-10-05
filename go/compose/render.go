@@ -1,6 +1,7 @@
 package compose
 
 import (
+	_blockmap_ "main/class/Blockmap"
 	_maps_ "maps"
 	_strings_ "strings"
 )
@@ -19,28 +20,26 @@ import (
 // 	return result
 // }
 
-func render_PartialsArrayPrefixer(object map[string]any, vendors []string) [][2]any {
+func render_PartialsArrayPrefixer(stylemap _blockmap_.Class, vendors []string) [][2]any {
 	var result [][2]any
 
-	for key, value := range object {
-		switch val := value.(type) {
-		case map[string]any:
-			if len(val) > 0 {
-				result = append(result, [2]any{key, val})
+	for key, val := range stylemap.PropRange() {
+		if key[0] == '@' {
+			for _, r := range prefix_ForAtRule(key, vendors) {
+				result = append(result, [2]any{r + ";", ""})
 			}
-		case string:
-			if _strings_.HasPrefix(key, "@") {
-				for _, r := range prefix_ForAtRule(key, vendors) {
-					result = append(result, [2]any{r + ";", ""})
-				}
-			} else if valstr, ok := value.(string); ok {
-				for _, kv := range prefix_LoadProps(key, valstr, vendors) {
-					k, v := kv[0], kv[1]
-					if k == key || object[k] == nil {
-						result = append(result, [2]any{k + ":" + v + ";"})
-					}
+		} else {
+			for _, kv := range prefix_LoadProps(key, val, vendors) {
+				k, v := kv[0], kv[1]
+				if hasProp, _ := stylemap.GetProp(k); hasProp || k == key {
+					result = append(result, [2]any{k + ":" + v + ";"})
 				}
 			}
+		}
+	}
+	for key, val := range stylemap.BlockRange() {
+		if val.Len() > 0 {
+			result = append(result, [2]any{key, val})
 		}
 	}
 	return result

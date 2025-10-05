@@ -21,14 +21,14 @@ func Test(t *testing.T) {
 	bm2.SetBlock("style", *nested2)
 
 	bm1.Mixin(*bm2)
-	val, ok := bm1.GetProp("color") // Returns "blue", true
+	ok, val := bm1.GetProp("color") // Returns "blue", true
 	fmt.Println(val, ok)            // Output: blue true
 
 	// Fixed: Properly handle GetBlock return values
-	block, ok := bm1.GetBlock("style")
+	ok, block := bm1.GetBlock("style")
 	var nestedVal string
 	if ok {
-		nestedVal, ok = block.GetProp("weight") // Returns "normal", true
+		ok, nestedVal = block.GetProp("weight") // Returns "normal", true
 	} else {
 		nestedVal, ok = "", false // Handle missing block
 	}
@@ -37,7 +37,7 @@ func Test(t *testing.T) {
 	bm3 := bm1.Clone()
 	bm3.Mixin(*bm2)
 	bm3.SetProp("color", "green")
-	if block, ok := bm3.GetBlock("style"); ok {
+	if ok, block := bm3.GetBlock("style"); ok {
 		block.SetProp("weight", "italic")
 		block.SetProp("--weight", "italic")
 	}

@@ -12,7 +12,7 @@ func (This *Class) print() []string {
 		result = append(result, k+" : "+v)
 	}
 	for k, v := range This.BlockRange() {
-		result = append(result, k+" {")
+		result = append(result, k+"{")
 		for _, vv := range v.print() {
 			result = append(result, tab+vv)
 		}
@@ -27,7 +27,7 @@ func (This *Class) Print() {
 
 func (This *Class) Skeleton() any {
 	result := map[string]any{}
-	
+
 	for k, v := range This.PropRange() {
 		if strings.HasPrefix(k, "--") {
 			result[k] = v
