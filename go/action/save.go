@@ -60,7 +60,6 @@ func save_CssImport(filepath_array []string) string {
 }
 
 func Save_RootCss() {
-	S.STEP("Updating Index", 1)
 	_cache_.Static.RootCSS = save_CssImport([]string{
 		_cache_.Path_Css["atrules"].Path,
 		_cache_.Path_Css["constants"].Path,
@@ -70,7 +69,6 @@ func Save_RootCss() {
 }
 
 func Save_Libraries() {
-	S.STEP("Updating Library", 1)
 	_cache_.Static.Libraries_Saved, _ = _fileman_.Read_Bulk(
 		_cache_.Path_Folder["libraries"].Path,
 		[]string{"css"},
@@ -78,21 +76,20 @@ func Save_Libraries() {
 }
 
 func Save_Artifacts() {
-	S.STEP("Updating External Artifacts", 1)
 	_cache_.Static.Artifacts_Saved, _ = _fileman_.Read_Bulk(
 		_cache_.Path_Folder["artifacts"].Path,
-		[]string{_cache_.Root.Extension},
+		[]string{_cache_.Root.Extension, "json"},
 	)
 }
 
 func Save_Targets() {
-	S.STEP("Syncing proxy folders", 1)
+	S.TASK("Saving Proxy-folders", 1)
 	_cache_.Static.TargetDir_Saved = Sync_ProxyMapDirs(_cache_.Static.ProxyMap)
 }
 
 func SaveHashrule() (Report string, Status bool) {
 
-	S.STEP("Updating Hashrule", 1)
+	S.TASK("Saving Hashrule", 1)
 
 	status := true
 	errors := []string{}

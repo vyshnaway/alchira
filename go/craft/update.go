@@ -11,7 +11,7 @@ import (
 	_style_ "main/style"
 )
 
-func Update_Barebones() {
+func Update_Scaffold() {
 	_cache_.Index_Reset(0)
 
 	_cache_.Style_Reset()
@@ -19,8 +19,8 @@ func Update_Barebones() {
 	_cache_.Manifest_Reset()
 
 	_stash_.Reset()
+	// _stash_.Artifact_Update()
 	_stash_.Library_Update()
-	_stash_.Artifact_Update()
 }
 
 type Update_Target_action_enum int

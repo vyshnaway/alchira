@@ -2,6 +2,7 @@ package assemble
 
 import (
 	_action_ "main/action"
+	_craft_ "main/craft"
 	_cache_ "main/cache"
 	S "main/shell"
 	X "main/xhell"
@@ -30,7 +31,7 @@ func orchestrate(heading string) {
 	report := ""
 	targets := []string{}
 	report_next := false
-	cycle_one := false
+	cycle_one := true
 	// initial_heading := "Initial Build"
 	// save_files = map[string]string{}
 	// stopWatcher: null | (() => void) = null
@@ -89,7 +90,9 @@ func orchestrate(heading string) {
 			fallthrough
 
 		case execute_Step_ProcessXtylesFolder:
-			//                 SMITH.UpdateXtylesFolder();
+			_craft_.Update_Scaffold()
+			fallthrough
+			
 		case execute_Step_ProcessProxyFolders:
 			//                 SMITH.SaveToTarget();
 		case execute_Step_GenerateFinals:

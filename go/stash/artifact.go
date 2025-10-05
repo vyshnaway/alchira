@@ -5,6 +5,7 @@ import (
 	_action_ "main/action"
 	_cache_ "main/cache"
 	_script_ "main/script"
+	// "main/shell"
 	_style_ "main/style"
 	_types_ "main/types"
 	X "main/xhell"
@@ -20,9 +21,7 @@ func artifact_DeleteFile(filepath string) {
 func artifact_SaveFile(filepath string, content string) {
 	artifact_DeleteFile(filepath)
 	stored := _action_.Store(_action_.Store_FileGroup_Artifact, filepath, content, "", "", "")
-	if stored.LibLevel < 3 {
-		Cache.Artifacts[filepath] = stored
-	}
+	Cache.Artifacts[filepath] = stored
 }
 
 type artifact_StackFiles_return struct {
@@ -30,7 +29,12 @@ type artifact_StackFiles_return struct {
 	Lookup map[string]_types_.File_Lookup
 }
 
-func artifact_StackFiles() artifact_StackFiles_return {
+func artifact_CacheFiles() artifact_StackFiles_return {
+	artifact_Clear()
+	for filepath, content := range _cache_.Static.Artifacts_Saved {
+		artifact_SaveFile(filepath, content)
+	}
+
 	files := []_types_.File_Stash{}
 	lookup := map[string]_types_.File_Lookup{}
 
@@ -52,29 +56,19 @@ func artifact_StackFiles() artifact_StackFiles_return {
 func artifact_Clear() {
 	for s, i := range _cache_.Style.Artifact_Index {
 		_cache_.Index_Dispose(i)
-		delete(_cache_.Style.Library__Index, s)
+		delete(_cache_.Style.Artifact_Index, s)
 	}
 
-	for k := range Cache.Libraries {
-		library_DeleteFile(k)
-	}
-}
-
-func Aritfact_ReDeclare() {
-	for _, i := range _cache_.Style.Artifact_Index {
-		data := _cache_.Index_Fetch(i)
-		data.Metadata.Declarations = data.Declarations
+	for k := range Cache.Artifacts {
+		artifact_DeleteFile(k)
 	}
 }
 
 func Artifact_Update() {
-	for filepath, content := range _cache_.Static.Artifacts_Saved {
-		artifact_SaveFile(filepath, content)
-	}
-
-	// Artifacts update actions
-	SaveArtifactFile_ := artifact_StackFiles()
+	// shell.Render.Raw(_cache_.Static.Artifacts_Saved)
+	SaveArtifactFile_ := artifact_CacheFiles()
 	_cache_.Delta.Lookup.Artifacts = SaveArtifactFile_.Lookup
+
 	_cache_.Manifest.Artifact = map[string]_types_.File_MetadataMap{}
 	_cache_.Delta.Errors.Artifacts = []string{}
 	_cache_.Delta.Diagnostics.Artifacts = []_types_.Refer_Diagnostic{}
@@ -121,4 +115,11 @@ func Artifact_Update() {
 		_cache_.Delta.Diagnostics.Artifacts = append(_cache_.Delta.Diagnostics.Artifacts, file.Manifest.Diagnostics...)
 	}
 	_cache_.Delta.Report.Artifacts = X.List_Chart(_fmt_.Sprint("Artifact: ", artifact_counter), artifact_chart)
+}
+
+func Aritfact_ReDeclare() {
+	for _, i := range _cache_.Style.Artifact_Index {
+		data := _cache_.Index_Fetch(i)
+		copy(data.Metadata.Declarations, data.Declarations)
+	}
 }

@@ -54,7 +54,7 @@ func parse_CssSnippet(
 	merge_n_flatten bool,
 	verbose bool,
 ) parse_Scanner_return {
-	scanned := block_Parse(content, true)
+	scanned := Block_Parse(content, true)
 	assigned := parse_AssignMerge(scanned.Assign)
 
 	variables := assigned.Variables

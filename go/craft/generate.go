@@ -15,7 +15,7 @@ import (
 	_strings_ "strings"
 )
 
-func Generate() (Files map[string]string, Report string) {
+func Generate_Finals() (Files map[string]string, Report string) {
 	files := map[string]string{}
 	report := ""
 

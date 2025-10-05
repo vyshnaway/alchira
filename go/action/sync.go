@@ -9,7 +9,6 @@ import (
 	_maps_ "maps"
 	_os_ "os"
 	_slices_ "slices"
-	"sync"
 	_sync_ "sync"
 )
 
@@ -91,7 +90,7 @@ func Sync_ProxyMapDirs(proxyMaps []_types_.Config_ProxyMap) map[string]_types_.C
 			StylesheetContent:   "",
 		}
 	}
-	var mut sync.Mutex
+	var mut _sync_.Mutex
 
 	var wg _sync_.WaitGroup
 	for id, pm := range static_proxystorage {
@@ -113,8 +112,8 @@ func Sync_ProxyMapDirs(proxyMaps []_types_.Config_ProxyMap) map[string]_types_.C
 
 			}
 			mut.Lock()
+			defer mut.Unlock()
 			static_proxystorage[proxyid] = proxystorage
-			mut.Unlock()
 			defer wg.Done()
 		}(id, pm)
 	}

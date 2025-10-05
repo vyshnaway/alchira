@@ -27,7 +27,7 @@ func Verify_Setup() (Status verify_Setup_Status_enum, Report string) {
 		_fileman_.Clone_Safe(_cache_.Sync_Blueprint["scaffold"].Path, _cache_.Path_Folder["scaffold"].Path, []string{})
 
 		errors := map[string]string{}
-		S.TASK("Verifying directory status", 0)
+		S.TASK("Verifying directory status", 1)
 
 		for _, v := range _cache_.Path_Folder {
 			if v.Essential && !_fileman_.Path_IfDir(v.Path) {
@@ -49,8 +49,6 @@ func Verify_Setup() (Status verify_Setup_Status_enum, Report string) {
 				}
 			}
 		}
-
-		S.TASK("Verification Complete", 1)
 
 		if len(errors) == 0 {
 			status = Verify_Setup_Status_Verified
@@ -88,7 +86,7 @@ func Verify_Configs(loadvendors bool) (Report string, status bool) {
 		_cache_.Archive.Licence = data
 	}
 
-	S.TASK("Verifying configs", 0)
+	S.TASK("Verifying configs", 1)
 	errors := []string{}
 
 	config_path := _cache_.Path_Json["configure"].Path
@@ -134,7 +132,7 @@ func Verify_Configs(loadvendors bool) (Report string, status bool) {
 
 	conflict_sync := Conflict_Sync_Test()
 	errors = append(errors, conflict_sync.Warnings...)
-	S.TASK("Verification finished", 1)
+	
 	status = len(errors) == 0
 	if status {
 		report := S.MAKE(

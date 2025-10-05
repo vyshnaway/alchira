@@ -2,6 +2,7 @@ package style
 
 import (
 	_cache_ "main/cache"
+	"main/shell"
 	_types_ "main/types"
 	_utils_ "main/utils"
 	_maps_ "maps"
@@ -14,7 +15,7 @@ type cssfile_Parse_return struct {
 }
 
 func Cssfile_Parse(content string, initial string, verbose bool) cssfile_Parse_return {
-	scanned := block_Parse(_utils_.Code_Uncomment(content, false, true, false), true)
+	scanned := Block_Parse(_utils_.Code_Uncomment(content, false, true, false), true)
 	styles := [][2]any{}
 	for _, kv := range scanned.XatProps {
 		styles = append(styles, [2]any{kv[0], kv[1]})
@@ -43,20 +44,22 @@ type cssfile_Collection_return struct {
 	SelectorList       []string
 }
 
-func Cssfile_Collection(files *[]_types_.File_Stash, forArtifact bool, verbose bool) cssfile_Collection_return {
+func Cssfile_Collection(files []_types_.File_Stash, forArtifact bool, verbose bool) cssfile_Collection_return {
 	selectorList := []string{}
 	selectors := map[string]int{}
 	indexMetaCollection := _types_.File_MetadataMap{}
 	var IndexMap map[string]int
+
 	if forArtifact {
 		IndexMap = _cache_.Style.Artifact_Index
 	} else {
 		IndexMap = _cache_.Style.Library__Index
 	}
 
-	for _, file := range *files {
-		// 		{ classFront, filePath, debugclassFront, content, manifesting: manifest } = source;
-		for _, so := range block_Parse(_utils_.Code_Uncomment(file.Content, false, true, false), true).XallBlocks {
+	for _, file := range files {
+		shell.Render.Raw(Block_Parse(_utils_.Code_Uncomment(file.Content, false, true, false), true))
+
+		for _, so := range Block_Parse(_utils_.Code_Uncomment(file.Content, false, true, false), true).XallBlocks {
 			selector := so[0]
 			value := so[1]
 
@@ -102,8 +105,8 @@ func Cssfile_Collection(files *[]_types_.File_Stash, forArtifact bool, verbose b
 					}
 				}
 
-				skeleton :=_utils_.Map_Skeleton(object) 
-				
+				skeleton := _utils_.Map_Skeleton(object)
+
 				classdata := _types_.Style_ClassData{
 					Index:    0,
 					Artifact: artifact,
@@ -130,13 +133,14 @@ func Cssfile_Collection(files *[]_types_.File_Stash, forArtifact bool, verbose b
 				selectors[classname] = index
 				indexMetaCollection[classname] = &classdata.Metadata
 				selectorList = append(selectorList, classname)
+
+				// shell.Render.Raw(classdata)
+
 			}
 		}
 	}
 
-	for k, v := range selectors {
-		IndexMap[k] = v
-	}
+	_maps_.Copy(IndexMap, selectors)
 
 	return cssfile_Collection_return{
 		MetadataCollection: indexMetaCollection,

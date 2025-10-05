@@ -73,7 +73,7 @@ func Store(
 		if cluster != "" {
 			lookupType = _types_.File_Type_Cluster
 		} else {
-			lookupType = _types_.File_Type_Artifact
+			lookupType = _types_.File_Type_Axiom
 		}
 	} else {
 		lookupType = _types_.File_Type_Target

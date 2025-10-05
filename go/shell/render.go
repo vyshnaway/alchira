@@ -87,14 +87,21 @@ func render_Raw(content any) {
 	_fmt_.Println(string(json))
 }
 
+func render_Close(content any) {
+	json, _ := _json_.Marshal(content)
+	_fmt_.Println(string(json))
+}
+
 // E provides package-level access to render functions
 var Render = struct {
 	Raw       func(content any)
+	Close     func(content any)
 	Write     func(str string, backRows int) int
 	Backspace func(chars int)
 	Animate   func(frames []string, duration int, iterations int) error
 }{
 	Raw:       render_Raw,
+	Close:     render_Close,
 	Write:     render_Write,
 	Backspace: render_Backspace,
 	Animate:   render_Animate,

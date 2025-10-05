@@ -1,11 +1,11 @@
 package utils
 
-var Refer = struct{
+var Refer = struct {
 	BracePair   map[rune]rune
 	OpenBraces  []rune
 	CloseBraces []rune
 	WatchQuotes []rune
-} {
+}{
 	BracePair: map[rune]rune{
 		'{':  '}',
 		'[':  ']',
@@ -15,6 +15,6 @@ var Refer = struct{
 		'\'': '\'',
 	},
 	OpenBraces:  []rune{'[', '{', '('},
-	CloseBraces: []rune{'\'', '"', '`'},
-	WatchQuotes: []rune{']', '}', ')'},
+	CloseBraces: []rune{']', '}', ')'},
+	WatchQuotes: []rune{'\'', '"', '`'},
 }

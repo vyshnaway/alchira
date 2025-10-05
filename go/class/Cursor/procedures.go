@@ -15,17 +15,17 @@ func (This *Type) setCurrent() {
 		if This.Active.Marker+1 < len(This.Runes) {
 			This.Active.Next = This.Runes[This.Active.Marker+1]
 		} else {
-			This.Active.Next = ' '
+			This.Active.Next = 0
 		}
 
 		if This.Active.Marker > 0 {
 			This.Active.Last = This.Runes[This.Active.Marker-1]
 		} else {
-			This.Active.Last = ' '
+			This.Active.Last = 0
 		}
 
 	} else {
-		This.Active.Char = ' '
+		This.Active.Char = 0
 		This.Streaming = false
 	}
 }
@@ -49,7 +49,7 @@ func (This *Type) Increment() (Char rune, Streaming bool) {
 	if This.Streaming {
 		return This.Active.Char, This.Streaming
 	}
-	return ' ', This.Streaming
+	return 0, This.Streaming
 }
 
 func (This *Type) updateDecPosition() {
@@ -71,5 +71,5 @@ func (This *Type) Decrement() (Char rune, Streaming bool) {
 	if This.Streaming {
 		return This.Active.Char, This.Streaming
 	}
-	return ' ', This.Streaming
+	return 0, This.Streaming
 }
