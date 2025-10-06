@@ -12,8 +12,8 @@ type block_groups struct {
 	vendor_element []Track
 	pseudo_element []Track
 	children       []Track
-	vendor_atblock []Track
-	atblock        []Track
+	vendor_atblock Type
+	atblock        Type
 }
 
 func (groups *block_groups) merge_groups(parent string) *Type {
@@ -24,10 +24,12 @@ func (groups *block_groups) merge_groups(parent string) *Type {
 			k := item.Selector
 			if strings.HasPrefix(k, "&") {
 				k = parent + k[1:]
-			}
-			tr = append(tr, Track{
-				Selector: k,
-				Blockmap: item.Blockmap,
+			} 
+			item.Blockmap.Flatten(k).BlockRange(func(kk string, vv Type) {
+				tr = append(tr, Track{
+					Selector: kk,
+					Blockmap: &vv,
+				})
 			})
 		}
 	}
@@ -35,15 +37,19 @@ func (groups *block_groups) merge_groups(parent string) *Type {
 	add(groups.compounds)
 	add(groups.vendor_class)
 	add(groups.pseudo_class)
-	add(groups.vendor_element)
+
+	sub := New()
+	sub.Mixin(groups.native)
+	sub.Mixin(groups.vendor_atblock)
+	sub.Mixin(groups.atblock)
 	tr = append(tr, Track{
 		Selector: parent,
-		Blockmap: &groups.native,
+		Blockmap: sub,
 	})
+
+	add(groups.vendor_element)
 	add(groups.pseudo_element)
 	add(groups.children)
-	add(groups.vendor_atblock)
-	add(groups.atblock)
 
 	rs := New()
 	for _, i := range tr {
@@ -60,9 +66,9 @@ func (This *Type) Flatten(parent string) (Res *Type) {
 		pseudo_class:   []Track{},
 		vendor_element: []Track{},
 		pseudo_element: []Track{},
-		vendor_atblock: []Track{},
-		atblock:        []Track{},
 		children:       []Track{},
+		vendor_atblock: *New(),
+		atblock:        *New(),
 		native:         *New(),
 	}
 
@@ -118,9 +124,9 @@ func (This *Type) Flatten(parent string) (Res *Type) {
 		} else if strings.HasPrefix(k, "&") {
 			track.compounds = append(track.compounds, Track{Selector: k, Blockmap: &v})
 		} else if strings.HasPrefix(k, "@-") {
-			track.vendor_atblock = append(track.vendor_atblock, Track{Selector: k, Blockmap: &v})
+			track.vendor_atblock.SetBlock(k, v)
 		} else if strings.HasPrefix(k, "@") {
-			track.atblock = append(track.atblock, Track{Selector: k, Blockmap: &v})
+			track.atblock.SetBlock(k, v)
 		} else if len(k) > 0 {
 			track.native.SetBlock(k, v)
 		} else {
@@ -130,47 +136,8 @@ func (This *Type) Flatten(parent string) (Res *Type) {
 
 	res := New()
 	track.merge_groups(parent).BlockRange(func(k string, v Type) {
-		res.Mixin(v)
+		res.SetBlock(k, v)
 	})
-
-	// push_new := func(order []Track) {
-	// 	for _, k := range order {
-	// 		if ok, v := This.GetBlock(k); ok {
-	// 			r, b := v.flatten(k)
-	// 			if strings.HasPrefix(k, "&") {
-	// 				buf = append(buf, Track{
-	// 					Selector: parent + k[1:],
-	// 					Blockmap: r,
-	// 				})
-	// 			} else {
-	// 				tmp.SetBlock(k, *r)
-	// 			}
-	// 			for _, bb := range b {
-	// 				new.SetBlock(bb.Selector, *bb.Blockmap)
-	// 			}
-	// 		}
-	// 	}
-	// }
-
-	// 	push_tmp := func ([]tracks) {
-
-	// 	}
-	// track.flat_block
-	// track.nest_block
-	// track.vendor_atblock
-	// track.atblock
-
-	// 	push_new(base_block)
-	// 	push_new(compounds)
-	// 	push_new(vendor_class)
-	// 	push_new(pseudo_class)
-	// 	push_new(nest_block)
-	// 	// new.Mixin(*tmp)
-	// 	push_new(vendor_element)
-	// 	push_new(pseudo_element)
-	// 	push_new(children)
-	// 	push_new(vendor_atblock)
-	// 	push_new(atblock)
 
 	return res
 }

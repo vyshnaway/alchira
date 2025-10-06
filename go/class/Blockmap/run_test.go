@@ -120,6 +120,12 @@ const content3 = `
         box-shadow: inset 0 0 15px -5px #00000044;
     }
 }
+	
+.glass {
+	&@before {
+		background-color: rgba(255, 255, 255, 0.25);
+	}
+}
 	`
 
 func Test(t *testing.T) {
@@ -174,6 +180,43 @@ func Test(t *testing.T) {
 // }
 
 func Test_Flatten(t *testing.T) {
-	res1 := style.Parse_CssSnippet(content1, "initial", "selector", true, false)
+	res1 := style.Parse_CssSnippet(content3, "initial", "selector", true, false)
 	res1.Result.Print().Flatten("test").Print()
 }
+
+/*
+
+back: blur(1px);
+backdrop: blur(1px);
+&:after {
+	backdrop-filter: blur(1px);
+}
+&:-before {
+	background-color: rgba(255, 255, 255, 0.6);
+}
+&::-after {
+	backdrop-filter: blur(.5px);
+}
+&.before {
+	background-color: rgba(255, 255, 255, 0.25);
+	& :before {
+		background-color: rgba(255, 255, 255, 0.25);
+	}
+}
+.before {
+	background-color: rgba(255, 255, 255, 0.25);
+}
+&::before {
+	background-color: rgba(255, 255, 255, 0.25);
+}
+& :before {
+	background-color: rgba(255, 255, 255, 0.25);
+}
+@-before {
+	background-color: rgba(255, 255, 255, 0.25);
+}
+@before {
+	background-color: rgba(255, 255, 255, 0.25);
+}
+
+*/
