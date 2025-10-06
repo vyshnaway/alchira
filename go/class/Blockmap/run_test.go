@@ -31,15 +31,22 @@ backdrop: blur(1px);
 }
 &.before {
 	background-color: rgba(255, 255, 255, 0.25);
-	& :before {
-		background-color: rgba(255, 255, 255, 0.25);
-	}
 }
 @before {
 	background-color: rgba(255, 255, 255, 0.25);
 }
 .before {
 	background-color: rgba(255, 255, 255, 0.25);
+	& :after {
+		background-color: rgba(255, 255, 255, 0.25);
+	}
+	:before {
+		background-color: rgba(255, 255, 255, 0.25);
+		& :before {
+			background-color: rgba(255, 255, 255, 0.25);
+			background: rgba(255, 255, 255, 0.25);
+		}
+	}
 }
 `
 
@@ -180,7 +187,7 @@ func Test(t *testing.T) {
 // }
 
 func Test_Flatten(t *testing.T) {
-	res1 := style.Parse_CssSnippet(content3, "initial", "selector", true, false)
+	res1 := style.Parse_CssSnippet(content1, "initial", "selector", true, false)
 	res1.Result.Print().Flatten("test").Print()
 }
 
@@ -197,26 +204,26 @@ backdrop: blur(1px);
 &::-after {
 	backdrop-filter: blur(.5px);
 }
-&.before {
-	background-color: rgba(255, 255, 255, 0.25);
-	& :before {
-		background-color: rgba(255, 255, 255, 0.25);
-	}
-}
-.before {
-	background-color: rgba(255, 255, 255, 0.25);
-}
 &::before {
 	background-color: rgba(255, 255, 255, 0.25);
 }
 & :before {
 	background-color: rgba(255, 255, 255, 0.25);
 }
-@-before {
+&.before {
 	background-color: rgba(255, 255, 255, 0.25);
 }
-@before {
+.before {
 	background-color: rgba(255, 255, 255, 0.25);
+	& :after {
+		background-color: rgba(255, 255, 255, 0.25);
+	}
+	:before {
+		background-color: rgba(255, 255, 255, 0.25);
+		& :before {
+			background-color: rgba(255, 255, 255, 0.25);
+			background: rgba(255, 255, 255, 0.25);
+		}
+	}
 }
-
 */
