@@ -1,36 +1,55 @@
 package blockmap
 
 import (
+	"slices"
 	"strings"
 )
 
-type block_groups struct {
-	props      Type
-	native     []string
-	comps_list []string
-	clven_list []string
-	clstd_list []string
-	elven_list []string
-	elstd_list []string
-	child_list []string
-	atven_list []string
-	atstd_list []string
+func flatten_AtExtremeSort(list []string) []string {
+
+	outs := []string{}
+	mins := []string{}
+	maxs := []string{}
+	none := []string{}
+
+	for _, key := range list {
+		min := strings.Index(key, "min-")
+		max := strings.Index(key, "max-")
+		if key != "" {
+			if min < max {
+				mins = append(mins, key)
+			} else if min > max {
+				maxs = append(maxs, key)
+			} else {
+				none = append(none, key)
+			}
+		}
+	}
+
+	slices.Sort(none)
+	slices.Sort(maxs)
+	slices.Sort(mins)
+	slices.Reverse(mins)
+
+	outs = append(outs, none...)
+	outs = append(outs, maxs...)
+	outs = append(outs, mins...)
+
+	return outs
 }
 
 func (This *Type) Flatten(parent string) (Res *Type) {
 
-	track := block_groups{
-		comps_list: []string{},
-		clven_list: []string{},
-		clstd_list: []string{},
-		elven_list: []string{},
-		elstd_list: []string{},
-		child_list: []string{},
-		atven_list: []string{},
-		atstd_list: []string{},
-		native:     []string{},
-		props:      *New(),
-	}
+	comps_list := []string{}
+	clven_list := []string{}
+	clstd_list := []string{}
+	elven_list := []string{}
+	elstd_list := []string{}
+	child_list := []string{}
+	atven_list := []string{}
+	atstd_list := []string{}
+	native := []string{}
+	props := *New()
 
 	sat_prop := []string{}
 	vat_prop := []string{}
@@ -65,33 +84,36 @@ func (This *Type) Flatten(parent string) (Res *Type) {
 
 	for _, k := range prop_order {
 		if ok, v := This.GetProp(k); ok {
-			track.props.SetProp(k, v)
+			props.SetProp(k, v)
 		}
 	}
 
 	This.BlockRange(func(k string, v Type) {
 		if strings.HasPrefix(k, "&::-") {
-			track.elven_list = append(track.elven_list, k)
+			elven_list = append(elven_list, k)
 		} else if strings.HasPrefix(k, "&::") {
-			track.elstd_list = append(track.elstd_list, k)
+			elstd_list = append(elstd_list, k)
 		} else if strings.HasPrefix(k, "&:-") {
-			track.clven_list = append(track.clven_list, k)
+			clven_list = append(clven_list, k)
 		} else if strings.HasPrefix(k, "&:") {
-			track.clstd_list = append(track.clstd_list, k)
+			clstd_list = append(clstd_list, k)
 		} else if strings.HasPrefix(k, "& ") {
-			track.child_list = append(track.child_list, k)
+			child_list = append(child_list, k)
 		} else if strings.HasPrefix(k, "&") {
-			track.comps_list = append(track.comps_list, k)
+			comps_list = append(comps_list, k)
 		} else if strings.HasPrefix(k, "@-") {
-			track.atven_list = append(track.atven_list, k)
+			atven_list = append(atven_list, k)
 		} else if strings.HasPrefix(k, "@") {
-			track.atstd_list = append(track.atstd_list, k)
+			atstd_list = append(atstd_list, k)
 		} else if len(k) > 0 {
-			track.native = append(track.native, k)
+			native = append(native, k)
 		} else {
-			track.props.Mixin(v)
+			props.Mixin(v)
 		}
 	})
+
+	atven_list = flatten_AtExtremeSort(atven_list)
+	atstd_list = flatten_AtExtremeSort(atstd_list)
 
 	add := func(target *Type, list []string) {
 		for _, k := range list {
@@ -106,20 +128,20 @@ func (This *Type) Flatten(parent string) (Res *Type) {
 		}
 	}
 
-	sub := &track.props
-	add(sub, track.native)
-	add(sub, track.atven_list)
-	add(sub, track.atstd_list)
+	sub := &props
+	add(sub, native)
+	add(sub, atven_list)
+	add(sub, atstd_list)
 	sub.Print()
 
 	all := New()
-	add(all, track.comps_list)
-	add(all, track.clven_list)
-	add(all, track.clstd_list)
+	add(all, comps_list)
+	add(all, clven_list)
+	add(all, clstd_list)
 	all.SetBlock(parent, *sub)
-	add(all, track.elven_list)
-	add(all, track.elstd_list)
-	add(all, track.child_list)
+	add(all, elven_list)
+	add(all, elstd_list)
+	add(all, child_list)
 
 	return all
 }

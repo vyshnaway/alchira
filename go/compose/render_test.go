@@ -84,10 +84,3 @@ func Test_Partials(t *testing.T) {
 	res1 := style.Parse_CssSnippet(content, "initial", "selector", true, true)
 	shell.Render.Raw(compose.Render_Prefixer(res1.Result, []string{}))
 }
-
-func Test_UnNester(t *testing.T) {
-	res1 := style.Parse_CssSnippet(content2, "initial", "selector", true, false)
-	res1.Result.Print()
-	res2 := compose.Render_UnNester("select", &res1.Result)
-	res2.Print()
-}

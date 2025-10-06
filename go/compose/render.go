@@ -2,140 +2,149 @@ package compose
 
 import (
 	_blockmap_ "main/class/Blockmap"
+	"strings"
 	// "main/shell"
 	// "strings"
 	// _strings_ "strings"
 )
 
-func Render_Prefixer(stylemap _blockmap_.Type, vendors []string) [][2]any {
-	var result [][2]any
+func Render_Prefixer(stylemap _blockmap_.Type, vendors []string) *_blockmap_.Type {
+	out := _blockmap_.New()
 
 	stylemap.PropRange(func(key, val string) {
 		if key[0] == '@' {
 			for _, r := range prefix_ForAtRule(key, vendors) {
-				result = append(result, [2]any{r + ";", ""})
+				out.SetProp(r+";", "")
 			}
 		} else {
 			for _, kv := range prefix_LoadProps(key, val, vendors) {
 				k, v := kv[0], kv[1]
 				if hasProp, _ := stylemap.GetProp(k); hasProp || k == key {
-					result = append(result, [2]any{k + ":" + v + ";", ""})
+					out.SetProp(k+":"+v+";", "")
 				}
 			}
 		}
+	})
 
-	}) 
-	
 	stylemap.BlockRange(func(k string, v _blockmap_.Type) {
 		if v.Len() > 0 {
-			result = append(result, [2]any{k, v})
+			out.SetBlock(k, v)
 		}
 	})
 
+	return out
+}
+
+func Render_LoadVendors(collection map[string]string, vendor string) []string {
+	result := []string{}
+	if vendor == "" {
+		for _, ven := range vendor_Providers {
+			if _, stat := collection[ven]; stat {
+				result = append(result, ven)
+			}
+		}
+	} else {
+		result = append(result, vendor)
+	}
 	return result
 }
 
-// func render_LoadVendors(collection map[string]string, vendor string) []string {
-// 	result := []string{}
-// 	if vendor == "" {
-// 		for _, ven := range vendor_Providers {
-// 			if _, stat := collection[ven]; stat {
-// 				result = append(result, ven)
-// 			}
-// 		}
-// 	} else {
-// 		result = append(result, vendor)
-// 	}
-// 	return result
-// }
+func render_ObjectCompose(styleobject _blockmap_.Type, minify bool, vendors []string, first bool) []string {
+	stylesheet := []string{}
+	var tab string
+	var space string
+	if minify {
+		tab = ""
+		space = ""
+	} else {
+		tab = "  "
+		space = " "
+	}
 
-// func render_ObjectCompose(object map[string]any, minify bool, vendors []string, first bool) []string {
-// 	stylesheet := []string{}
-// 	tab := "  "
-// 	space := " "
-// 	if minify {
-// 		tab = ""
-// 		space = ""
-// 	}
+	made := Render_Prefixer(styleobject, vendors)
 
-// 	for _, kv := range render_PartialsArrayPrefixer(object, vendors) {
-// 		key_typed, key_ok := kv[0].(string)
-// 		val := kv[1]
-// 		if key_ok {
-// 			switch val_typed := val.(type) {
-// 			case map[string]any:
-// 				if len(val_typed) > 0 {
-// 					if !minify && first {
-// 						stylesheet = append(stylesheet, "")
-// 					}
-// 					if key_typed[0] == '@' {
-// 						for vendor, selector := range prefix_ForAtRule(key_typed, vendors) {
-// 							composed := render_ObjectCompose(val_typed, minify, []string{vendor}, false)
-// 							if len(composed) > 0 {
-// 								stylesheet = append(stylesheet, selector)
-// 								stylesheet = append(stylesheet, "{")
-// 								for _, i := range composed {
-// 									stylesheet = append(stylesheet, tab+i)
-// 								}
-// 								stylesheet = append(stylesheet, "}")
+	made.PropRange(func(k, v string) {
+		if k[0] == '@' {
+			stylesheet = append(stylesheet, k)
+		} else {
+			stylesheet = append(stylesheet, k+space+v)
+		}
+	})
 
-// 							}
+	made.BlockRange(func(k string, v _blockmap_.Type) {
+		if v.BlockLen() > 0 {
+			if !minify && first {
+				stylesheet = append(stylesheet, "")
+			}
+			if strings.HasPrefix(k, "@") {
+				for vendor, selector := range prefix_ForAtRule(k, vendors) {
+					composed := render_ObjectCompose(v, minify, []string{vendor}, false)
+					if len(composed) > 0 {
+						stylesheet = append(stylesheet, selector)
+						stylesheet = append(stylesheet, "{")
+						for _, i := range composed {
+							stylesheet = append(stylesheet, tab+i)
+						}
+						stylesheet = append(stylesheet, "}")
 
-// 						}
-// 					} else {
-// 						composed := render_ObjectCompose(val_typed, minify, vendors, false)
-// 						if !minify {
-// 							for index, line := range composed {
-// 								composed[index] = tab + line
-// 							}
-// 						}
-// 						if len(composed) > 0 {
-// 							stylesheet = append(stylesheet, prefix_ForPseudos(key_typed, vendors)...)
-// 							stylesheet = append(stylesheet, "{")
-// 							stylesheet = append(stylesheet, composed...)
-// 							stylesheet = append(stylesheet, "}")
-// 						}
-// 					}
-// 				}
-// 			case string:
-// 				if key_typed[0] == '@' {
-// 					stylesheet = append(stylesheet, key_typed)
-// 				} else {
-// 					stylesheet = append(stylesheet, key_typed+space+val_typed)
-// 				}
-// 			}
-// 		}
-// 	}
+					}
+				}
+			} else {
+				composed := render_ObjectCompose(v, minify, vendors, false)
+				if !minify {
+					for index, line := range composed {
+						composed[index] = tab + line
+					}
+				}
+				if len(composed) > 0 {
+					stylesheet = append(stylesheet, prefix_ForPseudos(k, vendors)...)
+					stylesheet = append(stylesheet, "{")
+					stylesheet = append(stylesheet, composed...)
+					stylesheet = append(stylesheet, "}")
+				}
+			}
+		}
+	})
 
-// 	return stylesheet
-// }
+	return stylesheet
+}
 
-// func Render(array [][2]any, minify bool) string {
-// 	stylesheet := []string{}
-// 	var breaks string
+func Render(stylemap _blockmap_.Type, minify bool) string {
+	stylesheet := []string{}
+	var breaks string
 
-// 	if minify {
-// 		breaks = ""
-// 	} else {
-// 		breaks = "\n"
-// 	}
+	if minify {
+		breaks = ""
+	} else {
+		breaks = "\n"
+	}
 
-// 	for _, kv := range array {
-// 		if key, ok := kv[0].(string); ok {
-// 			val := kv[1]
-// 			flattened := map[string]any{}
+	// stylemap.PropRange(func(k, v string) {
+	// 		flattened = map[string]any{k: val_typed}
+	// 	composed := render_ObjectCompose(flattened, minify, vendor_Providers, true)
+	// 	stylesheet = append(stylesheet, composed...)
+	// })
 
-// 			switch val_typed := val.(type) {
-// 			case map[string]any:
-// 				flattened = Render_UnNester(key, val_typed, map[string]any{})
-// 			case string:
-// 				flattened = map[string]any{key: val_typed}
-// 			}
+	// stylemap.BlockRange(func(k string, v _blockmap_.Type) {
 
-// 			composed := render_ObjectCompose(flattened, minify, vendor_Providers, true)
-// 			stylesheet = append(stylesheet, composed...)
-// 		}
-// 	}
+	// })
+	
+	// for _, kv := range stylemap {
+	// 	if k, ok := kv[0].(string); ok {
+	// 		v := kv[1]
+	// 		flattened := map[string]any{}
 
-// 	return _strings_.Join(stylesheet, breaks)
-// }
+	// 		switch val_typed := v.(type) {
+	// 		case map[string]any:
+	// 			flattened = Render_UnNester(k, val_typed, map[string]any{})
+	// 		case string:
+	// 			flattened = map[string]any{k: val_typed}
+	// 		}
+
+	// 		composed := render_ObjectCompose(flattened, minify, vendor_Providers, true)
+	// 		stylesheet = append(stylesheet, composed...)
+	// 	}
+	// }
+
+	return strings.Join(stylesheet, breaks)
+}

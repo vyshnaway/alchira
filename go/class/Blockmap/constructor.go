@@ -7,11 +7,6 @@ type Type struct {
 	block_vals map[string]*Type
 }
 
-type Track struct {
-	Selector string
-	Blockmap *Type
-}
-
 func New() *Type {
 	return &Type{
 		Prop_keys:  make([]string, 0),
