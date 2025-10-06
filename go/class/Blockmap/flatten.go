@@ -6,29 +6,29 @@ import (
 
 type block_groups struct {
 	props      Type
-	native     Type
-	comps_list Type
-	clven_list Type
-	clstd_list Type
-	elven_list Type
-	elstd_list Type
-	child_list Type
-	atven_list Type
-	atstd_list Type
+	native     []string
+	comps_list []string
+	clven_list []string
+	clstd_list []string
+	elven_list []string
+	elstd_list []string
+	child_list []string
+	atven_list []string
+	atstd_list []string
 }
 
 func (This *Type) Flatten(parent string) (Res *Type) {
 
 	track := block_groups{
-		comps_list: *New(),
-		clven_list: *New(),
-		clstd_list: *New(),
-		elven_list: *New(),
-		elstd_list: *New(),
-		child_list: *New(),
-		atven_list: *New(),
-		atstd_list: *New(),
-		native:     *New(),
+		comps_list: []string{},
+		clven_list: []string{},
+		clstd_list: []string{},
+		elven_list: []string{},
+		elstd_list: []string{},
+		child_list: []string{},
+		atven_list: []string{},
+		atstd_list: []string{},
+		native:     []string{},
 		props:      *New(),
 	}
 
@@ -71,43 +71,46 @@ func (This *Type) Flatten(parent string) (Res *Type) {
 
 	This.BlockRange(func(k string, v Type) {
 		if strings.HasPrefix(k, "&::-") {
-			track.elven_list.SetBlock(k, v)
+			track.elven_list = append(track.elven_list, k)
 		} else if strings.HasPrefix(k, "&::") {
-			track.elstd_list.SetBlock(k, v)
+			track.elstd_list = append(track.elstd_list, k)
 		} else if strings.HasPrefix(k, "&:-") {
-			track.clven_list.SetBlock(k, v)
+			track.clven_list = append(track.clven_list, k)
 		} else if strings.HasPrefix(k, "&:") {
-			track.clstd_list.SetBlock(k, v)
+			track.clstd_list = append(track.clstd_list, k)
 		} else if strings.HasPrefix(k, "& ") {
-			track.child_list.SetBlock(k, v)
+			track.child_list = append(track.child_list, k)
 		} else if strings.HasPrefix(k, "&") {
-			track.comps_list.SetBlock(k, v)
+			track.comps_list = append(track.comps_list, k)
 		} else if strings.HasPrefix(k, "@-") {
-			track.atven_list.SetBlock(k, v)
+			track.atven_list = append(track.atven_list, k)
 		} else if strings.HasPrefix(k, "@") {
-			track.atstd_list.SetBlock(k, v)
+			track.atstd_list = append(track.atstd_list, k)
 		} else if len(k) > 0 {
-			track.native.SetBlock(k, v)
+			track.native = append(track.native, k)
 		} else {
-			track.native.Mixin(v)
+			track.props.Mixin(v)
 		}
 	})
 
-	add := func(target *Type, list Type) {
-		list.BlockRange(func(k string, v Type) {
-			if strings.HasPrefix(k, "&") {
-				k = parent + k[1:]
+	add := func(target *Type, list []string) {
+		for _, k := range list {
+			if o, v := This.GetBlock(k); o {
+				if strings.HasPrefix(k, "&") {
+					k = parent + k[1:]
+				}
+				v.Flatten(k).BlockRange(func(kk string, vv Type) {
+					target.SetBlock(kk, vv)
+				})
 			}
-			v.Flatten(k).BlockRange(func(kk string, vv Type) {
-				target.SetBlock(kk, vv)
-			})
-		})
+		}
 	}
-	
+
 	sub := &track.props
 	add(sub, track.native)
 	add(sub, track.atven_list)
 	add(sub, track.atstd_list)
+	sub.Print()
 
 	all := New()
 	add(all, track.comps_list)

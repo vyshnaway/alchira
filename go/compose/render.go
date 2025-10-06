@@ -2,15 +2,15 @@ package compose
 
 import (
 	_blockmap_ "main/class/Blockmap"
-	"main/shell"
-	"strings"
+	// "main/shell"
+	// "strings"
 	// _strings_ "strings"
 )
 
 func Render_Prefixer(stylemap _blockmap_.Type, vendors []string) [][2]any {
 	var result [][2]any
 
-	for key, val := range stylemap.PropRange() {
+	stylemap.PropRange(func(key, val string) {
 		if key[0] == '@' {
 			for _, r := range prefix_ForAtRule(key, vendors) {
 				result = append(result, [2]any{r + ";", ""})
@@ -23,115 +23,16 @@ func Render_Prefixer(stylemap _blockmap_.Type, vendors []string) [][2]any {
 				}
 			}
 		}
-	}
-	for key, val := range stylemap.BlockRange() {
-		if val.Len() > 0 {
-			result = append(result, [2]any{key, val})
+
+	}) 
+	
+	stylemap.BlockRange(func(k string, v _blockmap_.Type) {
+		if v.Len() > 0 {
+			result = append(result, [2]any{k, v})
 		}
-	}
-	return result
-}
-
-// Pending to handle states &:* states.
-
-func render_UnNester(selector string, value, result *_blockmap_.Type) (Result *_blockmap_.Type) {
-
-	compounds := _blockmap_.New()
-	// vendor_class := _blockmap_.New()
-	// vendor_element := _blockmap_.New()
-	// pseudo_class := _blockmap_.New()
-	// pseudo_element := _blockmap_.New()
-	// children := _blockmap_.New()
-	nest_block := _blockmap_.New()
-	compounds_list := []_blockmap_.Track{}
-	vendor_class_list := []_blockmap_.Track{}
-	vendor_element_list := []_blockmap_.Track{}
-	pseudo_class_list := []_blockmap_.Track{}
-	pseudo_element_list := []_blockmap_.Track{}
-	children_list := []_blockmap_.Track{}
-	nest_block_list := []_blockmap_.Track{}
-
-	for key, val := range value.PropRange() {
-		nest_block.SetProp(key, val)
-	}
-
-	for key, val := range value.BlockRange() {
-		if strings.HasPrefix(key, "&") {
-			nexelector := selector + key[1:]
-
-			if strings.HasPrefix(key, "&::-") {
-				vendor_element_list = append(vendor_element_list, _blockmap_.Track{
-					Selector: nexelector,
-					Blockmap: val,
-				})
-			} else if strings.HasPrefix(key, "&::") {
-				pseudo_element_list = append(pseudo_element_list, _blockmap_.Track{
-					Selector: nexelector,
-					Blockmap: val,
-				})
-			} else if strings.HasPrefix(key, "&:-") {
-				vendor_class_list = append(vendor_class_list, _blockmap_.Track{
-					Selector: nexelector,
-					Blockmap: val,
-				})
-			} else if strings.HasPrefix(key, "&:") {
-				pseudo_class_list = append(pseudo_class_list, _blockmap_.Track{
-					Selector: nexelector,
-					Blockmap: val,
-				})
-			} else if strings.HasPrefix(key, "& ") {
-				children_list = append(children_list, _blockmap_.Track{
-					Selector: nexelector,
-					Blockmap: val,
-				})
-			} else if strings.HasPrefix(key, "&") {
-				compounds_list = append(compounds_list, _blockmap_.Track{
-					Selector: nexelector,
-					Blockmap: val,
-				})
-			}
-		} else {
-			nest_block_list = append(nest_block_list, _blockmap_.Track{
-				Selector: key,
-				Blockmap: val,
-			})
-		}
-	}
-
-	shell.Render.Raw(compounds_list)
-	// shell.Render.Raw(vendor_class_list)
-	// shell.Render.Raw(vendor_element_list)
-	// shell.Render.Raw(pseudo_class_list)
-	// shell.Render.Raw(pseudo_element_list)
-	// shell.Render.Raw(children_list)
-	// shell.Render.Raw(nest_block_list)
-
-	// shell.Render.Raw("---")
-	deeper_list := func(tracks []_blockmap_.Track, group *_blockmap_.Type) {
-		for _, v := range tracks {
-			render_UnNester(v.Selector, v.Blockmap, group).Print()
-		}
-		result.Mixin(*group).Print()
-	}
-
-	deeper_list(compounds_list, compounds)
-	// deeper_list(pseudo_class_list, pseudo_class)
-	// deeper_list(vendor_class_list, vendor_class)
-
-	for _, v := range nest_block_list {
-		result.SetBlock(v.Selector, *v.Blockmap)
-	}
-
-	// deeper_list(pseudo_element_list, pseudo_element)
-	// deeper_list(vendor_element_list, vendor_element)
-	// deeper_list(children_list, children)
+	})
 
 	return result
-}
-
-func Render_UnNester(selector string, value *_blockmap_.Type) (Result *_blockmap_.Type) {
-	result := _blockmap_.New()
-	return render_UnNester(selector, value, result)
 }
 
 // func render_LoadVendors(collection map[string]string, vendor string) []string {

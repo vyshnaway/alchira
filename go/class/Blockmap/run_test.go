@@ -181,49 +181,7 @@ func Test(t *testing.T) {
 	shell.Render.Raw(bm3.Skeleton())
 }
 
-// func Test_Order(t *testing.T) {
-// 	res1 := style.Parse_CssSnippet(content1, "initial", "selector", true, false)
-// 	res1.Result.Print().Order().Print()
-// }
-
 func Test_Flatten(t *testing.T) {
 	res1 := style.Parse_CssSnippet(content1, "initial", "selector", true, false)
 	res1.Result.Print().Flatten("test").Print()
 }
-
-/*
-
-back: blur(1px);
-backdrop: blur(1px);
-&:after {
-	backdrop-filter: blur(1px);
-}
-&:-before {
-	background-color: rgba(255, 255, 255, 0.6);
-}
-&::-after {
-	backdrop-filter: blur(.5px);
-}
-&::before {
-	background-color: rgba(255, 255, 255, 0.25);
-}
-& :before {
-	background-color: rgba(255, 255, 255, 0.25);
-}
-&.before {
-	background-color: rgba(255, 255, 255, 0.25);
-}
-.before {
-	background-color: rgba(255, 255, 255, 0.25);
-	& :after {
-		background-color: rgba(255, 255, 255, 0.25);
-	}
-	:before {
-		background-color: rgba(255, 255, 255, 0.25);
-		& :before {
-			background-color: rgba(255, 255, 255, 0.25);
-			background: rgba(255, 255, 255, 0.25);
-		}
-	}
-}
-*/
