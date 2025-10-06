@@ -5,37 +5,40 @@ import (
 	"strings"
 )
 
-func (This *Class) print() []string {
+func (This *Type) print() []string {
 	const tab = "  "
 	result := []string{}
-	for k, v := range This.PropRange() {
-		result = append(result, k+" : "+v)
-	}
-	for k, v := range This.BlockRange() {
-		result = append(result, k+"{")
+
+	This.PropRange(func(k, v string) {
+		result = append(result, k+": "+v)
+	})
+	This.BlockRange(func(k string, v Type) {
+		result = append(result, k+" {")
 		for _, vv := range v.print() {
 			result = append(result, tab+vv)
 		}
 		result = append(result, "}")
-	}
+	})
 	return result
 }
 
-func (This *Class) Print() {
+func (This *Type) Print() *Type {
 	fmt.Println("\n---\n" + strings.Join(This.print(), "\n") + "\n---\n")
+	return This
 }
 
-func (This *Class) Skeleton() any {
+func (This *Type) Skeleton() any {
 	result := map[string]any{}
 
-	for k, v := range This.PropRange() {
+	This.PropRange(func(k string, v string) {
 		if strings.HasPrefix(k, "--") {
 			result[k] = v
 		}
-	}
+	})
 
-	for k, v := range This.BlockRange() {
+	This.BlockRange(func(k string, v Type) {
 		result[k] = v.Skeleton()
-	}
+	})
+
 	return result
 }

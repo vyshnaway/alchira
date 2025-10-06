@@ -3,20 +3,21 @@ package style
 import (
 	_cache_ "main/cache"
 	_Blockmap_ "main/class/Blockmap"
+
 	// "main/shell"
 	_types_ "main/types"
 	_maps_ "maps"
 )
 
 type Parse_return struct {
-	Result      _Blockmap_.Class
+	Result      _Blockmap_.Type
 	Attachments []string
 	Variables   map[string]string
 }
 
 func parse_AssignMerge(classlist []string) Parse_return {
 	attachments := []string{}
-	result := _Blockmap_.Class{}
+	result := _Blockmap_.Type{}
 	variables := map[string]string{}
 
 	for _, classname := range classlist {
@@ -56,7 +57,7 @@ func Parse_CssSnippet(
 		}
 	}
 
-	propmap := _Blockmap_.Class{}
+	propmap := _Blockmap_.Type{}
 	for k, v := range assigned.Variables {
 		propmap.SetProp(k, v)
 	}
@@ -78,13 +79,12 @@ func Parse_CssSnippet(
 	blockmap := *assigned.Result.Mixin(*_Blockmap_.New().SetBlock("", propmap))
 	if flatten {
 		if ok, bm := blockmap.GetBlock(""); ok {
-
-			for k, v := range bm.PropRange() {
+			bm.PropRange(func(k, v string) {
 				blockmap.SetProp(k, v)
-			}
-			for k, v := range bm.BlockRange() {
+			})
+			bm.BlockRange(func(k string, v _Blockmap_.Type) {
 				blockmap.SetBlock(k, *v.Clone())
-			}
+			})
 		}
 		blockmap.DelBlock("")
 	}

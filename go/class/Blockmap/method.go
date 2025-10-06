@@ -4,25 +4,24 @@ import (
 	_utils_ "main/utils"
 )
 
-
-func (This *Class) Clone() *Class {
+func (This *Type) Clone() *Type {
 	if This == nil {
 		return New()
 	}
-	copy := &Class{
-		prop_keys:  make([]string, len(This.prop_keys)),
+	copy := &Type{
+		Prop_keys:  make([]string, len(This.Prop_keys)),
 		prop_vals:  make(map[string]string, len(This.prop_vals)),
-		block_keys: make([]string, len(This.block_keys)),
-		block_vals: make(map[string]*Class, len(This.block_vals)),
+		Block_keys: make([]string, len(This.Block_keys)),
+		block_vals: make(map[string]*Type, len(This.block_vals)),
 	}
 
-	copy.prop_keys = append(copy.prop_keys, This.prop_keys...)
+	copy.Prop_keys = append(copy.Prop_keys, This.Prop_keys...)
 
 	for key, val := range This.prop_vals {
 		copy.prop_vals[key] = val
 	}
 
-	copy.block_keys = append(copy.block_keys, This.block_keys...)
+	copy.Block_keys = append(copy.Block_keys, This.Block_keys...)
 
 	for key, val := range This.block_vals {
 		if val != nil {
@@ -33,34 +32,34 @@ func (This *Class) Clone() *Class {
 	return copy
 }
 
-func (This *Class) Mixin(source Class) *Class {
+func (This *Type) Mixin(source Type) *Type {
 	if This.prop_vals == nil {
 		This.prop_vals = make(map[string]string)
 	}
-	if This.prop_keys == nil {
-		This.prop_keys = make([]string, 0)
+	if This.Prop_keys == nil {
+		This.Prop_keys = make([]string, 0)
 	}
 	if This.block_vals == nil {
-		This.block_vals = make(map[string]*Class)
+		This.block_vals = make(map[string]*Type)
 	}
-	if This.block_keys == nil {
-		This.block_keys = make([]string, 0)
+	if This.Block_keys == nil {
+		This.Block_keys = make([]string, 0)
 	}
 
-	for skey, sval := range source.PropRange() {
-		This.SetProp(skey, sval)
-	}
-	This.prop_keys = _utils_.Array_Setfront(append(This.prop_keys, source.prop_keys...))
+	source.PropRange(func(k, v string) {
+		This.SetProp(k, v)
+	})
+	This.Prop_keys = _utils_.Array_SetAppend(This.Prop_keys, source.Prop_keys...)
 
-	for skey, sval := range source.BlockRange() {
+	source.BlockRange(func(skey string, sval Type) {
 		if isBlock, tval := This.GetBlock(skey); isBlock {
-			tval.Mixin(*sval)
-			This.block_vals[skey] = tval
+			tval.Mixin(sval)
+			This.SetBlock(skey, *tval)
 		} else {
-			This.SetBlock(skey, *sval)
+			This.SetBlock(skey, sval)
 		}
-	}
-	This.block_keys = _utils_.Array_Setfront(append(This.block_keys, source.block_keys...))
+	})
+	This.Block_keys = _utils_.Array_SetAppend(This.Block_keys, source.Block_keys...)
 
 	return This
 }

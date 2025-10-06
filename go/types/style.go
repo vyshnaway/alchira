@@ -36,7 +36,6 @@ type Style_Metadata struct {
 	Attributes   map[string]string `json:"attributes"`
 }
 
-
 type Style_ClassData struct {
 	Index         int
 	Metadata      Style_Metadata
@@ -46,9 +45,9 @@ type Style_ClassData struct {
 	DebugClass    string
 	Attachments   []string
 	Declarations  []string
-	StyleObject   _blockmap_.Class
+	StyleObject   _blockmap_.Type
 	SnippetStaple string
-	SnippetStyle  _blockmap_.Class
+	SnippetStyle  _blockmap_.Type
 }
 
 type Style_Dictionary map[string]map[int]string

@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"slices"
 	_slices_ "slices"
 )
 
@@ -31,6 +32,18 @@ func Array_Setfront[T comparable](array []T) []T {
 			out = append(out, item)
 		}
 	}
+	return out
+}
+
+func Array_SetAppend[T comparable](array []T, items ...T) []T {
+	out := append([]T{}, array...)
+
+	for _, item := range items {
+		if !slices.Contains(array, item) {
+			out = append(out, item)
+		}
+	}
+
 	return out
 }
 

@@ -1,17 +1,22 @@
 package blockmap
 
-type Class struct {
-	prop_keys  []string
+type Type struct {
+	Prop_keys  []string
 	prop_vals  map[string]string
-	block_keys []string
-	block_vals map[string]*Class
+	Block_keys []string
+	block_vals map[string]*Type
 }
 
-func New() *Class {
-	return &Class{
-		prop_keys:  make([]string, 0),
+type Tracks struct {
+	Selector string
+	Blockmap *Type
+}
+
+func New() *Type {
+	return &Type{
+		Prop_keys:  make([]string, 0),
 		prop_vals:  make(map[string]string),
-		block_keys: make([]string, 0),
-		block_vals: make(map[string]*Class),
+		Block_keys: make([]string, 0),
+		block_vals: make(map[string]*Type),
 	}
 }

@@ -1,51 +1,54 @@
 package blockmap
 
-
 import (
 	_utils_ "main/utils"
 	"slices"
+	"testing"
 )
 
-
-func (This *Class) SetProp(key string, val string) *Class {
+func (This *Type) SetProp(key string, val string) *Type {
 	if This.prop_vals == nil {
 		This.prop_vals = make(map[string]string)
 	}
 	if _, ok := This.prop_vals[key]; !ok {
-		This.prop_keys = append(This.prop_keys, key)
+		This.Prop_keys = append(This.Prop_keys, key)
 	}
 	This.prop_vals[key] = val
 	return This
 }
 
-func (This *Class) SetBlock(key string, val Class) *Class {
+func (This *Type) SetBlock(key string, val Type) *Type {
 	if This.block_vals == nil {
-		This.block_vals = make(map[string]*Class)
+		This.block_vals = make(map[string]*Type)
 	}
 	if _, ok := This.block_vals[key]; !ok {
-		This.block_keys = append(This.block_keys, key)
+		This.Block_keys = append(This.Block_keys, key)
 	}
 	This.block_vals[key] = val.Clone()
 
 	return This
 }
 
-func (This *Class) DelProp(key string) *Class {
+func (This *Type) DelProp(key string) *Type {
 	if This.prop_vals != nil {
-		if i := slices.Index(This.prop_keys, key); i != -1 {
-			This.prop_keys = _utils_.Array_RemoveAt(This.prop_keys, i)
+		if i := slices.Index(This.Prop_keys, key); i != -1 {
+			This.Prop_keys = _utils_.Array_RemoveAt(This.Prop_keys, i)
 			delete(This.prop_vals, key)
 		}
 	}
 	return This
 }
 
-func (This *Class) DelBlock(key string) *Class {
+func (This *Type) DelBlock(key string) *Type {
 	if This.block_vals != nil {
-		if i := slices.Index(This.block_keys, key); i != -1 {
-			This.block_keys = _utils_.Array_RemoveAt(This.block_keys, i)
+		if i := slices.Index(This.Block_keys, key); i != -1 {
+			This.Block_keys = _utils_.Array_RemoveAt(This.Block_keys, i)
 			delete(This.block_vals, key)
 		}
 	}
 	return This
+}
+
+func Test(t *testing.T) {
+
 }

@@ -4,8 +4,117 @@ import (
 	"fmt"
 	blockmap "main/class/Blockmap"
 	"main/shell"
+	"main/style"
 	"testing"
 )
+
+const content3 = `
+back: blur(1px);
+backdrop: blur(1px);
+&:after {
+	backdrop-filter: blur(1px);
+}
+&:-before {
+	background-color: rgba(255, 255, 255, 0.6);
+}
+&::-after {
+	backdrop-filter: blur(.5px);
+}
+&::before {
+	background-color: rgba(255, 255, 255, 0.25);
+}
+@-before {
+	background-color: rgba(255, 255, 255, 0.25);
+}
+& :before {
+	background-color: rgba(255, 255, 255, 0.25);
+}
+&.before {
+	background-color: rgba(255, 255, 255, 0.25);
+}
+@before {
+	background-color: rgba(255, 255, 255, 0.25);
+}
+.before {
+	background-color: rgba(255, 255, 255, 0.25);
+}
+`
+
+const content1 = `
+backdrop: blur(1px);
+.glass-type {
+	backdrop: blur(1px);
+	&:after {
+		backdrop-filter: blur(1px);
+	}
+	&:-before {
+		background-color: rgba(255, 255, 255, 0.6);
+	}
+	&::-after {
+		backdrop-filter: blur(.5px);
+	}
+	&::before {
+		background-color: rgba(255, 255, 255, 0.25);
+	}
+	@-before {
+		background-color: rgba(255, 255, 255, 0.25);
+	}
+	& :before {
+		background-color: rgba(255, 255, 255, 0.25);
+	}
+	&.before {
+		background-color: rgba(255, 255, 255, 0.25);
+	}
+	@before {
+		background-color: rgba(255, 255, 255, 0.25);
+	}
+	.before {
+		background-color: rgba(255, 255, 255, 0.25);
+	}
+}
+`
+
+const content2 = `
+.glass-type {
+	@before {
+		background-color: rgba(255, 255, 255, 0.25);
+	}
+	.before {
+		background: rgba(255, 255, 255, 0.25);
+	}
+	backdrop-filter: blur(1px);
+    &[data-glass-type='frosted'] {
+		backdrop-filter: blur(1px);
+        &:after {
+            backdrop-filter: blur(1px);
+        }
+        &:-before {
+            background-color: rgba(255, 255, 255, 0.6);
+        }
+        &::-after {
+            backdrop-filter: blur(.5px);
+        }
+        &::before {
+            background-color: rgba(255, 255, 255, 0.25);
+        }
+        & :before {
+            background-color: rgba(255, 255, 255, 0.25);
+        }
+        &.before {
+            background-color: rgba(255, 255, 255, 0.25);
+        }
+        @before {
+            background-color: rgba(255, 255, 255, 0.25);
+        }
+    }
+    &:before {
+        box-shadow: inset 0 0 15px -5px #00000044;
+    }
+    &::before {
+        box-shadow: inset 0 0 15px -5px #00000044;
+    }
+}
+	`
 
 func Test(t *testing.T) {
 	bm1 := blockmap.New()
@@ -51,4 +160,14 @@ func Test(t *testing.T) {
 	shell.Render.Raw(bm1.Skeleton())
 	shell.Render.Raw(bm2.Skeleton())
 	shell.Render.Raw(bm3.Skeleton())
+}
+
+// func Test_Order(t *testing.T) {
+// 	res1 := style.Parse_CssSnippet(content1, "initial", "selector", true, false)
+// 	res1.Result.Print().Order().Print()
+// }
+
+func Test_Flatten(t *testing.T) {
+	res1 := style.Parse_CssSnippet(content3, "initial", "selector", true, false)
+	res1.Result.Print().Flatten().Print()
 }
