@@ -1,18 +1,60 @@
 package blockmap
 
 import (
-	"main/shell"
 	"strings"
 )
 
-func (This *Type) Flatten() (Res *Type) {
-	res, _ := This.flatten()
+type block_groups struct {
+	native         Type
+	compounds      []Track
+	vendor_class   []Track
+	pseudo_class   []Track
+	vendor_element []Track
+	pseudo_element []Track
+	children       []Track
+	vendor_atblock []Track
+	atblock        []Track
+}
+
+func merge_groups(groups block_groups, parent string) *Type {
+	res := New()
+
+	add := func(list []Track) {
+		for _, item := range list {
+			k := item.Selector
+			if strings.HasPrefix(k, "&") {
+				k = parent + k[1:]
+			}
+			res.SetBlock(k, *item.Blockmap)
+		}
+	}
+
+	add(groups.compounds)
+	add(groups.vendor_class)
+	add(groups.pseudo_class)
+	add(groups.vendor_element)
+	res.Mixin(groups.native)
+	add(groups.pseudo_element)
+	add(groups.children)
+	add(groups.vendor_atblock)
+	add(groups.atblock)
+
 	return res
 }
 
-func (This *Type) flatten() (Res *Type, Buf []Tracks) {
-	new := New()
-	buf := []Tracks{}
+func (This *Type) Flatten(parent string) (Res block_groups) {
+
+	track := block_groups{
+		compounds:      []Track{},
+		vendor_class:   []Track{},
+		pseudo_class:   []Track{},
+		vendor_element: []Track{},
+		pseudo_element: []Track{},
+		vendor_atblock: []Track{},
+		atblock:        []Track{},
+		children:       []Track{},
+		native:         *New(),
+	}
 
 	sat_prop := []string{}
 	vat_prop := []string{}
@@ -47,99 +89,72 @@ func (This *Type) flatten() (Res *Type, Buf []Tracks) {
 
 	for _, k := range prop_order {
 		if ok, v := This.GetProp(k); ok {
-			new.SetProp(k, v)
+			track.native.SetProp(k, v)
 		}
 	}
-
-	compounds := []string{}
-	vendor_class := []string{}
-	pseudo_class := []string{}
-	nest_block := []string{}
-	vendor_element := []string{}
-	pseudo_element := []string{}
-	vendor_atblock := []string{}
-	atblock := []string{}
-	children := []string{}
-	base_block := []string{}
 
 	This.BlockRange(func(k string, v Type) {
 		if strings.HasPrefix(k, "&::-") {
-			vendor_element = append(vendor_element, k)
+			track.vendor_element = append(track.vendor_element, Track{Selector: k, Blockmap: &v})
 		} else if strings.HasPrefix(k, "&::") {
-			pseudo_element = append(pseudo_element, k)
+			track.pseudo_element = append(track.pseudo_element, Track{Selector: k, Blockmap: &v})
 		} else if strings.HasPrefix(k, "&:-") {
-			vendor_class = append(vendor_class, k)
+			track.vendor_class = append(track.vendor_class, Track{Selector: k, Blockmap: &v})
 		} else if strings.HasPrefix(k, "&:") {
-			pseudo_class = append(pseudo_class, k)
+			track.pseudo_class = append(track.pseudo_class, Track{Selector: k, Blockmap: &v})
 		} else if strings.HasPrefix(k, "& ") {
-			children = append(children, k)
+			track.children = append(track.children, Track{Selector: k, Blockmap: &v})
 		} else if strings.HasPrefix(k, "&") {
-			compounds = append(compounds, k)
+			track.compounds = append(track.compounds, Track{Selector: k, Blockmap: &v})
 		} else if strings.HasPrefix(k, "@-") {
-			vendor_atblock = append(vendor_atblock, k)
+			track.vendor_atblock = append(track.vendor_atblock, Track{Selector: k, Blockmap: &v})
 		} else if strings.HasPrefix(k, "@") {
-			atblock = append(atblock, k)
+			track.atblock = append(track.atblock, Track{Selector: k, Blockmap: &v})
 		} else if len(k) > 0 {
-			nest_block = append(nest_block, k)
+			track.native.SetBlock(k, *merge_groups(v.flatten(k)))
 		} else {
-			base_block = append(base_block, k)
+			track.native.Mixin(v)
 		}
 	})
 
-	block_order := []string{}
-	block_order = append(block_order, base_block...)
-	block_order = append(block_order, compounds...)
-	block_order = append(block_order, vendor_class...)
-	block_order = append(block_order, pseudo_class...)
-	block_order = append(block_order, nest_block...)
-	block_order = append(block_order, vendor_element...)
-	block_order = append(block_order, pseudo_element...)
-	block_order = append(block_order, vendor_atblock...)
-	block_order = append(block_order, atblock...)
-	block_order = append(block_order, children...)
+	// push_new := func(order []Track) {
+	// 	for _, k := range order {
+	// 		if ok, v := This.GetBlock(k); ok {
+	// 			r, b := v.flatten(k)
+	// 			if strings.HasPrefix(k, "&") {
+	// 				buf = append(buf, Track{
+	// 					Selector: parent + k[1:],
+	// 					Blockmap: r,
+	// 				})
+	// 			} else {
+	// 				tmp.SetBlock(k, *r)
+	// 			}
+	// 			for _, bb := range b {
+	// 				new.SetBlock(bb.Selector, *bb.Blockmap)
+	// 			}
+	// 		}
+	// 	}
+	// }
 
-	shell.Render.Raw(block_order)
-	for _, k := range block_order {
-		if ok, v := This.GetBlock(k); ok {
-			r, _ := v.flatten()
-			r.BlockRange(func(kk string, vv Type) {
-				new.SetBlock(k, *v)
-			})
-			// for _, bb := range b {
-			// 	bb.Selector
-			// }
-		}
-	}
+	// 	push_tmp := func ([]tracks) {
 
-	return new, buf
+	// 	}
+	// track.flat_block
+	// track.nest_block
+	// track.vendor_atblock
+	// track.atblock
+
+	// 	push_new(base_block)
+	// 	push_new(compounds)
+	// 	push_new(vendor_class)
+	// 	push_new(pseudo_class)
+	// 	push_new(nest_block)
+	// 	// new.Mixin(*tmp)
+	// 	push_new(vendor_element)
+	// 	push_new(pseudo_element)
+	// 	push_new(children)
+	// 	push_new(vendor_atblock)
+	// 	push_new(atblock)
+
+	return track
 }
-
-// func (This *Type) Flattehn() *Type {
-// 	new := New()
-
-// 	This.PropRange(func(k, v string) {
-// 		new.SetProp(k, v)
-// 	})
-
-// 	This.BlockRange(func(k string, v Type) {
-// 		nn := New()
-
-// 		v.PropRange(func(k, v string) {
-// 			nn.SetProp(k, v)
-// 		})
-
-// 		v.BlockRange(func(kk string, vv Type) {
-// 			vvv := *vv.Flatten()
-// 			if strings.HasPrefix(kk, "&") {
-// 				s := k + kk[1:]
-// 				nn.SetBlock(s, vvv)
-// 			} else {
-// 				nn.SetBlock(kk, vvv)
-// 			}
-// 		})
-
-// 		// new.SetBlock(k, *nn)
-// 	})
-
-// 	return new
-// }

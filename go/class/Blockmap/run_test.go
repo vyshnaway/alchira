@@ -66,6 +66,9 @@ backdrop: blur(1px);
 		background-color: rgba(255, 255, 255, 0.25);
 	}
 	@before {
+		&.before {
+			background-color: rgba(255, 255, 255, 0.25);
+		}
 		background-color: rgba(255, 255, 255, 0.25);
 	}
 	.before {
@@ -168,6 +171,6 @@ func Test(t *testing.T) {
 // }
 
 func Test_Flatten(t *testing.T) {
-	res1 := style.Parse_CssSnippet(content3, "initial", "selector", true, false)
+	res1 := style.Parse_CssSnippet(content1, "initial", "selector", true, false)
 	res1.Result.Print().Flatten().Print()
 }

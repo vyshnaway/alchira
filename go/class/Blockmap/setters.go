@@ -3,10 +3,9 @@ package blockmap
 import (
 	_utils_ "main/utils"
 	"slices"
-	"testing"
 )
 
-func (This *Type) SetProp(key string, val string) *Type {
+func (This *Type) SetProp(key string, val string) {
 	if This.prop_vals == nil {
 		This.prop_vals = make(map[string]string)
 	}
@@ -14,7 +13,6 @@ func (This *Type) SetProp(key string, val string) *Type {
 		This.Prop_keys = append(This.Prop_keys, key)
 	}
 	This.prop_vals[key] = val
-	return This
 }
 
 func (This *Type) SetBlock(key string, val Type) *Type {
@@ -26,7 +24,7 @@ func (This *Type) SetBlock(key string, val Type) *Type {
 	}
 	This.block_vals[key] = val.Clone()
 
-	return This
+	return This.block_vals[key]
 }
 
 func (This *Type) DelProp(key string) *Type {
@@ -47,8 +45,4 @@ func (This *Type) DelBlock(key string) *Type {
 		}
 	}
 	return This
-}
-
-func Test(t *testing.T) {
-
 }

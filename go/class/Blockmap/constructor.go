@@ -7,7 +7,7 @@ type Type struct {
 	block_vals map[string]*Type
 }
 
-type Tracks struct {
+type Track struct {
 	Selector string
 	Blockmap *Type
 }
