@@ -8,7 +8,7 @@ import (
 	"testing"
 )
 
-const content3 = `
+const content1 = `
 back: blur(1px);
 backdrop: blur(1px);
 &:after {
@@ -31,6 +31,9 @@ backdrop: blur(1px);
 }
 &.before {
 	background-color: rgba(255, 255, 255, 0.25);
+	& :before {
+		background-color: rgba(255, 255, 255, 0.25);
+	}
 }
 @before {
 	background-color: rgba(255, 255, 255, 0.25);
@@ -40,7 +43,7 @@ backdrop: blur(1px);
 }
 `
 
-const content1 = `
+const content2 = `
 backdrop: blur(1px);
 .glass-type {
 	backdrop: blur(1px);
@@ -77,7 +80,7 @@ backdrop: blur(1px);
 }
 `
 
-const content2 = `
+const content3 = `
 .glass-type {
 	@before {
 		background-color: rgba(255, 255, 255, 0.25);
@@ -172,5 +175,5 @@ func Test(t *testing.T) {
 
 func Test_Flatten(t *testing.T) {
 	res1 := style.Parse_CssSnippet(content1, "initial", "selector", true, false)
-	res1.Result.Print().Flatten().Print()
+	res1.Result.Print().Flatten("test").Print()
 }

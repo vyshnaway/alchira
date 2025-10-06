@@ -16,8 +16,8 @@ type block_groups struct {
 	atblock        []Track
 }
 
-func merge_groups(groups block_groups, parent string) *Type {
-	res := New()
+func (groups *block_groups) merge_groups(parent string) *Type {
+	tr := []Track{}
 
 	add := func(list []Track) {
 		for _, item := range list {
@@ -25,7 +25,10 @@ func merge_groups(groups block_groups, parent string) *Type {
 			if strings.HasPrefix(k, "&") {
 				k = parent + k[1:]
 			}
-			res.SetBlock(k, *item.Blockmap)
+			tr = append(tr, Track{
+				Selector: k,
+				Blockmap: item.Blockmap,
+			})
 		}
 	}
 
@@ -33,16 +36,23 @@ func merge_groups(groups block_groups, parent string) *Type {
 	add(groups.vendor_class)
 	add(groups.pseudo_class)
 	add(groups.vendor_element)
-	res.Mixin(groups.native)
+	tr = append(tr, Track{
+		Selector: parent,
+		Blockmap: &groups.native,
+	})
 	add(groups.pseudo_element)
 	add(groups.children)
 	add(groups.vendor_atblock)
 	add(groups.atblock)
 
-	return res
+	rs := New()
+	for _, i := range tr {
+		rs.SetBlock(i.Selector, *i.Blockmap)
+	}
+	return rs
 }
 
-func (This *Type) Flatten(parent string) (Res block_groups) {
+func (This *Type) Flatten(parent string) (Res *Type) {
 
 	track := block_groups{
 		compounds:      []Track{},
@@ -94,6 +104,7 @@ func (This *Type) Flatten(parent string) (Res block_groups) {
 	}
 
 	This.BlockRange(func(k string, v Type) {
+
 		if strings.HasPrefix(k, "&::-") {
 			track.vendor_element = append(track.vendor_element, Track{Selector: k, Blockmap: &v})
 		} else if strings.HasPrefix(k, "&::") {
@@ -111,10 +122,15 @@ func (This *Type) Flatten(parent string) (Res block_groups) {
 		} else if strings.HasPrefix(k, "@") {
 			track.atblock = append(track.atblock, Track{Selector: k, Blockmap: &v})
 		} else if len(k) > 0 {
-			track.native.SetBlock(k, *merge_groups(v.flatten(k)))
+			track.native.SetBlock(k, v)
 		} else {
 			track.native.Mixin(v)
 		}
+	})
+
+	res := New()
+	track.merge_groups(parent).BlockRange(func(k string, v Type) {
+		res.Mixin(v)
 	})
 
 	// push_new := func(order []Track) {
@@ -156,5 +172,5 @@ func (This *Type) Flatten(parent string) (Res block_groups) {
 	// 	push_new(vendor_atblock)
 	// 	push_new(atblock)
 
-	return track
+	return res
 }
