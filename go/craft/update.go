@@ -9,6 +9,7 @@ import (
 	_fileman_ "main/fileman"
 	_stash_ "main/stash"
 	_style_ "main/style"
+	_watcher_ "main/watcher"
 )
 
 func Update_Scaffold() {
@@ -23,41 +24,31 @@ func Update_Scaffold() {
 	_stash_.Library_Update()
 }
 
-type Update_Target_action_enum int
+func Build_Targets() {
+	Update_Target(_watcher_.Event{Action: _watcher_.Action_Reload})
+}
 
-const (
-	Update_Target_action_Refresh Update_Target_action_enum = 1 << iota
-	Update_Target_action_Updated
-	Update_Target_action_Removed
-)
-
-func Update_Target(
-	action Update_Target_action_enum,
-	targetfolder string,
-	filepath string,
-	filecontent string,
-	extension string,
-) {
+func Update_Target(event _watcher_.Event) {
 	reCache := true
-	switch action {
-	case Update_Target_action_Updated:
-		if targetStruct, ok := _cache_.Static.TargetDir_Saved[targetfolder]; ok {
-			if targetStruct.Stylesheet == filepath {
-				targetStruct.StylesheetContent = filecontent
-				_cache_.Static.TargetDir_Saved[targetfolder] = targetStruct
+	switch event.Action {
+	case _watcher_.Action_Update:
+		if targetStruct, ok := _cache_.Static.TargetDir_Saved[event.Folder]; ok {
+			if targetStruct.Stylesheet == event.FilePath {
+				targetStruct.StylesheetContent = event.FileContent
+				_cache_.Static.TargetDir_Saved[event.Folder] = targetStruct
 				reCache = false
 			}
-		} else if _, ok := _cache_.Static.TargetDir_Saved[targetfolder].Extensions[extension]; ok {
-			_cache_.Static.TargetDir_Saved[targetfolder].Filepath_to_Content[filepath] = filecontent
-			_cache_.Delta.Path = _fileman_.Path_Join(_cache_.Static.TargetDir_Saved[targetfolder].Source, filepath)
+		} else if _, ok := _cache_.Static.TargetDir_Saved[event.Folder].Extensions[event.Extension]; ok {
+			_cache_.Static.TargetDir_Saved[event.Folder].Filepath_to_Content[event.FilePath] = event.FileContent
+			_cache_.Delta.Path = _fileman_.Path_Join(_cache_.Static.TargetDir_Saved[event.Folder].Source, event.FilePath)
 		} else {
-			_cache_.Delta.Path = _fileman_.Path_Join(_cache_.Static.TargetDir_Saved[targetfolder].Source, filepath)
-			_cache_.Delta.Content = filecontent
+			_cache_.Delta.Path = _fileman_.Path_Join(_cache_.Static.TargetDir_Saved[event.Folder].Source, event.FilePath)
+			_cache_.Delta.Content = event.FileContent
 			reCache = false
 		}
-	case Update_Target_action_Removed:
-		if targetStruct, ok := _cache_.Static.TargetDir_Saved[targetfolder]; ok {
-			delete(targetStruct.Filepath_to_Content, filepath)
+	case _watcher_.Action_Unlink:
+		if targetStruct, ok := _cache_.Static.TargetDir_Saved[event.Folder]; ok {
+			delete(targetStruct.Filepath_to_Content, event.FilePath)
 		}
 	default:
 		_style_.Hashrule_Upload()

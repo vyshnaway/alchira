@@ -12,11 +12,11 @@ import (
 	_base64_ "encoding/base64"
 )
 
-// tCrypt_KeyPair represents a public-private key pair
-type tCrypt_KeyPair struct {
-	PublicKey  string `json:"publicKey"`
-	PrivateKey string `json:"privateKey"`
-}
+// // tCrypt_KeyPair represents a public-private key pair
+// type tCrypt_KeyPair struct {
+// 	PublicKey  string `json:"publicKey"`
+// 	PrivateKey string `json:"privateKey"`
+// }
 
 // tCrypt_SymResult represents symmetric encryption result
 type tCrypt_SymResult struct {
@@ -25,31 +25,31 @@ type tCrypt_SymResult struct {
 	IV   string `json:"iv"`
 }
 
-// crypt_AsymKeyPair generates an RSA-OAEP 2048-bit key pair
-func crypt_AsymKeyPair() (*tCrypt_KeyPair, error) {
-	// Generate RSA key pair
-	privateKey, err := _rsa_.GenerateKey(_rand_.Reader, 2048)
-	if err != nil {
-		return nil, _fmt_.Errorf("failed to generate key pair: %w", err)
-	}
+// // crypt_AsymKeyPair generates an RSA-OAEP 2048-bit key pair
+// func crypt_AsymKeyPair() (*tCrypt_KeyPair, error) {
+// 	// Generate RSA key pair
+// 	privateKey, err := _rsa_.GenerateKey(_rand_.Reader, 2048)
+// 	if err != nil {
+// 		return nil, _fmt_.Errorf("failed to generate key pair: %w", err)
+// 	}
 
-	// Export public key in SPKI format
-	publicKeyBytes, err := _x509_.MarshalPKIXPublicKey(&privateKey.PublicKey)
-	if err != nil {
-		return nil, _fmt_.Errorf("failed to marshal public key: %w", err)
-	}
+// 	// Export public key in SPKI format
+// 	publicKeyBytes, err := _x509_.MarshalPKIXPublicKey(&privateKey.PublicKey)
+// 	if err != nil {
+// 		return nil, _fmt_.Errorf("failed to marshal public key: %w", err)
+// 	}
 
-	// Export private key in PKCS8 format
-	privateKeyBytes, err := _x509_.MarshalPKCS8PrivateKey(privateKey)
-	if err != nil {
-		return nil, _fmt_.Errorf("failed to marshal private key: %w", err)
-	}
+// 	// Export private key in PKCS8 format
+// 	privateKeyBytes, err := _x509_.MarshalPKCS8PrivateKey(privateKey)
+// 	if err != nil {
+// 		return nil, _fmt_.Errorf("failed to marshal private key: %w", err)
+// 	}
 
-	return &tCrypt_KeyPair{
-		PublicKey:  _base64_.StdEncoding.EncodeToString(publicKeyBytes),
-		PrivateKey: _base64_.StdEncoding.EncodeToString(privateKeyBytes),
-	}, nil
-}
+// 	return &tCrypt_KeyPair{
+// 		PublicKey:  _base64_.StdEncoding.EncodeToString(publicKeyBytes),
+// 		PrivateKey: _base64_.StdEncoding.EncodeToString(privateKeyBytes),
+// 	}, nil
+// }
 
 // crypt_AsymEncrypt encrypts data using RSA-OAEP with a base64-encoded public key
 func crypt_AsymEncrypt(data, publicKeyBase64 string) (string, error) {
@@ -85,45 +85,45 @@ func crypt_AsymEncrypt(data, publicKeyBase64 string) (string, error) {
 	return _base64_.StdEncoding.EncodeToString(encrypted), nil
 }
 
-// crypt_AsymDecrypt decrypts data using RSA-OAEP with a base64-encoded private key
-func crypt_AsymDecrypt(encryptedData, privateKeyBase64 string) (string, error) {
-	// Decode private key from base64
-	privateKeyBytes, err := _base64_.StdEncoding.DecodeString(privateKeyBase64)
-	if err != nil {
-		return "", _fmt_.Errorf("failed to decode private key: %w", err)
-	}
+// // crypt_AsymDecrypt decrypts data using RSA-OAEP with a base64-encoded private key
+// func crypt_AsymDecrypt(encryptedData, privateKeyBase64 string) (string, error) {
+// 	// Decode private key from base64
+// 	privateKeyBytes, err := _base64_.StdEncoding.DecodeString(privateKeyBase64)
+// 	if err != nil {
+// 		return "", _fmt_.Errorf("failed to decode private key: %w", err)
+// 	}
 
-	// Parse private key
-	privateKeyInterface, err := _x509_.ParsePKCS8PrivateKey(privateKeyBytes)
-	if err != nil {
-		return "", _fmt_.Errorf("failed to parse private key: %w", err)
-	}
+// 	// Parse private key
+// 	privateKeyInterface, err := _x509_.ParsePKCS8PrivateKey(privateKeyBytes)
+// 	if err != nil {
+// 		return "", _fmt_.Errorf("failed to parse private key: %w", err)
+// 	}
 
-	privateKey, ok := privateKeyInterface.(*_rsa_.PrivateKey)
-	if !ok {
-		return "", _errors_.New("private key is not RSA")
-	}
+// 	privateKey, ok := privateKeyInterface.(*_rsa_.PrivateKey)
+// 	if !ok {
+// 		return "", _errors_.New("private key is not RSA")
+// 	}
 
-	// Decode encrypted data from base64
-	encryptedBytes, err := _base64_.StdEncoding.DecodeString(encryptedData)
-	if err != nil {
-		return "", _fmt_.Errorf("failed to decode encrypted data: %w", err)
-	}
+// 	// Decode encrypted data from base64
+// 	encryptedBytes, err := _base64_.StdEncoding.DecodeString(encryptedData)
+// 	if err != nil {
+// 		return "", _fmt_.Errorf("failed to decode encrypted data: %w", err)
+// 	}
 
-	// Decrypt data
-	decrypted, err := _rsa_.DecryptOAEP(
-		_sha256_.New(),
-		_rand_.Reader,
-		privateKey,
-		encryptedBytes,
-		nil,
-	)
-	if err != nil {
-		return "", _fmt_.Errorf("failed to decrypt: %w", err)
-	}
+// 	// Decrypt data
+// 	decrypted, err := _rsa_.DecryptOAEP(
+// 		_sha256_.New(),
+// 		_rand_.Reader,
+// 		privateKey,
+// 		encryptedBytes,
+// 		nil,
+// 	)
+// 	if err != nil {
+// 		return "", _fmt_.Errorf("failed to decrypt: %w", err)
+// 	}
 
-	return string(decrypted), nil
-}
+// 	return string(decrypted), nil
+// }
 
 // crypt_SymGencrypt generates a new AES-256-GCM key and encrypts data
 func crypt_SymGencrypt(data string) (*tCrypt_SymResult, error) {
@@ -161,40 +161,40 @@ func crypt_SymGencrypt(data string) (*tCrypt_SymResult, error) {
 	}, nil
 }
 
-// crypt_SymEncrypt encrypts data using provided AES-256-GCM key and nonce
-func crypt_SymEncrypt(data, base64Key, base64IV string) (*tCrypt_SymResult, error) {
-	// Decode key and IV
-	key, err := _base64_.StdEncoding.DecodeString(base64Key)
-	if err != nil {
-		return nil, _fmt_.Errorf("failed to decode key: %w", err)
-	}
+// // crypt_SymEncrypt encrypts data using provided AES-256-GCM key and nonce
+// func crypt_SymEncrypt(data, base64Key, base64IV string) (*tCrypt_SymResult, error) {
+// 	// Decode key and IV
+// 	key, err := _base64_.StdEncoding.DecodeString(base64Key)
+// 	if err != nil {
+// 		return nil, _fmt_.Errorf("failed to decode key: %w", err)
+// 	}
 
-	nonce, err := _base64_.StdEncoding.DecodeString(base64IV)
-	if err != nil {
-		return nil, _fmt_.Errorf("failed to decode IV: %w", err)
-	}
+// 	nonce, err := _base64_.StdEncoding.DecodeString(base64IV)
+// 	if err != nil {
+// 		return nil, _fmt_.Errorf("failed to decode IV: %w", err)
+// 	}
 
-	// Create AES cipher
-	block, err := _aes_.NewCipher(key)
-	if err != nil {
-		return nil, _fmt_.Errorf("failed to create cipher: %w", err)
-	}
+// 	// Create AES cipher
+// 	block, err := _aes_.NewCipher(key)
+// 	if err != nil {
+// 		return nil, _fmt_.Errorf("failed to create cipher: %w", err)
+// 	}
 
-	// Create GCM mode
-	gcm, err := _cipher_.NewGCM(block)
-	if err != nil {
-		return nil, _fmt_.Errorf("failed to create GCM: %w", err)
-	}
+// 	// Create GCM mode
+// 	gcm, err := _cipher_.NewGCM(block)
+// 	if err != nil {
+// 		return nil, _fmt_.Errorf("failed to create GCM: %w", err)
+// 	}
 
-	// Encrypt data
-	encrypted := gcm.Seal(nil, nonce, []byte(data), nil)
+// 	// Encrypt data
+// 	encrypted := gcm.Seal(nil, nonce, []byte(data), nil)
 
-	return &tCrypt_SymResult{
-		Key:  base64Key,
-		Data: _base64_.StdEncoding.EncodeToString(encrypted),
-		IV:   base64IV,
-	}, nil
-}
+// 	return &tCrypt_SymResult{
+// 		Key:  base64Key,
+// 		Data: _base64_.StdEncoding.EncodeToString(encrypted),
+// 		IV:   base64IV,
+// 	}, nil
+// }
 
 // crypt_SymDecrypt decrypts data using AES-256-GCM with provided key and nonce
 func crypt_SymDecrypt(encryptedData, base64Key, base64IV string) (string, error) {

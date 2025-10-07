@@ -7,6 +7,7 @@ import (
 	_io_ "io"
 	_cache_ "main/cache"
 	_types_ "main/types"
+	"main/utils"
 	_http_ "net/http"
 	_time_ "time"
 )
@@ -145,7 +146,9 @@ func Order(
 
 	// Parse the worker response
 	var workerResp tApi_Response
-	if err := _json_.Unmarshal(responseBody, &workerResp); err != nil {
+	if res, err := utils.Code_JsonParse[tApi_Response](string(responseBody)); err == nil {
+		workerResp = res
+	} else {
 		response.Message = "Failed to parse server response. Fallback: preview"
 		return response, nil
 	}
@@ -169,7 +172,9 @@ func Order(
 
 		// Parse the decrypted result
 		var sortedOutput _types_.Refer_SortedOutput
-		if err := _json_.Unmarshal([]byte(decryptedResult), &sortedOutput); err != nil {
+		if res, err := utils.Code_JsonParse[_types_.Refer_SortedOutput](decryptedResult); err == nil {
+			sortedOutput = res
+		} else {
 			response.Message = "Failed to parse decrypted result. Fallback: preview"
 			return response, nil
 		}

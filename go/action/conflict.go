@@ -52,7 +52,7 @@ func Conflict_Sync_Test() Verify_ProxyMapDependency_return {
 					notification_channel <- _fmt_.Sprintf("[%d]:\"%s\" cloned from [%d]:\"%s\"", i, m.Source, i, m.Target)
 				}
 			}
-			if source_type == _fileman_.Path_Check_Type_Dir && (target_type == _fileman_.Path_Check_Type_Nil || target_type == _fileman_.Path_Check_Type_Dir) {
+			if source_type == _fileman_.Path_Check_Type_Dir && target_type == _fileman_.Path_Check_Type_Nil {
 				if err := _fileman_.Clone_Safe(m.Source, m.Target, []string{}); err == nil {
 					notification_channel <- _fmt_.Sprintf("[%d]:\"%s\" cloned from [%d]:\"%s\"", i, m.Target, i, m.Source)
 				}

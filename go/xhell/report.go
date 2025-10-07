@@ -19,7 +19,7 @@ func Report(heading string, targets []string, report string, footer []string) {
 			),
 			report,
 			S.MAKE(
-				S.Tag.H1("Press Ctrl+C to stop watching.", S.Preset.Failed),
+				S.Tag.H5("Press Ctrl+C to stop watching.", S.Preset.Failed),
 				footer,
 				S.MakeList{TypeFunc: S.List.Catalog, Intent: 0, Preset: S.Preset.Tertiary},
 			),

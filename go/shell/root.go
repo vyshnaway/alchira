@@ -14,13 +14,6 @@ type tRoot_Config struct {
 	TabSpace   int
 }
 
-// tRoot_Divider used for drawing dividers
-type tRoot_Divider struct {
-	Top string
-	Mid string
-	Btm string
-}
-
 // tRoot_DivRune holds characters used for drawing dividers
 type tRoot_DivRune struct {
 	Top rune

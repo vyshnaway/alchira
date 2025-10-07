@@ -1,11 +1,11 @@
 package action
 
 import (
-	_json_ "encoding/json"
 	_cache_ "main/cache"
 	_compose_ "main/compose"
 	_fileman_ "main/fileman"
 	_types_ "main/types"
+	"main/utils"
 	_maps_ "maps"
 	_os_ "os"
 	_slices_ "slices"
@@ -69,8 +69,7 @@ func Sync_SaveVendors(vendor_source string) {
 		return ""
 	}()
 
-	vendor_table := _compose_.Type_VendorTable{}
-	if err := _json_.Unmarshal([]byte(content), &vendor_table); err == nil {
+	if vendor_table, err := utils.Code_JsonParse[_compose_.Type_VendorTable](content); err == nil {
 		_compose_.Vendor_Save(vendor_table)
 		if newdata {
 			_fileman_.Write_File(vendor_path, content)

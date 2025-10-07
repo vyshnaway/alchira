@@ -4,7 +4,7 @@ import (
 	_fmt_ "fmt"
 	_action_ "main/action"
 	_cache_ "main/cache"
-	// "main/shell"
+	"main/shell"
 
 	_style_ "main/style"
 	_types_ "main/types"
@@ -45,7 +45,7 @@ func library_Clear() {
 	}
 }
 
-func library_CacheFiles() library_StackFiles_return {
+func Library_CacheFiles() library_StackFiles_return {
 
 	library_Clear()
 	for filepath, content := range _cache_.Static.Libraries_Saved {
@@ -94,7 +94,7 @@ func library_CacheFiles() library_StackFiles_return {
 }
 
 func Library_Update() {
-	StackLibraryFiles_ := library_CacheFiles()
+	StackLibraryFiles_ := Library_CacheFiles()
 	_cache_.Delta.Lookup.Libraries = StackLibraryFiles_.Lookup
 
 	// Axiom update actions
@@ -104,7 +104,7 @@ func Library_Update() {
 	axiomChart := map[string][]string{}
 	axiom_counter := 0
 	for index, files := range StackLibraryFiles_.Axiom {
-		Cssfile_Collection_ := _style_.Cssfile_Collection(files, false, _cache_.Static.VERBOSE)
+		Cssfile_Collection_ := _style_.Cssfile_Collection(files, _cache_.Static.VERBOSE)
 		_cache_.Manifest.Axiom[_strconv_.Itoa(index)] = Cssfile_Collection_.MetadataCollection
 		if count := len(Cssfile_Collection_.SelectorList); count > 0 {
 			axiom_counter += count
@@ -116,31 +116,28 @@ func Library_Update() {
 		}
 	}
 	_cache_.Delta.Report.Axioms = X.List_Chart(_fmt_.Sprintf("Axiom: %d", axiom_counter), axiomChart)
-	// shell.Render.Raw(axiomChart)
-	// shell.Render.Raw(_cache_.Manifest.Axiom)
-	// shell.Render.Raw(_cache_.Delta.Report.Axioms)
-	// shell.Render.Raw(_cache_.Delta.Errors.Axioms)
-	// shell.Render.Raw(_cache_.Delta.Diagnostics.Axioms)
+	shell.Post(_cache_.Delta.Report.Axioms)
 
 	// Cluster update actions
 	_cache_.Manifest.Cluster = map[string]_types_.File_MetadataMap{}
 	_cache_.Delta.Errors.Clusters = []string{}
 	_cache_.Delta.Diagnostics.Clusters = []_types_.Refer_Diagnostic{}
-	// clusterChart := map[string][]string{}
-	// cluster_counter := 0
-	// for index, files := range StackLibraryFiles_.Cluster {
-	// 	Cssfile_Collection_ := _style_.Cssfile_Collection(&files, false, _cache_.Static.VERBOSE)
-	// 	_cache_.Manifest.Cluster[_strconv_.Itoa(index)] = Cssfile_Collection_.MetadataCollection
-	// 	if count := len(Cssfile_Collection_.SelectorList); count > 0 {
-	// 		cluster_counter += count
-	// 		clusterChart[_fmt_.Sprint("Level ", index, ": ", count, " Classes")] = Cssfile_Collection_.SelectorList
-	// 	}
-	// 	for _, file := range files {
-	// 		_cache_.Delta.Errors.Clusters = append(_cache_.Delta.Errors.Clusters, file.Manifest.Errors...)
-	// 		_cache_.Delta.Diagnostics.Clusters = append(_cache_.Delta.Diagnostics.Clusters, file.Manifest.Diagnostics...)
-	// 	}
-	// }
-	// _cache_.Delta.Report.Clusters = X.List_Chart(_fmt_.Sprintf("Cluster: %d", cluster_counter), clusterChart)
+	clusterChart := map[string][]string{}
+	cluster_counter := 0
+	for index, files := range StackLibraryFiles_.Cluster {
+		Cssfile_Collection_ := _style_.Cssfile_Collection(files, _cache_.Static.VERBOSE)
+		_cache_.Manifest.Cluster[_strconv_.Itoa(index)] = Cssfile_Collection_.MetadataCollection
+		if count := len(Cssfile_Collection_.SelectorList); count > 0 {
+			cluster_counter += count
+			clusterChart[_fmt_.Sprint("Level ", index, ": ", count, " Classes")] = Cssfile_Collection_.SelectorList
+		}
+		for _, file := range files {
+			_cache_.Delta.Errors.Clusters = append(_cache_.Delta.Errors.Clusters, file.Manifest.Errors...)
+			_cache_.Delta.Diagnostics.Clusters = append(_cache_.Delta.Diagnostics.Clusters, file.Manifest.Diagnostics...)
+		}
+	}
+	_cache_.Delta.Report.Clusters = X.List_Chart(_fmt_.Sprintf("Cluster: %d", cluster_counter), clusterChart)
+	shell.Post(_cache_.Delta.Report.Clusters)
 }
 
 func Library_ReDeclare() {

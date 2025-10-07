@@ -64,14 +64,14 @@ func preview_Organize(arrarr [][]int, merge bool) *_types_.Refer_SortedOutput {
 	referenceMap := make(map[string]map[int]int)
 
 	for key, arrarr := range shortlistedArrays {
-		var templateArray []int
-		_json_.Unmarshal([]byte(key), &templateArray)
 
 		indexMapFragment := make(map[int]int)
-		for _, item := range templateArray {
-			counted++
-			indexMapFragment[item] = counted
-			recompClasslist = append(recompClasslist, [2]int{item, counted})
+		if seq, err := _utils_.Code_JsonParse[[]int](key); err == nil {
+			for _, item := range seq {
+				counted++
+				indexMapFragment[item] = counted
+				recompClasslist = append(recompClasslist, [2]int{item, counted})
+			}
 		}
 
 		for _, arr := range arrarr {

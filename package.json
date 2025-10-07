@@ -17,6 +17,7 @@
   },
   "scripts": {
     "install": "node ./run/install.js",
+    "go:lint": "cd go && golangci-lint run && cd ..",
     "ts:build": "tsc -p ./ts",
     "go:build": "chmod +x ./dev/exec.sh && ./dev/exec.sh go",
     "go:stats": "chmod +x ./dev/stats.sh && ./dev/stats.sh go"

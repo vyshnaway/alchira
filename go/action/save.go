@@ -1,10 +1,10 @@
 package action
 
 import (
-	"encoding/json"
 	_cache_ "main/cache"
 	_fileman_ "main/fileman"
 	S "main/shell"
+	"main/utils"
 	_regexp_ "regexp"
 	_strings_ "strings"
 )
@@ -93,11 +93,10 @@ func SaveHashrule() (Report string, Status bool) {
 
 	status := true
 	errors := []string{}
-	hashrules := map[string]string{}
 	_cache_.Static.Hashrule = map[string]string{}
 	hashrule_path := _cache_.Path_Json["hashrule"].Path
 	if content, err := _fileman_.Read_File(hashrule_path, false); err == nil {
-		if e := json.Unmarshal([]byte(content), &hashrules); e == nil {
+		if hashrules, e := utils.Code_JsonParse[map[string]string](content); e == nil {
 			_cache_.Static.Hashrule = hashrules
 		} else {
 			status = false

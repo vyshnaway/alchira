@@ -1,8 +1,8 @@
 package compose
 
 import (
-	_json_ "encoding/json"
 	blockmap "main/class/Blockmap"
+	"main/utils"
 )
 
 func wrapper(pm *blockmap.Type, keys []string, cm *blockmap.Type) {
@@ -41,8 +41,7 @@ func switch_Blockmap(This *blockmap.Type) *blockmap.Type {
 			if k1 == "" {
 				inq.SetBlock(k0, v0)
 			} else {
-				var wrappers []string
-				if err := _json_.Unmarshal([]byte(k1), &wrappers); err == nil {
+				if wrappers, err := utils.Code_JsonParse[[]string](k1); err == nil {
 					keyseq := []string{}
 					for index, wrapper := range wrappers {
 						if index == 0 || wrappers[index-1][0] == '@' || wrapper[0] == '@' {

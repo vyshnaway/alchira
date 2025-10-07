@@ -97,9 +97,9 @@ func Code_JsonBuild(obj any, gap string) string {
 	}
 }
 
-func Code_JsonParse(str string) (map[string]any, error) {
+func Code_JsonParse[T any](str string) (T, error) {
+	var out T
 	clean := Code_Uncomment(str, true, true, true)
-	var result map[string]any
-	e := _json_.Unmarshal([]byte(clean), &result)
-	return result, e
+	err := _json_.Unmarshal([]byte(clean), &out)
+	return out, err
 }

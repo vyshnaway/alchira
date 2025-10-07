@@ -1,7 +1,6 @@
 package fileman
 
 import (
-	_json_ "encoding/json"
 	_fmt_ "fmt"
 	_io_ "io"
 	_utils_ "main/utils"
@@ -56,10 +55,7 @@ func Read_Json(target string, online bool) (data any, err error) {
 		return nil, readErr
 	}
 
-	cleanContent := _utils_.Code_Uncomment(rawContent, true, true, false)
-
-	var jsonData map[string]any
-	err = _json_.Unmarshal([]byte(cleanContent), &jsonData)
+	jsonData, err := _utils_.Code_JsonParse[any](rawContent)
 	if err != nil {
 		return nil, _fmt_.Errorf("failed to parse JSON from '%s': %w", target, err)
 	}

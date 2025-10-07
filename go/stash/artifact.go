@@ -5,6 +5,8 @@ import (
 	_action_ "main/action"
 	_cache_ "main/cache"
 	_script_ "main/script"
+	"main/shell"
+
 	// "main/shell"
 	_style_ "main/style"
 	_types_ "main/types"
@@ -65,7 +67,7 @@ func artifact_Clear() {
 }
 
 func Artifact_Update() {
-	// shell.Render.Raw(_cache_.Static.Artifacts_Saved)
+
 	SaveArtifactFile_ := artifact_CacheFiles()
 	_cache_.Delta.Lookup.Artifacts = SaveArtifactFile_.Lookup
 
@@ -115,6 +117,7 @@ func Artifact_Update() {
 		_cache_.Delta.Diagnostics.Artifacts = append(_cache_.Delta.Diagnostics.Artifacts, file.Manifest.Diagnostics...)
 	}
 	_cache_.Delta.Report.Artifacts = X.List_Chart(_fmt_.Sprint("Artifact: ", artifact_counter), artifact_chart)
+	shell.Post(_cache_.Delta.Report.Artifacts)
 }
 
 func Aritfact_ReDeclare() {

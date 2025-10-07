@@ -4,7 +4,6 @@ import (
 	_cache_ "main/cache"
 	blockmap "main/class/Blockmap"
 
-	// "main/shell"
 	_types_ "main/types"
 	_utils_ "main/utils"
 	_maps_ "maps"
@@ -46,17 +45,10 @@ type cssfile_Collection_return struct {
 	SelectorList       []string
 }
 
-func Cssfile_Collection(files []_types_.File_Stash, forArtifact bool, verbose bool) cssfile_Collection_return {
+func Cssfile_Collection(files []_types_.File_Stash, verbose bool) cssfile_Collection_return {
 	selectorList := []string{}
 	selectors := map[string]int{}
 	indexMetaCollection := _types_.File_MetadataMap{}
-	var IndexMap map[string]int
-
-	if forArtifact {
-		IndexMap = _cache_.Style.Artifact_Index
-	} else {
-		IndexMap = _cache_.Style.Library__Index
-	}
 
 	for _, file := range files {
 		for _, so := range Block_Parse(_utils_.Code_Uncomment(file.Content, false, true, false)).AllBlocks {
@@ -67,7 +59,7 @@ func Cssfile_Collection(files []_types_.File_Stash, forArtifact bool, verbose bo
 			classname := file.ClassFront + _utils_.String_Filter(selector, []rune{}, []rune{'\\', '.'}, []rune{})
 
 			index := 0
-			if v, ok := IndexMap[classname]; ok {
+			if v, ok := _cache_.Style.Library__Index[classname]; ok {
 				index = v
 			}
 			if v, ok := selectors[classname]; ok {
@@ -89,12 +81,6 @@ func Cssfile_Collection(files []_types_.File_Stash, forArtifact bool, verbose bo
 				object := stylescanned.Result
 
 				artifact := _cache_.Archive.Name
-				if forArtifact {
-					artifact = file.Artifact
-					for i, v := range attachments {
-						attachments[i] = file.ClassFront + v
-					}
-				}
 
 				classdata := _types_.Style_ClassData{
 					Index:    0,
@@ -130,14 +116,11 @@ func Cssfile_Collection(files []_types_.File_Stash, forArtifact bool, verbose bo
 				selectors[classname] = index
 				indexMetaCollection[classname] = &classdata.Metadata
 				selectorList = append(selectorList, classname)
-
-				// shell.Render.Raw(classdata)
-
 			}
 		}
 	}
 
-	_maps_.Copy(IndexMap, selectors)
+	_maps_.Copy(_cache_.Style.Library__Index, selectors)
 
 	return cssfile_Collection_return{
 		MetadataCollection: indexMetaCollection,

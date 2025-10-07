@@ -1,11 +1,11 @@
 package action
 
 import (
-	_json_ "encoding/json"
 	_cache_ "main/cache"
 	_fileman_ "main/fileman"
 	S "main/shell"
 	_types_ "main/types"
+	"main/utils"
 	X "main/xhell"
 )
 
@@ -94,9 +94,8 @@ func Verify_Configs(loadvendors bool) (Report string, status bool) {
 
 	_cache_.Static.ProxyMap = []_types_.Config_ProxyMap{}
 	if config_data, config_err := _fileman_.Read_File(config_path, false); config_err == nil {
-		config := _types_.Config_Raw{}
 
-		if err := _json_.Unmarshal([]byte(config_data), &config); err != nil {
+		if config, err := utils.Code_JsonParse[_types_.Config_Raw](config_data); err != nil {
 			errors = append(errors, config_path+" : Bad json/ Incomplete schema.")
 		} else {
 			if loadvendors {
@@ -132,7 +131,7 @@ func Verify_Configs(loadvendors bool) (Report string, status bool) {
 
 	conflict_sync := Conflict_Sync_Test()
 	errors = append(errors, conflict_sync.Warnings...)
-	
+
 	status = len(errors) == 0
 	if status {
 		report := S.MAKE(

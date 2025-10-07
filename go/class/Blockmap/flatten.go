@@ -132,7 +132,6 @@ func (This *Type) Flatten(parent string) (Res *Type) {
 	add(sub, native)
 	add(sub, atven_list)
 	add(sub, atstd_list)
-	sub.Print()
 
 	all := New()
 	add(all, comps_list)

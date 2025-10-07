@@ -13,9 +13,9 @@ import (
 type store_FileGroup_param int
 
 const (
-	Store_FileGroup_Library  store_FileGroup_param = 1
-	Store_FileGroup_Artifact store_FileGroup_param = 2
-	Store_FileGroup_Target   store_FileGroup_param = 3
+	Store_FileGroup_Library store_FileGroup_param = iota
+	Store_FileGroup_Artifact
+	Store_FileGroup_Target
 )
 
 func Store(
@@ -28,7 +28,7 @@ func Store(
 ) _types_.File_Stash {
 	isLibrary := fileGroup == Store_FileGroup_Library
 	isArtifact := fileGroup == Store_FileGroup_Artifact
-	fromXtylesFolder := fileGroup == Store_FileGroup_Target
+	fromScaffold := fileGroup != Store_FileGroup_Target
 
 	targetPath := _fileman_.Path_Join(target, filePath)
 	sourcePath := _fileman_.Path_Join(source, filePath)
@@ -49,17 +49,17 @@ func Store(
 		cluster = parts[3]
 	}
 
-	liblevel_int, liblevel_err := _strconv_.Atoi(liblevel)
+	
 	idn := 0
-	if liblevel_err != nil && liblevel_int >= 0 && liblevel_int <= 2 {
-		idn = liblevel_int
+	if num, err := _strconv_.Atoi(liblevel);err == nil && num >= 0 && num <= 2 {
+		idn = num
 	}
 
-	var normalFileName string
+	var norm_artifact string
 	if isArtifact {
-		normalFileName = _utils_.String_Filter(artifactName, []rune{}, []rune{}, []rune{})
+		norm_artifact = _utils_.String_Filter(artifactName, []rune{}, []rune{}, []rune{})
 	} else {
-		normalFileName = _cache_.Archive.Name
+		norm_artifact = _cache_.Archive.Name
 	}
 
 	var lookupType _types_.File_Type
@@ -79,28 +79,21 @@ func Store(
 		lookupType = _types_.File_Type_Target
 	}
 
-	normalCluster := _utils_.String_Filter(cluster, []rune{}, []rune{}, []rune{})
+	norm_cluster := _utils_.String_Filter(cluster, []rune{}, []rune{}, []rune{})
 	classFront := ""
 
 	if isArtifact {
-		classFront += "/" + normalFileName + "/"
+		classFront += "/" + norm_artifact + "/"
 	}
-	if (idn > 0) && (extension == "css") && (normalCluster != "-") {
-		classFront += normalCluster
+	if (idn > 0) && (extension == "css") && (norm_cluster != "-") {
+		classFront += norm_cluster
 	}
-	if fromXtylesFolder && extension == "css" {
+	if fromScaffold && extension == "css" {
 		classFront += _strings_.Repeat("$", idn)
 	}
 
-	var artifact string
-	if fromXtylesFolder {
-		artifact = artifactName
-	} else {
-		artifact = _cache_.Archive.Name
-	}
-
 	debugClassfront := "\\|" + _utils_.String_Filter(targetPath, []rune{}, []rune{}, []rune{'/', '.'})
-	if fromXtylesFolder {
+	if fromScaffold {
 		debugClassfront = string(lookupType) + debugClassfront
 	}
 
@@ -116,7 +109,7 @@ func Store(
 	result := _types_.File_Stash{
 		LibLevel:   idn,
 		Label:      label,
-		Artifact:   artifact,
+		Artifact:   norm_artifact,
 		FilePath:   filePath,
 		Extension:  extension,
 		SourcePath: sourcePath,

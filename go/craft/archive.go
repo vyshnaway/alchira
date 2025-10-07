@@ -7,6 +7,7 @@ import (
 	_stash_ "main/stash"
 	_style_ "main/style"
 	_types_ "main/types"
+	"main/utils"
 	_utils_ "main/utils"
 	_maps_ "maps"
 	_slices_ "slices"
@@ -54,8 +55,7 @@ func archive_Build() _types_.Config_Archive {
 					exportsheet.WriteString("=" + v)
 				}
 			} else if key[0] == ' ' {
-				var arr []string
-				if err := _json_.Unmarshal([]byte(key), &arr); err == nil {
+				if arr, err := utils.Code_JsonParse[[]string](key); err == nil {
 					exportsheet.WriteString("{")
 					exportsheet.WriteString(_strings_.Join(arr, "}&{"))
 					exportsheet.WriteString("}&=")
