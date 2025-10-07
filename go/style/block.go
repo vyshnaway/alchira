@@ -44,7 +44,7 @@ func Block_Parse(content string) block_Parse_retype {
 	deviance := 0
 	isProp := true
 	cursor := _Cursor_.Construct(content + ";")
-
+	
 	for ch, streaming := cursor.Active.Char, cursor.Streaming; streaming; ch, streaming = cursor.Increment() {
 
 		if ch == '\\' {
@@ -67,20 +67,20 @@ func Block_Parse(content string) block_Parse_retype {
 
 		if deviance == 1 && cursor.Active.Char == '{' {
 			isProp = false
-			key = _utils_.String_Minify(content[keyStart : cursor.Active.Marker-1])
-			valStart = cursor.Active.Marker
+			key = _utils_.String_Minify(content[keyStart:cursor.Active.Marker])
+			valStart = cursor.Active.Marker + 1
 		} else if deviance != 0 {
 			continue
 		} else {
 			switch cursor.Active.Char {
 			case ':':
-				key = _utils_.String_Minify(content[keyStart : cursor.Active.Marker-1])
-				valStart = cursor.Active.Marker
+				key = _utils_.String_Minify(content[keyStart:cursor.Active.Marker])
+				valStart = cursor.Active.Marker + 1
 			case '}':
 				fallthrough
 			case ';':
 				{
-					value := _utils_.String_Minify(content[valStart : cursor.Active.Marker-1])
+					value := _utils_.String_Minify(content[valStart:cursor.Active.Marker])
 					if isProp {
 						if len(key) > 0 {
 							if _strings_.HasPrefix(key, "--") {
@@ -127,8 +127,8 @@ func Block_Parse(content string) block_Parse_retype {
 						}
 						result.AllBlocks = append(result.AllBlocks, [2]string{key, value})
 					}
-					keyStart = cursor.Active.Marker
-					valStart = cursor.Active.Marker
+					keyStart = cursor.Active.Marker + 1
+					valStart = cursor.Active.Marker + 1
 					key = ""
 					isProp = true
 				}

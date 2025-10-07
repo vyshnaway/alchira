@@ -104,7 +104,7 @@ func Artifact_Update() {
 				file.Manifest.Diagnostics = append(file.Manifest.Diagnostics, E.Diagnostic)
 			} else {
 				artifact_counter++
-				Rawtag_Upload_ := _style_.Rawtag_Upload(&tagstyle, &file, &_cache_.Style.Artifact_Index, _cache_.Static.VERBOSE)
+				Rawtag_Upload_ := _style_.Rawtag_Upload(tagstyle, &file, &_cache_.Style.Artifact_Index, _cache_.Static.VERBOSE)
 				styledata := _cache_.Index_Fetch(Rawtag_Upload_.Index)
 				if len(styledata.Declarations) == 1 {
 					file.StyleData.UsedIn = append(file.StyleData.UsedIn, Rawtag_Upload_.Index)
@@ -116,7 +116,7 @@ func Artifact_Update() {
 			}
 		}
 		if len(symclasses) > 0 {
-			artifact_chart[_fmt_.Sprint("Artifact [", file.FilePath, "]: ", len(symclasses), " SymClasses")] = symclasses
+			artifact_chart[_fmt_.Sprint("Artifact [", file.FilePath, "]: ", len(symclasses))] = symclasses
 		}
 		_cache_.Manifest.Artifact[file.FilePath] = metadatas
 		_cache_.Delta.Errors.Artifacts = append(_cache_.Delta.Errors.Artifacts, file.Manifest.Errors...)

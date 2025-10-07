@@ -108,7 +108,7 @@ func Library_Update() {
 		_cache_.Manifest.Axiom[_strconv_.Itoa(index)] = Cssfile_Collection_.MetadataCollection
 		if count := len(Cssfile_Collection_.SelectorList); count > 0 {
 			axiom_counter += count
-			axiomChart[_fmt_.Sprint("Level ", index, ": ", count, " Classes")] = Cssfile_Collection_.SelectorList
+			axiomChart[_fmt_.Sprint("Axiom ", index, ": ", count)] = Cssfile_Collection_.SelectorList
 		}
 		for _, file := range files {
 			_cache_.Delta.Errors.Axioms = append(_cache_.Delta.Errors.Axioms, file.Manifest.Errors...)
@@ -129,7 +129,7 @@ func Library_Update() {
 		_cache_.Manifest.Cluster[_strconv_.Itoa(index)] = Cssfile_Collection_.MetadataCollection
 		if count := len(Cssfile_Collection_.SelectorList); count > 0 {
 			cluster_counter += count
-			clusterChart[_fmt_.Sprint("Level ", index, ": ", count, " Classes")] = Cssfile_Collection_.SelectorList
+			clusterChart[_fmt_.Sprint("Cluster ", index, ": ", count)] = Cssfile_Collection_.SelectorList
 		}
 		for _, file := range files {
 			_cache_.Delta.Errors.Clusters = append(_cache_.Delta.Errors.Clusters, file.Manifest.Errors...)

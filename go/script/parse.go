@@ -53,13 +53,13 @@ func Rider(
 
 	cursor := _Cursor_.Construct(content)
 	regexp_aftertagopen := _regexp_.MustCompile(`(?i)[\w\-\!/]`)
-	
-	cursor.Stream(false, func() {
+
+	for cursor.Streaming {
 		ch := cursor.Active.Char
 
 		if cursor.Active.Last != '\\' && ch == '<' && regexp_aftertagopen.MatchString(string(cursor.Active.Next)) {
 			subScribed := ""
-			tagStart := cursor.Active.Marker - 1
+			tagStart := cursor.Active.Marker
 			result := Tag_Scanner(fileData, classProps, action, &cursor)
 			fragment := string(cursor.Runes[tagStart:result.StyleDeclarations.EndMarker])
 			hasDeclared := len(result.StyleDeclarations.Styles) > 0 || len(result.StyleDeclarations.SymClasses) > 0
@@ -130,7 +130,7 @@ func Rider(
 			} else {
 				subScribed += fragment
 			}
-
+			
 			exitedNow := false
 			if !result.SelfClosed && result.Ok {
 				if result.StyleDeclarations.Element[0] == '/' {
@@ -160,7 +160,7 @@ func Rider(
 				stream.WriteRune(ch)
 			}
 		}
-	})
+	}
 
 	fileData.StyleData.TagReplacements = append(fileData.StyleData.TagReplacements, _types_.File_TagReplacement{Loc: 0, Elid: 0})
 

@@ -156,7 +156,10 @@ func Tag_Scanner(
 				value.Reset()
 			}
 			if (deviance == 0 && (ch == '>' || ch == ';' || ch == ',' || ch == '<')) || deviance < 0 {
-				ok = ch == '>'
+				if ch == '>' {
+					ok = true 
+
+				}
 				break
 			}
 		}
@@ -172,10 +175,9 @@ func Tag_Scanner(
 		}
 	}
 
+	styleDeclarations.EndMarker = cursor.Active.Marker
 	if cursor.Active.Char == '>' {
-		styleDeclarations.EndMarker = cursor.Active.Marker + 1
-	} else {
-		styleDeclarations.EndMarker = cursor.Active.Marker
+		styleDeclarations.EndMarker++
 	}
 
 	if ok {
