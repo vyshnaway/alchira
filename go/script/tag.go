@@ -21,7 +21,7 @@ type tag_Parse_retype struct {
 	StyleDeclarations _types_.Script_RawStyle
 }
 
-func tag_Scanner(
+func Tag_Scanner(
 	fileData *_types_.File_Stash,
 	classProps []string,
 	action _types_.Script_Action,
@@ -36,7 +36,7 @@ func tag_Scanner(
 	deviance := 0
 	var attr _strings_.Builder
 	var value _strings_.Builder
-	var awaitBrace rune = 0
+	var awaitClosure rune = 0
 	ok := false
 	isVal := false
 	selfClosed := false
@@ -59,7 +59,8 @@ func tag_Scanner(
 		Styles:     make(map[string]string),
 	}
 
-	for ch, streaming := cursor.Increment(); streaming; ch, streaming = cursor.Increment() {
+	for cursor.Streaming {
+		ch, _ := cursor.Increment()
 
 		if cursor.Active.Last != '\\' {
 			if !fallbackAquired && cursor.Active.Next == '<' {
@@ -67,26 +68,24 @@ func tag_Scanner(
 				cursor.SaveFallback()
 			}
 
-			if awaitBrace == ch {
-				if len(braceTrack) > 0 {
-					braceTrack = braceTrack[:len(braceTrack)-1]
-				}
-				deviance := len(braceTrack)
-
+			if awaitClosure == ch {
+				deviance = len(braceTrack) - 1
+				braceTrack = braceTrack[:deviance]
 				if deviance > 0 {
-					last := braceTrack[deviance-1]
-					awaitBrace = _utils_.Refer.BracePair[last]
+					awaitClosure = braceTrack[deviance-1]
 				} else {
-					awaitBrace = 0
+					awaitClosure = 0
 				}
-
-			} else if _slices_.Contains(_utils_.Refer.OpenBraces, ch) && _slices_.Contains(_utils_.Refer.WatchQuotes, awaitBrace) {
-				braceTrack = append(braceTrack, ch)
-				deviance = len(braceTrack)
-				awaitBrace = _utils_.Refer.BracePair[ch]
-
-			} else if len(braceTrack) == 0 && _slices_.Contains(_utils_.Refer.WatchQuotes, ch) {
-				break
+			} else if !_slices_.Contains(_utils_.Refer.WatchQuotes, awaitClosure) {
+				if _slices_.Contains(_utils_.Refer.OpenBraces, ch) ||
+					_slices_.Contains(_utils_.Refer.WatchQuotes, ch) {
+					awaitClosure = _utils_.Refer.BracePair[ch]
+					braceTrack = append(braceTrack, awaitClosure)
+					deviance = len(braceTrack)
+				} else if awaitClosure != ch && _slices_.Contains(_utils_.Refer.CloseBraces, ch) {
+					cursor.Increment()
+					break
+				}
 			}
 
 			if deviance == 0 && attr.Len() > 0 && _slices_.Contains([]rune{' ', '\n', '\r', '>', '\t'}, ch) {
@@ -94,12 +93,11 @@ func tag_Scanner(
 				tr_Value := _strings_.Trim(value.String(), " \t\n")
 				symclass_regex := _regexp_.MustCompile(`(?i)^[\w\-]+\$+[\w\-]+$`)
 				if len(styleDeclarations.Element) == 0 {
-					a, b := _cache_.Root.CustomElements[tr_Attr]
-					if b {
-						styleDeclarations.Elid = a
-						styleDeclarations.Element = tr_Attr
-						styleDeclarations.Elvalue = tr_Value
+					if elid, elok := _cache_.Root.CustomElements[tr_Attr]; elok {
+						styleDeclarations.Elid = elid
 					}
+					styleDeclarations.Element = tr_Attr
+					styleDeclarations.Elvalue = tr_Value
 				} else if tr_Attr == "&" {
 					if len(tr_Value) > 3 {
 						for _, line := range _strings_.Split(tr_Value[1:len(tr_Value)-2], "\n") {
@@ -157,7 +155,7 @@ func tag_Scanner(
 				attr.Reset()
 				value.Reset()
 			}
-			if deviance == 0 && (ch == '>' || ch == ';' || ch == ',' || ch == '<') {
+			if (deviance == 0 && (ch == '>' || ch == ';' || ch == ',' || ch == '<')) || deviance < 0 {
 				ok = ch == '>'
 				break
 			}
@@ -174,9 +172,10 @@ func tag_Scanner(
 		}
 	}
 
-	styleDeclarations.EndMarker = cursor.Active.Marker
-	if cursor.Active.Char != '<' {
-		styleDeclarations.EndMarker = styleDeclarations.EndMarker + 1
+	if cursor.Active.Char == '>' {
+		styleDeclarations.EndMarker = cursor.Active.Marker + 1
+	} else {
+		styleDeclarations.EndMarker = cursor.Active.Marker
 	}
 
 	if ok {

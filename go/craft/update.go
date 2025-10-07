@@ -20,7 +20,7 @@ func Update_Scaffold() {
 	_cache_.Manifest_Reset()
 
 	_stash_.Reset()
-	// _stash_.Artifact_Update()
+	_stash_.Artifact_Update()
 	_stash_.Library_Update()
 }
 

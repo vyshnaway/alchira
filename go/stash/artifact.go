@@ -27,8 +27,9 @@ func artifact_SaveFile(filepath string, content string) {
 }
 
 type artifact_StackFiles_return struct {
-	Files  []_types_.File_Stash
-	Lookup map[string]_types_.File_Lookup
+	Files   []_types_.File_Stash
+	Lookup  map[string]_types_.File_Lookup
+	Handoff []_types_.File_Stash
 }
 
 func artifact_CacheFiles() artifact_StackFiles_return {
@@ -39,19 +40,24 @@ func artifact_CacheFiles() artifact_StackFiles_return {
 
 	files := []_types_.File_Stash{}
 	lookup := map[string]_types_.File_Lookup{}
+	handoff := []_types_.File_Stash{}
 
 	for path, data := range Cache.Artifacts {
 		reference := data.Manifest.Lookup
-		lookup[path] = reference
 
 		if reference.Type == _types_.File_Type_Artifact {
+			lookup[path] = reference
 			files = append(files, data)
+		} else {
+			handoff = append(handoff, data)
+
 		}
 	}
 
 	return artifact_StackFiles_return{
-		Files:  files,
-		Lookup: lookup,
+		Files:   files,
+		Lookup:  lookup,
+		Handoff: handoff,
 	}
 }
 

@@ -19,7 +19,7 @@ type Type struct {
 }
 
 func Construct(content string) Type {
-	This := Type{Runes: []rune(" " + content + " ")}
+	This := Type{Runes: []rune(content)}
 	This.Reset()
 	return This
 }

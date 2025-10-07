@@ -83,6 +83,7 @@ export default function scanner(
 			if (deviance === 0 && [" ", "\n", "\r", ">", "\t"].includes(ch) && (attr !== "")) {
 				const tr_Attr = attr.trim();
 				const tr_Value = value.trim();
+				
 				if (!styleDeclarations.element.length) {
 					styleDeclarations.elid = CACHE.ROOT.customElements[tr_Attr] || 0;
 					styleDeclarations.element = tr_Attr;

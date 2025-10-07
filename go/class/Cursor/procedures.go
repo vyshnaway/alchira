@@ -73,3 +73,16 @@ func (This *Type) Decrement() (Char rune, Streaming bool) {
 	}
 	return 0, This.Streaming
 }
+
+func (This *Type) Stream(autoincrement bool, function func()) {
+	if autoincrement {
+		for This.Streaming {
+			function()
+			This.Increment()
+		}
+	} else {
+		for This.Streaming {
+			function()
+		}
+	}
+}

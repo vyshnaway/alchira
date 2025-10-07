@@ -4,19 +4,28 @@ import (
 	_cache_ "main/cache"
 	_Cursor_ "main/class/Cursor"
 	_types_ "main/types"
+	"maps"
 	_regexp_ "regexp"
 	_slices_ "slices"
 	_strings_ "strings"
 )
 
-var initStatus bool
-var customElements []string
-var replacementTags map[string]int
+var customElements = _slices_.Collect(maps.Keys(_cache_.Root.CustomElements))
+
+var replacementTags = func() map[string]int {
+	res := map[string]int{}
+	for k, v := range _cache_.Root.CustomElements {
+		res["<!-- "+k+" -->"] = v
+		res["<"+k+" />"] = v
+		res["<"+k+"/>"] = v
+	}
+	return res
+}()
 
 type parse_return struct {
 	Scribed     string
 	ClassesList [][]string
-	StylesList  []_types_.Script_RawStyle
+	StylesList  []*_types_.Script_RawStyle
 	Attachments []string
 	Locales     []string
 }
@@ -26,22 +35,13 @@ func Rider(
 	classProps []string,
 	action _types_.Script_Action,
 ) parse_return {
-	if !initStatus {
-		for k, v := range _cache_.Root.CustomElements {
-			customElements = append(customElements, k)
-			replacementTags["<!-- "+k+" -->"] = v
-			replacementTags["<"+k+" />"] = v
-			replacementTags["<"+k+"/>"] = v
-		}
-	}
-	initStatus = true
 
 	fileData.StyleData.TagReplacements = []_types_.File_TagReplacement{}
 	tagTrack := []*_types_.Script_RawStyle{}
 	classesList := [][]string{}
 	attachments := []string{}
 	locales := []string{}
-	stylesList := []_types_.Script_RawStyle{}
+	stylesList := []*_types_.Script_RawStyle{}
 
 	var content string
 	var stream _strings_.Builder
@@ -52,13 +52,15 @@ func Rider(
 	}
 
 	cursor := _Cursor_.Construct(content)
-	for ch, streaming := cursor.Active.Char, cursor.Streaming; streaming; ch, streaming = cursor.Increment() {
+	regexp_aftertagopen := _regexp_.MustCompile(`(?i)[\w\-\!/]`)
+	
+	cursor.Stream(false, func() {
+		ch := cursor.Active.Char
 
-		regexp_aftertagopen := _regexp_.MustCompile(`(?i)[\w\-\!]`)
 		if cursor.Active.Last != '\\' && ch == '<' && regexp_aftertagopen.MatchString(string(cursor.Active.Next)) {
 			subScribed := ""
-			tagStart := cursor.Active.Marker
-			result := tag_Scanner(fileData, classProps, action, &cursor)
+			tagStart := cursor.Active.Marker - 1
+			result := Tag_Scanner(fileData, classProps, action, &cursor)
 			fragment := string(cursor.Runes[tagStart:result.StyleDeclarations.EndMarker])
 			hasDeclared := len(result.StyleDeclarations.Styles) > 0 || len(result.StyleDeclarations.SymClasses) > 0
 
@@ -68,7 +70,7 @@ func Rider(
 				locales = append(locales, result.Locales...)
 
 				if hasDeclared {
-					stylesList = append(stylesList, result.StyleDeclarations)
+					stylesList = append(stylesList, &result.StyleDeclarations)
 				} else if elid, status := replacementTags[fragment]; status && len(tagTrack) == 0 {
 					fileData.StyleData.TagReplacements = append(fileData.StyleData.TagReplacements, _types_.File_TagReplacement{
 						Loc:  stream.Len(),
@@ -80,7 +82,7 @@ func Rider(
 					if len(v) > 2 {
 						result.StyleDeclarations.Styles[k] = v[1 : len(v)-1]
 					} else {
-						result.StyleDeclarations.Styles[k] = ""
+						delete(result.StyleDeclarations.Styles, k)
 					}
 				}
 
@@ -158,7 +160,7 @@ func Rider(
 				stream.WriteRune(ch)
 			}
 		}
-	}
+	})
 
 	fileData.StyleData.TagReplacements = append(fileData.StyleData.TagReplacements, _types_.File_TagReplacement{Loc: 0, Elid: 0})
 

@@ -52,7 +52,7 @@ func List_Chart(heading string, items map[string][]string) string {
 			sections = append(sections, S.MAKE(
 				S.Tag.H6(head, S.Preset.Tertiary),
 				entries,
-				S.MakeList{TypeFunc: S.List.Catalog},
+				S.MakeList{TypeFunc: S.List.Catalog, Preset: S.Preset.Text},
 			))
 		}
 		return S.MAKE(
