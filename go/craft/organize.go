@@ -9,7 +9,6 @@ import (
 	_utils_ "main/utils"
 	X "main/xhell"
 	_maps_ "maps"
-	_slices_ "slices"
 	_strconv_ "strconv"
 )
 
@@ -33,12 +32,8 @@ func accumulate() {
 		_cache_.Delta.Diagnostics.TargetDir = append(_cache_.Delta.Diagnostics.TargetDir, val.Diagnostics...)
 
 		mergedMap := make(_types_.File_MetadataMap)
-		for k, v := range val.Public {
-			mergedMap[k] = v
-		}
-		for k, v := range val.Global {
-			mergedMap[k] = v
-		}
+		_maps_.Copy(mergedMap, val.Public)
+		_maps_.Copy(mergedMap, val.Global)
 		_cache_.Manifest.Global[key] = mergedMap
 	}
 
@@ -58,19 +53,19 @@ func accumulate() {
 	}
 
 	_cache_.Manifest.Diagnostics = []_types_.Refer_Diagnostic{}
-	_slices_.Concat(_cache_.Manifest.Diagnostics, _cache_.Delta.Diagnostics.Artifacts)
-	_slices_.Concat(_cache_.Manifest.Diagnostics, _cache_.Delta.Diagnostics.Axioms)
-	_slices_.Concat(_cache_.Manifest.Diagnostics, _cache_.Delta.Diagnostics.Clusters)
-	_slices_.Concat(_cache_.Manifest.Diagnostics, _cache_.Delta.Diagnostics.Multiples)
-	_slices_.Concat(_cache_.Manifest.Diagnostics, _cache_.Delta.Diagnostics.TargetDir)
+	_cache_.Manifest.Diagnostics = append(_cache_.Manifest.Diagnostics, _cache_.Delta.Diagnostics.Artifacts...)
+	_cache_.Manifest.Diagnostics = append(_cache_.Manifest.Diagnostics, _cache_.Delta.Diagnostics.Axioms...)
+	_cache_.Manifest.Diagnostics = append(_cache_.Manifest.Diagnostics, _cache_.Delta.Diagnostics.Clusters...)
+	_cache_.Manifest.Diagnostics = append(_cache_.Manifest.Diagnostics, _cache_.Delta.Diagnostics.Multiples...)
+	_cache_.Manifest.Diagnostics = append(_cache_.Manifest.Diagnostics, _cache_.Delta.Diagnostics.TargetDir...)
 	_cache_.Delta.ErrorCount = len(_cache_.Manifest.Diagnostics)
 
 	errorlist := []string{}
-	_slices_.Concat(errorlist, _cache_.Delta.Errors.Artifacts)
-	_slices_.Concat(errorlist, _cache_.Delta.Errors.Axioms)
-	_slices_.Concat(errorlist, _cache_.Delta.Errors.Clusters)
-	_slices_.Concat(errorlist, _cache_.Delta.Errors.Multiples)
-	_slices_.Concat(errorlist, _cache_.Delta.Errors.TargetDir)
+	errorlist = append(errorlist, _cache_.Delta.Errors.Artifacts...)
+	errorlist = append(errorlist, _cache_.Delta.Errors.Axioms...)
+	errorlist = append(errorlist, _cache_.Delta.Errors.Clusters...)
+	errorlist = append(errorlist, _cache_.Delta.Errors.Multiples...)
+	errorlist = append(errorlist, _cache_.Delta.Errors.TargetDir...)
 	_cache_.Delta.Report.Errors = ""
 
 	if _cache_.Delta.ErrorCount > 0 {

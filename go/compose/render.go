@@ -2,6 +2,7 @@ package compose
 
 import (
 	_blockmap_ "main/class/Blockmap"
+	"main/utils"
 	"strings"
 	// "main/shell"
 	// "strings"
@@ -49,7 +50,7 @@ func Render_Prefixer(stylemap _blockmap_.Type, vendors []string) *_blockmap_.Typ
 	return out
 }
 
-func render_Prefixed(styleobject *_blockmap_.Type, minify bool, vendors []string, first bool) []string {
+func render_Vendored(stylemap *_blockmap_.Type, minify bool, vendors []string, first bool) []string {
 	stylesheet := []string{}
 	var tab string
 	var space string
@@ -61,24 +62,27 @@ func render_Prefixed(styleobject *_blockmap_.Type, minify bool, vendors []string
 		space = " "
 	}
 
-	made := Render_Prefixer(*styleobject, vendors)
+	prefixed := Render_Prefixer(*stylemap, vendors)
 
-	made.PropRange(func(k, v string) {
-		if k[0] == '@' {
-			stylesheet = append(stylesheet, k)
-		} else {
-			stylesheet = append(stylesheet, k+space+v)
-		}
-	})
+	if prefixed.PropLen() > 0 {
+		prefixed.PropRange(func(k, v string) {
+			if k[0] == '@' {
+				stylesheet = append(stylesheet, k)
+			} else {
+				stylesheet = append(stylesheet, k+space+v)
+			}
+		})
+	}
 
-	made.BlockRange(func(k string, v _blockmap_.Type) {
-		if v.BlockLen() > 0 {
+	if prefixed.BlockLen() > 0 {
+		prefixed.BlockRange(func(k string, v _blockmap_.Type) {
 			if !minify && first {
 				stylesheet = append(stylesheet, "")
 			}
+
 			if strings.HasPrefix(k, "@") {
 				for vendor, selector := range prefix_ForAtRule(k, vendors) {
-					composed := render_Prefixed(&v, minify, []string{vendor}, false)
+					composed := render_Vendored(&v, minify, []string{vendor}, false)
 					if len(composed) > 0 {
 						stylesheet = append(stylesheet, selector)
 						stylesheet = append(stylesheet, "{")
@@ -90,7 +94,7 @@ func render_Prefixed(styleobject *_blockmap_.Type, minify bool, vendors []string
 					}
 				}
 			} else {
-				composed := render_Prefixed(&v, minify, vendors, false)
+				composed := render_Vendored(&v, minify, vendors, false)
 				if !minify {
 					for index, line := range composed {
 						composed[index] = tab + line
@@ -103,14 +107,13 @@ func render_Prefixed(styleobject *_blockmap_.Type, minify bool, vendors []string
 					stylesheet = append(stylesheet, "}")
 				}
 			}
-		}
-	})
+		})
+	}
 
 	return stylesheet
 }
 
-func Render_Prefixed(stylemap *_blockmap_.Type, minify bool) string {
-	stylesheet := []string{}
+func Render_Vendored(stylemap *_blockmap_.Type, minify bool) string {
 	var breaks string
 
 	if minify {
@@ -119,6 +122,64 @@ func Render_Prefixed(stylemap *_blockmap_.Type, minify bool) string {
 		breaks = "\n"
 	}
 
-	stylesheet = append(stylesheet, render_Prefixed(stylemap.Flatten(), minify, vendor_Providers, true)...)
-	return strings.Join(stylesheet, breaks)
+	return strings.Join(render_Vendored(stylemap.Flatten(), minify, vendor_Providers, true), breaks)
+}
+
+func render_Wrapper(pm *_blockmap_.Type, keys []string, cm *_blockmap_.Type) {
+	if len(keys) == 0 {
+		return
+	}
+
+	key := keys[0]
+	keys = keys[1:]
+
+	if len(keys) > 0 {
+		ok, m := pm.GetBlock(key)
+		if !ok {
+			m =_blockmap_.New()
+			pm.SetBlock(key, *m)
+		}
+
+		if ok, n := m.GetBlock(key); ok {
+			render_Wrapper(n, keys, cm)
+		}
+	} else {
+		pm.SetBlock(key, *cm)
+	}
+}
+
+func render_Switched(This *_blockmap_.Type) *_blockmap_.Type {
+	out := _blockmap_.New()
+	inq := out.SetBlock("", *_blockmap_.New())
+
+	This.PropRange(func(k, v string) {
+		out.SetProp(k, v)
+	})
+
+	out.BlockRange(func(k0 string, v0 _blockmap_.Type) {
+		v0.BlockRange(func(k1 string, v1 _blockmap_.Type) {
+			if k1 == "" {
+				inq.SetBlock(k0, v0)
+			} else {
+				if wrappers, err := utils.Code_JsonParse[[]string](k1); err == nil {
+					keyseq := []string{}
+					for index, wrapper := range wrappers {
+						if index == 0 || wrappers[index-1][0] == '@' || wrapper[0] == '@' {
+							keyseq = append(keyseq, wrapper)
+						} else {
+							keyseq = append(keyseq, "& "+wrapper)
+						}
+					}
+					render_Wrapper(out, keyseq, &v1)
+				}
+			}
+		})
+	})
+
+	return out
+}
+
+func Render_Switched(stylemap _blockmap_.Type, minify bool) string {
+	switched := render_Switched(&stylemap)
+	return Render_Vendored(switched, minify)
 }

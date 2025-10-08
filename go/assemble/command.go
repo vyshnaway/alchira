@@ -20,7 +20,7 @@ func Commander(
 ) {
 	_cache_.Static.Command = command
 	_cache_.Static.Argument = argument
-	_cache_.Static.VERBOSE = command == "debug"
+	_cache_.Static.MINIFY = command != "debug"
 	_cache_.Static.WATCH = (command == "debug" || command == "preview") && (argument == "-w")
 	_cache_.Static.ProjectName = _utils_.String_Filter(projectname, []rune{}, []rune{}, []rune{})
 	_cache_.Static.ProjectVersion = projectversion

@@ -23,7 +23,7 @@ type Cache_Root struct {
 
 type Cache_Static struct {
 	WATCH             bool
-	VERBOSE           bool
+	MINIFY            bool
 	Command           string
 	Argument          string
 	RootCSS           string

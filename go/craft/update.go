@@ -27,19 +27,17 @@ func Build_Targets() {
 func Update_Target(event _watcher_.Event) {
 	switch event.Action {
 	case _watcher_.Action_Update:
-		if targetStruct, ok := _cache_.Static.TargetDir_Saved[event.Folder]; ok {
-			if targetStruct.Stylesheet == event.FilePath {
-				targetStruct.StylesheetContent = event.FileContent
-				_cache_.Static.TargetDir_Saved[event.Folder] = targetStruct
-				_stash_.Target_UpdateDirs()
-			}
+		if targetStruct, ok := _cache_.Static.TargetDir_Saved[event.Folder]; ok &&
+			targetStruct.Stylesheet == event.FilePath {
+			targetStruct.StylesheetContent = event.FileContent
+			_cache_.Static.TargetDir_Saved[event.Folder] = targetStruct
 		} else if _, ok := _cache_.Static.TargetDir_Saved[event.Folder].Extensions[event.Extension]; ok {
 			_cache_.Static.TargetDir_Saved[event.Folder].Filepath_to_Content[event.FilePath] = event.FileContent
 			_cache_.Delta.Path = _fileman_.Path_Join(_cache_.Static.TargetDir_Saved[event.Folder].Source, event.FilePath)
+			_stash_.Target_UpdateDirs()
 		} else {
 			_cache_.Delta.Path = _fileman_.Path_Join(_cache_.Static.TargetDir_Saved[event.Folder].Source, event.FilePath)
 			_cache_.Delta.Content = event.FileContent
-			_stash_.Target_UpdateDirs()
 		}
 	case _watcher_.Action_Unlink:
 		if targetStruct, ok := _cache_.Static.TargetDir_Saved[event.Folder]; ok {
@@ -47,5 +45,6 @@ func Update_Target(event _watcher_.Event) {
 		}
 	default:
 		_style_.Hashrule_Upload()
+		_stash_.Target_UpdateDirs()
 	}
 }

@@ -104,7 +104,7 @@ func Library_Update() {
 	axiomChart := map[string][]string{}
 	axiom_counter := 0
 	for index, files := range StackLibraryFiles_.Axiom {
-		Cssfile_Collection_ := _style_.Cssfile_Collection(files, _cache_.Static.VERBOSE)
+		Cssfile_Collection_ := _style_.Cssfile_Collection(files, _cache_.Static.MINIFY)
 		_cache_.Manifest.Axiom[_strconv_.Itoa(index)] = Cssfile_Collection_.MetadataCollection
 		if count := len(Cssfile_Collection_.SelectorList); count > 0 {
 			axiom_counter += count
@@ -125,7 +125,7 @@ func Library_Update() {
 	clusterChart := map[string][]string{}
 	cluster_counter := 0
 	for index, files := range StackLibraryFiles_.Cluster {
-		Cssfile_Collection_ := _style_.Cssfile_Collection(files, _cache_.Static.VERBOSE)
+		Cssfile_Collection_ := _style_.Cssfile_Collection(files, _cache_.Static.MINIFY)
 		_cache_.Manifest.Cluster[_strconv_.Itoa(index)] = Cssfile_Collection_.MetadataCollection
 		if count := len(Cssfile_Collection_.SelectorList); count > 0 {
 			cluster_counter += count

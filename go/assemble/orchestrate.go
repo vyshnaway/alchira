@@ -81,7 +81,7 @@ func orchestrate(heading string) {
 				cycle_one = false
 				report = ""
 			}
-			fallthrough 
+			fallthrough
 
 		case execute_Step_ReadArtifacts:
 			_action_.Save_Artifacts()
@@ -111,7 +111,8 @@ func orchestrate(heading string) {
 
 		case execute_Step_GenerateFiles:
 			outfiles, report = _craft_.Generate_Files()
-			// fallthrough
+			S.Render.Raw(outfiles)
+			fallthrough
 
 		case execute_Step_Publish:
 			if len(outfiles) > 0 {
@@ -129,87 +130,85 @@ func orchestrate(heading string) {
 			fallthrough
 
 		case execute_Step_WatchFolders:
-
 			if _cache_.Static.WATCH {
+
 				step = execute_Step_WatchFolders
-			} else {
-				break
-			}
 
-			if watcher == nil {
-				watch_dirs := append(
-					slices.Collect(maps.Keys(stash.Cache.Targetdir)),
-					_cache_.Path_Folder["scaffold"].Path,
-				)
-				ignore_dirs := []string{
-					_cache_.Path_Folder["autogen"].Path,
-					_cache_.Path_Folder["archive"].Path,
-				}
-				X.Report(heading, targets, report, []string{})
-
-				if w, err := _watcher_.Create(watch_dirs, ignore_dirs); err == nil {
-					watcher = w
-					sigs := make(chan os.Signal, 1)
-					signal.Notify(sigs, syscall.SIGINT)
-
-					go func() {
-						<-sigs
-						if w != nil {
-							w.Close()
-							w = nil
-							S.Render.Write("\n", 2)
-						}
-						os.Exit(0)
-					}()
-				}
-			}
-
-			if watcher.Length() > 16 {
-				watcher.Reset()
-				step = execute_Step_Initialize
-			} else if event := watcher.Pull(); event != nil {
-				filepath := fileman.Path_Join(event.Folder, event.FilePath)
-
-				if event.Folder == _cache_.Path_Folder["scaffold"].Path {
-					if event.Action == _watcher_.Action_Update {
-						switch filepath {
-						case _cache_.Path_Json["configure"].Path:
-							watcher.Close()
-							watcher = nil
-							step = execute_Step_VerifyConfigs
-						case _cache_.Path_Css["atrules"].Path:
-						case _cache_.Path_Css["constants"].Path:
-						case _cache_.Path_Css["elements"].Path:
-						case _cache_.Path_Css["extends"].Path:
-							_action_.Save_RootCss()
-							step = execute_Step_GenerateFiles
-						case _cache_.Path_Json["hashrule"].Path:
-							step = execute_Step_ReadHashrule
-						default:
-							if fileman.Path_IsSubpath(event.FilePath, _cache_.Path_Folder["libraries"].Path) &&
-								event.Extension == "css" {
-								_cache_.Static.Libraries_Saved[filepath] = event.FileContent
-							} else if fileman.Path_IsSubpath(filepath, _cache_.Path_Folder["artifacts"].Path) &&
-								(event.Extension == _cache_.Root.Extension || event.Extension == "json") {
-								_cache_.Static.Artifacts_Saved[filepath] = event.FileContent
-							}
-							step = execute_Step_ProcessScaffold
-						}
-					} else {
-						step = execute_Step_VerifySetupStruct
+				if watcher == nil {
+					watch_dirs := append(
+						slices.Collect(maps.Keys(stash.Cache.Targetdir)),
+						_cache_.Path_Folder["scaffold"].Path,
+					)
+					ignore_dirs := []string{
+						_cache_.Path_Folder["autogen"].Path,
+						_cache_.Path_Folder["archive"].Path,
 					}
-				} else if event.Action == _watcher_.Action_Update || event.Action == _watcher_.Action_Unlink {
-					_craft_.Update_Target(*event)
-					step = execute_Step_GenerateFiles
-				} else {
-					step = execute_Step_VerifyConfigs
+					X.Report(heading, targets, report, []string{})
+
+					if w, err := _watcher_.Create(watch_dirs, ignore_dirs); err == nil {
+						watcher = w
+						sigs := make(chan os.Signal, 1)
+						signal.Notify(sigs, syscall.SIGINT)
+
+						go func() {
+							<-sigs
+							if w != nil {
+								w.Close()
+								w = nil
+								S.Render.Write("\n", 2)
+							}
+							os.Exit(0)
+						}()
+					}
 				}
 
-				heading = event.TimeStamp + " | " + event.FilePath
-				report_next = true
-			}
+				if watcher.Length() > 16 {
+					watcher.Reset()
+					step = execute_Step_Initialize
+				} else if event := watcher.Pull(); event != nil {
+					filepath := fileman.Path_Join(event.Folder, event.FilePath)
 
-			time.Sleep(20 * time.Millisecond)
+					if event.Folder == _cache_.Path_Folder["scaffold"].Path {
+						if event.Action == _watcher_.Action_Update {
+							switch filepath {
+							case _cache_.Path_Json["configure"].Path:
+								watcher.Close()
+								watcher = nil
+								step = execute_Step_VerifyConfigs
+							case _cache_.Path_Css["atrules"].Path:
+							case _cache_.Path_Css["constants"].Path:
+							case _cache_.Path_Css["elements"].Path:
+							case _cache_.Path_Css["extends"].Path:
+								_action_.Save_RootCss()
+								step = execute_Step_GenerateFiles
+							case _cache_.Path_Json["hashrule"].Path:
+								step = execute_Step_ReadHashrule
+							default:
+								if fileman.Path_IsSubpath(event.FilePath, _cache_.Path_Folder["libraries"].Path) &&
+									event.Extension == "css" {
+									_cache_.Static.Libraries_Saved[filepath] = event.FileContent
+								} else if fileman.Path_IsSubpath(filepath, _cache_.Path_Folder["artifacts"].Path) &&
+									(event.Extension == _cache_.Root.Extension || event.Extension == "json") {
+									_cache_.Static.Artifacts_Saved[filepath] = event.FileContent
+								}
+								step = execute_Step_ProcessScaffold
+							}
+						} else {
+							step = execute_Step_VerifySetupStruct
+						}
+					} else if event.Action == _watcher_.Action_Update || event.Action == _watcher_.Action_Unlink {
+						_craft_.Update_Target(*event)
+						step = execute_Step_GenerateFiles
+					} else {
+						step = execute_Step_VerifyConfigs
+					}
+
+					heading = event.TimeStamp + " | " + event.FilePath
+					report_next = true
+				}
+
+				time.Sleep(20 * time.Millisecond)
+			}
 
 		}
 
@@ -218,6 +217,7 @@ func orchestrate(heading string) {
 		}
 	}
 
+	save_action.Wait()
 	if !_cache_.Static.WATCH {
 		S.Post(report)
 	} else if watcher != nil {

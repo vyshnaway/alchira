@@ -85,7 +85,7 @@ func (This *Class) Savefile(filepath string, content string, hashindex int) {
 				medatata_map = &_types_.File_MetadataMap{}
 			}
 
-			response := _style_.Rawtag_Upload(tagdata, &file, index_map, _cache_.Static.VERBOSE)
+			response := _style_.Rawtag_Upload(tagdata, &file, index_map, _cache_.Static.MINIFY)
 			classdata := _cache_.Index_Fetch(response.Index)
 
 			if len(classdata.Metadata.Declarations) == 1 {

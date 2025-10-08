@@ -69,6 +69,7 @@ func Code_Uncomment(content string, single, multi, html bool) string {
 		result.WriteByte(char)
 		i++
 	}
+	
 	return result.String()
 }
 
@@ -79,11 +80,13 @@ func Code_Minify(content string) string {
 }
 
 func Code_Strip(content string, single, multi, html, minify bool) string {
-	uncommented := Code_Uncomment(content, single, multi, html)
+	if single || multi || html {
+		content = Code_Uncomment(content, single, multi, html)
+	}
 	if minify {
-		return Code_Minify(uncommented)
+		return Code_Minify(content)
 	} else {
-		return uncommented
+		return content
 	}
 }
 
