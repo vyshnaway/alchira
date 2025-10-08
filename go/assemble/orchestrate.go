@@ -5,10 +5,10 @@ import (
 	_cache_ "main/cache"
 	_craft_ "main/craft"
 	"main/fileman"
-	S "main/shell"
+	S "main/shell/core"
+	X "main/shell/make"
 	"main/stash"
 	_watcher_ "main/watcher"
-	X "main/xhell"
 	"maps"
 	"os"
 	"os/signal"
@@ -37,11 +37,12 @@ const (
 	execute_Step_WatchFolders
 )
 
-func orchestrate(heading string) {
+func orchestrate(heading string) (Exitcode int) {
+	exitcode := 0
 	step := execute_Step_Initialize
 	report := ""
 	targets := []string{}
-	report_next := false
+	report_next := true
 	cycle_one := true
 	// initial_heading := "Initial Build"
 	outfiles := map[string]string{}
@@ -111,7 +112,6 @@ func orchestrate(heading string) {
 
 		case execute_Step_GenerateFiles:
 			outfiles, report = _craft_.Generate_Files()
-			S.Render.Raw(outfiles)
 			fallthrough
 
 		case execute_Step_Publish:
@@ -143,7 +143,6 @@ func orchestrate(heading string) {
 						_cache_.Path_Folder["autogen"].Path,
 						_cache_.Path_Folder["archive"].Path,
 					}
-					X.Report(heading, targets, report, []string{})
 
 					if w, err := _watcher_.Create(watch_dirs, ignore_dirs); err == nil {
 						watcher = w
@@ -218,10 +217,10 @@ func orchestrate(heading string) {
 	}
 
 	save_action.Wait()
-	if !_cache_.Static.WATCH {
-		S.Post(report)
-	} else if watcher != nil {
+	if watcher != nil {
 		watcher.Close()
 		watcher = nil
 	}
+
+	return exitcode
 }

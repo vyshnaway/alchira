@@ -38,7 +38,7 @@ type Style_Metadata struct {
 
 type Style_ClassData struct {
 	Index         int
-	Metadata      Style_Metadata
+	Metadata      *Style_Metadata
 	Artifact      string
 	Definent      string
 	SymClass      string

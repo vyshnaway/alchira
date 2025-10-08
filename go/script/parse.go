@@ -71,7 +71,7 @@ func Rider(
 
 				if hasDeclared {
 					stylesList = append(stylesList, &result.StyleDeclarations)
-				} else if elid, status := replacementTags[fragment]; status && len(tagTrack) == 0 {
+				} else if elid, status := replacementTags[fragment]; action != _types_.Script_Action_Read && status && len(tagTrack) == 0 {
 					fileData.StyleData.TagReplacements = append(fileData.StyleData.TagReplacements, _types_.File_TagReplacement{
 						Loc:  stream.Len(),
 						Elid: elid,
@@ -130,7 +130,7 @@ func Rider(
 			} else {
 				subScribed += fragment
 			}
-			
+
 			exitedNow := false
 			if !result.SelfClosed && result.Ok {
 				if result.StyleDeclarations.Element[0] == '/' {

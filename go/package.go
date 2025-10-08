@@ -5,7 +5,7 @@ import (
 	_action_ "main/action"
 	_assemble_ "main/assemble"
 	_cache_ "main/cache"
-	_fileman_ "main/fileman"
+	_fileman_ "main/module/fileman"
 	_utils_ "main/utils"
 	_os_ "os"
 	_slices_ "slices"
@@ -59,10 +59,12 @@ func main() {
 
 	_action_.Setup_Environment(rootpath, workpath)
 
-	_assemble_.Commander(
+	exitcode := _assemble_.Commander(
 		command,
 		argument,
 		projectname,
 		projectversion,
 	)
+
+	_os_.Exit(exitcode)
 }

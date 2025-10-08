@@ -4,7 +4,7 @@ import (
 	"main/action"
 	"main/class/Cursor"
 	"main/script"
-	"main/shell"
+	shell "main/shell/core"
 	"main/types"
 	"testing"
 )

@@ -4,13 +4,11 @@ import (
 	_fmt_ "fmt"
 	_action_ "main/action"
 	_cache_ "main/cache"
-	"main/shell"
-
 	_style_ "main/style"
 	_types_ "main/types"
 	_utils_ "main/utils"
 
-	X "main/xhell"
+	X "main/shell/make"
 	_strconv_ "strconv"
 )
 
@@ -116,7 +114,6 @@ func Library_Update() {
 		}
 	}
 	_cache_.Delta.Report.Axioms = X.List_Chart("", axiomChart)
-	shell.Post(_cache_.Delta.Report.Axioms)
 
 	// Cluster update actions
 	_cache_.Manifest.Cluster = map[string]_types_.File_MetadataMap{}
@@ -137,7 +134,6 @@ func Library_Update() {
 		}
 	}
 	_cache_.Delta.Report.Clusters = X.List_Chart("", clusterChart)
-	shell.Post(_cache_.Delta.Report.Clusters)
 }
 
 func Library_ReDeclare() {

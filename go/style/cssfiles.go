@@ -82,20 +82,21 @@ func Cssfile_Collection(files []_types_.File_Stash, verbose bool) cssfile_Collec
 
 				artifact := _cache_.Archive.Name
 
+				metadata := _types_.Style_Metadata{
+					Info:         []string{},
+					WatchClass:   "",
+					Variables:    stylescanned.Variables,
+					Skeleton:     object.Skeleton(),
+					Declarations: []string{declaration},
+					Summon:       "",
+					Attributes:   map[string]string{},
+				}
 				classdata := _types_.Style_ClassData{
-					Index:    0,
-					Artifact: artifact,
-					Definent: selector,
-					SymClass: classname,
-					Metadata: _types_.Style_Metadata{
-						Info:         []string{},
-						WatchClass:   "",
-						Variables:    stylescanned.Variables,
-						Skeleton:     object.Skeleton(),
-						Declarations: []string{declaration},
-						Summon:       "",
-						Attributes:   map[string]string{},
-					},
+					Index:         0,
+					Artifact:      artifact,
+					Definent:      selector,
+					SymClass:      classname,
+					Metadata:      &metadata,
 					StyleObject:   object,
 					Attachments:   attachments,
 					DebugClass:    file.DebugFront + "_" + _utils_.String_Filter(classname, []rune{}, []rune{}, []rune{'$', '/'}),
@@ -114,7 +115,7 @@ func Cssfile_Collection(files []_types_.File_Stash, verbose bool) cssfile_Collec
 				index := _cache_.Index_Declare(classdata)
 				file.StyleData.UsedIn = append(file.StyleData.UsedIn, index)
 				selectors[classname] = index
-				indexMetaCollection[classname] = &classdata.Metadata
+				indexMetaCollection[classname] = &metadata
 				selectorList = append(selectorList, classname)
 			}
 		}

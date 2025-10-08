@@ -3,10 +3,10 @@ package action
 import (
 	_cache_ "main/cache"
 	_fileman_ "main/fileman"
-	S "main/shell"
+	S "main/shell/core"
+	X "main/shell/make"
 	_types_ "main/types"
 	"main/utils"
-	X "main/xhell"
 )
 
 type verify_Setup_Status_enum int

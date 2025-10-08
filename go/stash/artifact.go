@@ -5,12 +5,9 @@ import (
 	_action_ "main/action"
 	_cache_ "main/cache"
 	_script_ "main/script"
-	"main/shell"
-
-	// "main/shell"
+	X "main/shell/make"
 	_style_ "main/style"
 	_types_ "main/types"
-	X "main/xhell"
 )
 
 func artifact_DeleteFile(filepath string) {
@@ -104,11 +101,9 @@ func Artifact_Update() {
 				file.Manifest.Diagnostics = append(file.Manifest.Diagnostics, E.Diagnostic)
 			} else {
 				artifact_counter++
-				Rawtag_Upload_ := _style_.Rawtag_Upload(tagstyle, &file, &_cache_.Style.Artifact_Index, _cache_.Static.MINIFY)
+				Rawtag_Upload_ := _style_.Rawtag_Upload(tagstyle, &file, _cache_.Style.Artifact_Index, metadatas, _cache_.Static.MINIFY)
 				styledata := _cache_.Index_Fetch(Rawtag_Upload_.Index)
 				if len(styledata.Declarations) == 1 {
-					file.StyleData.UsedIn = append(file.StyleData.UsedIn, Rawtag_Upload_.Index)
-					metadatas[Rawtag_Upload_.Symclass] = &styledata.Metadata
 					symclasses = append(symclasses, Rawtag_Upload_.Symclass)
 				}
 				file.Manifest.Errors = append(file.Manifest.Errors, Rawtag_Upload_.Errors...)
@@ -123,7 +118,6 @@ func Artifact_Update() {
 		_cache_.Delta.Diagnostics.Artifacts = append(_cache_.Delta.Diagnostics.Artifacts, file.Manifest.Diagnostics...)
 	}
 	_cache_.Delta.Report.Artifacts = X.List_Chart("", artifact_chart)
-	shell.Post(_cache_.Delta.Report.Artifacts)
 }
 
 func Aritfact_ReDeclare() {

@@ -2,7 +2,7 @@ package cache
 
 import (
 	_types_ "main/types"
-	_strconv_ "strconv"
+	"main/utils"
 	_sync_ "sync"
 )
 
@@ -33,7 +33,7 @@ func Index_Declare(object _types_.Style_ClassData) int {
 	}
 	object.Index = idx
 	delete(BIN, idx)
-	object.Metadata.WatchClass = "__" + _strconv_.Itoa(idx)
+	object.Metadata.WatchClass = "__" + utils.String_EnCounter(idx)
 	Style.Index_to_Data[idx] = object
 	return idx
 }

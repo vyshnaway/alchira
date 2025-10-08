@@ -2,7 +2,7 @@ package action_test
 
 import (
 	"main/action"
-	"main/shell"
+	shell "main/shell/core"
 	"testing"
 )
 

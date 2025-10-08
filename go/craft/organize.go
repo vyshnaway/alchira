@@ -3,18 +3,18 @@ package craft
 import (
 	_cache_ "main/cache"
 	_order_ "main/order"
-	"main/shell"
-	S "main/shell"
+	S "main/shell/core"
+	X "main/shell/make"
 	_stash_ "main/stash"
 	_types_ "main/types"
 	_utils_ "main/utils"
-	X "main/xhell"
 	_maps_ "maps"
 	_strconv_ "strconv"
 )
 
 func accumulate() {
 	accumulated := _stash_.Target_Accumulate()
+
 	_cache_.Style.Global___Index = accumulated.GlobalClasses
 	_cache_.Style.Public___Index = accumulated.PublicClasses
 	_cache_.Delta.Report.TargetDir = S.MAKE("", accumulated.Report)
@@ -93,15 +93,12 @@ func Organize() (AritfactFiles map[string]string, Attachments []int) {
 			})
 		}
 
-		for json_array, imap := range stash.List_to_Group {
+		for json_array, imap := range stash.List_to_GroupId {
 			_cache_.Style.ClassDictionary[json_array] = map[int]string{}
-			for ref, id := range imap {
+			for ref, id := range stash.Group_to_Table[imap] {
 				_cache_.Style.ClassDictionary[json_array][ref] = "_" + _utils_.String_EnCounter(id)
 			}
 		}
-		shell.Render.Raw(stash)
-		shell.Render.Raw(_cache_.Style.PublishIndexMap)
-		shell.Render.Raw(_cache_.Style.ClassDictionary)
 	}
 
 	accumulate()
@@ -111,7 +108,7 @@ func Organize() (AritfactFiles map[string]string, Attachments []int) {
 	if _cache_.Static.WATCH {
 		_cache_.Delta.FinalMessage = _strconv_.Itoa(_cache_.Delta.ErrorCount) + " Errors."
 	} else if _cache_.Static.Command == "preview" {
-		res, _ := _order_.Order(tracks_.ClassTracks, "preview", _cache_.Static.Argument, _types_.Config_Archive{})
+		res, _ := _order_.Order(tracks_.ClassTracks, false, _cache_.Static.Argument, _types_.Config_Archive{})
 		SaveClassRefs(*res.Result)
 
 		if _cache_.Delta.ErrorCount > 0 {
@@ -121,14 +118,14 @@ func Organize() (AritfactFiles map[string]string, Attachments []int) {
 		}
 	} else if _cache_.Static.Command == "publish" {
 		if _cache_.Delta.ErrorCount > 0 {
-			res, _ := _order_.Order(tracks_.ClassTracks, "preview", _cache_.Static.Argument, _types_.Config_Archive{})
+			res, _ := _order_.Order(tracks_.ClassTracks, false, _cache_.Static.Argument, _types_.Config_Archive{})
 			SaveClassRefs(*res.Result)
 
 			_cache_.Delta.FinalMessage = "Errors in " + _strconv_.Itoa(_cache_.Delta.ErrorCount) + " Tags. Falling back to 'preview' command."
 			_cache_.Static.Command = "preview"
 		} else {
 			archive := archive_Build()
-			res, _ := _order_.Order(tracks_.ClassTracks, "publish", _cache_.Static.Argument, archive)
+			res, _ := _order_.Order(tracks_.ClassTracks, true, _cache_.Static.Argument, archive)
 			SaveClassRefs(*res.Result)
 
 			if res.Status {

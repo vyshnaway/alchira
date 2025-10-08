@@ -2,7 +2,7 @@ package compose_test
 
 import (
 	"main/compose"
-	"main/shell"
+	shell "main/shell/core"
 	"main/style"
 	"testing"
 )
@@ -56,29 +56,30 @@ const content = `
     }
 }
 	`
-const content2 = `
-&:after {
-    backdrop-filter: blur(1px);
-}
-&:-before {
-    background-color: rgba(255, 255, 255, 0.6);
-}
-&::-after {
-    backdrop-filter: blur(.5px);
-}
-&::before {
-    background-color: rgba(255, 255, 255, 0.25);
-}
-& :before {
-    background-color: rgba(255, 255, 255, 0.25);
-}
-&.before {
-    background-color: rgba(255, 255, 255, 0.25);
-}
-@before {
-    background-color: rgba(255, 255, 255, 0.25);
-}
-	`
+
+// const content = `
+// &:after {
+//     backdrop-filter: blur(1px);
+// }
+// &:-before {
+//     background-color: rgba(255, 255, 255, 0.6);
+// }
+// &::-after {
+//     backdrop-filter: blur(.5px);
+// }
+// &::before {
+//     background-color: rgba(255, 255, 255, 0.25);
+// }
+// & :before {
+//     background-color: rgba(255, 255, 255, 0.25);
+// }
+// &.before {
+//     background-color: rgba(255, 255, 255, 0.25);
+// }
+// @before {
+//     background-color: rgba(255, 255, 255, 0.25);
+// }
+// 	`
 
 func Test_Partials(t *testing.T) {
 	res1 := style.Parse_CssSnippet(content, "initial", "selector", true, true)

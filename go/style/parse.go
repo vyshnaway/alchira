@@ -4,7 +4,7 @@ import (
 	_cache_ "main/cache"
 	_Blockmap_ "main/class/Blockmap"
 
-	// "main/shell"
+	// "main/shell/core"
 	_types_ "main/types"
 	_maps_ "maps"
 )

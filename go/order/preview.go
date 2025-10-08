@@ -9,6 +9,8 @@ import (
 func Preview_Organize(classtrace [][]int, merge bool) *_types_.Refer_SortedOutput {
 	maxLen := 0
 	counter := 0
+	refindex := 0
+	finalists := [][]int{}
 	final_hashtrace := [][2]int{}
 	sorted_classtrace := [][]int{}
 	list_to_group := make(map[string]int)
@@ -42,11 +44,11 @@ func Preview_Organize(classtrace [][]int, merge bool) *_types_.Refer_SortedOutpu
 		grouped_classtrace[superParentString] = append(grouped_classtrace[superParentString], arr)
 	}
 
-	refindex := 0
 	for jsonref, classlists := range grouped_classtrace {
 
 		reftable := make(map[int]int)
 		if seq, err := _utils_.Code_JsonParse[[]int](jsonref); err == nil {
+			finalists = append(finalists, seq)
 			for _, item := range seq {
 				counter++
 				reftable[item] = counter
@@ -66,7 +68,8 @@ func Preview_Organize(classtrace [][]int, merge bool) *_types_.Refer_SortedOutpu
 
 	return &_types_.Refer_SortedOutput{
 		Count:           counter,
-		List_to_Group:   list_to_group,
+		ClassLists:      finalists,
+		List_to_GroupId: list_to_group,
 		Group_to_Table:  group_to_table,
 		Final_Hashtrace: final_hashtrace,
 	}

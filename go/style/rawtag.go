@@ -15,7 +15,8 @@ import (
 func Rawtag_Upload(
 	raw *_types_.Script_RawStyle,
 	file *_types_.File_Stash,
-	IndexMap *_types_.Style_ClassIndexMap,
+	IndexMap _types_.Style_ClassIndexMap,
+	metadata_map _types_.File_MetadataMap,
 	verbose bool,
 ) rawtag_Upload_return {
 	errors := []string{}
@@ -39,7 +40,7 @@ func Rawtag_Upload(
 		normalsymclass = _utils_.String_Filter(symclass, []rune{}, []rune{}, []rune{'$'})
 	}
 
-	found := _cache_.Index_Find(symclass, *IndexMap)
+	found := _cache_.Index_Find(symclass, IndexMap)
 	index := found.Index
 	if found.Group != _types_.Style_Type_Null {
 		classdata := _cache_.Index_Fetch(found.Index)
@@ -131,28 +132,31 @@ func Rawtag_Upload(
 			staple = raw.Innertext
 		}
 
+		metadata := _types_.Style_Metadata{
+			Info:         raw.Comments,
+			WatchClass:   "",
+			Variables:    variables,
+			Skeleton:     object.Skeleton(),
+			Declarations: []string{declaration},
+			Summon:       summon,
+			Attributes:   attributes,
+		}
 		index = _cache_.Index_Declare(_types_.Style_ClassData{
-			Index:       0,
-			Artifact:    artifact,
-			Definent:    raw.SymClasses[0],
-			SymClass:    symclass,
-			StyleObject: object,
-			Metadata: _types_.Style_Metadata{
-				Info:         raw.Comments,
-				WatchClass:   "",
-				Variables:    variables,
-				Skeleton:     object.Skeleton(),
-				Declarations: []string{declaration},
-				Summon:       summon,
-				Attributes:   attributes,
-			},
+			Index:         0,
+			Artifact:      artifact,
+			Definent:      raw.SymClasses[0],
+			SymClass:      symclass,
+			StyleObject:   object,
+			Metadata:      &metadata ,
 			Attachments:   attachments,
 			DebugClass:    debugclass,
 			Declarations:  []string{declaration},
 			SnippetStaple: staple,
 			SnippetStyle:  inner_style.Result,
 		})
-		// IndexMap[symclass] = index;
+		IndexMap[symclass] = index
+		file.StyleData.UsedIn = append(file.StyleData.UsedIn, index)
+		metadata_map[symclass] = &metadata
 	}
 
 	return rawtag_Upload_return{

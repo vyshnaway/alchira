@@ -4,7 +4,7 @@ import (
 	_blockmap_ "main/class/Blockmap"
 	"main/utils"
 	"strings"
-	// "main/shell"
+	// "main/shell/core"
 	// "strings"
 	// _strings_ "strings"
 )
@@ -136,7 +136,7 @@ func render_Wrapper(pm *_blockmap_.Type, keys []string, cm *_blockmap_.Type) {
 	if len(keys) > 0 {
 		ok, m := pm.GetBlock(key)
 		if !ok {
-			m =_blockmap_.New()
+			m = _blockmap_.New()
 			pm.SetBlock(key, *m)
 		}
 

@@ -37,19 +37,19 @@ type tApi_Result struct {
 // Order processes sequences for either preview or publish operations
 func Order(
 	sequences [][]int,
-	command string,
+	publish bool,
 	argument string,
 	artifact _types_.Config_Archive,
 ) (*tApi_Result, error) {
 
 	// Initialize response with preview defaults
 	response := &tApi_Result{
-		Status:  command == "preview",
+		Status:  !publish,
 		Message: "Preview Build",
-		Result:  Preview_Organize(sequences, true), // merge = true by default
+		Result:  Preview_Organize(sequences, false),
 	}
 
-	if command != "publish" {
+	if !publish {
 		return response, nil
 	}
 

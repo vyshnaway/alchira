@@ -1,9 +1,11 @@
-package stash
+package Target
 
 import (
 	_cache_ "main/cache"
 	_fileman_ "main/fileman"
 	_types_ "main/types"
+	"maps"
+	"slices"
 )
 
 type Class struct {
@@ -22,7 +24,6 @@ type Class struct {
 
 func New(storage _types_.Config_ProxyStorage, label string) Class {
 	storage.Extensions[_cache_.Root.Extension] = []string{}
-	extentions := []string{}
 
 	var This = Class{
 		Source:            storage.Source,
@@ -32,7 +33,7 @@ func New(storage _types_.Config_ProxyStorage, label string) Class {
 		TargetStylesheet:  _fileman_.Path_Join(storage.Target, storage.Stylesheet),
 		StylesheetContent: storage.StylesheetContent,
 		Label:             label,
-		Extensions:        extentions,
+		Extensions:        slices.Collect(maps.Keys(storage.Extensions)),
 		ExtnsProps:        storage.Extensions,
 		FileCache:         map[string]_types_.File_Stash{},
 	}

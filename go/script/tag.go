@@ -144,7 +144,7 @@ func Tag_Scanner(
 						attachments = append(attachments, value_Parse_return.Attachments...)
 					}
 					if len(value_Parse_return.Locales) > 0 {
-						locales = append(locales, value_Parse_return.Attachments...)
+						locales = append(locales, value_Parse_return.Locales...)
 					}
 					nativeAttributes[tr_Attr] = value_Parse_return.Scribed
 				} else {

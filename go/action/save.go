@@ -3,7 +3,7 @@ package action
 import (
 	_cache_ "main/cache"
 	_fileman_ "main/fileman"
-	S "main/shell"
+	S "main/shell/core"
 	"main/utils"
 	_regexp_ "regexp"
 	_strings_ "strings"

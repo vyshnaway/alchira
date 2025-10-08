@@ -5,9 +5,10 @@ import (
 	_cache_ "main/cache"
 	_craft_ "main/craft"
 	_fileman_ "main/fileman"
-	S "main/shell"
+	S "main/shell/core"
+	S_make "main/shell/make"
+	S_play "main/shell/play"
 	_utils_ "main/utils"
-	X "main/xhell"
 	_strings_ "strings"
 	_sync_ "sync"
 )
@@ -17,7 +18,7 @@ func Commander(
 	argument string,
 	projectname string,
 	projectversion string,
-) {
+) (Exitcode int) {
 	_cache_.Static.Command = command
 	_cache_.Static.Argument = argument
 	_cache_.Static.MINIFY = command != "debug"
@@ -29,6 +30,7 @@ func Commander(
 	corecaps := _strings_.ToUpper(_cache_.Root.Name)
 
 	var flagmode string
+	exitcode := 0
 	if _cache_.Static.WATCH {
 		flagmode = "Watch"
 	} else {
@@ -36,23 +38,21 @@ func Commander(
 	}
 
 	switch _cache_.Static.Command {
-	case "version":
-		{
-			S.Post(_cache_.Root.Name + "@" + _cache_.Root.Version)
-		}
 	case "init":
 		{
 			var wg _sync_.WaitGroup
 			wg.Add(2)
 			go func() { _action_.Sync_RootDocs(); wg.Done() }()
-			go func() { S.Animate.Title(corecaps+" : Initialize", 1000, 1); wg.Done() }()
+			go func() { S_play.Title(corecaps+" : Initialize", 1000, 1); wg.Done() }()
 			wg.Wait()
 			status, setup_report := _action_.Verify_Setup()
 			switch status {
 			case _action_.Verify_Setup_Status_Uninitialized:
 				_action_.Initialize()
+				exitcode = 1
 			case _action_.Verify_Setup_Status_Initialized:
 				S.Post(setup_report)
+				exitcode = 1
 			case _action_.Verify_Setup_Status_Verified:
 				report, _ := _action_.Verify_Configs(true)
 				S.Post(report)
@@ -60,15 +60,15 @@ func Commander(
 		}
 	case "debug":
 		{
-			orchestrate(corecaps + " : Debug " + flagmode)
+			exitcode = orchestrate(corecaps + " : Debug " + flagmode)
 		}
 	case "preview":
 		{
-			orchestrate(corecaps + " : Preview " + flagmode)
+			exitcode = orchestrate(corecaps + " : Preview " + flagmode)
 		}
 	case "publish":
 		{
-			orchestrate(corecaps + " : " + "Publishing for Production")
+			exitcode = orchestrate(corecaps + " : " + "Publishing for Production")
 		}
 	case "install":
 		{
@@ -79,18 +79,21 @@ func Commander(
 			case _action_.Verify_Setup_Status_Uninitialized:
 				S.Post(setup_report)
 			case _action_.Verify_Setup_Status_Initialized:
+				exitcode = 1
 				fallthrough
 			case _action_.Verify_Setup_Status_Verified:
-				if config_message, config_ok := _action_.Verify_Configs(true); !config_ok {
-					S.Post(config_message)
-				} else {
+				if config_message, config_ok := _action_.Verify_Configs(true); config_ok {
 					if update_ok, update_message, update_files := _craft_.Artifact_Update(); update_ok {
 						S.Post(update_message)
 						_fileman_.Write_Bulk(update_files)
 						S.Post(S.Tag.H4("Artifacts Updated", S.Preset.Success, S.Style.AS_Bold))
 					} else {
 						S.Post(S.Tag.H4("Artifacts not updated due to pending errors on dryrun.", S.Preset.Failed, S.Style.AS_Bold))
+						exitcode = 1
 					}
+				} else {
+					S.Post(config_message)
+					exitcode = 1
 				}
 			}
 		}
@@ -104,15 +107,15 @@ func Commander(
 			))
 
 			S.Post(S.MAKE("", []string{
-				X.List_Record("Available Commands", _cache_.Root.Commands),
-				X.List_Record("Agreements", func() map[string]string {
+				S_make.List_Record("Available Commands", _cache_.Root.Commands),
+				S_make.List_Record("Agreements", func() map[string]string {
 					res := map[string]string{}
 					for _, data := range _cache_.Sync_Agreements {
 						res[data.Title] = data.Path
 					}
 					return res
 				}()),
-				X.List_Record("References", func() map[string]string {
+				S_make.List_Record("References", func() map[string]string {
 					res := map[string]string{}
 					for _, data := range _cache_.Sync_References {
 						res[data.Title] = data.Path
@@ -123,4 +126,6 @@ func Commander(
 			}))
 		}
 	}
+
+	return exitcode
 }

@@ -1,112 +1,69 @@
-package shell
+package make
 
 import (
-	_fmt_ "fmt"
+	S "main/shell/core"
 )
 
-func list_Bullets(items []string, intent int, preset []string, styles ...string) []string {
-	if intent < 0 {
-		intent = 0
+func List_Props(record map[string]string, keystyles []string, valstyles []string) []string {
+	keys := make([]string, 0, len(record))
+	values := make([]string, 0, len(record))
+
+	for k, v := range record {
+		keys = append(keys, S.Format(k, S.Preset.None, keystyles...))
+		values = append(values, S.Format(v, S.Preset.None, valstyles...))
 	}
-	result := make([]string, len(items))
-	for i, item := range items {
-		result[i] = tag_Tab(intent, Preset.None) + Format(tag_Li(item, Preset.None), preset, styles...)
+
+	output := make([]string, len(keys))
+	for i, k := range S.List.Level(keys, 0, S.Preset.None) {
+		output[i] = k + ": " + S.Format(values[i], S.Preset.None, valstyles...)
 	}
-	return result
+
+	return output
 }
 
-func list_Numbers(items []string, intent int, preset []string, styles ...string) []string {
-	if intent < 0 {
-		intent = 0
-	}
-	result := make([]string, len(items))
-	for i, item := range items {
-		line := _fmt_.Sprintf("%d%s%s", i+1, tag_Tab(1, Preset.None), Format(item, preset, styles...))
-		result[i] = tag_Tab(intent, Preset.None) + Format(line, preset, styles...)
-	}
-	return result
+func List_Steps(heading string, steps []string) string {
+	return S.MAKE(
+		S.Tag.H2(heading, S.Preset.Primary),
+		steps,
+		S.MakeList{TypeFunc: S.List.Bullets},
+	)
 }
 
-func list_Level(items []string, intent int, preset []string, styles ...string) []string {
-	if intent < 0 {
-		intent = 0
-	}
-	keyLength := 0
-	for _, key := range items {
-		if len(key) > keyLength {
-			keyLength = len(key)
+func List_Record(heading string, record map[string]string) string {
+	return S.MAKE(
+		S.Tag.H2(heading, S.Preset.Primary),
+		List_Props(record, S.Preset.Primary, S.Preset.Text),
+		S.MakeList{TypeFunc: S.List.Bullets, Preset: S.Preset.Primary},
+	)
+}
+
+func List_Catalog(heading string, items []string) string {
+	return S.MAKE(
+		S.Tag.H2(heading, S.Preset.Primary),
+		items,
+		S.MakeList{TypeFunc: S.List.Catalog},
+	)
+}
+
+func List_Chart(heading string, items map[string][]string) string {
+	if len(items) > 0 {
+		sections := []string{}
+		for head, entries := range items {
+			sections = append(sections, S.MAKE(
+				S.Tag.H6(head, S.Preset.Tertiary),
+				entries,
+				S.MakeList{TypeFunc: S.List.Catalog, Preset: S.Preset.Text},
+			))
 		}
-	}
-	result := make([]string, len(items))
-	for i, key := range items {
-		padded := _fmt_.Sprintf("%-*s%s", keyLength, key, tag_Tab(1, Preset.None))
-		result[i] = tag_Tab(intent, Preset.None) + Format(padded, preset, styles...)
-	}
-	return result
-}
-
-func list_Waterfall(items []string, intent int, preset []string, styles ...string) []string {
-	if intent < 0 {
-		intent = 0
-	}
-	result := make([]string, len(items))
-	for i, item := range items {
-		arrow := " ├─> "
-		if i == len(items)-1 {
-			arrow = " └─> "
-		}
-		result[i] = tag_Tab(intent, Preset.None) + Format(arrow+tag_Tab(1, Preset.None)+item, preset, styles...)
-	}
-	return result
-}
-
-func list_Catalog(items []string, intent int, preset []string, styles ...string) []string {
-	if intent < 0 {
-		intent = 0
-	}
-	prefix := tag_Tab(intent, Preset.None)
-	size := 0
-	for _, i := range items {
-		if len(i) > size {
-			size = len(i)
-		}
-	}
-	colWidth := Canvas.Width() - len(prefix) + len(tag_Tab(1, Preset.None))
-	cols := colWidth / (size + len(tag_Tab(1, Preset.None)))
-	if cols <= 0 {
-		cols = 1
-	}
-	var result []string
-	subResult := ""
-	for i, item := range items {
-		formatted := Format(util_PadEnd(item, size, ' '), preset, styles...)
-		if (i+1)%cols == 0 {
-			subResult += formatted
-			result = append(result, subResult)
-			subResult = ""
+		if len(heading) > 0 {
+			return S.MAKE(
+				S.Tag.H2(heading, S.Preset.Primary),
+				sections,
+			)
 		} else {
-			subResult += formatted + tag_Tab(1, Preset.None)
+			return S.MAKE("", sections)
+
 		}
 	}
-	if len(subResult) > 0 {
-		result = append(result, subResult)
-	}
-	for i := range result {
-		result[i] = prefix + result[i]
-	}
-	return result
-}
-
-var List = struct {
-	Bullets   func(items []string, intent int, preset []string, styles ...string) []string
-	Numbers   func(items []string, intent int, preset []string, styles ...string) []string
-	Level     func(items []string, intent int, preset []string, styles ...string) []string
-	Waterfall func(items []string, intent int, preset []string, styles ...string) []string
-	Catalog   func(items []string, intent int, preset []string, styles ...string) []string
-}{
-	Bullets:   list_Bullets,
-	Numbers:   list_Numbers,
-	Level:     list_Level,
-	Waterfall: list_Waterfall,
-	Catalog:   list_Catalog,
+	return ""
 }

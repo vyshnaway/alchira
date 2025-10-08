@@ -14,7 +14,7 @@ func Target_UpdateDirs() {
 
 	for key, data := range Cache.Targetdir {
 		data.ClearFiles()
-		delete(_cache_.Static.TargetDir_Saved, key)
+		delete(Cache.Targetdir, key)
 	}
 	Cache.Targetdir = map[string]_target_.Class{}
 

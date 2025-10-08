@@ -5,20 +5,16 @@ import (
 	_cache_ "main/cache"
 	blockmap "main/class/Blockmap"
 	_compose_ "main/compose"
-	S "main/shell"
+	S "main/shell/core"
+	X "main/shell/make"
 	_stash_ "main/stash"
 	_style_ "main/style"
 	_types_ "main/types"
 	_utils_ "main/utils"
-	X "main/xhell"
 	_maps_ "maps"
 	_slices_ "slices"
 	_strings_ "strings"
 )
-
-// _cache_ "main/cache"
-// _Blockmap_ "main/class/Blockmap"
-// _maps_ "maps"
 
 func Generate_Files() (Files map[string]string, Report string) {
 

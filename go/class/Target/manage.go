@@ -1,15 +1,14 @@
-package stash
+package Target
 
 import (
 	_fmt_ "fmt"
 	_action_ "main/action"
 	_cache_ "main/cache"
 	_script_ "main/script"
+	X "main/shell/make"
 	_style_ "main/style"
 	_types_ "main/types"
 	_utils_ "main/utils"
-	X "main/xhell"
-	_slices_ "slices"
 )
 
 func (This *Class) Savefile(filepath string, content string, hashindex int) {
@@ -33,23 +32,16 @@ func (This *Class) Savefile(filepath string, content string, hashindex int) {
 		_fmt_.Sprint(This.Label, "_", _utils_.String_EnCounter(hashindex)),
 	)
 
-	watchprops := []string{}
-	if props, ok := This.ExtnsProps[file.Extension]; ok && file.Extension != _cache_.Root.Extension {
-		watchprops = props
-	}
-	parse_response := _script_.Rider(&file, watchprops, _types_.Script_Action_Read)
+	parse_response := _script_.Rider(&file, This.ExtnsProps[file.Extension], _types_.Script_Action_Read)
+	file.StyleData.ClassTracks = parse_response.ClassesList
+	file.StyleData.Attachments = parse_response.Attachments
 	file.Midway = parse_response.Scribed
-	locales := []string{}
-	for _, locale := range parse_response.Locales {
-		if _slices_.Contains(locales, locale) {
-			locales = append(locales, locale)
-		}
-	}
-	file.StyleData.Locales = locales
+
+	file.StyleData.Locales = _utils_.Array_Setfront(parse_response.Locales)
 	file.Manifest.Lookup = _types_.File_Lookup{
 		Id:     file.TargetPath,
 		Type:   _types_.File_Type_Target,
-		Locale: locales,
+		Locale: file.StyleData.Locales,
 	}
 
 	for _, tagdata := range parse_response.StylesList {
@@ -68,30 +60,24 @@ func (This *Class) Savefile(filepath string, content string, hashindex int) {
 			file.Manifest.Errors = append(file.Manifest.Errors, E.Errorstring)
 			file.Manifest.Diagnostics = append(file.Manifest.Diagnostics, E.Diagnostic)
 		} else {
-			var index_map *_types_.Style_ClassIndexMap
-			var medatata_map *_types_.File_MetadataMap
+			var index_map _types_.Style_ClassIndexMap
+			var metadata_map _types_.File_MetadataMap
 			switch tagdata.Scope {
 			case _types_.Style_Type_Local:
-				medatata_map = &file.Manifest.Local
-				index_map = &file.StyleData.LocalClasses
+				metadata_map = file.Manifest.Local
+				index_map = file.StyleData.LocalClasses
 			case _types_.Style_Type_Global:
-				medatata_map = &file.Manifest.Global
-				index_map = &file.StyleData.GlobalClasses
+				metadata_map = file.Manifest.Global
+				index_map = file.StyleData.GlobalClasses
 			case _types_.Style_Type_Public:
-				medatata_map = &file.Manifest.Public
-				index_map = &file.StyleData.PublicClasses
+				metadata_map = file.Manifest.Public
+				index_map = file.StyleData.PublicClasses
 			default:
-				index_map = &_types_.Style_ClassIndexMap{}
-				medatata_map = &_types_.File_MetadataMap{}
+				index_map = _types_.Style_ClassIndexMap{}
+				metadata_map = _types_.File_MetadataMap{}
 			}
 
-			response := _style_.Rawtag_Upload(tagdata, &file, index_map, _cache_.Static.MINIFY)
-			classdata := _cache_.Index_Fetch(response.Index)
-
-			if len(classdata.Metadata.Declarations) == 1 {
-				file.StyleData.UsedIn = append(file.StyleData.UsedIn, response.Index)
-				(*medatata_map)[response.Symclass] = &classdata.Metadata
-			}
+			response := _style_.Rawtag_Upload(tagdata, &file, index_map, metadata_map, _cache_.Static.MINIFY)
 
 			file.Manifest.Errors = append(file.Manifest.Errors, response.Errors...)
 			file.Manifest.Diagnostics = append(file.Manifest.Diagnostics, response.Diagnostics...)

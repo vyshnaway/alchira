@@ -1,10 +1,10 @@
-package stash
+package Target
 
 import (
 	_cache_ "main/cache"
 	_compose_ "main/compose"
 	_script_ "main/script"
-	S "main/shell"
+	S "main/shell/core"
 	_types_ "main/types"
 	_maps_ "maps"
 	_slices_ "slices"

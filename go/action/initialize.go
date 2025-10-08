@@ -3,8 +3,8 @@ package action
 import (
 	_cache_ "main/cache"
 	_fileman_ "main/fileman"
-	S "main/shell"
-	X "main/xhell"
+	S "main/shell/core"
+	X "main/shell/make"
 )
 
 func Initialize() {

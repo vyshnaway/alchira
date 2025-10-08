@@ -27,7 +27,8 @@ type Refer_Diagnostic struct {
 
 type Refer_SortedOutput struct {
 	Count           int                 `json:"count"`
-	List_to_Group   map[string]int      `json:"listToGroup"`
+	ClassLists      [][]int             `json:"classlist"`
+	List_to_GroupId map[string]int      `json:"listToGroup"`
 	Group_to_Table  map[int]map[int]int `json:"groupToMap"`
 	Final_Hashtrace [][2]int            `json:"recompClasslist"`
 }
