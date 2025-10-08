@@ -2,8 +2,8 @@ package test
 
 import (
 	"fmt"
-	blockmap "main/module/css/block"
-	shell "main/module/shell/core"
+	blockmap "main/package/css/block"
+	shell "main/package/shell/core"
 	"main/style"
 	"testing"
 )

@@ -1,7 +1,7 @@
 package make
 
 import (
-	S "main/module/shell/core"
+	S "main/package/shell/core"
 	_types_ "main/types"
 )
 

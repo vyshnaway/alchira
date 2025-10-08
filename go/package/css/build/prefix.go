@@ -1,7 +1,7 @@
 package compose
 
 import (
-	_utils_ "main/utils"
+	_utils_ "main/package/utils"
 	_regexp_ "regexp"
 	_slices_ "slices"
 	_strings_ "strings"

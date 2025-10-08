@@ -1,8 +1,8 @@
 package compose
 
 import (
-	_utils_ "main/utils"
-	_Cursor_ "main/class/Cursor"
+	_Cursor_ "main/package/reader"
+	_utils_ "main/package/utils"
 	_math_ "math"
 	_regexp_ "regexp"
 	_slices_ "slices"

@@ -2,8 +2,8 @@ package style
 
 import (
 	_cache_ "main/cache"
-	_Cursor_ "main/module/reader"
-	_utils_ "main/module/utils"
+	_Cursor_ "main/package/reader"
+	_utils_ "main/package/utils"
 	_slices_ "slices"
 	_strings_ "strings"
 )
@@ -44,7 +44,7 @@ func Block_Parse(content string) block_Parse_retype {
 	deviance := 0
 	isProp := true
 	cursor := _Cursor_.Construct(content + ";")
-	
+
 	for ch, streaming := cursor.Active.Char, cursor.Streaming; streaming; ch, streaming = cursor.Increment() {
 
 		if ch == '\\' {

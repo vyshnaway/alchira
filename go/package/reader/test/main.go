@@ -1,8 +1,8 @@
 package test
 
 import (
-	reader "main/module/reader"
-	shell "main/module/shell/core"
+	reader "main/package/reader"
+	shell "main/package/shell/core"
 	"testing"
 )
 

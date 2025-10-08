@@ -1,12 +1,12 @@
-package assemble
+package cmd
 
 import (
 	_action_ "main/action"
 	_cache_ "main/cache"
 	_craft_ "main/craft"
-	"main/fileman"
-	S "main/shell/core"
-	X "main/shell/make"
+	"main/package/fileman"
+	S "main/package/shell/core"
+	X "main/int/shell"
 	"main/stash"
 	_watcher_ "main/watcher"
 	"maps"
@@ -37,7 +37,7 @@ const (
 	execute_Step_WatchFolders
 )
 
-func orchestrate(heading string) (Exitcode int) {
+func exec(heading string) (Exitcode int) {
 	exitcode := 0
 	step := execute_Step_Initialize
 	report := ""

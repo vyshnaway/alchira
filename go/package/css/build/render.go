@@ -1,7 +1,7 @@
 package compose
 
 import (
-	_blockmap_ "main/class/Blockmap"
+	_blockmap_ "main/package/css/block"
 	"main/utils"
 	"strings"
 	// "main/shell/core"

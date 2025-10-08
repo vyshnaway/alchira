@@ -3,7 +3,7 @@ package fileman
 import (
 	_fmt_ "fmt"
 	_io_ "io"
-	_utils_ "main/utils"
+	_utils_ "main/package/utils"
 	_http_ "net/http"
 	_os_ "os"
 	_filepath_ "path/filepath"

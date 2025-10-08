@@ -1,7 +1,7 @@
 package block
 
 import (
-	_utils_ "main/module/utils"
+	_utils_ "main/package/utils"
 	"slices"
 )
 

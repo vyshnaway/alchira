@@ -1,24 +1,69 @@
-package assemble
+package cmd
 
 import (
+	_fmt_ "fmt"
 	_action_ "main/action"
 	_cache_ "main/cache"
 	_craft_ "main/craft"
-	_fileman_ "main/fileman"
+	_fileman_ "main/package/fileman"
 	S "main/shell/core"
-	S_make "main/shell/make"
-	S_play "main/shell/play"
-	_utils_ "main/utils"
+	S_make "main/int/shell"
+	S_play "main/package/shell/play"
+	_utils_ "main/package/utils"
+	_os_ "os"
+	_slices_ "slices"
 	_strings_ "strings"
 	_sync_ "sync"
 )
 
-func Commander(
-	command string,
-	argument string,
-	projectname string,
-	projectversion string,
-) (Exitcode int) {
+func main() {
+
+	exposedCommands := []string{}
+	for k := range _cache_.Root.Commands {
+		exposedCommands = append(exposedCommands, k)
+	}
+
+	command := ""
+	if len(_os_.Args) > 1 {
+		command = _os_.Args[1]
+	}
+	argument := ""
+	if _slices_.Contains(exposedCommands, command) {
+		if len(_os_.Args) > 2 {
+			argument = _os_.Args[2]
+		}
+	} else {
+		command = ""
+	}
+
+	workpath := "."
+	workPackagePath := "package.json"
+	rootpath, _ := _fileman_.Path_FromRoot(".")
+	rootPackagePath, _ := _fileman_.Path_FromRoot("package.json")
+
+	rootPackageData, rootPackageErr := _fileman_.Read_Json(rootPackagePath, false)
+	if rootPackageErr != nil {
+		_fmt_.Println("Bad root package.json file.")
+		_os_.Exit(1)
+	}
+	rootPackageData_ := rootPackageData.(map[string]any)
+	_cache_.Root.Name = _utils_.String_Fallback(rootPackageData_["name"], _cache_.Root.Name)
+	_cache_.Root.Version = _utils_.String_Fallback(rootPackageData_["version"], _cache_.Root.Version)
+
+	projectname := "-"
+	projectversion := "0.0.0"
+	if workPackageData, workPackageErr := _fileman_.Read_Json(workPackagePath, false); workPackageErr == nil {
+		workPackageData_ := workPackageData.(map[string]any)
+		if val, ok := workPackageData_["name"].(string); ok && val != "" {
+			projectname = val
+		}
+		if val, ok := workPackageData_["version"].(string); ok && val != "" {
+			projectversion = val
+		}
+	}
+
+	_action_.Setup_Environment(rootpath, workpath)
+
 	_cache_.Static.Command = command
 	_cache_.Static.Argument = argument
 	_cache_.Static.MINIFY = command != "debug"
@@ -60,15 +105,15 @@ func Commander(
 		}
 	case "debug":
 		{
-			exitcode = orchestrate(corecaps + " : Debug " + flagmode)
+			exitcode = exec(corecaps + " : Debug " + flagmode)
 		}
 	case "preview":
 		{
-			exitcode = orchestrate(corecaps + " : Preview " + flagmode)
+			exitcode = exec(corecaps + " : Preview " + flagmode)
 		}
 	case "publish":
 		{
-			exitcode = orchestrate(corecaps + " : " + "Publishing for Production")
+			exitcode = exec(corecaps + " : " + "Publishing for Production")
 		}
 	case "install":
 		{
@@ -127,5 +172,5 @@ func Commander(
 		}
 	}
 
-	return exitcode
+	_os_.Exit(exitcode)
 }

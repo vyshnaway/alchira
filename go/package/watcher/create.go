@@ -2,7 +2,7 @@ package event
 
 import (
 	_fmt_ "fmt"
-	_fileman_ "main/module/fileman"
+	_fileman_ "main/package/fileman"
 	_os_ "os"
 	"path/filepath"
 	_strings_ "strings"

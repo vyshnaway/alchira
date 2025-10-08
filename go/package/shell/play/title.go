@@ -1,7 +1,7 @@
 package play
 
 import (
-	shell "main/module/shell/core"
+	shell "main/package/shell/core"
 	_math_ "math"
 	_strings_ "strings"
 )

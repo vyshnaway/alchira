@@ -1,10 +1,9 @@
-package style_test
+package test
 
 import (
-	css_parse "main/module/css/parse"
-	"main/module/utils"
-
-	shell "main/module/shell/core"
+	css_parse "main/package/css/parse"
+	"main/package/utils"
+	shell "main/package/shell/core"
 	"testing"
 )
 
