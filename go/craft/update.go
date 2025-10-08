@@ -1,10 +1,6 @@
 package craft
 
 import (
-	// S "main/shell"
-	// S "main/shell"
-	// S "main/shell"
-	// S "main/shell"
 	_cache_ "main/cache"
 	_fileman_ "main/fileman"
 	_stash_ "main/stash"
@@ -29,14 +25,13 @@ func Build_Targets() {
 }
 
 func Update_Target(event _watcher_.Event) {
-	reCache := true
 	switch event.Action {
 	case _watcher_.Action_Update:
 		if targetStruct, ok := _cache_.Static.TargetDir_Saved[event.Folder]; ok {
 			if targetStruct.Stylesheet == event.FilePath {
 				targetStruct.StylesheetContent = event.FileContent
 				_cache_.Static.TargetDir_Saved[event.Folder] = targetStruct
-				reCache = false
+				_stash_.Target_UpdateDirs()
 			}
 		} else if _, ok := _cache_.Static.TargetDir_Saved[event.Folder].Extensions[event.Extension]; ok {
 			_cache_.Static.TargetDir_Saved[event.Folder].Filepath_to_Content[event.FilePath] = event.FileContent
@@ -44,7 +39,7 @@ func Update_Target(event _watcher_.Event) {
 		} else {
 			_cache_.Delta.Path = _fileman_.Path_Join(_cache_.Static.TargetDir_Saved[event.Folder].Source, event.FilePath)
 			_cache_.Delta.Content = event.FileContent
-			reCache = false
+			_stash_.Target_UpdateDirs()
 		}
 	case _watcher_.Action_Unlink:
 		if targetStruct, ok := _cache_.Static.TargetDir_Saved[event.Folder]; ok {
@@ -52,9 +47,5 @@ func Update_Target(event _watcher_.Event) {
 		}
 	default:
 		_style_.Hashrule_Upload()
-	}
-
-	if reCache {
-		_stash_.Target_UpdateDirs()
 	}
 }

@@ -38,7 +38,7 @@ func flatten_AtExtremeSort(list []string) []string {
 	return outs
 }
 
-func (This *Type) Flatten(parent string) (Res *Type) {
+func (This *Type) flatten(parent string) (Res *Type) {
 
 	comps_list := []string{}
 	clven_list := []string{}
@@ -121,7 +121,7 @@ func (This *Type) Flatten(parent string) (Res *Type) {
 				if strings.HasPrefix(k, "&") {
 					k = parent + k[1:]
 				}
-				v.Flatten(k).BlockRange(func(kk string, vv Type) {
+				v.flatten(k).BlockRange(func(kk string, vv Type) {
 					target.SetBlock(kk, vv)
 				})
 			}
@@ -141,6 +141,20 @@ func (This *Type) Flatten(parent string) (Res *Type) {
 	add(all, elven_list)
 	add(all, elstd_list)
 	add(all, child_list)
+
+	return all
+}
+
+func (This *Type) Flatten() (Res *Type) {
+	all := New()
+
+	This.PropRange(func(k, v string) {
+		all.SetProp(k, v)
+	})
+
+	This.BlockRange(func(k string, v Type) {
+		all.Mixin(*v.flatten(k))
+	})
 
 	return all
 }

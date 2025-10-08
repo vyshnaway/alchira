@@ -122,7 +122,7 @@ func Artifact_Update() {
 		_cache_.Delta.Errors.Artifacts = append(_cache_.Delta.Errors.Artifacts, file.Manifest.Errors...)
 		_cache_.Delta.Diagnostics.Artifacts = append(_cache_.Delta.Diagnostics.Artifacts, file.Manifest.Diagnostics...)
 	}
-	_cache_.Delta.Report.Artifacts = X.List_Chart(_fmt_.Sprint("Artifact: ", artifact_counter), artifact_chart)
+	_cache_.Delta.Report.Artifacts = X.List_Chart("", artifact_chart)
 	shell.Post(_cache_.Delta.Report.Artifacts)
 }
 

@@ -8,6 +8,20 @@ import (
 	// _strings_ "strings"
 )
 
+// func render_LoadVendors(collection map[string]string, vendor string) []string {
+// 	result := []string{}
+// 	if vendor == "" {
+// 		for _, ven := range vendor_Providers {
+// 			if _, stat := collection[ven]; stat {
+// 				result = append(result, ven)
+// 			}
+// 		}
+// 	} else {
+// 		result = append(result, vendor)
+// 	}
+// 	return result
+// }
+
 func Render_Prefixer(stylemap _blockmap_.Type, vendors []string) *_blockmap_.Type {
 	out := _blockmap_.New()
 
@@ -35,21 +49,7 @@ func Render_Prefixer(stylemap _blockmap_.Type, vendors []string) *_blockmap_.Typ
 	return out
 }
 
-func Render_LoadVendors(collection map[string]string, vendor string) []string {
-	result := []string{}
-	if vendor == "" {
-		for _, ven := range vendor_Providers {
-			if _, stat := collection[ven]; stat {
-				result = append(result, ven)
-			}
-		}
-	} else {
-		result = append(result, vendor)
-	}
-	return result
-}
-
-func render_ObjectCompose(styleobject _blockmap_.Type, minify bool, vendors []string, first bool) []string {
+func render_Prefixed(styleobject *_blockmap_.Type, minify bool, vendors []string, first bool) []string {
 	stylesheet := []string{}
 	var tab string
 	var space string
@@ -61,7 +61,7 @@ func render_ObjectCompose(styleobject _blockmap_.Type, minify bool, vendors []st
 		space = " "
 	}
 
-	made := Render_Prefixer(styleobject, vendors)
+	made := Render_Prefixer(*styleobject, vendors)
 
 	made.PropRange(func(k, v string) {
 		if k[0] == '@' {
@@ -78,7 +78,7 @@ func render_ObjectCompose(styleobject _blockmap_.Type, minify bool, vendors []st
 			}
 			if strings.HasPrefix(k, "@") {
 				for vendor, selector := range prefix_ForAtRule(k, vendors) {
-					composed := render_ObjectCompose(v, minify, []string{vendor}, false)
+					composed := render_Prefixed(&v, minify, []string{vendor}, false)
 					if len(composed) > 0 {
 						stylesheet = append(stylesheet, selector)
 						stylesheet = append(stylesheet, "{")
@@ -90,7 +90,7 @@ func render_ObjectCompose(styleobject _blockmap_.Type, minify bool, vendors []st
 					}
 				}
 			} else {
-				composed := render_ObjectCompose(v, minify, vendors, false)
+				composed := render_Prefixed(&v, minify, vendors, false)
 				if !minify {
 					for index, line := range composed {
 						composed[index] = tab + line
@@ -109,7 +109,7 @@ func render_ObjectCompose(styleobject _blockmap_.Type, minify bool, vendors []st
 	return stylesheet
 }
 
-func Render(stylemap _blockmap_.Type, minify bool) string {
+func Render_Prefixed(stylemap *_blockmap_.Type, minify bool) string {
 	stylesheet := []string{}
 	var breaks string
 
@@ -119,32 +119,6 @@ func Render(stylemap _blockmap_.Type, minify bool) string {
 		breaks = "\n"
 	}
 
-	// stylemap.PropRange(func(k, v string) {
-	// 		flattened = map[string]any{k: val_typed}
-	// 	composed := render_ObjectCompose(flattened, minify, vendor_Providers, true)
-	// 	stylesheet = append(stylesheet, composed...)
-	// })
-
-	// stylemap.BlockRange(func(k string, v _blockmap_.Type) {
-
-	// })
-	
-	// for _, kv := range stylemap {
-	// 	if k, ok := kv[0].(string); ok {
-	// 		v := kv[1]
-	// 		flattened := map[string]any{}
-
-	// 		switch val_typed := v.(type) {
-	// 		case map[string]any:
-	// 			flattened = Render_UnNester(k, val_typed, map[string]any{})
-	// 		case string:
-	// 			flattened = map[string]any{k: val_typed}
-	// 		}
-
-	// 		composed := render_ObjectCompose(flattened, minify, vendor_Providers, true)
-	// 		stylesheet = append(stylesheet, composed...)
-	// 	}
-	// }
-
+	stylesheet = append(stylesheet, render_Prefixed(stylemap.Flatten(), minify, vendor_Providers, true)...)
 	return strings.Join(stylesheet, breaks)
 }

@@ -4,7 +4,6 @@ import (
 	_cache_ "main/cache"
 	_fileman_ "main/fileman"
 	_types_ "main/types"
-	_maps_ "maps"
 )
 
 type Class struct {
@@ -24,10 +23,6 @@ type Class struct {
 func New(storage _types_.Config_ProxyStorage, label string) Class {
 	storage.Extensions[_cache_.Root.Extension] = []string{}
 	extentions := []string{}
-
-	for extention := range _maps_.Keys(storage.Extensions) {
-		extentions = append(extentions, extention)
-	}
 
 	var This = Class{
 		Source:            storage.Source,

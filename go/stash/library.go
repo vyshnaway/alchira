@@ -115,7 +115,7 @@ func Library_Update() {
 			_cache_.Delta.Diagnostics.Axioms = append(_cache_.Delta.Diagnostics.Axioms, file.Manifest.Diagnostics...)
 		}
 	}
-	_cache_.Delta.Report.Axioms = X.List_Chart(_fmt_.Sprintf("Axiom: %d", axiom_counter), axiomChart)
+	_cache_.Delta.Report.Axioms = X.List_Chart("", axiomChart)
 	shell.Post(_cache_.Delta.Report.Axioms)
 
 	// Cluster update actions
@@ -136,7 +136,7 @@ func Library_Update() {
 			_cache_.Delta.Diagnostics.Clusters = append(_cache_.Delta.Diagnostics.Clusters, file.Manifest.Diagnostics...)
 		}
 	}
-	_cache_.Delta.Report.Clusters = X.List_Chart(_fmt_.Sprintf("Cluster: %d", cluster_counter), clusterChart)
+	_cache_.Delta.Report.Clusters = X.List_Chart("", clusterChart)
 	shell.Post(_cache_.Delta.Report.Clusters)
 }
 

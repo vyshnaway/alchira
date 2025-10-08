@@ -55,10 +55,15 @@ func List_Chart(heading string, items map[string][]string) string {
 				S.MakeList{TypeFunc: S.List.Catalog, Preset: S.Preset.Text},
 			))
 		}
-		return S.MAKE(
-			S.Tag.H2(heading, S.Preset.Primary),
-			sections,
-		)
+		if len(heading) > 0 {
+			return S.MAKE(
+				S.Tag.H2(heading, S.Preset.Primary),
+				sections,
+			)
+		} else {
+			return S.MAKE("", sections)
+
+		}
 	}
 	return ""
 }

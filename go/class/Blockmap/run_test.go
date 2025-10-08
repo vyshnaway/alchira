@@ -52,6 +52,12 @@ backdrop: blur(1px);
 
 const content2 = `
 backdrop: blur(1px);
+@before {
+	&.before {
+		background-color: rgba(255, 255, 255, 0.25);
+	}
+	background-color: rgba(255, 255, 255, 0.25);
+}
 .glass-type {
 	backdrop: blur(1px);
 	&:after {
@@ -182,6 +188,6 @@ func Test(t *testing.T) {
 }
 
 func Test_Flatten(t *testing.T) {
-	res1 := style.Parse_CssSnippet(content1, "initial", "selector", true, false)
-	res1.Result.Print().Flatten("test").Print()
+	res1 := style.Parse_CssSnippet(content2, "initial", "selector", true, false)
+	res1.Result.Print().Flatten().Print()
 }

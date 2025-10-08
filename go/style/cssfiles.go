@@ -10,31 +10,31 @@ import (
 )
 
 type cssfile_Parse_return struct {
-	Result      [][2]any
+	Result      *blockmap.Type
 	Attachments []string
 	Variables   map[string]string
 }
 
 func Cssfile_Parse(content string, initial string, verbose bool) cssfile_Parse_return {
 	scanned := Block_Parse(_utils_.Code_Uncomment(content, false, true, false))
-	styles := [][2]any{}
+	result := blockmap.New()
 	for _, kv := range scanned.AtProps {
-		styles = append(styles, [2]any{kv[0], kv[1]})
+		result.SetProp(kv[0], kv[1])
 	}
 
 	variables := map[string]string{}
 	attachments := []string{}
 	for _, kv := range scanned.AllBlocks {
 		key := kv[0]
-		value := kv[1]
-		result := Parse_CssSnippet(value, initial, key, true, verbose)
-		_maps_.Copy(variables, result.Variables)
-		attachments = append(attachments, result.Attachments...)
-		styles = append(styles, [2]any{key, result.Result})
+		val := kv[1]
+		res := Parse_CssSnippet(val, initial, key, true, verbose)
+		_maps_.Copy(variables, res.Variables)
+		attachments = append(attachments, res.Attachments...)
+		result.SetBlock(key, res.Result)
 	}
 
 	return cssfile_Parse_return{
-		Result:      styles,
+		Result:      result,
 		Attachments: attachments,
 		Variables:   variables,
 	}

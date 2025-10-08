@@ -100,10 +100,9 @@ type hashrule_Render_return struct {
 }
 
 func Hashrule_Render(str string, src string) hashrule_Render_return {
-	const wrapperlimit = 12
 	extended := Hashrule_Import(str, src)
-	snippets := _utils_.String_ZeroBreaks(extended.Result, []rune{'&'})[:wrapperlimit]
-	wrappers := make([]string, 0, wrapperlimit)
+	snippets := _utils_.String_ZeroBreaks(extended.Result, []rune{'&'})
+	wrappers := []string{}
 
 	for _, snippet := range snippets {
 		var wrapper _strings_.Builder
@@ -114,7 +113,7 @@ func Hashrule_Render(str string, src string) hashrule_Render_return {
 		splAtrule := false
 		holdAtRune := false
 
-		for i := 0; i < length; i++ {
+		for i := range length {
 			ch := rune(snippet[i])
 			if ch == ')' || ch == '}' || ch == ']' {
 				deviance--

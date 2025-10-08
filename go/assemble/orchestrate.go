@@ -103,7 +103,7 @@ func orchestrate(heading string) {
 
 		case execute_Step_ProcessScaffold:
 			_craft_.Update_Scaffold()
-			// fallthrough
+			fallthrough
 
 		case execute_Step_ProcessProxyFolders:
 			_craft_.Build_Targets()
@@ -111,7 +111,7 @@ func orchestrate(heading string) {
 
 		case execute_Step_GenerateFiles:
 			outfiles, report = _craft_.Generate_Files()
-			fallthrough
+			// fallthrough
 
 		case execute_Step_Publish:
 			if len(outfiles) > 0 {
