@@ -5,7 +5,6 @@ import (
 	_cache_ "main/cache"
 	blockmap "main/class/Blockmap"
 	_compose_ "main/compose"
-	"main/shell"
 	S "main/shell"
 	_stash_ "main/stash"
 	_style_ "main/style"
@@ -22,7 +21,7 @@ import (
 // _maps_ "maps"
 
 func Generate_Files() (Files map[string]string, Report string) {
-	shell.Render.Raw(_cache_.Static.TargetDir_Saved)
+
 	files := map[string]string{}
 	report := ""
 

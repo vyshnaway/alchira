@@ -46,7 +46,7 @@ func Order(
 	response := &tApi_Result{
 		Status:  command == "preview",
 		Message: "Preview Build",
-		Result:  preview_Organize(sequences, true), // merge = true by default
+		Result:  Preview_Organize(sequences, true), // merge = true by default
 	}
 
 	if command != "publish" {

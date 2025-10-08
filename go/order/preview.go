@@ -4,86 +4,70 @@ import (
 	_json_ "encoding/json"
 	_types_ "main/types"
 	_utils_ "main/utils"
-	_sort_ "sort"
 )
 
-func preview_Organize(arrarr [][]int, merge bool) *_types_.Refer_SortedOutput {
+func Preview_Organize(classtrace [][]int, merge bool) *_types_.Refer_SortedOutput {
 	maxLen := 0
+	counter := 0
+	final_hashtrace := [][2]int{}
+	sorted_classtrace := [][]int{}
+	list_to_group := make(map[string]int)
+	group_to_table := make(map[int]map[int]int)
+	grouped_classtrace := make(map[string][][]int)
 
-	// Group arrays by length (equivalent to lenmap_arrarr)
-	lenmapArrarr := make(map[int][][]int)
-	for _, arr := range arrarr {
+	lengrouped_classtrace := make(map[int][][]int)
+	for _, arr := range classtrace {
 		length := len(arr)
-		lenmapArrarr[length] = append(lenmapArrarr[length], arr)
+		lengrouped_classtrace[length] = append(lengrouped_classtrace[length], arr)
 		if maxLen < length {
 			maxLen = length
 		}
 	}
 
-	// // Sort arrays by length (longest first) - equivalent to sorted_arrarr
-	// var sortedArrarr [][]int
-	// for currentLen := maxLen; currentLen > 0; currentLen-- {
-	// 	if arrays, exists := lenmapArrarr[currentLen]; exists {
-	// 		sortedArrarr = append(sortedArrarr, arrays...)
-	// 	}
-	// }
-
-	// Sort by length using Go's sort package
-	var sortedArrarr [][]int
-	lengths := make([]int, 0, len(lenmapArrarr))
-	for length := range lenmapArrarr {
-		lengths = append(lengths, length)
+	for currentLen := maxLen; currentLen > 0; currentLen-- {
+		if arrays, exists := lengrouped_classtrace[currentLen]; exists {
+			sorted_classtrace = append(sorted_classtrace, arrays...)
+		}
 	}
 
-	// Sort lengths in descending order
-	_sort_.Sort(_sort_.Reverse(_sort_.IntSlice(lengths)))
-
-	for _, length := range lengths {
-		sortedArrarr = append(sortedArrarr, lenmapArrarr[length]...)
-	}
-
-	// Rest of the logic remains the same
-	shortlistedArrays := make(map[string][][]int)
-	for _, arr := range sortedArrarr {
+	for _, arr := range sorted_classtrace {
 		var superParent []int
 		if merge {
-			superParent = _utils_.Array_FindSuperParent(arr, sortedArrarr)
+			superParent = _utils_.Array_FindSuperParent(arr, sorted_classtrace)
 		} else {
 			superParent = arr
 		}
-
 		superParentJSON, _ := _json_.Marshal(superParent)
 		superParentString := string(superParentJSON)
-
-		shortlistedArrays[superParentString] = append(shortlistedArrays[superParentString], arr)
+		grouped_classtrace[superParentString] = append(grouped_classtrace[superParentString], arr)
 	}
 
-	// Create reference map and recomp class list
-	counted := 0
-	var recompClasslist [][2]int
-	referenceMap := make(map[string]map[int]int)
+	refindex := 0
+	for jsonref, classlists := range grouped_classtrace {
 
-	for key, arrarr := range shortlistedArrays {
-
-		indexMapFragment := make(map[int]int)
-		if seq, err := _utils_.Code_JsonParse[[]int](key); err == nil {
+		reftable := make(map[int]int)
+		if seq, err := _utils_.Code_JsonParse[[]int](jsonref); err == nil {
 			for _, item := range seq {
-				counted++
-				indexMapFragment[item] = counted
-				recompClasslist = append(recompClasslist, [2]int{item, counted})
+				counter++
+				reftable[item] = counter
+				final_hashtrace = append(final_hashtrace, [2]int{item, counter})
 			}
 		}
 
-		for _, arr := range arrarr {
+		for _, arr := range classlists {
 			arrJSON, _ := _json_.Marshal(arr)
 			arrString := string(arrJSON)
-			referenceMap[arrString] = indexMapFragment
+			list_to_group[arrString] = refindex
 		}
+
+		group_to_table[refindex] = reftable
+		refindex++
 	}
 
 	return &_types_.Refer_SortedOutput{
-		Count:           counted,
-		ReferenceMap:    referenceMap,
-		RecompClasslist: recompClasslist,
+		Count:           counter,
+		List_to_Group:   list_to_group,
+		Group_to_Table:  group_to_table,
+		Final_Hashtrace: final_hashtrace,
 	}
 }

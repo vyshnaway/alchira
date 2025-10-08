@@ -3,6 +3,7 @@ package craft
 import (
 	_cache_ "main/cache"
 	_order_ "main/order"
+	"main/shell"
 	S "main/shell"
 	_stash_ "main/stash"
 	_types_ "main/types"
@@ -82,7 +83,7 @@ func Organize() (AritfactFiles map[string]string, Attachments []int) {
 	_cache_.Style.PublishIndexMap = []_types_.Style_ClassIndexTrace{}
 
 	SaveClassRefs := func(stash _types_.Refer_SortedOutput) {
-		for _, val := range stash.RecompClasslist {
+		for _, val := range stash.Final_Hashtrace {
 			index := val[0]
 			classid := val[1]
 			classname := "_" + _utils_.String_EnCounter(classid)
@@ -92,12 +93,15 @@ func Organize() (AritfactFiles map[string]string, Attachments []int) {
 			})
 		}
 
-		for json_array, imap := range stash.ReferenceMap {
+		for json_array, imap := range stash.List_to_Group {
 			_cache_.Style.ClassDictionary[json_array] = map[int]string{}
 			for ref, id := range imap {
 				_cache_.Style.ClassDictionary[json_array][ref] = "_" + _utils_.String_EnCounter(id)
 			}
 		}
+		shell.Render.Raw(stash)
+		shell.Render.Raw(_cache_.Style.PublishIndexMap)
+		shell.Render.Raw(_cache_.Style.ClassDictionary)
 	}
 
 	accumulate()
