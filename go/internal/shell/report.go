@@ -1,7 +1,7 @@
-package make
+package shell
 
 import (
-	S "main/shell/core"
+	S "main/package/shell"
 )
 
 func Report(heading string, targets []string, report string, footer []string) {

@@ -1,52 +1,53 @@
 package order
 
 import (
-	_bytes_ "bytes"
-	_context_ "context"
-	_json_ "encoding/json"
-	_io_ "io"
-	_cache_ "main/cache"
-	_types_ "main/types"
-	"main/utils"
-	_http_ "net/http"
-	_time_ "time"
+	_bytes "bytes"
+	_context "context"
+	_json "encoding/json"
+	_io "io"
+	_config "main/configs"
+	_model "main/models"
+	_crypto "main/package/crypto"
+	_util "main/package/utils"
+	_http "net/http"
+	_time "time"
 )
 
-// tApi_Request represents the request payload sent to the worker API
-type tApi_Request struct {
+// t_ApiRequest represents the request payload sent to the worker API
+type t_ApiRequest struct {
 	Access  string `json:"access"`
 	Private string `json:"private"`
 	Content string `json:"content"`
 	Archive string `json:"artifact"`
 }
 
-// tApi_Response represents the response from the worker API
-type tApi_Response struct {
+// t_ApiResponse represents the response from the worker API
+type t_ApiResponse struct {
 	Status  bool   `json:"status"`
 	Message string `json:"message,omitempty"`
 	Result  string `json:"result,omitempty"`
 }
 
-// tApi_Result represents the response structure
-type tApi_Result struct {
-	Status  bool                        `json:"status"`
-	Message string                      `json:"message"`
-	Result  *_types_.Refer_SortedOutput `json:"result"`
+// R_Optimize represents the response structure
+type R_Optimize struct {
+	Status  bool       `json:"status"`
+	Message string     `json:"message"`
+	Result  *R_Preview `json:"result"`
 }
 
-// Order processes sequences for either preview or publish operations
-func Order(
+// Optimize processes sequences for either preview or publish operations
+func Optimize(
 	sequences [][]int,
 	publish bool,
 	argument string,
-	artifact _types_.Config_Archive,
-) (*tApi_Result, error) {
+	artifact _model.Config_Archive,
+) (*R_Optimize, error) {
 
 	// Initialize response with preview defaults
-	response := &tApi_Result{
+	response := &R_Optimize{
 		Status:  !publish,
 		Message: "Preview Build",
-		Result:  Preview_Organize(sequences, false),
+		Result:  Preview(sequences, false),
 	}
 
 	if !publish {
@@ -64,13 +65,13 @@ func Order(
 	publicKey := argument[25:]
 
 	// Encrypt the sequences content
-	sequencesJSON, err := _json_.Marshal(sequences)
+	sequencesJSON, err := _json.Marshal(sequences)
 	if err != nil {
 		response.Message = "Failed to serialize sequences. Fallback: preview"
 		return response, nil
 	}
 
-	contentCrypt, err := crypt_SymGencrypt(string(sequencesJSON))
+	contentCrypt, err := _crypto.SymGencrypt(string(sequencesJSON))
 	if err != nil {
 		response.Message = "Failed to encrypt content. Fallback: preview"
 		return response, nil
@@ -80,19 +81,19 @@ func Order(
 	asymPayload := projectId + contentCrypt.IV + contentCrypt.Key
 
 	// Perform asymmetric encryption
-	asymEncrypted, err := crypt_AsymEncrypt(asymPayload, publicKey)
+	asymEncrypted, err := _crypto.AsymEncrypt(asymPayload, publicKey)
 	if err != nil {
 		response.Message = "Invalid Key. Fallback: preview"
 		return response, nil
 	}
 
-	artifactData, err := _json_.Marshal(artifact)
+	artifactData, err := _json.Marshal(artifact)
 	if err != nil {
 		// handle error (e.g., log, return, panic)
 	}
 
 	// Prepare the request payload
-	requestData := tApi_Request{
+	requestData := t_ApiRequest{
 		Access:  publicKey,
 		Private: asymEncrypted,
 		Content: contentCrypt.Data,
@@ -100,26 +101,26 @@ func Order(
 	}
 
 	// Marshal request data to JSON
-	requestBody, err := _json_.Marshal(requestData)
+	requestBody, err := _json.Marshal(requestData)
 	if err != nil {
 		response.Message = "Failed to prepare request. Fallback: preview"
 		return response, nil
 	}
 
 	// Create HTTP client with timeout
-	client := &_http_.Client{
-		Timeout: 30 * _time_.Second,
+	client := &_http.Client{
+		Timeout: 30 * _time.Second,
 	}
 
 	// Create the HTTP request with context
-	ctx, cancel := _context_.WithTimeout(_context_.Background(), 25*_time_.Second)
+	ctx, cancel := _context.WithTimeout(_context.Background(), 25*_time.Second)
 	defer cancel()
 
-	req, err := _http_.NewRequestWithContext(
+	req, err := _http.NewRequestWithContext(
 		ctx,
 		"POST",
-		_cache_.Root.Url.Worker,
-		_bytes_.NewBuffer(requestBody),
+		_config.Root.Url.Worker,
+		_bytes.NewBuffer(requestBody),
 	)
 	if err != nil {
 		response.Message = "Failed to create request. Fallback: preview"
@@ -138,15 +139,15 @@ func Order(
 	defer resp.Body.Close()
 
 	// Read response body
-	responseBody, err := _io_.ReadAll(resp.Body)
+	responseBody, err := _io.ReadAll(resp.Body)
 	if err != nil {
 		response.Message = "Failed to read server response. Fallback: preview"
 		return response, nil
 	}
 
 	// Parse the worker response
-	var workerResp tApi_Response
-	if res, err := utils.Code_JsonParse[tApi_Response](string(responseBody)); err == nil {
+	var workerResp t_ApiResponse
+	if res, err := _util.Code_JsonParse[t_ApiResponse](string(responseBody)); err == nil {
 		workerResp = res
 	} else {
 		response.Message = "Failed to parse server response. Fallback: preview"
@@ -160,7 +161,7 @@ func Order(
 		response.Message = workerResp.Message
 
 		// Decrypt the result
-		decryptedResult, err := crypt_SymDecrypt(
+		decryptedResult, err := _crypto.SymDecrypt(
 			workerResp.Result,
 			contentCrypt.Key,
 			contentCrypt.IV,
@@ -171,8 +172,8 @@ func Order(
 		}
 
 		// Parse the decrypted result
-		var sortedOutput _types_.Refer_SortedOutput
-		if res, err := utils.Code_JsonParse[_types_.Refer_SortedOutput](decryptedResult); err == nil {
+		var sortedOutput R_Preview
+		if res, err := _util.Code_JsonParse[R_Preview](decryptedResult); err == nil {
 			sortedOutput = res
 		} else {
 			response.Message = "Failed to parse decrypted result. Fallback: preview"

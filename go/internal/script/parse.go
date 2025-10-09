@@ -1,20 +1,45 @@
 package script
 
 import (
-	_cache_ "main/cache"
-	_Cursor_ "main/class/Cursor"
-	_types_ "main/types"
-	"maps"
-	_regexp_ "regexp"
-	_slices_ "slices"
-	_strings_ "strings"
+	_config "main/configs"
+	_reader "main/package/reader"
+	_model "main/models"
+	_map "maps"
+	_regexp "regexp"
+	_slice "slices"
+	_string "strings"
 )
 
-var customElements = _slices_.Collect(maps.Keys(_cache_.Root.CustomElements))
+type E_Action int
+
+const (
+	E_Action_Read E_Action = iota
+	E_Action_Sync
+	E_Action_Watch
+	E_Action_Monitor
+)
+
+type T_RawStyle struct {
+	Elid       int
+	Element    string
+	Elvalue    string
+	TagCount   int
+	RowIndex   int
+	ColIndex   int
+	EndMarker  int
+	SymClasses []string
+	Scope      _model.Style_Type
+	Comments   []string
+	Innertext  string
+	Styles     map[string]string
+	Attributes map[string]string
+}
+
+var customElements = _slice.Collect(_map.Keys(_config.Root.CustomElements))
 
 var replacementTags = func() map[string]int {
 	res := map[string]int{}
-	for k, v := range _cache_.Root.CustomElements {
+	for k, v := range _config.Root.CustomElements {
 		res["<!-- "+k+" -->"] = v
 		res["<"+k+" />"] = v
 		res["<"+k+"/>"] = v
@@ -25,34 +50,34 @@ var replacementTags = func() map[string]int {
 type parse_return struct {
 	Scribed     string
 	ClassesList [][]string
-	StylesList  []*_types_.Script_RawStyle
+	StylesList  []*T_RawStyle
 	Attachments []string
 	Locales     []string
 }
 
 func Rider(
-	fileData *_types_.File_Stash,
+	fileData *_model.File_Stash,
 	classProps []string,
-	action _types_.Script_Action,
+	action E_Action,
 ) parse_return {
 
-	fileData.StyleData.TagReplacements = []_types_.File_TagReplacement{}
-	tagTrack := []*_types_.Script_RawStyle{}
+	fileData.StyleData.TagReplacements = []_model.File_TagReplacement{}
+	tagTrack := []*T_RawStyle{}
 	classesList := [][]string{}
 	attachments := []string{}
 	locales := []string{}
-	stylesList := []*_types_.Script_RawStyle{}
+	stylesList := []*T_RawStyle{}
 
 	var content string
-	var stream _strings_.Builder
-	if action == _types_.Script_Action_Read {
+	var stream _string.Builder
+	if action == E_Action_Read {
 		content = fileData.Content
 	} else {
 		content = fileData.Midway
 	}
 
-	cursor := _Cursor_.Construct(content)
-	regexp_aftertagopen := _regexp_.MustCompile(`(?i)[\w\-\!/]`)
+	cursor := _reader.New(content)
+	regexp_aftertagopen := _regexp.MustCompile(`(?i)[\w\-\!/]`)
 
 	for cursor.Streaming {
 		ch := cursor.Active.Char
@@ -71,8 +96,8 @@ func Rider(
 
 				if hasDeclared {
 					stylesList = append(stylesList, &result.StyleDeclarations)
-				} else if elid, status := replacementTags[fragment]; action != _types_.Script_Action_Read && status && len(tagTrack) == 0 {
-					fileData.StyleData.TagReplacements = append(fileData.StyleData.TagReplacements, _types_.File_TagReplacement{
+				} else if elid, status := replacementTags[fragment]; action != E_Action_Read && status && len(tagTrack) == 0 {
+					fileData.StyleData.TagReplacements = append(fileData.StyleData.TagReplacements, _model.File_TagReplacement{
 						Loc:  stream.Len(),
 						Elid: elid,
 					})
@@ -86,10 +111,10 @@ func Rider(
 					}
 				}
 
-				if action == _types_.Script_Action_Read {
+				if action == E_Action_Read {
 					if hasDeclared {
 						if result.StyleDeclarations.Elid == 0 {
-							var stash _strings_.Builder
+							var stash _string.Builder
 							stash.WriteString(result.StyleDeclarations.Element)
 							if len(result.StyleDeclarations.Elvalue) > 0 {
 								stash.WriteString(result.StyleDeclarations.Elvalue)
@@ -110,7 +135,7 @@ func Rider(
 					if result.ClassSynced {
 						subScribed = fragment
 					} else {
-						var stash _strings_.Builder
+						var stash _string.Builder
 						stash.WriteString(result.StyleDeclarations.Element)
 						if len(result.StyleDeclarations.Elvalue) > 0 {
 							stash.WriteString(result.StyleDeclarations.Elvalue)
@@ -145,7 +170,7 @@ func Rider(
 							tagTrack = append(tagTrack, track)
 						}
 					}
-				} else if _slices_.Contains(customElements, result.StyleDeclarations.Element) && hasDeclared {
+				} else if _slice.Contains(customElements, result.StyleDeclarations.Element) && hasDeclared {
 					result.StyleDeclarations.Attributes = result.NativeAttributes
 					tagTrack = append(tagTrack, &result.StyleDeclarations)
 				}
@@ -162,7 +187,7 @@ func Rider(
 		}
 	}
 
-	fileData.StyleData.TagReplacements = append(fileData.StyleData.TagReplacements, _types_.File_TagReplacement{Loc: 0, Elid: 0})
+	fileData.StyleData.TagReplacements = append(fileData.StyleData.TagReplacements, _model.File_TagReplacement{Loc: 0, Elid: 0})
 
 	return parse_return{
 		Scribed:     stream.String(),

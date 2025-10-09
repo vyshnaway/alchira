@@ -1,13 +1,13 @@
 package order_test
 
 import (
-	"main/order"
-	"main/types"
-	"testing"
+	_order "main/internal/order"
+	_model "main/models"
+	_testing "testing"
 )
 
 // TestOrderPreview tests the preview operation
-func TestOrderPreview(t *testing.T) {
+func TestOrderPreview(t *_testing.T) {
 	// Example test data
 	sequences := [][]int{
 		{1, 2, 3},
@@ -16,7 +16,7 @@ func TestOrderPreview(t *testing.T) {
 		{6, 7, 8, 9},
 	}
 
-	artifact := types.Config_Archive{
+	artifact := _model.Config_Archive{
 		Name:    "my-project",
 		Version: "1.0.0",
 		Readme:  "Sample readme",
@@ -24,7 +24,7 @@ func TestOrderPreview(t *testing.T) {
 	}
 
 	// Test preview operation
-	result, err := order.Order(sequences, false, "", artifact)
+	result, err := _order.Optimize(sequences, false, "", artifact)
 
 	// Assertions
 	if err != nil {

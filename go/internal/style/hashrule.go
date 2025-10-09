@@ -1,23 +1,23 @@
 package style
 
 import (
-	_cache_ "main/cache"
-	X "main/shell/make"
-	_types_ "main/types"
-	_utils_ "main/utils"
-	_regexp_ "regexp"
-	_slices_ "slices"
-	_strings_ "strings"
+	_config "main/configs"
+	X "main/internal/shell"
+	_model "main/models"
+	_util "main/package/utils"
+	_regexp "regexp"
+	_slice "slices"
+	_string "strings"
 )
 
 func Hashrule_Upload() {
-	_cache_.Style.Hashrules = _cache_.Static.Hashrule
-	hashrule := _cache_.Static.Hashrule
+	_config.Style.Hashrules = _config.Static.Hashrule
+	hashrule := _config.Static.Hashrule
 	errors := make([]string, len(hashrule))
 
 	for key := range hashrule {
 		var hash = "#{" + key + "}"
-		response := Hashrule_Import(hash, _cache_.Path_Json["hashrule"].Path)
+		response := Hashrule_Import(hash, _config.Path_Json["hashrule"].Path)
 		if response.Status {
 			hashrule[key] = response.Result
 		} else {
@@ -26,22 +26,22 @@ func Hashrule_Upload() {
 		}
 	}
 
-	_cache_.Style.Hashrules = hashrule
-	_cache_.Manifest.Hashrules = hashrule
-	_cache_.Delta.Report.Hashrule = X.Hashrule_Report(hashrule, errors)
+	_config.Style.Hashrules = hashrule
+	_config.Manifest.Hashrules = hashrule
+	_config.Delta.Report.Hashrule = X.Hashrule_Report(hashrule, errors)
 }
 
 type hashrule_Import_return struct {
 	Status      bool
 	Result      string
 	Errorstring string
-	Diagnostic  _types_.Refer_Diagnostic
+	Diagnostic  _model.Refer_Diagnostic
 }
 
 func Hashrule_Import(str string, src string) hashrule_Import_return {
 	primitive := str
-	recursionSequence := make([]string, 0, len(_cache_.Style.Hashrules))
-	preview := make(map[string]string, len(_cache_.Style.Hashrules))
+	recursionSequence := make([]string, 0, len(_config.Style.Hashrules))
+	preview := make(map[string]string, len(_config.Style.Hashrules))
 
 	var response = func(
 		result string,
@@ -64,7 +64,7 @@ func Hashrule_Import(str string, src string) hashrule_Import_return {
 		}
 	}
 
-	var hashpattern = _regexp_.MustCompile(`(?i)#\{[a-z0-9-]+\}`)
+	var hashpattern = _regexp.MustCompile(`(?i)#\{[a-z0-9-]+\}`)
 	for {
 		loc := hashpattern.FindStringIndex(str)
 		if loc == nil {
@@ -72,7 +72,7 @@ func Hashrule_Import(str string, src string) hashrule_Import_return {
 		}
 		match := str[loc[0]:loc[1]]
 		key := match[2 : len(match)-1]
-		replacement, found := _cache_.Style.Hashrules[key]
+		replacement, found := _config.Style.Hashrules[key]
 		if !found {
 			replacement = match
 		}
@@ -81,7 +81,7 @@ func Hashrule_Import(str string, src string) hashrule_Import_return {
 		if !found {
 			return response("", match, "Undefined Hashrule.")
 		}
-		if _slices_.Contains(recursionSequence, match) {
+		if _slice.Contains(recursionSequence, match) {
 			return response("", match, "Hashrule recursion loop.")
 		}
 
@@ -96,18 +96,18 @@ type hashrule_Render_return struct {
 	Wrappers    []string
 	Status      bool
 	Errorstring string
-	Diagnostic  _types_.Refer_Diagnostic
+	Diagnostic  _model.Refer_Diagnostic
 }
 
 func Hashrule_Render(str string, src string) hashrule_Render_return {
 	extended := Hashrule_Import(str, src)
-	snippets := _utils_.String_ZeroBreaks(extended.Result, []rune{'&'})
+	snippets := _util.String_ZeroBreaks(extended.Result, []rune{'&'})
 	wrappers := []string{}
 
 	for _, snippet := range snippets {
-		var wrapper _strings_.Builder
+		var wrapper _string.Builder
 
-		snippet = _strings_.TrimSpace(snippet)
+		snippet = _string.TrimSpace(snippet)
 		length := len(snippet)
 		deviance := 0
 		splAtrule := false
@@ -146,12 +146,12 @@ func Hashrule_Render(str string, src string) hashrule_Render_return {
 				wrapped = "@" + wrapped
 			}
 			if splAtrule {
-				wrapped = _regexp_.MustCompile(`width\s*>=`).ReplaceAllString(wrapped, "min-width:")
-				wrapped = _regexp_.MustCompile(`width\s*<=`).ReplaceAllString(wrapped, "max-width:")
-				wrapped = _regexp_.MustCompile(`height\s*>=`).ReplaceAllString(wrapped, "min-height:")
-				wrapped = _regexp_.MustCompile(`height\s*<=`).ReplaceAllString(wrapped, "max-height:")
+				wrapped = _regexp.MustCompile(`width\s*>=`).ReplaceAllString(wrapped, "min-width:")
+				wrapped = _regexp.MustCompile(`width\s*<=`).ReplaceAllString(wrapped, "max-width:")
+				wrapped = _regexp.MustCompile(`height\s*>=`).ReplaceAllString(wrapped, "min-height:")
+				wrapped = _regexp.MustCompile(`height\s*<=`).ReplaceAllString(wrapped, "max-height:")
 			}
-			wrapped = _utils_.String_Minify(wrapped)
+			wrapped = _util.String_Minify(wrapped)
 			wrappers = append(wrappers, wrapped)
 		}
 	}

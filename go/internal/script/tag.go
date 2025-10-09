@@ -1,13 +1,13 @@
 package script
 
 import (
-	_cache_ "main/cache"
-	_Cursor_ "main/class/Cursor"
-	_types_ "main/types"
-	_utils_ "main/utils"
-	_regexp_ "regexp"
-	_slices_ "slices"
-	_strings_ "strings"
+	_config "main/configs"
+	_reader "main/package/reader"
+	_model "main/models"
+	_util "main/package/utils"
+	_regexp "regexp"
+	_slice "slices"
+	_string "strings"
 )
 
 type tag_Parse_retype struct {
@@ -18,14 +18,14 @@ type tag_Parse_retype struct {
 	Locales           []string
 	Attachments       []string
 	NativeAttributes  map[string]string
-	StyleDeclarations _types_.Script_RawStyle
+	StyleDeclarations T_RawStyle
 }
 
 func Tag_Scanner(
-	fileData *_types_.File_Stash,
+	fileData *_model.File_Stash,
 	classProps []string,
-	action _types_.Script_Action,
-	cursor *_Cursor_.Type,
+	action E_Action,
+	cursor *_reader.Type,
 ) tag_Parse_retype {
 	classesList := [][]string{}
 	attachments := []string{}
@@ -34,8 +34,8 @@ func Tag_Scanner(
 	nativeAttributes := make(map[string]string)
 
 	deviance := 0
-	var attr _strings_.Builder
-	var value _strings_.Builder
+	var attr _string.Builder
+	var value _string.Builder
 	var awaitClosure rune = 0
 	ok := false
 	isVal := false
@@ -43,13 +43,13 @@ func Tag_Scanner(
 	classSynced := false
 	fallbackAquired := false
 
-	styleDeclarations := _types_.Script_RawStyle{
+	styleDeclarations := T_RawStyle{
 		Elid:       0,
 		EndMarker:  0,
 		Element:    "",
 		Elvalue:    "",
 		Innertext:  "",
-		Scope:      _types_.Style_Type_Null,
+		Scope:      _model.Style_Type_Null,
 		TagCount:   cursor.Active.Cycle + 1,
 		RowIndex:   cursor.Active.RowMarker,
 		ColIndex:   cursor.Active.ColMarker,
@@ -76,32 +76,32 @@ func Tag_Scanner(
 				} else {
 					awaitClosure = 0
 				}
-			} else if !_slices_.Contains(_utils_.Refer.WatchQuotes, awaitClosure) {
-				if _slices_.Contains(_utils_.Refer.OpenBraces, ch) ||
-					_slices_.Contains(_utils_.Refer.WatchQuotes, ch) {
-					awaitClosure = _utils_.Refer.BracePair[ch]
+			} else if !_slice.Contains(_util.Refer.WatchQuotes, awaitClosure) {
+				if _slice.Contains(_util.Refer.OpenBraces, ch) ||
+					_slice.Contains(_util.Refer.WatchQuotes, ch) {
+					awaitClosure = _util.Refer.BracePair[ch]
 					braceTrack = append(braceTrack, awaitClosure)
 					deviance = len(braceTrack)
-				} else if awaitClosure != ch && _slices_.Contains(_utils_.Refer.CloseBraces, ch) {
+				} else if awaitClosure != ch && _slice.Contains(_util.Refer.CloseBraces, ch) {
 					cursor.Increment()
 					break
 				}
 			}
 
-			if deviance == 0 && attr.Len() > 0 && _slices_.Contains([]rune{' ', '\n', '\r', '>', '\t'}, ch) {
-				tr_Attr := _strings_.Trim(attr.String(), " \t\n")
-				tr_Value := _strings_.Trim(value.String(), " \t\n")
-				symclass_regex := _regexp_.MustCompile(`(?i)^[\w\-]+\$+[\w\-]+$`)
+			if deviance == 0 && attr.Len() > 0 && _slice.Contains([]rune{' ', '\n', '\r', '>', '\t'}, ch) {
+				tr_Attr := _string.Trim(attr.String(), " \t\n")
+				tr_Value := _string.Trim(value.String(), " \t\n")
+				symclass_regex := _regexp.MustCompile(`(?i)^[\w\-]+\$+[\w\-]+$`)
 				if len(styleDeclarations.Element) == 0 {
-					if elid, elok := _cache_.Root.CustomElements[tr_Attr]; elok {
+					if elid, elok := _config.Root.CustomElements[tr_Attr]; elok {
 						styleDeclarations.Elid = elid
 					}
 					styleDeclarations.Element = tr_Attr
 					styleDeclarations.Elvalue = tr_Value
 				} else if tr_Attr == "&" {
 					if len(tr_Value) > 3 {
-						for _, line := range _strings_.Split(tr_Value[1:len(tr_Value)-2], "\n") {
-							commentTrimmed := _strings_.Trim(line, "\t ")
+						for _, line := range _string.Split(tr_Value[1:len(tr_Value)-2], "\n") {
+							commentTrimmed := _string.Trim(line, "\t ")
 							if len(commentTrimmed) > 0 {
 								styleDeclarations.Comments = append(styleDeclarations.Comments, commentTrimmed)
 							}
@@ -109,18 +109,18 @@ func Tag_Scanner(
 					}
 				} else if symclass_regex.MatchString(tr_Attr) {
 					if len(styleDeclarations.SymClasses) == 0 {
-						if _strings_.Contains(tr_Attr, "$$$$") {
-							styleDeclarations.Scope = _types_.Style_Type_Null
-						} else if fileData.Manifest.Lookup.Type == _types_.File_Type_Artifact {
-							styleDeclarations.Scope = _types_.Style_Type_Artifact
-						} else if _strings_.Contains(tr_Attr, "$$$") {
-							styleDeclarations.Scope = _types_.Style_Type_Public
-						} else if _strings_.Contains(tr_Attr, "$$") {
-							styleDeclarations.Scope = _types_.Style_Type_Global
+						if _string.Contains(tr_Attr, "$$$$") {
+							styleDeclarations.Scope = _model.Style_Type_Null
+						} else if fileData.Manifest.Lookup.Type == _model.File_Type_Artifact {
+							styleDeclarations.Scope = _model.Style_Type_Artifact
+						} else if _string.Contains(tr_Attr, "$$$") {
+							styleDeclarations.Scope = _model.Style_Type_Public
+						} else if _string.Contains(tr_Attr, "$$") {
+							styleDeclarations.Scope = _model.Style_Type_Global
 						} else {
-							styleDeclarations.Scope = _types_.Style_Type_Local
+							styleDeclarations.Scope = _model.Style_Type_Local
 						}
-						if styleDeclarations.Scope != _types_.Style_Type_Null {
+						if styleDeclarations.Scope != _model.Style_Type_Null {
 							styleDeclarations.Styles[""] = tr_Value
 						}
 					}
@@ -129,7 +129,7 @@ func Tag_Scanner(
 					if len(tr_Value) > 0 {
 						styleDeclarations.Styles[tr_Attr] = tr_Value
 					}
-				} else if _slices_.Contains(classProps, tr_Attr) {
+				} else if _slice.Contains(classProps, tr_Attr) {
 					classSynced = true
 					value_Parse_return := value_Parse(
 						tr_Value,
@@ -164,7 +164,7 @@ func Tag_Scanner(
 			}
 		}
 
-		if deviance != 0 || (deviance == 0 && !_slices_.Contains([]rune{' ', '=', '\n', '\r', '\t', '>'}, ch)) {
+		if deviance != 0 || (deviance == 0 && !_slice.Contains([]rune{' ', '=', '\n', '\r', '\t', '>'}, ch)) {
 			if isVal {
 				value.WriteRune(ch)
 			} else {

@@ -1,11 +1,11 @@
 package style_test
 
 import (
-	_style_ "main/style"
-	"testing"
+	_style "main/internal/style"
+	_testing "testing"
 )
 
-func Test_Hashrule(t *testing.T) {
+func Test_Hashrule(t *_testing.T) {
 	content := `
 @hover $scale-125;
 --box-shadow: #77777777;
@@ -45,9 +45,9 @@ m-auto { k: l; }
     }
 }
 	`
-	res1 := _style_.Parse_CssSnippet(content, "initial", "selector", true, true)
+	res1 := _style.Parse_CssSnippet(content, "initial", "selector", true, true)
 	res1.Result.Print()
-	res2 := _style_.Parse_CssSnippet(content, "initial", "selector", false, false)
+	res2 := _style.Parse_CssSnippet(content, "initial", "selector", false, false)
 	res2.Result.Print()
 }
 

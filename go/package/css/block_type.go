@@ -80,7 +80,7 @@ func (This *T_Block) SetProp(key string, val string) {
 	This.prop_vals[key] = val
 }
 
-func (This *T_Block) SetBlock(key string, val T_Block) *T_Block {
+func (This *T_Block) SetBlock(key string, val *T_Block) *T_Block {
 	if This.block_vals == nil {
 		This.block_vals = make(map[string]*T_Block)
 	}
@@ -112,7 +112,7 @@ func (This *T_Block) DelBlock(key string) *T_Block {
 	return This
 }
 
-func (This *T_Block) Mixin(source T_Block) *T_Block {
+func (This *T_Block) Mixin(source *T_Block) *T_Block {
 	if This.prop_vals == nil {
 		This.prop_vals = make(map[string]string)
 	}
@@ -131,10 +131,10 @@ func (This *T_Block) Mixin(source T_Block) *T_Block {
 	})
 	This.Prop_keys = _utils_.Array_SetAppend(This.Prop_keys, source.Prop_keys...)
 
-	source.BlockRange(func(skey string, sval T_Block) {
+	source.BlockRange(func(skey string, sval *T_Block) {
 		if isBlock, tval := This.GetBlock(skey); isBlock {
 			tval.Mixin(sval)
-			This.SetBlock(skey, *tval)
+			This.SetBlock(skey, tval)
 		} else {
 			This.SetBlock(skey, sval)
 		}

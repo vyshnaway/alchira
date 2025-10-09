@@ -1,47 +1,39 @@
 package css
 
 import (
-	_cache_ "main/cache"
+	// _cache_ "main/cache"
 	_Cursor_ "main/package/reader"
 	_utils_ "main/package/utils"
 	_slices_ "slices"
 	_strings_ "strings"
 )
 
-type r_Parse struct {
-	Assign     []string
-	Attach     []string
-	AtProps    [][2]string
-	Properties [][2]string
-	AtRules    [][2]string
-	Nested     [][2]string
-	Classes    [][2]string
-	Flats      [][2]string
-	AllBlocks  [][2]string
-	Variables  map[string]string
-	Specials   []string
+type R_Parse struct {
+	Directives    []string
+	Properties    [][2]string
+	Atrule_Blocks [][2]string
+	Nested_Blocks [][2]string
+	Select_Blocks [][2]string
+	All_Blocks    [][2]string
+	Variables     map[string]string
 }
 
-func Parse(content string) r_Parse {
+func ParsePartial(content string) R_Parse {
 
-	result := r_Parse{
-		Assign:     []string{},
-		Attach:     []string{},
-		AtProps:    [][2]string{},
-		Properties: [][2]string{},
-		AtRules:    [][2]string{},
-		Nested:     [][2]string{},
-		Classes:    [][2]string{},
-		Flats:      [][2]string{},
-		AllBlocks:  [][2]string{},
-		Variables:  map[string]string{},
+	result := R_Parse{
+		Directives:    []string{},
+		Properties:    [][2]string{},
+		Atrule_Blocks: [][2]string{},
+		Nested_Blocks: [][2]string{},
+		Select_Blocks: [][2]string{},
+		All_Blocks:    [][2]string{},
+		Variables:     map[string]string{},
 	}
 
 	key := ""
 	var awaitBrace rune = 0
 	braceTrack := []rune{}
-	keyStart := 0
-	valStart := 0
+	start := 0
 	deviance := 0
 	isProp := true
 	cursor := _Cursor_.New(content + ";")
@@ -68,68 +60,41 @@ func Parse(content string) r_Parse {
 
 		if deviance == 1 && cursor.Active.Char == '{' {
 			isProp = false
-			key = _utils_.String_Minify(content[keyStart:cursor.Active.Marker])
-			valStart = cursor.Active.Marker + 1
+			key = _utils_.String_Minify(content[start:cursor.Active.Marker])
+			start = cursor.Active.Marker + 1
 		} else if deviance != 0 {
 			continue
 		} else {
 			switch cursor.Active.Char {
 			case ':':
-				key = _utils_.String_Minify(content[keyStart:cursor.Active.Marker])
-				valStart = cursor.Active.Marker + 1
+				key = _utils_.String_Minify(content[start:cursor.Active.Marker])
+				start = cursor.Active.Marker + 1
 			case '}':
 				fallthrough
 			case ';':
+				val := _utils_.String_Minify(content[start:cursor.Active.Marker])
 				{
-					value := _utils_.String_Minify(content[valStart:cursor.Active.Marker])
 					if isProp {
 						if len(key) > 0 {
 							if _strings_.HasPrefix(key, "--") {
-								result.Variables[key] = value
+								result.Variables[key] = val
 							}
-							result.Properties = append(result.Properties, [2]string{key, value})
-						} else if len(value) > 0 && value[0] == '@' {
-							spaceIndex := _strings_.Index(value, " ")
-							if spaceIndex < 0 {
-								spaceIndex = len(value)
-							}
-							directive := value[0:spaceIndex]
-
-							switch directive {
-							case _cache_.Root.CustomAtrules["attach"]:
-								breaks := _utils_.String_ZeroBreaks(value[spaceIndex:], []rune{' ', '\n', ','})
-								result.Attach = append(result.Attach, breaks...)
-							case _cache_.Root.CustomAtrules["assign"]:
-								breaks := _utils_.String_ZeroBreaks(value[spaceIndex:], []rune{' ', '\n', ','})
-								result.Assign = append(result.Assign, breaks...)
-							default:
-								result.AtProps = append(result.AtProps, [2]string{value, ""})
-							}
-						} else {
-							breaks := _utils_.String_ZeroBreaks(value, []rune{' ', '\n', ','})
-							if len(breaks) > 0 {
-								if breaks[0] == string(_cache_.Root.CustomOperations["attach"]) {
-									result.Attach = append(result.Attach, breaks[1:]...)
-								} else if (breaks[0]) == string(_cache_.Root.CustomOperations["assign"]) {
-									result.Assign = append(result.Assign, breaks[1:]...)
-								}
-							}
+							result.Properties = append(result.Properties, [2]string{key, val})
+						} else if len(val) > 0 && val[0] == '@' {
+							result.Directives = append(result.Directives, val)
 						}
 					} else if len(key) > 0 {
 						switch rune(key[0]) {
 						case '@':
-							result.AtRules = append(result.AtRules, [2]string{key, value})
+							result.Atrule_Blocks = append(result.Atrule_Blocks, [2]string{key, val})
 						case '&':
-							result.Nested = append(result.Nested, [2]string{key, value})
-						case '.':
-							result.Classes = append(result.Classes, [2]string{key, value})
+							result.Nested_Blocks = append(result.Nested_Blocks, [2]string{key, val})
 						default:
-							result.Flats = append(result.Flats, [2]string{key, value})
+							result.Select_Blocks = append(result.Select_Blocks, [2]string{key, val})
 						}
-						result.AllBlocks = append(result.AllBlocks, [2]string{key, value})
+						result.All_Blocks = append(result.All_Blocks, [2]string{key, val})
 					}
-					keyStart = cursor.Active.Marker + 1
-					valStart = cursor.Active.Marker + 1
+					start = cursor.Active.Marker + 1
 					key = ""
 					isProp = true
 				}

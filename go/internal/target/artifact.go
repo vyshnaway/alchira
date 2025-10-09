@@ -1,14 +1,14 @@
-package compose
+package target
 
 import (
-	blockmap "main/class/Blockmap"
-	_types_ "main/types"
+	"main/package/css"
+	_types_ "main/models"
 	// _cache_ "main/cache"
 	// _utils_ "main/utils"
 	// _strings_ "strings"
 )
 
-func artifact_Partial(object blockmap.Type, minify bool) []string {
+func artifact_Partial(object css.T_Block, minify bool) []string {
 	stylesheet := []string{}
 	// 	tab := "  "
 	// 	if minify {

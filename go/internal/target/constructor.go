@@ -1,11 +1,11 @@
-package Target
+package target
 
 import (
-	_cache_ "main/cache"
-	_fileman_ "main/fileman"
-	_types_ "main/types"
-	"maps"
-	"slices"
+	_config "main/configs"
+	_fileman "main/package/fileman"
+	_model "main/models"
+	_map "maps"
+	_slice "slices"
 )
 
 type Class struct {
@@ -19,23 +19,23 @@ type Class struct {
 	Label      string
 	Extensions []string
 	ExtnsProps map[string][]string
-	FileCache  map[string]_types_.File_Stash
+	FileCache  map[string]_model.File_Stash
 }
 
-func New(storage _types_.Config_ProxyStorage, label string) Class {
-	storage.Extensions[_cache_.Root.Extension] = []string{}
+func New(storage _model.Config_ProxyStorage, label string) Class {
+	storage.Extensions[_config.Root.Extension] = []string{}
 
 	var This = Class{
 		Source:            storage.Source,
 		Target:            storage.Target,
 		Stylesheet:        storage.Stylesheet,
-		SourceStylesheet:  _fileman_.Path_Join(storage.Source, storage.Stylesheet),
-		TargetStylesheet:  _fileman_.Path_Join(storage.Target, storage.Stylesheet),
+		SourceStylesheet:  _fileman.Path_Join(storage.Source, storage.Stylesheet),
+		TargetStylesheet:  _fileman.Path_Join(storage.Target, storage.Stylesheet),
 		StylesheetContent: storage.StylesheetContent,
 		Label:             label,
-		Extensions:        slices.Collect(maps.Keys(storage.Extensions)),
+		Extensions:        _slice.Collect(_map.Keys(storage.Extensions)),
 		ExtnsProps:        storage.Extensions,
-		FileCache:         map[string]_types_.File_Stash{},
+		FileCache:         map[string]_model.File_Stash{},
 	}
 
 	index := 1

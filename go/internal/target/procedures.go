@@ -1,21 +1,21 @@
-package Target
+package target
 
 import (
-	_cache_ "main/cache"
-	_compose_ "main/compose"
-	_script_ "main/script"
-	S "main/shell/core"
-	_types_ "main/types"
-	_maps_ "maps"
-	_slices_ "slices"
-	_strings_ "strings"
+	_config "main/configs"
+	_script "main/internal/script"
+	_model "main/models"
+	S "main/package/shell"
+	_map "maps"
+	_slice "slices"
+	_string "strings"
+	_action "main/internal/action"
 )
 
 type Accumulator_return struct {
 	Report        []string
 	GlobalClasses map[string]int
 	PublicClasses map[string]int
-	FileManifests map[string]_types_.File_LocalManifest
+	FileManifests map[string]_model.File_LocalManifest
 }
 
 func (This *Class) Accumulator() Accumulator_return {
@@ -23,20 +23,20 @@ func (This *Class) Accumulator() Accumulator_return {
 		Report:        []string{},
 		GlobalClasses: map[string]int{},
 		PublicClasses: map[string]int{},
-		FileManifests: map[string]_types_.File_LocalManifest{},
+		FileManifests: map[string]_model.File_LocalManifest{},
 	}
 
-	accumulate.FileManifests[This.TargetStylesheet] = _types_.File_LocalManifest{
-		Lookup: _types_.File_Lookup{
+	accumulate.FileManifests[This.TargetStylesheet] = _model.File_LocalManifest{
+		Lookup: _model.File_Lookup{
 			Id:     This.TargetStylesheet,
-			Type:   _types_.File_Type_Stylesheet,
+			Type:   _model.File_Type_Stylesheet,
 			Locale: []string{},
 		},
-		Local:       _types_.File_MetadataMap{},
-		Global:      _types_.File_MetadataMap{},
-		Public:      _types_.File_MetadataMap{},
+		Local:       _model.File_MetadataMap{},
+		Global:      _model.File_MetadataMap{},
+		Public:      _model.File_MetadataMap{},
 		Errors:      []string{},
-		Diagnostics: []_types_.Refer_Diagnostic{},
+		Diagnostics: []_model.Refer_Diagnostic{},
 	}
 
 	accumulate.Report = append(
@@ -46,13 +46,13 @@ func (This *Class) Accumulator() Accumulator_return {
 
 	for _, file := range This.FileCache {
 		accumulate.FileManifests[file.Manifest.Lookup.Id] = file.Manifest
-		_maps_.Copy(accumulate.GlobalClasses, file.StyleData.GlobalClasses)
-		_maps_.Copy(accumulate.PublicClasses, file.StyleData.PublicClasses)
+		_map.Copy(accumulate.GlobalClasses, file.StyleData.GlobalClasses)
+		_map.Copy(accumulate.PublicClasses, file.StyleData.PublicClasses)
 
 		symclasses := []string{}
-		symclasses = append(symclasses, _slices_.Collect(_maps_.Keys(file.StyleData.LocalClasses))...)
-		symclasses = append(symclasses, _slices_.Collect(_maps_.Keys(file.StyleData.PublicClasses))...)
-		symclasses = append(symclasses, _slices_.Collect(_maps_.Keys(file.StyleData.GlobalClasses))...)
+		symclasses = append(symclasses, _slice.Collect(_map.Keys(file.StyleData.LocalClasses))...)
+		symclasses = append(symclasses, _slice.Collect(_map.Keys(file.StyleData.PublicClasses))...)
+		symclasses = append(symclasses, _slice.Collect(_map.Keys(file.StyleData.GlobalClasses))...)
 
 		if counter := len(symclasses); counter > 0 {
 			accumulate.Report = append(
@@ -80,7 +80,7 @@ func (This *Class) GetTracks() GetTracks_return {
 
 	for _, file := range This.FileCache {
 		for _, i := range file.StyleData.Attachments {
-			if found := _cache_.Index_Find(i, file.StyleData.LocalClasses); found.Index > 0 {
+			if found := _action.Index_Find(i, file.StyleData.LocalClasses); found.Index > 0 {
 				attachments = append(attachments, found.Index)
 			}
 		}
@@ -88,11 +88,11 @@ func (This *Class) GetTracks() GetTracks_return {
 		for _, track := range file.StyleData.ClassTracks {
 			retraces := []int{}
 			for _, i := range track {
-				if found := _cache_.Index_Find(i, file.StyleData.LocalClasses); found.Index > 0 {
+				if found := _action.Index_Find(i, file.StyleData.LocalClasses); found.Index > 0 {
 					retraces = append(retraces, found.Index)
 					attachments = append(attachments, found.Index)
-					for _, i := range _cache_.Index_Fetch(found.Index).Attachments {
-						if found := _cache_.Index_Find(i, file.StyleData.LocalClasses); found.Index > 0 {
+					for _, i := range _action.Index_Fetch(found.Index).Attachments {
+						if found := _action.Index_Find(i, file.StyleData.LocalClasses); found.Index > 0 {
 							attachments = append(attachments, found.Index)
 						}
 					}
@@ -111,17 +111,17 @@ func (This *Class) GetTracks() GetTracks_return {
 	}
 }
 
-func (This *Class) GetExports() map[string]_types_.Style_ExportStyle {
-	exports := map[string]_types_.Style_ExportStyle{}
+func (This *Class) GetExports() map[string]_model.Style_ExportStyle {
+	exports := map[string]_model.Style_ExportStyle{}
 
 	for _, file := range This.FileCache {
 		for _, pubindex := range file.StyleData.PublicClasses {
-			exporting := _compose_.Artifact(pubindex)
+			exporting := Artifact(pubindex)
 			exports[exporting.SymClass] = exporting
 
-			for _, a := range _cache_.Index_Fetch(pubindex).Attachments {
-				if found := _cache_.Index_Find(a, file.StyleData.LocalClasses); found.Index > 0 {
-					subexporting := _compose_.Artifact(found.Index)
+			for _, a := range _action.Index_Fetch(pubindex).Attachments {
+				if found := _action.Index_Find(a, file.StyleData.LocalClasses); found.Index > 0 {
+					subexporting := Artifact(found.Index)
 					exporting.Attachments = append(exporting.Attachments, subexporting.SymClass)
 					exports[subexporting.SymClass] = subexporting
 				}
@@ -132,13 +132,13 @@ func (This *Class) GetExports() map[string]_types_.Style_ExportStyle {
 	return exports
 }
 
-func (This *Class) SyncClassnames(action _types_.Script_Action) {
+func (This *Class) SyncClassnames(action _script.E_Action) {
 	for _, file := range This.FileCache {
 		watchprops := []string{}
-		if props, ok := This.ExtnsProps[file.Extension]; ok && file.Extension != _cache_.Root.Extension {
+		if props, ok := This.ExtnsProps[file.Extension]; ok && file.Extension != _config.Root.Extension {
 			watchprops = props
 		}
-		file.Scratch = _script_.Rider(
+		file.Scratch = _script.Rider(
 			&file,
 			watchprops,
 			action,
@@ -155,16 +155,16 @@ func (This *Class) SummonFiles(
 	savefiles := map[string]string{This.SourceStylesheet: stylesheet}
 
 	for _, file := range This.FileCache {
-		if file.Extension != _cache_.Root.Extension {
+		if file.Extension != _config.Root.Extension {
 			fromPos := 0
-			var out _strings_.Builder
+			var out _string.Builder
 			for _, m := range file.StyleData.TagReplacements {
 				switch m.Elid {
-				case _cache_.Root.CustomElements["staple"]:
+				case _config.Root.CustomElements["staple"]:
 					out.WriteString(file.Scratch[fromPos:m.Loc] + stapleBlock)
-				case _cache_.Root.CustomElements["summon"]:
+				case _config.Root.CustomElements["summon"]:
 					out.WriteString(file.Scratch[fromPos:m.Loc] + summonBlock)
-				case _cache_.Root.CustomElements["style"]:
+				case _config.Root.CustomElements["style"]:
 					out.WriteString(file.Scratch[fromPos:m.Loc] + styleBlock)
 				default:
 					out.WriteString(file.Scratch[fromPos:])

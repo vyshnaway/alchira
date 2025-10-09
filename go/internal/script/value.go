@@ -2,38 +2,39 @@ package script
 
 import (
 	_json_ "encoding/json"
-	_fmt_ "fmt"
-	_cache_ "main/cache"
-	_Cursor_ "main/class/Cursor"
-	_type_ "main/types"
-	_utils_ "main/utils"
-	_slices_ "slices"
-	_strings_ "strings"
+	_fmt "fmt"
+	_config "main/configs"
+	_reader "main/package/reader"
+	_model "main/models"
+	_util "main/package/utils"
+	_slice "slices"
+	_string "strings"
+	_action "main/internal/action"
 )
 
 func value_EvaluateIndexTraces(
-	action _type_.Script_Action,
+	action E_Action,
 	metaFront string,
 	classList []string,
-	localClassMap _type_.Style_ClassIndexMap,
+	localClassMap _model.Style_ClassIndexMap,
 ) (ClassMap map[string]string) {
 	classMap := make(map[string]string)
 	indexArray := []int{}
-	classTrace := []_type_.Style_ClassIndexTrace{}
+	classTrace := []_model.Style_ClassIndexTrace{}
 
 	for _, entry := range classList {
-		found := _cache_.Index_Find(entry, localClassMap)
-		if found.Group != _type_.Style_Type_Null {
-			classTrace = append(classTrace, _type_.Style_ClassIndexTrace{ClassName: entry, ClassIndex: found.Index})
+		found := _action.Index_Find(entry, localClassMap)
+		if found.Group != _model.Style_Type_Null {
+			classTrace = append(classTrace, _model.Style_ClassIndexTrace{ClassName: entry, ClassIndex: found.Index})
 			indexArray = append(indexArray, found.Index)
 		}
 	}
 
-	indexSetback := _utils_.Array_Setback(indexArray)
-	if action == _type_.Script_Action_Sync {
+	indexSetback := _util.Array_Setback(indexArray)
+	if action == E_Action_Sync {
 		json_Return, json_Error := _json_.Marshal(indexSetback)
 		if json_Error == nil {
-			dict_Return, dict_Status := _cache_.Style.ClassDictionary[string(json_Return)]
+			dict_Return, dict_Status := _config.Style.ClassDictionary[string(json_Return)]
 			if dict_Status {
 				for _, trace := range classTrace {
 					classMap[trace.ClassName] = dict_Return[trace.ClassIndex]
@@ -41,10 +42,10 @@ func value_EvaluateIndexTraces(
 			}
 		}
 	} else {
-		if action == _type_.Script_Action_Watch {
+		if action == E_Action_Watch {
 			for index, item := range classTrace {
-				classname := _fmt_.Sprintf("%s%d", metaFront, index)
-				_cache_.Style.PublishIndexMap = append(_cache_.Style.PublishIndexMap, _type_.Style_ClassIndexTrace{
+				classname := _fmt.Sprintf("%s%d", metaFront, index)
+				_config.Style.PublishIndexMap = append(_config.Style.PublishIndexMap, _model.Style_ClassIndexTrace{
 					ClassName:  "." + classname,
 					ClassIndex: item.ClassIndex,
 				})
@@ -52,15 +53,15 @@ func value_EvaluateIndexTraces(
 			}
 		}
 
-		if action == _type_.Script_Action_Monitor {
+		if action == E_Action_Monitor {
 			for _, item := range classTrace {
-				classdata := _cache_.Index_Fetch(item.ClassIndex)
-				classname := _fmt_.Sprintf("%s%s", metaFront, classdata.DebugClass)
-				_cache_.Style.PublishIndexMap = append(_cache_.Style.PublishIndexMap, _type_.Style_ClassIndexTrace{
+				classdata := _action.Index_Fetch(item.ClassIndex)
+				classname := _fmt.Sprintf("%s%s", metaFront, classdata.DebugClass)
+				_config.Style.PublishIndexMap = append(_config.Style.PublishIndexMap, _model.Style_ClassIndexTrace{
 					ClassName:  "." + classname,
 					ClassIndex: item.ClassIndex,
 				})
-				classMap[item.ClassName] = _utils_.String_Filter(
+				classMap[item.ClassName] = _util.String_Filter(
 					classname,
 					[]rune{'/', '.', ':', '|', '$'},
 					[]rune{'\\'},
@@ -82,16 +83,16 @@ type value_Parse_retype struct {
 
 func value_Parse(
 	value string,
-	action _type_.Script_Action,
-	fileData *_type_.File_Stash,
-	FileCursor _Cursor_.Type,
+	action E_Action,
+	fileData *_model.File_Stash,
+	FileCursor _reader.Type,
 ) value_Parse_retype {
 	classlist := []string{}
 	quotes := []rune{'\'', '`', '"'}
 	attachments := []string{}
 	locales := []string{}
 
-	var entry _strings_.Builder
+	var entry _string.Builder
 	scribed := value
 	activeQuote := ' '
 	inQuote := false
@@ -104,11 +105,11 @@ func value_Parse(
 		if inQuote {
 			if ch == ' ' || ch == activeQuote {
 				entrystring := entry.String()
-				if rune(entrystring[0]) == _cache_.Root.CustomOperations["attach"] {
+				if rune(entrystring[0]) == _config.Root.CustomOperations["attach"] {
 					attachments = append(attachments, entrystring[1:])
-				} else if rune(entrystring[0]) == _cache_.Root.CustomOperations["assign"] {
+				} else if rune(entrystring[0]) == _config.Root.CustomOperations["assign"] {
 					classlist = append(classlist, entrystring[1:])
-				} else if rune(entrystring[0]) == _cache_.Root.CustomOperations["locale"] {
+				} else if rune(entrystring[0]) == _config.Root.CustomOperations["locale"] {
 					locales = append(locales, entrystring)
 				}
 				entry.Reset()
@@ -119,14 +120,14 @@ func value_Parse(
 				inQuote = false
 				activeQuote = ' '
 			}
-		} else if _slices_.Contains(quotes, ch) {
+		} else if _slice.Contains(quotes, ch) {
 			inQuote = true
 			activeQuote = ch
 		}
 	}
 
-	if action != _type_.Script_Action_Read {
-		var scriber _strings_.Builder
+	if action != E_Action_Read {
+		var scriber _string.Builder
 
 		entry.Reset()
 		activeQuote = ' '
@@ -134,15 +135,15 @@ func value_Parse(
 
 		var metafront string
 		switch action {
-		case _type_.Script_Action_Monitor:
-			metafront = _fmt_.Sprintf(
+		case E_Action_Monitor:
+			metafront = _fmt.Sprintf(
 				"TAG%s\\:%d\\:%d__",
 				fileData.DebugFront,
 				FileCursor.Active.RowMarker,
 				FileCursor.Active.ColMarker,
 			)
-		case _type_.Script_Action_Watch:
-			metafront = _fmt_.Sprintf(
+		case E_Action_Watch:
+			metafront = _fmt.Sprintf(
 				"_%s_%d",
 				fileData.Label,
 				FileCursor.Active.Cycle,
@@ -159,10 +160,10 @@ func value_Parse(
 			if inQuote {
 				if ch == ' ' || ch == activeQuote {
 					entrystring := entry.String()
-					if rune(entrystring[0]) != _cache_.Root.CustomOperations["attach"] {
-						if rune(entrystring[0]) == _cache_.Root.CustomOperations["locale"] {
-							scriber.WriteString(_fmt_.Sprintf("_%s_%s", fileData.Label, entrystring))
-						} else if rune(entrystring[0]) == _cache_.Root.CustomOperations["assign"] {
+					if rune(entrystring[0]) != _config.Root.CustomOperations["attach"] {
+						if rune(entrystring[0]) == _config.Root.CustomOperations["locale"] {
+							scriber.WriteString(_fmt.Sprintf("_%s_%s", fileData.Label, entrystring))
+						} else if rune(entrystring[0]) == _config.Root.CustomOperations["assign"] {
 							entrystring := entrystring[1:]
 							found_Entry, found_Status := classMap[entrystring]
 							if found_Status {
@@ -185,7 +186,7 @@ func value_Parse(
 				}
 			} else {
 				scriber.WriteRune(ch)
-				if _slices_.Contains(quotes, ch) {
+				if _slice.Contains(quotes, ch) {
 					inQuote = true
 					activeQuote = ch
 				}

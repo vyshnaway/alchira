@@ -1,6 +1,7 @@
-package cache
+package action
 
 import (
+	_config "main/configs"
 	_model "main/models"
 	_utils "main/package/utils"
 	_sync "sync"
@@ -14,7 +15,7 @@ var mu _sync.Mutex
 func Index_Fetch(index int) *_model.Style_ClassData {
 	mu.Lock()
 	defer mu.Unlock()
-	data := Style.Index_to_Data[index]
+	data := _config.Style.Index_to_Data[index]
 	return &data
 }
 
@@ -34,7 +35,7 @@ func Index_Declare(object _model.Style_ClassData) int {
 	object.Index = idx
 	delete(BIN, idx)
 	object.Metadata.WatchClass = "__" + _utils.String_EnCounter(idx)
-	Style.Index_to_Data[idx] = object
+	_config.Style.Index_to_Data[idx] = object
 	return idx
 }
 
@@ -45,7 +46,7 @@ func Index_Dispose(indexes ...int) {
 	for _, idx := range indexes {
 		if idx > 0 {
 			BIN[idx] = struct{}{}
-			delete(Style.Index_to_Data, idx)
+			delete(_config.Style.Index_to_Data, idx)
 		}
 	}
 }
@@ -58,10 +59,10 @@ func Index_Reset(after int) int {
 		after = 0
 	}
 	removed := 0
-	for idx := range Style.Index_to_Data {
+	for idx := range _config.Style.Index_to_Data {
 		if idx > after {
 			delete(BIN, idx)
-			delete(Style.Index_to_Data, idx)
+			delete(_config.Style.Index_to_Data, idx)
 			removed++
 		}
 	}
@@ -82,16 +83,16 @@ func Index_Find(classname string, localMap _model.Style_ClassIndexMap) index_Fin
 	if idx, found := localMap[classname]; found {
 		index = idx
 		group = _model.Style_Type_Local
-	} else if idx, found := Style.Global___Index[classname]; found {
+	} else if idx, found := _config.Style.Global___Index[classname]; found {
 		index = idx
 		group = _model.Style_Type_Global
-	} else if idx, found := Style.Public___Index[classname]; found {
+	} else if idx, found := _config.Style.Public___Index[classname]; found {
 		index = idx
 		group = _model.Style_Type_Public
-	} else if idx, found := Style.Library__Index[classname]; found {
+	} else if idx, found := _config.Style.Library__Index[classname]; found {
 		index = idx
 		group = _model.Style_Type_Library
-	} else if idx, found := Style.Artifact_Index[classname]; found {
+	} else if idx, found := _config.Style.Artifact_Index[classname]; found {
 		index = idx
 		group = _model.Style_Type_Artifact
 	}

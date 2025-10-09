@@ -89,7 +89,7 @@ func (This *T_Block) flatten(parent string) (Res *T_Block) {
 		}
 	}
 
-	This.BlockRange(func(k string, v T_Block) {
+	This.BlockRange(func(k string, v *T_Block) {
 		if strings.HasPrefix(k, "&::-") {
 			elven_list = append(elven_list, k)
 		} else if strings.HasPrefix(k, "&::") {
@@ -122,7 +122,7 @@ func (This *T_Block) flatten(parent string) (Res *T_Block) {
 				if strings.HasPrefix(k, "&") {
 					k = parent + k[1:]
 				}
-				v.flatten(k).BlockRange(func(kk string, vv T_Block) {
+				v.flatten(k).BlockRange(func(kk string, vv *T_Block) {
 					target.SetBlock(kk, vv)
 				})
 			}
@@ -138,7 +138,7 @@ func (This *T_Block) flatten(parent string) (Res *T_Block) {
 	add(all, comps_list)
 	add(all, clven_list)
 	add(all, clstd_list)
-	all.SetBlock(parent, *sub)
+	all.SetBlock(parent, sub)
 	add(all, elven_list)
 	add(all, elstd_list)
 	add(all, child_list)
@@ -153,8 +153,8 @@ func (This *T_Block) Flatten() (Res *T_Block) {
 		all.SetProp(k, v)
 	})
 
-	This.BlockRange(func(k string, v T_Block) {
-		all.Mixin(*v.flatten(k))
+	This.BlockRange(func(k string, v *T_Block) {
+		all.Mixin(v.flatten(k))
 	})
 
 	return all
@@ -168,10 +168,10 @@ func (This *T_Block) PropRange(fn func(k string, v string)) {
 	}
 }
 
-func (This *T_Block) BlockRange(fn func(k string, v T_Block)) {
+func (This *T_Block) BlockRange(fn func(k string, v *T_Block)) {
 	for _, key := range This.Block_keys {
 		if ok, val := This.GetBlock(key); ok {
-			fn(key, *val)
+			fn(key, val)
 		}
 	}
 }
@@ -183,7 +183,7 @@ func (This *T_Block) print() []string {
 	This.PropRange(func(k, v string) {
 		result = append(result, k+": "+v)
 	})
-	This.BlockRange(func(k string, v T_Block) {
+	This.BlockRange(func(k string, v *T_Block) {
 		result = append(result, k+" {")
 		for _, vv := range v.print() {
 			result = append(result, tab+vv)
@@ -207,7 +207,7 @@ func (This *T_Block) Skeleton() any {
 		}
 	})
 
-	This.BlockRange(func(k string, v T_Block) {
+	This.BlockRange(func(k string, v *T_Block) {
 		result[k] = v.Skeleton()
 	})
 

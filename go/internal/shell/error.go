@@ -1,13 +1,13 @@
-package make
+package shell
 
 import (
-	S "main/package/shell/core"
-	_types_ "main/types"
+	_model "main/models"
+	S "main/package/shell"
 )
 
 type error_return struct {
 	Errorstring string
-	Diagnostic  _types_.Refer_Diagnostic
+	Diagnostic  _model.Refer_Diagnostic
 }
 
 func Error_Write(
@@ -19,7 +19,7 @@ func Error_Write(
 		declaration,
 		S.MakeList{TypeFunc: S.List.Bullets, Intent: 1, Preset: S.Preset.Tertiary},
 	)
-	diagnostic := _types_.Refer_Diagnostic{
+	diagnostic := _model.Refer_Diagnostic{
 		Message: message,
 		Sources: declaration,
 	}

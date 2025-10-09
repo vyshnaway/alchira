@@ -40,7 +40,7 @@ func Render_Prefixer(stylemap T_Block, vendors []string) *T_Block {
 		}
 	})
 
-	stylemap.BlockRange(func(k string, v T_Block) {
+	stylemap.BlockRange(func(k string, v *T_Block) {
 		if v.Len() > 0 {
 			out.SetBlock(k, v)
 		}
@@ -74,14 +74,14 @@ func render_Vendored(stylemap *T_Block, minify bool, vendors []string, first boo
 	}
 
 	if prefixed.BlockLen() > 0 {
-		prefixed.BlockRange(func(k string, v T_Block) {
+		prefixed.BlockRange(func(k string, v *T_Block) {
 			if !minify && first {
 				stylesheet = append(stylesheet, "")
 			}
 
 			if _strings.HasPrefix(k, "@") {
 				for vendor, selector := range prefix_ForAtRule(k, vendors) {
-					composed := render_Vendored(&v, minify, []string{vendor}, false)
+					composed := render_Vendored(v, minify, []string{vendor}, false)
 					if len(composed) > 0 {
 						stylesheet = append(stylesheet, selector)
 						stylesheet = append(stylesheet, "{")
@@ -93,7 +93,7 @@ func render_Vendored(stylemap *T_Block, minify bool, vendors []string, first boo
 					}
 				}
 			} else {
-				composed := render_Vendored(&v, minify, vendors, false)
+				composed := render_Vendored(v, minify, vendors, false)
 				if !minify {
 					for index, line := range composed {
 						composed[index] = tab + line
@@ -136,27 +136,27 @@ func render_Wrapper(pm *T_Block, keys []string, cm *T_Block) {
 		ok, m := pm.GetBlock(key)
 		if !ok {
 			m = NewBlock()
-			pm.SetBlock(key, *m)
+			pm.SetBlock(key, m)
 		}
 
 		if ok, n := m.GetBlock(key); ok {
 			render_Wrapper(n, keys, cm)
 		}
 	} else {
-		pm.SetBlock(key, *cm)
+		pm.SetBlock(key, cm)
 	}
 }
 
 func render_Switched(This *T_Block) *T_Block {
 	out := NewBlock()
-	inq := out.SetBlock("", *NewBlock())
+	inq := out.SetBlock("", NewBlock())
 
 	This.PropRange(func(k, v string) {
 		out.SetProp(k, v)
 	})
 
-	out.BlockRange(func(k0 string, v0 T_Block) {
-		v0.BlockRange(func(k1 string, v1 T_Block) {
+	out.BlockRange(func(k0 string, v0 *T_Block) {
+		v0.BlockRange(func(k1 string, v1 *T_Block) {
 			if k1 == "" {
 				inq.SetBlock(k0, v0)
 			} else {
@@ -169,7 +169,7 @@ func render_Switched(This *T_Block) *T_Block {
 							keyseq = append(keyseq, "& "+wrapper)
 						}
 					}
-					render_Wrapper(out, keyseq, &v1)
+					render_Wrapper(out, keyseq, v1)
 				}
 			}
 		})

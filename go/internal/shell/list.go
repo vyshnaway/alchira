@@ -1,7 +1,7 @@
-package make
+package shell
 
 import (
-	S "main/shell/core"
+	S "main/package/shell"
 )
 
 func List_Props(record map[string]string, keystyles []string, valstyles []string) []string {

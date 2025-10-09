@@ -1,8 +1,8 @@
-package make
+package shell
 
 import (
-	S "main/shell/core"
-	_types_ "main/types"
+	_model "main/models"
+	S "main/package/shell"
 )
 
 func Hashrule_Error(
@@ -20,7 +20,7 @@ func Hashrule_Error(
 	)
 
 	preview["ERROR BY"] = cause
-	var diagnostic = _types_.Refer_Diagnostic{
+	var diagnostic = _model.Refer_Diagnostic{
 		Message: S.MAKE(
 			primitive+" : "+message,
 			List_Props(preview, S.Preset.None, S.Preset.None),

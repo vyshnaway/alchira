@@ -1,31 +1,33 @@
 package style
 
 import (
-	_json_ "encoding/json"
-	_fmt_ "fmt"
-	_cache_ "main/cache"
-	_types_ "main/types"
-	_utils_ "main/utils"
-	_maps_ "maps"
-	_regexp_ "regexp"
-	_strconv_ "strconv"
-	"strings"
+	_json "encoding/json"
+	_fmt "fmt"
+	_config "main/configs"
+	_action "main/internal/action"
+	_script "main/internal/script"
+	_model "main/models"
+	_util "main/package/utils"
+	_map "maps"
+	_regexp "regexp"
+	_strconv "strconv"
+	_string "strings"
 )
 
 func Rawtag_Upload(
-	raw *_types_.Script_RawStyle,
-	file *_types_.File_Stash,
-	IndexMap _types_.Style_ClassIndexMap,
-	metadata_map _types_.File_MetadataMap,
+	raw *_script.T_RawStyle,
+	file *_model.File_Stash,
+	IndexMap _model.Style_ClassIndexMap,
+	metadata_map _model.File_MetadataMap,
 	verbose bool,
 ) rawtag_Upload_return {
 	errors := []string{}
-	diagnostics := []_types_.Refer_Diagnostic{}
+	diagnostics := []_model.Refer_Diagnostic{}
 	attachments := []string{}
-	forArtifact := file.Manifest.Lookup.Type == _types_.File_Type_Artifact
-	declaration := file.TargetPath + ":" + _strconv_.Itoa(raw.RowIndex) + ":" + _strconv_.Itoa(raw.ColIndex)
+	forArtifact := file.Manifest.Lookup.Type == _model.File_Type_Artifact
+	declaration := file.TargetPath + ":" + _strconv.Itoa(raw.RowIndex) + ":" + _strconv.Itoa(raw.ColIndex)
 
-	re := _regexp_.MustCompile(`^-\$`)
+	re := _regexp.MustCompile(`^-\$`)
 	symzero := ""
 	if len(raw.SymClasses) > 0 {
 		symzero = re.ReplaceAllString(raw.SymClasses[0], "$")
@@ -33,31 +35,31 @@ func Rawtag_Upload(
 	var normalsymclass string
 	symclass := file.ClassFront
 	if forArtifact {
-		symclass += strings.ReplaceAll(symzero, "$$$", "$")
-		normalsymclass = _utils_.String_Filter(symclass, []rune{}, []rune{}, []rune{'$', '/'})
+		symclass += _string.ReplaceAll(symzero, "$$$", "$")
+		normalsymclass = _util.String_Filter(symclass, []rune{}, []rune{}, []rune{'$', '/'})
 	} else {
 		symclass += string(symzero)
-		normalsymclass = _utils_.String_Filter(symclass, []rune{}, []rune{}, []rune{'$'})
+		normalsymclass = _util.String_Filter(symclass, []rune{}, []rune{}, []rune{'$'})
 	}
 
-	found := _cache_.Index_Find(symclass, IndexMap)
+	found := _action.Index_Find(symclass, IndexMap)
 	index := found.Index
-	if found.Group != _types_.Style_Type_Null {
-		classdata := _cache_.Index_Fetch(found.Index)
+	if found.Group != _model.Style_Type_Null {
+		classdata := _action.Index_Fetch(found.Index)
 		classdata.Metadata.Declarations = append(classdata.Metadata.Declarations, declaration)
 	} else {
-		var scope _types_.Style_Type
-		if raw.Scope == _types_.Style_Type_Artifact {
-			scope = _types_.Style_Type_Null
+		var scope _model.Style_Type
+		if raw.Scope == _model.Style_Type_Artifact {
+			scope = _model.Style_Type_Null
 		} else {
 			scope = raw.Scope
 		}
-		debugclass := _fmt_.Sprint(scope, file.DebugFront, "\\:", raw.RowIndex, "\\:", raw.ColIndex, "_", normalsymclass)
+		debugclass := _fmt.Sprint(scope, file.DebugFront, "\\:", raw.RowIndex, "\\:", raw.ColIndex, "_", normalsymclass)
 
 		stylescanned := Parse_CssSnippet(
-			_utils_.Code_Uncomment(raw.Styles[""], true, true, false),
-			_fmt_.Sprint(raw.Scope, " : ", file.FilePath, " |"),
-			_fmt_.Sprint(raw.SymClasses),
+			_util.Code_Uncomment(raw.Styles[""], true, true, false),
+			_fmt.Sprint(raw.Scope, " : ", file.FilePath, " |"),
+			_fmt.Sprint(raw.SymClasses),
 			false,
 			verbose,
 		)
@@ -71,21 +73,21 @@ func Rawtag_Upload(
 				query := Hashrule_Render(key, declaration)
 				if query.Status {
 					stylescanned = Parse_CssSnippet(
-						_utils_.Code_Uncomment(val, true, true, false),
-						_fmt_.Sprint(raw.Scope, " : ", file.FilePath, " |"),
-						_fmt_.Sprint(raw.SymClasses, " => ", key),
+						_util.Code_Uncomment(val, true, true, false),
+						_fmt.Sprint(raw.Scope, " : ", file.FilePath, " |"),
+						_fmt.Sprint(raw.SymClasses, " => ", key),
 						true,
 						verbose,
 					)
 					attachments = append(attachments, stylescanned.Attachments...)
-					_maps_.Copy(variables, stylescanned.Variables)
+					_map.Copy(variables, stylescanned.Variables)
 					if stylescanned.Result.Len() > 0 {
-						res, err := _json_.Marshal(query.Wrappers)
+						res, err := _json.Marshal(query.Wrappers)
 						if err == nil {
 							res_typed := string(res)
-							re := _regexp_.MustCompile(`.()` + string(_cache_.Root.CustomOperations["locale"]))
+							re := _regexp.MustCompile(`.()` + string(_config.Root.CustomOperations["locale"]))
 							if !forArtifact {
-								re.ReplaceAllString(res_typed, _fmt_.Sprintf("_%s_$1", file.Label))
+								re.ReplaceAllString(res_typed, _fmt.Sprintf("_%s_$1", file.Label))
 							}
 							object.SetBlock(res_typed, stylescanned.Result)
 						}
@@ -98,22 +100,22 @@ func Rawtag_Upload(
 		}
 
 		inner_style := Parse_CssSnippet(
-			_utils_.Code_Uncomment(raw.Innertext, true, true, false),
-			_fmt_.Sprint(raw.Scope, ":ATTACHMENT : ", file.FilePath, ":", raw.RowIndex, ":", raw.ColIndex, " |"),
+			_util.Code_Uncomment(raw.Innertext, true, true, false),
+			_fmt.Sprint(raw.Scope, ":ATTACHMENT : ", file.FilePath, ":", raw.RowIndex, ":", raw.ColIndex, " |"),
 			raw.SymClasses[0],
 			true,
 			verbose,
 		)
 
 		attachments = append(attachments, inner_style.Attachments...)
-		_maps_.Copy(variables, inner_style.Variables)
+		_map.Copy(variables, inner_style.Variables)
 
-		artifact := _cache_.Archive.Name
+		artifact := _config.Archive.Name
 		if forArtifact {
 			artifact = file.Artifact
 			for i, v := range attachments {
-				if strings.Contains(v, "$$$") {
-					attachments[i] = file.ClassFront + strings.ReplaceAll(v, "$$$", "$")
+				if _string.Contains(v, "$$$") {
+					attachments[i] = file.ClassFront + _string.ReplaceAll(v, "$$$", "$")
 				} else {
 					attachments[i] = file.ClassFront + "$/" + v
 				}
@@ -122,17 +124,17 @@ func Rawtag_Upload(
 
 		summon := ""
 		attributes := map[string]string{}
-		if raw.Elid == _cache_.Root.CustomElements["summon"] {
+		if raw.Elid == _config.Root.CustomElements["summon"] {
 			summon = raw.Innertext
 			attributes = raw.Attributes
 		}
 
 		staple := ""
-		if raw.Elid == _cache_.Root.CustomElements["staple"] {
+		if raw.Elid == _config.Root.CustomElements["staple"] {
 			staple = raw.Innertext
 		}
 
-		metadata := _types_.Style_Metadata{
+		metadata := _model.Style_Metadata{
 			Info:         raw.Comments,
 			WatchClass:   "",
 			Variables:    variables,
@@ -141,13 +143,13 @@ func Rawtag_Upload(
 			Summon:       summon,
 			Attributes:   attributes,
 		}
-		index = _cache_.Index_Declare(_types_.Style_ClassData{
+		index = _action.Index_Declare(_model.Style_ClassData{
 			Index:         0,
 			Artifact:      artifact,
 			Definent:      raw.SymClasses[0],
 			SymClass:      symclass,
 			StyleObject:   object,
-			Metadata:      &metadata ,
+			Metadata:      &metadata,
 			Attachments:   attachments,
 			DebugClass:    debugclass,
 			Declarations:  []string{declaration},
@@ -172,6 +174,6 @@ type rawtag_Upload_return struct {
 	Symclass    string
 	Index       int
 	Attachments []string
-	Diagnostics []_types_.Refer_Diagnostic
+	Diagnostics []_model.Refer_Diagnostic
 	Errors      []string
 }

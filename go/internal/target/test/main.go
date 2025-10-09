@@ -1,9 +1,9 @@
 package Target_test
 
 import (
-	"main/class/Target"
-	"main/types"
-	"testing"
+	_model "main/models"
+	_target "main/internal/target"
+	_testing "testing"
 )
 
 const content = `
@@ -93,8 +93,8 @@ const content1 = `
 	<div data-glass-type='liquid' class="=glass$$$container ~glass-type =glass$$--container -locale">
 `
 
-func Test_Main(t *testing.T) {
-	Target.New(types.Config_ProxyStorage{
+func Test_Main(t *_testing.T) {
+	_target.New(_model.Config_ProxyStorage{
 		Source:            "Source",
 		Target:            "Target",
 		Stylesheet:        "Stylesheet",

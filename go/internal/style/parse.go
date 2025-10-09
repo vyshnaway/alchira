@@ -1,30 +1,29 @@
 package style
 
 import (
-	_cache_ "main/cache"
-	_Blockmap_ "main/class/Blockmap"
+	_action "main/internal/action"
+	_css "main/package/css"
 
-	// "main/shell/core"
-	_types_ "main/types"
-	_maps_ "maps"
+	_model "main/models"
+	_map "maps"
 )
 
 type Parse_return struct {
-	Result      _Blockmap_.Type
+	Result      *_css.T_Block
 	Attachments []string
 	Variables   map[string]string
 }
 
 func parse_AssignMerge(classlist []string) Parse_return {
 	attachments := []string{}
-	result := _Blockmap_.Type{}
+	result := _css.NewBlock()
 	variables := map[string]string{}
 
 	for _, classname := range classlist {
-		found := _cache_.Index_Find(classname, _types_.Style_ClassIndexMap{})
-		if found.Group == _types_.Style_Type_Library {
-			classdata := _cache_.Index_Fetch(found.Index)
-			_maps_.Copy(variables, classdata.Metadata.Variables)
+		found := _action.Index_Find(classname, _model.Style_ClassIndexMap{})
+		if found.Group == _model.Style_Type_Library {
+			classdata := _action.Index_Fetch(found.Index)
+			_map.Copy(variables, classdata.Metadata.Variables)
 			attachments = append(attachments, classdata.Attachments...)
 			result.Mixin(classdata.StyleObject)
 		}
@@ -37,6 +36,48 @@ func parse_AssignMerge(classlist []string) Parse_return {
 	}
 }
 
+type R_Parse_Filter struct {
+	Assign    []string
+	Attach    []string
+	Liners    map[string]string
+	Blocks    map[string]string
+	Variables map[string]string
+}
+
+func parse_Filter(content string) R_Parse_Filter {
+	assign := []string{}
+	attach := []string{}
+	directives := []string{}
+	properties := []string{}
+	_css.ParsePartial(content)
+	// for _, kv := refer
+
+	// 	spaceIndex := _strings_.Index(val, " ")
+	// 	if spaceIndex < 0 {
+	// 		spaceIndex = len(val)
+	// 	}
+	// 	directive := val[0:spaceIndex]
+
+	// 	switch directive {
+	// 	case _cache_.Root.CustomAtrules["attach"]:
+	// 		breaks := _utils_.String_ZeroBreaks(val[spaceIndex:], []rune{' ', '\n', ','})
+	// 		result.Attach = append(result.Attach, breaks...)
+	// 	case _cache_.Root.CustomAtrules["assign"]:
+	// 		breaks := _utils_.String_ZeroBreaks(val[spaceIndex:], []rune{' ', '\n', ','})
+	// 		result.Assign = append(result.Assign, breaks...)
+	// 	default:
+	// 	}
+	// } else {
+	// 	breaks := _utils_.String_ZeroBreaks(val, []rune{' ', '\n', ','})
+	// 	if len(breaks) > 0 {
+	// 		if breaks[0] == string(_cache_.Root.CustomOperations["attach"]) {
+	// 			result.Attach = append(result.Attach, breaks[1:]...)
+	// 		} else if (breaks[0]) == string(_cache_.Root.CustomOperations["assign"]) {
+	// 			result.Assign = append(result.Assign, breaks[1:]...)
+	// 		}
+	// 	}
+}
+
 func Parse_CssSnippet(
 	content string,
 	initial string,
@@ -45,10 +86,10 @@ func Parse_CssSnippet(
 	verbose bool,
 ) Parse_return {
 
-	scanned := Block_Parse(content)
+	scanned := parse_Filter(content)
 	assigned := parse_AssignMerge(scanned.Assign)
 	variables := assigned.Variables
-	_maps_.Copy(variables, scanned.Variables)
+	_map.Copy(variables, scanned.Variables)
 
 	attachments := assigned.Attachments
 	for _, v := range scanned.Attach {
@@ -57,43 +98,37 @@ func Parse_CssSnippet(
 		}
 	}
 
-	propmap := _Blockmap_.Type{}
+	propmap := _css.NewBlock()
 	for k, v := range assigned.Variables {
 		propmap.SetProp(k, v)
 	}
 
-	savprop := func(proplist [][2]string) {
-		if verbose {
-			for _, kv := range proplist {
-				propmap.SetProp(kv[0], kv[1]+"/* "+initial+srcselector+" */")
-			}
-		} else {
-			for _, kv := range proplist {
-				propmap.SetProp(kv[0], kv[1])
-			}
+	if verbose {
+		for k, v := range scanned.Liners {
+			propmap.SetProp(k, v+"/* "+initial+srcselector+" */")
+		}
+	} else {
+		for k, v := range scanned.Liners {
+			propmap.SetProp(k, v)
 		}
 	}
-	savprop(scanned.AtProps)
-	savprop(scanned.Properties)
 
-	blockmap := *assigned.Result.Mixin(*_Blockmap_.New().SetBlock("", propmap))
+	blockmap := *assigned.Result.Mixin(_css.NewBlock().SetBlock("", propmap))
 	if flatten {
 		if ok, bm := blockmap.GetBlock(""); ok {
 			bm.PropRange(func(k, v string) {
 				blockmap.SetProp(k, v)
 			})
-			bm.BlockRange(func(k string, v _Blockmap_.Type) {
-				blockmap.SetBlock(k, *v.Clone())
+			bm.BlockRange(func(k string, v *_css.T_Block) {
+				blockmap.SetBlock(k, v.Clone())
 			})
 		}
 		blockmap.DelBlock("")
 	}
 
-	for _, kv := range scanned.AllBlocks {
-		key := kv[0]
-		val := kv[1]
+	for key, val := range scanned.Blocks {
 		sub_result := Parse_CssSnippet(val, initial, srcselector+" -> "+key, true, verbose)
-		_maps_.Copy(variables, sub_result.Variables)
+		_map.Copy(variables, sub_result.Variables)
 		attachments = append(attachments, sub_result.Attachments...)
 		if flatten {
 			blockmap.SetBlock(key, sub_result.Result)
@@ -103,7 +138,7 @@ func Parse_CssSnippet(
 	}
 
 	return Parse_return{
-		Result:      blockmap,
+		Result:      &blockmap,
 		Attachments: attachments,
 		Variables:   variables,
 	}

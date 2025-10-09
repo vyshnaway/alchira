@@ -2,11 +2,18 @@ package order
 
 import (
 	_json_ "encoding/json"
-	_types_ "main/types"
-	_utils_ "main/utils"
+	_utils_ "main/package/utils"
 )
 
-func Preview_Organize(classtrace [][]int, merge bool) *_types_.Refer_SortedOutput {
+type R_Preview struct {
+	Count           int                 `json:"count"`
+	ClassLists      [][]int             `json:"classlist"`
+	List_to_GroupId map[string]int      `json:"listToGroup"`
+	Group_to_Table  map[int]map[int]int `json:"groupToMap"`
+	Final_Hashtrace [][2]int            `json:"recompClasslist"`
+}
+
+func Preview(classtrace [][]int, merge bool) *R_Preview {
 	maxLen := 0
 	counter := 0
 	refindex := 0
@@ -66,7 +73,7 @@ func Preview_Organize(classtrace [][]int, merge bool) *_types_.Refer_SortedOutpu
 		refindex++
 	}
 
-	return &_types_.Refer_SortedOutput{
+	return &R_Preview{
 		Count:           counter,
 		ClassLists:      finalists,
 		List_to_GroupId: list_to_group,
