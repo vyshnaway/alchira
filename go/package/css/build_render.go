@@ -1,9 +1,8 @@
-package compose
+package css
 
 import (
-	_blockmap_ "main/package/css/block"
-	"main/utils"
-	"strings"
+	_utils "main/package/utils"
+	_strings "strings"
 	// "main/shell/core"
 	// "strings"
 	// _strings_ "strings"
@@ -23,8 +22,8 @@ import (
 // 	return result
 // }
 
-func Render_Prefixer(stylemap _blockmap_.Type, vendors []string) *_blockmap_.Type {
-	out := _blockmap_.New()
+func Render_Prefixer(stylemap T_Block, vendors []string) *T_Block {
+	out := NewBlock()
 
 	stylemap.PropRange(func(key, val string) {
 		if key[0] == '@' {
@@ -41,7 +40,7 @@ func Render_Prefixer(stylemap _blockmap_.Type, vendors []string) *_blockmap_.Typ
 		}
 	})
 
-	stylemap.BlockRange(func(k string, v _blockmap_.Type) {
+	stylemap.BlockRange(func(k string, v T_Block) {
 		if v.Len() > 0 {
 			out.SetBlock(k, v)
 		}
@@ -50,7 +49,7 @@ func Render_Prefixer(stylemap _blockmap_.Type, vendors []string) *_blockmap_.Typ
 	return out
 }
 
-func render_Vendored(stylemap *_blockmap_.Type, minify bool, vendors []string, first bool) []string {
+func render_Vendored(stylemap *T_Block, minify bool, vendors []string, first bool) []string {
 	stylesheet := []string{}
 	var tab string
 	var space string
@@ -75,12 +74,12 @@ func render_Vendored(stylemap *_blockmap_.Type, minify bool, vendors []string, f
 	}
 
 	if prefixed.BlockLen() > 0 {
-		prefixed.BlockRange(func(k string, v _blockmap_.Type) {
+		prefixed.BlockRange(func(k string, v T_Block) {
 			if !minify && first {
 				stylesheet = append(stylesheet, "")
 			}
 
-			if strings.HasPrefix(k, "@") {
+			if _strings.HasPrefix(k, "@") {
 				for vendor, selector := range prefix_ForAtRule(k, vendors) {
 					composed := render_Vendored(&v, minify, []string{vendor}, false)
 					if len(composed) > 0 {
@@ -113,7 +112,7 @@ func render_Vendored(stylemap *_blockmap_.Type, minify bool, vendors []string, f
 	return stylesheet
 }
 
-func Render_Vendored(stylemap *_blockmap_.Type, minify bool) string {
+func Render_Vendored(stylemap *T_Block, minify bool) string {
 	var breaks string
 
 	if minify {
@@ -122,10 +121,10 @@ func Render_Vendored(stylemap *_blockmap_.Type, minify bool) string {
 		breaks = "\n"
 	}
 
-	return strings.Join(render_Vendored(stylemap.Flatten(), minify, vendor_Providers, true), breaks)
+	return _strings.Join(render_Vendored(stylemap.Flatten(), minify, vendor_Providers, true), breaks)
 }
 
-func render_Wrapper(pm *_blockmap_.Type, keys []string, cm *_blockmap_.Type) {
+func render_Wrapper(pm *T_Block, keys []string, cm *T_Block) {
 	if len(keys) == 0 {
 		return
 	}
@@ -136,7 +135,7 @@ func render_Wrapper(pm *_blockmap_.Type, keys []string, cm *_blockmap_.Type) {
 	if len(keys) > 0 {
 		ok, m := pm.GetBlock(key)
 		if !ok {
-			m = _blockmap_.New()
+			m = NewBlock()
 			pm.SetBlock(key, *m)
 		}
 
@@ -148,20 +147,20 @@ func render_Wrapper(pm *_blockmap_.Type, keys []string, cm *_blockmap_.Type) {
 	}
 }
 
-func render_Switched(This *_blockmap_.Type) *_blockmap_.Type {
-	out := _blockmap_.New()
-	inq := out.SetBlock("", *_blockmap_.New())
+func render_Switched(This *T_Block) *T_Block {
+	out := NewBlock()
+	inq := out.SetBlock("", *NewBlock())
 
 	This.PropRange(func(k, v string) {
 		out.SetProp(k, v)
 	})
 
-	out.BlockRange(func(k0 string, v0 _blockmap_.Type) {
-		v0.BlockRange(func(k1 string, v1 _blockmap_.Type) {
+	out.BlockRange(func(k0 string, v0 T_Block) {
+		v0.BlockRange(func(k1 string, v1 T_Block) {
 			if k1 == "" {
 				inq.SetBlock(k0, v0)
 			} else {
-				if wrappers, err := utils.Code_JsonParse[[]string](k1); err == nil {
+				if wrappers, err := _utils.Code_JsonParse[[]string](k1); err == nil {
 					keyseq := []string{}
 					for index, wrapper := range wrappers {
 						if index == 0 || wrappers[index-1][0] == '@' || wrapper[0] == '@' {
@@ -179,7 +178,7 @@ func render_Switched(This *_blockmap_.Type) *_blockmap_.Type {
 	return out
 }
 
-func Render_Switched(stylemap _blockmap_.Type, minify bool) string {
+func Render_Switched(stylemap T_Block, minify bool) string {
 	switched := render_Switched(&stylemap)
 	return Render_Vendored(switched, minify)
 }

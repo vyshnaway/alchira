@@ -1,7 +1,8 @@
 package shell
 
 import (
-	_fmt_ "fmt"
+	_fmt "fmt"
+	_utils "main/package/utils"
 )
 
 func list_Bullets(items []string, intent int, preset []string, styles ...string) []string {
@@ -21,7 +22,7 @@ func list_Numbers(items []string, intent int, preset []string, styles ...string)
 	}
 	result := make([]string, len(items))
 	for i, item := range items {
-		line := _fmt_.Sprintf("%d%s%s", i+1, tag_Tab(1, Preset.None), Format(item, preset, styles...))
+		line := _fmt.Sprintf("%d%s%s", i+1, tag_Tab(1, Preset.None), Format(item, preset, styles...))
 		result[i] = tag_Tab(intent, Preset.None) + Format(line, preset, styles...)
 	}
 	return result
@@ -39,7 +40,7 @@ func list_Level(items []string, intent int, preset []string, styles ...string) [
 	}
 	result := make([]string, len(items))
 	for i, key := range items {
-		padded := _fmt_.Sprintf("%-*s%s", keyLength, key, tag_Tab(1, Preset.None))
+		padded := _fmt.Sprintf("%-*s%s", keyLength, key, tag_Tab(1, Preset.None))
 		result[i] = tag_Tab(intent, Preset.None) + Format(padded, preset, styles...)
 	}
 	return result
@@ -79,7 +80,7 @@ func list_Catalog(items []string, intent int, preset []string, styles ...string)
 	var result []string
 	subResult := ""
 	for i, item := range items {
-		formatted := Format(util_PadEnd(item, size, ' '), preset, styles...)
+		formatted := Format(_utils.String_PadEnd(item, size, ' '), preset, styles...)
 		if (i+1)%cols == 0 {
 			subResult += formatted
 			result = append(result, subResult)

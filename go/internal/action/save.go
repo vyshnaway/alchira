@@ -1,37 +1,37 @@
 package action
 
 import (
-	_cache_ "main/cache"
-	_fileman_ "main/fileman"
-	S "main/shell/core"
-	"main/utils"
-	_regexp_ "regexp"
-	_strings_ "strings"
+	_config "main/configs"
+	_fileman "main/package/fileman"
+	S "main/package/shell"
+	_util "main/package/utils"
+	_regexp "regexp"
+	_string "strings"
 )
 
 // save_CssInlineImports recursively processes CSS imports
 func save_CssInlineImports(filePath string, resolvedFiles *map[string]bool) (string, error) {
 
-	content, err := _fileman_.Read_File(filePath, false)
+	content, err := _fileman.Read_File(filePath, false)
 	if err != nil {
 		return "", err
 	}
-	basedir := _fileman_.Path_Basedir(filePath)
+	basedir := _fileman.Path_Basedir(filePath)
 
 	content_string := string(content)
-	import_regex := _regexp_.MustCompile(`@import\s+(?:url\()?["']?(.*?)["']?\)?\s*;`)
+	import_regex := _regexp.MustCompile(`@import\s+(?:url\()?["']?(.*?)["']?\)?\s*;`)
 	for _, match := range import_regex.FindAllStringSubmatch(content_string, -1) {
 		fullmatch := match[0]
 		importpath := match[1]
 
-		absolute_importpath, err := _fileman_.Path_Resolves(_fileman_.Path_Join(basedir, importpath))
-		if err == nil && _fileman_.Path_IfFile(absolute_importpath) && !(*resolvedFiles)[absolute_importpath] {
+		absolute_importpath, err := _fileman.Path_Resolves(_fileman.Path_Join(basedir, importpath))
+		if err == nil && _fileman.Path_IfFile(absolute_importpath) && !(*resolvedFiles)[absolute_importpath] {
 
 			replacement, err := save_CssInlineImports(absolute_importpath, resolvedFiles)
 			if err != nil {
 				replacement = fullmatch
 			}
-			content_string = _strings_.Replace(content_string, fullmatch, replacement, 1)
+			content_string = _string.Replace(content_string, fullmatch, replacement, 1)
 		}
 		(*resolvedFiles)[absolute_importpath] = true
 	}
@@ -43,7 +43,7 @@ func save_CssInlineImports(filePath string, resolvedFiles *map[string]bool) (str
 func save_CssImport(filepath_array []string) string {
 	resolved_files := make(map[string]bool)
 	for _, filepath := range filepath_array {
-		if abspath, err := _fileman_.Path_Resolves(filepath); err == nil && _fileman_.Path_IfFile(abspath) {
+		if abspath, err := _fileman.Path_Resolves(filepath); err == nil && _fileman.Path_IfFile(abspath) {
 			resolved_files[abspath] = true
 		}
 	}
@@ -56,35 +56,35 @@ func save_CssImport(filepath_array []string) string {
 		}
 	}
 
-	return _strings_.Join(inlined, "\n")
+	return _string.Join(inlined, "\n")
 }
 
 func Save_RootCss() {
-	_cache_.Static.RootCSS = save_CssImport([]string{
-		_cache_.Path_Css["atrules"].Path,
-		_cache_.Path_Css["constants"].Path,
-		_cache_.Path_Css["elements"].Path,
-		_cache_.Path_Css["extends"].Path,
+	_config.Static.RootCSS = save_CssImport([]string{
+		_config.Path_Css["atrules"].Path,
+		_config.Path_Css["constants"].Path,
+		_config.Path_Css["elements"].Path,
+		_config.Path_Css["extends"].Path,
 	})
 }
 
 func Save_Libraries() {
-	_cache_.Static.Libraries_Saved, _ = _fileman_.Read_Bulk(
-		_cache_.Path_Folder["libraries"].Path,
+	_config.Static.Libraries_Saved, _ = _fileman.Read_Bulk(
+		_config.Path_Folder["libraries"].Path,
 		[]string{"css"},
 	)
 }
 
 func Save_Artifacts() {
-	_cache_.Static.Artifacts_Saved, _ = _fileman_.Read_Bulk(
-		_cache_.Path_Folder["artifacts"].Path,
-		[]string{_cache_.Root.Extension, "json"},
+	_config.Static.Artifacts_Saved, _ = _fileman.Read_Bulk(
+		_config.Path_Folder["artifacts"].Path,
+		[]string{_config.Root.Extension, "json"},
 	)
 }
 
 func Save_Targets() {
 	S.TASK("Saving Proxy-folders", 1)
-	_cache_.Static.TargetDir_Saved = Sync_ProxyMapDirs(_cache_.Static.ProxyMap)
+	_config.Static.TargetDir_Saved = Sync_ProxyMapDirs(_config.Static.ProxyMap)
 }
 
 func SaveHashrule() (Report string, Status bool) {
@@ -93,11 +93,11 @@ func SaveHashrule() (Report string, Status bool) {
 
 	status := true
 	errors := []string{}
-	_cache_.Static.Hashrule = map[string]string{}
-	hashrule_path := _cache_.Path_Json["hashrule"].Path
-	if content, err := _fileman_.Read_File(hashrule_path, false); err == nil {
-		if hashrules, e := utils.Code_JsonParse[map[string]string](content); e == nil {
-			_cache_.Static.Hashrule = hashrules
+	_config.Static.Hashrule = map[string]string{}
+	hashrule_path := _config.Path_Json["hashrule"].Path
+	if content, err := _fileman.Read_File(hashrule_path, false); err == nil {
+		if hashrules, e := _util.Code_JsonParse[map[string]string](content); e == nil {
+			_config.Static.Hashrule = hashrules
 		} else {
 			status = false
 			errors = append(errors, "Bad "+hashrule_path+" file data.")

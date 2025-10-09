@@ -1,7 +1,7 @@
 package cache
 
 import (
-	_types_ "main/types"
+	_model "main/models"
 )
 
 const (
@@ -10,11 +10,11 @@ const (
 	domain = id + "." + tld
 )
 
-var Root = _types_.Cache_Root{
+var Root = _model.Cache_Root{
 	Name:      id,
 	Version:   "0.0.0",
 	Extension: id,
-	Url: _types_.Cache_Url{
+	Url: _model.Cache_Url{
 		Site:      "https://www." + domain + "/",
 		Docs:      "https://docs." + domain + "/",
 		Worker:    "https://worker." + domain + "/",
@@ -30,7 +30,7 @@ var Root = _types_.Cache_Root{
 		"install": "Install external artifacts.",
 		"version": "Returns version.",
 	},
-	Tweaks: _types_.Config_Tweaks{
+	Tweaks: _model.Config_Tweaks{
 		"CacheUsage": false,
 	},
 	CustomElements: map[string]int{

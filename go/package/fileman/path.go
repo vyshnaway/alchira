@@ -1,43 +1,43 @@
 package fileman
 
 import (
-	_fmt_ "fmt"
-	_fs_ "io/fs"
-	_os_ "os"
-	_filepath_ "path/filepath"
-	_runtime_ "runtime"
-	_strings_ "strings"
+	_fmt "fmt"
+	_fs "io/fs"
+	_os "os"
+	_filepath "path/filepath"
+	_runtime "runtime"
+	_strings "strings"
 )
 
 // Returns basename from a pathString
 func Path_BaseName(pathString string) string {
-	return _filepath_.Base(pathString)
+	return _filepath.Base(pathString)
 }
 
 // Join joins any number of path elements into a single path.
 func Path_Join(pathfrags ...string) string {
-	return _filepath_.Join(pathfrags...)
+	return _filepath.Join(pathfrags...)
 }
 
 // Path_FromRoot joins the given path elements to the calculated root directory.
 func Path_FromRoot(elem ...string) (string, error) {
-	_, filename, _, ok := _runtime_.Caller(0)
+	_, filename, _, ok := _runtime.Caller(0)
 	if !ok {
-		return "", _fmt_.Errorf("failed to get current file path for root calculation")
+		return "", _fmt.Errorf("failed to get current file path for root calculation")
 	}
-	root := _filepath_.Join(_filepath_.Dir(filename), "..", "..")
-	joined := _filepath_.Join(root, _filepath_.Join(elem...))
+	root := _filepath.Join(_filepath.Dir(filename), "..", "..")
+	joined := _filepath.Join(root, _filepath.Join(elem...))
 	return joined, nil
 }
 
 // Resolves returns the absolute path of the given path string.
 func Path_Resolves(pathString string) (string, error) {
-	return _filepath_.Abs(pathString)
+	return _filepath.Abs(pathString)
 }
 
 // Resolves returns the absolute path of the given path string.
 func Path_Basedir(pathString string) string {
-	return _filepath_.Dir(pathString)
+	return _filepath.Dir(pathString)
 }
 
 type Path_Check_Type int
@@ -51,12 +51,12 @@ const (
 
 // Available checks if a path exists and returns its type ("txt", "dir") or an error.
 func Path_Check(pathString string) (Type Path_Check_Type, Error error) {
-	info, err := _os_.Stat(pathString)
+	info, err := _os.Stat(pathString)
 	if err != nil {
-		if _os_.IsNotExist(err) {
+		if _os.IsNotExist(err) {
 			return Path_Check_Type_Nil, nil
 		}
-		return 0, _fmt_.Errorf("path check error for '%s': %w", pathString, err)
+		return 0, _fmt.Errorf("path check error for '%s': %w", pathString, err)
 	}
 	if info.IsDir() {
 		return Path_Check_Type_Dir, nil
@@ -66,8 +66,8 @@ func Path_Check(pathString string) (Type Path_Check_Type, Error error) {
 
 // PathFix normalizes a file path for cross-platform compatibility
 func PathFix(pathString string) string {
-	normalized := _strings_.ReplaceAll(pathString, "\\", "/")
-	components := _strings_.Split(normalized, "/")
+	normalized := _strings.ReplaceAll(pathString, "\\", "/")
+	components := _strings.Split(normalized, "/")
 
 	var cleanComponents []string
 	for _, comp := range components {
@@ -76,7 +76,7 @@ func PathFix(pathString string) string {
 		}
 	}
 
-	return _filepath_.Clean(_filepath_.Join(cleanComponents...))
+	return _filepath.Clean(_filepath.Join(cleanComponents...))
 }
 
 // IfFolder checks if a path exists and is a directory.
@@ -93,27 +93,27 @@ func Path_IfFile(pathString string) bool {
 
 // isSubpath returns true if child is a subdirectory of parent, not counting equality.
 func Path_IsSubpath(parent, child string) bool {
-	parent = _filepath_.Clean(parent)
-	child = _filepath_.Clean(child)
+	parent = _filepath.Clean(parent)
+	child = _filepath.Clean(child)
 	if len(child) <= len(parent) {
 		return false
 	}
 	// Ensure there's a path separator after the parent
-	return _strings_.HasPrefix(child, parent+string(_filepath_.Separator))
+	return _strings.HasPrefix(child, parent+string(_filepath.Separator))
 }
 
 // Path_IsIndependent checks if two folders are independent (neither is inside the other).
 func Path_IsIndependent(folder1, folder2 string) (bool, error) {
-	abs1, err := _filepath_.Abs(folder1)
+	abs1, err := _filepath.Abs(folder1)
 	if err != nil {
-		return false, _fmt_.Errorf("could not get absolute path for folder1 '%s': %w", folder1, err)
+		return false, _fmt.Errorf("could not get absolute path for folder1 '%s': %w", folder1, err)
 	}
-	abs2, err := _filepath_.Abs(folder2)
+	abs2, err := _filepath.Abs(folder2)
 	if err != nil {
-		return false, _fmt_.Errorf("could not get absolute path for folder2 '%s': %w", folder2, err)
+		return false, _fmt.Errorf("could not get absolute path for folder2 '%s': %w", folder2, err)
 	}
-	abs1 = _filepath_.Clean(abs1)
-	abs2 = _filepath_.Clean(abs2)
+	abs1 = _filepath.Clean(abs1)
+	abs2 = _filepath.Clean(abs2)
 
 	// If they are the same folder, not independent.
 	if abs1 == abs2 {
@@ -132,7 +132,7 @@ func Path_ListFiles(dir string, fileList []string) ([]string, error) {
 	if !Path_IfDir(dir) {
 		return fileList, nil // Return current list if dir doesn't exist or is not a folder
 	}
-	err := _filepath_.WalkDir(dir, func(path string, d _fs_.DirEntry, err error) error {
+	err := _filepath.WalkDir(dir, func(path string, d _fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
@@ -149,7 +149,7 @@ func Path_ListFolders(dir string, folderList []string) ([]string, error) {
 	if !Path_IfDir(dir) {
 		return folderList, nil
 	}
-	err := _filepath_.WalkDir(dir, func(path string, d _fs_.DirEntry, err error) error {
+	err := _filepath.WalkDir(dir, func(path string, d _fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}

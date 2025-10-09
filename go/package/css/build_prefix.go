@@ -1,4 +1,4 @@
-package compose
+package css
 
 import (
 	_utils_ "main/package/utils"

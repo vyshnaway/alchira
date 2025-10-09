@@ -2,9 +2,8 @@ package test
 
 import (
 	"fmt"
-	blockmap "main/package/css/block"
-	shell "main/package/shell/core"
-	"main/style"
+	css "main/package/css"
+	shell "main/package/shell"
 	"testing"
 )
 
@@ -142,15 +141,15 @@ const content3 = `
 	`
 
 func Test(t *testing.T) {
-	bm1 := blockmap.New()
+	bm1 := css.NewBlock()
 	bm1.SetProp("color", "red")
-	nested := blockmap.New()
+	nested := css.NewBlock()
 	nested.SetProp("weight", "bold")
 	bm1.SetBlock("style", *nested)
 
-	bm2 := blockmap.New()
+	bm2 := css.NewBlock()
 	bm2.SetProp("color", "blue")
-	nested2 := blockmap.New()
+	nested2 := css.NewBlock()
 	nested2.SetProp("weight", "normal")
 	bm2.SetBlock("style", *nested2)
 
@@ -185,9 +184,4 @@ func Test(t *testing.T) {
 	shell.Render.Raw(bm1.Skeleton())
 	shell.Render.Raw(bm2.Skeleton())
 	shell.Render.Raw(bm3.Skeleton())
-}
-
-func Test_Flatten(t *testing.T) {
-	res1 := style.Parse_CssSnippet(content2, "initial", "selector", true, false)
-	res1.Result.Print().Flatten().Print()
 }

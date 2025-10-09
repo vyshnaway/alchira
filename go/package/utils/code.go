@@ -1,13 +1,13 @@
 package utils
 
 import (
-	_json_ "encoding/json"
-	_regexp_ "regexp"
-	_strings_ "strings"
+	_json "encoding/json"
+	_regexp "regexp"
+	_strings "strings"
 )
 
 func Code_Uncomment(content string, single, multi, html bool) string {
-	var result _strings_.Builder
+	var result _strings.Builder
 
 	isInString := func(input string, index int) bool {
 		inSingleQuote, inDoubleQuote, inTemplateLiteral, escaped := false, false, false, false
@@ -74,9 +74,9 @@ func Code_Uncomment(content string, single, multi, html bool) string {
 }
 
 func Code_Minify(content string) string {
-	var minify_regex = _regexp_.MustCompile(`\s*([{}:;,])\s*`)
+	var minify_regex = _regexp.MustCompile(`\s*([{}:;,])\s*`)
 	out := minify_regex.ReplaceAllString(content, "$1")
-	return _strings_.TrimSpace(out)
+	return _strings.TrimSpace(out)
 }
 
 func Code_Strip(content string, single, multi, html, minify bool) string {
@@ -92,10 +92,10 @@ func Code_Strip(content string, single, multi, html, minify bool) string {
 
 func Code_JsonBuild(obj any, gap string) string {
 	if gap == "" {
-		b, _ := _json_.Marshal(obj)
+		b, _ := _json.Marshal(obj)
 		return string(b)
 	} else {
-		b, _ := _json_.MarshalIndent(obj, "", "  ")
+		b, _ := _json.MarshalIndent(obj, "", "  ")
 		return string(b)
 	}
 }
@@ -103,6 +103,6 @@ func Code_JsonBuild(obj any, gap string) string {
 func Code_JsonParse[T any](str string) (T, error) {
 	var out T
 	clean := Code_Uncomment(str, true, true, true)
-	err := _json_.Unmarshal([]byte(clean), &out)
+	err := _json.Unmarshal([]byte(clean), &out)
 	return out, err
 }

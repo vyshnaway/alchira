@@ -1,37 +1,37 @@
 package fileman
 
 import (
-	_fmt_ "fmt"
-	_os_ "os"
-	_filepath_ "path/filepath"
-	_slices_ "slices"
+	_fmt "fmt"
+	_os "os"
+	_filepath "path/filepath"
+	_slices "slices"
 )
 
 func Clone_Hard(source, destination string, ignoreFiles []string) error {
-	sourceInfo, err := _os_.Stat(source)
+	sourceInfo, err := _os.Stat(source)
 	if err != nil {
-		if _os_.IsNotExist(err) {
-			return _fmt_.Errorf("source folder '%s' does not exist: %w", source, err)
+		if _os.IsNotExist(err) {
+			return _fmt.Errorf("source folder '%s' does not exist: %w", source, err)
 		}
-		return _fmt_.Errorf("could not stat source '%s': %w", source, err)
+		return _fmt.Errorf("could not stat source '%s': %w", source, err)
 	}
 
 	if sourceInfo.IsDir() {
-		err = _os_.MkdirAll(destination, sourceInfo.Mode())
+		err = _os.MkdirAll(destination, sourceInfo.Mode())
 		if err != nil {
-			return _fmt_.Errorf("could not create destination directory '%s': %w", destination, err)
+			return _fmt.Errorf("could not create destination directory '%s': %w", destination, err)
 		}
 
-		entries, err := _os_.ReadDir(source)
+		entries, err := _os.ReadDir(source)
 		if err != nil {
-			return _fmt_.Errorf("could not read source directory '%s': %w", source, err)
+			return _fmt.Errorf("could not read source directory '%s': %w", source, err)
 		}
 
 		for _, entry := range entries {
-			srcPath := _filepath_.Join(source, entry.Name())
-			destPath := _filepath_.Join(destination, entry.Name())
+			srcPath := _filepath.Join(source, entry.Name())
+			destPath := _filepath.Join(destination, entry.Name())
 
-			found := _slices_.Contains(ignoreFiles, srcPath)
+			found := _slices.Contains(ignoreFiles, srcPath)
 			if found {
 				continue
 			}
@@ -61,17 +61,17 @@ func Clone_Safe(source, destination string, ignoreFiles []string) error {
 		var err error
 		destinationFiles, err = Path_ListFiles(destination, []string{})
 		if err != nil {
-			return _fmt_.Errorf("could not list files in destination '%s': %w", destination, err)
+			return _fmt.Errorf("could not list files in destination '%s': %w", destination, err)
 		}
 	}
 
 	var existingDestAbsPaths []string
 	for _, destFile := range destinationFiles {
-		relPath, err := _filepath_.Rel(destination, destFile)
+		relPath, err := _filepath.Rel(destination, destFile)
 		if err != nil {
-			return _fmt_.Errorf("could not get relative path for '%s': %w", destFile, err)
+			return _fmt.Errorf("could not get relative path for '%s': %w", destFile, err)
 		}
-		existingDestAbsPaths = append(existingDestAbsPaths, _filepath_.Join(source, relPath))
+		existingDestAbsPaths = append(existingDestAbsPaths, _filepath.Join(source, relPath))
 	}
 
 	allIgnoreFiles := append(ignoreFiles, existingDestAbsPaths...)

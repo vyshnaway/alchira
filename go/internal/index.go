@@ -1,17 +1,17 @@
 package cache
 
 import (
-	_types_ "main/types"
-	"main/utils"
-	_sync_ "sync"
+	_model "main/models"
+	_utils "main/package/utils"
+	_sync "sync"
 )
 
 // Simulated utils and enums
 var NOW = 0
 var BIN = make(map[int]struct{})
-var mu _sync_.Mutex
+var mu _sync.Mutex
 
-func Index_Fetch(index int) *_types_.Style_ClassData {
+func Index_Fetch(index int) *_model.Style_ClassData {
 	mu.Lock()
 	defer mu.Unlock()
 	data := Style.Index_to_Data[index]
@@ -19,7 +19,7 @@ func Index_Fetch(index int) *_types_.Style_ClassData {
 }
 
 // Index_Declare: Assigns and registers a new index
-func Index_Declare(object _types_.Style_ClassData) int {
+func Index_Declare(object _model.Style_ClassData) int {
 	mu.Lock()
 	defer mu.Unlock()
 	var idx int
@@ -33,7 +33,7 @@ func Index_Declare(object _types_.Style_ClassData) int {
 	}
 	object.Index = idx
 	delete(BIN, idx)
-	object.Metadata.WatchClass = "__" + utils.String_EnCounter(idx)
+	object.Metadata.WatchClass = "__" + _utils.String_EnCounter(idx)
 	Style.Index_to_Data[idx] = object
 	return idx
 }
@@ -71,29 +71,29 @@ func Index_Reset(after int) int {
 
 type index_Find_retrun struct {
 	Index int
-	Group _types_.Style_Type
+	Group _model.Style_Type
 }
 
-func Index_Find(classname string, localMap _types_.Style_ClassIndexMap) index_Find_retrun {
+func Index_Find(classname string, localMap _model.Style_ClassIndexMap) index_Find_retrun {
 	mu.Lock()
 	defer mu.Unlock()
 	index := 0
-	group := _types_.Style_Type_Null
+	group := _model.Style_Type_Null
 	if idx, found := localMap[classname]; found {
 		index = idx
-		group = _types_.Style_Type_Local
+		group = _model.Style_Type_Local
 	} else if idx, found := Style.Global___Index[classname]; found {
 		index = idx
-		group = _types_.Style_Type_Global
+		group = _model.Style_Type_Global
 	} else if idx, found := Style.Public___Index[classname]; found {
 		index = idx
-		group = _types_.Style_Type_Public
+		group = _model.Style_Type_Public
 	} else if idx, found := Style.Library__Index[classname]; found {
 		index = idx
-		group = _types_.Style_Type_Library
+		group = _model.Style_Type_Library
 	} else if idx, found := Style.Artifact_Index[classname]; found {
 		index = idx
-		group = _types_.Style_Type_Artifact
+		group = _model.Style_Type_Artifact
 	}
 	return index_Find_retrun{
 		Index: index,

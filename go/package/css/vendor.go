@@ -1,11 +1,12 @@
-package compose
+package css
 
 import (
-	"maps"
-	_slices_ "slices"
+	"main/package/utils"
+	_maps "maps"
+	_slices "slices"
 )
 
-type Type_VendorTable struct {
+type T_Vendor_Table struct {
 	Atrules    map[string]map[string]string            `json:"atrules"`
 	Attributes map[string]map[string]string            `json:"attributes"`
 	Pseudos    map[string]map[string]string            `json:"pseudos"`
@@ -14,7 +15,7 @@ type Type_VendorTable struct {
 	Values     map[string]map[string]map[string]string `json:"values"`
 }
 
-var Vendor_Refer = Type_VendorTable{
+var Vendor_Refer = T_Vendor_Table{
 	Atrules:    map[string]map[string]string{},
 	Attributes: map[string]map[string]string{},
 	Pseudos:    map[string]map[string]string{},
@@ -25,22 +26,7 @@ var Vendor_Refer = Type_VendorTable{
 
 var vendor_Providers = []string{}
 
-func collectStringTypeKeys(object any) []string {
-	collected := []string{}
-	switch obj := object.(type) {
-	case map[string]string:
-		for k := range obj {
-			collected = append(collected, k)
-		}
-	case map[string]any:
-		for _, inner := range obj {
-			collected = append(collected, collectStringTypeKeys(inner)...)
-		}
-	}
-	return collected
-}
-
-func Vendor_Save(table Type_VendorTable) {
+func Vendor_Save(table T_Vendor_Table) {
 
 	if table.Values == nil {
 		Vendor_Refer.Values = map[string]map[string]map[string]string{}
@@ -78,20 +64,20 @@ func Vendor_Save(table Type_VendorTable) {
 		Vendor_Refer.Pseudos = table.Pseudos
 	}
 
-	maps.Copy(Vendor_Refer.Pseudos, Vendor_Refer.Elements)
-	maps.Copy(Vendor_Refer.Pseudos, Vendor_Refer.Pseudos)
+	_maps.Copy(Vendor_Refer.Pseudos, Vendor_Refer.Elements)
+	_maps.Copy(Vendor_Refer.Pseudos, Vendor_Refer.Pseudos)
 
 	collected := []string{}
-	collected = append(collected, collectStringTypeKeys(table.Atrules)...)
-	collected = append(collected, collectStringTypeKeys(table.Attributes)...)
-	collected = append(collected, collectStringTypeKeys(table.Pseudos)...)
-	collected = append(collected, collectStringTypeKeys(table.Classes)...)
-	collected = append(collected, collectStringTypeKeys(table.Elements)...)
-	collected = append(collected, collectStringTypeKeys(table.Atrules)...)
+	collected = append(collected, utils.Map_CollectKeyStrings(table.Atrules)...)
+	collected = append(collected, utils.Map_CollectKeyStrings(table.Attributes)...)
+	collected = append(collected, utils.Map_CollectKeyStrings(table.Pseudos)...)
+	collected = append(collected, utils.Map_CollectKeyStrings(table.Classes)...)
+	collected = append(collected, utils.Map_CollectKeyStrings(table.Elements)...)
+	collected = append(collected, utils.Map_CollectKeyStrings(table.Atrules)...)
 
 	vendor_Providers = []string{}
 	for _, v := range collected {
-		if !_slices_.Contains(vendor_Providers, v) {
+		if !_slices.Contains(vendor_Providers, v) {
 			vendor_Providers = append(vendor_Providers, v)
 		}
 	}

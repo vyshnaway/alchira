@@ -1,8 +1,7 @@
 package utils
 
 import (
-	_reflect_ "reflect"
-	_strings_ "strings"
+	_reflect "reflect"
 )
 
 // Aggressive deepcopy with flattened pointer values
@@ -21,8 +20,8 @@ func Map_DeepCopy(v any) any {
 		}
 		return s
 	default:
-		rv := _reflect_.ValueOf(vv)
-		if rv.Kind() == _reflect_.Pointer && !rv.IsNil() {
+		rv := _reflect.ValueOf(vv)
+		if rv.Kind() == _reflect.Pointer && !rv.IsNil() {
 			return Map_DeepCopy(rv.Elem().Interface())
 		}
 		return vv
@@ -33,14 +32,14 @@ func Map_DeepCopy(v any) any {
 func Map_Union(target, source map[string]any, aggressive, arrayMerge bool) map[string]any {
 	for key, srcVal := range source {
 		tgtVal, hasTgt := target[key]
-		srcType := _reflect_.TypeOf(srcVal)
-		tgtType := _reflect_.TypeOf(tgtVal)
+		srcType := _reflect.TypeOf(srcVal)
+		tgtType := _reflect.TypeOf(tgtVal)
 
-		if srcType != nil && srcType.Kind() == _reflect_.Map && srcVal != nil {
+		if srcType != nil && srcType.Kind() == _reflect.Map && srcVal != nil {
 			srcMap, srcOk := srcVal.(map[string]any)
 			if srcOk {
 				var tgtMap map[string]any
-				if tgtType != nil && tgtType.Kind() == _reflect_.Map && tgtVal != nil {
+				if tgtType != nil && tgtType.Kind() == _reflect.Map && tgtVal != nil {
 					tgtMap, _ = tgtVal.(map[string]any)
 				} else {
 					tgtMap = make(map[string]any)
@@ -87,21 +86,17 @@ func Map_Skeleton(object map[string]any) map[string]any {
 	for k, v := range object {
 		if sub, ok := v.(map[string]any); ok {
 			result[k] = Map_Skeleton(sub)
-		} else if _strings_.HasPrefix(k, "--") {
-			if strVal, ok := v.(string); ok {
-				result[k] = strVal
-			}
 		}
 	}
 	return result
 }
 
-type map_Difference_return struct {
+type r_Map_Difference struct {
 	Result map[string]any
 	Score int
 }
 
-func Map_Difference(A, B map[string]any) map_Difference_return {
+func Map_Difference(A, B map[string]any) r_Map_Difference {
 	score := 0
 	result := make(map[string]any)
 	for Bkey, Bvalue := range B {
@@ -124,8 +119,23 @@ func Map_Difference(A, B map[string]any) map_Difference_return {
 			}
 		}
 	}
-	return map_Difference_return{
+	return r_Map_Difference{
 		Result: result, 
 		Score: score,
 	}
+}
+
+func Map_CollectKeyStrings(object any) []string {
+	collected := []string{}
+	switch obj := object.(type) {
+	case map[string]string:
+		for k := range obj {
+			collected = append(collected, k)
+		}
+	case map[string]any:
+		for _, inner := range obj {
+			collected = append(collected, Map_CollectKeyStrings(inner)...)
+		}
+	}
+	return collected
 }

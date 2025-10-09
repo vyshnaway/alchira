@@ -1,10 +1,10 @@
 package cache
 
 import (
-	_types_ "main/types"
+	_model "main/models"
 )
 
-var Sync_References = map[string]_types_.File_Source{
+var Sync_References = map[string]_model.File_Source{
 	"readme": {
 		Title:   "Documentation",
 		Url:     "readme.md",
@@ -28,14 +28,14 @@ var Sync_References = map[string]_types_.File_Source{
 	},
 	"agentnote": {
 		Title:   "Ai Agent Note",
-		Url:     "agentnote.md",
+		Url:     "agent.md",
 		Path:    "",
-		Frags:   []string{"agentnote.md"},
+		Frags:   []string{"agent.md"},
 		Content: "",
 	},
 }
 
-var Sync_Agreements = map[string]_types_.File_Source{
+var Sync_Agreements = map[string]_model.File_Source{
 	"license": {
 		Title:   "License",
 		Url:     "license.md",
@@ -59,7 +59,7 @@ var Sync_Agreements = map[string]_types_.File_Source{
 	},
 }
 
-var Sync_Blueprint = map[string]_types_.File_Source{
+var Sync_Blueprint = map[string]_model.File_Source{
 	"scaffold": {
 		Frags:     []string{"blueprint", "scaffold"},
 		Path:      "",

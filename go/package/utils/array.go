@@ -1,8 +1,7 @@
 package utils
 
 import (
-	"slices"
-	_slices_ "slices"
+	_slices "slices"
 )
 
 func Array_Setback[T comparable](array []T) []T {
@@ -39,7 +38,7 @@ func Array_SetAppend[T comparable](array []T, items ...T) []T {
 	out := append([]T{}, array...)
 
 	for _, item := range items {
-		if !slices.Contains(array, item) {
+		if !_slices.Contains(array, item) {
 			out = append(out, item)
 		}
 	}
@@ -99,7 +98,7 @@ func Array_LongestSubChain[T comparable](parent, child []T) []T {
 				currentChain = append(currentChain, child[index])
 				parentInLast = parentInNow
 			} else {
-				if _slices_.Contains(remainingChild, child[index]) {
+				if _slices.Contains(remainingChild, child[index]) {
 					remainingChildNext = append(remainingChildNext, child[index])
 				}
 			}

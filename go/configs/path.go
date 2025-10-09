@@ -1,10 +1,10 @@
 package cache
 
 import (
-	_types_ "main/types"
+	_model "main/models"
 )
 
-var Path_Folder = map[string]_types_.File_Source{
+var Path_Folder = map[string]_model.File_Source{
 	"scaffold": {
 		Frags:     []string{id},
 		Path:      "",
@@ -43,7 +43,7 @@ var Path_Folder = map[string]_types_.File_Source{
 	},
 }
 
-var Path_Css = map[string]_types_.File_Source{
+var Path_Css = map[string]_model.File_Source{
 	"atrules": {
 		Frags:     []string{id, "#at-rules.css"},
 		Path:      "",
@@ -70,7 +70,7 @@ var Path_Css = map[string]_types_.File_Source{
 	},
 }
 
-var Path_Json = map[string]_types_.File_Source{
+var Path_Json = map[string]_model.File_Source{
 	"configure": {
 		Frags:     []string{id, "configure.jsonc"},
 		Path:      "",
@@ -97,7 +97,7 @@ var Path_Json = map[string]_types_.File_Source{
 	},
 }
 
-var Path_Files = map[string]_types_.File_Source{
+var Path_Files = map[string]_model.File_Source{
 	"readme": {
 		Frags:     []string{id, "readme.md"},
 		Path:      "",
@@ -112,7 +112,7 @@ var Path_Files = map[string]_types_.File_Source{
 	},
 }
 
-var Path_Autogen = map[string]_types_.File_Source{
+var Path_Autogen = map[string]_model.File_Source{
 	"index": {
 		Path:      "",
 		Frags:     []string{id, "autogen", "preview", "index.css"},

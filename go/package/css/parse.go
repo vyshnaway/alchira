@@ -1,4 +1,4 @@
-package style
+package css
 
 import (
 	_cache_ "main/cache"
@@ -8,7 +8,7 @@ import (
 	_strings_ "strings"
 )
 
-type block_Parse_retype struct {
+type r_Parse struct {
 	Assign     []string
 	Attach     []string
 	AtProps    [][2]string
@@ -19,11 +19,12 @@ type block_Parse_retype struct {
 	Flats      [][2]string
 	AllBlocks  [][2]string
 	Variables  map[string]string
+	Specials   []string
 }
 
-func Block_Parse(content string) block_Parse_retype {
+func Parse(content string) r_Parse {
 
-	result := block_Parse_retype{
+	result := r_Parse{
 		Assign:     []string{},
 		Attach:     []string{},
 		AtProps:    [][2]string{},
@@ -43,7 +44,7 @@ func Block_Parse(content string) block_Parse_retype {
 	valStart := 0
 	deviance := 0
 	isProp := true
-	cursor := _Cursor_.Construct(content + ";")
+	cursor := _Cursor_.New(content + ";")
 
 	for ch, streaming := cursor.Active.Char, cursor.Streaming; streaming; ch, streaming = cursor.Increment() {
 

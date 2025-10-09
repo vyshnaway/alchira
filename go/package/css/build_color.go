@@ -1,4 +1,4 @@
-package compose
+package css
 
 import (
 	_Cursor_ "main/package/reader"
@@ -53,7 +53,7 @@ func color_Investigate(cursor *_Cursor_.Type, palette string) []float64 {
 					}
 				} else if numValue, err := _strconv_.ParseFloat(trimmed, 64); err == nil {
 					if (palette == "rgb" || palette == "rgba") && len(values) < 3 {
-						if _utils_.Number_FloatIsInteger(numValue).Status && numValue >= 0 && numValue <= 255 {
+						if o, _, _ := _utils_.Number_FloatIsInt(numValue); o && numValue >= 0 && numValue <= 255 {
 							values = append(values, numValue)
 						} else {
 							values = append(values, numValue)
@@ -101,7 +101,7 @@ func Color_FallbackGen(
 	score := 0
 
 	var capture _strings_.Builder
-	cursor := _Cursor_.Construct(content)
+	cursor := _Cursor_.New(content)
 	for ch, streaming := cursor.Active.Char, cursor.Streaming; streaming; ch, streaming = cursor.Increment() {
 		regex_isAlNum := _regexp_.MustCompile(`^[a-zA-Z0-9]$`)
 

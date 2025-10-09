@@ -1,7 +1,7 @@
 package types
 
 import (
-	_blockmap_ "main/class/Blockmap"
+	css "main/package/css"
 )
 
 type Style_Type string
@@ -45,9 +45,9 @@ type Style_ClassData struct {
 	DebugClass    string
 	Attachments   []string
 	Declarations  []string
-	StyleObject   _blockmap_.Type
+	StyleObject   css.T_Block
 	SnippetStaple string
-	SnippetStyle  _blockmap_.Type
+	SnippetStyle  css.T_Block
 }
 
 type Style_Dictionary map[string]map[int]string

@@ -1,10 +1,9 @@
 package shell
 
 import (
-	_os_ "os"
-	_strings_ "strings"
-
-	_term_ "golang.org/x/term"
+	_term "golang.org/x/term"
+	_os "os"
+	_strings "strings"
 )
 
 // tRoot_Config holds terminal configuration settings
@@ -30,7 +29,7 @@ type tRoot_Canvas struct {
 
 // Width returns the current terminal width
 func (i *tRoot_Canvas) Width() int {
-	width, _, err := _term_.GetSize(int(_os_.Stdout.Fd()))
+	width, _, err := _term.GetSize(int(_os.Stdout.Fd()))
 	if err != nil || width <= 0 {
 		return 48 // fallback width
 	}
@@ -79,7 +78,7 @@ var Preset = struct {
 
 func (i *tRoot_Canvas) Initialize(taskActive bool, postActive bool, tabWidth int) {
 	// Initialize tab spacing
-	i.Tab = _strings_.Repeat(string(i.Tab[0]), tabWidth)
+	i.Tab = _strings.Repeat(string(i.Tab[0]), tabWidth)
 
 	// Set configuration
 	i.Config.TaskActive = taskActive
@@ -87,7 +86,7 @@ func (i *tRoot_Canvas) Initialize(taskActive bool, postActive bool, tabWidth int
 }
 
 func Divider(ch rune) string {
-	return _strings_.Repeat(string(ch), Canvas.Width())
+	return _strings.Repeat(string(ch), Canvas.Width())
 }
 
 // Format applies ANSI styles to a string
@@ -96,7 +95,7 @@ func Format(str string, preset []string, styles ...string) string {
 	if len(args) == 0 {
 		return str
 	}
-	return "\x1b[" + _strings_.Join(args, ";") + "m" + str + "\x1b[0m"
+	return "\x1b[" + _strings.Join(args, ";") + "m" + str + "\x1b[0m"
 }
 
 // Post writes a formatted string to the terminal

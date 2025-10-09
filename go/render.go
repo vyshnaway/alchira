@@ -1,4 +1,4 @@
-package compose_test
+package test
 
 import (
 	"main/compose"

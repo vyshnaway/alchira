@@ -1,13 +1,13 @@
 package action
 
 import (
-	_cache_ "main/cache"
-	_fileman_ "main/fileman"
-	_types_ "main/types"
-	_utils_ "main/utils"
-	_slices_ "slices"
-	_strconv_ "strconv"
-	_strings_ "strings"
+	_config "main/configs"
+	_model "main/models"
+	_fileman "main/package/fileman"
+	_util "main/package/utils"
+	_slice "slices"
+	_strconv "strconv"
+	_string "strings"
 )
 
 type store_FileGroup_param int
@@ -25,16 +25,16 @@ func Store(
 	target string,
 	source string,
 	label string,
-) _types_.File_Stash {
+) _model.File_Stash {
 	isLibrary := fileGroup == Store_FileGroup_Library
 	isArtifact := fileGroup == Store_FileGroup_Artifact
 	fromScaffold := fileGroup != Store_FileGroup_Target
 
-	targetPath := _fileman_.Path_Join(target, filePath)
-	sourcePath := _fileman_.Path_Join(source, filePath)
+	targetPath := _fileman.Path_Join(target, filePath)
+	sourcePath := _fileman.Path_Join(source, filePath)
 
-	parts := _strings_.Split(_fileman_.Path_BaseName(filePath), ".")
-	_slices_.Reverse(parts)
+	parts := _string.Split(_fileman.Path_BaseName(filePath), ".")
+	_slice.Reverse(parts)
 	var extension, artifactName, liblevel, cluster string
 	if len(parts) > 0 {
 		extension = parts[0]
@@ -49,37 +49,36 @@ func Store(
 		cluster = parts[3]
 	}
 
-	
 	idn := 0
-	if num, err := _strconv_.Atoi(liblevel);err == nil && num >= 0 && num <= 2 {
+	if num, err := _strconv.Atoi(liblevel); err == nil && num >= 0 && num <= 2 {
 		idn = num
 	}
 
 	var norm_artifact string
 	if isArtifact {
-		norm_artifact = _utils_.String_Filter(artifactName, []rune{}, []rune{}, []rune{})
+		norm_artifact = _util.String_Filter(artifactName, []rune{}, []rune{}, []rune{})
 	} else {
-		norm_artifact = _cache_.Archive.Name
+		norm_artifact = _config.Archive.Name
 	}
 
-	var lookupType _types_.File_Type
+	var lookupType _model.File_Type
 	if isArtifact {
-		if extension == _cache_.Root.Extension {
-			lookupType = _types_.File_Type_Artifact
+		if extension == _config.Root.Extension {
+			lookupType = _model.File_Type_Artifact
 		} else {
-			lookupType = _types_.File_Type_Null
+			lookupType = _model.File_Type_Null
 		}
 	} else if isLibrary {
 		if cluster != "" {
-			lookupType = _types_.File_Type_Cluster
+			lookupType = _model.File_Type_Cluster
 		} else {
-			lookupType = _types_.File_Type_Axiom
+			lookupType = _model.File_Type_Axiom
 		}
 	} else {
-		lookupType = _types_.File_Type_Target
+		lookupType = _model.File_Type_Target
 	}
 
-	norm_cluster := _utils_.String_Filter(cluster, []rune{}, []rune{}, []rune{})
+	norm_cluster := _util.String_Filter(cluster, []rune{}, []rune{}, []rune{})
 	classFront := ""
 
 	if isArtifact {
@@ -89,24 +88,24 @@ func Store(
 		classFront += norm_cluster
 	}
 	if fromScaffold && extension == "css" {
-		classFront += _strings_.Repeat("$", idn)
+		classFront += _string.Repeat("$", idn)
 	}
 
-	debugClassfront := "\\|" + _utils_.String_Filter(targetPath, []rune{}, []rune{}, []rune{'/', '.'})
+	debugClassfront := "\\|" + _util.String_Filter(targetPath, []rune{}, []rune{}, []rune{'/', '.'})
 	if fromScaffold {
 		debugClassfront = string(lookupType) + debugClassfront
 	}
 
 	var lookupId string
 	if isLibrary {
-		lookupId = _strconv_.Itoa(idn)
+		lookupId = _strconv.Itoa(idn)
 	} else if isArtifact {
 		lookupId = filePath
 	} else {
 		lookupId = targetPath
 	}
 
-	result := _types_.File_Stash{
+	result := _model.File_Stash{
 		LibLevel:   idn,
 		Label:      label,
 		Artifact:   norm_artifact,
@@ -116,27 +115,27 @@ func Store(
 		TargetPath: targetPath,
 		ClassFront: classFront,
 		DebugFront: debugClassfront,
-		Manifest: _types_.File_LocalManifest{
-			Lookup: _types_.File_Lookup{
+		Manifest: _model.File_LocalManifest{
+			Lookup: _model.File_Lookup{
 				Id:     lookupId,
 				Type:   lookupType,
 				Locale: []string{},
 			},
-			Local:       _types_.File_MetadataMap{},
-			Global:      _types_.File_MetadataMap{},
-			Public:      _types_.File_MetadataMap{},
+			Local:       _model.File_MetadataMap{},
+			Global:      _model.File_MetadataMap{},
+			Public:      _model.File_MetadataMap{},
 			Errors:      []string{},
-			Diagnostics: []_types_.Refer_Diagnostic{},
+			Diagnostics: []_model.Refer_Diagnostic{},
 		},
-		StyleData: _types_.File_StyleData{
+		StyleData: _model.File_StyleData{
 			UsedIn:          []int{},
 			Locales:         []string{},
 			Attachments:     []string{},
 			ClassTracks:     [][]string{},
-			LocalClasses:    _types_.Style_ClassIndexMap{},
-			GlobalClasses:   _types_.Style_ClassIndexMap{},
-			PublicClasses:   _types_.Style_ClassIndexMap{},
-			TagReplacements: []_types_.File_TagReplacement{},
+			LocalClasses:    _model.Style_ClassIndexMap{},
+			GlobalClasses:   _model.Style_ClassIndexMap{},
+			PublicClasses:   _model.Style_ClassIndexMap{},
+			TagReplacements: []_model.File_TagReplacement{},
 		},
 		Content: content,
 		Midway:  "",

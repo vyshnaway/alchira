@@ -1,12 +1,12 @@
 package action
 
 import (
-	_cache_ "main/cache"
-	_fileman_ "main/fileman"
-	S "main/shell/core"
-	X "main/shell/make"
-	_types_ "main/types"
-	"main/utils"
+	_config "main/configs"
+	X "main/internal/shell"
+	_model "main/models"
+	_fileman "main/package/fileman"
+	S "main/package/shell"
+	_util "main/package/utils"
 )
 
 type verify_Setup_Status_enum int
@@ -21,29 +21,29 @@ func Verify_Setup() (Status verify_Setup_Status_enum, Report string) {
 	status := Verify_Setup_Status_Uninitialized
 	report := ""
 
-	if _fileman_.Path_IfDir(_cache_.Path_Folder["scaffold"].Path) {
-		_fileman_.Write_File(_cache_.Path_Files["reference"].Path, _cache_.Sync_References["readme"].Content)
-		_fileman_.Write_File(_cache_.Path_Files["guildelines"].Path, _cache_.Sync_References["guildelines"].Content)
-		_fileman_.Clone_Safe(_cache_.Sync_Blueprint["scaffold"].Path, _cache_.Path_Folder["scaffold"].Path, []string{})
+	if _fileman.Path_IfDir(_config.Path_Folder["scaffold"].Path) {
+		_fileman.Write_File(_config.Path_Files["reference"].Path, _config.Sync_References["readme"].Content)
+		_fileman.Write_File(_config.Path_Files["guildelines"].Path, _config.Sync_References["guildelines"].Content)
+		_fileman.Clone_Safe(_config.Sync_Blueprint["scaffold"].Path, _config.Path_Folder["scaffold"].Path, []string{})
 
 		errors := map[string]string{}
 		S.TASK("Verifying directory status", 1)
 
-		for _, v := range _cache_.Path_Folder {
-			if v.Essential && !_fileman_.Path_IfDir(v.Path) {
+		for _, v := range _config.Path_Folder {
+			if v.Essential && !_fileman.Path_IfDir(v.Path) {
 				S.STEP("Path: "+v.Path, 1)
 				errors[v.Path] = "Folder not found."
 			}
 		}
 
-		for _, val := range []map[string]_types_.File_Source{
-			_cache_.Path_Autogen,
-			_cache_.Path_Css,
-			_cache_.Path_Files,
-			_cache_.Path_Json,
+		for _, val := range []map[string]_model.File_Source{
+			_config.Path_Autogen,
+			_config.Path_Css,
+			_config.Path_Files,
+			_config.Path_Json,
 		} {
 			for _, v := range val {
-				if v.Essential && !_fileman_.Path_IfFile(v.Path) {
+				if v.Essential && !_fileman.Path_IfFile(v.Path) {
 					S.STEP("Path: "+v.Path, 1)
 					errors[v.Path] = "File not found."
 				}
@@ -79,23 +79,23 @@ type Verify_ProxyMapDependency_return struct {
 
 func Verify_Configs(loadvendors bool) (Report string, status bool) {
 	Setup_Ignorefiles()
-	if data, err := _fileman_.Read_File(_cache_.Path_Files["readme"].Path, false); err == nil {
-		_cache_.Archive.Readme = data
+	if data, err := _fileman.Read_File(_config.Path_Files["readme"].Path, false); err == nil {
+		_config.Archive.Readme = data
 	}
-	if data, err := _fileman_.Read_File(_cache_.Path_Files["licence"].Path, false); err == nil {
-		_cache_.Archive.Licence = data
+	if data, err := _fileman.Read_File(_config.Path_Files["licence"].Path, false); err == nil {
+		_config.Archive.Licence = data
 	}
 
 	S.TASK("Verifying configs", 1)
 	errors := []string{}
 
-	config_path := _cache_.Path_Json["configure"].Path
+	config_path := _config.Path_Json["configure"].Path
 	S.STEP("PATH : "+config_path, 1)
 
-	_cache_.Static.ProxyMap = []_types_.Config_ProxyMap{}
-	if config_data, config_err := _fileman_.Read_File(config_path, false); config_err == nil {
+	_config.Static.ProxyMap = []_model.Config_ProxyMap{}
+	if config_data, config_err := _fileman.Read_File(config_path, false); config_err == nil {
 
-		if config, err := utils.Code_JsonParse[_types_.Config_Raw](config_data); err != nil {
+		if config, err := _util.Code_JsonParse[_model.Config_Raw](config_data); err != nil {
 			errors = append(errors, config_path+" : Bad json/ Incomplete schema.")
 		} else {
 			if loadvendors {
@@ -106,25 +106,25 @@ func Verify_Configs(loadvendors bool) (Report string, status bool) {
 			Setup_Tweaks(config.Tweaks)
 
 			if len(config.Name) > 0 {
-				_cache_.Archive.Name = config.Name
+				_config.Archive.Name = config.Name
 			} else {
-				_cache_.Archive.Name = _cache_.Static.ProjectName
+				_config.Archive.Name = _config.Static.ProjectName
 			}
 
 			if len(config.Version) > 0 {
-				_cache_.Archive.Version = config.Version
+				_config.Archive.Version = config.Version
 			} else {
-				_cache_.Archive.Version = _cache_.Static.ProjectVersion
+				_config.Archive.Version = _config.Static.ProjectVersion
 			}
 
 			if config.Artifacts == nil {
-				_cache_.Static.Artifacts_Sources = map[string]string{}
+				_config.Static.Artifacts_Sources = map[string]string{}
 			} else {
-				_cache_.Static.Artifacts_Sources = config.Artifacts
+				_config.Static.Artifacts_Sources = config.Artifacts
 			}
 
 			if config.ProxyMap != nil {
-				_cache_.Static.ProxyMap = config.ProxyMap
+				_config.Static.ProxyMap = config.ProxyMap
 			}
 		}
 	}

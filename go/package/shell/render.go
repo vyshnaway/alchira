@@ -1,11 +1,10 @@
 package shell
 
 import (
-	_json_ "encoding/json"
-	_fmt_ "fmt"
-	// _os_ "os"
-	_strings_ "strings"
-	_time_ "time"
+	_json "encoding/json"
+	_fmt "fmt"
+	_strings "strings"
+	_time "time"
 )
 
 // ANSI escape codes for terminal manipulation
@@ -23,22 +22,22 @@ func render_Backspace(chars int) {
 	if chars <= 0 {
 		return
 	}
-	_fmt_.Printf(ansi_MoveLeft, chars)
-	_fmt_.Print(ansi_ClearLine)
+	_fmt.Printf(ansi_MoveLeft, chars)
+	_fmt.Print(ansi_ClearLine)
 }
 
 // Write prints the string to the terminal, handling cursor positioning
 // Returns the number of rows created by the output
 func render_Write(str string, backRows int) int {
 	if backRows > 0 {
-		_fmt_.Printf(ansi_MoveUp, backRows)
-		_fmt_.Print(ansi_ClearToBottom)
+		_fmt.Printf(ansi_MoveUp, backRows)
+		_fmt.Print(ansi_ClearToBottom)
 	} else if backRows < 0 {
-		_fmt_.Print(ansi_ClearConsole)
-		_fmt_.Print(ansi_MoveToHome)
+		_fmt.Print(ansi_ClearConsole)
+		_fmt.Print(ansi_MoveToHome)
 	}
-	rowsCreated := len(_strings_.Split(str, "\n"))
-	_fmt_.Println(str)
+	rowsCreated := len(_strings.Split(str, "\n"))
+	_fmt.Println(str)
 	return rowsCreated
 }
 
@@ -50,13 +49,13 @@ func render_Animate(frames []string, duration int, iterations int) error {
 		return nil
 	}
 
-	interval := max(_time_.Duration(duration/(len(frames)*(iterations|1)))*_time_.Millisecond, _time_.Millisecond)
+	interval := max(_time.Duration(duration/(len(frames)*(iterations|1)))*_time.Millisecond, _time.Millisecond)
 
 	iteration := 0
 	backRows := 0
 	frameIndex := 0
 
-	ticker := _time_.NewTicker(interval)
+	ticker := _time.NewTicker(interval)
 	defer ticker.Stop()
 
 	for {
@@ -71,7 +70,7 @@ func render_Animate(frames []string, duration int, iterations int) error {
 			}
 			backRows = render_Write(frames[frameIndex], backRows)
 			frameIndex++
-		case <-_time_.After(_time_.Duration(duration) * _time_.Millisecond):
+		case <-_time.After(_time.Duration(duration) * _time.Millisecond):
 			if iterations == 0 {
 				continue
 			}
@@ -81,14 +80,14 @@ func render_Animate(frames []string, duration int, iterations int) error {
 }
 
 func render_Raw(content any) []byte {
-	json, _ := _json_.MarshalIndent(content, "", "  ")
-	_fmt_.Println(string(json))
+	json, _ := _json.MarshalIndent(content, "", "  ")
+	_fmt.Println(string(json))
 	return json
 }
 
 func render_Close(content any) {
-	json, _ := _json_.Marshal(content)
-	_fmt_.Println(string(json))
+	json, _ := _json.Marshal(content)
+	_fmt.Println(string(json))
 }
 
 // E provides package-level access to render functions

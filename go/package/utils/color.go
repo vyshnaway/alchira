@@ -1,10 +1,10 @@
 package utils
 
 import (
-	_fmt_ "fmt"
-	_math_ "math"
-	_strconv_ "strconv"
-	_strings_ "strings"
+	_fmt "fmt"
+	_math "math"
+	_strconv "strconv"
+	_strings "strings"
 )
 
 // color_return defines the structure for returned color values,
@@ -34,23 +34,23 @@ func color_HslToRgb(h, s, l, alpha float64) color_return {
 	l /= 100
 
 	k := func(n float64) float64 {
-		return _math_.Mod(n+h/30, 12)
+		return _math.Mod(n+h/30, 12)
 	}
 
-	_a := s * _math_.Min(l, 1-l)
+	_a := s * _math.Min(l, 1-l)
 
 	f := func(n float64) float64 {
-		return l - _a*_math_.Max(-1, _math_.Min(k(n)-3, _math_.Min(9-k(n), 1)))
+		return l - _a*_math.Max(-1, _math.Min(k(n)-3, _math.Min(9-k(n), 1)))
 	}
 
-	r := _math_.Max(0, _math_.Min(255, _math_.Round(f(0)*255)))
-	g := _math_.Max(0, _math_.Min(255, _math_.Round(f(8)*255)))
-	b := _math_.Max(0, _math_.Min(255, _math_.Round(f(4)*255)))
-	a := _math_.Max(0, _math_.Min(1, alpha))
+	r := _math.Max(0, _math.Min(255, _math.Round(f(0)*255)))
+	g := _math.Max(0, _math.Min(255, _math.Round(f(8)*255)))
+	b := _math.Max(0, _math.Min(255, _math.Round(f(4)*255)))
+	a := _math.Max(0, _math.Min(1, alpha))
 
-	converted := _fmt_.Sprintf("rgb(%.0f, %.0f, %.0f)", r, g, b)
+	converted := _fmt.Sprintf("rgb(%.0f, %.0f, %.0f)", r, g, b)
 	if a != 1 {
-		converted = _fmt_.Sprintf("rgba(%.0f, %.0f, %.0f, %.3f)", r, g, b, a)
+		converted = _fmt.Sprintf("rgba(%.0f, %.0f, %.0f, %.3f)", r, g, b, a)
 	}
 
 	return color_return{R: r, G: g, B: b, Alpha: a, Converted: converted}
@@ -63,8 +63,8 @@ func color_RgbToHsl(r, g, b, alpha float64) color_return {
 	g /= 255
 	b /= 255
 
-	max := _math_.Max(r, _math_.Max(g, b))
-	min := _math_.Min(r, _math_.Min(g, b))
+	max := _math.Max(r, _math.Max(g, b))
+	min := _math.Min(r, _math.Min(g, b))
 
 	var h, s float64
 	l := (max + min) / 2
@@ -96,14 +96,14 @@ func color_RgbToHsl(r, g, b, alpha float64) color_return {
 		h /= 6
 	}
 
-	h = _math_.Round(h * 360)
-	s = _math_.Round(s * 100)
-	l = _math_.Round(l * 100)
-	a := _math_.Max(0, _math_.Min(1, alpha))
+	h = _math.Round(h * 360)
+	s = _math.Round(s * 100)
+	l = _math.Round(l * 100)
+	a := _math.Max(0, _math.Min(1, alpha))
 
-	converted := _fmt_.Sprintf("hsl(%.0f %.0f%% %.0f%%)", h, s, l)
+	converted := _fmt.Sprintf("hsl(%.0f %.0f%% %.0f%%)", h, s, l)
 	if a != 1 {
-		converted = _fmt_.Sprintf("hsl(%.0f %.0f%% %.0f%% / %.3f)", h, s, l, a)
+		converted = _fmt.Sprintf("hsl(%.0f %.0f%% %.0f%% / %.3f)", h, s, l, a)
 	}
 
 	return color_return{H: h, S: s, L: l, Alpha: a, Converted: converted}
@@ -121,8 +121,8 @@ func color_LabToRgb(L, a, b, alpha float64) color_return {
 	f_z := f_y - b/200
 
 	inverse_f := func(t float64) float64 {
-		if _math_.Pow(t, 3) > 0.008856 {
-			return _math_.Pow(t, 3)
+		if _math.Pow(t, 3) > 0.008856 {
+			return _math.Pow(t, 3)
 		}
 		return (t - 16/116.0) / 7.787
 	}
@@ -143,19 +143,19 @@ func color_LabToRgb(L, a, b, alpha float64) color_return {
 		if v <= 0.0031308 {
 			v = 12.92 * v
 		} else {
-			v = 1.055*_math_.Pow(v, 1/2.4) - 0.055
+			v = 1.055*_math.Pow(v, 1/2.4) - 0.055
 		}
-		return _math_.Max(0, _math_.Min(255, _math_.Round(v*255)))
+		return _math.Max(0, _math.Min(255, _math.Round(v*255)))
 	}
 
 	r := gammaCorrectAndClamp(r_linear)
 	g := gammaCorrectAndClamp(g_linear)
 	b_val := gammaCorrectAndClamp(b_linear)
-	a_val := _math_.Max(0, _math_.Min(1, alpha))
+	a_val := _math.Max(0, _math.Min(1, alpha))
 
-	converted := _fmt_.Sprintf("rgb(%.0f, %.0f, %.0f)", r, g, b_val)
+	converted := _fmt.Sprintf("rgb(%.0f, %.0f, %.0f)", r, g, b_val)
 	if a_val != 1 {
-		converted = _fmt_.Sprintf("rgba(%.0f, %.0f, %.0f, %.3f)", r, g, b_val, a_val)
+		converted = _fmt.Sprintf("rgba(%.0f, %.0f, %.0f, %.3f)", r, g, b_val, a_val)
 	}
 
 	return color_return{R: r, G: g, B: b_val, Alpha: a_val, Converted: converted}
@@ -170,7 +170,7 @@ func color_RgbToLab(r, g, b, alpha float64) color_return {
 
 	gammaCorrected := func(v float64) float64 {
 		if v > 0.04045 {
-			return _math_.Pow((v+0.055)/1.055, 2.4)
+			return _math.Pow((v+0.055)/1.055, 2.4)
 		}
 		return v / 12.92
 	}
@@ -189,7 +189,7 @@ func color_RgbToLab(r, g, b, alpha float64) color_return {
 
 	f := func(v float64) float64 {
 		if v > 0.008856 {
-			return _math_.Cbrt(v)
+			return _math.Cbrt(v)
 		}
 		return (7.787 * v) + 16/116.0
 	}
@@ -201,15 +201,15 @@ func color_RgbToLab(r, g, b, alpha float64) color_return {
 	L := (116 * fY) - 16
 	aComp := 500 * (fX - fY)
 	bComp := 200 * (fY - fZ)
-	a_val := _math_.Max(0, _math_.Min(1, alpha))
+	a_val := _math.Max(0, _math.Min(1, alpha))
 
-	L = _math_.Round(L*10) / 10         // ToFixed(1)
-	aComp = _math_.Round(aComp*10) / 10 // ToFixed(1)
-	bComp = _math_.Round(bComp*10) / 10 // ToFixed(1)
+	L = _math.Round(L*10) / 10         // ToFixed(1)
+	aComp = _math.Round(aComp*10) / 10 // ToFixed(1)
+	bComp = _math.Round(bComp*10) / 10 // ToFixed(1)
 
-	converted := _fmt_.Sprintf("lab(%.1f %.1f %.1f)", L, aComp, bComp)
+	converted := _fmt.Sprintf("lab(%.1f %.1f %.1f)", L, aComp, bComp)
 	if a_val != 1 {
-		converted = _fmt_.Sprintf("lab(%.1f %.1f %.1f / %.3f)", L, aComp, bComp, a_val)
+		converted = _fmt.Sprintf("lab(%.1f %.1f %.1f / %.3f)", L, aComp, bComp, a_val)
 	}
 
 	return color_return{L: L, A: aComp, BComp: bComp, Alpha: a_val, Converted: converted}
@@ -218,15 +218,15 @@ func color_RgbToLab(r, g, b, alpha float64) color_return {
 // lchToRgb converts LCH color values to RGB.
 // L: Lightness (0-100), C: Chroma (0-100+), H: Hue (0-360), alpha: Opacity (0-1).
 func color_LchToRgb(L, C, H, alpha float64) color_return {
-	hRad := H * _math_.Pi / 180
-	_a := C * _math_.Cos(hRad)
-	_b := C * _math_.Sin(hRad)
+	hRad := H * _math.Pi / 180
+	_a := C * _math.Cos(hRad)
+	_b := C * _math.Sin(hRad)
 	rgb := color_LabToRgb(L, _a, _b, alpha)
-	a_val := _math_.Max(0, _math_.Min(1, alpha))
+	a_val := _math.Max(0, _math.Min(1, alpha))
 
-	converted := _fmt_.Sprintf("rgb(%.0f, %.0f, %.0f)", rgb.R, rgb.G, rgb.B)
+	converted := _fmt.Sprintf("rgb(%.0f, %.0f, %.0f)", rgb.R, rgb.G, rgb.B)
 	if a_val != 1 {
-		converted = _fmt_.Sprintf("rgba(%.0f, %.0f, %.0f, %.3f)", rgb.R, rgb.G, rgb.B, a_val)
+		converted = _fmt.Sprintf("rgba(%.0f, %.0f, %.0f, %.3f)", rgb.R, rgb.G, rgb.B, a_val)
 	}
 
 	return color_return{R: rgb.R, G: rgb.G, B: rgb.B, Alpha: a_val, Converted: converted}
@@ -240,20 +240,20 @@ func color_RgbToLch(r, g, b, alpha float64) color_return {
 	_a := lab.A
 	bComp := lab.BComp
 
-	C := _math_.Sqrt(_a*_a + bComp*bComp)
-	H := _math_.Mod(_math_.Atan2(bComp, _a)*180/_math_.Pi+360, 360)
+	C := _math.Sqrt(_a*_a + bComp*bComp)
+	H := _math.Mod(_math.Atan2(bComp, _a)*180/_math.Pi+360, 360)
 	if C < 1e-6 {
 		H = 0
 	}
-	a_val := _math_.Max(0, _math_.Min(1, alpha))
+	a_val := _math.Max(0, _math.Min(1, alpha))
 
-	L = _math_.Round(L*10) / 10 // ToFixed(1)
-	C = _math_.Round(C*10) / 10 // ToFixed(1)
-	H = _math_.Round(H*10) / 10 // ToFixed(1)
+	L = _math.Round(L*10) / 10 // ToFixed(1)
+	C = _math.Round(C*10) / 10 // ToFixed(1)
+	H = _math.Round(H*10) / 10 // ToFixed(1)
 
-	converted := _fmt_.Sprintf("lch(%.1f %.1f %.1f)", L, C, H)
+	converted := _fmt.Sprintf("lch(%.1f %.1f %.1f)", L, C, H)
 	if a_val != 1 {
-		converted = _fmt_.Sprintf("lch(%.1f %.1f %.1f / %.3f)", L, C, H, a_val)
+		converted = _fmt.Sprintf("lch(%.1f %.1f %.1f / %.3f)", L, C, H, a_val)
 	}
 
 	return color_return{L: L, C: C, HComp: H, Alpha: a_val, Converted: converted}
@@ -262,7 +262,7 @@ func color_RgbToLch(r, g, b, alpha float64) color_return {
 // hwbToRgb converts HWB color values to RGB.
 // h: Hue (0-360), w: Whiteness (0-100), bl: Blackness (0-100), alpha: Opacity (0-1).
 func color_HwbToRgb(h, w, bl, alpha float64) color_return {
-	h = _math_.Mod(h, 360)
+	h = _math.Mod(h, 360)
 	w /= 100
 	bl /= 100
 
@@ -272,15 +272,15 @@ func color_HwbToRgb(h, w, bl, alpha float64) color_return {
 	gFinal := baseRgb.G*(1-w-bl) + w*255
 	bFinal := baseRgb.B*(1-w-bl) + w*255
 
-	a_val := _math_.Max(0, _math_.Min(1, alpha))
+	a_val := _math.Max(0, _math.Min(1, alpha))
 
-	r := _math_.Max(0, _math_.Min(255, _math_.Round(rFinal)))
-	g := _math_.Max(0, _math_.Min(255, _math_.Round(gFinal)))
-	b := _math_.Max(0, _math_.Min(255, _math_.Round(bFinal)))
+	r := _math.Max(0, _math.Min(255, _math.Round(rFinal)))
+	g := _math.Max(0, _math.Min(255, _math.Round(gFinal)))
+	b := _math.Max(0, _math.Min(255, _math.Round(bFinal)))
 
-	converted := _fmt_.Sprintf("rgb(%.0f, %.0f, %.0f)", r, g, b)
+	converted := _fmt.Sprintf("rgb(%.0f, %.0f, %.0f)", r, g, b)
 	if a_val != 1 {
-		converted = _fmt_.Sprintf("rgba(%.0f, %.0f, %.0f, %.3f)", r, g, b, a_val)
+		converted = _fmt.Sprintf("rgba(%.0f, %.0f, %.0f, %.3f)", r, g, b, a_val)
 	}
 
 	return color_return{R: r, G: g, B: b, Alpha: a_val, Converted: converted}
@@ -293,32 +293,32 @@ func color_RgbToHwb(r, g, b, alpha float64) color_return {
 	g /= 255
 	b /= 255
 
-	max := _math_.Max(r, _math_.Max(g, b))
-	min := _math_.Min(r, _math_.Min(g, b))
+	max := _math.Max(r, _math.Max(g, b))
+	min := _math.Min(r, _math.Min(g, b))
 
 	var h float64
 	switch max {
 	case min:
 		h = 0
 	case r:
-		h = _math_.Mod((60*((g-b)/(max-min)) + 360), 360)
+		h = _math.Mod((60*((g-b)/(max-min)) + 360), 360)
 	case g:
-		h = _math_.Mod((60*((b-r)/(max-min)) + 120), 360)
+		h = _math.Mod((60*((b-r)/(max-min)) + 120), 360)
 	case b:
-		h = _math_.Mod((60*((r-g)/(max-min)) + 240), 360)
+		h = _math.Mod((60*((r-g)/(max-min)) + 240), 360)
 	}
 
 	w := min * 100
 	bl := (1 - max) * 100
-	a_val := _math_.Max(0, _math_.Min(1, alpha))
+	a_val := _math.Max(0, _math.Min(1, alpha))
 
-	h = _math_.Round(h*10) / 10   // ToFixed(1)
-	w = _math_.Round(w*10) / 10   // ToFixed(1)
-	bl = _math_.Round(bl*10) / 10 // ToFixed(1)
+	h = _math.Round(h*10) / 10   // ToFixed(1)
+	w = _math.Round(w*10) / 10   // ToFixed(1)
+	bl = _math.Round(bl*10) / 10 // ToFixed(1)
 
-	converted := _fmt_.Sprintf("hwb(%.1f %.1f%% %.1f%%)", h, w, bl)
+	converted := _fmt.Sprintf("hwb(%.1f %.1f%% %.1f%%)", h, w, bl)
 	if a_val != 1 {
-		converted = _fmt_.Sprintf("hwb(%.1f %.1f%% %.1f%% / %.3f)", h, w, bl, a_val)
+		converted = _fmt.Sprintf("hwb(%.1f %.1f%% %.1f%% / %.3f)", h, w, bl, a_val)
 	}
 
 	return color_return{H: h, W: w, Bl: bl, Alpha: a_val, Converted: converted}
@@ -328,17 +328,17 @@ func color_RgbToHwb(r, g, b, alpha float64) color_return {
 // r, g, b: Red, Green, Blue components (0-255), alpha: Opacity (0-1).
 func color_RgbToHex(r, g, b, alpha float64) string {
 	toHex := func(c float64) string {
-		hex := _strconv_.FormatInt(int64(_math_.Round(c)), 16)
+		hex := _strconv.FormatInt(int64(_math.Round(c)), 16)
 		if len(hex) == 1 {
 			return "0" + hex
 		}
 		return hex
 	}
 
-	aVal := _math_.Max(0, _math_.Min(1, alpha))
-	alphaHex := _math_.Round(aVal * 255)
+	aVal := _math.Max(0, _math.Min(1, alpha))
+	alphaHex := _math.Round(aVal * 255)
 
-	hexString := _fmt_.Sprintf("#%s%s%s", toHex(r), toHex(g), toHex(b))
+	hexString := _fmt.Sprintf("#%s%s%s", toHex(r), toHex(g), toHex(b))
 	if alphaHex != 255 {
 		hexString += toHex(alphaHex)
 	}
@@ -348,40 +348,40 @@ func color_RgbToHex(r, g, b, alpha float64) string {
 // hexToRgb converts a hexadecimal color string to RGB.
 // hex: Hexadecimal color string (e.g., "#RRGGBB", "#RRGGBBAA", "#RGB", "#RGBA").
 func color_HexToRgb(hex string) (color_return, error) {
-	cleanHex := _strings_.TrimPrefix(hex, "#")
+	cleanHex := _strings.TrimPrefix(hex, "#")
 	var r, g, b int64
 	var alpha float64 = 1.0
 
 	switch len(cleanHex) {
 	case 8: // RRGGBBAA
-		r, _ = _strconv_.ParseInt(cleanHex[0:2], 16, 64)
-		g, _ = _strconv_.ParseInt(cleanHex[2:4], 16, 64)
-		b, _ = _strconv_.ParseInt(cleanHex[4:6], 16, 64)
-		alphaVal, _ := _strconv_.ParseInt(cleanHex[6:8], 16, 64)
+		r, _ = _strconv.ParseInt(cleanHex[0:2], 16, 64)
+		g, _ = _strconv.ParseInt(cleanHex[2:4], 16, 64)
+		b, _ = _strconv.ParseInt(cleanHex[4:6], 16, 64)
+		alphaVal, _ := _strconv.ParseInt(cleanHex[6:8], 16, 64)
 		alpha = float64(alphaVal) / 255.0
 	case 6: // RRGGBB
-		r, _ = _strconv_.ParseInt(cleanHex[0:2], 16, 64)
-		g, _ = _strconv_.ParseInt(cleanHex[2:4], 16, 64)
-		b, _ = _strconv_.ParseInt(cleanHex[4:6], 16, 64)
+		r, _ = _strconv.ParseInt(cleanHex[0:2], 16, 64)
+		g, _ = _strconv.ParseInt(cleanHex[2:4], 16, 64)
+		b, _ = _strconv.ParseInt(cleanHex[4:6], 16, 64)
 	case 4: // RGBA
-		r, _ = _strconv_.ParseInt(_strings_.Repeat(string(cleanHex[0]), 2), 16, 64)
-		g, _ = _strconv_.ParseInt(_strings_.Repeat(string(cleanHex[1]), 2), 16, 64)
-		b, _ = _strconv_.ParseInt(_strings_.Repeat(string(cleanHex[2]), 2), 16, 64)
-		alphaVal, _ := _strconv_.ParseInt(_strings_.Repeat(string(cleanHex[3]), 2), 16, 64)
+		r, _ = _strconv.ParseInt(_strings.Repeat(string(cleanHex[0]), 2), 16, 64)
+		g, _ = _strconv.ParseInt(_strings.Repeat(string(cleanHex[1]), 2), 16, 64)
+		b, _ = _strconv.ParseInt(_strings.Repeat(string(cleanHex[2]), 2), 16, 64)
+		alphaVal, _ := _strconv.ParseInt(_strings.Repeat(string(cleanHex[3]), 2), 16, 64)
 		alpha = float64(alphaVal) / 255.0
 	case 3: // RGB
-		r, _ = _strconv_.ParseInt(_strings_.Repeat(string(cleanHex[0]), 2), 16, 64)
-		g, _ = _strconv_.ParseInt(_strings_.Repeat(string(cleanHex[1]), 2), 16, 64)
-		b, _ = _strconv_.ParseInt(_strings_.Repeat(string(cleanHex[2]), 2), 16, 64)
+		r, _ = _strconv.ParseInt(_strings.Repeat(string(cleanHex[0]), 2), 16, 64)
+		g, _ = _strconv.ParseInt(_strings.Repeat(string(cleanHex[1]), 2), 16, 64)
+		b, _ = _strconv.ParseInt(_strings.Repeat(string(cleanHex[2]), 2), 16, 64)
 	default:
-		return color_return{}, _fmt_.Errorf("invalid hex color format: %s", hex)
+		return color_return{}, _fmt.Errorf("invalid hex color format: %s", hex)
 	}
 
-	alpha = _math_.Round(alpha*1000) / 1000 // ToFixed(3)
+	alpha = _math.Round(alpha*1000) / 1000 // ToFixed(3)
 
-	converted := _fmt_.Sprintf("rgb(%.0f, %.0f, %.0f)", float64(r), float64(g), float64(b))
+	converted := _fmt.Sprintf("rgb(%.0f, %.0f, %.0f)", float64(r), float64(g), float64(b))
 	if alpha != 1 {
-		converted = _fmt_.Sprintf("rgba(%.0f, %.0f, %.0f, %.3f)", float64(r), float64(g), float64(b), alpha)
+		converted = _fmt.Sprintf("rgba(%.0f, %.0f, %.0f, %.3f)", float64(r), float64(g), float64(b), alpha)
 	}
 
 	return color_return{R: float64(r), G: float64(g), B: float64(b), Alpha: alpha, Converted: converted}, nil
@@ -403,21 +403,21 @@ func color_OklabToRgb(L, a, b, alpha float64) color_return {
 	bLinear := -0.0041960863*lLinear - 0.7034186147*mLinear + 1.707614701*sLinear
 
 	srgbOetf := func(val float64) float64 {
-		val = _math_.Max(0, _math_.Min(1, val))
+		val = _math.Max(0, _math.Min(1, val))
 		if val <= 0.0031308 {
 			return 12.92 * val
 		}
-		return 1.055*_math_.Pow(val, 1/2.4) - 0.055
+		return 1.055*_math.Pow(val, 1/2.4) - 0.055
 	}
 
-	r := _math_.Max(0, _math_.Min(255, _math_.Round(srgbOetf(rLinear)*255)))
-	g := _math_.Max(0, _math_.Min(255, _math_.Round(srgbOetf(gLinear)*255)))
-	b_val := _math_.Max(0, _math_.Min(255, _math_.Round(srgbOetf(bLinear)*255)))
-	a_val := _math_.Max(0, _math_.Min(1, alpha))
+	r := _math.Max(0, _math.Min(255, _math.Round(srgbOetf(rLinear)*255)))
+	g := _math.Max(0, _math.Min(255, _math.Round(srgbOetf(gLinear)*255)))
+	b_val := _math.Max(0, _math.Min(255, _math.Round(srgbOetf(bLinear)*255)))
+	a_val := _math.Max(0, _math.Min(1, alpha))
 
-	converted := _fmt_.Sprintf("rgb(%.0f, %.0f, %.0f)", r, g, b_val)
+	converted := _fmt.Sprintf("rgb(%.0f, %.0f, %.0f)", r, g, b_val)
 	if a_val != 1 {
-		converted = _fmt_.Sprintf("rgba(%.0f, %.0f, %.0f, %.3f)", r, g, b_val, a_val)
+		converted = _fmt.Sprintf("rgba(%.0f, %.0f, %.0f, %.3f)", r, g, b_val, a_val)
 	}
 
 	return color_return{R: r, G: g, B: b_val, Alpha: a_val, Converted: converted}
@@ -431,7 +431,7 @@ func color_RgbToOklab(r, g, b, alpha float64) color_return {
 		if val <= 0.04045 {
 			return val / 12.92
 		}
-		return _math_.Pow((val+0.055)/1.055, 2.4)
+		return _math.Pow((val+0.055)/1.055, 2.4)
 	}
 
 	rLinear := srgbInverseOetf(r)
@@ -442,23 +442,23 @@ func color_RgbToOklab(r, g, b, alpha float64) color_return {
 	m := 0.2119034982*rLinear + 0.6806995451*gLinear + 0.1073969566*bLinear
 	s := 0.0883024619*rLinear + 0.2817188376*gLinear + 0.6299787005*bLinear
 
-	l_val := _math_.Cbrt(l)
-	m_val := _math_.Cbrt(m)
-	s_val := _math_.Cbrt(s)
+	l_val := _math.Cbrt(l)
+	m_val := _math.Cbrt(m)
+	s_val := _math.Cbrt(s)
 
 	L := 0.2104542553*l_val + 0.7936177850*m_val - 0.0040720468*s_val
 	a_val := 1.9779984951*l_val - 2.4285922050*m_val + 0.4505937099*s_val
 	b_val := 0.0259040371*l_val + 0.7827717662*m_val - 0.8086757660*s_val
 
-	alpha_val := _math_.Max(0, _math_.Min(1, alpha))
+	alpha_val := _math.Max(0, _math.Min(1, alpha))
 
-	L = _math_.Round(L*1000000) / 1000000         // ToFixed(6)
-	a_val = _math_.Round(a_val*1000000) / 1000000 // ToFixed(6)
-	b_val = _math_.Round(b_val*1000000) / 1000000 // ToFixed(6)
+	L = _math.Round(L*1000000) / 1000000         // ToFixed(6)
+	a_val = _math.Round(a_val*1000000) / 1000000 // ToFixed(6)
+	b_val = _math.Round(b_val*1000000) / 1000000 // ToFixed(6)
 
-	converted := _fmt_.Sprintf("oklab(%.6f %.6f %.6f)", L, a_val, b_val)
+	converted := _fmt.Sprintf("oklab(%.6f %.6f %.6f)", L, a_val, b_val)
 	if alpha_val != 1 {
-		converted = _fmt_.Sprintf("oklab(%.6f %.6f %.6f / %.3f)", L, a_val, b_val, alpha_val)
+		converted = _fmt.Sprintf("oklab(%.6f %.6f %.6f / %.3f)", L, a_val, b_val, alpha_val)
 	}
 
 	return color_return{L: L, A: a_val, BComp: b_val, Alpha: alpha_val, Converted: converted}
@@ -467,15 +467,15 @@ func color_RgbToOklab(r, g, b, alpha float64) color_return {
 // oklchToRgb converts Oklch color values to RGB.
 // L: Lightness (0-1), C: Chroma (0-0.5 approx), H: Hue (0-360), alpha: Opacity (0-1).
 func color_OklchToRgb(L, C, H, alpha float64) color_return {
-	hRad := H * _math_.Pi / 180
-	_a := C * _math_.Cos(hRad)
-	_b := C * _math_.Sin(hRad)
+	hRad := H * _math.Pi / 180
+	_a := C * _math.Cos(hRad)
+	_b := C * _math.Sin(hRad)
 	rgb := color_OklabToRgb(L, _a, _b, alpha)
-	a_val := _math_.Max(0, _math_.Min(1, alpha))
+	a_val := _math.Max(0, _math.Min(1, alpha))
 
-	converted := _fmt_.Sprintf("rgb(%.0f, %.0f, %.0f)", rgb.R, rgb.G, rgb.B)
+	converted := _fmt.Sprintf("rgb(%.0f, %.0f, %.0f)", rgb.R, rgb.G, rgb.B)
 	if a_val != 1 {
-		converted = _fmt_.Sprintf("rgba(%.0f, %.0f, %.0f, %.3f)", rgb.R, rgb.G, rgb.B, a_val)
+		converted = _fmt.Sprintf("rgba(%.0f, %.0f, %.0f, %.3f)", rgb.R, rgb.G, rgb.B, a_val)
 	}
 
 	return color_return{R: rgb.R, G: rgb.G, B: rgb.B, Alpha: a_val, Converted: converted}
@@ -489,20 +489,20 @@ func color_RgbToOklch(r, g, b, alpha float64) color_return {
 	_a := oklab.A
 	_b := oklab.BComp
 
-	C := _math_.Sqrt(_a*_a + _b*_b)
-	H := _math_.Mod(_math_.Atan2(_b, _a)*180/_math_.Pi+360, 360)
+	C := _math.Sqrt(_a*_a + _b*_b)
+	H := _math.Mod(_math.Atan2(_b, _a)*180/_math.Pi+360, 360)
 	if C < 1e-6 {
 		H = 0
 	}
-	a_val := _math_.Max(0, _math_.Min(1, alpha))
+	a_val := _math.Max(0, _math.Min(1, alpha))
 
-	L = _math_.Round(L*1000) / 1000 // ToFixed(3)
-	C = _math_.Round(C*1000) / 1000 // ToFixed(3)
-	H = _math_.Round(H*10) / 10     // ToFixed(1)
+	L = _math.Round(L*1000) / 1000 // ToFixed(3)
+	C = _math.Round(C*1000) / 1000 // ToFixed(3)
+	H = _math.Round(H*10) / 10     // ToFixed(1)
 
-	converted := _fmt_.Sprintf("oklch(%.3f %.3f %.1f)", L, C, H)
+	converted := _fmt.Sprintf("oklch(%.3f %.3f %.1f)", L, C, H)
 	if a_val != 1 {
-		converted = _fmt_.Sprintf("oklch(%.3f %.3f %.1f / %.3f)", L, C, H, a_val)
+		converted = _fmt.Sprintf("oklch(%.3f %.3f %.1f / %.3f)", L, C, H, a_val)
 	}
 
 	return color_return{L: L, C: C, HComp: H, Alpha: a_val, Converted: converted}

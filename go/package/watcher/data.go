@@ -1,20 +1,20 @@
 package event
 
 import (
-	"sync"
+	_sync "sync"
 )
 
-type Action int
+type E_Action int
 
 const (
-	Action_Reload Action = iota
-	Action_Access
-	Action_Update
-	Action_Unlink
+	E_Action_Reload E_Action = iota
+	E_Action_Access
+	E_Action_Update
+	E_Action_Unlink
 )
 
 type Event struct {
-	Action      Action
+	Action      E_Action
 	TimeStamp   string
 	Folder      string
 	FilePath    string
@@ -23,7 +23,7 @@ type Event struct {
 }
 
 type Watcher struct {
-	mutex sync.Mutex
+	mutex _sync.Mutex
 	queue []Event
 	Close func()
 }

@@ -1,7 +1,24 @@
-# Experimental Conventions
 
-## Project Structure
+# Directory structure reference
 
-- Package name start with capital for OOP-representative classes 
-- `constructor.go` with type and implementation method
+project-root/
+  ├── cmd/
+  │   ├── root.go          # Main command setup
+  │   └── subcmd.go        # Subcommands or additional CLI features
+  ├── internal/            # Helpers/utilities only for this project
+  │   ├── fileutils/
+  │   └── apiutils/
+  ├── models/              # Common structs and types
+  ├── services/            # Core business logic
+  ├── pkg/                 # (Optional) Exported packages for reuse
+  ├── configs/             # CLI configs, templates, defaults
+  ├── scripts/             # Helper scripts for dev/build
+  ├── test/                # Integration/system tests
+  ├── go.mod
+  ├── go.sum
+  └── README.md
 
+P_ : Function Params
+T_ : Type
+R_ : Return Type
+E_ : Enum

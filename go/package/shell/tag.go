@@ -1,14 +1,14 @@
 package shell
 
 import (
-	_math_ "math"
-	_strings_ "strings"
+	_math "math"
+	_strings "strings"
 )
 
 func tag_H1(content string, preset []string, styles ...string) string {
 	minWidth := 10
 	width := max(Canvas.Width(), minWidth)
-	words := _strings_.Fields(content)
+	words := _strings.Fields(content)
 	var lines []string
 	var currentLine string
 	for _, word := range words {
@@ -27,11 +27,11 @@ func tag_H1(content string, preset []string, styles ...string) string {
 	var paddedLines []string
 	for _, line := range lines {
 		padding := width - 6 - len(line)
-		leftPad := _strings_.Repeat(" ", padding/2)
-		rightPad := _strings_.Repeat(" ", (padding+1)/2)
+		leftPad := _strings.Repeat(" ", padding/2)
+		rightPad := _strings.Repeat(" ", (padding+1)/2)
 		paddedLines = append(paddedLines, ">>>"+leftPad+line+rightPad+"<<<")
 	}
-	s := "\n" + Divider(Canvas.DivRune.Mid) + "\n" + _strings_.Join(paddedLines, "\n") + "\n" + Divider(Canvas.DivRune.Mid) + "\n\n"
+	s := "\n" + Divider(Canvas.DivRune.Mid) + "\n" + _strings.Join(paddedLines, "\n") + "\n" + Divider(Canvas.DivRune.Mid) + "\n\n"
 	return Format(s, preset, styles...)
 }
 
@@ -62,7 +62,7 @@ func tag_H6(content string, preset []string, styles ...string) string {
 	width := Canvas.Width()
 	tabLen := len(Canvas.Tab)
 	remain := width - tabLen - len(content)
-	s := _strings_.Repeat(string(Canvas.DivRune.Mid), remain) + Canvas.Tab + content
+	s := _strings.Repeat(string(Canvas.DivRune.Mid), remain) + Canvas.Tab + content
 	return Format(s, preset, styles...)
 }
 
@@ -82,8 +82,8 @@ func tag_Li(content string, preset []string, styles ...string) string {
 
 func tag_Hr(content string, preset []string, styles ...string) string {
 	width := Canvas.Width()
-	n := int(_math_.Ceil(float64(width) / float64(len(content))))
-	repeated := _strings_.Repeat(content, n)
+	n := int(_math.Ceil(float64(width) / float64(len(content))))
+	repeated := _strings.Repeat(content, n)
 	if len(repeated) > width {
 		repeated = repeated[:width]
 	}
@@ -95,14 +95,14 @@ func tag_Br(repeat int, preset []string, styles ...string) string {
 	if repeat < 0 {
 		repeat = 0
 	}
-	return Format(_strings_.Repeat("\n", repeat), preset, styles...)
+	return Format(_strings.Repeat("\n", repeat), preset, styles...)
 }
 
 func tag_Tab(repeat int, preset []string, styles ...string) string {
 	if repeat < 0 {
 		repeat = 0
 	}
-	return Format(_strings_.Repeat(Canvas.Tab, repeat), preset, styles...)
+	return Format(_strings.Repeat(Canvas.Tab, repeat), preset, styles...)
 }
 
 var Tag = struct {

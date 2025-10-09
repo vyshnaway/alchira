@@ -1,10 +1,10 @@
 package cache
 
 import (
-	_types_ "main/types"
+	_model "main/models"
 )
 
-var Static = _types_.Cache_Static{
+var Static = _model.Cache_Static{
 	WATCH:             false,
 	MINIFY:            false,
 	ProjectName:       "",
@@ -14,16 +14,16 @@ var Static = _types_.Cache_Static{
 	RootCSS:           "",
 	RootPath:          "",
 	WorkPath:          "",
-	ProxyMap:          []_types_.Config_ProxyMap{},
+	ProxyMap:          []_model.Config_ProxyMap{},
 	Hashrule:          map[string]string{},
-	Tweaks:            _types_.Config_Tweaks{},
+	Tweaks:            _model.Config_Tweaks{},
 	Artifacts_Saved:   map[string]string{},
 	Libraries_Saved:   map[string]string{},
-	TargetDir_Saved:   map[string]_types_.Config_ProxyStorage{},
+	TargetDir_Saved:   map[string]_model.Config_ProxyStorage{},
 	Artifacts_Sources: map[string]string{},
 }
 
-var Archive = _types_.Config_Archive{
+var Archive = _model.Config_Archive{
 	Name:          "",
 	Author:        "",
 	Version:       "",
@@ -38,7 +38,7 @@ var Archive = _types_.Config_Archive{
 }
 
 func Archive_Reset() {
-	Archive = _types_.Config_Archive{
+	Archive = _model.Config_Archive{
 		Name:          "",
 		Author:        "",
 		Version:       "",
@@ -53,13 +53,13 @@ func Archive_Reset() {
 	}
 }
 
-var Delta = _types_.Cache_Delta{
+var Delta = _model.Cache_Delta{
 	ErrorCount:   0,
 	Path:         "",
 	Content:      "",
 	FinalMessage: "",
 	PublishError: "",
-	Report: _types_.Cache_Delta_Report{
+	Report: _model.Cache_Delta_Report{
 		Artifacts: "",
 		Axioms:    "",
 		Clusters:  "",
@@ -70,35 +70,35 @@ var Delta = _types_.Cache_Delta{
 		MemChart:  "",
 		Footer:    "",
 	},
-	Lookup: _types_.Cache_Delta_Lookup{
-		Artifacts: map[string]_types_.File_Lookup{},
-		Libraries: map[string]_types_.File_Lookup{},
-		TargetDir: map[string]_types_.File_Lookup{},
+	Lookup: _model.Cache_Delta_Lookup{
+		Artifacts: map[string]_model.File_Lookup{},
+		Libraries: map[string]_model.File_Lookup{},
+		TargetDir: map[string]_model.File_Lookup{},
 	},
-	Errors: _types_.Cache_Delta_Errors{
+	Errors: _model.Cache_Delta_Errors{
 		Artifacts: []string{},
 		Axioms:    []string{},
 		Clusters:  []string{},
 		Multiples: []string{},
 		TargetDir: []string{},
 	},
-	Diagnostics: _types_.Cache_Delta_Diagnostics{
-		Artifacts: []_types_.Refer_Diagnostic{},
-		Axioms:    []_types_.Refer_Diagnostic{},
-		Clusters:  []_types_.Refer_Diagnostic{},
-		TargetDir: []_types_.Refer_Diagnostic{},
-		Multiples: []_types_.Refer_Diagnostic{},
+	Diagnostics: _model.Cache_Delta_Diagnostics{
+		Artifacts: []_model.Refer_Diagnostic{},
+		Axioms:    []_model.Refer_Diagnostic{},
+		Clusters:  []_model.Refer_Diagnostic{},
+		TargetDir: []_model.Refer_Diagnostic{},
+		Multiples: []_model.Refer_Diagnostic{},
 	},
 }
 
 func Delta_Reset() {
-	Delta = _types_.Cache_Delta{
+	Delta = _model.Cache_Delta{
 		ErrorCount:   0,
 		Path:         "",
 		Content:      "",
 		FinalMessage: "",
 		PublishError: "",
-		Report: _types_.Cache_Delta_Report{
+		Report: _model.Cache_Delta_Report{
 			Artifacts: "",
 			Axioms:    "",
 			Clusters:  "",
@@ -109,74 +109,74 @@ func Delta_Reset() {
 			MemChart:  "",
 			Footer:    "",
 		},
-		Lookup: _types_.Cache_Delta_Lookup{
-			Artifacts: map[string]_types_.File_Lookup{},
-			Libraries: map[string]_types_.File_Lookup{},
-			TargetDir: map[string]_types_.File_Lookup{},
+		Lookup: _model.Cache_Delta_Lookup{
+			Artifacts: map[string]_model.File_Lookup{},
+			Libraries: map[string]_model.File_Lookup{},
+			TargetDir: map[string]_model.File_Lookup{},
 		},
-		Errors: _types_.Cache_Delta_Errors{
+		Errors: _model.Cache_Delta_Errors{
 			Artifacts: []string{},
 			Axioms:    []string{},
 			Clusters:  []string{},
 			Multiples: []string{},
 			TargetDir: []string{},
 		},
-		Diagnostics: _types_.Cache_Delta_Diagnostics{
-			Artifacts: []_types_.Refer_Diagnostic{},
-			Axioms:    []_types_.Refer_Diagnostic{},
-			Clusters:  []_types_.Refer_Diagnostic{},
-			TargetDir: []_types_.Refer_Diagnostic{},
-			Multiples: []_types_.Refer_Diagnostic{},
+		Diagnostics: _model.Cache_Delta_Diagnostics{
+			Artifacts: []_model.Refer_Diagnostic{},
+			Axioms:    []_model.Refer_Diagnostic{},
+			Clusters:  []_model.Refer_Diagnostic{},
+			TargetDir: []_model.Refer_Diagnostic{},
+			Multiples: []_model.Refer_Diagnostic{},
 		},
 	}
 }
 
-var Style = _types_.Cache_Style{
+var Style = _model.Cache_Style{
 	Hashrules:       map[string]string{},
-	Index_to_Data:   map[int]_types_.Style_ClassData{},
-	Global___Index:  _types_.Style_ClassIndexMap{},
-	Public___Index:  _types_.Style_ClassIndexMap{},
-	Library__Index:  _types_.Style_ClassIndexMap{},
-	Artifact_Index:  _types_.Style_ClassIndexMap{},
-	ClassDictionary: _types_.Style_Dictionary{},
-	PublishIndexMap: []_types_.Style_ClassIndexTrace{},
+	Index_to_Data:   map[int]_model.Style_ClassData{},
+	Global___Index:  _model.Style_ClassIndexMap{},
+	Public___Index:  _model.Style_ClassIndexMap{},
+	Library__Index:  _model.Style_ClassIndexMap{},
+	Artifact_Index:  _model.Style_ClassIndexMap{},
+	ClassDictionary: _model.Style_Dictionary{},
+	PublishIndexMap: []_model.Style_ClassIndexTrace{},
 }
 
 func Style_Reset() {
-	Style = _types_.Cache_Style{
+	Style = _model.Cache_Style{
 		Hashrules:       map[string]string{},
-		Index_to_Data:   map[int]_types_.Style_ClassData{},
-		Global___Index:  _types_.Style_ClassIndexMap{},
-		Public___Index:  _types_.Style_ClassIndexMap{},
-		Library__Index:  _types_.Style_ClassIndexMap{},
-		Artifact_Index:  _types_.Style_ClassIndexMap{},
-		ClassDictionary: _types_.Style_Dictionary{},
-		PublishIndexMap: []_types_.Style_ClassIndexTrace{},
+		Index_to_Data:   map[int]_model.Style_ClassData{},
+		Global___Index:  _model.Style_ClassIndexMap{},
+		Public___Index:  _model.Style_ClassIndexMap{},
+		Library__Index:  _model.Style_ClassIndexMap{},
+		Artifact_Index:  _model.Style_ClassIndexMap{},
+		ClassDictionary: _model.Style_Dictionary{},
+		PublishIndexMap: []_model.Style_ClassIndexTrace{},
 	}
 }
 
-var Manifest = _types_.Cache_Manifest{
+var Manifest = _model.Cache_Manifest{
 	Constants:   []string{},
 	Hashrules:   map[string]string{},
-	Diagnostics: []_types_.Refer_Diagnostic{},
-	Lookup:      map[string]_types_.File_Lookup{},
-	Axiom:       map[string]_types_.File_MetadataMap{},
-	Cluster:     map[string]_types_.File_MetadataMap{},
-	Local:       map[string]_types_.File_MetadataMap{},
-	Global:      map[string]_types_.File_MetadataMap{},
-	Artifact:    map[string]_types_.File_MetadataMap{},
+	Diagnostics: []_model.Refer_Diagnostic{},
+	Lookup:      map[string]_model.File_Lookup{},
+	Axiom:       map[string]_model.File_MetadataMap{},
+	Cluster:     map[string]_model.File_MetadataMap{},
+	Local:       map[string]_model.File_MetadataMap{},
+	Global:      map[string]_model.File_MetadataMap{},
+	Artifact:    map[string]_model.File_MetadataMap{},
 }
 
 func Manifest_Reset() {
-	Manifest = _types_.Cache_Manifest{
+	Manifest = _model.Cache_Manifest{
 		Constants:   []string{},
 		Hashrules:   map[string]string{},
-		Diagnostics: []_types_.Refer_Diagnostic{},
-		Lookup:      map[string]_types_.File_Lookup{},
-		Axiom:       map[string]_types_.File_MetadataMap{},
-		Cluster:     map[string]_types_.File_MetadataMap{},
-		Local:       map[string]_types_.File_MetadataMap{},
-		Global:      map[string]_types_.File_MetadataMap{},
-		Artifact:    map[string]_types_.File_MetadataMap{},
+		Diagnostics: []_model.Refer_Diagnostic{},
+		Lookup:      map[string]_model.File_Lookup{},
+		Axiom:       map[string]_model.File_MetadataMap{},
+		Cluster:     map[string]_model.File_MetadataMap{},
+		Local:       map[string]_model.File_MetadataMap{},
+		Global:      map[string]_model.File_MetadataMap{},
+		Artifact:    map[string]_model.File_MetadataMap{},
 	}
 }

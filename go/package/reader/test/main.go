@@ -1,14 +1,14 @@
 package test
 
 import (
-	reader "main/package/reader"
-	shell "main/package/shell/core"
-	"testing"
+	_reader "main/package/reader"
+	_shell "main/package/shell"
+	_testing "testing"
 )
 
-func Test_cursor(t *testing.T) {
-	cursor := reader.Construct("12345")
+func Test_cursor(t *_testing.T) {
+	cursor := _reader.New("12345")
 	cursor.Stream(true, func() {
-		shell.Render.Raw(cursor.Active.Char)
+		_shell.Render.Raw(cursor.Active.Char)
 	})
 }

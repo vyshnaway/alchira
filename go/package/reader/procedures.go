@@ -30,7 +30,7 @@ func (This *Type) setCurrent() {
 	}
 }
 
-func (This *Type) _UpdateIncPosition() {
+func (This *Type) updateIncPosition() {
 	if This.Active.Char == '\n' {
 		This.Active.RowMarker++
 		This.Active.ColFallback = This.Active.ColMarker
@@ -44,7 +44,7 @@ func (This *Type) Increment() (Char rune, Streaming bool) {
 	This.Active.Last = This.Active.Char
 	This.Active.Marker++
 	This.setCurrent()
-	This._UpdateIncPosition()
+	This.updateIncPosition()
 
 	if This.Streaming {
 		return This.Active.Char, This.Streaming

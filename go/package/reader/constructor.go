@@ -18,7 +18,7 @@ type Type struct {
 	Streaming bool
 }
 
-func Construct(content string) Type {
+func New(content string) Type {
 	This := Type{Runes: []rune(content)}
 	This.Reset()
 	return This
@@ -42,5 +42,5 @@ func (This *Type) Reset() {
 	This.Streaming = true
 
 	This.setCurrent()
-	This._UpdateIncPosition()
+	This.updateIncPosition()
 }

@@ -1,31 +1,31 @@
 package utils
 
 import (
-	_regexp_ "regexp"
-	_slices_ "slices"
-	_strconv_ "strconv"
-	_strings_ "strings"
+	_regexp "regexp"
+	_slices "slices"
+	_strconv "strconv"
+	_strings "strings"
 )
 
-// Normalize: replaces spaces and '@', then applies filters and replacements
+// Replaces spaces and '@', then applies filters and replacements
 func String_Filter(s string, keepChars, skipChars, addBackSlashFor []rune) string {
-	final := _strings_.Builder{}
-	regex_alphanumeric := _regexp_.MustCompile(`[a-zA-Z0-9]`)
-	regex_space := _regexp_.MustCompile(`\s+`)
-	regex_at := _regexp_.MustCompile(`@+`)
+	final := _strings.Builder{}
+	regex_alphanumeric := _regexp.MustCompile(`[a-zA-Z0-9]`)
+	regex_space := _regexp.MustCompile(`\s+`)
+	regex_at := _regexp.MustCompile(`@+`)
 
 	s = regex_space.ReplaceAllString(s, "_")
 	s = regex_at.ReplaceAllString(s, "_")
 	for _, ch := range s {
-		if _slices_.Contains(skipChars, ch) {
+		if _slices.Contains(skipChars, ch) {
 			continue
-		} else if _slices_.Contains(addBackSlashFor, ch) {
+		} else if _slices.Contains(addBackSlashFor, ch) {
 			final.WriteRune('\\')
 			final.WriteRune(ch)
 		} else {
 			if ch == '_' {
 				final.WriteRune('_')
-			} else if _slices_.Contains(keepChars, ch) {
+			} else if _slices.Contains(keepChars, ch) {
 				final.WriteRune(ch)
 			} else if regex_alphanumeric.MatchString(string(ch)) {
 				final.WriteRune(ch)
@@ -37,7 +37,7 @@ func String_Filter(s string, keepChars, skipChars, addBackSlashFor []rune) strin
 	return final.String()
 }
 
-// Minify: strips repeated whitespace and trims ends
+// Strips repeated whitespace and trims ends
 func String_Minify(s string) string {
 	var result []rune
 	lastCh := ' '
@@ -58,7 +58,7 @@ func String_Minify(s string) string {
 	return string(result)
 }
 
-// ZeroBreaks: splits string into segments not containing conditions
+// Splits string into segments not containing conditions
 func String_ZeroBreaks(s string, conditions []rune) []string {
 	var result []string
 	start := 0
@@ -80,7 +80,7 @@ func String_ZeroBreaks(s string, conditions []rune) []string {
 	return result
 }
 
-// EnCounter: integer to base-62 encoding, offset by 512
+// Integer to base-62 encoding, offset by 512
 func String_EnCounter(number int) string {
 	digits := "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 	base := len(digits)
@@ -94,17 +94,45 @@ func String_EnCounter(number int) string {
 	return result
 }
 
-// StringMem: approximates string memory size in kilobytes
+// Approximates string memory size in kilobytes
 func String_Memory(s string) float64 {
 	// Each Go string char is 1 byte (UTF-8 already handled), so use length/1024
 	sizeKB := float64(len(s)) / 1024
-	f, _ := _strconv_.ParseFloat(_strconv_.FormatFloat(sizeKB, 'f', 2, 64), 64)
+	f, _ := _strconv.ParseFloat(_strconv.FormatFloat(sizeKB, 'f', 2, 64), 64)
 	return f
 }
 
+// Fallback if type check as string fails
 func String_Fallback(val any, fallback string) string {
 	if s, ok := val.(string); ok && s != "" {
 		return s
 	}
 	return fallback
+}
+
+// Add space padding to both sides of string till limit
+func String_PadBothSides(str string, totalLength int) string {
+	totalPadding := totalLength - len(str)
+	if totalPadding <= 0 {
+		return str
+	}
+	start := totalPadding / 2
+	end := totalPadding - start
+	return _strings.Repeat(" ", start) + str + _strings.Repeat(" ", end)
+}
+
+// Add padding to end of string till limit
+func String_PadEnd(s string, width int, padChar rune) string {
+	if len(s) >= width {
+		return s
+	}
+	return s + _strings.Repeat(string(padChar), width-len(s))
+}
+
+// Add padding to start of string till limit
+func String_PadStart(s string, width int, padChar rune) string {
+	if len(s) >= width {
+		return s
+	}
+	return s + _strings.Repeat(string(padChar), width-len(s))
 }
