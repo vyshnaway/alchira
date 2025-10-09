@@ -1,8 +1,11 @@
 package style
 
 import (
+	_config "main/configs"
 	_action "main/internal/action"
 	_css "main/package/css"
+	_util "main/package/utils"
+	_string "strings"
 
 	_model "main/models"
 	_map "maps"
@@ -37,45 +40,58 @@ func parse_AssignMerge(classlist []string) Parse_return {
 }
 
 type R_Parse_Filter struct {
-	Assign    []string
-	Attach    []string
-	Liners    map[string]string
-	Blocks    map[string]string
-	Variables map[string]string
+	Assign     []string
+	Attach     []string
+	Properties map[string]string
+	Blocks     map[string]string
+	Variables  map[string]string
 }
 
 func parse_Filter(content string) R_Parse_Filter {
-	assign := []string{}
-	attach := []string{}
-	directives := []string{}
-	properties := []string{}
-	_css.ParsePartial(content)
-	// for _, kv := refer
+	ref := _css.ParsePartial(content)
+	res := R_Parse_Filter{
+		Assign:     []string{},
+		Attach:     []string{},
+		Blocks:     map[string]string{},
+		Variables:  map[string]string{},
+		Properties: map[string]string{},
+	}
 
-	// 	spaceIndex := _strings_.Index(val, " ")
-	// 	if spaceIndex < 0 {
-	// 		spaceIndex = len(val)
-	// 	}
-	// 	directive := val[0:spaceIndex]
+	for _, val := range ref.Directives {
+		spaceIndex := _string.Index(val, " ")
+		if spaceIndex < 0 {
+			spaceIndex = len(val)
+		}
+		directive := val[0:spaceIndex]
 
-	// 	switch directive {
-	// 	case _cache_.Root.CustomAtrules["attach"]:
-	// 		breaks := _utils_.String_ZeroBreaks(val[spaceIndex:], []rune{' ', '\n', ','})
-	// 		result.Attach = append(result.Attach, breaks...)
-	// 	case _cache_.Root.CustomAtrules["assign"]:
-	// 		breaks := _utils_.String_ZeroBreaks(val[spaceIndex:], []rune{' ', '\n', ','})
-	// 		result.Assign = append(result.Assign, breaks...)
-	// 	default:
-	// 	}
-	// } else {
-	// 	breaks := _utils_.String_ZeroBreaks(val, []rune{' ', '\n', ','})
-	// 	if len(breaks) > 0 {
-	// 		if breaks[0] == string(_cache_.Root.CustomOperations["attach"]) {
-	// 			result.Attach = append(result.Attach, breaks[1:]...)
-	// 		} else if (breaks[0]) == string(_cache_.Root.CustomOperations["assign"]) {
-	// 			result.Assign = append(result.Assign, breaks[1:]...)
-	// 		}
-	// 	}
+		switch directive {
+		case _config.Root.CustomAtrules["attach"]:
+			breaks := _util.String_ZeroBreaks(val[spaceIndex:], []rune{' ', '\n', ','})
+			res.Attach = append(res.Attach, breaks...)
+		case _config.Root.CustomAtrules["assign"]:
+			breaks := _util.String_ZeroBreaks(val[spaceIndex:], []rune{' ', '\n', ','})
+			res.Assign = append(res.Assign, breaks...)
+		default:
+		}
+	}
+
+	for _, val := range ref.Operations {
+		breaks := _util.String_ZeroBreaks(val, []rune{' ', '\n', ','})
+		if len(breaks) > 0 {
+			if breaks[0] == string(_config.Root.CustomOperations["attach"]) {
+				res.Attach = append(res.Attach, breaks[1:]...)
+			} else if (breaks[0]) == string(_config.Root.CustomOperations["assign"]) {
+				res.Assign = append(res.Assign, breaks[1:]...)
+			}
+		}
+	}
+
+	for _, kv := range ref.Properties {
+		key, val := kv[0], kv[1]
+		res.Properties[key] = val
+	}
+
+	return res
 }
 
 func Parse_CssSnippet(
@@ -104,11 +120,11 @@ func Parse_CssSnippet(
 	}
 
 	if verbose {
-		for k, v := range scanned.Liners {
+		for k, v := range scanned.Properties {
 			propmap.SetProp(k, v+"/* "+initial+srcselector+" */")
 		}
 	} else {
-		for k, v := range scanned.Liners {
+		for k, v := range scanned.Properties {
 			propmap.SetProp(k, v)
 		}
 	}

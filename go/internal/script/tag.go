@@ -2,8 +2,8 @@ package script
 
 import (
 	_config "main/configs"
-	_reader "main/package/reader"
 	_model "main/models"
+	_reader "main/package/reader"
 	_util "main/package/utils"
 	_regexp "regexp"
 	_slice "slices"
@@ -157,7 +157,7 @@ func Tag_Scanner(
 			}
 			if (deviance == 0 && (ch == '>' || ch == ';' || ch == ',' || ch == '<')) || deviance < 0 {
 				if ch == '>' {
-					ok = true 
+					ok = true
 
 				}
 				break

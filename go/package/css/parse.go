@@ -10,6 +10,7 @@ import (
 
 type R_Parse struct {
 	Directives    []string
+	Operations    []string
 	Properties    [][2]string
 	Atrule_Blocks [][2]string
 	Nested_Blocks [][2]string
@@ -82,6 +83,8 @@ func ParsePartial(content string) R_Parse {
 							result.Properties = append(result.Properties, [2]string{key, val})
 						} else if len(val) > 0 && val[0] == '@' {
 							result.Directives = append(result.Directives, val)
+						} else {
+							result.Operations = append(result.Directives, val)
 						}
 					} else if len(key) > 0 {
 						switch rune(key[0]) {

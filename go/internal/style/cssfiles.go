@@ -19,8 +19,8 @@ type cssfile_Parse_return struct {
 func Cssfile_Parse(content string, initial string, verbose bool) cssfile_Parse_return {
 	scanned := _css.ParsePartial(_util.Code_Uncomment(content, false, true, false))
 	result := _css.NewBlock()
-	for _, kv := range scanned.Directives {
-		result.SetProp(kv[0], kv[1])
+	for _, d := range scanned.Directives {
+		result.SetProp(d, "")
 	}
 
 	variables := map[string]string{}

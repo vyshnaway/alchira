@@ -1,4 +1,4 @@
-package cache
+package configs
 
 import (
 	_model "main/models"

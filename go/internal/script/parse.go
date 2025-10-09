@@ -2,8 +2,8 @@ package script
 
 import (
 	_config "main/configs"
-	_reader "main/package/reader"
 	_model "main/models"
+	_reader "main/package/reader"
 	_map "maps"
 	_regexp "regexp"
 	_slice "slices"

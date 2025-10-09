@@ -145,15 +145,15 @@ func Test(t *testing.T) {
 	bm1.SetProp("color", "red")
 	nested := css.NewBlock()
 	nested.SetProp("weight", "bold")
-	bm1.SetBlock("style", *nested)
+	bm1.SetBlock("style", nested)
 
 	bm2 := css.NewBlock()
 	bm2.SetProp("color", "blue")
 	nested2 := css.NewBlock()
 	nested2.SetProp("weight", "normal")
-	bm2.SetBlock("style", *nested2)
+	bm2.SetBlock("style", nested2)
 
-	bm1.Mixin(*bm2)
+	bm1.Mixin(bm2)
 	ok, val := bm1.GetProp("color") // Returns "blue", true
 	fmt.Println(val, ok)            // Output: blue true
 
@@ -168,7 +168,7 @@ func Test(t *testing.T) {
 	fmt.Println(nestedVal, ok) // Output: normal true
 
 	bm3 := bm1.Clone()
-	bm3.Mixin(*bm2)
+	bm3.Mixin(bm2)
 	bm3.SetProp("color", "green")
 	if ok, block := bm3.GetBlock("style"); ok {
 		block.SetProp("weight", "italic")
