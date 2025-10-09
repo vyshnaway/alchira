@@ -97,14 +97,18 @@ type Cache_Style struct {
 	PublishIndexMap []Style_ClassIndexTrace
 }
 
+type Cache_Manifest_Groups struct {
+	Axiom    map[string]File_MetadataMap `json:"axiom"`
+	Cluster  map[string]File_MetadataMap `json:"cluster"`
+	Local    map[string]File_MetadataMap `json:"local"`
+	Global   map[string]File_MetadataMap `json:"global"`
+	Artifact map[string]File_MetadataMap `json:"artifact"`
+}
+
 type Cache_Manifest struct {
-	Constants   []string                    `json:"constants"`
-	Hashrules   map[string]string           `json:"hashrules"`
-	Diagnostics []Refer_Diagnostic          `json:"diagnostics"`
-	Lookup      map[string]File_Lookup      `json:"lookup"`
-	Axiom       map[string]File_MetadataMap `json:"AXIOM"`
-	Cluster     map[string]File_MetadataMap `json:"CLUSTER"`
-	Local       map[string]File_MetadataMap `json:"LOCAL"`
-	Global      map[string]File_MetadataMap `json:"GLOBAL"`
-	Artifact    map[string]File_MetadataMap `json:"ARTIFACT"`
+	Constants   []string               `json:"constants"`
+	Hashrules   map[string]string      `json:"hashrules"`
+	Diagnostics []Refer_Diagnostic     `json:"diagnostics"`
+	Lookup      map[string]File_Lookup `json:"lookup"`
+	Group       Cache_Manifest_Groups  `json:"group"`
 }

@@ -25,7 +25,7 @@ func Path_FromRoot(elem ...string) (string, error) {
 	if !ok {
 		return "", _fmt.Errorf("failed to get current file path for root calculation")
 	}
-	root := _filepath.Join(_filepath.Dir(filename), "..", "..")
+	root := _filepath.Join(_filepath.Dir(filename), "..", "..", "..")
 	joined := _filepath.Join(root, _filepath.Join(elem...))
 	return joined, nil
 }

@@ -22,7 +22,7 @@ import (
 // 	return result
 // }
 
-func Render_Prefixer(stylemap T_Block, vendors []string) *T_Block {
+func Render_Prefixer(stylemap *T_Block, vendors []string) *T_Block {
 	out := NewBlock()
 
 	stylemap.PropRange(func(key, val string) {
@@ -61,7 +61,7 @@ func render_Vendored(stylemap *T_Block, minify bool, vendors []string, first boo
 		space = " "
 	}
 
-	prefixed := Render_Prefixer(*stylemap, vendors)
+	prefixed := Render_Prefixer(stylemap, vendors)
 
 	if prefixed.PropLen() > 0 {
 		prefixed.PropRange(func(k, v string) {
@@ -178,7 +178,7 @@ func render_Switched(This *T_Block) *T_Block {
 	return out
 }
 
-func Render_Switched(stylemap T_Block, minify bool) string {
-	switched := render_Switched(&stylemap)
+func Render_Switched(stylemap *T_Block, minify bool) string {
+	switched := render_Switched(stylemap)
 	return Render_Vendored(switched, minify)
 }

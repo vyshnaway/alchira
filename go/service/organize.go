@@ -1,77 +1,77 @@
-package craft
+package service
 
 import (
-	_cache_ "main/cache"
-	_order_ "main/order"
-	S "main/shell/core"
-	X "main/shell/make"
-	_stash_ "main/stash"
-	_types_ "main/types"
-	_utils_ "main/utils"
-	_maps_ "maps"
-	_strconv_ "strconv"
+	_config "main/configs"
+	_order_ "main/internal/order"
+	X "main/internal/shell"
+	_stash "main/internal/stash"
+	_model "main/models"
+	S "main/package/shell"
+	_util "main/package/utils"
+	_map "maps"
+	_strconv "strconv"
 )
 
 func accumulate() {
-	accumulated := _stash_.Target_Accumulate()
+	accumulated := _stash.Target_Accumulate()
 
-	_cache_.Style.Global___Index = accumulated.GlobalClasses
-	_cache_.Style.Public___Index = accumulated.PublicClasses
-	_cache_.Delta.Report.TargetDir = S.MAKE("", accumulated.Report)
+	_config.Style.Global___Index = accumulated.GlobalClasses
+	_config.Style.Public___Index = accumulated.PublicClasses
+	_config.Delta.Report.TargetDir = S.MAKE("", accumulated.Report)
 
-	_cache_.Manifest.Local = map[string]_types_.File_MetadataMap{}
-	_cache_.Manifest.Global = map[string]_types_.File_MetadataMap{}
+	_config.Manifest.Group.Local = map[string]_model.File_MetadataMap{}
+	_config.Manifest.Group.Global = map[string]_model.File_MetadataMap{}
 
-	_cache_.Delta.Errors.TargetDir = []string{}
-	_cache_.Delta.Lookup.TargetDir = map[string]_types_.File_Lookup{}
-	_cache_.Delta.Diagnostics.TargetDir = []_types_.Refer_Diagnostic{}
+	_config.Delta.Errors.TargetDir = []string{}
+	_config.Delta.Lookup.TargetDir = map[string]_model.File_Lookup{}
+	_config.Delta.Diagnostics.TargetDir = []_model.Refer_Diagnostic{}
 
 	for key, val := range accumulated.FileManifests {
-		_cache_.Manifest.Local[key] = val.Local
-		_cache_.Delta.Lookup.TargetDir[key] = val.Lookup
-		_cache_.Delta.Errors.TargetDir = append(_cache_.Delta.Errors.TargetDir, val.Errors...)
-		_cache_.Delta.Diagnostics.TargetDir = append(_cache_.Delta.Diagnostics.TargetDir, val.Diagnostics...)
+		_config.Manifest.Group.Local[key] = val.Local
+		_config.Delta.Lookup.TargetDir[key] = val.Lookup
+		_config.Delta.Errors.TargetDir = append(_config.Delta.Errors.TargetDir, val.Errors...)
+		_config.Delta.Diagnostics.TargetDir = append(_config.Delta.Diagnostics.TargetDir, val.Diagnostics...)
 
-		mergedMap := make(_types_.File_MetadataMap)
-		_maps_.Copy(mergedMap, val.Public)
-		_maps_.Copy(mergedMap, val.Global)
-		_cache_.Manifest.Global[key] = mergedMap
+		mergedMap := make(_model.File_MetadataMap)
+		_map.Copy(mergedMap, val.Public)
+		_map.Copy(mergedMap, val.Global)
+		_config.Manifest.Group.Global[key] = mergedMap
 	}
 
-	_cache_.Manifest.Lookup = map[string]_types_.File_Lookup{}
-	_maps_.Copy(_cache_.Manifest.Lookup, _cache_.Delta.Lookup.Artifacts)
-	_maps_.Copy(_cache_.Manifest.Lookup, _cache_.Delta.Lookup.Libraries)
-	_maps_.Copy(_cache_.Manifest.Lookup, _cache_.Delta.Lookup.TargetDir)
+	_config.Manifest.Lookup = map[string]_model.File_Lookup{}
+	_map.Copy(_config.Manifest.Lookup, _config.Delta.Lookup.Artifacts)
+	_map.Copy(_config.Manifest.Lookup, _config.Delta.Lookup.Libraries)
+	_map.Copy(_config.Manifest.Lookup, _config.Delta.Lookup.TargetDir)
 
-	_cache_.Delta.Errors.Multiples = []string{}
-	_cache_.Delta.Diagnostics.Multiples = []_types_.Refer_Diagnostic{}
-	for _, val := range _cache_.Style.Index_to_Data {
+	_config.Delta.Errors.Multiples = []string{}
+	_config.Delta.Diagnostics.Multiples = []_model.Refer_Diagnostic{}
+	for _, val := range _config.Style.Index_to_Data {
 		if len(val.Metadata.Declarations) > 1 {
 			error_ := X.Error_Write("Duplicate Declarations: "+val.SymClass, val.Metadata.Declarations)
-			_cache_.Delta.Errors.Multiples = append(_cache_.Delta.Errors.Multiples, error_.Errorstring)
-			_cache_.Delta.Diagnostics.Multiples = append(_cache_.Delta.Diagnostics.Multiples, error_.Diagnostic)
+			_config.Delta.Errors.Multiples = append(_config.Delta.Errors.Multiples, error_.Errorstring)
+			_config.Delta.Diagnostics.Multiples = append(_config.Delta.Diagnostics.Multiples, error_.Diagnostic)
 		}
 	}
 
-	_cache_.Manifest.Diagnostics = []_types_.Refer_Diagnostic{}
-	_cache_.Manifest.Diagnostics = append(_cache_.Manifest.Diagnostics, _cache_.Delta.Diagnostics.Artifacts...)
-	_cache_.Manifest.Diagnostics = append(_cache_.Manifest.Diagnostics, _cache_.Delta.Diagnostics.Axioms...)
-	_cache_.Manifest.Diagnostics = append(_cache_.Manifest.Diagnostics, _cache_.Delta.Diagnostics.Clusters...)
-	_cache_.Manifest.Diagnostics = append(_cache_.Manifest.Diagnostics, _cache_.Delta.Diagnostics.Multiples...)
-	_cache_.Manifest.Diagnostics = append(_cache_.Manifest.Diagnostics, _cache_.Delta.Diagnostics.TargetDir...)
-	_cache_.Delta.ErrorCount = len(_cache_.Manifest.Diagnostics)
+	_config.Manifest.Diagnostics = []_model.Refer_Diagnostic{}
+	_config.Manifest.Diagnostics = append(_config.Manifest.Diagnostics, _config.Delta.Diagnostics.Artifacts...)
+	_config.Manifest.Diagnostics = append(_config.Manifest.Diagnostics, _config.Delta.Diagnostics.Axioms...)
+	_config.Manifest.Diagnostics = append(_config.Manifest.Diagnostics, _config.Delta.Diagnostics.Clusters...)
+	_config.Manifest.Diagnostics = append(_config.Manifest.Diagnostics, _config.Delta.Diagnostics.Multiples...)
+	_config.Manifest.Diagnostics = append(_config.Manifest.Diagnostics, _config.Delta.Diagnostics.TargetDir...)
+	_config.Delta.ErrorCount = len(_config.Manifest.Diagnostics)
 
 	errorlist := []string{}
-	errorlist = append(errorlist, _cache_.Delta.Errors.Artifacts...)
-	errorlist = append(errorlist, _cache_.Delta.Errors.Axioms...)
-	errorlist = append(errorlist, _cache_.Delta.Errors.Clusters...)
-	errorlist = append(errorlist, _cache_.Delta.Errors.Multiples...)
-	errorlist = append(errorlist, _cache_.Delta.Errors.TargetDir...)
-	_cache_.Delta.Report.Errors = ""
+	errorlist = append(errorlist, _config.Delta.Errors.Artifacts...)
+	errorlist = append(errorlist, _config.Delta.Errors.Axioms...)
+	errorlist = append(errorlist, _config.Delta.Errors.Clusters...)
+	errorlist = append(errorlist, _config.Delta.Errors.Multiples...)
+	errorlist = append(errorlist, _config.Delta.Errors.TargetDir...)
+	_config.Delta.Report.Errors = ""
 
-	if _cache_.Delta.ErrorCount > 0 {
+	if _config.Delta.ErrorCount > 0 {
 		S.MAKE(
-			S.Tag.H2(_strconv_.Itoa(_cache_.Delta.ErrorCount)+" Errors", S.Preset.Failed),
+			S.Tag.H2(_strconv.Itoa(_config.Delta.ErrorCount)+" Errors", S.Preset.Failed),
 			errorlist,
 		)
 	}
@@ -79,61 +79,61 @@ func accumulate() {
 
 func Organize() (AritfactFiles map[string]string, Attachments []int) {
 
-	_cache_.Style.ClassDictionary = _types_.Style_Dictionary{}
-	_cache_.Style.PublishIndexMap = []_types_.Style_ClassIndexTrace{}
+	_config.Style.ClassDictionary = _model.Style_Dictionary{}
+	_config.Style.PublishIndexMap = []_model.Style_ClassIndexTrace{}
 
-	SaveClassRefs := func(stash _types_.Refer_SortedOutput) {
+	SaveClassRefs := func(stash _order_.R_Preview) {
 		for _, val := range stash.Final_Hashtrace {
 			index := val[0]
 			classid := val[1]
-			classname := "_" + _utils_.String_EnCounter(classid)
-			_cache_.Style.PublishIndexMap = append(_cache_.Style.PublishIndexMap, _types_.Style_ClassIndexTrace{
+			classname := "_" + _util.String_EnCounter(classid)
+			_config.Style.PublishIndexMap = append(_config.Style.PublishIndexMap, _model.Style_ClassIndexTrace{
 				ClassName:  classname,
 				ClassIndex: index,
 			})
 		}
 
 		for json_array, imap := range stash.List_to_GroupId {
-			_cache_.Style.ClassDictionary[json_array] = map[int]string{}
+			_config.Style.ClassDictionary[json_array] = map[int]string{}
 			for ref, id := range stash.Group_to_Table[imap] {
-				_cache_.Style.ClassDictionary[json_array][ref] = "_" + _utils_.String_EnCounter(id)
+				_config.Style.ClassDictionary[json_array][ref] = "_" + _util.String_EnCounter(id)
 			}
 		}
 	}
 
 	accumulate()
 	artifact_files := map[string]string{}
-	tracks_ := _stash_.Target_GetTracks()
+	tracks_ := _stash.Target_GetTracks()
 
-	if _cache_.Static.WATCH {
-		_cache_.Delta.FinalMessage = _strconv_.Itoa(_cache_.Delta.ErrorCount) + " Errors."
-	} else if _cache_.Static.Command == "preview" {
-		res, _ := _order_.Order(tracks_.ClassTracks, false, _cache_.Static.Argument, _types_.Config_Archive{})
+	if _config.Static.WATCH {
+		_config.Delta.FinalMessage = _strconv.Itoa(_config.Delta.ErrorCount) + " Errors."
+	} else if _config.Static.Command == "preview" {
+		res, _ := _order_.Optimize(tracks_.ClassTracks, false, _config.Static.Argument, _model.Config_Archive{})
 		SaveClassRefs(*res.Result)
 
-		if _cache_.Delta.ErrorCount > 0 {
-			_cache_.Delta.FinalMessage = _strconv_.Itoa(_cache_.Delta.ErrorCount) + " Unresolved Errors. Rectify them to proceed with 'publish' command."
+		if _config.Delta.ErrorCount > 0 {
+			_config.Delta.FinalMessage = _strconv.Itoa(_config.Delta.ErrorCount) + " Unresolved Errors. Rectify them to proceed with 'publish' command."
 		} else {
-			_cache_.Delta.FinalMessage = "Preview verified with no major errors. Procceed to 'publish' using your key."
+			_config.Delta.FinalMessage = "Preview verified with no major errors. Procceed to 'publish' using your key."
 		}
-	} else if _cache_.Static.Command == "publish" {
-		if _cache_.Delta.ErrorCount > 0 {
-			res, _ := _order_.Order(tracks_.ClassTracks, false, _cache_.Static.Argument, _types_.Config_Archive{})
+	} else if _config.Static.Command == "publish" {
+		if _config.Delta.ErrorCount > 0 {
+			res, _ := _order_.Optimize(tracks_.ClassTracks, false, _config.Static.Argument, _model.Config_Archive{})
 			SaveClassRefs(*res.Result)
 
-			_cache_.Delta.FinalMessage = "Errors in " + _strconv_.Itoa(_cache_.Delta.ErrorCount) + " Tags. Falling back to 'preview' command."
-			_cache_.Static.Command = "preview"
+			_config.Delta.FinalMessage = "Errors in " + _strconv.Itoa(_config.Delta.ErrorCount) + " Tags. Falling back to 'preview' command."
+			_config.Static.Command = "preview"
 		} else {
 			archive := archive_Build()
-			res, _ := _order_.Order(tracks_.ClassTracks, true, _cache_.Static.Argument, archive)
+			res, _ := _order_.Optimize(tracks_.ClassTracks, true, _config.Static.Argument, archive)
 			SaveClassRefs(*res.Result)
 
 			if res.Status {
 				artifact_files = archive_Deploy()
-				_cache_.Delta.FinalMessage = "Build Success."
+				_config.Delta.FinalMessage = "Build Success."
 			} else {
-				_cache_.Delta.PublishError = res.Message
-				_cache_.Delta.FinalMessage = "Build Atttempt Failed. Fallback with Preview."
+				_config.Delta.PublishError = res.Message
+				_config.Delta.FinalMessage = "Build Atttempt Failed. Fallback with Preview."
 			}
 		}
 	}

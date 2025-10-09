@@ -160,11 +160,13 @@ var Manifest = _model.Cache_Manifest{
 	Hashrules:   map[string]string{},
 	Diagnostics: []_model.Refer_Diagnostic{},
 	Lookup:      map[string]_model.File_Lookup{},
-	Axiom:       map[string]_model.File_MetadataMap{},
-	Cluster:     map[string]_model.File_MetadataMap{},
-	Local:       map[string]_model.File_MetadataMap{},
-	Global:      map[string]_model.File_MetadataMap{},
-	Artifact:    map[string]_model.File_MetadataMap{},
+	Group: _model.Cache_Manifest_Groups{
+		Axiom:    map[string]_model.File_MetadataMap{},
+		Cluster:  map[string]_model.File_MetadataMap{},
+		Local:    map[string]_model.File_MetadataMap{},
+		Global:   map[string]_model.File_MetadataMap{},
+		Artifact: map[string]_model.File_MetadataMap{},
+	},
 }
 
 func Manifest_Reset() {
@@ -173,10 +175,12 @@ func Manifest_Reset() {
 		Hashrules:   map[string]string{},
 		Diagnostics: []_model.Refer_Diagnostic{},
 		Lookup:      map[string]_model.File_Lookup{},
-		Axiom:       map[string]_model.File_MetadataMap{},
-		Cluster:     map[string]_model.File_MetadataMap{},
-		Local:       map[string]_model.File_MetadataMap{},
-		Global:      map[string]_model.File_MetadataMap{},
-		Artifact:    map[string]_model.File_MetadataMap{},
+		Group: _model.Cache_Manifest_Groups{
+			Axiom:    map[string]_model.File_MetadataMap{},
+			Cluster:  map[string]_model.File_MetadataMap{},
+			Local:    map[string]_model.File_MetadataMap{},
+			Global:   map[string]_model.File_MetadataMap{},
+			Artifact: map[string]_model.File_MetadataMap{},
+		},
 	}
 }

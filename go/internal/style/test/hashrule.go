@@ -1,4 +1,4 @@
-package style_test
+package test
 
 import (
 	_style "main/internal/style"

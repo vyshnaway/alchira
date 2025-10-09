@@ -1,10 +1,10 @@
 package test
 
 import (
-	"main/compose"
-	shell "main/shell/core"
-	"main/style"
-	"testing"
+	_style "main/internal/style"
+	_css "main/package/css"
+	_shell "main/package/shell"
+	_testing "testing"
 )
 
 // @hover $scale-125;
@@ -81,7 +81,7 @@ const content = `
 // }
 // 	`
 
-func Test_Partials(t *testing.T) {
-	res1 := style.Parse_CssSnippet(content, "initial", "selector", true, true)
-	shell.Render.Raw(compose.Render_Prefixer(res1.Result, []string{}))
+func Test_Partials(t *_testing.T) {
+	res1 := _style.Parse_CssSnippet(content, "initial", "selector", true, true)
+	_shell.Render.Raw(_css.Render_Vendored(res1.Result, true))
 }

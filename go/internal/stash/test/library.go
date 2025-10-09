@@ -1,14 +1,14 @@
 package stash_test
 
 import (
-	"main/cache"
-	shell "main/shell/core"
-	"main/stash"
-	"testing"
+	_config "main/configs"
+	_shell "main/package/shell"
+	_stash "main/internal/stash"
+	_testing "testing"
 )
 
 func test_SaveFiles() {
-	cache.Static.Libraries_Saved = map[string]string{
+	_config.Static.Libraries_Saved = map[string]string{
 		"0.test.css":    "",
 		"0.a0.css":      "",
 		"goo.1.go.css":  "",
@@ -19,7 +19,7 @@ func test_SaveFiles() {
 	}
 }
 
-func Test_Library(t *testing.T) {
+func Test_Library(t *_testing.T) {
 	test_SaveFiles()
-	shell.Render.Raw(stash.Library_CacheFiles())
+	_shell.Render.Raw(_stash.Library_CacheFiles())
 }

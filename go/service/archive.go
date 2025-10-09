@@ -1,32 +1,30 @@
-package craft
+package service
 
 import (
-	_json_ "encoding/json"
-	_cache_ "main/cache"
-	_fileman_ "main/fileman"
-	_stash_ "main/stash"
-	_style_ "main/style"
-	_types_ "main/types"
-	"main/utils"
-	_utils_ "main/utils"
-	_maps_ "maps"
-	_slices_ "slices"
-	_sort_ "sort"
-	_strings_ "strings"
+	_config "main/configs"
+	_stash "main/internal/stash"
+	_style "main/internal/style"
+	_models "main/models"
+	_fileman "main/package/fileman"
+	_util "main/package/utils"
+	_map "maps"
+	_slice "slices"
+	_sort "sort"
+	_string "strings"
 )
 
-func archive_Build() _types_.Config_Archive {
-	archive := _cache_.Archive
+func archive_Build() _models.Config_Archive {
+	archive := _config.Archive
 	archive.ExportClasses = []string{}
 
-	exportdata := map[string]_types_.Style_ExportStyle{}
-	for _, val := range _stash_.Cache.Targetdir {
-		_maps_.Copy(exportdata, val.GetExports())
+	exportdata := map[string]_models.Style_ExportStyle{}
+	for _, val := range _stash.Cache.Targetdir {
+		_map.Copy(exportdata, val.GetExports())
 	}
 
-	var exportsheet _strings_.Builder
+	var exportsheet _string.Builder
 	for _, data := range exportdata {
-		if _strings_.Contains(data.SymClass, "$$$") {
+		if _string.Contains(data.SymClass, "$$$") {
 			archive.ExportClasses = append(archive.ExportClasses, data.SymClass)
 		}
 
@@ -47,7 +45,7 @@ func archive_Build() _types_.Config_Archive {
 
 				var v string
 				if len(data.Attachments) > 0 {
-					v = string(_cache_.Root.CustomOperations["attach"]) + " " + _strings_.Join(data.Attachments, " ") + ";"
+					v = string(_config.Root.CustomOperations["attach"]) + " " + _string.Join(data.Attachments, " ") + ";"
 				}
 				v += val
 
@@ -55,9 +53,9 @@ func archive_Build() _types_.Config_Archive {
 					exportsheet.WriteString("=" + v)
 				}
 			} else if key[0] == ' ' {
-				if arr, err := utils.Code_JsonParse[[]string](key); err == nil {
+				if arr, err := _util.Code_JsonParse[[]string](key); err == nil {
 					exportsheet.WriteString("{")
-					exportsheet.WriteString(_strings_.Join(arr, "}&{"))
+					exportsheet.WriteString(_string.Join(arr, "}&{"))
 					exportsheet.WriteString("}&=")
 					exportsheet.WriteString("{" + val + "}")
 				}
@@ -81,34 +79,34 @@ func archive_Deploy() map[string]string {
 	latestverfile := "latest.json"
 	currentverfile := archive_Build().Version + ".json"
 	availableversions := []string{}
-	if items, err := _fileman_.Path_ListFiles(_cache_.Path_Folder["arcversion"].Path, []string{}); err == nil {
+	if items, err := _fileman.Path_ListFiles(_config.Path_Folder["arcversion"].Path, []string{}); err == nil {
 		for _, item := range items {
 			availableversions = append(availableversions, item)
 		}
 	}
-	if _slices_.Contains(availableversions, latestverfile) {
+	if _slice.Contains(availableversions, latestverfile) {
 		availableversions = append(availableversions, latestverfile)
 	}
-	if _slices_.Contains(availableversions, currentverfile) {
+	if _slice.Contains(availableversions, currentverfile) {
 		availableversions = append(availableversions, currentverfile)
 	}
-	_sort_.Strings(availableversions)
+	_sort.Strings(availableversions)
 
-	indexexport := _cache_.Archive
+	indexexport := _config.Archive
 	indexexport.ExportSheet = ""
 	indexexport.Versions = availableversions
-	indexexport.Constants = _style_.Cssfile_Parse(
-		_utils_.Code_Uncomment(_cache_.Static.RootCSS, false, true, false),
+	indexexport.Constants = _style.Cssfile_Parse(
+		_util.Code_Uncomment(_config.Static.RootCSS, false, true, false),
 		"", false).Variables
 
-	indexexportjson, _ := _json_.Marshal(indexexport)
-	exportjson, _ := _json_.Marshal(_cache_.Archive)
-	latestpath := _fileman_.Path_Join(_cache_.Path_Folder["arcversion"].Path, latestverfile)
-	currentpath := _fileman_.Path_Join(_cache_.Path_Folder["arcversion"].Path, currentverfile)
+	indexexportjson := _util.Code_JsonBuild(indexexport, "")
+	exportjson := _util.Code_JsonBuild(_config.Archive, "")
+	latestpath := _fileman.Path_Join(_config.Path_Folder["arcversion"].Path, latestverfile)
+	currentpath := _fileman.Path_Join(_config.Path_Folder["arcversion"].Path, currentverfile)
 	artifact_files := map[string]string{
 		latestpath:                        string(exportjson),
 		currentpath:                       string(exportjson),
-		_cache_.Path_Json["archive"].Path: string(indexexportjson),
+		_config.Path_Json["archive"].Path: string(indexexportjson),
 	}
 
 	return artifact_files

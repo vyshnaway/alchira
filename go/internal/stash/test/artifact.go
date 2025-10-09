@@ -1,13 +1,13 @@
 package stash_test
 
 import (
-	"main/cache"
-	"main/stash"
-	"testing"
+	_config "main/configs"
+	_stash "main/internal/stash"
+	_testing "testing"
 )
 
 func test_SaveArtifacts() {
-	cache.Static.Libraries_Saved = map[string]string{
+	_config.Static.Libraries_Saved = map[string]string{
 		"lib.xcss":      `
 # -webapps@1.0.1 : Available SymClasses
 
@@ -23,7 +23,7 @@ func test_SaveArtifacts() {
 	}
 }
 
-func Test_Artifacts(t *testing.T) {
+func Test_Artifacts(t *_testing.T) {
 	test_SaveArtifacts()
-	stash.Artifact_Update()
+	_stash.Artifact_Update()
 }

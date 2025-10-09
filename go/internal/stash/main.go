@@ -5,7 +5,7 @@ import (
 	_config "main/configs"
 	_target "main/internal/target"
 	_model "main/models"
-	_util "main/utils"
+	_util "main/package/utils"
 	_string "strings"
 )
 

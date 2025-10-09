@@ -1,21 +1,20 @@
-package cmd
+package service
 
 import (
-	_action_ "main/action"
-	_cache_ "main/cache"
-	_craft_ "main/craft"
-	"main/package/fileman"
-	S "main/package/shell/core"
-	X "main/int/shell"
-	"main/stash"
-	_watcher_ "main/watcher"
-	"maps"
-	"os"
-	"os/signal"
-	"slices"
-	"sync"
-	"syscall"
-	"time"
+	_config "main/configs"
+	_action "main/internal/action"
+	X "main/internal/shell"
+	_stash "main/internal/stash"
+	_fileman "main/package/fileman"
+	S "main/package/shell"
+	_watcher "main/package/watcher"
+	_map "maps"
+	_os "os"
+	_signal "os/signal"
+	_slice "slices"
+	_sync "sync"
+	_syscall "syscall"
+	_time "time"
 )
 
 type execute_Step_enum int
@@ -37,7 +36,7 @@ const (
 	execute_Step_WatchFolders
 )
 
-func exec(heading string) (Exitcode int) {
+func Execute(heading string) (Exitcode int) {
 	exitcode := 0
 	step := execute_Step_Initialize
 	report := ""
@@ -46,8 +45,8 @@ func exec(heading string) (Exitcode int) {
 	cycle_one := true
 	// initial_heading := "Initial Build"
 	outfiles := map[string]string{}
-	var watcher *_watcher_.Watcher
-	var save_action sync.WaitGroup
+	var watcher *_watcher.Watcher
+	var save_action _sync.WaitGroup
 
 	for {
 		switch step {
@@ -56,7 +55,7 @@ func exec(heading string) (Exitcode int) {
 			fallthrough
 
 		case execute_Step_VerifySetupStruct:
-			if res_status, res_report := _action_.Verify_Setup(); res_status != _action_.Verify_Setup_Status_Verified {
+			if res_status, res_report := _action.Verify_Setup(); res_status != _action.Verify_Setup_Status_Verified {
 				report = res_report
 				step = execute_Step_WatchFolders
 				break
@@ -66,15 +65,15 @@ func exec(heading string) (Exitcode int) {
 			fallthrough
 
 		case execute_Step_ReadRootCss:
-			_action_.Save_RootCss()
+			_action.Save_RootCss()
 			fallthrough
 
 		case execute_Step_ReadLibraries:
-			_action_.Save_Libraries()
+			_action.Save_Libraries()
 			fallthrough
 
 		case execute_Step_VerifyConfigs:
-			if res_report, res_status := _action_.Verify_Configs(cycle_one); !res_status {
+			if res_report, res_status := _action.Verify_Configs(cycle_one); !res_status {
 				report = res_report
 				step = execute_Step_WatchFolders
 				break
@@ -85,15 +84,15 @@ func exec(heading string) (Exitcode int) {
 			fallthrough
 
 		case execute_Step_ReadArtifacts:
-			_action_.Save_Artifacts()
+			_action.Save_Artifacts()
 			fallthrough
 
 		case execute_Step_ReadTargets:
-			_action_.Save_Targets()
+			_action.Save_Targets()
 			fallthrough
 
 		case execute_Step_ReadHashrule:
-			if res_report, res_status := _action_.SaveHashrule(); !res_status {
+			if res_report, res_status := _action.SaveHashrule(); !res_status {
 				report = res_report
 				step = execute_Step_WatchFolders
 				break
@@ -103,15 +102,15 @@ func exec(heading string) (Exitcode int) {
 			fallthrough
 
 		case execute_Step_ProcessScaffold:
-			_craft_.Update_Scaffold()
+			Update_Scaffold()
 			fallthrough
 
 		case execute_Step_ProcessProxyFolders:
-			_craft_.Build_Targets()
+			Build_Targets()
 			fallthrough
 
 		case execute_Step_GenerateFiles:
-			outfiles, report = _craft_.Generate_Files()
+			outfiles, report = Generate_Files()
 			fallthrough
 
 		case execute_Step_Publish:
@@ -119,7 +118,7 @@ func exec(heading string) (Exitcode int) {
 				save_action.Wait()
 				save_action.Add(1)
 				go func() {
-					fileman.Write_Bulk(outfiles)
+					_fileman.Write_Bulk(outfiles)
 					save_action.Done()
 				}()
 			}
@@ -130,24 +129,24 @@ func exec(heading string) (Exitcode int) {
 			fallthrough
 
 		case execute_Step_WatchFolders:
-			if _cache_.Static.WATCH {
+			if _config.Static.WATCH {
 
 				step = execute_Step_WatchFolders
 
 				if watcher == nil {
 					watch_dirs := append(
-						slices.Collect(maps.Keys(stash.Cache.Targetdir)),
-						_cache_.Path_Folder["scaffold"].Path,
+						_slice.Collect(_map.Keys(_stash.Cache.Targetdir)),
+						_config.Path_Folder["scaffold"].Path,
 					)
 					ignore_dirs := []string{
-						_cache_.Path_Folder["autogen"].Path,
-						_cache_.Path_Folder["archive"].Path,
+						_config.Path_Folder["autogen"].Path,
+						_config.Path_Folder["archive"].Path,
 					}
 
-					if w, err := _watcher_.Create(watch_dirs, ignore_dirs); err == nil {
+					if w, err := _watcher.Create(watch_dirs, ignore_dirs); err == nil {
 						watcher = w
-						sigs := make(chan os.Signal, 1)
-						signal.Notify(sigs, syscall.SIGINT)
+						sigs := make(chan _os.Signal, 1)
+						_signal.Notify(sigs, _syscall.SIGINT)
 
 						go func() {
 							<-sigs
@@ -156,7 +155,7 @@ func exec(heading string) (Exitcode int) {
 								w = nil
 								S.Render.Write("\n", 2)
 							}
-							os.Exit(0)
+							_os.Exit(0)
 						}()
 					}
 				}
@@ -165,38 +164,38 @@ func exec(heading string) (Exitcode int) {
 					watcher.Reset()
 					step = execute_Step_Initialize
 				} else if event := watcher.Pull(); event != nil {
-					filepath := fileman.Path_Join(event.Folder, event.FilePath)
+					filepath := _fileman.Path_Join(event.Folder, event.FilePath)
 
-					if event.Folder == _cache_.Path_Folder["scaffold"].Path {
-						if event.Action == _watcher_.Action_Update {
+					if event.Folder == _config.Path_Folder["scaffold"].Path {
+						if event.Action == _watcher.E_Action_Update {
 							switch filepath {
-							case _cache_.Path_Json["configure"].Path:
+							case _config.Path_Json["configure"].Path:
 								watcher.Close()
 								watcher = nil
 								step = execute_Step_VerifyConfigs
-							case _cache_.Path_Css["atrules"].Path:
-							case _cache_.Path_Css["constants"].Path:
-							case _cache_.Path_Css["elements"].Path:
-							case _cache_.Path_Css["extends"].Path:
-								_action_.Save_RootCss()
+							case _config.Path_Css["atrules"].Path:
+							case _config.Path_Css["constants"].Path:
+							case _config.Path_Css["elements"].Path:
+							case _config.Path_Css["extends"].Path:
+								_action.Save_RootCss()
 								step = execute_Step_GenerateFiles
-							case _cache_.Path_Json["hashrule"].Path:
+							case _config.Path_Json["hashrule"].Path:
 								step = execute_Step_ReadHashrule
 							default:
-								if fileman.Path_IsSubpath(event.FilePath, _cache_.Path_Folder["libraries"].Path) &&
+								if _fileman.Path_IsSubpath(event.FilePath, _config.Path_Folder["libraries"].Path) &&
 									event.Extension == "css" {
-									_cache_.Static.Libraries_Saved[filepath] = event.FileContent
-								} else if fileman.Path_IsSubpath(filepath, _cache_.Path_Folder["artifacts"].Path) &&
-									(event.Extension == _cache_.Root.Extension || event.Extension == "json") {
-									_cache_.Static.Artifacts_Saved[filepath] = event.FileContent
+									_config.Static.Libraries_Saved[filepath] = event.FileContent
+								} else if _fileman.Path_IsSubpath(filepath, _config.Path_Folder["artifacts"].Path) &&
+									(event.Extension == _config.Root.Extension || event.Extension == "json") {
+									_config.Static.Artifacts_Saved[filepath] = event.FileContent
 								}
 								step = execute_Step_ProcessScaffold
 							}
 						} else {
 							step = execute_Step_VerifySetupStruct
 						}
-					} else if event.Action == _watcher_.Action_Update || event.Action == _watcher_.Action_Unlink {
-						_craft_.Update_Target(*event)
+					} else if event.Action == _watcher.E_Action_Update || event.Action == _watcher.E_Action_Unlink {
+						Update_Target(*event)
 						step = execute_Step_GenerateFiles
 					} else {
 						step = execute_Step_VerifyConfigs
@@ -206,12 +205,12 @@ func exec(heading string) (Exitcode int) {
 					report_next = true
 				}
 
-				time.Sleep(20 * time.Millisecond)
+				_time.Sleep(20 * _time.Millisecond)
 			}
 
 		}
 
-		if !_cache_.Static.WATCH {
+		if !_config.Static.WATCH {
 			break
 		}
 	}

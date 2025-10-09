@@ -1,19 +1,20 @@
-package craft
+package service
 
 import (
-	_fmt_ "fmt"
-	_cache_ "main/cache"
-	blockmap "main/class/Blockmap"
-	_compose_ "main/compose"
-	S "main/shell/core"
-	X "main/shell/make"
-	_stash_ "main/stash"
-	_style_ "main/style"
-	_types_ "main/types"
-	_utils_ "main/utils"
-	_maps_ "maps"
-	_slices_ "slices"
-	_strings_ "strings"
+	_fmt "fmt"
+	_config "main/configs"
+	_action "main/internal/action"
+	_script "main/internal/script"
+	X "main/internal/shell"
+	_stash "main/internal/stash"
+	_style "main/internal/style"
+	_model "main/models"
+	_css "main/package/css"
+	S "main/package/shell"
+	_util "main/package/utils"
+	_map "maps"
+	_slice "slices"
+	_string "strings"
 )
 
 func Generate_Files() (Files map[string]string, Report string) {
@@ -21,61 +22,61 @@ func Generate_Files() (Files map[string]string, Report string) {
 	files := map[string]string{}
 	report := ""
 
-	if len(_cache_.Delta.Content) > 0 {
-		files[_cache_.Delta.Path] = _cache_.Delta.Content
+	if len(_config.Delta.Content) > 0 {
+		files[_config.Delta.Path] = _config.Delta.Content
 	} else {
 
 		artifact_files, attachments := Organize()
-		_maps_.Copy(files, artifact_files)
+		_map.Copy(files, artifact_files)
 
-		index_scanned := _style_.Cssfile_Parse(
-			_utils_.Code_Uncomment(_cache_.Static.RootCSS, false, true, false),
+		index_scanned := _style.Cssfile_Parse(
+			_util.Code_Uncomment(_config.Static.RootCSS, false, true, false),
 			"INDEX ||",
-			_cache_.Static.WATCH,
+			_config.Static.WATCH,
 		)
-		_cache_.Manifest.Constants = _slices_.Collect(_maps_.Keys(index_scanned.Variables))
-		_cache_.Delta.Report.Constants = X.List_Catalog("Root Constants", _cache_.Manifest.Constants)
+		_config.Manifest.Constants = _slice.Collect(_map.Keys(index_scanned.Variables))
+		_config.Delta.Report.Constants = X.List_Catalog("Root Constants", _config.Manifest.Constants)
 		for _, attachment := range index_scanned.Attachments {
-			if res := _cache_.Index_Find(attachment, _types_.Style_ClassIndexMap{}); res.Index > 0 {
+			if res := _action.Index_Find(attachment, _model.Style_ClassIndexMap{}); res.Index > 0 {
 				attachments = append(attachments, res.Index)
 			}
 		}
-		watch_index := _compose_.Render_Vendored(index_scanned.Result, !_cache_.Static.MINIFY)
+		watch_index := _css.Render_Vendored(index_scanned.Result, !_config.Static.MINIFY)
 
-		var render_action _types_.Script_Action
-		if _cache_.Static.Command == "debug" {
-			render_action = _types_.Script_Action_Monitor
-		} else if _cache_.Static.Command == "preview" && _cache_.Static.WATCH {
-			render_action = _types_.Script_Action_Watch
+		var render_action _script.E_Action
+		if _config.Static.Command == "debug" {
+			render_action = _script.E_Action_Monitor
+		} else if _config.Static.Command == "preview" && _config.Static.WATCH {
+			render_action = _script.E_Action_Watch
 		} else {
-			render_action = _types_.Script_Action_Sync
+			render_action = _script.E_Action_Sync
 		}
-		for _, target := range _stash_.Cache.Targetdir {
+		for _, target := range _stash.Cache.Targetdir {
 			target.SyncClassnames(render_action)
 		}
 
-		var attach_staples _strings_.Builder
-		attach_styles := blockmap.New()
-		if _cache_.Static.WATCH {
-			attachments = _slices_.Collect(_maps_.Keys(_cache_.Style.Index_to_Data))
+		var attach_staples _string.Builder
+		attach_styles := _css.NewBlock()
+		if _config.Static.WATCH {
+			attachments = _slice.Collect(_map.Keys(_config.Style.Index_to_Data))
 		} else {
-			attachments = _utils_.Array_Setback(attachments)
+			attachments = _util.Array_Setback(attachments)
 		}
 		for _, a := range attachments {
-			data := _cache_.Index_Fetch(a)
+			data := _action.Index_Fetch(a)
 			attach_styles.Mixin(data.SnippetStyle)
 			if len(data.SnippetStaple) > 0 {
 				attach_staples.WriteString(data.SnippetStaple)
 			}
 		}
-		staple_sheet := _utils_.Code_Minify(_utils_.Code_Uncomment(attach_staples.String(), false, false, true))
+		staple_sheet := _util.Code_Minify(_util.Code_Uncomment(attach_staples.String(), false, false, true))
 
 		type t_frag struct {
 			key string
 			val string
 		}
 
-		attach_frag := _compose_.Render_Vendored(attach_styles, !_cache_.Static.MINIFY)
+		attach_frag := _css.Render_Vendored(attach_styles, !_config.Static.MINIFY)
 		render_frags := []t_frag{
 			{
 				key: "Root",
@@ -83,13 +84,13 @@ func Generate_Files() (Files map[string]string, Report string) {
 			},
 			{
 				key: "Class",
-				val: _compose_.Render_Switched(func() blockmap.Type {
-					result := blockmap.Type{}
-					for _, i := range _cache_.Style.PublishIndexMap {
-						result.SetBlock(i.ClassName, _cache_.Index_Fetch(i.ClassIndex).StyleObject)
+				val: _css.Render_Switched(func() *_css.T_Block {
+					result := _css.NewBlock()
+					for _, i := range _config.Style.PublishIndexMap {
+						result.SetBlock(i.ClassName, _action.Index_Fetch(i.ClassIndex).StyleObject)
 					}
 					return result
-				}(), _cache_.Static.MINIFY),
+				}(), _config.Static.MINIFY),
 			},
 			{
 				key: "Attach",
@@ -97,71 +98,71 @@ func Generate_Files() (Files map[string]string, Report string) {
 			},
 			{
 				key: "Appendix",
-				val: _compose_.Render_Vendored(func() *blockmap.Type {
-					appendix_styles := blockmap.New()
-					for _, cache := range _stash_.Cache.Targetdir {
-						scanned := _style_.Cssfile_Parse(cache.StylesheetContent, `APPENDIX : ${cache.targetStylesheet} ||`, _cache_.Static.WATCH)
-						appendix_styles.Mixin(*scanned.Result)
+				val: _css.Render_Vendored(func() *_css.T_Block {
+					appendix_styles := _css.NewBlock()
+					for _, cache := range _stash.Cache.Targetdir {
+						scanned := _style.Cssfile_Parse(cache.StylesheetContent, `APPENDIX : ${cache.targetStylesheet} ||`, _config.Static.WATCH)
+						appendix_styles.Mixin(scanned.Result)
 						for _, attachment := range scanned.Attachments {
-							if res := _cache_.Index_Find(attachment, _types_.Style_ClassIndexMap{}); res.Index > 0 {
+							if res := _action.Index_Find(attachment, _model.Style_ClassIndexMap{}); res.Index > 0 {
 								attachments = append(attachments, res.Index)
 							}
 						}
 					}
 					return appendix_styles
-				}(), !_cache_.Static.MINIFY),
+				}(), !_config.Static.MINIFY),
 			},
 		}
 
 		style_sheet := func() string {
 			frags := []string{}
 			for _, i := range render_frags {
-				if _cache_.Static.MINIFY {
+				if _config.Static.MINIFY {
 					frags = append(frags, "\n\n/* Section: "+i.key+" */\n"+i.val+"\n")
 				} else {
 					frags = append(frags, i.val)
 				}
 			}
-			return _strings_.Join(frags, "")
+			return _string.Join(frags, "")
 		}()
 
 		watch_class := ""
-		if _cache_.Static.WATCH {
-			watch_class = _utils_.Code_Strip(_compose_.Render_Switched(
-				func() blockmap.Type {
-					res := blockmap.New()
-					for i, d := range _cache_.Style.Index_to_Data {
-						res.SetBlock("."+d.Metadata.WatchClass, _cache_.Index_Fetch(i).StyleObject)
+		if _config.Static.WATCH {
+			watch_class = _util.Code_Strip(_css.Render_Switched(
+				func() *_css.T_Block {
+					res := _css.NewBlock()
+					for i, d := range _config.Style.Index_to_Data {
+						res.SetBlock("."+d.Metadata.WatchClass, _action.Index_Fetch(i).StyleObject)
 					}
-					return *res
-				}(), _cache_.Static.MINIFY,
+					return res
+				}(), _config.Static.MINIFY,
 			)+attach_frag, true, true, false, true)
 		}
 
 		block_style := "<style>" + style_sheet + "</style>"
 		block_summon := block_style + block_style
-		for _, target := range _stash_.Cache.Targetdir {
-			_maps_.Copy(files, target.SummonFiles(style_sheet, block_style, block_summon, staple_sheet))
+		for _, target := range _stash.Cache.Targetdir {
+			_map.Copy(files, target.SummonFiles(style_sheet, block_style, block_summon, staple_sheet))
 		}
 
-		if _cache_.Static.WATCH {
-			files[_cache_.Path_Autogen["manifest"].Path] = _utils_.Code_JsonBuild(_cache_.Manifest, "")
-			files[_cache_.Path_Autogen["index"].Path] = watch_index
-			files[_cache_.Path_Autogen["watch"].Path] = watch_class
-			files[_cache_.Path_Autogen["staple"].Path] = staple_sheet
+		if _config.Static.WATCH {
+			files[_config.Path_Autogen["manifest"].Path] = _util.Code_JsonBuild(_config.Manifest, "")
+			files[_config.Path_Autogen["index"].Path] = watch_index
+			files[_config.Path_Autogen["watch"].Path] = watch_class
+			files[_config.Path_Autogen["staple"].Path] = staple_sheet
 		} else {
 			memchart := map[string]string{}
 			for _, i := range render_frags {
-				memchart[i.key] = _fmt_.Sprintf("%9s", _fmt_.Sprintf("%v Kb", _utils_.String_Memory(i.val)))
+				memchart[i.key] = _fmt.Sprintf("%9s", _fmt.Sprintf("%v Kb", _util.String_Memory(i.val)))
 			}
-			memchart["[***.css]"] = _fmt_.Sprintf("%9s", _fmt_.Sprintf("%v Kb", _utils_.String_Memory(style_sheet)))
+			memchart["[***.css]"] = _fmt.Sprintf("%9s", _fmt.Sprintf("%v Kb", _util.String_Memory(style_sheet)))
 
-			_cache_.Delta.Report.MemChart = func() string {
+			_config.Delta.Report.MemChart = func() string {
 				var heading string
-				if _cache_.Delta.ErrorCount > 0 {
-					heading = S.Tag.H2(_cache_.Delta.FinalMessage, S.Preset.Failed)
+				if _config.Delta.ErrorCount > 0 {
+					heading = S.Tag.H2(_config.Delta.FinalMessage, S.Preset.Failed)
 				} else {
-					heading = S.Tag.H2(_cache_.Delta.FinalMessage, S.Preset.Success)
+					heading = S.Tag.H2(_config.Delta.FinalMessage, S.Preset.Success)
 				}
 				return S.MAKE(
 					heading,
@@ -175,8 +176,8 @@ func Generate_Files() (Files map[string]string, Report string) {
 		}
 	}
 
-	_cache_.Delta.Path = ""
-	_cache_.Delta.Content = ""
+	_config.Delta.Path = ""
+	_config.Delta.Content = ""
 
 	return files, report
 }

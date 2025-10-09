@@ -1,11 +1,12 @@
 package stash
 
 import (
-	_cache_ "main/cache"
-	_target_ "main/class/Target"
-	_types_ "main/types"
-	_utils_ "main/utils"
-	_maps_ "maps"
+	_config "main/configs"
+	_action "main/internal/action"
+	_target "main/internal/target"
+	_model "main/models"
+	_util "main/package/utils"
+	_map "maps"
 )
 
 func Target_UpdateDirs() {
@@ -16,46 +17,46 @@ func Target_UpdateDirs() {
 		data.ClearFiles()
 		delete(Cache.Targetdir, key)
 	}
-	Cache.Targetdir = map[string]_target_.Class{}
+	Cache.Targetdir = map[string]_target.Class{}
 
-	for c, i := range _cache_.Style.Public___Index {
-		_cache_.Index_Dispose(i)
-		delete(_cache_.Style.Public___Index, c)
+	for c, i := range _config.Style.Public___Index {
+		_action.Index_Dispose(i)
+		delete(_config.Style.Public___Index, c)
 	}
-	_cache_.Style.Public___Index = _types_.Style_ClassIndexMap{}
+	_config.Style.Public___Index = _model.Style_ClassIndexMap{}
 
-	for c, i := range _cache_.Style.Global___Index {
-		_cache_.Index_Dispose(i)
-		delete(_cache_.Style.Public___Index, c)
+	for c, i := range _config.Style.Global___Index {
+		_action.Index_Dispose(i)
+		delete(_config.Style.Public___Index, c)
 	}
-	_cache_.Style.Global___Index = _types_.Style_ClassIndexMap{}
+	_config.Style.Global___Index = _model.Style_ClassIndexMap{}
 
 	index := 0
-	for key, files := range _cache_.Static.TargetDir_Saved {
-		Cache.Targetdir[key] = _target_.New(files, _utils_.String_EnCounter(index))
+	for key, files := range _config.Static.TargetDir_Saved {
+		Cache.Targetdir[key] = _target.New(files, _util.String_EnCounter(index))
 	}
 }
 
-func Target_Accumulate() _target_.Accumulator_return {
-	accumulated := _target_.Accumulator_return{
+func Target_Accumulate() _target.Accumulator_return {
+	accumulated := _target.Accumulator_return{
 		Report:        []string{},
 		GlobalClasses: map[string]int{},
 		PublicClasses: map[string]int{},
-		FileManifests: map[string]_types_.File_LocalManifest{},
+		FileManifests: map[string]_model.File_LocalManifest{},
 	}
 
 	for _, target := range Cache.Targetdir {
 		C := target.Accumulator()
 		accumulated.Report = append(accumulated.Report, C.Report...)
-		_maps_.Copy(accumulated.GlobalClasses, C.GlobalClasses)
-		_maps_.Copy(accumulated.PublicClasses, C.PublicClasses)
-		_maps_.Copy(accumulated.FileManifests, C.FileManifests)
+		_map.Copy(accumulated.GlobalClasses, C.GlobalClasses)
+		_map.Copy(accumulated.PublicClasses, C.PublicClasses)
+		_map.Copy(accumulated.FileManifests, C.FileManifests)
 	}
 
 	return accumulated
 }
 
-func Target_GetTracks() _target_.GetTracks_return {
+func Target_GetTracks() _target.GetTracks_return {
 	classtracks := [][]int{}
 	attachments := []int{}
 
@@ -65,7 +66,7 @@ func Target_GetTracks() _target_.GetTracks_return {
 		attachments = append(attachments, tracks_.Attachments...)
 	}
 
-	return _target_.GetTracks_return{
+	return _target.GetTracks_return{
 		Attachments: attachments,
 		ClassTracks: classtracks,
 	}
