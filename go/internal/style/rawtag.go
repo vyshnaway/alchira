@@ -1,7 +1,6 @@
 package style
 
 import (
-	_json "encoding/json"
 	_fmt "fmt"
 	_config "main/configs"
 	_action "main/internal/action"
@@ -83,14 +82,12 @@ func Rawtag_Upload(
 					attachments = append(attachments, stylescanned.Attachments...)
 					variables.Copy(stylescanned.Variables)
 					if stylescanned.Result.Len() > 0 {
-						res, err := _json.Marshal(query.Wrappers)
-						if err == nil {
-							res_typed := string(res)
-							if !forArtifact {
-								regex_locale.ReplaceAllString(res_typed, _fmt.Sprintf("_%s_$1", file.Label))
-							}
-							object.SetBlock(res_typed, stylescanned.Result)
+						wrapperjson := _util.Code_JsonBuild(query.Wrappers, "")
+						res_typed := string(wrapperjson)
+						if !forArtifact {
+							regex_locale.ReplaceAllString(res_typed, _fmt.Sprintf("_%s_$1", file.Label))
 						}
+						object.SetBlock(res_typed, stylescanned.Result)
 					}
 				} else {
 					errors = append(errors, query.Errorstring)

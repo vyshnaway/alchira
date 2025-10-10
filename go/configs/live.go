@@ -7,7 +7,7 @@ import (
 var Static = _model.Cache_Static{
 	WATCH:             false,
 	DEBUG:             false,
-	MINIFY:             false,
+	MINIFY:            false,
 	ProjectName:       "",
 	ProjectVersion:    "",
 	Command:           "",
@@ -55,7 +55,6 @@ func Archive_Reset() {
 }
 
 var Delta = _model.Cache_Delta{
-	ErrorCount:   0,
 	Path:         "",
 	Content:      "",
 	FinalMessage: "",
@@ -76,7 +75,8 @@ var Delta = _model.Cache_Delta{
 		Libraries: map[string]_model.File_Lookup{},
 		TargetDir: map[string]_model.File_Lookup{},
 	},
-	Errors: _model.Cache_Delta_Errors{
+	Errors: []string{},
+	Error: _model.Cache_Delta_Errors{
 		Artifacts: []string{},
 		Axioms:    []string{},
 		Clusters:  []string{},
@@ -85,7 +85,7 @@ var Delta = _model.Cache_Delta{
 		Hashrules: []string{},
 		Handoffs:  []string{},
 	},
-	Diagnostics: _model.Cache_Delta_Diagnostics{
+	Diagnostic: _model.Cache_Delta_Diagnostics{
 		Artifacts: []_model.Refer_Diagnostic{},
 		Axioms:    []_model.Refer_Diagnostic{},
 		Clusters:  []_model.Refer_Diagnostic{},
@@ -98,7 +98,6 @@ var Delta = _model.Cache_Delta{
 
 func Delta_Reset() {
 	Delta = _model.Cache_Delta{
-		ErrorCount:   0,
 		Path:         "",
 		Content:      "",
 		FinalMessage: "",
@@ -119,7 +118,8 @@ func Delta_Reset() {
 			Libraries: map[string]_model.File_Lookup{},
 			TargetDir: map[string]_model.File_Lookup{},
 		},
-		Errors: _model.Cache_Delta_Errors{
+		Errors: []string{},
+		Error: _model.Cache_Delta_Errors{
 			Artifacts: []string{},
 			Axioms:    []string{},
 			Clusters:  []string{},
@@ -128,7 +128,7 @@ func Delta_Reset() {
 			Hashrules: []string{},
 			Handoffs:  []string{},
 		},
-		Diagnostics: _model.Cache_Delta_Diagnostics{
+		Diagnostic: _model.Cache_Delta_Diagnostics{
 			Artifacts: []_model.Refer_Diagnostic{},
 			Axioms:    []_model.Refer_Diagnostic{},
 			Clusters:  []_model.Refer_Diagnostic{},

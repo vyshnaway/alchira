@@ -1,80 +1,51 @@
 package target
 
 import (
-	"main/package/css"
+	_action "main/internal/action"
+	_model "main/models"
 	_types_ "main/models"
-	// _cache_ "main/cache"
-	// _utils_ "main/utils"
-	// _strings_ "strings"
+	_css "main/package/css"
+	_util "main/package/utils"
+	_string "strings"
 )
-
-func artifact_Partial(object css.T_Block, minify bool) []string {
-	stylesheet := []string{}
-	// 	tab := "  "
-	// 	if minify {
-	// 		tab = ""
-	// 	}
-
-	// 	for key, val := range object {
-	// 		switch val_typed := val.(type) {
-	// 		case map[string]any:
-	// 			if len(val_typed) > 1 {
-	// 				stylesheet = append(stylesheet, key)
-	// 				stylesheet = append(stylesheet, "{")
-	// 				for _, line := range artifact_Partial(val_typed, minify) {
-	// 					stylesheet = append(stylesheet, tab+line)
-	// 				}
-	// 				stylesheet = append(stylesheet, "}")
-	// 			}
-	// 		case string:
-	// 			if key[0] == '@' {
-	// 				stylesheet = append(stylesheet, key+";")
-	// 			} else {
-	// 				stylesheet = append(stylesheet, key+": "+val_typed+";")
-	// 			}
-	// 		}
-	// 	}
-
-	return stylesheet
-}
 
 func Artifact(index int) _types_.Style_ExportStyle {
 
-		element := ""
-		innertext := ""
-		symclass := ""
-		stylesheet := [][2]string{}
-		attributes := [][2]string{}
-		// styleobject := map[string]any{}
+	element := ""
+	innertext := ""
+	symclass := ""
+	stylesheet := [][2]string{}
+	attributes := [][2]string{}
 
-	// 	if style := _cache_.Index_Fetch(index); _strings_.Contains(style.SymClass, "$$$") && style != nil {
-	// 		for k, v := range style.StyleObject {
-	// 			styleobject[k] = v
-	// 			if v_mod, v_ok := v.(map[string]any); v_ok {
-	// 				stylesheet = append(stylesheet, [2]string{k, _strings_.Join(artifact_Partial(v_mod, true), "")})
-	// 			}
-	// 		}
+	if style := _action.Index_Fetch(index); style != nil && _string.Contains(style.SymClass, "$$$") {
+		blockseq := _css.NewBlockSeq()
+		style.StyleObject.BlockRange(func(k string, v *_css.T_Block) {
+			blockseq.AddNewBlock(k, v)
+			v.BlockRange(func(k string, v *_css.T_Block) {
+				stylesheet = append(stylesheet, [2]string{k, v.Format(true)})
+			})
+		})
 
-	// 		if len(style.SnippetStaple) > 0 {
-	// 			element = "staple"
-	// 			innertext = style.SnippetStaple
-	// 		} else if len(style.Metadata.Summon) > 0 {
-	// 			element = "summon"
-	// 			innertext = style.Metadata.Summon
-	// 		} else {
-	// 			innertext = _strings_.Join(artifact_Partial(styleobject, true), "")
-	// 			element = "style"
-	// 		}
+		if len(style.SnippetStaple) > 0 {
+			element = "staple"
+			innertext = style.SnippetStaple
+		} else if len(style.Metadata.Summon) > 0 {
+			element = "summon"
+			innertext = style.Metadata.Summon
+		} else {
+			innertext = style.SnippetStyle.Format(true)
+			element = "style"
+		}
 
-	// 		if _strings_.Contains(style.Definent, "$$$") {
-	// 			symclass = style.Definent
-	// 		} else {
-	// 			symclass = "$---" + _utils_.String_EnCounter(style.Index)
-	// 		}
-	// 		for k, v := range style.Metadata.Attributes {
-	// 			attributes = append(attributes, [2]string{k, _utils_.Code_Minify(v)})
-	// 		}
-	// 	}
+		if _string.Contains(style.Definent, "$$$") {
+			symclass = style.Definent
+		} else {
+			symclass = "$---" + _util.String_EnCounter(style.Index)
+		}
+		for k, v := range style.Metadata.Attributes {
+			attributes = append(attributes, [2]string{k, _util.Code_Minify(v)})
+		}
+	}
 
 	return _types_.Style_ExportStyle{
 		Element:     element,
@@ -84,4 +55,25 @@ func Artifact(index int) _types_.Style_ExportStyle {
 		Attributes:  attributes,
 		Attachments: []string{},
 	}
+}
+
+func (This *Class) GetArtifacts() map[string]_model.Style_ExportStyle {
+	exports := map[string]_model.Style_ExportStyle{}
+
+	for _, file := range This.FileCache {
+		for _, pubindex := range file.StyleData.PublicClasses {
+			exporting := Artifact(pubindex)
+			exports[exporting.SymClass] = exporting
+
+			for _, a := range _action.Index_Fetch(pubindex).Attachments {
+				if found := _action.Index_Find(a, file.StyleData.LocalClasses); found.Index > 0 {
+					subexporting := Artifact(found.Index)
+					exporting.Attachments = append(exporting.Attachments, subexporting.SymClass)
+					exports[subexporting.SymClass] = subexporting
+				}
+			}
+		}
+	}
+
+	return exports
 }

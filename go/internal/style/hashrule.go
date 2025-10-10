@@ -44,8 +44,8 @@ func Hashrule_Upload() {
 		return temp
 	})
 
-	_config.Delta.Errors.Hashrules = errors
-	_config.Delta.Diagnostics.Hashrules = diagnostics
+	_config.Delta.Error.Hashrules = errors
+	_config.Delta.Diagnostic.Hashrules = diagnostics
 	_config.Style.Hashrules = filtered
 	_config.Manifest.Hashrules = filtered
 	_config.Delta.Report.Hashrule = X.List_Record("Active Hashrule", printmap)

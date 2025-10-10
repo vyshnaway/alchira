@@ -24,5 +24,10 @@ R_ : Return Type
 E_ : Enum
 _* : Private Global in module
 
+## Return sequence for functions
+```
+Result Report Status Error 
+```
+
 ---
 css vendor load

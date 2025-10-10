@@ -22,15 +22,15 @@ func accumulate() {
 	_config.Manifest.Group.Local = map[string]_model.File_MetadataMap{}
 	_config.Manifest.Group.Global = map[string]_model.File_MetadataMap{}
 
-	_config.Delta.Errors.TargetDir = []string{}
+	_config.Delta.Error.TargetDir = []string{}
 	_config.Delta.Lookup.TargetDir = map[string]_model.File_Lookup{}
-	_config.Delta.Diagnostics.TargetDir = []_model.Refer_Diagnostic{}
+	_config.Delta.Diagnostic.TargetDir = []_model.Refer_Diagnostic{}
 
 	for key, val := range accumulated.FileManifests {
 		_config.Manifest.Group.Local[key] = val.Local
 		_config.Delta.Lookup.TargetDir[key] = val.Lookup
-		_config.Delta.Errors.TargetDir = append(_config.Delta.Errors.TargetDir, val.Errors...)
-		_config.Delta.Diagnostics.TargetDir = append(_config.Delta.Diagnostics.TargetDir, val.Diagnostics...)
+		_config.Delta.Error.TargetDir = append(_config.Delta.Error.TargetDir, val.Errors...)
+		_config.Delta.Diagnostic.TargetDir = append(_config.Delta.Diagnostic.TargetDir, val.Diagnostics...)
 
 		mergedMap := make(_model.File_MetadataMap)
 		_map.Copy(mergedMap, val.Public)
@@ -43,41 +43,41 @@ func accumulate() {
 	_map.Copy(_config.Manifest.Lookup, _config.Delta.Lookup.Libraries)
 	_map.Copy(_config.Manifest.Lookup, _config.Delta.Lookup.TargetDir)
 
-	_config.Delta.Errors.Multiples = []string{}
-	_config.Delta.Diagnostics.Multiples = []_model.Refer_Diagnostic{}
+	_config.Delta.Error.Multiples = []string{}
+	_config.Delta.Diagnostic.Multiples = []_model.Refer_Diagnostic{}
 	for _, val := range _config.Style.Index_to_Data {
 		if len(val.Metadata.Declarations) > 1 {
 			error_ := X.Error_Standard("Duplicate Declarations: "+val.SymClass, val.Metadata.Declarations)
-			_config.Delta.Errors.Multiples = append(_config.Delta.Errors.Multiples, error_.Errorstring)
-			_config.Delta.Diagnostics.Multiples = append(_config.Delta.Diagnostics.Multiples, error_.Diagnostic)
+			_config.Delta.Error.Multiples = append(_config.Delta.Error.Multiples, error_.Errorstring)
+			_config.Delta.Diagnostic.Multiples = append(_config.Delta.Diagnostic.Multiples, error_.Diagnostic)
 		}
 	}
 
 	diagnostics := []_model.Refer_Diagnostic{}
-	diagnostics = append(diagnostics, _config.Delta.Diagnostics.Hashrules...)
-	diagnostics = append(diagnostics, _config.Delta.Diagnostics.Artifacts...)
-	diagnostics = append(diagnostics, _config.Delta.Diagnostics.Handoffs...)
-	diagnostics = append(diagnostics, _config.Delta.Diagnostics.Axioms...)
-	diagnostics = append(diagnostics, _config.Delta.Diagnostics.Clusters...)
-	diagnostics = append(diagnostics, _config.Delta.Diagnostics.Multiples...)
-	diagnostics = append(diagnostics, _config.Delta.Diagnostics.TargetDir...)
+	diagnostics = append(diagnostics, _config.Delta.Diagnostic.Hashrules...)
+	diagnostics = append(diagnostics, _config.Delta.Diagnostic.Artifacts...)
+	diagnostics = append(diagnostics, _config.Delta.Diagnostic.Handoffs...)
+	diagnostics = append(diagnostics, _config.Delta.Diagnostic.Axioms...)
+	diagnostics = append(diagnostics, _config.Delta.Diagnostic.Clusters...)
+	diagnostics = append(diagnostics, _config.Delta.Diagnostic.Multiples...)
+	diagnostics = append(diagnostics, _config.Delta.Diagnostic.TargetDir...)
 	_config.Manifest.Diagnostics = diagnostics
 
-	errorlist := []string{}
-	errorlist = append(errorlist, _config.Delta.Errors.Handoffs...)
-	errorlist = append(errorlist, _config.Delta.Errors.Hashrules...)
-	errorlist = append(errorlist, _config.Delta.Errors.Artifacts...)
-	errorlist = append(errorlist, _config.Delta.Errors.Axioms...)
-	errorlist = append(errorlist, _config.Delta.Errors.Clusters...)
-	errorlist = append(errorlist, _config.Delta.Errors.Multiples...)
-	errorlist = append(errorlist, _config.Delta.Errors.TargetDir...)
-	_config.Delta.ErrorCount = len(diagnostics)
+	errors := []string{}
+	errors = append(errors, _config.Delta.Error.Handoffs...)
+	errors = append(errors, _config.Delta.Error.Hashrules...)
+	errors = append(errors, _config.Delta.Error.Artifacts...)
+	errors = append(errors, _config.Delta.Error.Axioms...)
+	errors = append(errors, _config.Delta.Error.Clusters...)
+	errors = append(errors, _config.Delta.Error.Multiples...)
+	errors = append(errors, _config.Delta.Error.TargetDir...)
+	_config.Delta.Errors = errors
 
 	_config.Delta.Report.Errors = ""
-	if _config.Delta.ErrorCount > 0 {
+	if len(_config.Delta.Errors) > 0 {
 		_config.Delta.Report.Errors = S.MAKE(
-			S.Tag.H2(_strconv.Itoa(_config.Delta.ErrorCount)+" Errors", S.Preset.Failed),
-			errorlist,
+			S.Tag.H2(_strconv.Itoa(len(_config.Delta.Errors))+" Errors", S.Preset.Failed),
+			errors,
 		)
 	}
 }
@@ -111,22 +111,22 @@ func Organize() (AritfactFiles map[string]string, Attachments []int) {
 	tracks_ := _stash.Target_GetTracks()
 
 	if _config.Static.WATCH {
-		_config.Delta.FinalMessage = _strconv.Itoa(_config.Delta.ErrorCount) + " Errors."
+		_config.Delta.FinalMessage = _strconv.Itoa(len(_config.Delta.Errors)) + " Errors."
 	} else if _config.Static.Command == "preview" {
 		res, _ := _order_.Optimize(tracks_.ClassTracks, false, _config.Static.Argument, _model.Config_Archive{})
 		SaveClassRefs(*res.Result)
 
-		if _config.Delta.ErrorCount > 0 {
-			_config.Delta.FinalMessage = _strconv.Itoa(_config.Delta.ErrorCount) + " Unresolved Errors. Rectify them to proceed with 'publish' command."
+		if len(_config.Delta.Errors) > 0 {
+			_config.Delta.FinalMessage = _strconv.Itoa(len(_config.Delta.Errors)) + " Unresolved Errors. Rectify them to proceed with 'publish' command."
 		} else {
 			_config.Delta.FinalMessage = "Preview verified with no major errors. Procceed to 'publish' using your key."
 		}
 	} else if _config.Static.Command == "publish" {
-		if _config.Delta.ErrorCount > 0 {
-			res, _ := _order_.Optimize(tracks_.ClassTracks, false, _config.Static.Argument, _model.Config_Archive{})
+		if len(_config.Delta.Errors) > 0 {
+			res, _ := _order_.Optimize(tracks_.ClassTracks, false, _config.Static.Argument, archive_Build())
 			SaveClassRefs(*res.Result)
 
-			_config.Delta.FinalMessage = "Errors in " + _strconv.Itoa(_config.Delta.ErrorCount) + " Tags. Falling back to 'preview' command."
+			_config.Delta.FinalMessage = "Errors in " + _strconv.Itoa(len(_config.Delta.Errors)) + " Tags. Falling back to 'preview' command."
 			_config.Static.Command = "preview"
 		} else {
 			archive := archive_Build()

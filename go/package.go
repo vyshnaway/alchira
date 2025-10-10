@@ -92,8 +92,8 @@ func main() {
 			go func() { _action.Sync_RootDocs(); wg.Done() }()
 			go func() { Sp.Title(corecaps+" : Initialize", 1000, 1); wg.Done() }()
 			wg.Wait()
-			status, setup_report := _action.Verify_Setup()
-			switch status {
+			setup_report, setup_status := _action.Verify_Setup()
+			switch setup_status {
 			case _action.Verify_Setup_Status_Uninitialized:
 				_action.Initialize()
 				exitcode = 1
@@ -120,7 +120,7 @@ func main() {
 	case "install":
 		{
 			S.Post(S.Tag.H3("Installing Artifacts", S.Preset.Primary, S.Style.AS_Bold))
-			setup_status, setup_report := _action.Verify_Setup()
+			setup_report, setup_status := _action.Verify_Setup()
 
 			switch setup_status {
 			case _action.Verify_Setup_Status_Uninitialized:

@@ -76,7 +76,7 @@ func Generate_Files() (Files map[string]string, Report string) {
 			val string
 		}
 
-		attach_frag := _css.Render_Vendored(attach_styles,  _config.Static.MINIFY)
+		attach_frag := _css.Render_Vendored(attach_styles, _config.Static.MINIFY)
 		render_frags := []t_frag{
 			{
 				key: "Root",
@@ -110,7 +110,7 @@ func Generate_Files() (Files map[string]string, Report string) {
 						}
 					}
 					return appendix_styles
-				}(),  _config.Static.MINIFY),
+				}(), _config.Static.MINIFY),
 			},
 		}
 
@@ -135,7 +135,7 @@ func Generate_Files() (Files map[string]string, Report string) {
 						res.SetBlock("."+d.Metadata.WatchClass, _action.Index_Fetch(i).StyleObject)
 					}
 					return res
-				}(),  _config.Static.MINIFY,
+				}(), _config.Static.MINIFY,
 			)+attach_frag, true, true, false, true)
 		}
 
@@ -165,7 +165,7 @@ func Generate_Files() (Files map[string]string, Report string) {
 
 			_config.Delta.Report.MemChart = func() string {
 				var heading string
-				if _config.Delta.ErrorCount > 0 {
+				if len(_config.Delta.Errors) > 0 {
 					heading = S.Tag.H2(_config.Delta.FinalMessage, S.Preset.Failed)
 				} else {
 					heading = S.Tag.H2(_config.Delta.FinalMessage, S.Preset.Success)

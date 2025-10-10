@@ -84,11 +84,11 @@ type Cache_Delta struct {
 	Content      string
 	PublishError string
 	FinalMessage string
-	ErrorCount   int
+	Errors       []string
 	Report       Cache_Delta_Report
 	Lookup       Cache_Delta_Lookup
-	Errors       Cache_Delta_Errors
-	Diagnostics  Cache_Delta_Diagnostics
+	Error        Cache_Delta_Errors
+	Diagnostic   Cache_Delta_Diagnostics
 }
 
 type Cache_Style struct {

@@ -176,16 +176,26 @@ func (This *T_Block) BlockRange(fn func(k string, v *T_Block)) {
 	}
 }
 
-func (This *T_Block) print() []string {
-	const tab = "  "
+func (This *T_Block) format(minify bool) []string {
+	tab := "  "
+	space := " "
+	if minify {
+		tab = ""
+		space = ""
+	}
 	result := []string{}
 
 	This.PropRange(func(k, v string) {
-		result = append(result, k+": "+v)
+		str := k
+		if len(v) > 0 {
+			str += ":" + space + v
+		}
+		str += ";"
+		result = append(result, str)
 	})
 	This.BlockRange(func(k string, v *T_Block) {
 		result = append(result, k+" {")
-		for _, vv := range v.print() {
+		for _, vv := range v.format(minify) {
 			result = append(result, tab+vv)
 		}
 		result = append(result, "}")
@@ -193,8 +203,16 @@ func (This *T_Block) print() []string {
 	return result
 }
 
+func (This *T_Block) Format(minify bool) string {
+	br := "\n"
+	if minify {
+		br = ""
+	}
+	return _string.Join(This.format(minify), br)
+}
+
 func (This *T_Block) Print() *T_Block {
-	_fmt.Println("\n---\n" + _string.Join(This.print(), "\n") + "\n---\n")
+	_fmt.Println("\n---\n" + This.Format(false) + "\n---\n")
 	return This
 }
 

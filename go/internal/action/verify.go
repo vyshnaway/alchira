@@ -18,7 +18,7 @@ const (
 	Verify_Setup_Status_Verified      verify_Setup_Status_enum = 2
 )
 
-func Verify_Setup() (Status verify_Setup_Status_enum, Report string) {
+func Verify_Setup() (Report string, Status verify_Setup_Status_enum) {
 	status := Verify_Setup_Status_Uninitialized
 	report := ""
 
@@ -70,7 +70,7 @@ func Verify_Setup() (Status verify_Setup_Status_enum, Report string) {
 		)
 	}
 
-	return status, report
+	return report, status
 }
 
 type Verify_ProxyMapDependency_return struct {
@@ -78,7 +78,7 @@ type Verify_ProxyMapDependency_return struct {
 	Messages []string
 }
 
-func Verify_Configs(loadvendors bool) (Report string, status bool) {
+func Verify_Configs(loadvendors bool) (Report string, Status bool) {
 	Setup_Ignorefiles()
 	if data, err := _fileman.Read_File(_config.Path_Files["readme"].Path, false); err == nil {
 		_config.Archive.Readme = data
@@ -133,15 +133,15 @@ func Verify_Configs(loadvendors bool) (Report string, status bool) {
 	conflict_sync := Conflict_Sync_Test()
 	errors = append(errors, conflict_sync.Warnings...)
 
-	status = len(errors) == 0
-	if status {
+	Status = len(errors) == 0
+	if Status {
 		report := S.MAKE(
 			S.Tag.H4("Configs Healthy", S.Preset.Success, S.Style.AS_Bold),
 			errors,
 			S.MakeList{TypeFunc: S.List.Bullets, Intent: 0, Preset: S.Preset.Warning},
 		)
 
-		return report, status
+		return report, Status
 	} else {
 		report := S.MAKE(
 			S.Tag.H4("Error path : "+config_path, S.Preset.Failed, S.Style.AS_Bold),
@@ -149,7 +149,7 @@ func Verify_Configs(loadvendors bool) (Report string, status bool) {
 			S.MakeList{TypeFunc: S.List.Bullets, Intent: 0, Preset: S.Preset.Warning},
 		)
 
-		return report, status
+		return report, Status
 	}
 
 }

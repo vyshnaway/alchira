@@ -97,8 +97,8 @@ func Library_Update(debug bool) {
 
 	// Axiom update actions
 	_config.Manifest.Group.Axiom = map[string]_model.File_MetadataMap{}
-	_config.Delta.Errors.Axioms = []string{}
-	_config.Delta.Diagnostics.Axioms = []_model.Refer_Diagnostic{}
+	_config.Delta.Error.Axioms = []string{}
+	_config.Delta.Diagnostic.Axioms = []_model.Refer_Diagnostic{}
 	axiom_chart := O.New[string, []string]()
 	axiom_counter := 0
 	for index, files := range StackLibraryFiles_.Axiom {
@@ -112,16 +112,16 @@ func Library_Update(debug bool) {
 			)
 		}
 		for _, file := range files {
-			_config.Delta.Errors.Axioms = append(_config.Delta.Errors.Axioms, file.Manifest.Errors...)
-			_config.Delta.Diagnostics.Axioms = append(_config.Delta.Diagnostics.Axioms, file.Manifest.Diagnostics...)
+			_config.Delta.Error.Axioms = append(_config.Delta.Error.Axioms, file.Manifest.Errors...)
+			_config.Delta.Diagnostic.Axioms = append(_config.Delta.Diagnostic.Axioms, file.Manifest.Diagnostics...)
 		}
 	}
 	_config.Delta.Report.Axioms = X.List_Chart("Axiom: "+_strconv.Itoa(axiom_counter)+" Symclasses", axiom_chart)
 
 	// Cluster update actions
 	_config.Manifest.Group.Cluster = map[string]_model.File_MetadataMap{}
-	_config.Delta.Errors.Clusters = []string{}
-	_config.Delta.Diagnostics.Clusters = []_model.Refer_Diagnostic{}
+	_config.Delta.Error.Clusters = []string{}
+	_config.Delta.Diagnostic.Clusters = []_model.Refer_Diagnostic{}
 	cluster_chart := O.New[string, []string]()
 	cluster_counter := 0
 	for index, files := range StackLibraryFiles_.Cluster {
@@ -135,8 +135,8 @@ func Library_Update(debug bool) {
 			)
 		}
 		for _, file := range files {
-			_config.Delta.Errors.Clusters = append(_config.Delta.Errors.Clusters, file.Manifest.Errors...)
-			_config.Delta.Diagnostics.Clusters = append(_config.Delta.Diagnostics.Clusters, file.Manifest.Diagnostics...)
+			_config.Delta.Error.Clusters = append(_config.Delta.Error.Clusters, file.Manifest.Errors...)
+			_config.Delta.Diagnostic.Clusters = append(_config.Delta.Diagnostic.Clusters, file.Manifest.Diagnostics...)
 		}
 	}
 	_config.Delta.Report.Clusters = X.List_Chart("Cluster: "+_strconv.Itoa(cluster_counter)+" Symclasses", cluster_chart)

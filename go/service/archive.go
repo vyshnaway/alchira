@@ -19,7 +19,7 @@ func archive_Build() _models.Config_Archive {
 
 	exportdata := map[string]_models.Style_ExportStyle{}
 	for _, val := range _stash.Cache.Targetdir {
-		_map.Copy(exportdata, val.GetExports())
+		_map.Copy(exportdata, val.GetArtifacts())
 	}
 
 	var exportsheet _string.Builder

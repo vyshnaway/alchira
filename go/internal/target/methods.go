@@ -87,27 +87,6 @@ func (This *Class) GetTracks() GetTracks_return {
 	}
 }
 
-func (This *Class) GetExports() map[string]_model.Style_ExportStyle {
-	exports := map[string]_model.Style_ExportStyle{}
-
-	for _, file := range This.FileCache {
-		for _, pubindex := range file.StyleData.PublicClasses {
-			exporting := Artifact(pubindex)
-			exports[exporting.SymClass] = exporting
-
-			for _, a := range _action.Index_Fetch(pubindex).Attachments {
-				if found := _action.Index_Find(a, file.StyleData.LocalClasses); found.Index > 0 {
-					subexporting := Artifact(found.Index)
-					exporting.Attachments = append(exporting.Attachments, subexporting.SymClass)
-					exports[subexporting.SymClass] = subexporting
-				}
-			}
-		}
-	}
-
-	return exports
-}
-
 func (This *Class) SyncClassnames(action _script.E_Action) {
 	for _, file := range This.FileCache {
 		watchprops := []string{}

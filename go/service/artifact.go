@@ -47,12 +47,6 @@ func artifact_Fetch(identifier string, source string) (Files map[string]string, 
 	}()
 
 	if status {
-		// if fetched.Artifacts != nil {
-		// 	for lib, str := range fetched.Artifacts {
-		// 		files[_fileman_.Path_Join(artifactspath, identifier, lib+"."+identifier+"."+"css")] = str
-		// 	}
-		// 	fetched.Artifacts = nil
-		// }
 
 		if fetched.Readme != "" {
 			files[_fileman.Path_Join(artifactspath, identifier, `readme.md`)] = fetched.Readme

@@ -55,11 +55,11 @@ func Execute(heading string) (Exitcode int) {
 			fallthrough
 
 		case execute_Step_VerifySetupStruct:
-			if res_status, res_report := _action.Verify_Setup(); res_status != _action.Verify_Setup_Status_Verified {
+			if res_report, res_status := _action.Verify_Setup(); res_status != _action.Verify_Setup_Status_Verified {
 				report = res_report
 				step = execute_Step_WatchFolders
 				break
-			} 
+			}
 			fallthrough
 
 		case execute_Step_ReadRootCss:

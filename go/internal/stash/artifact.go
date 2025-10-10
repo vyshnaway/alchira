@@ -77,8 +77,8 @@ func Artifact_Update(debug bool) {
 	_config.Delta.Lookup.Artifacts = SaveArtifactFile_.Lookup
 
 	_config.Manifest.Group.Artifact = map[string]_model.File_MetadataMap{}
-	_config.Delta.Errors.Artifacts = []string{}
-	_config.Delta.Diagnostics.Artifacts = []_model.Refer_Diagnostic{}
+	_config.Delta.Error.Artifacts = []string{}
+	_config.Delta.Diagnostic.Artifacts = []_model.Refer_Diagnostic{}
 	artifact_chart := O.New[string, []string]()
 	artifact_counter := 0
 	for _, file := range SaveArtifactFile_.Files {
@@ -119,8 +119,8 @@ func Artifact_Update(debug bool) {
 			)
 		}
 		_config.Manifest.Group.Artifact[file.FilePath] = metadatas
-		_config.Delta.Errors.Artifacts = append(_config.Delta.Errors.Artifacts, file.Manifest.Errors...)
-		_config.Delta.Diagnostics.Artifacts = append(_config.Delta.Diagnostics.Artifacts, file.Manifest.Diagnostics...)
+		_config.Delta.Error.Artifacts = append(_config.Delta.Error.Artifacts, file.Manifest.Errors...)
+		_config.Delta.Diagnostic.Artifacts = append(_config.Delta.Diagnostic.Artifacts, file.Manifest.Diagnostics...)
 	}
 	_config.Delta.Report.Artifacts = X.List_Chart("Artifact: "+_strconv.Itoa(artifact_counter)+" Symclasses", artifact_chart)
 }
