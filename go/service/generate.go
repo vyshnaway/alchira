@@ -29,10 +29,10 @@ func Generate_Files() (Files map[string]string, Report string) {
 		artifact_files, attachments := Organize()
 		_map.Copy(files, artifact_files)
 
-		index_scanned := _style.Cssfile_Parse(
+		index_scanned := _style.Cssfile_String(
 			_util.Code_Uncomment(_config.Static.RootCSS, false, true, false),
 			"INDEX ||",
-			!_config.Static.DEBUG,
+			_config.Static.DEBUG,
 		)
 		_config.Manifest.Constants = index_scanned.Variables.Keys()
 		_config.Delta.Report.Constants = X.List_Catalog("Root Constants", _config.Manifest.Constants)
@@ -101,7 +101,7 @@ func Generate_Files() (Files map[string]string, Report string) {
 				val: _css.Render_Sequence(func() *_css.T_BlockSeq {
 					appendix_styles := _css.NewBlockSeq()
 					for _, cache := range _stash.Cache.Targetdir {
-						scanned := _style.Cssfile_Parse(cache.StylesheetContent, `APPENDIX : ${cache.targetStylesheet} ||`, _config.Static.WATCH)
+						scanned := _style.Cssfile_String(cache.StylesheetContent, `APPENDIX : ${cache.targetStylesheet} ||`, _config.Static.WATCH)
 						appendix_styles.Append(scanned.Result.Units...)
 						for _, attachment := range scanned.Attachments {
 							if res := _action.Index_Find(attachment, _model.Style_ClassIndexMap{}); res.Index > 0 {

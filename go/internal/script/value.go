@@ -153,7 +153,7 @@ func value_Parse(
 		}
 
 		classMap := value_EvaluateIndexTraces(action, metafront, classlist, fileData.StyleData.LocalClasses)
-
+		
 		for marker := range valuelen {
 			ch := rune(value[marker])
 
@@ -162,7 +162,7 @@ func value_Parse(
 					entrystring := entry.String()
 					if rune(entrystring[0]) != _config.Root.CustomOperations["attach"] {
 						if rune(entrystring[0]) == _config.Root.CustomOperations["locale"] {
-							scriber.WriteString(_fmt.Sprintf("_%s_%s", fileData.Label, entrystring))
+							scriber.WriteString(_fmt.Sprintf("_%s%s", fileData.Label, entrystring))
 						} else if rune(entrystring[0]) == _config.Root.CustomOperations["assign"] {
 							entrystring := entrystring[1:]
 							found_Entry, found_Status := classMap[entrystring]

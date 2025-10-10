@@ -17,7 +17,7 @@ type R_Cssfile_Parse struct {
 	Variables   *O.T[string, string]
 }
 
-func Cssfile_Parse(content string, initial string, debug bool) R_Cssfile_Parse {
+func Cssfile_String(content string, initial string, debug bool) R_Cssfile_Parse {
 	scanned := _css.ParsePartial(_util.Code_Uncomment(content, false, true, false))
 	result := _css.NewBlockSeq()
 	for _, d := range scanned.Directives {
@@ -30,6 +30,7 @@ func Cssfile_Parse(content string, initial string, debug bool) R_Cssfile_Parse {
 		key := kv[0]
 		val := kv[1]
 		res := Parse_CssSnippet(val, initial, key, true, debug)
+		res.Result.Print()
 
 		variables.Copy(res.Variables)
 		attachments = append(attachments, res.Attachments...)

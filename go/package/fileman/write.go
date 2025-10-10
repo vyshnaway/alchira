@@ -43,14 +43,14 @@ func Write_Json(pathString string, object any) error {
 }
 
 // Bulk writes multiple files from a map of file paths to content.
-func Write_Bulk(fileContentMap map[string]string) []string {
+func Write_Bulk(fileContentMap map[string]string) error {
 	var wg _sync.WaitGroup
-	var err []string
+	var errs []string
 	wg.Add(len(fileContentMap))
 	for filePath, content := range fileContentMap {
 		go func() {
 			if e := Write_File(filePath, content); e != nil {
-				err = append(err, e.Error())
+				errs = append(errs, e.Error())
 			}
 			wg.Done()
 		}()

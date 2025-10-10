@@ -93,7 +93,7 @@ func archive_Deploy() map[string]string {
 	indexexport := _config.Archive
 	indexexport.ExportSheet = ""
 	indexexport.Versions = availableversions
-	indexexport.Constants = _style.Cssfile_Parse(
+	indexexport.Constants = _style.Cssfile_String(
 		_util.Code_Uncomment(_config.Static.RootCSS, false, true, false),
 		"", false).Variables.ToMap()
 
