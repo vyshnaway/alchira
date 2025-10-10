@@ -1,4 +1,4 @@
-package shell
+package console
 
 import (
 	_math "math"
@@ -53,7 +53,7 @@ func tag_H4(content string, preset []string, styles ...string) string {
 func tag_H5(content string, preset []string, styles ...string) string {
 	width := Canvas.Width()
 	tabLen := len(Canvas.Tab)
-	remain := width - tabLen - len(content)
+	remain := width - int(_math.Remainder(float64(tabLen+len(content)), float64(width)))
 	s := content + Canvas.Tab + Divider(Canvas.DivRune.Mid)[:remain] + "\n"
 	return Format(s, preset, styles...)
 }
@@ -61,7 +61,7 @@ func tag_H5(content string, preset []string, styles ...string) string {
 func tag_H6(content string, preset []string, styles ...string) string {
 	width := Canvas.Width()
 	tabLen := len(Canvas.Tab)
-	remain := width - tabLen - len(content)
+	remain := width - int(_math.Remainder(float64(tabLen+len(content)), float64(width)))
 	s := _strings.Repeat(string(Canvas.DivRune.Mid), remain) + Canvas.Tab + content
 	return Format(s, preset, styles...)
 }

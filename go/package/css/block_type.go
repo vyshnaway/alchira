@@ -1,8 +1,8 @@
 package css
 
 import (
-	_utils_ "main/package/utils"
-	"slices"
+	_util "main/package/utils"
+	_slice "slices"
 )
 
 type T_Block struct {
@@ -94,8 +94,8 @@ func (This *T_Block) SetBlock(key string, val *T_Block) *T_Block {
 
 func (This *T_Block) DelProp(key string) *T_Block {
 	if This.prop_vals != nil {
-		if i := slices.Index(This.Prop_keys, key); i != -1 {
-			This.Prop_keys = _utils_.Array_RemoveAt(This.Prop_keys, i)
+		if i := _slice.Index(This.Prop_keys, key); i != -1 {
+			This.Prop_keys = _util.Array_RemoveAt(This.Prop_keys, i)
 			delete(This.prop_vals, key)
 		}
 	}
@@ -104,8 +104,8 @@ func (This *T_Block) DelProp(key string) *T_Block {
 
 func (This *T_Block) DelBlock(key string) *T_Block {
 	if This.block_vals != nil {
-		if i := slices.Index(This.Block_keys, key); i != -1 {
-			This.Block_keys = _utils_.Array_RemoveAt(This.Block_keys, i)
+		if i := _slice.Index(This.Block_keys, key); i != -1 {
+			This.Block_keys = _util.Array_RemoveAt(This.Block_keys, i)
 			delete(This.block_vals, key)
 		}
 	}
@@ -129,7 +129,7 @@ func (This *T_Block) Mixin(source *T_Block) *T_Block {
 	source.PropRange(func(k, v string) {
 		This.SetProp(k, v)
 	})
-	This.Prop_keys = _utils_.Array_SetAppend(This.Prop_keys, source.Prop_keys...)
+	This.Prop_keys = _util.Array_SetAppend(This.Prop_keys, source.Prop_keys...)
 
 	source.BlockRange(func(skey string, sval *T_Block) {
 		if isBlock, tval := This.GetBlock(skey); isBlock {
@@ -139,7 +139,7 @@ func (This *T_Block) Mixin(source *T_Block) *T_Block {
 			This.SetBlock(skey, sval)
 		}
 	})
-	This.Block_keys = _utils_.Array_SetAppend(This.Block_keys, source.Block_keys...)
+	This.Block_keys = _util.Array_SetAppend(This.Block_keys, source.Block_keys...)
 
 	return This
 }

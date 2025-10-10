@@ -6,7 +6,8 @@ import (
 
 var Static = _model.Cache_Static{
 	WATCH:             false,
-	MINIFY:            false,
+	DEBUG:             false,
+	MINIFY:             false,
 	ProjectName:       "",
 	ProjectVersion:    "",
 	Command:           "",
@@ -81,6 +82,8 @@ var Delta = _model.Cache_Delta{
 		Clusters:  []string{},
 		Multiples: []string{},
 		TargetDir: []string{},
+		Hashrules: []string{},
+		Handoffs:  []string{},
 	},
 	Diagnostics: _model.Cache_Delta_Diagnostics{
 		Artifacts: []_model.Refer_Diagnostic{},
@@ -88,6 +91,8 @@ var Delta = _model.Cache_Delta{
 		Clusters:  []_model.Refer_Diagnostic{},
 		TargetDir: []_model.Refer_Diagnostic{},
 		Multiples: []_model.Refer_Diagnostic{},
+		Hashrules: []_model.Refer_Diagnostic{},
+		Handoffs:  []_model.Refer_Diagnostic{},
 	},
 }
 
@@ -120,6 +125,8 @@ func Delta_Reset() {
 			Clusters:  []string{},
 			Multiples: []string{},
 			TargetDir: []string{},
+			Hashrules: []string{},
+			Handoffs:  []string{},
 		},
 		Diagnostics: _model.Cache_Delta_Diagnostics{
 			Artifacts: []_model.Refer_Diagnostic{},
@@ -127,6 +134,8 @@ func Delta_Reset() {
 			Clusters:  []_model.Refer_Diagnostic{},
 			TargetDir: []_model.Refer_Diagnostic{},
 			Multiples: []_model.Refer_Diagnostic{},
+			Hashrules: []_model.Refer_Diagnostic{},
+			Handoffs:  []_model.Refer_Diagnostic{},
 		},
 	}
 }

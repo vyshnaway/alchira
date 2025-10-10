@@ -5,14 +5,12 @@ import (
 	_action "main/internal/action"
 	_script "main/internal/script"
 	_model "main/models"
-	S "main/package/shell"
 	_map "maps"
-	_slice "slices"
 	_string "strings"
 )
 
 type Accumulator_return struct {
-	Report        []string
+	Report        string
 	GlobalClasses map[string]int
 	PublicClasses map[string]int
 	FileManifests map[string]_model.File_LocalManifest
@@ -20,7 +18,6 @@ type Accumulator_return struct {
 
 func (This *Class) Accumulator() Accumulator_return {
 	accumulate := Accumulator_return{
-		Report:        []string{},
 		GlobalClasses: map[string]int{},
 		PublicClasses: map[string]int{},
 		FileManifests: map[string]_model.File_LocalManifest{},
@@ -39,31 +36,10 @@ func (This *Class) Accumulator() Accumulator_return {
 		Diagnostics: []_model.Refer_Diagnostic{},
 	}
 
-	accumulate.Report = append(
-		accumulate.Report,
-		S.Tag.H2("PROXY : "+This.Target+" -> "+This.Source, S.Preset.Primary, S.Style.AS_Bold),
-	)
-
 	for _, file := range This.FileCache {
 		accumulate.FileManifests[file.Manifest.Lookup.Id] = file.Manifest
 		_map.Copy(accumulate.GlobalClasses, file.StyleData.GlobalClasses)
 		_map.Copy(accumulate.PublicClasses, file.StyleData.PublicClasses)
-
-		symclasses := []string{}
-		symclasses = append(symclasses, _slice.Collect(_map.Keys(file.StyleData.LocalClasses))...)
-		symclasses = append(symclasses, _slice.Collect(_map.Keys(file.StyleData.PublicClasses))...)
-		symclasses = append(symclasses, _slice.Collect(_map.Keys(file.StyleData.GlobalClasses))...)
-
-		if counter := len(symclasses); counter > 0 {
-			accumulate.Report = append(
-				accumulate.Report,
-				S.MAKE(
-					S.Tag.H6(file.TargetPath, S.Preset.Tertiary),
-					S.List.Catalog(symclasses, 0, S.Preset.Primary, S.Style.AS_Bold),
-				),
-			)
-
-		}
 	}
 
 	return accumulate
@@ -138,11 +114,14 @@ func (This *Class) SyncClassnames(action _script.E_Action) {
 		if props, ok := This.ExtnsProps[file.Extension]; ok && file.Extension != _config.Root.Extension {
 			watchprops = props
 		}
-		file.Scratch = _script.Rider(
-			&file,
+		res := _script.Rider(
+			file,
 			watchprops,
 			action,
-		).Scribed
+		)
+		
+		file.Scratch = res.Scribed
+		file.StyleData.TagReplacements = res.Replacements
 	}
 }
 

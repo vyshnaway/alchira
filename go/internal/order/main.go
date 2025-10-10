@@ -87,10 +87,10 @@ func Optimize(
 		return response, nil
 	}
 
-	artifactData, err := _json.Marshal(artifact)
-	if err != nil {
-		// handle error (e.g., log, return, panic)
-	}
+	artifactData, _ := _json.Marshal(artifact)
+	// if err != nil {
+		// handleerror(e.g., log, return, panic)
+	// }
 
 	// Prepare the request payload
 	requestData := t_ApiRequest{

@@ -48,20 +48,24 @@ var replacementTags = func() map[string]int {
 }()
 
 type parse_return struct {
-	Scribed     string
-	ClassesList [][]string
-	StylesList  []*T_RawStyle
-	Attachments []string
-	Locales     []string
+	Scribed      string
+	ClassesList  [][]string
+	StylesList   []*T_RawStyle
+	Attachments  []string
+	Locales      []string
+	Replacements []_model.File_TagReplacement
 }
+
+var regexp_aftertagopen = _regexp.MustCompile(`(?i)[\w\-\!/]`)
 
 func Rider(
 	fileData *_model.File_Stash,
 	classProps []string,
 	action E_Action,
 ) parse_return {
-
 	fileData.StyleData.TagReplacements = []_model.File_TagReplacement{}
+	fileData.Scratch = ""
+	replacements := []_model.File_TagReplacement{}
 	tagTrack := []*T_RawStyle{}
 	classesList := [][]string{}
 	attachments := []string{}
@@ -77,7 +81,6 @@ func Rider(
 	}
 
 	cursor := _reader.New(content)
-	regexp_aftertagopen := _regexp.MustCompile(`(?i)[\w\-\!/]`)
 
 	for cursor.Streaming {
 		ch := cursor.Active.Char
@@ -97,7 +100,7 @@ func Rider(
 				if hasDeclared {
 					stylesList = append(stylesList, &result.StyleDeclarations)
 				} else if elid, status := replacementTags[fragment]; action != E_Action_Read && status && len(tagTrack) == 0 {
-					fileData.StyleData.TagReplacements = append(fileData.StyleData.TagReplacements, _model.File_TagReplacement{
+					replacements = append(replacements, _model.File_TagReplacement{
 						Loc:  stream.Len(),
 						Elid: elid,
 					})
@@ -111,44 +114,28 @@ func Rider(
 					}
 				}
 
-				if action == E_Action_Read {
-					if hasDeclared {
-						if result.StyleDeclarations.Elid == 0 {
-							var stash _string.Builder
-							stash.WriteString(result.StyleDeclarations.Element)
-							if len(result.StyleDeclarations.Elvalue) > 0 {
-								stash.WriteString(result.StyleDeclarations.Elvalue)
-							}
-							for k, v := range result.NativeAttributes {
-								if len(v) > 0 {
-									stash.WriteString(k + "=" + v)
-								} else {
-									stash.WriteString(k)
-								}
-							}
-							subScribed = "<" + stash.String() + ">"
-						}
-					} else {
-						subScribed = fragment
-					}
-				} else if _, status := replacementTags[fragment]; !status {
-					if result.ClassSynced {
-						subScribed = fragment
-					} else {
-						var stash _string.Builder
-						stash.WriteString(result.StyleDeclarations.Element)
+				if _, status := replacementTags[fragment]; (!status && result.ClassSynced) || (action == E_Action_Read && hasDeclared) {
+					if result.StyleDeclarations.Elid == 0 {
+						var strbuild _string.Builder
+						strbuild.WriteRune('<')
+						strbuild.WriteString(result.StyleDeclarations.Element)
 						if len(result.StyleDeclarations.Elvalue) > 0 {
-							stash.WriteString(result.StyleDeclarations.Elvalue)
+							strbuild.WriteRune('=')
+							strbuild.WriteString(result.StyleDeclarations.Elvalue)
 						}
 						for k, v := range result.NativeAttributes {
+							strbuild.WriteRune(' ')
+							strbuild.WriteString(k)
 							if len(v) > 0 {
-								stash.WriteString(k + "=" + v)
-							} else {
-								stash.WriteString(k)
+								strbuild.WriteRune('=')
+								strbuild.WriteString(v)
 							}
 						}
-						subScribed = "<" + stash.String() + ">"
+						strbuild.WriteRune('>')
+						subScribed = strbuild.String()
 					}
+				} else {
+					subScribed = fragment
 				}
 
 				cursor.Increment()
@@ -187,13 +174,14 @@ func Rider(
 		}
 	}
 
-	fileData.StyleData.TagReplacements = append(fileData.StyleData.TagReplacements, _model.File_TagReplacement{Loc: 0, Elid: 0})
+	replacements = append(replacements, _model.File_TagReplacement{Loc: 0, Elid: 0})
 
 	return parse_return{
-		Scribed:     stream.String(),
-		ClassesList: classesList,
-		StylesList:  stylesList,
-		Attachments: attachments,
-		Locales:     locales,
+		Replacements: replacements,
+		Scribed:      stream.String(),
+		ClassesList:  classesList,
+		StylesList:   stylesList,
+		Attachments:  attachments,
+		Locales:      locales,
 	}
 }

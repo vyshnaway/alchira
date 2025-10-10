@@ -4,37 +4,39 @@ import (
 	_config "main/configs"
 	_action "main/internal/action"
 	_css "main/package/css"
+	O "main/package/object"
 
 	_model "main/models"
 	_util "main/package/utils"
 	_map "maps"
 )
 
-type cssfile_Parse_return struct {
-	Result      *_css.T_Block
+type R_Cssfile_Parse struct {
+	Result      *_css.T_BlockSeq
 	Attachments []string
-	Variables   map[string]string
+	Variables   *O.T[string, string]
 }
 
-func Cssfile_Parse(content string, initial string, verbose bool) cssfile_Parse_return {
+func Cssfile_Parse(content string, initial string, debug bool) R_Cssfile_Parse {
 	scanned := _css.ParsePartial(_util.Code_Uncomment(content, false, true, false))
-	result := _css.NewBlock()
+	result := _css.NewBlockSeq()
 	for _, d := range scanned.Directives {
-		result.SetProp(d, "")
+		result.AddDirective(d)
 	}
 
-	variables := map[string]string{}
+	variables := O.New[string, string]()
 	attachments := []string{}
 	for _, kv := range scanned.All_Blocks {
 		key := kv[0]
 		val := kv[1]
-		res := Parse_CssSnippet(val, initial, key, true, verbose)
-		_map.Copy(variables, res.Variables)
+		res := Parse_CssSnippet(val, initial, key, true, debug)
+
+		variables.Copy(res.Variables)
 		attachments = append(attachments, res.Attachments...)
-		result.SetBlock(key, res.Result)
+		result.AddNewBlock(key, res.Result)
 	}
 
-	return cssfile_Parse_return{
+	return R_Cssfile_Parse{
 		Result:      result,
 		Attachments: attachments,
 		Variables:   variables,
@@ -46,7 +48,7 @@ type cssfile_Collection_return struct {
 	SelectorList       []string
 }
 
-func Cssfile_Collection(files []_model.File_Stash, verbose bool) cssfile_Collection_return {
+func Cssfile_Collection(files []_model.File_Stash, debug bool) cssfile_Collection_return {
 	selectorList := []string{}
 	selectors := map[string]int{}
 	indexMetaCollection := _model.File_MetadataMap{}
@@ -76,7 +78,7 @@ func Cssfile_Collection(files []_model.File_Stash, verbose bool) cssfile_Collect
 					string(file.Manifest.Lookup.Type)+" : "+file.FilePath+" |",
 					selector,
 					false,
-					verbose,
+					debug,
 				)
 				attachments := stylescanned.Attachments
 				object := stylescanned.Result
@@ -86,7 +88,7 @@ func Cssfile_Collection(files []_model.File_Stash, verbose bool) cssfile_Collect
 				metadata := _model.Style_Metadata{
 					Info:         []string{},
 					WatchClass:   "",
-					Variables:    stylescanned.Variables,
+					Variables:    stylescanned.Variables.ToMap(),
 					Skeleton:     object.Skeleton(),
 					Declarations: []string{declaration},
 					Summon:       "",

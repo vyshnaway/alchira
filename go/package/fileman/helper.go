@@ -4,7 +4,6 @@ import (
 	_io "io"
 	_os "os"
 	_fmt "fmt"
-	_slices "slices"
 	_strings "strings"
 )
 
@@ -27,11 +26,6 @@ func helper_CopyFile(src, dst string) error {
 		return _fmt.Errorf("could not copy content from '%s' to '%s': %w", src, dst, err)
 	}
 	return destFile.Sync() // Ensure data is written to disk
-}
-
-// Helper function to check if a string is in a slice.
-func helper_Contains(slice []string, item string) bool {
-	return _slices.Contains(slice, item)
 }
 
 // isExcluded checks if a relative path or an absolute path is in the exclusion list.

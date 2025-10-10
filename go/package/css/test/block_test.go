@@ -2,8 +2,8 @@ package test
 
 import (
 	"fmt"
+	console "main/package/console"
 	css "main/package/css"
-	shell "main/package/shell"
 	"testing"
 )
 
@@ -181,7 +181,7 @@ func Test(t *testing.T) {
 	bm1.Print()
 	bm2.Print()
 	bm3.Print()
-	shell.Render.Raw(bm1.Skeleton())
-	shell.Render.Raw(bm2.Skeleton())
-	shell.Render.Raw(bm3.Skeleton())
+	console.Render.Raw(bm1.Skeleton())
+	console.Render.Raw(bm2.Skeleton())
+	console.Render.Raw(bm3.Skeleton())
 }

@@ -4,10 +4,11 @@ import (
 	_fmt "fmt"
 	_config "main/configs"
 	_action "main/internal/action"
-	X "main/internal/shell"
+	X "main/internal/console"
+	S "main/package/console"
+	Sp "main/package/console/play"
 	_fileman_ "main/package/fileman"
-	S "main/package/shell"
-	Sp "main/package/shell/play"
+	O "main/package/object"
 	_utils_ "main/package/utils"
 	_service "main/service"
 	_os_ "os"
@@ -42,7 +43,6 @@ func main() {
 	rootPackagePath, _ := _fileman_.Path_FromRoot("package.json")
 
 	rootPackageData, rootPackageErr := _fileman_.Read_Json(rootPackagePath, false)
-	S.Post(rootPackagePath)
 	if rootPackageErr != nil {
 		_fmt.Println("Bad root package.json file.")
 		_os_.Exit(1)
@@ -67,7 +67,8 @@ func main() {
 
 	_config.Static.Command = command
 	_config.Static.Argument = argument
-	_config.Static.MINIFY = command != "debug"
+	_config.Static.DEBUG = command == "debug"
+	_config.Static.MINIFY = !_config.Static.DEBUG
 	_config.Static.WATCH = (command == "debug" || command == "preview") && (argument == "-w")
 	_config.Static.ProjectName = _utils_.String_Filter(projectname, []rune{}, []rune{}, []rune{})
 	_config.Static.ProjectVersion = projectversion
@@ -153,18 +154,18 @@ func main() {
 			))
 
 			S.Post(S.MAKE("", []string{
-				X.List_Record("Available Commands", _config.Root.Commands),
-				X.List_Record("Agreements", func() map[string]string {
-					res := map[string]string{}
+				X.List_Record("Available Commands", O.FromMap(_config.Root.Commands)),
+				X.List_Record("Agreements", func() *O.T[string, string] {
+					res := O.New[string, string]()
 					for _, data := range _config.Sync_Agreements {
-						res[data.Title] = data.Path
+						res.Set(data.Title, data.Path)
 					}
 					return res
 				}()),
-				X.List_Record("References", func() map[string]string {
-					res := map[string]string{}
+				X.List_Record("References", func() *O.T[string, string] {
+					res := O.New[string, string]()
 					for _, data := range _config.Sync_References {
-						res[data.Title] = data.Path
+						res.Set(data.Title, data.Path)
 					}
 					return res
 				}()),

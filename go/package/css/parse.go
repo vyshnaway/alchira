@@ -1,11 +1,10 @@
 package css
 
 import (
-	// _cache_ "main/cache"
-	_Cursor_ "main/package/reader"
-	_utils_ "main/package/utils"
-	_slices_ "slices"
-	_strings_ "strings"
+	_reader "main/package/reader"
+	_util "main/package/utils"
+	_slice "slices"
+	_string "strings"
 )
 
 type R_Parse struct {
@@ -16,7 +15,7 @@ type R_Parse struct {
 	Nested_Blocks [][2]string
 	Select_Blocks [][2]string
 	All_Blocks    [][2]string
-	Variables     map[string]string
+	Variables     [][2]string
 }
 
 func ParsePartial(content string) R_Parse {
@@ -28,16 +27,17 @@ func ParsePartial(content string) R_Parse {
 		Nested_Blocks: [][2]string{},
 		Select_Blocks: [][2]string{},
 		All_Blocks:    [][2]string{},
-		Variables:     map[string]string{},
+		Variables:     [][2]string{},
 	}
 
 	key := ""
 	var awaitBrace rune = 0
 	braceTrack := []rune{}
-	start := 0
+	keyStart := 0
+	valStart := 0
 	deviance := 0
 	isProp := true
-	cursor := _Cursor_.New(content + ";")
+	cursor := _reader.New(content + ";")
 
 	for ch, streaming := cursor.Active.Char, cursor.Streaming; streaming; ch, streaming = cursor.Increment() {
 
@@ -52,33 +52,33 @@ func ParsePartial(content string) R_Parse {
 			} else {
 				awaitBrace = 0
 			}
-		} else if !_slices_.Contains(_utils_.Refer.WatchQuotes, awaitBrace) &&
-			_slices_.Contains(_utils_.Refer.OpenBraces, ch) || _slices_.Contains(_utils_.Refer.WatchQuotes, ch) {
-			awaitBrace = _utils_.Refer.BracePair[ch]
+		} else if !_slice.Contains(_util.Refer.WatchQuotes, awaitBrace) &&
+			_slice.Contains(_util.Refer.OpenBraces, ch) || _slice.Contains(_util.Refer.WatchQuotes, ch) {
+			awaitBrace = _util.Refer.BracePair[ch]
 			braceTrack = append(braceTrack, awaitBrace)
 			deviance = len(braceTrack)
 		}
 
 		if deviance == 1 && cursor.Active.Char == '{' {
 			isProp = false
-			key = _utils_.String_Minify(content[start:cursor.Active.Marker])
-			start = cursor.Active.Marker + 1
+			key = _util.String_Minify(content[keyStart:cursor.Active.Marker])
+			valStart = cursor.Active.Marker + 1
 		} else if deviance != 0 {
 			continue
 		} else {
 			switch cursor.Active.Char {
 			case ':':
-				key = _utils_.String_Minify(content[start:cursor.Active.Marker])
-				start = cursor.Active.Marker + 1
+				key = _util.String_Minify(content[keyStart:cursor.Active.Marker])
+				valStart = cursor.Active.Marker + 1
 			case '}':
 				fallthrough
 			case ';':
-				val := _utils_.String_Minify(content[start:cursor.Active.Marker])
+				val := _util.String_Minify(content[valStart:cursor.Active.Marker])
 				{
 					if isProp {
 						if len(key) > 0 {
-							if _strings_.HasPrefix(key, "--") {
-								result.Variables[key] = val
+							if _string.HasPrefix(key, "--") {
+								result.Variables = append(result.Variables, [2]string{key, val})
 							}
 							result.Properties = append(result.Properties, [2]string{key, val})
 						} else if len(val) > 0 && val[0] == '@' {
@@ -97,7 +97,8 @@ func ParsePartial(content string) R_Parse {
 						}
 						result.All_Blocks = append(result.All_Blocks, [2]string{key, val})
 					}
-					start = cursor.Active.Marker + 1
+					keyStart = cursor.Active.Marker + 1
+					valStart = cursor.Active.Marker + 1
 					key = ""
 					isProp = true
 				}

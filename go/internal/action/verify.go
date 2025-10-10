@@ -2,10 +2,11 @@ package action
 
 import (
 	_config "main/configs"
-	X "main/internal/shell"
+	X "main/internal/console"
 	_model "main/models"
+	S "main/package/console"
 	_fileman "main/package/fileman"
-	S "main/package/shell"
+	O "main/package/object"
 	_util "main/package/utils"
 )
 
@@ -57,7 +58,7 @@ func Verify_Setup() (Status verify_Setup_Status_enum, Report string) {
 			status = Verify_Setup_Status_Initialized
 			report = S.MAKE(
 				S.Tag.H4("Error Paths", S.Preset.Failed),
-				X.List_Props(errors, []string{}, []string{}),
+				X.List_Props(O.FromMap(errors), []string{}, []string{}),
 				S.MakeList{TypeFunc: S.List.Bullets, Intent: 0, Preset: S.Preset.Failed, Styles: []string{}},
 			)
 		}

@@ -7,12 +7,13 @@ import (
 	_strings "strings"
 )
 
+var regex_alphanumeric = _regexp.MustCompile(`[a-zA-Z0-9]`)
+var regex_space = _regexp.MustCompile(`\s+`)
+var regex_at = _regexp.MustCompile(`@+`)
+
 // Replaces spaces and '@', then applies filters and replacements
 func String_Filter(s string, keepChars, skipChars, addBackSlashFor []rune) string {
 	final := _strings.Builder{}
-	regex_alphanumeric := _regexp.MustCompile(`[a-zA-Z0-9]`)
-	regex_space := _regexp.MustCompile(`\s+`)
-	regex_at := _regexp.MustCompile(`@+`)
 
 	s = regex_space.ReplaceAllString(s, "_")
 	s = regex_at.ReplaceAllString(s, "_")

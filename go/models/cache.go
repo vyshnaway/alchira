@@ -23,6 +23,7 @@ type Cache_Root struct {
 
 type Cache_Static struct {
 	WATCH             bool
+	DEBUG             bool
 	MINIFY            bool
 	Command           string
 	Argument          string
@@ -64,6 +65,8 @@ type Cache_Delta_Errors struct {
 	Clusters  []string
 	Multiples []string
 	TargetDir []string
+	Hashrules []string
+	Handoffs  []string
 }
 
 type Cache_Delta_Diagnostics struct {
@@ -72,6 +75,8 @@ type Cache_Delta_Diagnostics struct {
 	Clusters  []Refer_Diagnostic
 	TargetDir []Refer_Diagnostic
 	Multiples []Refer_Diagnostic
+	Hashrules []Refer_Diagnostic
+	Handoffs  []Refer_Diagnostic
 }
 
 type Cache_Delta struct {

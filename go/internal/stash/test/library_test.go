@@ -2,8 +2,8 @@ package stash_test
 
 import (
 	_config "main/configs"
-	_shell "main/package/shell"
 	_stash "main/internal/stash"
+	_console "main/package/console"
 	_testing "testing"
 )
 
@@ -21,5 +21,5 @@ func test_SaveFiles() {
 
 func Test_Library(t *_testing.T) {
 	test_SaveFiles()
-	_shell.Render.Raw(_stash.Library_CacheFiles())
+	_console.Render.Raw(_stash.Library_CacheFiles())
 }

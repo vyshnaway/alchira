@@ -1,4 +1,4 @@
-package shell
+package console
 
 var Style = struct{
 	AS_Bold string

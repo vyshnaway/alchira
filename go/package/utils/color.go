@@ -350,7 +350,7 @@ func color_RgbToHex(r, g, b, alpha float64) string {
 func color_HexToRgb(hex string) (color_return, error) {
 	cleanHex := _strings.TrimPrefix(hex, "#")
 	var r, g, b int64
-	var alpha float64 = 1.0
+	alpha := 1.0
 
 	switch len(cleanHex) {
 	case 8: // RRGGBBAA

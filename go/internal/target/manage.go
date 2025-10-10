@@ -4,8 +4,8 @@ import (
 	_fmt "fmt"
 	_config "main/configs"
 	_action "main/internal/action"
+	X "main/internal/console"
 	_script "main/internal/script"
-	X "main/internal/shell"
 	_style "main/internal/style"
 	_model "main/models"
 	_util "main/package/utils"
@@ -46,14 +46,14 @@ func (This *Class) Savefile(filepath string, content string, hashindex int) {
 
 	for _, tagdata := range parse_response.StylesList {
 		if len(tagdata.SymClasses) == 0 {
-			E := X.Error_Write(
+			E := X.Error_Standard(
 				"Symclass missing declaration scope.",
 				[]string{_fmt.Sprint(file.TargetPath, ":", tagdata.RowIndex, ":", tagdata.ColIndex)},
 			)
 			file.Manifest.Errors = append(file.Manifest.Errors, E.Errorstring)
 			file.Manifest.Diagnostics = append(file.Manifest.Diagnostics, E.Diagnostic)
 		} else if len(tagdata.SymClasses) > 1 {
-			E := X.Error_Write(
+			E := X.Error_Standard(
 				"Multiple SymClasses declaration scope.",
 				[]string{_fmt.Sprint(file.TargetPath, ":", tagdata.RowIndex, ":", tagdata.ColIndex)},
 			)
@@ -77,14 +77,14 @@ func (This *Class) Savefile(filepath string, content string, hashindex int) {
 				metadata_map = _model.File_MetadataMap{}
 			}
 
-			response := _style.Rawtag_Upload(tagdata, &file, index_map, metadata_map, _config.Static.MINIFY)
+			response := _style.Rawtag_Upload(tagdata, &file, index_map, metadata_map, _config.Static.DEBUG)
 
 			file.Manifest.Errors = append(file.Manifest.Errors, response.Errors...)
 			file.Manifest.Diagnostics = append(file.Manifest.Diagnostics, response.Diagnostics...)
 		}
 	}
 
-	This.FileCache[filepath] = file
+	This.FileCache[filepath] = &file
 }
 
 func (This *Class) UpdateCache() {

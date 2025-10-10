@@ -4,13 +4,14 @@ import (
 	_fmt "fmt"
 	_config "main/configs"
 	_action "main/internal/action"
+	X "main/internal/console"
 	_script "main/internal/script"
-	X "main/internal/shell"
 	_stash "main/internal/stash"
 	_style "main/internal/style"
 	_model "main/models"
+	S "main/package/console"
 	_css "main/package/css"
-	S "main/package/shell"
+	O "main/package/object"
 	_util "main/package/utils"
 	_map "maps"
 	_slice "slices"
@@ -20,7 +21,6 @@ import (
 func Generate_Files() (Files map[string]string, Report string) {
 
 	files := map[string]string{}
-	report := ""
 
 	if len(_config.Delta.Content) > 0 {
 		files[_config.Delta.Path] = _config.Delta.Content
@@ -32,16 +32,16 @@ func Generate_Files() (Files map[string]string, Report string) {
 		index_scanned := _style.Cssfile_Parse(
 			_util.Code_Uncomment(_config.Static.RootCSS, false, true, false),
 			"INDEX ||",
-			_config.Static.WATCH,
+			!_config.Static.DEBUG,
 		)
-		_config.Manifest.Constants = _slice.Collect(_map.Keys(index_scanned.Variables))
+		_config.Manifest.Constants = index_scanned.Variables.Keys()
 		_config.Delta.Report.Constants = X.List_Catalog("Root Constants", _config.Manifest.Constants)
 		for _, attachment := range index_scanned.Attachments {
 			if res := _action.Index_Find(attachment, _model.Style_ClassIndexMap{}); res.Index > 0 {
 				attachments = append(attachments, res.Index)
 			}
 		}
-		watch_index := _css.Render_Vendored(index_scanned.Result, !_config.Static.MINIFY)
+		watch_index := _css.Render_Sequence(index_scanned.Result, _config.Static.MINIFY)
 
 		var render_action _script.E_Action
 		if _config.Static.Command == "debug" {
@@ -76,7 +76,7 @@ func Generate_Files() (Files map[string]string, Report string) {
 			val string
 		}
 
-		attach_frag := _css.Render_Vendored(attach_styles, !_config.Static.MINIFY)
+		attach_frag := _css.Render_Vendored(attach_styles,  _config.Static.MINIFY)
 		render_frags := []t_frag{
 			{
 				key: "Root",
@@ -90,7 +90,7 @@ func Generate_Files() (Files map[string]string, Report string) {
 						result.SetBlock(i.ClassName, _action.Index_Fetch(i.ClassIndex).StyleObject)
 					}
 					return result
-				}(), _config.Static.MINIFY),
+				}(), _config.Static.DEBUG),
 			},
 			{
 				key: "Attach",
@@ -98,11 +98,11 @@ func Generate_Files() (Files map[string]string, Report string) {
 			},
 			{
 				key: "Appendix",
-				val: _css.Render_Vendored(func() *_css.T_Block {
-					appendix_styles := _css.NewBlock()
+				val: _css.Render_Sequence(func() *_css.T_BlockSeq {
+					appendix_styles := _css.NewBlockSeq()
 					for _, cache := range _stash.Cache.Targetdir {
 						scanned := _style.Cssfile_Parse(cache.StylesheetContent, `APPENDIX : ${cache.targetStylesheet} ||`, _config.Static.WATCH)
-						appendix_styles.Mixin(scanned.Result)
+						appendix_styles.Append(scanned.Result.Units...)
 						for _, attachment := range scanned.Attachments {
 							if res := _action.Index_Find(attachment, _model.Style_ClassIndexMap{}); res.Index > 0 {
 								attachments = append(attachments, res.Index)
@@ -110,14 +110,14 @@ func Generate_Files() (Files map[string]string, Report string) {
 						}
 					}
 					return appendix_styles
-				}(), !_config.Static.MINIFY),
+				}(),  _config.Static.MINIFY),
 			},
 		}
 
 		style_sheet := func() string {
 			frags := []string{}
 			for _, i := range render_frags {
-				if _config.Static.MINIFY {
+				if _config.Static.DEBUG {
 					frags = append(frags, "\n\n/* Section: "+i.key+" */\n"+i.val+"\n")
 				} else {
 					frags = append(frags, i.val)
@@ -135,14 +135,14 @@ func Generate_Files() (Files map[string]string, Report string) {
 						res.SetBlock("."+d.Metadata.WatchClass, _action.Index_Fetch(i).StyleObject)
 					}
 					return res
-				}(), _config.Static.MINIFY,
+				}(),  _config.Static.MINIFY,
 			)+attach_frag, true, true, false, true)
 		}
 
 		block_style := "<style>" + style_sheet + "</style>"
-		block_summon := block_style + block_style
+		block_on := block_style + block_style
 		for _, target := range _stash.Cache.Targetdir {
-			_map.Copy(files, target.SummonFiles(style_sheet, block_style, block_summon, staple_sheet))
+			_map.Copy(files, target.SummonFiles(style_sheet, block_style, block_on, staple_sheet))
 		}
 
 		if _config.Static.WATCH {
@@ -151,11 +151,17 @@ func Generate_Files() (Files map[string]string, Report string) {
 			files[_config.Path_Autogen["watch"].Path] = watch_class
 			files[_config.Path_Autogen["staple"].Path] = staple_sheet
 		} else {
-			memchart := map[string]string{}
+			memchart := O.New[string, string]()
 			for _, i := range render_frags {
-				memchart[i.key] = _fmt.Sprintf("%9s", _fmt.Sprintf("%v Kb", _util.String_Memory(i.val)))
+				memchart.Set(
+					i.key,
+					_fmt.Sprintf("%9s", _fmt.Sprintf("%v Kb", _util.String_Memory(i.val))),
+				)
 			}
-			memchart["[***.css]"] = _fmt.Sprintf("%9s", _fmt.Sprintf("%v Kb", _util.String_Memory(style_sheet)))
+			memchart.Set(
+				"",
+				_fmt.Sprintf("%9s", _fmt.Sprintf("%v Kb", _util.String_Memory(style_sheet))),
+			)
 
 			_config.Delta.Report.MemChart = func() string {
 				var heading string
@@ -178,6 +184,25 @@ func Generate_Files() (Files map[string]string, Report string) {
 
 	_config.Delta.Path = ""
 	_config.Delta.Content = ""
+
+	var builder _string.Builder
+	for _, s := range []string{
+		_config.Delta.Report.Axioms,
+		_config.Delta.Report.Clusters,
+		_config.Delta.Report.Artifacts,
+		_config.Delta.Report.TargetDir,
+		_config.Delta.Report.Constants,
+		_config.Delta.Report.Hashrule,
+		_config.Delta.Report.Errors,
+		_config.Delta.Report.MemChart,
+		_config.Delta.Report.Footer,
+	} {
+		if len(s) > 0 {
+			builder.WriteString(s)
+			builder.WriteRune('\n')
+		}
+	}
+	report := builder.String()
 
 	return files, report
 }

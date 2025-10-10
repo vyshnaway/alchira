@@ -4,6 +4,7 @@ import (
 	_fmt "fmt"
 	_os "os"
 	_filepath "path/filepath"
+	_slice "slices"
 	_strings "strings"
 )
 
@@ -122,16 +123,10 @@ func Sync_Bulk(source, target string, extInclude, extnUnsync, fileExcludes []str
 		targetFilePath := _filepath.Join(target, relFile)
 
 		// Check if file exists in source
-		sourceFileExists := false
-		for _, sf := range relativeSourceFiles {
-			if sf == relFile {
-				sourceFileExists = true
-				break
-			}
-		}
+		sourceFileExists := _slice.Contains(relativeSourceFiles, relFile)
 
 		// Check if extension is in unsync list
-		isUnsyncable := helper_Contains(extnUnsync, _filepath.Ext(relFile))
+		isUnsyncable := _slice.Contains(extnUnsync, _filepath.Ext(relFile))
 
 		if !sourceFileExists || isUnsyncable {
 			if err := _os.Remove(targetFilePath); err != nil && !_os.IsNotExist(err) {
@@ -153,7 +148,7 @@ func Sync_Bulk(source, target string, extInclude, extnUnsync, fileExcludes []str
 			}
 		}
 
-		if helper_Contains(extInclude, _filepath.Ext(relFile)) {
+		if _slice.Contains(extInclude, _filepath.Ext(relFile)) {
 			contentBytes, err := _os.ReadFile(sourceFilePath)
 			if err != nil {
 				return nil, _fmt.Errorf("failed to read source file '%s' for inclusion: %w", sourceFilePath, err)
@@ -185,13 +180,7 @@ func Sync_Bulk(source, target string, extInclude, extnUnsync, fileExcludes []str
 		sourceFolderPath := _filepath.Join(source, relFolder)
 
 		// Check if the corresponding source folder exists
-		sourceFolderExists := false
-		for _, sf := range sourceFolders {
-			if sf == sourceFolderPath {
-				sourceFolderExists = true
-				break
-			}
-		}
+		sourceFolderExists := _slice.Contains(sourceFolders, sourceFolderPath)
 
 		// If target folder is empty and no corresponding source folder, remove it
 		// (Note: This logic is simplified from Node.js version which checks if sourceFolderPath exists based on target path)

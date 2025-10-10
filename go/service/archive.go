@@ -80,9 +80,7 @@ func archive_Deploy() map[string]string {
 	currentverfile := archive_Build().Version + ".json"
 	availableversions := []string{}
 	if items, err := _fileman.Path_ListFiles(_config.Path_Folder["arcversion"].Path, []string{}); err == nil {
-		for _, item := range items {
-			availableversions = append(availableversions, item)
-		}
+		availableversions = append(availableversions, items...)
 	}
 	if _slice.Contains(availableversions, latestverfile) {
 		availableversions = append(availableversions, latestverfile)
@@ -97,7 +95,7 @@ func archive_Deploy() map[string]string {
 	indexexport.Versions = availableversions
 	indexexport.Constants = _style.Cssfile_Parse(
 		_util.Code_Uncomment(_config.Static.RootCSS, false, true, false),
-		"", false).Variables
+		"", false).Variables.ToMap()
 
 	indexexportjson := _util.Code_JsonBuild(indexexport, "")
 	exportjson := _util.Code_JsonBuild(_config.Archive, "")

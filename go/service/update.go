@@ -17,8 +17,8 @@ func Update_Scaffold() {
 	_config.Manifest_Reset()
 
 	_stash.Reset()
-	_stash.Artifact_Update()
-	_stash.Library_Update()
+	_stash.Artifact_Update(_config.Static.DEBUG)
+	_stash.Library_Update(_config.Static.DEBUG)
 }
 
 func Build_Targets() {

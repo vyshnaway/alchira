@@ -3,10 +3,10 @@ package service
 import (
 	_config "main/configs"
 	_action "main/internal/action"
-	X "main/internal/shell"
+	X "main/internal/console"
 	_stash "main/internal/stash"
+	S "main/package/console"
 	_fileman "main/package/fileman"
-	S "main/package/shell"
 	_watcher "main/package/watcher"
 	_map "maps"
 	_os "os"
@@ -41,7 +41,7 @@ func Execute(heading string) (Exitcode int) {
 	step := execute_Step_Initialize
 	report := ""
 	targets := []string{}
-	report_next := true
+	report_next := false
 	cycle_one := true
 	// initial_heading := "Initial Build"
 	outfiles := map[string]string{}
@@ -59,9 +59,7 @@ func Execute(heading string) (Exitcode int) {
 				report = res_report
 				step = execute_Step_WatchFolders
 				break
-			} else {
-				report = ""
-			}
+			} 
 			fallthrough
 
 		case execute_Step_ReadRootCss:
@@ -79,7 +77,6 @@ func Execute(heading string) (Exitcode int) {
 				break
 			} else {
 				cycle_one = false
-				report = ""
 			}
 			fallthrough
 
@@ -216,7 +213,9 @@ func Execute(heading string) (Exitcode int) {
 	}
 
 	save_action.Wait()
-	if watcher != nil {
+	if watcher == nil {
+		S.Post(report)
+	} else {
 		watcher.Close()
 		watcher = nil
 	}

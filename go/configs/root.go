@@ -41,7 +41,7 @@ var Root = _model.Cache_Root{
 	CustomOperations: map[string]rune{
 		"attach": '~',
 		"assign": '=',
-		"locale": '-',
+		"locale": '_',
 	},
 	CustomAtrules: map[string]string{
 		"attach": "@--attach",

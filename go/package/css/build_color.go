@@ -92,6 +92,8 @@ func color_Investigate(cursor *_Cursor_.Type, palette string) []float64 {
 	return values
 }
 
+var regex_isAlNum = _regexp_.MustCompile(`^[a-zA-Z0-9]$`)
+
 func Color_FallbackGen(
 	content string,
 	fallback_RGB1_HEX0 bool,
@@ -103,7 +105,7 @@ func Color_FallbackGen(
 	var capture _strings_.Builder
 	cursor := _Cursor_.New(content)
 	for ch, streaming := cursor.Active.Char, cursor.Streaming; streaming; ch, streaming = cursor.Increment() {
-		regex_isAlNum := _regexp_.MustCompile(`^[a-zA-Z0-9]$`)
+		
 
 		if regex_isAlNum.MatchString(string(ch)) {
 			capture.WriteRune(ch)

@@ -3,10 +3,14 @@ package stash
 import (
 	_config "main/configs"
 	_action "main/internal/action"
+	X "main/internal/console"
 	_target "main/internal/target"
 	_model "main/models"
+	O "main/package/object"
 	_util "main/package/utils"
 	_map "maps"
+	_slice "slices"
+	_strconv "strconv"
 )
 
 func Target_UpdateDirs() {
@@ -39,19 +43,28 @@ func Target_UpdateDirs() {
 
 func Target_Accumulate() _target.Accumulator_return {
 	accumulated := _target.Accumulator_return{
-		Report:        []string{},
 		GlobalClasses: map[string]int{},
 		PublicClasses: map[string]int{},
 		FileManifests: map[string]_model.File_LocalManifest{},
 	}
 
+	sections := O.New[string, []string]()
 	for _, target := range Cache.Targetdir {
 		C := target.Accumulator()
-		accumulated.Report = append(accumulated.Report, C.Report...)
 		_map.Copy(accumulated.GlobalClasses, C.GlobalClasses)
 		_map.Copy(accumulated.PublicClasses, C.PublicClasses)
 		_map.Copy(accumulated.FileManifests, C.FileManifests)
+		symclasses := append(
+			_slice.Collect(_map.Keys(C.GlobalClasses)),
+			_slice.Collect(_map.Keys(C.PublicClasses))...,
+		)
+		sections.Set(
+			"["+target.Target+" -> "+target.Source+"]: "+_strconv.Itoa(len(symclasses)),
+			symclasses,
+		)
 	}
+	counter := len(accumulated.GlobalClasses) + len(accumulated.PublicClasses)
+	accumulated.Report = X.List_Chart("Globals: "+_strconv.Itoa(counter)+" Symclasses", sections)
 
 	return accumulated
 }

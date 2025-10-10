@@ -1,40 +1,56 @@
 package css
 
 import (
-	_utils "main/package/utils"
-	_strings "strings"
-	// "main/shell/core"
-	// "strings"
-	// _strings_ "strings"
+	O "main/package/object"
+	_util "main/package/utils"
+	_string "strings"
 )
 
-// func render_LoadVendors(collection map[string]string, vendor string) []string {
-// 	result := []string{}
-// 	if vendor == "" {
-// 		for _, ven := range vendor_Providers {
-// 			if _, stat := collection[ven]; stat {
-// 				result = append(result, ven)
-// 			}
-// 		}
-// 	} else {
-// 		result = append(result, vendor)
-// 	}
-// 	return result
-// }
+var _tab = ""
+var _breaks = ""
+var _space = ""
+var _minify = false
 
-func Render_Prefixer(stylemap *T_Block, vendors []string) *T_Block {
+func SetMinification(active bool) {
+	_minify = active
+	if active {
+		_tab = ""
+		_breaks = ""
+		_space = ""
+	} else {
+		_tab = "  "
+		_space = " "
+		_breaks = "\n"
+	}
+}
+
+func render_LoadVendors(collection *O.T[string, string], vendor string) []string {
+	result := []string{}
+	if vendor == "" {
+		for _, ven := range vendor_Providers {
+			if _, stat := collection.Get(ven); stat {
+				result = append(result, ven)
+			}
+		}
+	} else {
+		result = append(result, vendor)
+	}
+	return result
+}
+
+func render_Prefixer(stylemap *T_Block, vendors []string) *T_Block {
 	out := NewBlock()
 
 	stylemap.PropRange(func(key, val string) {
 		if key[0] == '@' {
-			for _, r := range prefix_ForAtRule(key, vendors) {
+			for _, r := range prefix_ForAtRule(key, vendors).Keys() {
 				out.SetProp(r+";", "")
 			}
 		} else {
 			for _, kv := range prefix_LoadProps(key, val, vendors) {
 				k, v := kv[0], kv[1]
 				if hasProp, _ := stylemap.GetProp(k); hasProp || k == key {
-					out.SetProp(k+":"+v+";", "")
+					out.SetProp(k+":"+_space+v+";", "")
 				}
 			}
 		}
@@ -49,59 +65,57 @@ func Render_Prefixer(stylemap *T_Block, vendors []string) *T_Block {
 	return out
 }
 
-func render_Vendored(stylemap *T_Block, minify bool, vendors []string, first bool) []string {
+func render_Partial(stylemap *T_Block, vendors []string) []string {
 	stylesheet := []string{}
-	var tab string
-	var space string
-	if minify {
-		tab = ""
-		space = ""
-	} else {
-		tab = "  "
-		space = " "
-	}
 
-	prefixed := Render_Prefixer(stylemap, vendors)
+	prefixed := render_Prefixer(stylemap, vendors)
 
 	if prefixed.PropLen() > 0 {
 		prefixed.PropRange(func(k, v string) {
 			if k[0] == '@' {
 				stylesheet = append(stylesheet, k)
 			} else {
-				stylesheet = append(stylesheet, k+space+v)
+				stylesheet = append(stylesheet, k+_space+v)
 			}
 		})
 	}
 
 	if prefixed.BlockLen() > 0 {
 		prefixed.BlockRange(func(k string, v *T_Block) {
-			if !minify && first {
+			if !_minify {
 				stylesheet = append(stylesheet, "")
 			}
 
-			if _strings.HasPrefix(k, "@") {
-				for vendor, selector := range prefix_ForAtRule(k, vendors) {
-					composed := render_Vendored(v, minify, []string{vendor}, false)
+			if _string.HasPrefix(k, "@") {
+				atprefixes := prefix_ForAtRule(k, vendors)
+				atprefixes.Range(func(vendor, selector string) {
+					composed := render_Partial(v, render_LoadVendors(atprefixes, vendor))
 					if len(composed) > 0 {
-						stylesheet = append(stylesheet, selector)
-						stylesheet = append(stylesheet, "{")
+						stylesheet = append(stylesheet, selector+_space+"{")
 						for _, i := range composed {
-							stylesheet = append(stylesheet, tab+i)
+							stylesheet = append(stylesheet, _tab+i)
 						}
 						stylesheet = append(stylesheet, "}")
 
 					}
-				}
+				})
+
 			} else {
-				composed := render_Vendored(v, minify, vendors, false)
-				if !minify {
-					for index, line := range composed {
-						composed[index] = tab + line
-					}
+				composed := render_Partial(v, vendors)
+				for index, line := range composed {
+					composed[index] = _tab + line
 				}
 				if len(composed) > 0 {
-					stylesheet = append(stylesheet, prefix_ForPseudos(k, vendors)...)
-					stylesheet = append(stylesheet, "{")
+					selectors := prefix_ForPseudos(k, vendors)
+					finalIndex := len(selectors) - 1
+					for i, s := range selectors {
+						if finalIndex == i {
+							selectors[i] = s + _space + "{"
+						} else {
+							selectors[i] = s + ","
+						}
+					}
+					stylesheet = append(stylesheet, selectors...)
 					stylesheet = append(stylesheet, composed...)
 					stylesheet = append(stylesheet, "}")
 				}
@@ -113,15 +127,27 @@ func render_Vendored(stylemap *T_Block, minify bool, vendors []string, first boo
 }
 
 func Render_Vendored(stylemap *T_Block, minify bool) string {
-	var breaks string
+	SetMinification(minify)
+	return _string.Join(render_Partial(stylemap.Flatten(), vendor_Providers), _breaks)
+}
 
-	if minify {
-		breaks = ""
-	} else {
-		breaks = "\n"
+func Render_Sequence(seq *T_BlockSeq, minify bool) string {
+	SetMinification(minify)
+
+	lines := []string{}
+	for _, i := range seq.Units {
+		if i.CssBlock.Len() > 0 {
+			lines = append(lines, i.Selector+_space+"{")
+			for _, line := range render_Partial(i.CssBlock, vendor_Providers) {
+				lines = append(lines, _tab+line)
+			}
+			lines = append(lines, "}"+_breaks)
+		} else {
+			lines = append(lines, i.Selector+";")
+		}
 	}
 
-	return _strings.Join(render_Vendored(stylemap.Flatten(), minify, vendor_Providers, true), breaks)
+	return _string.Join(lines, _breaks)
 }
 
 func render_Wrapper(pm *T_Block, keys []string, cm *T_Block) {
@@ -147,20 +173,22 @@ func render_Wrapper(pm *T_Block, keys []string, cm *T_Block) {
 	}
 }
 
-func render_Switched(This *T_Block) *T_Block {
-	out := NewBlock()
-	inq := out.SetBlock("", NewBlock())
+func Render_Switched(This *T_Block, minify bool) string {
+	SetMinification(minify)
+
+	switched := NewBlock()
+	inq := switched.SetBlock("", NewBlock())
 
 	This.PropRange(func(k, v string) {
-		out.SetProp(k, v)
+		switched.SetProp(k, v)
 	})
 
-	out.BlockRange(func(k0 string, v0 *T_Block) {
+	switched.BlockRange(func(k0 string, v0 *T_Block) {
 		v0.BlockRange(func(k1 string, v1 *T_Block) {
 			if k1 == "" {
 				inq.SetBlock(k0, v0)
 			} else {
-				if wrappers, err := _utils.Code_JsonParse[[]string](k1); err == nil {
+				if wrappers, err := _util.Code_JsonParse[[]string](k1); err == nil {
 					keyseq := []string{}
 					for index, wrapper := range wrappers {
 						if index == 0 || wrappers[index-1][0] == '@' || wrapper[0] == '@' {
@@ -169,16 +197,11 @@ func render_Switched(This *T_Block) *T_Block {
 							keyseq = append(keyseq, "& "+wrapper)
 						}
 					}
-					render_Wrapper(out, keyseq, v1)
+					render_Wrapper(switched, keyseq, v1)
 				}
 			}
 		})
 	})
 
-	return out
-}
-
-func Render_Switched(stylemap *T_Block, minify bool) string {
-	switched := render_Switched(stylemap)
 	return Render_Vendored(switched, minify)
 }

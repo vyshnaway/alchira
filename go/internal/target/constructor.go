@@ -19,7 +19,7 @@ type Class struct {
 	Label      string
 	Extensions []string
 	ExtnsProps map[string][]string
-	FileCache  map[string]_model.File_Stash
+	FileCache  map[string]*_model.File_Stash
 }
 
 func New(storage _model.Config_ProxyStorage, label string) Class {
@@ -35,7 +35,7 @@ func New(storage _model.Config_ProxyStorage, label string) Class {
 		Label:             label,
 		Extensions:        _slice.Collect(_map.Keys(storage.Extensions)),
 		ExtnsProps:        storage.Extensions,
-		FileCache:         map[string]_model.File_Stash{},
+		FileCache:         map[string]*_model.File_Stash{},
 	}
 
 	index := 1

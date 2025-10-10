@@ -2,11 +2,11 @@ package service
 
 import (
 	_config "main/configs"
+	X "main/internal/console"
 	_order_ "main/internal/order"
-	X "main/internal/shell"
 	_stash "main/internal/stash"
 	_model "main/models"
-	S "main/package/shell"
+	S "main/package/console"
 	_util "main/package/utils"
 	_map "maps"
 	_strconv "strconv"
@@ -17,7 +17,7 @@ func accumulate() {
 
 	_config.Style.Global___Index = accumulated.GlobalClasses
 	_config.Style.Public___Index = accumulated.PublicClasses
-	_config.Delta.Report.TargetDir = S.MAKE("", accumulated.Report)
+	_config.Delta.Report.TargetDir = accumulated.Report
 
 	_config.Manifest.Group.Local = map[string]_model.File_MetadataMap{}
 	_config.Manifest.Group.Global = map[string]_model.File_MetadataMap{}
@@ -47,30 +47,35 @@ func accumulate() {
 	_config.Delta.Diagnostics.Multiples = []_model.Refer_Diagnostic{}
 	for _, val := range _config.Style.Index_to_Data {
 		if len(val.Metadata.Declarations) > 1 {
-			error_ := X.Error_Write("Duplicate Declarations: "+val.SymClass, val.Metadata.Declarations)
+			error_ := X.Error_Standard("Duplicate Declarations: "+val.SymClass, val.Metadata.Declarations)
 			_config.Delta.Errors.Multiples = append(_config.Delta.Errors.Multiples, error_.Errorstring)
 			_config.Delta.Diagnostics.Multiples = append(_config.Delta.Diagnostics.Multiples, error_.Diagnostic)
 		}
 	}
 
-	_config.Manifest.Diagnostics = []_model.Refer_Diagnostic{}
-	_config.Manifest.Diagnostics = append(_config.Manifest.Diagnostics, _config.Delta.Diagnostics.Artifacts...)
-	_config.Manifest.Diagnostics = append(_config.Manifest.Diagnostics, _config.Delta.Diagnostics.Axioms...)
-	_config.Manifest.Diagnostics = append(_config.Manifest.Diagnostics, _config.Delta.Diagnostics.Clusters...)
-	_config.Manifest.Diagnostics = append(_config.Manifest.Diagnostics, _config.Delta.Diagnostics.Multiples...)
-	_config.Manifest.Diagnostics = append(_config.Manifest.Diagnostics, _config.Delta.Diagnostics.TargetDir...)
-	_config.Delta.ErrorCount = len(_config.Manifest.Diagnostics)
+	diagnostics := []_model.Refer_Diagnostic{}
+	diagnostics = append(diagnostics, _config.Delta.Diagnostics.Hashrules...)
+	diagnostics = append(diagnostics, _config.Delta.Diagnostics.Artifacts...)
+	diagnostics = append(diagnostics, _config.Delta.Diagnostics.Handoffs...)
+	diagnostics = append(diagnostics, _config.Delta.Diagnostics.Axioms...)
+	diagnostics = append(diagnostics, _config.Delta.Diagnostics.Clusters...)
+	diagnostics = append(diagnostics, _config.Delta.Diagnostics.Multiples...)
+	diagnostics = append(diagnostics, _config.Delta.Diagnostics.TargetDir...)
+	_config.Manifest.Diagnostics = diagnostics
 
 	errorlist := []string{}
+	errorlist = append(errorlist, _config.Delta.Errors.Handoffs...)
+	errorlist = append(errorlist, _config.Delta.Errors.Hashrules...)
 	errorlist = append(errorlist, _config.Delta.Errors.Artifacts...)
 	errorlist = append(errorlist, _config.Delta.Errors.Axioms...)
 	errorlist = append(errorlist, _config.Delta.Errors.Clusters...)
 	errorlist = append(errorlist, _config.Delta.Errors.Multiples...)
 	errorlist = append(errorlist, _config.Delta.Errors.TargetDir...)
-	_config.Delta.Report.Errors = ""
+	_config.Delta.ErrorCount = len(diagnostics)
 
+	_config.Delta.Report.Errors = ""
 	if _config.Delta.ErrorCount > 0 {
-		S.MAKE(
+		_config.Delta.Report.Errors = S.MAKE(
 			S.Tag.H2(_strconv.Itoa(_config.Delta.ErrorCount)+" Errors", S.Preset.Failed),
 			errorlist,
 		)

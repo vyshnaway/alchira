@@ -3,10 +3,11 @@ package service
 import (
 	_fmt "fmt"
 	_config "main/configs"
-	X "main/internal/shell"
+	X "main/internal/console"
 	_model "main/models"
+	S "main/package/console"
 	_fileman "main/package/fileman"
-	S "main/package/shell"
+	"main/package/object"
 	_map "maps"
 	_string "strings"
 	_sync "sync"
@@ -122,7 +123,7 @@ func Artifact_Update() (Status bool, Report string, Files map[string]string) {
 
 	report = S.MAKE(
 		"",
-		X.List_Props(responses, S.Preset.None, S.Preset.None),
+		X.List_Props(object.FromMap(responses), S.Preset.None, S.Preset.None),
 		S.MakeList{Intent: 0, TypeFunc: S.List.Bullets, Preset: S.Preset.Text},
 	)
 	return status, report, files

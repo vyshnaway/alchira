@@ -2,8 +2,8 @@ package test
 
 import (
 	_style "main/internal/style"
+	_console "main/package/console"
 	_css "main/package/css"
-	_shell "main/package/shell"
 	_testing "testing"
 )
 
@@ -83,5 +83,5 @@ const content = `
 
 func Test_Partials(t *_testing.T) {
 	res1 := _style.Parse_CssSnippet(content, "initial", "selector", true, true)
-	_shell.Render.Raw(_css.Render_Vendored(res1.Result, true))
+	_console.Render.Raw(_css.Render_Vendored(res1.Result, true))
 }

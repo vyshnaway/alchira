@@ -21,6 +21,8 @@ type tag_Parse_retype struct {
 	StyleDeclarations T_RawStyle
 }
 
+var symclass_regex = _regexp.MustCompile(`(?i)^[\w\-]+\$+[\w\-]+$`)
+
 func Tag_Scanner(
 	fileData *_model.File_Stash,
 	classProps []string,
@@ -91,7 +93,6 @@ func Tag_Scanner(
 			if deviance == 0 && attr.Len() > 0 && _slice.Contains([]rune{' ', '\n', '\r', '>', '\t'}, ch) {
 				tr_Attr := _string.Trim(attr.String(), " \t\n")
 				tr_Value := _string.Trim(value.String(), " \t\n")
-				symclass_regex := _regexp.MustCompile(`(?i)^[\w\-]+\$+[\w\-]+$`)
 				if len(styleDeclarations.Element) == 0 {
 					if elid, elok := _config.Root.CustomElements[tr_Attr]; elok {
 						styleDeclarations.Elid = elid

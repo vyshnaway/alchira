@@ -50,7 +50,7 @@ func Code_Uncomment(content string, single, multi, html bool) string {
 
 		if multi && char == '/' && i+1 < len(content) && content[i+1] == '*' && !isInString(content, i) {
 			i += 2
-			for i+1 < len(content) && !(content[i] == '*' && content[i+1] == '/') {
+			for i+1 < len(content) && (content[i] != '*' || content[i+1] != '/') {
 				i++
 			}
 			i += 2
@@ -69,12 +69,13 @@ func Code_Uncomment(content string, single, multi, html bool) string {
 		result.WriteByte(char)
 		i++
 	}
-	
+
 	return result.String()
 }
 
+var minify_regex = _regexp.MustCompile(`\s*([{}:;,])\s*`)
+
 func Code_Minify(content string) string {
-	var minify_regex = _regexp.MustCompile(`\s*([{}:;,])\s*`)
 	out := minify_regex.ReplaceAllString(content, "$1")
 	return _strings.TrimSpace(out)
 }

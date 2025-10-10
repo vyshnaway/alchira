@@ -2,12 +2,15 @@ package action
 
 import (
 	_config "main/configs"
+	// "main/package/console"
+	S "main/package/console"
 	_fileman "main/package/fileman"
-	S "main/package/shell"
 	_util "main/package/utils"
 	_regexp "regexp"
 	_string "strings"
 )
+
+var import_regex = _regexp.MustCompile(`@import\s+(?:url\()?["']?(.*?)["']?\)?\s*;`)
 
 // save_CssInlineImports recursively processes CSS imports
 func save_CssInlineImports(filePath string, resolvedFiles *map[string]bool) (string, error) {
@@ -19,7 +22,6 @@ func save_CssInlineImports(filePath string, resolvedFiles *map[string]bool) (str
 	basedir := _fileman.Path_Basedir(filePath)
 
 	content_string := string(content)
-	import_regex := _regexp.MustCompile(`@import\s+(?:url\()?["']?(.*?)["']?\)?\s*;`)
 	for _, match := range import_regex.FindAllStringSubmatch(content_string, -1) {
 		fullmatch := match[0]
 		importpath := match[1]
@@ -55,7 +57,7 @@ func save_CssImport(filepath_array []string) string {
 			inlined = append(inlined, content)
 		}
 	}
-
+	// console.Post(_string.Join(inlined, "\n"))
 	return _string.Join(inlined, "\n")
 }
 

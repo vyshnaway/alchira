@@ -7,6 +7,7 @@ import (
 	_http "net/http"
 	_os "os"
 	_filepath "path/filepath"
+	_slice "slices"
 	_strings "strings"
 )
 
@@ -80,7 +81,7 @@ func Read_Bulk(target string, extensions []string) (map[string]string, error) {
 	}
 
 	for _, file := range files {
-		if len(convertedExtensions) == 0 || helper_Contains(convertedExtensions, _filepath.Ext(file)) {
+		if len(convertedExtensions) == 0 || _slice.Contains(convertedExtensions, _filepath.Ext(file)) {
 			contentBytes, err := _os.ReadFile(file)
 			if err != nil {
 				return nil, _fmt.Errorf("failed to read file '%s' during bulk read: %w", file, err)

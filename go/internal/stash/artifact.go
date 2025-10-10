@@ -4,10 +4,12 @@ import (
 	_fmt "fmt"
 	_config "main/configs"
 	_action "main/internal/action"
+	X "main/internal/console"
 	_script "main/internal/script"
-	X "main/internal/shell"
 	_style_ "main/internal/style"
 	_model "main/models"
+	O "main/package/object"
+	_strconv "strconv"
 )
 
 func artifact_DeleteFile(filepath string) {
@@ -69,7 +71,7 @@ func artifact_Clear() {
 	}
 }
 
-func Artifact_Update() {
+func Artifact_Update(debug bool) {
 
 	SaveArtifactFile_ := artifact_CacheFiles()
 	_config.Delta.Lookup.Artifacts = SaveArtifactFile_.Lookup
@@ -77,7 +79,7 @@ func Artifact_Update() {
 	_config.Manifest.Group.Artifact = map[string]_model.File_MetadataMap{}
 	_config.Delta.Errors.Artifacts = []string{}
 	_config.Delta.Diagnostics.Artifacts = []_model.Refer_Diagnostic{}
-	artifact_chart := map[string][]string{}
+	artifact_chart := O.New[string, []string]()
 	artifact_counter := 0
 	for _, file := range SaveArtifactFile_.Files {
 
@@ -86,14 +88,14 @@ func Artifact_Update() {
 		for _, tagstyle := range _script.Rider(&file, []string{}, _script.E_Action_Read).StylesList {
 
 			if len(tagstyle.SymClasses) == 0 {
-				E := X.Error_Write(
+				E := X.Error_Standard(
 					"Symclass missing declaration scope.",
 					[]string{_fmt.Sprint(file.FilePath, ":", tagstyle.RowIndex, ":", tagstyle.ColIndex)},
 				)
 				file.Manifest.Errors = append(file.Manifest.Errors, E.Errorstring)
 				file.Manifest.Diagnostics = append(file.Manifest.Diagnostics, E.Diagnostic)
 			} else if len(tagstyle.SymClasses) > 1 {
-				E := X.Error_Write(
+				E := X.Error_Standard(
 					"Multiple SymClasses declaration scope.",
 					[]string{_fmt.Sprint(file.FilePath, ":", tagstyle.RowIndex, ":", tagstyle.ColIndex)},
 				)
@@ -101,7 +103,7 @@ func Artifact_Update() {
 				file.Manifest.Diagnostics = append(file.Manifest.Diagnostics, E.Diagnostic)
 			} else {
 				artifact_counter++
-				Rawtag_Upload_ := _style_.Rawtag_Upload(tagstyle, &file, _config.Style.Artifact_Index, metadatas, _config.Static.MINIFY)
+				Rawtag_Upload_ := _style_.Rawtag_Upload(tagstyle, &file, _config.Style.Artifact_Index, metadatas, debug)
 				styledata := _action.Index_Fetch(Rawtag_Upload_.Index)
 				if len(styledata.Declarations) == 1 {
 					symclasses = append(symclasses, Rawtag_Upload_.Symclass)
@@ -111,13 +113,16 @@ func Artifact_Update() {
 			}
 		}
 		if len(symclasses) > 0 {
-			artifact_chart[_fmt.Sprint("Artifact [", file.FilePath, "]: ", len(symclasses))] = symclasses
+			artifact_chart.Set(
+				_fmt.Sprint("[", file.FilePath, "]: ", len(symclasses)),
+				symclasses,
+			)
 		}
 		_config.Manifest.Group.Artifact[file.FilePath] = metadatas
 		_config.Delta.Errors.Artifacts = append(_config.Delta.Errors.Artifacts, file.Manifest.Errors...)
 		_config.Delta.Diagnostics.Artifacts = append(_config.Delta.Diagnostics.Artifacts, file.Manifest.Diagnostics...)
 	}
-	_config.Delta.Report.Artifacts = X.List_Chart("", artifact_chart)
+	_config.Delta.Report.Artifacts = X.List_Chart("Artifact: "+_strconv.Itoa(artifact_counter)+" Symclasses", artifact_chart)
 }
 
 func Aritfact_ReDeclare() {

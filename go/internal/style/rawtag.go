@@ -8,18 +8,20 @@ import (
 	_script "main/internal/script"
 	_model "main/models"
 	_util "main/package/utils"
-	_map "maps"
 	_regexp "regexp"
 	_strconv "strconv"
 	_string "strings"
 )
+
+var regex_symzero = _regexp.MustCompile(`^-\$`)
+var regex_locale = _regexp.MustCompile(`.()` + string(_config.Root.CustomOperations["locale"]))
 
 func Rawtag_Upload(
 	raw *_script.T_RawStyle,
 	file *_model.File_Stash,
 	IndexMap _model.Style_ClassIndexMap,
 	metadata_map _model.File_MetadataMap,
-	verbose bool,
+	debug bool,
 ) rawtag_Upload_return {
 	errors := []string{}
 	diagnostics := []_model.Refer_Diagnostic{}
@@ -27,10 +29,9 @@ func Rawtag_Upload(
 	forArtifact := file.Manifest.Lookup.Type == _model.File_Type_Artifact
 	declaration := file.TargetPath + ":" + _strconv.Itoa(raw.RowIndex) + ":" + _strconv.Itoa(raw.ColIndex)
 
-	re := _regexp.MustCompile(`^-\$`)
 	symzero := ""
 	if len(raw.SymClasses) > 0 {
-		symzero = re.ReplaceAllString(raw.SymClasses[0], "$")
+		symzero = regex_symzero.ReplaceAllString(raw.SymClasses[0], "$")
 	}
 	var normalsymclass string
 	symclass := file.ClassFront
@@ -61,7 +62,7 @@ func Rawtag_Upload(
 			_fmt.Sprint(raw.Scope, " : ", file.FilePath, " |"),
 			_fmt.Sprint(raw.SymClasses),
 			false,
-			verbose,
+			debug,
 		)
 
 		object := stylescanned.Result
@@ -77,17 +78,16 @@ func Rawtag_Upload(
 						_fmt.Sprint(raw.Scope, " : ", file.FilePath, " |"),
 						_fmt.Sprint(raw.SymClasses, " => ", key),
 						true,
-						verbose,
+						debug,
 					)
 					attachments = append(attachments, stylescanned.Attachments...)
-					_map.Copy(variables, stylescanned.Variables)
+					variables.Copy(stylescanned.Variables)
 					if stylescanned.Result.Len() > 0 {
 						res, err := _json.Marshal(query.Wrappers)
 						if err == nil {
 							res_typed := string(res)
-							re := _regexp.MustCompile(`.()` + string(_config.Root.CustomOperations["locale"]))
 							if !forArtifact {
-								re.ReplaceAllString(res_typed, _fmt.Sprintf("_%s_$1", file.Label))
+								regex_locale.ReplaceAllString(res_typed, _fmt.Sprintf("_%s_$1", file.Label))
 							}
 							object.SetBlock(res_typed, stylescanned.Result)
 						}
@@ -104,11 +104,11 @@ func Rawtag_Upload(
 			_fmt.Sprint(raw.Scope, ":ATTACHMENT : ", file.FilePath, ":", raw.RowIndex, ":", raw.ColIndex, " |"),
 			raw.SymClasses[0],
 			true,
-			verbose,
+			debug,
 		)
 
 		attachments = append(attachments, inner_style.Attachments...)
-		_map.Copy(variables, inner_style.Variables)
+		variables.Copy(inner_style.Variables)
 
 		artifact := _config.Archive.Name
 		if forArtifact {
@@ -137,7 +137,7 @@ func Rawtag_Upload(
 		metadata := _model.Style_Metadata{
 			Info:         raw.Comments,
 			WatchClass:   "",
-			Variables:    variables,
+			Variables:    variables.ToMap(),
 			Skeleton:     object.Skeleton(),
 			Declarations: []string{declaration},
 			Summon:       summon,

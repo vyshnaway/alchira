@@ -2,18 +2,21 @@ package style
 
 import (
 	_config "main/configs"
-	X "main/internal/shell"
+	X "main/internal/console"
 	_model "main/models"
+	O "main/package/object"
 	_util "main/package/utils"
 	_regexp "regexp"
 	_slice "slices"
+	"sort"
 	_string "strings"
 )
 
 func Hashrule_Upload() {
 	_config.Style.Hashrules = _config.Static.Hashrule
 	hashrule := _config.Static.Hashrule
-	errors := make([]string, len(hashrule))
+	errors := []string{}
+	diagnostics := []_model.Refer_Diagnostic{}
 
 	for key := range hashrule {
 		var hash = "#{" + key + "}"
@@ -21,14 +24,31 @@ func Hashrule_Upload() {
 		if response.Status {
 			hashrule[key] = response.Result
 		} else {
-			hashrule[key] = ""
+			delete(hashrule, key)
 			errors = append(errors, response.Errorstring)
+			diagnostics = append(diagnostics, response.Diagnostic)
 		}
 	}
 
-	_config.Style.Hashrules = hashrule
-	_config.Manifest.Hashrules = hashrule
-	_config.Delta.Report.Hashrule = X.Hashrule_Report(hashrule, errors)
+	filtered := map[string]string{}
+	printmap := O.New[string, string]()
+	for k, v := range hashrule {
+		if len(k) > 0 && k[0] != '-' {
+			filtered[k] = v
+			printmap.Set(k, v)
+		}
+	}
+	printmap.Sort(func(s []string) []string {
+		temp := printmap.Keys()
+		sort.Strings(temp)
+		return temp
+	})
+
+	_config.Delta.Errors.Hashrules = errors
+	_config.Delta.Diagnostics.Hashrules = diagnostics
+	_config.Style.Hashrules = filtered
+	_config.Manifest.Hashrules = filtered
+	_config.Delta.Report.Hashrule = X.List_Record("Active Hashrule", printmap)
 }
 
 type hashrule_Import_return struct {
@@ -38,17 +58,19 @@ type hashrule_Import_return struct {
 	Diagnostic  _model.Refer_Diagnostic
 }
 
+var hashpattern = _regexp.MustCompile(`(?i)#\{[a-z0-9-]+\}`)
+
 func Hashrule_Import(str string, src string) hashrule_Import_return {
 	primitive := str
 	recursionSequence := make([]string, 0, len(_config.Style.Hashrules))
-	preview := make(map[string]string, len(_config.Style.Hashrules))
+	preview := O.New[string, string]()
 
 	var response = func(
 		result string,
 		cause string,
 		message string,
 	) hashrule_Import_return {
-		hashrule_Error_return := X.Hashrule_Error(
+		hashrule_Error_return := X.Error_Hashrule(
 			primitive,
 			cause,
 			src,
@@ -64,7 +86,6 @@ func Hashrule_Import(str string, src string) hashrule_Import_return {
 		}
 	}
 
-	var hashpattern = _regexp.MustCompile(`(?i)#\{[a-z0-9-]+\}`)
 	for {
 		loc := hashpattern.FindStringIndex(str)
 		if loc == nil {
@@ -76,7 +97,7 @@ func Hashrule_Import(str string, src string) hashrule_Import_return {
 		if !found {
 			replacement = match
 		}
-		preview["FROM "+match] = "GETS " + replacement + " FROM " + str
+		preview.Set("FROM "+match, "GETS "+replacement+" FROM "+str)
 
 		if !found {
 			return response("", match, "Undefined Hashrule.")
@@ -98,6 +119,11 @@ type hashrule_Render_return struct {
 	Errorstring string
 	Diagnostic  _model.Refer_Diagnostic
 }
+
+var regex_max_width = _regexp.MustCompile(`width\s*<=`)
+var regex_min_width = _regexp.MustCompile(`width\s*>=`)
+var regex_min_height = _regexp.MustCompile(`height\s*>=`)
+var regex_max_height = _regexp.MustCompile(`height\s*<=`)
 
 func Hashrule_Render(str string, src string) hashrule_Render_return {
 	extended := Hashrule_Import(str, src)
@@ -146,10 +172,10 @@ func Hashrule_Render(str string, src string) hashrule_Render_return {
 				wrapped = "@" + wrapped
 			}
 			if splAtrule {
-				wrapped = _regexp.MustCompile(`width\s*>=`).ReplaceAllString(wrapped, "min-width:")
-				wrapped = _regexp.MustCompile(`width\s*<=`).ReplaceAllString(wrapped, "max-width:")
-				wrapped = _regexp.MustCompile(`height\s*>=`).ReplaceAllString(wrapped, "min-height:")
-				wrapped = _regexp.MustCompile(`height\s*<=`).ReplaceAllString(wrapped, "max-height:")
+				wrapped = regex_max_width.ReplaceAllString(wrapped, "max-width:")
+				wrapped = regex_min_width.ReplaceAllString(wrapped, "min-width:")
+				wrapped = regex_min_height.ReplaceAllString(wrapped, "min-height:")
+				wrapped = regex_max_height.ReplaceAllString(wrapped, "max-height:")
 			}
 			wrapped = _util.String_Minify(wrapped)
 			wrappers = append(wrappers, wrapped)

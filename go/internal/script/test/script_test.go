@@ -2,9 +2,9 @@ package script_test
 
 import (
 	_action "main/internal/action"
-	_reader "main/package/reader"
 	_script "main/internal/script"
-	S "main/package/shell"
+	S "main/package/console"
+	_reader "main/package/reader"
 	_testing "testing"
 )
 

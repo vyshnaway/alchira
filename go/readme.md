@@ -22,3 +22,7 @@ P_ : Function Params
 T_ : Type
 R_ : Return Type
 E_ : Enum
+_* : Private Global in module
+
+---
+css vendor load

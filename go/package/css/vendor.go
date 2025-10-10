@@ -1,7 +1,7 @@
 package css
 
 import (
-	"main/package/utils"
+	_util "main/package/utils"
 	_maps "maps"
 	_slices "slices"
 )
@@ -68,12 +68,12 @@ func Vendor_Save(table T_Vendor_Table) {
 	_maps.Copy(Vendor_Refer.Pseudos, Vendor_Refer.Pseudos)
 
 	collected := []string{}
-	collected = append(collected, utils.Map_CollectKeyStrings(table.Atrules)...)
-	collected = append(collected, utils.Map_CollectKeyStrings(table.Attributes)...)
-	collected = append(collected, utils.Map_CollectKeyStrings(table.Pseudos)...)
-	collected = append(collected, utils.Map_CollectKeyStrings(table.Classes)...)
-	collected = append(collected, utils.Map_CollectKeyStrings(table.Elements)...)
-	collected = append(collected, utils.Map_CollectKeyStrings(table.Atrules)...)
+	collected = append(collected, _util.Map_CollectKeyStrings(table.Atrules)...)
+	collected = append(collected, _util.Map_CollectKeyStrings(table.Attributes)...)
+	collected = append(collected, _util.Map_CollectKeyStrings(table.Pseudos)...)
+	collected = append(collected, _util.Map_CollectKeyStrings(table.Classes)...)
+	collected = append(collected, _util.Map_CollectKeyStrings(table.Elements)...)
+	collected = append(collected, _util.Map_CollectKeyStrings(table.Atrules)...)
 
 	vendor_Providers = []string{}
 	for _, v := range collected {

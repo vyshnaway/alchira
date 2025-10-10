@@ -4,9 +4,10 @@ import (
 	_fmt "fmt"
 	_config "main/configs"
 	_action "main/internal/action"
-	X "main/internal/shell"
+	X "main/internal/console"
 	_style "main/internal/style"
 	_model "main/models"
+	O "main/package/object"
 	_util "main/package/utils"
 	_strconv "strconv"
 )
@@ -90,7 +91,7 @@ func Library_CacheFiles() library_StackFiles_return {
 	}
 }
 
-func Library_Update() {
+func Library_Update(debug bool) {
 	StackLibraryFiles_ := Library_CacheFiles()
 	_config.Delta.Lookup.Libraries = StackLibraryFiles_.Lookup
 
@@ -98,41 +99,47 @@ func Library_Update() {
 	_config.Manifest.Group.Axiom = map[string]_model.File_MetadataMap{}
 	_config.Delta.Errors.Axioms = []string{}
 	_config.Delta.Diagnostics.Axioms = []_model.Refer_Diagnostic{}
-	axiomChart := map[string][]string{}
+	axiom_chart := O.New[string, []string]()
 	axiom_counter := 0
 	for index, files := range StackLibraryFiles_.Axiom {
-		Cssfile_Collection_ := _style.Cssfile_Collection(files, _config.Static.MINIFY)
+		Cssfile_Collection_ := _style.Cssfile_Collection(files, debug)
 		_config.Manifest.Group.Axiom[_strconv.Itoa(index)] = Cssfile_Collection_.MetadataCollection
 		if count := len(Cssfile_Collection_.SelectorList); count > 0 {
 			axiom_counter += count
-			axiomChart[_fmt.Sprint("Axiom ", index, ": ", count)] = Cssfile_Collection_.SelectorList
+			axiom_chart.Set(
+				_fmt.Sprint("Level ", index, ": ", count),
+				Cssfile_Collection_.SelectorList,
+			)
 		}
 		for _, file := range files {
 			_config.Delta.Errors.Axioms = append(_config.Delta.Errors.Axioms, file.Manifest.Errors...)
 			_config.Delta.Diagnostics.Axioms = append(_config.Delta.Diagnostics.Axioms, file.Manifest.Diagnostics...)
 		}
 	}
-	_config.Delta.Report.Axioms = X.List_Chart("", axiomChart)
+	_config.Delta.Report.Axioms = X.List_Chart("Axiom: "+_strconv.Itoa(axiom_counter)+" Symclasses", axiom_chart)
 
 	// Cluster update actions
 	_config.Manifest.Group.Cluster = map[string]_model.File_MetadataMap{}
 	_config.Delta.Errors.Clusters = []string{}
 	_config.Delta.Diagnostics.Clusters = []_model.Refer_Diagnostic{}
-	clusterChart := map[string][]string{}
+	cluster_chart := O.New[string, []string]()
 	cluster_counter := 0
 	for index, files := range StackLibraryFiles_.Cluster {
-		Cssfile_Collection_ := _style.Cssfile_Collection(files, _config.Static.MINIFY)
+		Cssfile_Collection_ := _style.Cssfile_Collection(files, debug)
 		_config.Manifest.Group.Cluster[_strconv.Itoa(index)] = Cssfile_Collection_.MetadataCollection
 		if count := len(Cssfile_Collection_.SelectorList); count > 0 {
 			cluster_counter += count
-			clusterChart[_fmt.Sprint("Cluster ", index, ": ", count)] = Cssfile_Collection_.SelectorList
+			cluster_chart.Set(
+				_fmt.Sprint("Level ", index, ": ", count),
+				Cssfile_Collection_.SelectorList,
+			)
 		}
 		for _, file := range files {
 			_config.Delta.Errors.Clusters = append(_config.Delta.Errors.Clusters, file.Manifest.Errors...)
 			_config.Delta.Diagnostics.Clusters = append(_config.Delta.Diagnostics.Clusters, file.Manifest.Diagnostics...)
 		}
 	}
-	_config.Delta.Report.Clusters = X.List_Chart("", clusterChart)
+	_config.Delta.Report.Clusters = X.List_Chart("Cluster: "+_strconv.Itoa(cluster_counter)+" Symclasses", cluster_chart)
 }
 
 func Library_ReDeclare() {

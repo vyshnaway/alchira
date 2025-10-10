@@ -4,6 +4,7 @@ import (
 	_fmt "fmt"
 	_os "os"
 	_filepath "path/filepath"
+	_slice "slices"
 	_strings "strings"
 )
 
@@ -60,10 +61,10 @@ func Delete_Folder(folderPath string, extensions, ignorePaths []string) (success
 		return false, "Error listing files for deletion.", _fmt.Errorf("failed to list files in '%s': %w", folderPath, err)
 	}
 	for _, file := range files {
-		if helper_Contains(ignorePaths, file) {
+		if _slice.Contains(ignorePaths, file) {
 			continue
 		}
-		if len(normalizedExtensions) == 0 || helper_Contains(normalizedExtensions, _filepath.Ext(file)) {
+		if len(normalizedExtensions) == 0 || _slice.Contains(normalizedExtensions, _filepath.Ext(file)) {
 			if err := _os.Remove(file); err != nil && !_os.IsNotExist(err) {
 				return false, "Error deleting file.", _fmt.Errorf("failed to delete file '%s': %w", file, err)
 			}
@@ -81,7 +82,7 @@ func Delete_Folder(folderPath string, extensions, ignorePaths []string) (success
 	// This helps ensure parent folders become empty and can be deleted.
 	for i := len(folders) - 1; i >= 0; i-- {
 		subFolder := folders[i]
-		if helper_Contains(ignorePaths, subFolder) {
+		if _slice.Contains(ignorePaths, subFolder) {
 			continue
 		}
 		isEmpty, checkErr := helper_IsDirEmpty(subFolder)

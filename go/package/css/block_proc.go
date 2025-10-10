@@ -1,9 +1,9 @@
 package css
 
 import (
-	"fmt"
-	"slices"
-	"strings"
+	_fmt "fmt"
+	_slice "slices"
+	_string "strings"
 )
 
 func (This *T_Block) flatten(parent string) (Res *T_Block) {
@@ -16,8 +16,8 @@ func (This *T_Block) flatten(parent string) (Res *T_Block) {
 		none := []string{}
 
 		for _, key := range list {
-			min := strings.Index(key, "min-")
-			max := strings.Index(key, "max-")
+			min := _string.Index(key, "min-")
+			max := _string.Index(key, "max-")
 			if key != "" {
 				if min < max {
 					mins = append(mins, key)
@@ -29,10 +29,10 @@ func (This *T_Block) flatten(parent string) (Res *T_Block) {
 			}
 		}
 
-		slices.Sort(none)
-		slices.Sort(maxs)
-		slices.Sort(mins)
-		slices.Reverse(mins)
+		_slice.Sort(none)
+		_slice.Sort(maxs)
+		_slice.Sort(mins)
+		_slice.Reverse(mins)
 
 		outs = append(outs, none...)
 		outs = append(outs, maxs...)
@@ -60,15 +60,15 @@ func (This *T_Block) flatten(parent string) (Res *T_Block) {
 	std_prop := []string{}
 
 	This.PropRange(func(k, _ string) {
-		if strings.HasPrefix(k, "---") {
+		if _string.HasPrefix(k, "---") {
 			constant = append(constant, k)
-		} else if strings.HasPrefix(k, "--") {
+		} else if _string.HasPrefix(k, "--") {
 			variable = append(variable, k)
-		} else if strings.HasPrefix(k, "-") {
+		} else if _string.HasPrefix(k, "-") {
 			ven_prop = append(ven_prop, k)
-		} else if strings.HasPrefix(k, "@-") {
+		} else if _string.HasPrefix(k, "@-") {
 			vat_prop = append(vat_prop, k)
-		} else if strings.HasPrefix(k, "@") {
+		} else if _string.HasPrefix(k, "@") {
 			sat_prop = append(sat_prop, k)
 		} else if len(k) > 0 {
 			std_prop = append(std_prop, k)
@@ -90,21 +90,21 @@ func (This *T_Block) flatten(parent string) (Res *T_Block) {
 	}
 
 	This.BlockRange(func(k string, v *T_Block) {
-		if strings.HasPrefix(k, "&::-") {
+		if _string.HasPrefix(k, "&::-") {
 			elven_list = append(elven_list, k)
-		} else if strings.HasPrefix(k, "&::") {
+		} else if _string.HasPrefix(k, "&::") {
 			elstd_list = append(elstd_list, k)
-		} else if strings.HasPrefix(k, "&:-") {
+		} else if _string.HasPrefix(k, "&:-") {
 			clven_list = append(clven_list, k)
-		} else if strings.HasPrefix(k, "&:") {
+		} else if _string.HasPrefix(k, "&:") {
 			clstd_list = append(clstd_list, k)
-		} else if strings.HasPrefix(k, "& ") {
+		} else if _string.HasPrefix(k, "& ") {
 			child_list = append(child_list, k)
-		} else if strings.HasPrefix(k, "&") {
+		} else if _string.HasPrefix(k, "&") {
 			comps_list = append(comps_list, k)
-		} else if strings.HasPrefix(k, "@-") {
+		} else if _string.HasPrefix(k, "@-") {
 			atven_list = append(atven_list, k)
-		} else if strings.HasPrefix(k, "@") {
+		} else if _string.HasPrefix(k, "@") {
 			atstd_list = append(atstd_list, k)
 		} else if len(k) > 0 {
 			native = append(native, k)
@@ -119,7 +119,7 @@ func (This *T_Block) flatten(parent string) (Res *T_Block) {
 	add := func(target *T_Block, list []string) {
 		for _, k := range list {
 			if o, v := This.GetBlock(k); o {
-				if strings.HasPrefix(k, "&") {
+				if _string.HasPrefix(k, "&") {
 					k = parent + k[1:]
 				}
 				v.flatten(k).BlockRange(func(kk string, vv *T_Block) {
@@ -194,7 +194,7 @@ func (This *T_Block) print() []string {
 }
 
 func (This *T_Block) Print() *T_Block {
-	fmt.Println("\n---\n" + strings.Join(This.print(), "\n") + "\n---\n")
+	_fmt.Println("\n---\n" + _string.Join(This.print(), "\n") + "\n---\n")
 	return This
 }
 
@@ -202,7 +202,7 @@ func (This *T_Block) Skeleton() any {
 	result := map[string]any{}
 
 	This.PropRange(func(k string, v string) {
-		if strings.HasPrefix(k, "--") {
+		if _string.HasPrefix(k, "--") {
 			result[k] = v
 		}
 	})

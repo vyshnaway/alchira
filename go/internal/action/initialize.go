@@ -2,9 +2,10 @@ package action
 
 import (
 	_config "main/configs"
-	X "main/internal/shell"
+	X "main/internal/console"
+	S "main/package/console"
 	_fileman "main/package/fileman"
-	S "main/package/shell"
+	O "main/package/object"
 )
 
 func Initialize() {
@@ -54,7 +55,7 @@ func Initialize() {
 		},
 	))
 
-	S.Post(X.List_Record("Available Commands", _config.Root.Commands))
+	S.Post(X.List_Record("Available Commands", O.FromMap(_config.Root.Commands)))
 
 	if len(_config.Root.Version) > 0 && _config.Root.Version[0] == '0' {
 		S.Post(

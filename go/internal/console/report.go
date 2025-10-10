@@ -1,7 +1,7 @@
-package shell
+package console
 
 import (
-	S "main/package/shell"
+	S "main/package/console"
 )
 
 func Report(heading string, targets []string, report string, footer []string) {
