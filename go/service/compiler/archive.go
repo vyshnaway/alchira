@@ -1,11 +1,10 @@
-package service
+package compiler
 
 import (
 	_config "main/configs"
 	_stash "main/internal/stash"
 	_style "main/internal/style"
 	_models "main/models"
-	"main/package/console"
 	_fileman "main/package/fileman"
 	_util "main/package/utils"
 	_map "maps"
@@ -26,7 +25,7 @@ func archive_Build() _models.Config_Archive {
 	for _, val := range _stash.Cache.Targetdir {
 		_map.Copy(exportdata, val.GetArtifacts())
 	}
-  
+
 	var exportsheet _string.Builder
 	for _, data := range exportdata {
 		if _string.Contains(data.SymClass, "$$$") {
@@ -76,8 +75,6 @@ func archive_Build() _models.Config_Archive {
 	}
 
 	archive.ExportSheet = exportsheet.String()
-	console.Render.Raw(archive)
-	console.Post(archive.ExportSheet)
 	return archive
 }
 

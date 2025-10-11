@@ -10,7 +10,7 @@ import (
 	_fileman_ "main/package/fileman"
 	O "main/package/object"
 	_utils_ "main/package/utils"
-	_service "main/service"
+	_service "main/service/compiler"
 	_os_ "os"
 	_slices_ "slices"
 	_strings_ "strings"

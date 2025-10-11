@@ -99,11 +99,12 @@ func Rider(
 
 				if hasDeclared {
 					stylesList = append(stylesList, &result.StyleDeclarations)
-				} else if elid, status := replacementTags[fragment]; action != E_Action_Read && status && len(tagTrack) == 0 {
+				} else if elid, status := replacementTags[fragment]; status && len(tagTrack) == 0 && action != E_Action_Read {
 					replacements = append(replacements, _model.File_TagReplacement{
 						Loc:  stream.Len(),
 						Elid: elid,
 					})
+					fragment = ""
 				}
 
 				for k, v := range result.StyleDeclarations.Styles {
