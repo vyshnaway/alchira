@@ -2,6 +2,7 @@ package css
 
 import (
 	_fmt "fmt"
+	"main/package/console"
 	_slice "slices"
 	_string "strings"
 )
@@ -200,6 +201,7 @@ func (This *T_Block) format(minify bool) []string {
 		}
 		result = append(result, "}")
 	})
+	console.Render.Raw(This.Block_keys)
 	return result
 }
 

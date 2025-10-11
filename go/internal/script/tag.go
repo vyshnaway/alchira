@@ -126,7 +126,7 @@ func Tag_Scanner(
 						}
 					}
 					styleDeclarations.SymClasses = append(styleDeclarations.SymClasses, tr_Attr)
-				} else if tr_Attr[0] == '&' {
+				} else if _string.HasSuffix(tr_Attr, "&") {
 					if len(tr_Value) > 0 {
 						styleDeclarations.Styles[tr_Attr] = tr_Value
 					}
@@ -152,7 +152,7 @@ func Tag_Scanner(
 					nativeAttributes[tr_Attr] = tr_Value
 				}
 
-				isVal = false
+				isVal = false 
 				attr.Reset()
 				value.Reset()
 			}

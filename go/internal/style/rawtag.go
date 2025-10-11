@@ -72,22 +72,22 @@ func Rawtag_Upload(
 			if key != "" {
 				query := Hashrule_Render(key, declaration)
 				if query.Status {
-					stylescanned = Parse_CssSnippet(
+					substylescanned := Parse_CssSnippet(
 						_util.Code_Uncomment(val, true, true, false),
 						_fmt.Sprint(raw.Scope, " : ", file.FilePath, " |"),
 						_fmt.Sprint(raw.SymClasses, " => ", key),
 						true,
 						debug,
 					)
-					attachments = append(attachments, stylescanned.Attachments...)
-					variables.Copy(stylescanned.Variables)
-					if stylescanned.Result.Len() > 0 {
+					attachments = append(attachments, substylescanned.Attachments...)
+					variables.Copy(substylescanned.Variables)
+					if substylescanned.Result.Len() > 0 {
 						wrapperjson := _util.Code_JsonBuild(query.Wrappers, "")
 						res_typed := string(wrapperjson)
 						if !forArtifact {
 							regex_locale.ReplaceAllString(res_typed, _fmt.Sprintf("_%s_$1", file.Label))
 						}
-						object.SetBlock(res_typed, stylescanned.Result)
+						object.SetBlock(res_typed, substylescanned.Result)
 					}
 				} else {
 					errors = append(errors, query.Errorstring)
@@ -118,6 +118,8 @@ func Rawtag_Upload(
 				}
 			}
 		}
+
+		// object.Print()
 
 		summon := ""
 		attributes := map[string]string{}

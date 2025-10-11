@@ -30,7 +30,6 @@ func Cssfile_String(content string, initial string, debug bool) R_Cssfile_Parse 
 		key := kv[0]
 		val := kv[1]
 		res := Parse_CssSnippet(val, initial, key, true, debug)
-		res.Result.Print()
 
 		variables.Copy(res.Variables)
 		attachments = append(attachments, res.Attachments...)
@@ -108,7 +107,9 @@ func Cssfile_Collection(files []_model.File_Stash, debug bool) cssfile_Collectio
 					SnippetStaple: "",
 					SnippetStyle: func() *_css.T_Block {
 						if k, v := object.GetBlock(""); k {
-							return _css.NewBlock().SetBlock(selector, v)
+							temp := _css.NewBlock()
+							temp.SetBlock(selector, v)
+							return temp
 						} else {
 							return _css.NewBlock()
 						}

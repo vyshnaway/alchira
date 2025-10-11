@@ -2,6 +2,7 @@ package fileman
 
 import (
 	_json "encoding/json"
+	_error "errors"
 	_fmt "fmt"
 	_os "os"
 	_filepath "path/filepath"
@@ -45,16 +46,16 @@ func Write_Json(pathString string, object any) error {
 // Bulk writes multiple files from a map of file paths to content.
 func Write_Bulk(fileContentMap map[string]string) error {
 	var wg _sync.WaitGroup
-	var errs []string
+	var errs []error
 	wg.Add(len(fileContentMap))
 	for filePath, content := range fileContentMap {
 		go func() {
 			if e := Write_File(filePath, content); e != nil {
-				errs = append(errs, e.Error())
+				errs = append(errs, e)
 			}
 			wg.Done()
 		}()
 	}
 	wg.Wait()
-	return nil
+	return _error.Join(errs...)
 }

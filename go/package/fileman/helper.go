@@ -4,7 +4,6 @@ import (
 	_io "io"
 	_os "os"
 	_fmt "fmt"
-	_strings "strings"
 )
 
 // copyFile is a helper function to copy a single file.
@@ -32,7 +31,7 @@ func helper_CopyFile(src, dst string) error {
 func helper_IsExcluded(relPath string, excludes []string) bool {
 	for _, exclude := range excludes {
 		// Check if the relative path starts with any exclude prefix
-		if _strings.HasPrefix(relPath, exclude) {
+		if Path_IsSubpath(relPath, exclude) {
 			return true
 		}
 	}

@@ -177,8 +177,8 @@ func Render_Switched(This *T_Block, minify bool) string {
 	SetMinification(minify)
 
 	switched := NewBlock()
-	inq := switched.SetBlock("", NewBlock())
-
+	switched.SetBlock("", NewBlock())
+	_, inq := switched.GetBlock("")
 	This.PropRange(func(k, v string) {
 		switched.SetProp(k, v)
 	})

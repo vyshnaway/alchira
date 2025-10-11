@@ -43,7 +43,6 @@ func Execute(heading string) (Exitcode int) {
 	targets := []string{}
 	report_next := false
 	cycle_one := true
-	// initial_heading := "Initial Build"
 	outfiles := map[string]string{}
 	var watcher *_watcher.Watcher
 	var save_action _sync.WaitGroup

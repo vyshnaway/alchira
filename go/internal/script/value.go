@@ -31,7 +31,7 @@ func value_EvaluateIndexTraces(
 	}
 
 	indexSetback := _util.Array_Setback(indexArray)
-	if action == E_Action_Sync {
+	if action == E_Action_OptimalSync {
 		json_Return, json_Error := _json_.Marshal(indexSetback)
 		if json_Error == nil {
 			dict_Return, dict_Status := _config.Style.ClassDictionary[string(json_Return)]
@@ -42,7 +42,7 @@ func value_EvaluateIndexTraces(
 			}
 		}
 	} else {
-		if action == E_Action_Watch {
+		if action == E_Action_RapidHash {
 			for index, item := range classTrace {
 				classname := _fmt.Sprintf("%s%d", metaFront, index)
 				_config.Style.PublishIndexMap = append(_config.Style.PublishIndexMap, _model.Style_ClassIndexTrace{
@@ -53,7 +53,7 @@ func value_EvaluateIndexTraces(
 			}
 		}
 
-		if action == E_Action_Monitor {
+		if action == E_Action_DebugHash {
 			for _, item := range classTrace {
 				classdata := _action.Index_Fetch(item.ClassIndex)
 				classname := _fmt.Sprintf("%s%s", metaFront, classdata.DebugClass)
@@ -135,14 +135,14 @@ func value_Parse(
 
 		var metafront string
 		switch action {
-		case E_Action_Monitor:
+		case E_Action_DebugHash:
 			metafront = _fmt.Sprintf(
 				"TAG%s\\:%d\\:%d__",
 				fileData.DebugFront,
 				FileCursor.Active.RowMarker,
 				FileCursor.Active.ColMarker,
 			)
-		case E_Action_Watch:
+		case E_Action_RapidHash:
 			metafront = _fmt.Sprintf(
 				"_%s_%d",
 				fileData.Label,
@@ -153,7 +153,7 @@ func value_Parse(
 		}
 
 		classMap := value_EvaluateIndexTraces(action, metafront, classlist, fileData.StyleData.LocalClasses)
-		
+
 		for marker := range valuelen {
 			ch := rune(value[marker])
 

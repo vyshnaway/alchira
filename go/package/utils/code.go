@@ -2,12 +2,11 @@ package utils
 
 import (
 	_json "encoding/json"
-	_regexp "regexp"
-	_strings "strings"
+	_string "strings"
 )
 
 func Code_Uncomment(content string, single, multi, html bool) string {
-	var result _strings.Builder
+	var result _string.Builder
 
 	isInString := func(input string, index int) bool {
 		inSingleQuote, inDoubleQuote, inTemplateLiteral, escaped := false, false, false, false
@@ -73,11 +72,57 @@ func Code_Uncomment(content string, single, multi, html bool) string {
 	return result.String()
 }
 
-var minify_regex = _regexp.MustCompile(`\s*([{}:;,])\s*`)
+func Code_StripWhitespace(s string) string {
+	var out []rune
+	insideQuote := false
+	quoteChar := rune(0)
+	lastWasSpace := false
+	for _, r := range s {
+		if r == '"' || r == '\'' || r == '`' {
+			if insideQuote && r == quoteChar {
+				insideQuote = false
+			} else if !insideQuote {
+				insideQuote = true
+				quoteChar = r
+			}
+			out = append(out, r)
+			lastWasSpace = false
+			continue
+		}
+		if !insideQuote && (r == ' ' || r == '\t' || r == '\n' || r == '\r') {
+			if !lastWasSpace {
+				out = append(out, ' ')
+				lastWasSpace = true
+			}
+			continue
+		}
+		out = append(out, r)
+		lastWasSpace = false
+	}
+	return string(out)
+}
 
 func Code_Minify(content string) string {
-	out := minify_regex.ReplaceAllString(content, "$1")
-	return _strings.TrimSpace(out)
+	out := make([]rune, 0, len(content))
+	var prev rune
+	symbols := map[rune]struct{}{
+		'{': {}, '}': {}, ':': {}, ';': {}, ',': {},
+	}
+	for _, r := range content {
+		if _, isSym := symbols[r]; isSym {
+			if len(out) > 0 && out[len(out)-1] == ' ' {
+				out = out[:len(out)-1]
+			}
+			out = append(out, r)
+			prev = r
+			continue
+		}
+		if r != ' ' || prev != ' ' {
+			out = append(out, r)
+		}
+		prev = r
+	}
+	return _string.TrimSpace(string(out))
 }
 
 func Code_Strip(content string, single, multi, html, minify bool) string {
@@ -85,7 +130,7 @@ func Code_Strip(content string, single, multi, html, minify bool) string {
 		content = Code_Uncomment(content, single, multi, html)
 	}
 	if minify {
-		return Code_Minify(content)
+		return Code_StripWhitespace(Code_Minify(content))
 	} else {
 		return content
 	}
@@ -103,7 +148,7 @@ func Code_JsonBuild(obj any, gap string) string {
 
 func Code_JsonParse[T any](str string) (T, error) {
 	var out T
-	clean := Code_Uncomment(str, true, true, true)
+	clean := Code_Uncomment(str, true, true, false)
 	err := _json.Unmarshal([]byte(clean), &out)
 	return out, err
 }

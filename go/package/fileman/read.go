@@ -1,6 +1,7 @@
 package fileman
 
 import (
+	_error "errors"
 	_fmt "fmt"
 	_io "io"
 	_utils "main/package/utils"
@@ -12,7 +13,7 @@ import (
 )
 
 // File reads a file from disk or fetches it from a URL.
-func Read_File(target string, online bool) (data string, err error) {
+func Read_File(target string, online bool) (string, error) {
 	if online {
 		resp, err := _http.Get(target)
 		if err != nil {
@@ -42,7 +43,7 @@ func Read_File(target string, online bool) (data string, err error) {
 }
 
 // Json reads a JSON file from disk or fetches it from a URL, stripping comments.
-func Read_Json(target string, online bool) (data any, err error) {
+func Read_Json(target string, online bool) (any, error) {
 	var rawContent string
 	var readErr error
 
@@ -80,14 +81,16 @@ func Read_Bulk(target string, extensions []string) (map[string]string, error) {
 		return nil, _fmt.Errorf("failed to list files in '%s': %w", target, err)
 	}
 
+	errs := []error{}
 	for _, file := range files {
 		if len(convertedExtensions) == 0 || _slice.Contains(convertedExtensions, _filepath.Ext(file)) {
 			contentBytes, err := _os.ReadFile(file)
 			if err != nil {
-				return nil, _fmt.Errorf("failed to read file '%s' during bulk read: %w", file, err)
+				errs = append(errs, _fmt.Errorf("failed to read file '%s' during bulk read: %w", file, err))
+				continue
 			}
 			result[file] = string(contentBytes)
 		}
 	}
-	return result, nil
+	return result, _error.Join(errs...)
 }

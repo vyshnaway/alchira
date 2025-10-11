@@ -50,7 +50,7 @@ const (
 )
 
 // Available checks if a path exists and returns its type ("txt", "dir") or an error.
-func Path_Check(pathString string) (Type Path_Check_Type, Error error) {
+func Path_Check(pathString string) (Path_Check_Type, error) {
 	info, err := _os.Stat(pathString)
 	if err != nil {
 		if _os.IsNotExist(err) {

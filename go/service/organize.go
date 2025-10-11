@@ -2,11 +2,11 @@ package service
 
 import (
 	_config "main/configs"
-	X "main/internal/console"
+	K "main/internal/console"
 	_order_ "main/internal/order"
 	_stash "main/internal/stash"
 	_model "main/models"
-	S "main/package/console"
+	C "main/package/console"
 	_util "main/package/utils"
 	_map "maps"
 	_strconv "strconv"
@@ -47,7 +47,7 @@ func accumulate() {
 	_config.Delta.Diagnostic.Multiples = []_model.Refer_Diagnostic{}
 	for _, val := range _config.Style.Index_to_Data {
 		if len(val.Metadata.Declarations) > 1 {
-			error_ := X.Error_Standard("Duplicate Declarations: "+val.SymClass, val.Metadata.Declarations)
+			error_ := K.Error_Standard("Duplicate Declarations: "+val.SymClass, val.Metadata.Declarations)
 			_config.Delta.Error.Multiples = append(_config.Delta.Error.Multiples, error_.Errorstring)
 			_config.Delta.Diagnostic.Multiples = append(_config.Delta.Diagnostic.Multiples, error_.Diagnostic)
 		}
@@ -75,8 +75,8 @@ func accumulate() {
 
 	_config.Delta.Report.Errors = ""
 	if len(_config.Delta.Errors) > 0 {
-		_config.Delta.Report.Errors = S.MAKE(
-			S.Tag.H2(_strconv.Itoa(len(_config.Delta.Errors))+" Errors", S.Preset.Failed),
+		_config.Delta.Report.Errors = C.MAKE(
+			C.Tag.H2(_strconv.Itoa(len(_config.Delta.Errors))+" Errors", C.Preset.Failed),
 			errors,
 		)
 	}
@@ -126,7 +126,7 @@ func Organize() (AritfactFiles map[string]string, Attachments []int) {
 			res, _ := _order_.Optimize(tracks_.ClassTracks, false, _config.Static.Argument, archive_Build())
 			SaveClassRefs(*res.Result)
 
-			_config.Delta.FinalMessage = "Errors in " + _strconv.Itoa(len(_config.Delta.Errors)) + " Tags. Falling back to 'preview' command."
+			_config.Delta.FinalMessage = _strconv.Itoa(len(_config.Delta.Errors)) + " Errors. Falling back to 'preview' command."
 			_config.Static.Command = "preview"
 		} else {
 			archive := archive_Build()

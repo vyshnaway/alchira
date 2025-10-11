@@ -1,6 +1,7 @@
 package fileman
 
 import (
+	_error "errors"
 	_fmt "fmt"
 	_os "os"
 	_filepath "path/filepath"
@@ -87,6 +88,8 @@ func Sync_Bulk(source, target string, extInclude, extnUnsync, fileExcludes []str
 		}
 	}
 
+	errs := []error{}
+
 	// List files and filter by exclusions
 	targetFiles, err := Path_ListFiles(target, []string{})
 	if err != nil {
@@ -96,11 +99,13 @@ func Sync_Bulk(source, target string, extInclude, extnUnsync, fileExcludes []str
 	for _, file := range targetFiles {
 		relPath, err := _filepath.Rel(target, file)
 		if err != nil {
-			return nil, _fmt.Errorf("failed to get relative path for target file '%s': %w", file, err)
-		}
-		if !helper_IsExcluded(relPath, fileExcludes) {
+			errs = append(errs, _fmt.Errorf("failed to get relative path for target file '%s': %w", file, err))
+		} else if !helper_IsExcluded(relPath, fileExcludes) {
 			relativeTargetFiles = append(relativeTargetFiles, relPath)
 		}
+	}
+	if len(errs) > 0 {
+		return nil, _error.Join(errs...)
 	}
 
 	sourceFiles, err := Path_ListFiles(source, []string{})
@@ -111,9 +116,8 @@ func Sync_Bulk(source, target string, extInclude, extnUnsync, fileExcludes []str
 	for _, file := range sourceFiles {
 		relPath, err := _filepath.Rel(source, file)
 		if err != nil {
-			return nil, _fmt.Errorf("failed to get relative path for source file '%s': %w", file, err)
-		}
-		if !helper_IsExcluded(relPath, fileExcludes) {
+			errs = append(errs, _fmt.Errorf("failed to get relative path for source file '%s': %w", file, err))
+		} else if !helper_IsExcluded(relPath, fileExcludes) {
 			relativeSourceFiles = append(relativeSourceFiles, relPath)
 		}
 	}
@@ -130,9 +134,12 @@ func Sync_Bulk(source, target string, extInclude, extnUnsync, fileExcludes []str
 
 		if !sourceFileExists || isUnsyncable {
 			if err := _os.Remove(targetFilePath); err != nil && !_os.IsNotExist(err) {
-				return nil, _fmt.Errorf("failed to delete target file '%s': %w", targetFilePath, err)
+				errs = append(errs, nil, _fmt.Errorf("failed to delete target file '%s': %w", targetFilePath, err))
 			}
 		}
+	}
+	if len(errs) > 0 {
+		return nil, _error.Join(errs...)
 	}
 
 	// Copy files from source to target and read contents for included extensions
@@ -142,40 +149,46 @@ func Sync_Bulk(source, target string, extInclude, extnUnsync, fileExcludes []str
 
 		// Ensure parent directory exists in target
 		targetDir := _filepath.Dir(targetFilePath)
-		if !Path_IfDir(targetDir) {
+		targetDirOk := true
+		if targetDirOk = Path_IfDir(targetDir); !targetDirOk {
 			if err := _os.MkdirAll(targetDir, 0755); err != nil {
-				return nil, _fmt.Errorf("failed to create target directory '%s': %w", targetDir, err)
+				targetDirOk = false
+				errs = append(errs, _fmt.Errorf("failed to create target directory '%s': %w", targetDir, err))
 			}
 		}
 
 		if _slice.Contains(extInclude, _filepath.Ext(relFile)) {
 			contentBytes, err := _os.ReadFile(sourceFilePath)
 			if err != nil {
-				return nil, _fmt.Errorf("failed to read source file '%s' for inclusion: %w", sourceFilePath, err)
+				errs = append(errs, _fmt.Errorf("failed to read source file '%s' for inclusion: %w", sourceFilePath, err))
 			}
 			resultFileContents[relFile] = string(contentBytes)
-		} else {
+		} else if targetDirOk {
 			// Copy file if not in extInclude (and not deleted in previous step)
 			if err := helper_CopyFile(sourceFilePath, targetFilePath); err != nil {
-				return nil, _fmt.Errorf("failed to copy file from '%s' to '%s': %w", sourceFilePath, targetFilePath, err)
+				errs = append(errs, _fmt.Errorf("failed to copy file from '%s' to '%s': %w", sourceFilePath, targetFilePath, err))
 			}
 		}
+	}
+	if len(errs) > 0 {
+		return resultFileContents, _error.Join(errs...)
 	}
 
 	// Delete empty folders in target that no longer have corresponding source folders
 	targetFolders, err := Path_ListFolders(target, []string{})
 	if err != nil {
-		return nil, _fmt.Errorf("failed to list target folders: %w", err)
+		return resultFileContents, _fmt.Errorf("failed to list target folders: %w", err)
 	}
 	sourceFolders, err := Path_ListFolders(source, []string{})
 	if err != nil {
-		return nil, _fmt.Errorf("failed to list source folders: %w", err)
+		return resultFileContents, _fmt.Errorf("failed to list source folders: %w", err)
 	}
 
 	for _, targetFolder := range targetFolders {
 		relFolder, err := _filepath.Rel(target, targetFolder)
 		if err != nil {
-			return nil, _fmt.Errorf("failed to get relative path for target folder '%s': %w", targetFolder, err)
+			errs = append(errs, _fmt.Errorf("failed to get relative path for target folder '%s': %w", targetFolder, err))
+			continue
 		}
 		sourceFolderPath := _filepath.Join(source, relFolder)
 
@@ -189,10 +202,10 @@ func Sync_Bulk(source, target string, extInclude, extnUnsync, fileExcludes []str
 		isEmpty, _ := helper_IsDirEmpty(targetFolder) // Ignore error, assume not empty if error
 		if !sourceFolderExists && isEmpty {
 			if err := _os.RemoveAll(targetFolder); err != nil && !_os.IsNotExist(err) {
-				return nil, _fmt.Errorf("failed to remove empty target folder '%s': %w", targetFolder, err)
+				errs = append(errs, _fmt.Errorf("failed to remove empty target folder '%s': %w", targetFolder, err))
 			}
 		}
 	}
 
-	return resultFileContents, nil
+	return resultFileContents, _error.Join(errs...)
 }

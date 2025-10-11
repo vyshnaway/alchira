@@ -31,7 +31,7 @@ func Generate_Files() (Files map[string]string, Report string) {
 
 		index_scanned := _style.Cssfile_String(
 			_util.Code_Uncomment(_config.Static.RootCSS, false, true, false),
-			"INDEX ||",
+			"INDEX | ",
 			_config.Static.DEBUG,
 		)
 		_config.Manifest.Constants = index_scanned.Variables.Keys()
@@ -45,11 +45,11 @@ func Generate_Files() (Files map[string]string, Report string) {
 
 		var render_action _script.E_Action
 		if _config.Static.Command == "debug" {
-			render_action = _script.E_Action_Monitor
+			render_action = _script.E_Action_DebugHash
 		} else if _config.Static.Command == "preview" && _config.Static.WATCH {
-			render_action = _script.E_Action_Watch
+			render_action = _script.E_Action_RapidHash
 		} else {
-			render_action = _script.E_Action_Sync
+			render_action = _script.E_Action_OptimalSync
 		}
 		for _, target := range _stash.Cache.Targetdir {
 			target.SyncClassnames(render_action)
@@ -69,7 +69,7 @@ func Generate_Files() (Files map[string]string, Report string) {
 				attach_staples.WriteString(data.SnippetStaple)
 			}
 		}
-		staple_sheet := _util.Code_Minify(_util.Code_Uncomment(attach_staples.String(), false, false, true))
+		staple_sheet := _util.Code_Strip(attach_staples.String(), false, false, true, true)
 
 		type t_frag struct {
 			key string
@@ -87,8 +87,11 @@ func Generate_Files() (Files map[string]string, Report string) {
 				val: _css.Render_Switched(func() *_css.T_Block {
 					result := _css.NewBlock()
 					for _, i := range _config.Style.PublishIndexMap {
-						result.SetBlock(i.ClassName, _action.Index_Fetch(i.ClassIndex).StyleObject)
+						if res := _action.Index_Fetch(i.ClassIndex).StyleObject; res.Len() > 0 {
+							result.SetBlock(i.ClassName, res)
+						}
 					}
+					result.Format(false)
 					return result
 				}(), _config.Static.DEBUG),
 			},
@@ -101,7 +104,7 @@ func Generate_Files() (Files map[string]string, Report string) {
 				val: _css.Render_Sequence(func() *_css.T_BlockSeq {
 					appendix_styles := _css.NewBlockSeq()
 					for _, cache := range _stash.Cache.Targetdir {
-						scanned := _style.Cssfile_String(cache.StylesheetContent, `APPENDIX : ${cache.targetStylesheet} ||`, _config.Static.WATCH)
+						scanned := _style.Cssfile_String(cache.StylesheetContent, `APPENDIX : `+cache.Stylesheet+" | ", _config.Static.WATCH)
 						appendix_styles.Append(scanned.Result.Units...)
 						for _, attachment := range scanned.Attachments {
 							if res := _action.Index_Find(attachment, _model.Style_ClassIndexMap{}); res.Index > 0 {

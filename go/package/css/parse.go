@@ -22,6 +22,7 @@ func ParsePartial(content string) R_Parse {
 
 	result := R_Parse{
 		Directives:    []string{},
+		Operations:    []string{},
 		Properties:    [][2]string{},
 		Atrule_Blocks: [][2]string{},
 		Nested_Blocks: [][2]string{},
@@ -81,10 +82,12 @@ func ParsePartial(content string) R_Parse {
 								result.Variables = append(result.Variables, [2]string{key, val})
 							}
 							result.Properties = append(result.Properties, [2]string{key, val})
-						} else if len(val) > 0 && val[0] == '@' {
-							result.Directives = append(result.Directives, val)
-						} else {
-							result.Operations = append(result.Directives, val)
+						} else if len(val) > 0 {
+							if val[0] == '@' {
+								result.Directives = append(result.Directives, val)
+							} else {
+								result.Operations = append(result.Operations, val)
+							}
 						}
 					} else if len(key) > 0 {
 						switch rune(key[0]) {
@@ -100,6 +103,7 @@ func ParsePartial(content string) R_Parse {
 					keyStart = cursor.Active.Marker + 1
 					valStart = cursor.Active.Marker + 1
 					key = ""
+					val = ""
 					isProp = true
 				}
 			}

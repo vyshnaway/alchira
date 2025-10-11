@@ -185,3 +185,9 @@ func Test(t *testing.T) {
 	console.Render.Raw(bm2.Skeleton())
 	console.Render.Raw(bm3.Skeleton())
 }
+
+func Test_Blocked(t *testing.T) {
+	block := css.NewBlock().Print()
+	block.SetProp("a", "a")
+	block.SetPropa", "a")
+}

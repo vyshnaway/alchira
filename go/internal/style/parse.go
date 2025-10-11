@@ -48,11 +48,10 @@ type R_Parse_Filter struct {
 	Attach     []string
 	Properties *O.T[string, string]
 	Blocks     *O.T[string, string]
-	VarObject  *O.T[string, string]
 	Variables  *O.T[string, string]
 }
 
-func parse_Filter(content string) R_Parse_Filter {
+func Parse_Filter(content string) R_Parse_Filter {
 	ref := _css.ParsePartial(content)
 	res := R_Parse_Filter{
 		Assign:     []string{},
@@ -101,6 +100,11 @@ func parse_Filter(content string) R_Parse_Filter {
 		res.Blocks.Set(key, val)
 	}
 
+	for _, kv := range ref.Variables {
+		key, val := kv[0], kv[1]
+		res.Variables.Set(key, val)
+	}
+
 	return res
 }
 
@@ -112,24 +116,18 @@ func Parse_CssSnippet(
 	debug bool,
 ) Parse_return {
 
-	scanned := parse_Filter(content)
+	scanned := Parse_Filter(content)
 	assigned := parse_AssignMerge(scanned.Assign)
 	variables := assigned.Variables
 	variables.Copy(scanned.Variables)
 
-	attachments := assigned.Attachments
-	for _, v := range scanned.Attach {
-		if v[0] != '/' {
-			attachments = append(attachments, v)
-		}
-	}
+	attachments := append(assigned.Attachments, scanned.Attach...)
 
 	propmap := _css.NewBlock()
 	assigned.Variables.Range(func(k, v string) {
 		propmap.SetProp(k, v)
 		variables.Set(k, v)
 	})
-
 	if debug {
 		scanned.Properties.Range(func(k, v string) {
 			propmap.SetProp(k, v+"/* "+initial+srcselector+" */")
@@ -140,31 +138,34 @@ func Parse_CssSnippet(
 		})
 	}
 
-	blockmap := *assigned.Result.Mixin(_css.NewBlock().SetBlock("", propmap))
+	temp := _css.NewBlock()
+	temp.SetBlock("", propmap)
+	assigned.Result.Mixin(temp)
+	output := assigned.Result
+	_, target := output.GetBlock("")
+
 	if flatten {
-		if ok, bm := blockmap.GetBlock(""); ok {
+		if ok, bm := output.GetBlock(""); ok {
 			bm.PropRange(func(k, v string) {
-				blockmap.SetProp(k, v)
+				output.SetProp(k, v)
 			})
 			bm.BlockRange(func(k string, v *_css.T_Block) {
-				blockmap.SetBlock(k, v.Clone())
+				output.SetBlock(k, v.Clone())
 			})
 		}
-		blockmap.DelBlock("")
+		output.DelBlock("")
+		target = output
 	}
+
 	scanned.Blocks.Range(func(key, val string) {
 		sub_result := Parse_CssSnippet(val, initial, srcselector+" -> "+key, true, debug)
 		variables.Copy(sub_result.Variables)
 		attachments = append(attachments, sub_result.Attachments...)
-		if flatten {
-			blockmap.SetBlock(key, sub_result.Result)
-		} else if ok, bm := blockmap.GetBlock(""); ok {
-			bm.SetBlock(key, sub_result.Result)
-		}
+		target.SetBlock(key, sub_result.Result)
 	})
 
 	return Parse_return{
-		Result:      &blockmap,
+		Result:      output,
 		Attachments: attachments,
 		Variables:   variables,
 	}

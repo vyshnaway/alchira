@@ -80,7 +80,7 @@ func (This *T_Block) SetProp(key string, val string) {
 	This.prop_vals[key] = val
 }
 
-func (This *T_Block) SetBlock(key string, val *T_Block) *T_Block {
+func (This *T_Block) SetBlock(key string, val *T_Block) {
 	if This.block_vals == nil {
 		This.block_vals = make(map[string]*T_Block)
 	}
@@ -88,28 +88,6 @@ func (This *T_Block) SetBlock(key string, val *T_Block) *T_Block {
 		This.Block_keys = append(This.Block_keys, key)
 	}
 	This.block_vals[key] = val.Clone()
-
-	return This.block_vals[key]
-}
-
-func (This *T_Block) DelProp(key string) *T_Block {
-	if This.prop_vals != nil {
-		if i := _slice.Index(This.Prop_keys, key); i != -1 {
-			This.Prop_keys = _util.Array_RemoveAt(This.Prop_keys, i)
-			delete(This.prop_vals, key)
-		}
-	}
-	return This
-}
-
-func (This *T_Block) DelBlock(key string) *T_Block {
-	if This.block_vals != nil {
-		if i := _slice.Index(This.Block_keys, key); i != -1 {
-			This.Block_keys = _util.Array_RemoveAt(This.Block_keys, i)
-			delete(This.block_vals, key)
-		}
-	}
-	return This
 }
 
 func (This *T_Block) Mixin(source *T_Block) *T_Block {
@@ -141,5 +119,25 @@ func (This *T_Block) Mixin(source *T_Block) *T_Block {
 	})
 	This.Block_keys = _util.Array_SetAppend(This.Block_keys, source.Block_keys...)
 
+	return This
+}
+
+func (This *T_Block) DelProp(key string) *T_Block {
+	if This.prop_vals != nil {
+		if i := _slice.Index(This.Prop_keys, key); i != -1 {
+			This.Prop_keys = _util.Array_RemoveAt(This.Prop_keys, i)
+			delete(This.prop_vals, key)
+		}
+	}
+	return This
+}
+
+func (This *T_Block) DelBlock(key string) *T_Block {
+	if This.block_vals != nil {
+		if i := _slice.Index(This.Block_keys, key); i != -1 {
+			This.Block_keys = _util.Array_RemoveAt(This.Block_keys, i)
+			delete(This.block_vals, key)
+		}
+	}
 	return This
 }
