@@ -30,6 +30,7 @@ var Archive = _model.Config_Archive{
 	Version:       "",
 	Vendors:       "",
 	Readme:        "",
+	Changelog:     "",
 	Environment:   "",
 	Licence:       "",
 	ExportSheet:   "",

@@ -75,7 +75,7 @@ func Cssfile_Collection(files []_model.File_Stash, debug bool) cssfile_Collectio
 			} else {
 				stylescanned := Parse_CssSnippet(
 					value,
-					string(file.Manifest.Lookup.Type)+" : "+file.FilePath+" |",
+					string(file.Manifest.Lookup.Type)+" : "+file.FilePath+" | ",
 					selector,
 					false,
 					debug,
@@ -104,9 +104,9 @@ func Cssfile_Collection(files []_model.File_Stash, debug bool) cssfile_Collectio
 					Attachments:   attachments,
 					DebugClass:    file.DebugFront + "_" + _util.String_Filter(classname, []rune{}, []rune{}, []rune{'$', '/'}),
 					Declarations:  []string{declaration},
-					SnippetStaple: "",
-					SnippetStyle: func() *_css.T_Block {
-						if k, v := object.GetBlock(""); k {
+					StapleSnippet: "",
+					StyleSnippet: func() *_css.T_Block {
+						if k, v := object.GetBlock("[]"); k {
 							temp := _css.NewBlock()
 							temp.SetBlock(selector, v)
 							return temp

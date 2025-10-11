@@ -5,6 +5,7 @@ import (
 	_stash "main/internal/stash"
 	_style "main/internal/style"
 	_models "main/models"
+	"main/package/console"
 	_fileman "main/package/fileman"
 	_util "main/package/utils"
 	_map "maps"
@@ -15,13 +16,17 @@ import (
 
 func archive_Build() _models.Config_Archive {
 	archive := _config.Archive
+	archive.Constants = map[string]string{}
+	_style.Parse_CssSnippet(_config.Static.RootCSS, "", "", false, false).Variables.Range(func(k, v string) {
+		archive.Constants[k] = v
+	})
 	archive.ExportClasses = []string{}
 
 	exportdata := map[string]_models.Style_ExportStyle{}
 	for _, val := range _stash.Cache.Targetdir {
 		_map.Copy(exportdata, val.GetArtifacts())
 	}
-
+  
 	var exportsheet _string.Builder
 	for _, data := range exportdata {
 		if _string.Contains(data.SymClass, "$$$") {
@@ -71,10 +76,12 @@ func archive_Build() _models.Config_Archive {
 	}
 
 	archive.ExportSheet = exportsheet.String()
+	console.Render.Raw(archive)
+	console.Post(archive.ExportSheet)
 	return archive
 }
 
-func archive_Deploy() map[string]string {
+func archive_Files() map[string]string {
 
 	latestverfile := "latest.json"
 	currentverfile := archive_Build().Version + ".json"

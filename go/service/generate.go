@@ -64,12 +64,12 @@ func Generate_Files() (Files map[string]string, Report string) {
 		}
 		for _, a := range attachments {
 			data := _action.Index_Fetch(a)
-			attach_styles.Mixin(data.SnippetStyle)
-			if len(data.SnippetStaple) > 0 {
-				attach_staples.WriteString(data.SnippetStaple)
+			attach_styles.Merge(data.StyleSnippet)
+			if len(data.StapleSnippet) > 0 {
+				attach_staples.WriteString(data.StapleSnippet)
 			}
 		}
-		staple_sheet := _util.Code_Strip(attach_staples.String(), false, false, true, true)
+		staple_sheet := attach_staples.String()
 
 		type t_frag struct {
 			key string
@@ -87,13 +87,10 @@ func Generate_Files() (Files map[string]string, Report string) {
 				val: _css.Render_Switched(func() *_css.T_Block {
 					result := _css.NewBlock()
 					for _, i := range _config.Style.PublishIndexMap {
-						if res := _action.Index_Fetch(i.ClassIndex).StyleObject; res.Len() > 0 {
-							result.SetBlock(i.ClassName, res)
-						}
+						result.SetBlock(i.ClassName, _action.Index_Fetch(i.ClassIndex).StyleObject)
 					}
-					result.Format(false)
 					return result
-				}(), _config.Static.DEBUG),
+				}(), _config.Static.MINIFY),
 			},
 			{
 				key: "Attach",
@@ -104,7 +101,7 @@ func Generate_Files() (Files map[string]string, Report string) {
 				val: _css.Render_Sequence(func() *_css.T_BlockSeq {
 					appendix_styles := _css.NewBlockSeq()
 					for _, cache := range _stash.Cache.Targetdir {
-						scanned := _style.Cssfile_String(cache.StylesheetContent, `APPENDIX : `+cache.Stylesheet+" | ", _config.Static.WATCH)
+						scanned := _style.Cssfile_String(cache.StylesheetContent, `APPENDIX : `+cache.Stylesheet+" | ", _config.Static.DEBUG)
 						appendix_styles.Append(scanned.Result.Units...)
 						for _, attachment := range scanned.Attachments {
 							if res := _action.Index_Find(attachment, _model.Style_ClassIndexMap{}); res.Index > 0 {
@@ -121,7 +118,7 @@ func Generate_Files() (Files map[string]string, Report string) {
 			frags := []string{}
 			for _, i := range render_frags {
 				if _config.Static.DEBUG {
-					frags = append(frags, "\n\n/* Section: "+i.key+" */\n"+i.val+"\n")
+					frags = append(frags, _fmt.Sprint("\n\n/* Section: ", i.key, " */\n", i.val))
 				} else {
 					frags = append(frags, i.val)
 				}

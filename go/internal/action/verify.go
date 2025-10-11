@@ -86,6 +86,9 @@ func Verify_Configs(loadvendors bool) (Report string, Status bool) {
 	if data, err := _fileman.Read_File(_config.Path_Files["licence"].Path, false); err == nil {
 		_config.Archive.Licence = data
 	}
+	if data, err := _fileman.Read_File(_config.Path_Files["changelog"].Path, false); err == nil {
+		_config.Archive.Changelog = data
+	}
 
 	S.TASK("Verifying configs", 1)
 	errors := []string{}

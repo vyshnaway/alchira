@@ -134,7 +134,7 @@ func Organize() (AritfactFiles map[string]string, Attachments []int) {
 			SaveClassRefs(*res.Result)
 
 			if res.Status {
-				artifact_files = archive_Deploy()
+				artifact_files = archive_Files()
 				_config.Delta.FinalMessage = "Build Success."
 			} else {
 				_config.Delta.PublishError = res.Message

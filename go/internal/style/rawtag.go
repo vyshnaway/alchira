@@ -13,7 +13,7 @@ import (
 )
 
 var regex_symzero = _regexp.MustCompile(`^-\$`)
-var regex_locale = _regexp.MustCompile(`.()` + string(_config.Root.CustomOperations["locale"]))
+var regex_locale = _regexp.MustCompile(`\.(.*?)` + string(_config.Root.CustomOperations["locale"]))
 
 func Rawtag_Upload(
 	raw *_script.T_RawStyle,
@@ -58,8 +58,8 @@ func Rawtag_Upload(
 
 		stylescanned := Parse_CssSnippet(
 			_util.Code_Uncomment(raw.Styles[""], true, true, false),
-			_fmt.Sprint(raw.Scope, " : ", file.FilePath, " |"),
-			_fmt.Sprint(raw.SymClasses),
+			_fmt.Sprint(raw.Scope, " : ", declaration, " | "),
+			_fmt.Sprint(raw.SymClasses[0]),
 			false,
 			debug,
 		)
@@ -74,8 +74,8 @@ func Rawtag_Upload(
 				if query.Status {
 					substylescanned := Parse_CssSnippet(
 						_util.Code_Uncomment(val, true, true, false),
-						_fmt.Sprint(raw.Scope, " : ", file.FilePath, " |"),
-						_fmt.Sprint(raw.SymClasses, " => ", key),
+						_fmt.Sprint(raw.Scope, " : ", declaration, " | "),
+						_fmt.Sprint(raw.SymClasses[0], " // ", key),
 						true,
 						debug,
 					)
@@ -83,11 +83,10 @@ func Rawtag_Upload(
 					variables.Copy(substylescanned.Variables)
 					if substylescanned.Result.Len() > 0 {
 						wrapperjson := _util.Code_JsonBuild(query.Wrappers, "")
-						res_typed := string(wrapperjson)
-						if !forArtifact {
-							regex_locale.ReplaceAllString(res_typed, _fmt.Sprintf("_%s_$1", file.Label))
+						if !forArtifact && regex_locale.MatchString(wrapperjson) {
+							wrapperjson = " " + regex_locale.ReplaceAllString(wrapperjson, "._"+file.Label+"_")
 						}
-						object.SetBlock(res_typed, substylescanned.Result)
+						object.SetBlock(wrapperjson, substylescanned.Result)
 					}
 				} else {
 					errors = append(errors, query.Errorstring)
@@ -98,7 +97,7 @@ func Rawtag_Upload(
 
 		inner_style := Parse_CssSnippet(
 			_util.Code_Uncomment(raw.Innertext, true, true, false),
-			_fmt.Sprint(raw.Scope, ":ATTACHMENT : ", file.FilePath, ":", raw.RowIndex, ":", raw.ColIndex, " |"),
+			_fmt.Sprint(raw.Scope, ":ATTACHMENT : ", file.FilePath, ":", raw.RowIndex, ":", raw.ColIndex, " | "),
 			raw.SymClasses[0],
 			true,
 			debug,
@@ -119,18 +118,16 @@ func Rawtag_Upload(
 			}
 		}
 
-		// object.Print()
-
 		summon := ""
 		attributes := map[string]string{}
 		if raw.Elid == _config.Root.CustomElements["summon"] {
-			summon = raw.Innertext
+			summon = _util.Code_Strip(raw.Innertext, false, false, true, true)
 			attributes = raw.Attributes
 		}
 
 		staple := ""
 		if raw.Elid == _config.Root.CustomElements["staple"] {
-			staple = raw.Innertext
+			staple = _util.Code_Strip(raw.Innertext, false, false, true, true)
 		}
 
 		metadata := _model.Style_Metadata{
@@ -152,8 +149,8 @@ func Rawtag_Upload(
 			Attachments:   attachments,
 			DebugClass:    debugclass,
 			Declarations:  []string{declaration},
-			SnippetStaple: staple,
-			SnippetStyle:  inner_style.Result,
+			StapleSnippet: staple,
+			StyleSnippet:  inner_style.Result,
 		})
 		IndexMap[symclass] = index
 		file.StyleData.UsedIn = append(file.StyleData.UsedIn, index)

@@ -32,7 +32,7 @@ func parse_AssignMerge(classlist []string) Parse_return {
 				}
 			})
 			attachments = append(attachments, classdata.Attachments...)
-			result.Mixin(classdata.StyleObject)
+			result.Merge(classdata.StyleObject)
 		}
 	}
 
@@ -50,6 +50,11 @@ type R_Parse_Filter struct {
 	Blocks     *O.T[string, string]
 	Variables  *O.T[string, string]
 }
+
+var assign_directive = _config.Root.CustomAtrules["assign"]
+var attach_directive = _config.Root.CustomAtrules["attach"]
+var assign_operator = string(_config.Root.CustomOperations["assign"])
+var attach_operator = string(_config.Root.CustomOperations["attach"])
 
 func Parse_Filter(content string) R_Parse_Filter {
 	ref := _css.ParsePartial(content)
@@ -69,10 +74,10 @@ func Parse_Filter(content string) R_Parse_Filter {
 		directive := val[0:spaceIndex]
 
 		switch directive {
-		case _config.Root.CustomAtrules["attach"]:
+		case attach_directive:
 			breaks := _util.String_ZeroBreaks(val[spaceIndex:], []rune{' ', '\n', ','})
 			res.Attach = append(res.Attach, breaks...)
-		case _config.Root.CustomAtrules["assign"]:
+		case assign_directive:
 			breaks := _util.String_ZeroBreaks(val[spaceIndex:], []rune{' ', '\n', ','})
 			res.Assign = append(res.Assign, breaks...)
 		default:
@@ -82,9 +87,9 @@ func Parse_Filter(content string) R_Parse_Filter {
 	for _, val := range ref.Operations {
 		breaks := _util.String_ZeroBreaks(val, []rune{' ', '\n', ','})
 		if len(breaks) > 0 {
-			if breaks[0] == string(_config.Root.CustomOperations["attach"]) {
+			if breaks[0] == attach_operator {
 				res.Attach = append(res.Attach, breaks[1:]...)
-			} else if (breaks[0]) == string(_config.Root.CustomOperations["assign"]) {
+			} else if (breaks[0]) == assign_operator {
 				res.Assign = append(res.Assign, breaks[1:]...)
 			}
 		}
@@ -139,13 +144,13 @@ func Parse_CssSnippet(
 	}
 
 	temp := _css.NewBlock()
-	temp.SetBlock("", propmap)
-	assigned.Result.Mixin(temp)
+	temp.SetBlock("[]", propmap)
+	assigned.Result.Merge(temp)
 	output := assigned.Result
-	_, target := output.GetBlock("")
+	_, target := output.GetBlock("[]")
 
 	if flatten {
-		if ok, bm := output.GetBlock(""); ok {
+		if ok, bm := output.GetBlock("[]"); ok {
 			bm.PropRange(func(k, v string) {
 				output.SetProp(k, v)
 			})
@@ -153,12 +158,12 @@ func Parse_CssSnippet(
 				output.SetBlock(k, v.Clone())
 			})
 		}
-		output.DelBlock("")
+		output.DelBlock("[]")
 		target = output
 	}
 
 	scanned.Blocks.Range(func(key, val string) {
-		sub_result := Parse_CssSnippet(val, initial, srcselector+" -> "+key, true, debug)
+		sub_result := Parse_CssSnippet(val, initial, srcselector+" / "+key, true, debug)
 		variables.Copy(sub_result.Variables)
 		attachments = append(attachments, sub_result.Attachments...)
 		target.SetBlock(key, sub_result.Result)

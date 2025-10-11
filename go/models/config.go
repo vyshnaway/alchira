@@ -37,6 +37,7 @@ type Config_Archive struct {
 	Environment   string            `json:"environment,omitempty"`
 	Readme        string            `json:"readme,omitempty"`
 	Licence       string            `json:"licence,omitempty"`
+	Changelog     string            `json:"changelog,omitempty"`
 	ExportSheet   string            `json:"exportsheet,omitempty"`
 	Versions      []string          `json:"versions,omitempty"`
 	Constants     map[string]string `json:"constants,omitempty"`

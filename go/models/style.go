@@ -46,8 +46,8 @@ type Style_ClassData struct {
 	Attachments   []string
 	Declarations  []string
 	StyleObject   *css.T_Block
-	SnippetStaple string
-	SnippetStyle  *css.T_Block
+	StapleSnippet string
+	StyleSnippet  *css.T_Block
 }
 
 type Style_Dictionary map[string]map[int]string

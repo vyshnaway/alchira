@@ -27,6 +27,7 @@ _* : Private Global in module
 ## Return sequence for functions
 ```
 Result Report Status Error 
+Output Message Status Error 
 ```
 
 ---

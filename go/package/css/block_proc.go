@@ -2,7 +2,6 @@ package css
 
 import (
 	_fmt "fmt"
-	"main/package/console"
 	_slice "slices"
 	_string "strings"
 )
@@ -110,7 +109,7 @@ func (This *T_Block) flatten(parent string) (Res *T_Block) {
 		} else if len(k) > 0 {
 			native = append(native, k)
 		} else {
-			props.Mixin(v)
+			props.Merge(v)
 		}
 	})
 
@@ -155,7 +154,7 @@ func (This *T_Block) Flatten() (Res *T_Block) {
 	})
 
 	This.BlockRange(func(k string, v *T_Block) {
-		all.Mixin(v.flatten(k))
+		all.Merge(v.flatten(k))
 	})
 
 	return all
@@ -201,7 +200,6 @@ func (This *T_Block) format(minify bool) []string {
 		}
 		result = append(result, "}")
 	})
-	console.Render.Raw(This.Block_keys)
 	return result
 }
 

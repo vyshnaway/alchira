@@ -21,21 +21,102 @@ func NewBlock() *T_Block {
 	}
 }
 
-// Setters for CssBlock
+// Setters
 
-func (This *T_Block) GetProp(key string) (ok bool, val string) {
-	if val, ok := This.prop_vals[key]; ok {
-		return true, val
+func (This *T_Block) SetProp(key string, val string) {
+	if key == "" {
+		return
 	}
-	return false, ""
+	if This.prop_vals == nil {
+		This.prop_vals = make(map[string]string)
+	}
+	if ok, _ := This.GetProp(key); !ok {
+		This.Prop_keys = append(This.Prop_keys, key)
+	}
+	This.prop_vals[key] = val
 }
 
-func (This *T_Block) GetBlock(key string) (ok bool, val *T_Block) {
-	if val, ok := This.block_vals[key]; ok {
-		return true, val
+func (This *T_Block) SetBlock(key string, val *T_Block) {
+	if key == "" {
+		return
 	}
-	return false, nil
+	if This.block_vals == nil {
+		This.block_vals = make(map[string]*T_Block)
+	}
+	if ok, _ := This.GetBlock(key); !ok {
+		This.Block_keys = append(This.Block_keys, key)
+	}
+	This.block_vals[key] = val.Clone()
 }
+
+func (This *T_Block) MixinBlock(key string, val *T_Block) {
+	if key == "" {
+		return
+	}
+	if This.block_vals == nil {
+		This.block_vals = make(map[string]*T_Block)
+	}
+	if ok, block := This.GetBlock(key); ok {
+		block.Merge(val)
+	} else {
+		This.Block_keys = append(This.Block_keys, key)
+		This.block_vals[key] = val.Clone()
+	}
+}
+
+func (This *T_Block) Merge(source *T_Block) *T_Block {
+	if This.prop_vals == nil {
+		This.prop_vals = make(map[string]string)
+	}
+	if This.Prop_keys == nil {
+		This.Prop_keys = make([]string, 0)
+	}
+	if This.block_vals == nil {
+		This.block_vals = make(map[string]*T_Block)
+	}
+	if This.Block_keys == nil {
+		This.Block_keys = make([]string, 0)
+	}
+
+	source.PropRange(func(k, v string) {
+		This.SetProp(k, v)
+	})
+	This.Prop_keys = _util.Array_SetAppend(This.Prop_keys, source.Prop_keys...)
+
+	source.BlockRange(func(skey string, sval *T_Block) {
+		if isBlock, tval := This.GetBlock(skey); isBlock {
+			tval.Merge(sval)
+			This.SetBlock(skey, tval)
+		} else {
+			This.SetBlock(skey, sval)
+		}
+	})
+	This.Block_keys = _util.Array_SetAppend(This.Block_keys, source.Block_keys...)
+
+	return This
+}
+
+func (This *T_Block) DelProp(key string) *T_Block {
+	if This.prop_vals != nil {
+		if i := _slice.Index(This.Prop_keys, key); i != -1 {
+			This.Prop_keys = _util.Array_RemoveAt(This.Prop_keys, i)
+			delete(This.prop_vals, key)
+		}
+	}
+	return This
+}
+
+func (This *T_Block) DelBlock(key string) *T_Block {
+	if This.block_vals != nil {
+		if i := _slice.Index(This.Block_keys, key); i != -1 {
+			This.Block_keys = _util.Array_RemoveAt(This.Block_keys, i)
+			delete(This.block_vals, key)
+		}
+	}
+	return This
+}
+
+// Getters
 
 func (This *T_Block) PropLen() int {
 	return len(This.prop_vals)
@@ -68,76 +149,16 @@ func (This *T_Block) Keys() []string {
 	return keys
 }
 
-// Setters for CssBlock
-
-func (This *T_Block) SetProp(key string, val string) {
-	if This.prop_vals == nil {
-		This.prop_vals = make(map[string]string)
+func (This *T_Block) GetProp(key string) (ok bool, val string) {
+	if val, ok := This.prop_vals[key]; ok {
+		return true, val
 	}
-	if _, ok := This.prop_vals[key]; !ok {
-		This.Prop_keys = append(This.Prop_keys, key)
-	}
-	This.prop_vals[key] = val
+	return false, ""
 }
 
-func (This *T_Block) SetBlock(key string, val *T_Block) {
-	if This.block_vals == nil {
-		This.block_vals = make(map[string]*T_Block)
+func (This *T_Block) GetBlock(key string) (ok bool, val *T_Block) {
+	if val, ok := This.block_vals[key]; ok {
+		return true, val
 	}
-	if _, ok := This.block_vals[key]; !ok {
-		This.Block_keys = append(This.Block_keys, key)
-	}
-	This.block_vals[key] = val.Clone()
-}
-
-func (This *T_Block) Mixin(source *T_Block) *T_Block {
-	if This.prop_vals == nil {
-		This.prop_vals = make(map[string]string)
-	}
-	if This.Prop_keys == nil {
-		This.Prop_keys = make([]string, 0)
-	}
-	if This.block_vals == nil {
-		This.block_vals = make(map[string]*T_Block)
-	}
-	if This.Block_keys == nil {
-		This.Block_keys = make([]string, 0)
-	}
-
-	source.PropRange(func(k, v string) {
-		This.SetProp(k, v)
-	})
-	This.Prop_keys = _util.Array_SetAppend(This.Prop_keys, source.Prop_keys...)
-
-	source.BlockRange(func(skey string, sval *T_Block) {
-		if isBlock, tval := This.GetBlock(skey); isBlock {
-			tval.Mixin(sval)
-			This.SetBlock(skey, tval)
-		} else {
-			This.SetBlock(skey, sval)
-		}
-	})
-	This.Block_keys = _util.Array_SetAppend(This.Block_keys, source.Block_keys...)
-
-	return This
-}
-
-func (This *T_Block) DelProp(key string) *T_Block {
-	if This.prop_vals != nil {
-		if i := _slice.Index(This.Prop_keys, key); i != -1 {
-			This.Prop_keys = _util.Array_RemoveAt(This.Prop_keys, i)
-			delete(This.prop_vals, key)
-		}
-	}
-	return This
-}
-
-func (This *T_Block) DelBlock(key string) *T_Block {
-	if This.block_vals != nil {
-		if i := _slice.Index(This.Block_keys, key); i != -1 {
-			This.Block_keys = _util.Array_RemoveAt(This.Block_keys, i)
-			delete(This.block_vals, key)
-		}
-	}
-	return This
+	return false, nil
 }

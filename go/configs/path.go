@@ -110,6 +110,12 @@ var Path_Files = map[string]_model.File_Source{
 		Content:   "",
 		Essential: false,
 	},
+	"changelog": {
+		Frags:     []string{id, "changelog.md"},
+		Path:      "",
+		Content:   "",
+		Essential: false,
+	},
 }
 
 var Path_Autogen = map[string]_model.File_Source{
