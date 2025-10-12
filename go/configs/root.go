@@ -23,11 +23,11 @@ var Root = _model.Cache_Root{
 	},
 	Commands: map[string]string{
 		"init":    "Initiate or Update & Verify setup.",
+		"server":  "LSP Brige trigger.",
 		"debug":   "Live build for developer environment",
 		"preview": "Test build. Pass test for \"publish\" command.",
 		"publish": "Optimized build, uses web-api.",
 		"install": "Install external artifacts.",
-		"version": "Returns version.",
 	},
 	Tweaks: _model.Config_Tweaks{
 		"CacheUsage": false,

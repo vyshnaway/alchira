@@ -20,7 +20,6 @@ func Rawtag_Upload(
 	file *_model.File_Stash,
 	IndexMap _model.Style_ClassIndexMap,
 	metadata_map _model.File_MetadataMap,
-	debug bool,
 ) rawtag_Upload_return {
 	errors := []string{}
 	diagnostics := []_model.Refer_Diagnostic{}
@@ -61,7 +60,6 @@ func Rawtag_Upload(
 			_fmt.Sprint(raw.Scope, " : ", declaration, " | "),
 			_fmt.Sprint(raw.SymClasses[0]),
 			false,
-			debug,
 		)
 
 		object := stylescanned.Result
@@ -77,7 +75,6 @@ func Rawtag_Upload(
 						_fmt.Sprint(raw.Scope, " : ", declaration, " | "),
 						_fmt.Sprint(raw.SymClasses[0], " // ", key),
 						true,
-						debug,
 					)
 					attachments = append(attachments, substylescanned.Attachments...)
 					variables.Copy(substylescanned.Variables)
@@ -100,7 +97,6 @@ func Rawtag_Upload(
 			_fmt.Sprint(raw.Scope, ":ATTACHMENT : ", file.FilePath, ":", raw.RowIndex, ":", raw.ColIndex, " | "),
 			raw.SymClasses[0],
 			true,
-			debug,
 		)
 
 		attachments = append(attachments, inner_style.Attachments...)

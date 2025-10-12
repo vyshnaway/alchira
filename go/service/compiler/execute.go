@@ -126,7 +126,6 @@ func Execute(heading string) (Exitcode int) {
 
 		case execute_Step_WatchFolders:
 			if _config.Static.WATCH {
-
 				step = execute_Step_WatchFolders
 
 				if watcher == nil {
@@ -153,10 +152,16 @@ func Execute(heading string) (Exitcode int) {
 							}
 							_os.Exit(0)
 						}()
+					} else {
+						report = S.MAKE(
+							S.Tag.H4("Unexpected error while creating watcher", S.Preset.Failed),
+							[]string{S.Tag.Li(err.Error(), S.Preset.None)},
+						)
+						break
 					}
 				}
 
-				if watcher.Length() > 16 {
+				if watcher.Length() > 8 {
 					watcher.Reset()
 					step = execute_Step_Initialize
 				} else if event := watcher.Pull(); event != nil {

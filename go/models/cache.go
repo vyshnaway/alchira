@@ -85,6 +85,8 @@ type Cache_Delta struct {
 	PublishError string
 	FinalMessage string
 	Errors       []string
+	IndexAttach  []int
+	IndexBuild   string
 	Report       Cache_Delta_Report
 	Lookup       Cache_Delta_Lookup
 	Error        Cache_Delta_Errors
@@ -111,7 +113,7 @@ type Cache_Manifest_Groups struct {
 }
 
 type Cache_Manifest struct {
-	Constants   []string               `json:"constants"`
+	Constants   map[string]string      `json:"constants"`
 	Hashrules   map[string]string      `json:"hashrules"`
 	Diagnostics []Refer_Diagnostic     `json:"diagnostics"`
 	Lookup      map[string]File_Lookup `json:"lookup"`

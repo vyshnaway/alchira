@@ -29,7 +29,7 @@ func Cssfile_String(content string, initial string, debug bool) R_Cssfile_Parse 
 	for _, kv := range scanned.All_Blocks {
 		key := kv[0]
 		val := kv[1]
-		res := Parse_CssSnippet(val, initial, key, true, debug)
+		res := Parse_CssSnippet(val, initial, key, true)
 
 		variables.Copy(res.Variables)
 		attachments = append(attachments, res.Attachments...)
@@ -78,7 +78,6 @@ func Cssfile_Collection(files []_model.File_Stash, debug bool) cssfile_Collectio
 					string(file.Manifest.Lookup.Type)+" : "+file.FilePath+" | ",
 					selector,
 					false,
-					debug,
 				)
 				attachments := stylescanned.Attachments
 				object := stylescanned.Result

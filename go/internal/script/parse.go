@@ -14,8 +14,8 @@ type E_Action int
 
 const (
 	E_Action_Read E_Action = iota
-	E_Action_OptimalSync
-	E_Action_RapidHash
+	E_Action_BuildHash
+	E_Action_WatchmodeHash
 	E_Action_DebugHash
 )
 

@@ -60,6 +60,8 @@ var Delta = _model.Cache_Delta{
 	Content:      "",
 	FinalMessage: "",
 	PublishError: "",
+	IndexBuild:   "",
+	IndexAttach:  []int{},
 	Report: _model.Cache_Delta_Report{
 		Artifacts: "",
 		Axioms:    "",
@@ -86,6 +88,7 @@ var Delta = _model.Cache_Delta{
 		Hashrules: []string{},
 		Handoffs:  []string{},
 	},
+
 	Diagnostic: _model.Cache_Delta_Diagnostics{
 		Artifacts: []_model.Refer_Diagnostic{},
 		Axioms:    []_model.Refer_Diagnostic{},
@@ -103,6 +106,8 @@ func Delta_Reset() {
 		Content:      "",
 		FinalMessage: "",
 		PublishError: "",
+		IndexBuild:   "",
+		IndexAttach:  []int{},
 		Report: _model.Cache_Delta_Report{
 			Artifacts: "",
 			Axioms:    "",
@@ -166,7 +171,7 @@ func Style_Reset() {
 }
 
 var Manifest = _model.Cache_Manifest{
-	Constants:   []string{},
+	Constants:   map[string]string{},
 	Hashrules:   map[string]string{},
 	Diagnostics: []_model.Refer_Diagnostic{},
 	Lookup:      map[string]_model.File_Lookup{},
@@ -181,7 +186,7 @@ var Manifest = _model.Cache_Manifest{
 
 func Manifest_Reset() {
 	Manifest = _model.Cache_Manifest{
-		Constants:   []string{},
+		Constants:   map[string]string{},
 		Hashrules:   map[string]string{},
 		Diagnostics: []_model.Refer_Diagnostic{},
 		Lookup:      map[string]_model.File_Lookup{},

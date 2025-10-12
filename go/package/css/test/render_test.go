@@ -82,6 +82,6 @@ const content = `
 // 	`
 
 func Test_Partials(t *_testing.T) {
-	res1 := _style.Parse_CssSnippet(content, "initial", "selector", true, true)
+	res1 := _style.Parse_CssSnippet(content, "initial", "selector", true)
 	_console.Render.Raw(_css.Render_Vendored(res1.Result, true))
 }

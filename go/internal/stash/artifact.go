@@ -103,7 +103,7 @@ func Artifact_Update(debug bool) {
 				file.Manifest.Diagnostics = append(file.Manifest.Diagnostics, E.Diagnostic)
 			} else {
 				artifact_counter++
-				Rawtag_Upload_ := _style_.Rawtag_Upload(tagstyle, &file, _config.Style.Artifact_Index, metadatas, debug)
+				Rawtag_Upload_ := _style_.Rawtag_Upload(tagstyle, &file, _config.Style.Artifact_Index, metadatas)
 				styledata := _action.Index_Fetch(Rawtag_Upload_.Index)
 				if len(styledata.Declarations) == 1 {
 					symclasses = append(symclasses, Rawtag_Upload_.Symclass)

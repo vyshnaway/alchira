@@ -27,29 +27,16 @@ func Generate_Files() (Files map[string]string, Report string) {
 	} else {
 
 		artifact_files, attachments := Organize()
+		attachments = append(attachments, _config.Delta.IndexAttach...)
 		_map.Copy(files, artifact_files)
-
-		index_scanned := _style.Cssfile_String(
-			_util.Code_Uncomment(_config.Static.RootCSS, false, true, false),
-			"INDEX | ",
-			_config.Static.DEBUG,
-		)
-		_config.Manifest.Constants = index_scanned.Variables.Keys()
-		_config.Delta.Report.Constants = X.List_Catalog("Root Constants", _config.Manifest.Constants)
-		for _, attachment := range index_scanned.Attachments {
-			if res := _action.Index_Find(attachment, _model.Style_ClassIndexMap{}); res.Index > 0 {
-				attachments = append(attachments, res.Index)
-			}
-		}
-		watch_index := _css.Render_Sequence(index_scanned.Result, _config.Static.MINIFY)
 
 		var render_action _script.E_Action
 		if _config.Static.Command == "debug" {
 			render_action = _script.E_Action_DebugHash
 		} else if _config.Static.Command == "preview" && _config.Static.WATCH {
-			render_action = _script.E_Action_RapidHash
+			render_action = _script.E_Action_WatchmodeHash
 		} else {
-			render_action = _script.E_Action_OptimalSync
+			render_action = _script.E_Action_BuildHash
 		}
 		for _, target := range _stash.Cache.Targetdir {
 			target.SyncClassnames(render_action)
@@ -80,7 +67,7 @@ func Generate_Files() (Files map[string]string, Report string) {
 		render_frags := []t_frag{
 			{
 				key: "Root",
-				val: watch_index,
+				val: _config.Delta.IndexBuild,
 			},
 			{
 				key: "Class",
@@ -147,7 +134,7 @@ func Generate_Files() (Files map[string]string, Report string) {
 
 		if _config.Static.WATCH {
 			files[_config.Path_Autogen["manifest"].Path] = _util.Code_JsonBuild(_config.Manifest, "")
-			files[_config.Path_Autogen["index"].Path] = watch_index
+			files[_config.Path_Autogen["index"].Path] = _config.Delta.IndexBuild
 			files[_config.Path_Autogen["watch"].Path] = watch_class
 			files[_config.Path_Autogen["staple"].Path] = staple_sheet
 		} else {

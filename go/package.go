@@ -10,9 +10,11 @@ import (
 	_fileman_ "main/package/fileman"
 	O "main/package/object"
 	_utils_ "main/package/utils"
-	_service "main/service/compiler"
+	_compiler "main/service/compiler"
+	_server "main/service/server"
 	_os_ "os"
 	_slices_ "slices"
+	"strconv"
 	_strings_ "strings"
 	_sync_ "sync"
 )
@@ -107,15 +109,23 @@ func main() {
 		}
 	case "debug":
 		{
-			exitcode = _service.Execute(corecaps + " : Debug " + flagmode)
+			exitcode = _compiler.Execute(corecaps + " : Debug " + flagmode)
 		}
 	case "preview":
 		{
-			exitcode = _service.Execute(corecaps + " : Preview " + flagmode)
+			exitcode = _compiler.Execute(corecaps + " : Preview " + flagmode)
 		}
 	case "publish":
 		{
-			exitcode = _service.Execute(corecaps + " : " + "Publishing for Production")
+			exitcode = _compiler.Execute(corecaps + " : " + "Publishing for Production")
+		}
+	case "server":
+		{
+			port := 0
+			if val, err := strconv.Atoi(argument); err == nil {
+				port = val
+			}
+			exitcode = _server.Create(port)
 		}
 	case "install":
 		{
@@ -130,7 +140,7 @@ func main() {
 				fallthrough
 			case _action.Verify_Setup_Status_Verified:
 				if config_message, config_ok := _action.Verify_Configs(true); config_ok {
-					if update_ok, update_message, update_files := _service.Artifact_Update(); update_ok {
+					if update_ok, update_message, update_files := _compiler.Artifact_Install(); update_ok {
 						S.Post(update_message)
 						_fileman_.Write_Bulk(update_files)
 						S.Post(S.Tag.H4("Artifacts Updated", S.Preset.Success, S.Style.AS_Bold))

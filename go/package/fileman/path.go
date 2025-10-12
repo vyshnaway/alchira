@@ -64,8 +64,8 @@ func Path_Check(pathString string) (Path_Check_Type, error) {
 	return Path_Check_Type_Txt, nil
 }
 
-// PathFix normalizes a file path for cross-platform compatibility
-func PathFix(pathString string) string {
+// Path_Fix normalizes a file path for cross-platform compatibility
+func Path_Fix(pathString string) string {
 	normalized := _strings.ReplaceAll(pathString, "\\", "/")
 	components := _strings.Split(normalized, "/")
 

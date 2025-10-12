@@ -16,7 +16,7 @@ import (
 func archive_Build() _models.Config_Archive {
 	archive := _config.Archive
 	archive.Constants = map[string]string{}
-	_style.Parse_CssSnippet(_config.Static.RootCSS, "", "", false, false).Variables.Range(func(k, v string) {
+	_style.Parse_CssSnippet(_config.Static.RootCSS, "", "", false).Variables.Range(func(k, v string) {
 		archive.Constants[k] = v
 	})
 	archive.ExportClasses = []string{}
@@ -36,27 +36,22 @@ func archive_Build() _models.Config_Archive {
 
 		exportsheet.WriteString("<")
 		exportsheet.WriteString(data.Element)
-		for _, pair := range data.Stylesheet {
-			key := pair[0]
-			val := pair[1]
+		exportsheet.WriteString(" ")
+		if data.SymClass[0] == '$' {
+			exportsheet.WriteString("-")
+		}
+		exportsheet.WriteString(data.SymClass)
 
-			if key == "" {
-				var symclass string
-				if symclass[0] == '$' {
-					exportsheet.WriteString("-")
-				}
-				exportsheet.WriteString(data.SymClass)
+		v := data.Stylesheet["[]"]
+		if len(data.Attachments) > 0 {
+			v = string(_config.Root.CustomOperations["attach"]) + " " + _string.Join(data.Attachments, " ") + ";" + v
+		}
+		if len(v) > 0 {
+			exportsheet.WriteString("=\"" + v + "\"")
+		}
 
-				var v string
-				if len(data.Attachments) > 0 {
-					v = string(_config.Root.CustomOperations["attach"]) + " " + _string.Join(data.Attachments, " ") + ";"
-				}
-				v += val
-
-				if len(v) > 0 {
-					exportsheet.WriteString("=" + v)
-				}
-			} else if key[0] == ' ' {
+		for key, val := range data.Stylesheet {
+			if key != "[]" && key[0] != ' ' {
 				if arr, err := _util.Code_JsonParse[[]string](key); err == nil {
 					exportsheet.WriteString("{")
 					exportsheet.WriteString(_string.Join(arr, "}&{"))
@@ -65,12 +60,19 @@ func archive_Build() _models.Config_Archive {
 				}
 			}
 		}
-		for _, v := range data.Attributes {
-			exportsheet.WriteString(" " + v[0] + "=" + v[1])
+
+		for k, v := range data.Attributes {
+			exportsheet.WriteString(" ")
+			exportsheet.WriteString(k)
+			if len(v) > 0 {
+				exportsheet.WriteString("=")
+				exportsheet.WriteString(v)
+			}
 		}
 		exportsheet.WriteString(">")
 
 		exportsheet.WriteString(data.InnerText)
+
 		exportsheet.WriteString("</" + data.Element + ">")
 	}
 

@@ -118,7 +118,6 @@ func Parse_CssSnippet(
 	initial string,
 	srcselector string,
 	flatten bool,
-	debug bool,
 ) Parse_return {
 
 	scanned := Parse_Filter(content)
@@ -133,7 +132,7 @@ func Parse_CssSnippet(
 		propmap.SetProp(k, v)
 		variables.Set(k, v)
 	})
-	if debug {
+	if _config.Static.DEBUG {
 		scanned.Properties.Range(func(k, v string) {
 			propmap.SetProp(k, v+"/* "+initial+srcselector+" */")
 		})
@@ -163,7 +162,7 @@ func Parse_CssSnippet(
 	}
 
 	scanned.Blocks.Range(func(key, val string) {
-		sub_result := Parse_CssSnippet(val, initial, srcselector+" / "+key, true, debug)
+		sub_result := Parse_CssSnippet(val, initial, srcselector+" / "+key, true)
 		variables.Copy(sub_result.Variables)
 		attachments = append(attachments, sub_result.Attachments...)
 		target.SetBlock(key, sub_result.Result)

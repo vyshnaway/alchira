@@ -89,7 +89,7 @@ func artifact_Fetch(identifier string, source string) (Files map[string]string, 
 	return files, status
 }
 
-func Artifact_Update() (Status bool, Report string, Files map[string]string) {
+func Artifact_Install() (Status bool, Report string, Files map[string]string) {
 	files := map[string]string{}
 	responses := map[string]string{}
 	status := false

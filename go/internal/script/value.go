@@ -31,7 +31,7 @@ func value_EvaluateIndexTraces(
 	}
 
 	indexSetback := _util.Array_Setback(indexArray)
-	if action == E_Action_OptimalSync {
+	if action == E_Action_BuildHash {
 		json_Return, json_Error := _json_.Marshal(indexSetback)
 		if json_Error == nil {
 			dict_Return, dict_Status := _config.Style.ClassDictionary[string(json_Return)]
@@ -42,7 +42,7 @@ func value_EvaluateIndexTraces(
 			}
 		}
 	} else {
-		if action == E_Action_RapidHash {
+		if action == E_Action_WatchmodeHash {
 			for index, item := range classTrace {
 				classname := _fmt.Sprintf("%s%d", metaFront, index)
 				_config.Style.PublishIndexMap = append(_config.Style.PublishIndexMap, _model.Style_ClassIndexTrace{
@@ -142,7 +142,7 @@ func value_Parse(
 				FileCursor.Active.RowMarker,
 				FileCursor.Active.ColMarker,
 			)
-		case E_Action_RapidHash:
+		case E_Action_WatchmodeHash:
 			metafront = _fmt.Sprintf(
 				"_%s_%d",
 				fileData.Label,

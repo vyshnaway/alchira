@@ -1,12 +1,10 @@
-package compiler
+package server
 
 import (
 	_config "main/configs"
 	_action "main/internal/action"
 	_stash "main/internal/stash"
 	_style "main/internal/style"
-	_model "main/models"
-	_css "main/package/css"
 	_fileman "main/package/fileman"
 	_util "main/package/utils"
 	_watcher "main/package/watcher"
@@ -29,12 +27,6 @@ func Update_Scaffold() {
 		_config.Static.DEBUG,
 	)
 	_config.Manifest.Constants = index_scanned.Variables.ToMap()
-	for _, attachment := range index_scanned.Attachments {
-		if res := _action.Index_Find(attachment, _model.Style_ClassIndexMap{}); res.Index > 0 {
-			_config.Delta.IndexAttach = append(_config.Delta.IndexAttach, res.Index)
-		}
-	}
-	_config.Delta.IndexBuild = _css.Render_Sequence(index_scanned.Result, _config.Static.MINIFY)
 }
 
 func Build_Targets() {

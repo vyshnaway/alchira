@@ -45,9 +45,9 @@ m-auto { k: l; }
     }
 }
 	`
-	res1 := _style.Parse_CssSnippet(content, "initial", "selector", true, true)
+	res1 := _style.Parse_CssSnippet(content, "initial", "selector", true)
 	res1.Result.Print()
-	res2 := _style.Parse_CssSnippet(content, "initial", "selector", false, false)
+	res2 := _style.Parse_CssSnippet(content, "initial", "selector", false)
 	res2.Result.Print()
 }
 

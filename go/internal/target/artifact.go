@@ -14,18 +14,10 @@ func Artifact(index int) _types_.Style_ExportStyle {
 	element := ""
 	innertext := ""
 	symclass := ""
-	stylesheet := [][2]string{}
-	attributes := [][2]string{}
+	stylesheet := map[string]string{}
+	attributes := map[string]string{}
 
-	if style := _action.Index_Fetch(index); style != nil && _string.Contains(style.SymClass, "$$$") {
-		blockseq := _css.NewBlockSeq()
-		style.StyleObject.BlockRange(func(k string, v *_css.T_Block) {
-			blockseq.AddNewBlock(k, v)
-			v.BlockRange(func(k string, v *_css.T_Block) {
-				stylesheet = append(stylesheet, [2]string{k, v.Format(true)})
-			})
-		})
-
+	if style := _action.Index_Fetch(index); style != nil {
 		if len(style.StapleSnippet) > 0 {
 			element = "staple"
 			innertext = style.StapleSnippet
@@ -33,8 +25,8 @@ func Artifact(index int) _types_.Style_ExportStyle {
 			element = "summon"
 			innertext = style.Metadata.Summon
 		} else {
-			innertext = style.StyleSnippet.Format(true)
 			element = "style"
+			innertext = style.StyleSnippet.Format(true)
 		}
 
 		if _string.Contains(style.Definent, "$$$") {
@@ -42,9 +34,18 @@ func Artifact(index int) _types_.Style_ExportStyle {
 		} else {
 			symclass = "$---" + _util.String_EnCounter(style.Index)
 		}
-		for k, v := range style.Metadata.Attributes {
-			attributes = append(attributes, [2]string{k, _util.Code_Minify(v)})
+
+		isPublic := _string.Contains(style.SymClass, "$$$")
+		if isPublic {
+			for k, v := range style.Metadata.Attributes {
+				attributes[k] = _util.Code_Minify(v)
+			}
 		}
+
+		style.StyleObject.BlockRange(func(k string, v *_css.T_Block) {
+			stylesheet[k] = v.Format(true)
+		})
+
 	}
 
 	return _types_.Style_ExportStyle{
@@ -63,7 +64,6 @@ func (This *Class) GetArtifacts() map[string]_model.Style_ExportStyle {
 	for _, file := range This.FileCache {
 		for _, pubindex := range file.StyleData.PublicClasses {
 			exporting := Artifact(pubindex)
-			exports[exporting.SymClass] = exporting
 
 			for _, a := range _action.Index_Fetch(pubindex).Attachments {
 				if found := _action.Index_Find(a, file.StyleData.LocalClasses); found.Index > 0 {
@@ -72,6 +72,7 @@ func (This *Class) GetArtifacts() map[string]_model.Style_ExportStyle {
 					exports[subexporting.SymClass] = subexporting
 				}
 			}
+			exports[exporting.SymClass] = exporting
 		}
 	}
 

@@ -21,8 +21,8 @@ type Style_ExportStyle struct {
 	Element     string
 	SymClass    string
 	InnerText   string
-	Stylesheet  [][2]string
-	Attributes  [][2]string
+	Stylesheet  map[string]string
+	Attributes  map[string]string
 	Attachments []string
 }
 

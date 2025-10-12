@@ -77,7 +77,7 @@ func (This *Class) Savefile(filepath string, content string, hashindex int) {
 				metadata_map = _model.File_MetadataMap{}
 			}
 
-			response := _style.Rawtag_Upload(tagdata, &file, index_map, metadata_map, _config.Static.DEBUG)
+			response := _style.Rawtag_Upload(tagdata, &file, index_map, metadata_map)
 
 			file.Manifest.Errors = append(file.Manifest.Errors, response.Errors...)
 			file.Manifest.Diagnostics = append(file.Manifest.Diagnostics, response.Diagnostics...)
