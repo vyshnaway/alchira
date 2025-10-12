@@ -28,26 +28,26 @@ func title(input string) []string {
 
 	for i := 0; i < framecount*2; i++ {
 		frame := []string{"", "", _console.Divider(_console.Canvas.DivRune.Mid), ""}
-		preview = append(preview, _console.Format(_strings.Join(frame, "\n"), _console.Preset.Title, _console.Style.AS_Bold))
+		preview = append(preview, _console.Format(_strings.Join(frame, "\r\n"), _console.Preset.Title, _console.Style.AS_Bold))
 	}
 	for range framecount {
 		frame := []string{"", _console.Format(_console.Divider(_console.Canvas.DivRune.Top), _console.Preset.Title, _console.Style.AS_Underline), "", ""}
-		preview = append(preview, _console.Format(_strings.Join(frame, "\n"), _console.Preset.Title, _console.Style.AS_Bold))
+		preview = append(preview, _console.Format(_strings.Join(frame, "\r\n"), _console.Preset.Title, _console.Style.AS_Bold))
 	}
 	for range framecount {
 		line := "·" + _utils.String_PadBothSides("·", width-2) + "·"
 		frame := []string{"", _console.Divider(_console.Canvas.DivRune.Btm), line, _console.Divider(_console.Canvas.DivRune.Top), ""}
-		preview = append(preview, _console.Format(_strings.Join(frame, "\n"), _console.Preset.Title, _console.Style.AS_Bold))
+		preview = append(preview, _console.Format(_strings.Join(frame, "\r\n"), _console.Preset.Title, _console.Style.AS_Bold))
 	}
 	for range framecount {
 		line := ">" + _utils.String_PadBothSides("-", width-2) + "<"
 		frame := []string{"", _console.Divider(_console.Canvas.DivRune.Mid), line, _console.Divider(_console.Canvas.DivRune.Mid), ""}
-		preview = append(preview, _console.Format(_strings.Join(frame, "\n"), _console.Preset.Title, _console.Style.AS_Bold))
+		preview = append(preview, _console.Format(_strings.Join(frame, "\r\n"), _console.Preset.Title, _console.Style.AS_Bold))
 	}
 	for range framecount {
 		line := ">>" + _utils.String_PadBothSides("×", width-4) + "<<"
 		frame := []string{"", _console.Divider(_console.Canvas.DivRune.Top), line, _console.Divider(_console.Canvas.DivRune.Btm), ""}
-		preview = append(preview, _console.Format(_strings.Join(frame, "\n"), _console.Preset.Title, _console.Style.AS_Bold))
+		preview = append(preview, _console.Format(_strings.Join(frame, "\r\n"), _console.Preset.Title, _console.Style.AS_Bold))
 	}
 
 	rendered := []string{}

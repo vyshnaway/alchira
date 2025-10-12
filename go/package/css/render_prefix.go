@@ -92,7 +92,7 @@ func prefix_ForPseudos(content string, prefixes []string) []string {
 	selectors := []string{}
 	stringList := _util.String_ZeroBreaks(content, []rune{','})
 	for i, br := range stringList {
-		stringList[i] = _string.Trim(br, "\n\t \r")
+		stringList[i] = _string.Trim(br, "\r\n\t \r")
 	}
 
 	for _, str := range stringList {

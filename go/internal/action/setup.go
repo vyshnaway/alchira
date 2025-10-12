@@ -50,14 +50,14 @@ func Setup_Ignorefiles() {
 
 	project_ignores := []string{}
 	if result, err := _fileman.Read_File(ignorepath, false); err == nil {
-		for ig := range _string.SplitSeq(result, "\n") {
+		for ig := range _string.SplitSeq(result, "\r\n") {
 			project_ignores = append(project_ignores, _string.Trim(ig, "\r\t "))
 		}
 
 	}
 
 	points := 0
-	default_ignores := _string.SplitSeq(_config.Path_Autogen["ignore"].Content, "\n")
+	default_ignores := _string.SplitSeq(_config.Path_Autogen["ignore"].Content, "\r\n")
 	for ignore := range default_ignores {
 		if !_slice.Contains(project_ignores, ignore) {
 			points++
@@ -65,7 +65,7 @@ func Setup_Ignorefiles() {
 		}
 	}
 	if points > 0 {
-		_fileman.Write_File(ignorepath, _string.Join(project_ignores, "\n"))
+		_fileman.Write_File(ignorepath, _string.Join(project_ignores, "\r\n"))
 	}
 }
 

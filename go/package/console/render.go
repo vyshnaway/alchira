@@ -9,12 +9,12 @@ import (
 
 // ANSI escape codes for terminal manipulation
 const (
-	ansi_MoveUp         = "\033[%dA"
-	ansi_MoveLeft       = "\033[%dD"
-	ansi_ClearConsole   = "\033[2J"
-	ansi_MoveToHome     = "\033[H"
-	ansi_ClearToBottom  = "\033[J"
-	ansi_ClearLine      = "\033[2K"
+	ansi_MoveUp        = "\033[%dA"
+	ansi_MoveLeft      = "\033[%dD"
+	ansi_ClearConsole  = "\033[2J"
+	ansi_MoveToHome    = "\033[H"
+	ansi_ClearToBottom = "\033[J"
+	ansi_ClearLine     = "\033[2K"
 )
 
 // Backspace moves the cursor back by the specified number of characters and clears the line
@@ -36,7 +36,7 @@ func render_Write(str string, backRows int) int {
 		_fmt.Print(ansi_ClearConsole)
 		_fmt.Print(ansi_MoveToHome)
 	}
-	rowsCreated := len(_strings.Split(str, "\n"))
+	rowsCreated := len(_strings.Split(str, "\r\n"))
 	_fmt.Println(str)
 	return rowsCreated
 }

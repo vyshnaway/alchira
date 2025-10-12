@@ -91,8 +91,8 @@ func Tag_Scanner(
 			}
 
 			if deviance == 0 && attr.Len() > 0 && _slice.Contains([]rune{' ', '\n', '\r', '>', '\t'}, ch) {
-				tr_Attr := _string.Trim(attr.String(), " \t\n")
-				tr_Value := _string.Trim(value.String(), " \t\n")
+				tr_Attr := _string.Trim(attr.String(), " \t\r\n")
+				tr_Value := _string.Trim(value.String(), " \t\r\n")
 				if len(styleDeclarations.Element) == 0 {
 					if elid, elok := _config.Root.CustomElements[tr_Attr]; elok {
 						styleDeclarations.Elid = elid
@@ -101,7 +101,7 @@ func Tag_Scanner(
 					styleDeclarations.Elvalue = tr_Value
 				} else if tr_Attr == "&" {
 					if len(tr_Value) > 3 {
-						for _, line := range _string.Split(tr_Value[1:len(tr_Value)-2], "\n") {
+						for _, line := range _string.Split(tr_Value[1:len(tr_Value)-2], "\r\n") {
 							commentTrimmed := _string.Trim(line, "\t ")
 							if len(commentTrimmed) > 0 {
 								styleDeclarations.Comments = append(styleDeclarations.Comments, commentTrimmed)
@@ -152,7 +152,7 @@ func Tag_Scanner(
 					nativeAttributes[tr_Attr] = tr_Value
 				}
 
-				isVal = false 
+				isVal = false
 				attr.Reset()
 				value.Reset()
 			}

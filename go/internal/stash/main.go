@@ -55,5 +55,5 @@ func UtilsGetUsage() string {
 	for k, v := range chart {
 		result = append(result, _fmt.Sprintf("%s : %.2f Kb", k, float64(v)))
 	}
-	return _string.Join(result, "\n")
+	return _string.Join(result, "\r\n")
 }

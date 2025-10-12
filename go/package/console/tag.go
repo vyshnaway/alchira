@@ -31,22 +31,22 @@ func tag_H1(content string, preset []string, styles ...string) string {
 		rightPad := _strings.Repeat(" ", (padding+1)/2)
 		paddedLines = append(paddedLines, ">>>"+leftPad+line+rightPad+"<<<")
 	}
-	s := "\n" + Divider(Canvas.DivRune.Mid) + "\n" + _strings.Join(paddedLines, "\n") + "\n" + Divider(Canvas.DivRune.Mid) + "\n\n"
+	s := "\r\n" + Divider(Canvas.DivRune.Mid) + "\r\n" + _strings.Join(paddedLines, "\r\n") + "\r\n" + Divider(Canvas.DivRune.Mid) + "\r\n\r\n"
 	return Format(s, preset, styles...)
 }
 
 func tag_H2(content string, preset []string, styles ...string) string {
-	s := Divider(Canvas.DivRune.Mid) + "\n" + content + "\n" + Divider(Canvas.DivRune.Mid) + "\n"
+	s := Divider(Canvas.DivRune.Mid) + "\r\n" + content + "\r\n" + Divider(Canvas.DivRune.Mid) + "\r\n"
 	return Format(s, preset, styles...)
 }
 
 func tag_H3(content string, preset []string, styles ...string) string {
-	s := "\n" + content + "\n" + Divider(Canvas.DivRune.Mid)
+	s := "\r\n" + content + "\r\n" + Divider(Canvas.DivRune.Mid)
 	return Format(s, preset, styles...)
 }
 
 func tag_H4(content string, preset []string, styles ...string) string {
-	s := Divider(Canvas.DivRune.Mid) + "\n" + content + "\n"
+	s := Divider(Canvas.DivRune.Mid) + "\r\n" + content + "\r\n"
 	return Format(s, preset, styles...)
 }
 
@@ -68,7 +68,7 @@ func tag_H6(content string, preset []string, styles ...string) string {
 
 func tag_P(content string, preset []string, styles ...string) string {
 	s := Canvas.Tab + content
-	return Format(s, preset, styles...) + "\n"
+	return Format(s, preset, styles...) + "\r\n"
 }
 
 func tag_Span(content string, preset []string, styles ...string) string {
@@ -87,7 +87,7 @@ func tag_Hr(content string, preset []string, styles ...string) string {
 	if len(repeated) > width {
 		repeated = repeated[:width]
 	}
-	s := "\n" + repeated + "\n"
+	s := "\r\n" + repeated + "\r\n"
 	return Format(s, preset, styles...)
 }
 
@@ -95,7 +95,7 @@ func tag_Br(repeat int, preset []string, styles ...string) string {
 	if repeat < 0 {
 		repeat = 0
 	}
-	return Format(_strings.Repeat("\n", repeat), preset, styles...)
+	return Format(_strings.Repeat("\r\n", repeat), preset, styles...)
 }
 
 func tag_Tab(repeat int, preset []string, styles ...string) string {

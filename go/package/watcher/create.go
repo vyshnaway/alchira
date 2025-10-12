@@ -1,6 +1,7 @@
 package event
 
 import (
+	"errors"
 	_fmt "fmt"
 	_fileman "main/package/fileman"
 	_os "os"
@@ -9,11 +10,11 @@ import (
 	_sync "sync"
 	_time "time"
 
-	_fsnotify_ "github.com/fsnotify/fsnotify"
+	_watcher "github.com/radovskyb/watcher"
 )
 
-func Create(folders, ignores []string) (instance *Watcher, err error) {
-	WATCHER := Watcher{
+func Create(folders, ignores []string, interval int) (instance *T_Watcher, err error) {
+	WATCHER := T_Watcher{
 		mutex: _sync.Mutex{},
 		queue: []Event{},
 	}
@@ -32,17 +33,6 @@ func Create(folders, ignores []string) (instance *Watcher, err error) {
 	for _, p := range ignores {
 		abs, _ := _fileman.Path_Resolves(p)
 		resolvedIgnores = append(resolvedIgnores, abs)
-	}
-
-	w, err := _fsnotify_.NewWatcher()
-	if err != nil {
-		return nil, err
-	}
-
-	for _, folder := range resolvedFolders {
-		if err := w.Add(folder); err != nil {
-			return nil, err
-		}
 	}
 
 	handleEvent := func(action E_Action, filePath string) {
@@ -75,41 +65,46 @@ func Create(folders, ignores []string) (instance *Watcher, err error) {
 		WATCHER.Add(event)
 	}
 
+	w := _watcher.New()
+	w.SetMaxEvents(1)
+	w.FilterOps(_watcher.Move, _watcher.Remove, _watcher.Write, _watcher.Rename, _watcher.Create)
+
+	errs := []error{}
+	for _, folder := range resolvedFolders {
+		if err := w.AddRecursive(folder); err != nil {
+			errs = append(errs, err)
+		}
+	}
+	w.Ignore(resolvedIgnores...)
+
 	done := make(chan struct{})
 	go func() {
-		defer w.Close()
 		for {
 			select {
-			case event, ok := <-w.Events:
+			case event, ok := <-w.Event:
+				_fmt.Println("event")
 				if !ok {
 					return
 				}
 				var act E_Action
-				switch {
-				case event.Op&_fsnotify_.Create == _fsnotify_.Create:
+				switch event.Op {
+				case _watcher.Create:
 					fallthrough
-				case event.Op&_fsnotify_.Write == _fsnotify_.Write:
+				case _watcher.Rename:
+					fallthrough
+				case _watcher.Write:
 					act = E_Action_Update
-				case event.Op&_fsnotify_.Remove == _fsnotify_.Remove:
-					act = E_Action_Unlink
+				case _watcher.Move:
+					fallthrough
+				case _watcher.Remove:
+					act = E_Action_Refactor
 				default:
 					act = E_Action_Access
 				}
-				if act != E_Action_Access {
-					ignore := false
-					for _, ig := range resolvedIgnores {
-						if _fileman.Path_IsSubpath(event.Name, ig) {
-							ignore = true
-							break
-						}
-					}
-					if !ignore {
-						handleEvent(act, event.Name)
-					}
-				}
-			case err, ok := <-w.Errors:
+				handleEvent(act, event.Name())
+			case err, ok := <-w.Error:
 				if ok {
-					_fmt.Fprintf(_os.Stderr, "Watcher error: %v\n", err)
+					_fmt.Fprintf(_os.Stderr, "Watcher error: %v\r\n", err)
 				}
 			case <-done:
 				return
@@ -117,6 +112,16 @@ func Create(folders, ignores []string) (instance *Watcher, err error) {
 		}
 	}()
 
-	WATCHER.Close = func() { close(done) }
-	return &WATCHER, nil
+	go func() {
+		err := w.Start(_time.Millisecond * _time.Duration(interval))
+		if err != nil {
+			_fmt.Fprintf(_os.Stderr, "Watcher start error: %v\r\n", err)
+		}
+	}()
+
+	WATCHER.Close = func() {
+		close(done)
+		w.Close()
+	}
+	return &WATCHER, errors.Join(errs...)
 }

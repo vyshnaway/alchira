@@ -91,7 +91,7 @@ func Delete_Folder(folderPath string, extensions, ignorePaths []string) (err err
 		isEmpty, checkErr := helper_IsDirEmpty(subFolder)
 		if checkErr != nil {
 			// Log error but continue
-			_fmt.Printf("Warning: Could not check if directory '%s' is empty: %v\n", subFolder, checkErr)
+			_fmt.Printf("Warning: Could not check if directory '%s' is empty: %v\r\n", subFolder, checkErr)
 			continue
 		}
 		if isEmpty {

@@ -22,7 +22,7 @@ func color_Investigate(cursor *_Cursor_.Type, palette string) []float64 {
 
 		if deviance == 0 && (ch == ')' || ch == ',' || ch == ' ' || ch == '/') {
 
-			trimmed := _strings_.Trim(value.String(), " \t\n")
+			trimmed := _strings_.Trim(value.String(), " \t\r\n")
 			if len(trimmed) > 0 {
 
 				if _strings_.HasSuffix(trimmed, "deg") {
@@ -105,7 +105,6 @@ func Color_FallbackGen(
 	var capture _strings_.Builder
 	cursor := _Cursor_.New(content)
 	for ch, streaming := cursor.Active.Char, cursor.Streaming; streaming; ch, streaming = cursor.Increment() {
-		
 
 		if regex_isAlNum.MatchString(string(ch)) {
 			capture.WriteRune(ch)

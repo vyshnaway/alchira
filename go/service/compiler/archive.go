@@ -32,7 +32,7 @@ func archive_Build() _models.Config_Archive {
 			archive.ExportClasses = append(archive.ExportClasses, data.SymClass)
 		}
 
-		exportsheet.WriteString("\n\n")
+		exportsheet.WriteString("\r\n\r\n")
 
 		exportsheet.WriteString("<")
 		exportsheet.WriteString(data.Element)

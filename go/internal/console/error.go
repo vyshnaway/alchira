@@ -14,7 +14,7 @@ func Error_Hashrule(
 	preview *O.T[string, string],
 ) error_return {
 	preview.Set("ERROR BY", S.Format(cause, S.Preset.None, S.Style.AS_Bold, S.Style.TC_Normal_Red))
-	var errstring = S.Tag.Li(S.Format(source, S.Preset.Tertiary), S.Preset.Failed, S.Style.AS_Bold) + "\n " + S.Tag.Tab(1, S.Preset.None) + S.MAKE(
+	var errstring = S.Tag.Li(S.Format(source, S.Preset.Tertiary), S.Preset.Failed, S.Style.AS_Bold) + "\r\n " + S.Tag.Tab(1, S.Preset.None) + S.MAKE(
 		S.Format(primitive, S.Preset.Primary)+" : "+S.Format(message, S.Preset.Failed),
 		List_Props(preview, S.Preset.Primary, S.Preset.Tertiary),
 		S.MakeList{TypeFunc: S.List.Waterfall, Intent: 1, Preset: S.Preset.Primary},

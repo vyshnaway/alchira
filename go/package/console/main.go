@@ -13,7 +13,6 @@ type MakeList struct {
 	Styles   []string
 }
 
-
 // MAKE constructs output from heading, contents, and deployments
 func MAKE(heading string, contents []string, deployments ...MakeList) string {
 	modContents := make([]string, len(contents))
@@ -29,7 +28,7 @@ func MAKE(heading string, contents []string, deployments ...MakeList) string {
 		outList = append(outList, Format(heading, Preset.None, Style.AS_Bold))
 	}
 	outList = append(outList, modContents...)
-	return _strings.Join(outList, "\n")
+	return _strings.Join(outList, "\r\n")
 }
 
 func TASK(str string, rowShift int) {

@@ -10,7 +10,7 @@ const (
 	E_Action_Reload E_Action = iota
 	E_Action_Access
 	E_Action_Update
-	E_Action_Unlink
+	E_Action_Refactor
 )
 
 type Event struct {
@@ -22,19 +22,19 @@ type Event struct {
 	Extension   string
 }
 
-type Watcher struct {
+type T_Watcher struct {
 	mutex _sync.Mutex
 	queue []Event
 	Close func()
 }
 
-func (This *Watcher) Add(event Event) {
+func (This *T_Watcher) Add(event Event) {
 	This.mutex.Lock()
 	defer This.mutex.Unlock()
 	This.queue = append(This.queue, event)
 }
 
-func (This *Watcher) Pull() *Event {
+func (This *T_Watcher) Pull() *Event {
 	This.mutex.Lock()
 	defer This.mutex.Unlock()
 	if len(This.queue) == 0 {
@@ -45,19 +45,19 @@ func (This *Watcher) Pull() *Event {
 	return &evt
 }
 
-func (This *Watcher) Clear() {
+func (This *T_Watcher) Clear() {
 	This.mutex.Lock()
 	defer This.mutex.Unlock()
 	This.queue = This.queue[:0]
 }
 
-func (This *Watcher) Reset() {
+func (This *T_Watcher) Reset() {
 	This.mutex.Lock()
 	defer This.mutex.Unlock()
 	This.queue = []Event{}
 }
 
-func (This *Watcher) Length() int {
+func (This *T_Watcher) Length() int {
 	This.mutex.Lock()
 	defer This.mutex.Unlock()
 	return len(This.queue)

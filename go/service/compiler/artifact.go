@@ -81,7 +81,7 @@ func artifact_Fetch(identifier string, source string) (Files map[string]string, 
 			lines = append(lines, "")
 			lines = append(lines, fetched.ExportSheet)
 
-			files[_fileman.Path_Join(artifactspath, identifier, identifier+"."+_config.Root.Extension)] = _string.Join(lines, "\n")
+			files[_fileman.Path_Join(artifactspath, identifier, identifier+"."+_config.Root.Extension)] = _string.Join(lines, "\r\n")
 			fetched.ExportSheet = ""
 		}
 	}

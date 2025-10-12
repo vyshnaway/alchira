@@ -48,7 +48,7 @@ func Update_Target(event _watcher.Event) {
 			_config.Delta.Path = _fileman.Path_Join(_config.Static.TargetDir_Saved[event.Folder].Source, event.FilePath)
 			_config.Delta.Content = event.FileContent
 		}
-	case _watcher.E_Action_Unlink:
+	case _watcher.E_Action_Refactor:
 		if targetStruct, ok := _config.Static.TargetDir_Saved[event.Folder]; ok {
 			delete(targetStruct.Filepath_to_Content, event.FilePath)
 		}

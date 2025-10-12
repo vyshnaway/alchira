@@ -105,7 +105,7 @@ func Generate_Files() (Files map[string]string, Report string) {
 			frags := []string{}
 			for _, i := range render_frags {
 				if _config.Static.DEBUG {
-					frags = append(frags, _fmt.Sprint("\n\n/* Section: ", i.key, " */\n", i.val))
+					frags = append(frags, _fmt.Sprint("\r\n\r\n/* Section: ", i.key, " */\r\n", i.val))
 				} else {
 					frags = append(frags, i.val)
 				}
@@ -186,6 +186,7 @@ func Generate_Files() (Files map[string]string, Report string) {
 	} {
 		if len(s) > 0 {
 			builder.WriteString(s)
+			builder.WriteRune('\r')
 			builder.WriteRune('\n')
 		}
 	}

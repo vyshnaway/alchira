@@ -21,7 +21,7 @@ func SetMinification(active bool) {
 	} else {
 		_tab = "	"
 		_space = " "
-		_break = "\n"
+		_break = "\r\n"
 	}
 }
 

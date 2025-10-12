@@ -92,5 +92,5 @@ func Read_Files(filepath_array []string) string {
 		reading = append(reading, read_File(filePath, resolved_files))
 	}
 
-	return _string.Join(reading, "\n")
+	return _string.Join(reading, "\r\n")
 }

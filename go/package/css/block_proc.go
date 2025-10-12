@@ -204,7 +204,7 @@ func (This *T_Block) format(minify bool) []string {
 }
 
 func (This *T_Block) Format(minify bool) string {
-	br := "\n"
+	br := "\r\n"
 	if minify {
 		br = ""
 	}
@@ -212,7 +212,7 @@ func (This *T_Block) Format(minify bool) string {
 }
 
 func (This *T_Block) Print() *T_Block {
-	_fmt.Println("\n---\n" + This.Format(false) + "\n---\n")
+	_fmt.Println("\r\n---\r\n" + This.Format(false) + "\r\n---\r\n")
 	return This
 }
 

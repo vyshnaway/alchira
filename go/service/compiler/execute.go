@@ -38,11 +38,12 @@ const (
 
 func Execute(heading string) (Exitcode int) {
 	exitcode := 0
+	const interval = 100
 	step := execute_Step_Initialize
 	report := ""
 	report_next := false
 	outfiles := map[string]string{}
-	var watcher *_watcher.Watcher
+	var watcher *_watcher.T_Watcher
 	var save_action _sync.WaitGroup
 
 	for {
@@ -135,7 +136,7 @@ func Execute(heading string) (Exitcode int) {
 					}
 
 					X.Report("Initial Build", watch_dirs, report, []string{})
-					if w, err := _watcher.Create(watch_dirs, ignore_dirs); err == nil {
+					if w, err := _watcher.Create(watch_dirs, ignore_dirs, interval); err == nil {
 						watcher = w
 						sigs := make(chan _os.Signal, 1)
 						_signal.Notify(sigs, _syscall.SIGINT)
@@ -145,7 +146,7 @@ func Execute(heading string) (Exitcode int) {
 							if w != nil {
 								w.Close()
 								w = nil
-								S.Render.Write("\n", 2)
+								S.Render.Write("\r\n", 2)
 							}
 							_os.Exit(0)
 						}()
@@ -158,8 +159,9 @@ func Execute(heading string) (Exitcode int) {
 					}
 				}
 
-				if watcher.Length() > 8 {
+				if watcher.Length() > 12 {
 					watcher.Reset()
+					watcher = nil
 					step = execute_Step_Initialize
 				} else if event := watcher.Pull(); event != nil {
 					filepath := _fileman.Path_Join(event.Folder, event.FilePath)
@@ -192,7 +194,7 @@ func Execute(heading string) (Exitcode int) {
 						} else {
 							step = execute_Step_VerifySetupStruct
 						}
-					} else if event.Action == _watcher.E_Action_Update || event.Action == _watcher.E_Action_Unlink {
+					} else if event.Action == _watcher.E_Action_Update || event.Action == _watcher.E_Action_Refactor {
 						Update_Target(*event)
 						step = execute_Step_GenerateFiles
 					} else {
@@ -203,7 +205,7 @@ func Execute(heading string) (Exitcode int) {
 					report_next = true
 				}
 
-				_time.Sleep(20 * _time.Millisecond)
+				_time.Sleep(interval * _time.Millisecond)
 			}
 
 		}
