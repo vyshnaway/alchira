@@ -13,13 +13,13 @@ func Report(heading string, targets []string, report string, footer []string) {
 		"",
 		[]string{
 			S.MAKE(
-				S.Tag.H1(heading, S.Preset.Primary),
+				S.Tag.H2(heading, S.Preset.None),
 				targetlist,
-				S.MakeList{TypeFunc: S.List.Bullets, Intent: 0, Preset: S.Preset.Primary},
+				S.MakeList{TypeFunc: S.List.Bullets, Intent: 0, Preset: S.Preset.Tertiary},
 			),
 			report,
 			S.MAKE(
-				S.Tag.H5("Press Ctrl+C to stop watching.", S.Preset.Failed),
+				S.Tag.H4("Press Ctrl+C to stop watching.", S.Preset.Failed),
 				footer,
 				S.MakeList{TypeFunc: S.List.Catalog, Intent: 0, Preset: S.Preset.Tertiary},
 			),

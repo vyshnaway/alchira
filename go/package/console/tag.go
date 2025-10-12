@@ -54,7 +54,7 @@ func tag_H5(content string, preset []string, styles ...string) string {
 	width := Canvas.Width()
 	tabLen := len(Canvas.Tab)
 	remain := width - int(_math.Remainder(float64(tabLen+len(content)), float64(width)))
-	s := content + Canvas.Tab + Divider(Canvas.DivRune.Mid)[:remain] + "\n"
+	s := content + Canvas.Tab + _strings.Repeat(string(Canvas.DivRune.Mid), remain)
 	return Format(s, preset, styles...)
 }
 

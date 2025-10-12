@@ -40,9 +40,7 @@ func Execute(heading string) (Exitcode int) {
 	exitcode := 0
 	step := execute_Step_Initialize
 	report := ""
-	targets := []string{}
 	report_next := false
-	cycle_one := true
 	outfiles := map[string]string{}
 	var watcher *_watcher.Watcher
 	var save_action _sync.WaitGroup
@@ -70,12 +68,10 @@ func Execute(heading string) (Exitcode int) {
 			fallthrough
 
 		case execute_Step_VerifyConfigs:
-			if res_report, res_status := _action.Verify_Configs(cycle_one); !res_status {
+			if res_report, res_status := _action.Verify_Configs(false); !res_status {
 				report = res_report
 				step = execute_Step_WatchFolders
 				break
-			} else {
-				cycle_one = false
 			}
 			fallthrough
 
@@ -88,7 +84,7 @@ func Execute(heading string) (Exitcode int) {
 			fallthrough
 
 		case execute_Step_ReadHashrule:
-			if res_report, res_status := _action.SaveHashrule(); !res_status {
+			if res_report, res_status := _action.Save_Hashrule(); !res_status {
 				report = res_report
 				step = execute_Step_WatchFolders
 				break
@@ -119,7 +115,7 @@ func Execute(heading string) (Exitcode int) {
 				}()
 			}
 			if report_next {
-				X.Report(heading, targets, report, []string{})
+				X.Report(heading, []string{}, report, []string{})
 				report_next = false
 			}
 			fallthrough
@@ -138,6 +134,7 @@ func Execute(heading string) (Exitcode int) {
 						_config.Path_Folder["archive"].Path,
 					}
 
+					X.Report("Initial Build", watch_dirs, report, []string{})
 					if w, err := _watcher.Create(watch_dirs, ignore_dirs); err == nil {
 						watcher = w
 						sigs := make(chan _os.Signal, 1)

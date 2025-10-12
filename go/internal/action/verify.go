@@ -78,7 +78,7 @@ type Verify_ProxyMapDependency_return struct {
 	Messages []string
 }
 
-func Verify_Configs(loadvendors bool) (Report string, Status bool) {
+func Verify_Configs(remote_vendors bool) (Report string, Status bool) {
 	Setup_Ignorefiles()
 	if data, err := _fileman.Read_File(_config.Path_Files["readme"].Path, false); err == nil {
 		_config.Archive.Readme = data
@@ -102,10 +102,8 @@ func Verify_Configs(loadvendors bool) (Report string, Status bool) {
 		if config, err := _util.Code_JsonParse[_model.Config_Raw](config_data); err != nil {
 			errors = append(errors, config_path+" : Bad json/ Incomplete schema.")
 		} else {
-			if loadvendors {
-				S.TASK("Updating vendor-prefixes", 1)
-				Sync_SaveVendors(config.Vendors)
-			}
+			S.TASK("Updating vendor-prefixes", 1)
+			Sync_SaveVendors(config.Vendors, remote_vendors)
 
 			Setup_Tweaks(config.Tweaks)
 

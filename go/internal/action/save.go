@@ -36,7 +36,7 @@ func Save_Targets() {
 	_config.Static.TargetDir_Saved = Sync_ProxyMapDirs(_config.Static.ProxyMap)
 }
 
-func SaveHashrule() (Report string, Status bool) {
+func Save_Hashrule() (Report string, Status bool) {
 
 	S.TASK("Saving Hashrule", 1)
 

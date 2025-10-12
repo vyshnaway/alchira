@@ -47,20 +47,22 @@ func Sync_RootDocs() {
 	wg.Wait()
 }
 
-func Sync_SaveVendors(vendor_source string) {
+func Sync_SaveVendors(vendor_source string, try_remote bool) {
 
 	newdata := false
 	vendor_path := _config.Path_Json["vendors"].Path
 
 	content := func() string {
 
-		if r, e := _fileman.Read_File(vendor_source, true); e == nil {
-			newdata = true
-			return r
-		}
-		if r, e := _fileman.Read_File(_config.Root.Url.Vendors+vendor_source, true); e == nil {
-			newdata = true
-			return r
+		if try_remote {
+			if r, e := _fileman.Read_File(vendor_source, true); e == nil {
+				newdata = true
+				return r
+			}
+			if r, e := _fileman.Read_File(_config.Root.Url.Vendors+vendor_source, true); e == nil {
+				newdata = true
+				return r
+			}
 		}
 		if r, e := _fileman.Read_File(vendor_path, false); e == nil {
 			return r
