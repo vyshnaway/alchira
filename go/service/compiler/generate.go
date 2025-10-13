@@ -88,7 +88,7 @@ func Generate_Files() (Files map[string]string, Report string) {
 				val: _css.Render_Sequence(func() *_css.T_BlockSeq {
 					appendix_styles := _css.NewBlockSeq()
 					for _, cache := range _stash.Cache.Targetdir {
-						scanned := _style.Cssfile_String(cache.StylesheetContent, `APPENDIX : `+cache.Stylesheet+" | ", _config.Static.DEBUG)
+						scanned := _style.Cssfile_String(cache.StylesheetContent, `APPENDIX : `+cache.Stylesheet+" | ")
 						appendix_styles.Append(scanned.Result.Units...)
 						for _, attachment := range scanned.Attachments {
 							if res := _action.Index_Find(attachment, _model.Style_ClassIndexMap{}); res.Index > 0 {
@@ -119,7 +119,7 @@ func Generate_Files() (Files map[string]string, Report string) {
 				func() *_css.T_Block {
 					res := _css.NewBlock()
 					for i, d := range _config.Style.Index_to_Data {
-						res.SetBlock("."+d.Metadata.WatchClass, _action.Index_Fetch(i).StyleObject)
+						res.SetBlock("."+d.WatchClass, _action.Index_Fetch(i).StyleObject)
 					}
 					return res
 				}(), _config.Static.MINIFY,

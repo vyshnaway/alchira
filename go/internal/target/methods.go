@@ -33,7 +33,7 @@ func (This *Class) Accumulator() Accumulator_return {
 		Global:      _model.File_MetadataMap{},
 		Public:      _model.File_MetadataMap{},
 		Errors:      []string{},
-		Diagnostics: []_model.Refer_Diagnostic{},
+		Diagnostics: []_model.File_Diagnostic{},
 	}
 
 	for _, file := range This.FileCache {
@@ -98,7 +98,7 @@ func (This *Class) SyncClassnames(action _script.E_Action) {
 			watchprops,
 			action,
 		)
-		
+
 		file.Scratch = res.Scribed
 		file.StyleData.TagReplacements = res.Replacements
 	}

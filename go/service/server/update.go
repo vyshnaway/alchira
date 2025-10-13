@@ -3,11 +3,14 @@ package server
 import (
 	_config "main/configs"
 	_action "main/internal/action"
+	K "main/internal/console"
 	_stash "main/internal/stash"
 	_style "main/internal/style"
+	_model "main/models"
 	_fileman "main/package/fileman"
 	_util "main/package/utils"
 	_watcher "main/package/watcher"
+	_map "maps"
 )
 
 func Update_Scaffold() {
@@ -18,22 +21,15 @@ func Update_Scaffold() {
 	_config.Manifest_Reset()
 
 	_stash.Reset()
-	_stash.Artifact_Update(_config.Static.DEBUG)
-	_stash.Library_Update(_config.Static.DEBUG)
+	_stash.Artifact_Update()
+	_stash.Library_Update()
 
-	index_scanned := _style.Cssfile_String(
-		_util.Code_Uncomment(_config.Static.RootCSS, false, true, false),
-		"INDEX | ",
-		_config.Static.DEBUG,
-	)
+	index_scanned := _style.Cssfile_String(_util.Code_Uncomment(_config.Static.RootCSS, false, true, false), "")
 	_config.Manifest.Constants = index_scanned.Variables.ToMap()
 }
 
-func Build_Targets() {
-	Update_Target(_watcher.Event{Action: _watcher.E_Action_Reload})
-}
-
-func Update_Target(event _watcher.Event) {
+func Update_Manifest(event _watcher.Event) {
+	rebuildManifest := false
 	switch event.Action {
 	case _watcher.E_Action_Update:
 		if targetStruct, ok := _config.Static.TargetDir_Saved[event.Folder]; ok &&
@@ -43,7 +39,7 @@ func Update_Target(event _watcher.Event) {
 		} else if _, ok := _config.Static.TargetDir_Saved[event.Folder].Extensions[event.Extension]; ok {
 			_config.Static.TargetDir_Saved[event.Folder].Filepath_to_Content[event.FilePath] = event.FileContent
 			_config.Delta.Path = _fileman.Path_Join(_config.Static.TargetDir_Saved[event.Folder].Source, event.FilePath)
-			_stash.Target_UpdateDirs()
+			rebuildManifest = true
 		} else {
 			_config.Delta.Path = _fileman.Path_Join(_config.Static.TargetDir_Saved[event.Folder].Source, event.FilePath)
 			_config.Delta.Content = event.FileContent
@@ -54,6 +50,61 @@ func Update_Target(event _watcher.Event) {
 		}
 	default:
 		_style.Hashrule_Upload()
-		_stash.Target_UpdateDirs()
+		rebuildManifest = true
 	}
+
+	if rebuildManifest {
+		_stash.Target_UpdateDirs()
+		accumulated := _stash.Target_Accumulate()
+
+		_config.Style.Global___Index = accumulated.GlobalClasses
+		_config.Style.Public___Index = accumulated.PublicClasses
+		_config.Delta.Report.TargetDir = accumulated.Report
+
+		_config.Manifest.Group.Local = map[string]_model.File_MetadataMap{}
+		_config.Manifest.Group.Global = map[string]_model.File_MetadataMap{}
+
+		_config.Delta.Error.TargetDir = []string{}
+		_config.Delta.Lookup.TargetDir = map[string]_model.File_Lookup{}
+		_config.Delta.Diagnostic.TargetDir = []_model.File_Diagnostic{}
+
+		for key, val := range accumulated.FileManifests {
+			_config.Manifest.Group.Local[key] = val.Local
+			_config.Delta.Lookup.TargetDir[key] = val.Lookup
+			_config.Delta.Diagnostic.TargetDir = append(_config.Delta.Diagnostic.TargetDir, val.Diagnostics...)
+
+			mergedMap := make(_model.File_MetadataMap)
+			_map.Copy(mergedMap, val.Public)
+			_map.Copy(mergedMap, val.Global)
+			_config.Manifest.Group.Global[key] = mergedMap
+		}
+
+		_config.Manifest.Lookup = map[string]_model.File_Lookup{}
+		_map.Copy(_config.Manifest.Lookup, _config.Delta.Lookup.Artifacts)
+		_map.Copy(_config.Manifest.Lookup, _config.Delta.Lookup.Libraries)
+		_map.Copy(_config.Manifest.Lookup, _config.Delta.Lookup.TargetDir)
+
+		_config.Delta.Diagnostic.Multiples = []_model.File_Diagnostic{}
+		for _, val := range _config.Style.Index_to_Data {
+			if len(val.Metadata.Declarations) > 1 {
+				error_ := K.Error_Standard("Duplicate Declarations: "+val.SymClass, val.Metadata.Declarations)
+				_config.Delta.Diagnostic.Multiples = append(_config.Delta.Diagnostic.Multiples, error_.Diagnostic)
+			}
+		}
+
+		diagnostics := []_model.File_Diagnostic{}
+		diagnostics = append(diagnostics, _config.Delta.Diagnostic.Hashrules...)
+		diagnostics = append(diagnostics, _config.Delta.Diagnostic.Artifacts...)
+		diagnostics = append(diagnostics, _config.Delta.Diagnostic.Handoffs...)
+		diagnostics = append(diagnostics, _config.Delta.Diagnostic.Axioms...)
+		diagnostics = append(diagnostics, _config.Delta.Diagnostic.Clusters...)
+		diagnostics = append(diagnostics, _config.Delta.Diagnostic.Multiples...)
+		diagnostics = append(diagnostics, _config.Delta.Diagnostic.TargetDir...)
+		_config.Manifest.Diagnostics = diagnostics
+
+	}
+}
+
+func ReBuild_Manifest() {
+	Update_Manifest(_watcher.Event{Action: _watcher.E_Action_Reload})
 }

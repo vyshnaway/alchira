@@ -71,14 +71,14 @@ func artifact_Clear() {
 	}
 }
 
-func Artifact_Update(debug bool) {
+func Artifact_Update() {
 
 	SaveArtifactFile_ := artifact_CacheFiles()
 	_config.Delta.Lookup.Artifacts = SaveArtifactFile_.Lookup
 
 	_config.Manifest.Group.Artifact = map[string]_model.File_MetadataMap{}
 	_config.Delta.Error.Artifacts = []string{}
-	_config.Delta.Diagnostic.Artifacts = []_model.Refer_Diagnostic{}
+	_config.Delta.Diagnostic.Artifacts = []_model.File_Diagnostic{}
 	artifact_chart := O.New[string, []string]()
 	artifact_counter := 0
 	for _, file := range SaveArtifactFile_.Files {

@@ -24,7 +24,7 @@ func accumulate() {
 
 	_config.Delta.Error.TargetDir = []string{}
 	_config.Delta.Lookup.TargetDir = map[string]_model.File_Lookup{}
-	_config.Delta.Diagnostic.TargetDir = []_model.Refer_Diagnostic{}
+	_config.Delta.Diagnostic.TargetDir = []_model.File_Diagnostic{}
 
 	for key, val := range accumulated.FileManifests {
 		_config.Manifest.Group.Local[key] = val.Local
@@ -44,7 +44,7 @@ func accumulate() {
 	_map.Copy(_config.Manifest.Lookup, _config.Delta.Lookup.TargetDir)
 
 	_config.Delta.Error.Multiples = []string{}
-	_config.Delta.Diagnostic.Multiples = []_model.Refer_Diagnostic{}
+	_config.Delta.Diagnostic.Multiples = []_model.File_Diagnostic{}
 	for _, val := range _config.Style.Index_to_Data {
 		if len(val.Metadata.Declarations) > 1 {
 			error_ := K.Error_Standard("Duplicate Declarations: "+val.SymClass, val.Metadata.Declarations)
@@ -53,7 +53,7 @@ func accumulate() {
 		}
 	}
 
-	diagnostics := []_model.Refer_Diagnostic{}
+	diagnostics := []_model.File_Diagnostic{}
 	diagnostics = append(diagnostics, _config.Delta.Diagnostic.Hashrules...)
 	diagnostics = append(diagnostics, _config.Delta.Diagnostic.Artifacts...)
 	diagnostics = append(diagnostics, _config.Delta.Diagnostic.Handoffs...)

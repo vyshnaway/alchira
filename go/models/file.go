@@ -1,4 +1,4 @@
-package types
+package models
 
 type File_Type string
 
@@ -11,7 +11,7 @@ const (
 	File_Type_Stylesheet File_Type = "stylesheet"
 )
 
-type Refer_Diagnostic struct {
+type File_Diagnostic struct {
 	Message string   `json:"message"`
 	Sources []string `json:"sources"`
 }
@@ -50,12 +50,12 @@ type File_StyleData struct {
 }
 
 type File_LocalManifest struct {
-	Local       File_MetadataMap   `json:"local"`
-	Global      File_MetadataMap   `json:"global"`
-	Public      File_MetadataMap   `json:"public"`
-	Lookup      File_Lookup        `json:"lookup"`
-	Errors      []string           `json:"errors"`
-	Diagnostics []Refer_Diagnostic `json:"diagnostics"`
+	Local       File_MetadataMap  `json:"local"`
+	Global      File_MetadataMap  `json:"global"`
+	Public      File_MetadataMap  `json:"public"`
+	Lookup      File_Lookup       `json:"lookup"`
+	Errors      []string          `json:"errors"`
+	Diagnostics []File_Diagnostic `json:"diagnostics"`
 }
 
 type File_Stash struct {

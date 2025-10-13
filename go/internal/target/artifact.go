@@ -21,9 +21,9 @@ func Artifact(index int) _types_.Style_ExportStyle {
 		if len(style.StapleSnippet) > 0 {
 			element = "staple"
 			innertext = style.StapleSnippet
-		} else if len(style.Metadata.Summon) > 0 {
+		} else if len(style.SummonSnippet) > 0 {
 			element = "summon"
-			innertext = style.Metadata.Summon
+			innertext = style.SummonSnippet
 		} else {
 			element = "style"
 			innertext = style.StyleSnippet.Format(true)
@@ -37,7 +37,7 @@ func Artifact(index int) _types_.Style_ExportStyle {
 
 		isPublic := _string.Contains(style.SymClass, "$$$")
 		if isPublic {
-			for k, v := range style.Metadata.Attributes {
+			for k, v := range style.Attributes {
 				attributes[k] = _util.Code_Minify(v)
 			}
 		}

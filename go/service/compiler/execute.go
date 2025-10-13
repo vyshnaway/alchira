@@ -33,7 +33,7 @@ const (
 	execute_Step_ProcessProxyFolders
 	execute_Step_GenerateFiles
 	execute_Step_Publish
-	execute_Step_WatchFolders
+	execute_Step_LoopAround
 )
 
 func Execute(heading string) (Exitcode int) {
@@ -55,7 +55,7 @@ func Execute(heading string) (Exitcode int) {
 		case execute_Step_VerifySetupStruct:
 			if res_report, res_status := _action.Verify_Setup(); res_status != _action.Verify_Setup_Status_Verified {
 				report = res_report
-				step = execute_Step_WatchFolders
+				step = execute_Step_LoopAround
 				break
 			}
 			fallthrough
@@ -71,7 +71,7 @@ func Execute(heading string) (Exitcode int) {
 		case execute_Step_VerifyConfigs:
 			if res_report, res_status := _action.Verify_Configs(false); !res_status {
 				report = res_report
-				step = execute_Step_WatchFolders
+				step = execute_Step_LoopAround
 				break
 			}
 			fallthrough
@@ -87,7 +87,7 @@ func Execute(heading string) (Exitcode int) {
 		case execute_Step_ReadHashrule:
 			if res_report, res_status := _action.Save_Hashrule(); !res_status {
 				report = res_report
-				step = execute_Step_WatchFolders
+				step = execute_Step_LoopAround
 				break
 			} else {
 				report = ""
@@ -121,9 +121,9 @@ func Execute(heading string) (Exitcode int) {
 			}
 			fallthrough
 
-		case execute_Step_WatchFolders:
+		case execute_Step_LoopAround:
 			if _config.Static.WATCH {
-				step = execute_Step_WatchFolders
+				step = execute_Step_LoopAround
 
 				if watcher == nil {
 					watch_dirs := append(

@@ -25,5 +25,5 @@ func test_SaveArtifacts() {
 
 func Test_Artifacts(t *_testing.T) {
 	test_SaveArtifacts()
-	_stash.Artifact_Update(true)
+	_stash.Artifact_Update()
 }

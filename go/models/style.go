@@ -1,4 +1,4 @@
-package types
+package models
 
 import (
 	css "main/package/css"
@@ -30,13 +30,13 @@ type Style_Metadata struct {
 	Info         []string          `json:"info"`
 	Skeleton     any               `json:"skeleton"`
 	Declarations []string          `json:"declarations"`
-	WatchClass   string            `json:"watchclass"`
-	Variables    map[string]string `json:"variables"`
-	Summon       string            `json:"summon"`
-	Attributes   map[string]string `json:"attributes"`
 }
 
 type Style_ClassData struct {
+	Attributes    map[string]string
+	Variables    map[string]string
+	WatchClass    string
+	SummonSnippet string
 	Index         int
 	Metadata      *Style_Metadata
 	Artifact      string

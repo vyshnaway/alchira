@@ -125,7 +125,7 @@ func Store(
 			Global:      _model.File_MetadataMap{},
 			Public:      _model.File_MetadataMap{},
 			Errors:      []string{},
-			Diagnostics: []_model.Refer_Diagnostic{},
+			Diagnostics: []_model.File_Diagnostic{},
 		},
 		StyleData: _model.File_StyleData{
 			UsedIn:          []int{},

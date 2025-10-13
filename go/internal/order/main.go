@@ -89,7 +89,7 @@ func Optimize(
 
 	artifactData, _ := _json.Marshal(artifact)
 	// if err != nil {
-		// handleerror(e.g., log, return, panic)
+	// handleerror(e.g., log, return, panic)
 	// }
 
 	// Prepare the request payload

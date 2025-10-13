@@ -7,16 +7,16 @@ import (
 	X "main/internal/console"
 	S "main/package/console"
 	Sp "main/package/console/play"
-	_fileman_ "main/package/fileman"
+	_fileman "main/package/fileman"
 	O "main/package/object"
-	_utils_ "main/package/utils"
+	_util "main/package/utils"
 	_compiler "main/service/compiler"
 	_server "main/service/server"
 	_os_ "os"
-	_slices_ "slices"
-	"strconv"
-	_strings_ "strings"
-	_sync_ "sync"
+	_slice "slices"
+	_strconv "strconv"
+	_string "strings"
+	_sync "sync"
 )
 
 func main() {
@@ -31,7 +31,7 @@ func main() {
 		command = _os_.Args[1]
 	}
 	argument := ""
-	if _slices_.Contains(exposedCommands, command) {
+	if _slice.Contains(exposedCommands, command) {
 		if len(_os_.Args) > 2 {
 			argument = _os_.Args[2]
 		}
@@ -41,21 +41,21 @@ func main() {
 
 	workpath := "."
 	workPackagePath := "package.json"
-	rootpath, _ := _fileman_.Path_FromRoot(".")
-	rootPackagePath, _ := _fileman_.Path_FromRoot("package.json")
+	rootpath, _ := _fileman.Path_FromRoot(".")
+	rootPackagePath, _ := _fileman.Path_FromRoot("package.json")
 
-	rootPackageData, rootPackageErr := _fileman_.Read_Json(rootPackagePath, false)
+	rootPackageData, rootPackageErr := _fileman.Read_Json(rootPackagePath, false)
 	if rootPackageErr != nil {
 		_fmt.Println("Bad root package.json file.")
 		_os_.Exit(1)
 	}
 	rootPackageData_ := rootPackageData.(map[string]any)
-	_config.Root.Name = _utils_.String_Fallback(rootPackageData_["name"], _config.Root.Name)
-	_config.Root.Version = _utils_.String_Fallback(rootPackageData_["version"], _config.Root.Version)
+	_config.Root.Name = _util.String_Fallback(rootPackageData_["name"], _config.Root.Name)
+	_config.Root.Version = _util.String_Fallback(rootPackageData_["version"], _config.Root.Version)
 
 	projectname := "-"
 	projectversion := "0.0.0"
-	if workPackageData, workPackageErr := _fileman_.Read_Json(workPackagePath, false); workPackageErr == nil {
+	if workPackageData, workPackageErr := _fileman.Read_Json(workPackagePath, false); workPackageErr == nil {
 		workPackageData_ := workPackageData.(map[string]any)
 		if val, ok := workPackageData_["name"].(string); ok && val != "" {
 			projectname = val
@@ -72,11 +72,11 @@ func main() {
 	_config.Static.DEBUG = command == "debug"
 	_config.Static.MINIFY = !_config.Static.DEBUG
 	_config.Static.WATCH = (command == "debug" || command == "preview") && (argument == "-w")
-	_config.Static.ProjectName = _utils_.String_Filter(projectname, []rune{}, []rune{}, []rune{})
+	_config.Static.ProjectName = _util.String_Filter(projectname, []rune{}, []rune{}, []rune{})
 	_config.Static.ProjectVersion = projectversion
 
-	S.Canvas.Initialize(!_config.Static.WATCH || command == "install", true, 2)
-	corecaps := _strings_.ToUpper(_config.Root.Name)
+	S.Canvas.Initialize(!_config.Static.WATCH || command == "install" || command == "server", true, 2)
+	corecaps := _string.ToUpper(_config.Root.Name)
 
 	var flagmode string
 	exitcode := 0
@@ -89,7 +89,7 @@ func main() {
 	switch _config.Static.Command {
 	case "init":
 		{
-			var wg _sync_.WaitGroup
+			var wg _sync.WaitGroup
 			wg.Add(2)
 			go func() { _action.Sync_RootDocs(); wg.Done() }()
 			go func() { Sp.Title(corecaps+" : Initialize", 1000, 1); wg.Done() }()
@@ -122,10 +122,14 @@ func main() {
 	case "server":
 		{
 			port := 0
-			if val, err := strconv.Atoi(argument); err == nil {
+			if val, err := _strconv.Atoi(argument); err == nil {
 				port = val
 			}
 			exitcode = _server.Create(port)
+		}
+	case "iamai":
+		{
+			exitcode = _server.Manifest(argument)
 		}
 	case "install":
 		{
@@ -142,7 +146,7 @@ func main() {
 				if config_message, config_ok := _action.Verify_Configs(true); config_ok {
 					if update_ok, update_message, update_files := _compiler.Artifact_Install(); update_ok {
 						S.Post(update_message)
-						_fileman_.Write_Bulk(update_files)
+						_fileman.Write_Bulk(update_files)
 						S.Post(S.Tag.H4("Artifacts Updated", S.Preset.Success, S.Style.AS_Bold))
 					} else {
 						S.Post(S.Tag.H4("Artifacts not updated due to pending errors on dryrun.", S.Preset.Failed, S.Style.AS_Bold))
@@ -160,7 +164,7 @@ func main() {
 
 			S.Post(S.MAKE(
 				S.Tag.H1(corecaps, S.Preset.Title),
-				[]string{_strings_.Trim(_config.Sync_References["alerts"].Content, "\t\r\n ")},
+				[]string{_string.Trim(_config.Sync_References["alerts"].Content, "\t\r\n ")},
 			))
 
 			S.Post(S.MAKE("", []string{

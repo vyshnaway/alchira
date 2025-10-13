@@ -1,4 +1,4 @@
-package types
+package models
 
 type Config_Tweaks map[string]any
 
@@ -21,6 +21,7 @@ type Config_ProxyStorage struct {
 type Config_Raw struct {
 	Name        string            `json:"name,omitempty"`
 	Author      string            `json:"author,omitempty"`
+	Source        string            `json:"source,omitempty"`
 	Version     string            `json:"version,omitempty"`
 	Vendors     string            `json:"vendors,omitempty"`
 	Environment string            `json:"environment,omitempty"`
@@ -34,6 +35,7 @@ type Config_Archive struct {
 	Author        string            `json:"author,omitempty"`
 	Version       string            `json:"version,omitempty"`
 	Vendors       string            `json:"vendors,omitempty"`
+	Source        string            `json:"source,omitempty"`
 	Environment   string            `json:"environment,omitempty"`
 	Readme        string            `json:"readme,omitempty"`
 	Licence       string            `json:"licence,omitempty"`

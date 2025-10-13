@@ -90,13 +90,13 @@ var Delta = _model.Cache_Delta{
 	},
 
 	Diagnostic: _model.Cache_Delta_Diagnostics{
-		Artifacts: []_model.Refer_Diagnostic{},
-		Axioms:    []_model.Refer_Diagnostic{},
-		Clusters:  []_model.Refer_Diagnostic{},
-		TargetDir: []_model.Refer_Diagnostic{},
-		Multiples: []_model.Refer_Diagnostic{},
-		Hashrules: []_model.Refer_Diagnostic{},
-		Handoffs:  []_model.Refer_Diagnostic{},
+		Artifacts: []_model.File_Diagnostic{},
+		Axioms:    []_model.File_Diagnostic{},
+		Clusters:  []_model.File_Diagnostic{},
+		TargetDir: []_model.File_Diagnostic{},
+		Multiples: []_model.File_Diagnostic{},
+		Hashrules: []_model.File_Diagnostic{},
+		Handoffs:  []_model.File_Diagnostic{},
 	},
 }
 
@@ -135,13 +135,13 @@ func Delta_Reset() {
 			Handoffs:  []string{},
 		},
 		Diagnostic: _model.Cache_Delta_Diagnostics{
-			Artifacts: []_model.Refer_Diagnostic{},
-			Axioms:    []_model.Refer_Diagnostic{},
-			Clusters:  []_model.Refer_Diagnostic{},
-			TargetDir: []_model.Refer_Diagnostic{},
-			Multiples: []_model.Refer_Diagnostic{},
-			Hashrules: []_model.Refer_Diagnostic{},
-			Handoffs:  []_model.Refer_Diagnostic{},
+			Artifacts: []_model.File_Diagnostic{},
+			Axioms:    []_model.File_Diagnostic{},
+			Clusters:  []_model.File_Diagnostic{},
+			TargetDir: []_model.File_Diagnostic{},
+			Multiples: []_model.File_Diagnostic{},
+			Hashrules: []_model.File_Diagnostic{},
+			Handoffs:  []_model.File_Diagnostic{},
 		},
 	}
 }
@@ -172,8 +172,7 @@ func Style_Reset() {
 
 var Manifest = _model.Cache_Manifest{
 	Constants:   map[string]string{},
-	Hashrules:   map[string]string{},
-	Diagnostics: []_model.Refer_Diagnostic{},
+	Diagnostics: []_model.File_Diagnostic{},
 	Lookup:      map[string]_model.File_Lookup{},
 	Group: _model.Cache_Manifest_Groups{
 		Axiom:    map[string]_model.File_MetadataMap{},
@@ -187,8 +186,7 @@ var Manifest = _model.Cache_Manifest{
 func Manifest_Reset() {
 	Manifest = _model.Cache_Manifest{
 		Constants:   map[string]string{},
-		Hashrules:   map[string]string{},
-		Diagnostics: []_model.Refer_Diagnostic{},
+		Diagnostics: []_model.File_Diagnostic{},
 		Lookup:      map[string]_model.File_Lookup{},
 		Group: _model.Cache_Manifest_Groups{
 			Axiom:    map[string]_model.File_MetadataMap{},

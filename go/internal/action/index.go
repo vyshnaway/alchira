@@ -34,7 +34,7 @@ func Index_Declare(object _model.Style_ClassData) int {
 	}
 	object.Index = idx
 	delete(BIN, idx)
-	object.Metadata.WatchClass = "__" + _utils.String_EnCounter(idx)
+	object.WatchClass = "__" + _utils.String_EnCounter(idx)
 	_config.Style.Index_to_Data[idx] = object
 	return idx
 }

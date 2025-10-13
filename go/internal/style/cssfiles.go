@@ -17,7 +17,7 @@ type R_Cssfile_Parse struct {
 	Variables   *O.T[string, string]
 }
 
-func Cssfile_String(content string, initial string, debug bool) R_Cssfile_Parse {
+func Cssfile_String(content string, initial string) R_Cssfile_Parse {
 	scanned := _css.ParsePartial(_util.Code_Uncomment(content, false, true, false))
 	result := _css.NewBlockSeq()
 	for _, d := range scanned.Directives {
@@ -48,7 +48,7 @@ type cssfile_Collection_return struct {
 	SelectorList       []string
 }
 
-func Cssfile_Collection(files []_model.File_Stash, debug bool) cssfile_Collection_return {
+func Cssfile_Collection(files []_model.File_Stash) cssfile_Collection_return {
 	selectorList := []string{}
 	selectors := map[string]int{}
 	indexMetaCollection := _model.File_MetadataMap{}
@@ -86,15 +86,15 @@ func Cssfile_Collection(files []_model.File_Stash, debug bool) cssfile_Collectio
 
 				metadata := _model.Style_Metadata{
 					Info:         []string{},
-					WatchClass:   "",
-					Variables:    stylescanned.Variables.ToMap(),
 					Skeleton:     object.Skeleton(),
 					Declarations: []string{declaration},
-					Summon:       "",
-					Attributes:   map[string]string{},
 				}
 				classdata := _model.Style_ClassData{
+					Variables:     stylescanned.Variables.ToMap(),
+					Attributes:    map[string]string{},
 					Index:         0,
+					SummonSnippet: "",
+					WatchClass:    "",
 					Artifact:      artifact,
 					Definent:      selector,
 					SymClass:      classname,

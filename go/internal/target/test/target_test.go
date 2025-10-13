@@ -1,8 +1,8 @@
 package Target_test
 
 import (
-	_model "main/models"
 	_target "main/internal/target"
+	_model "main/models"
 	_testing "testing"
 )
 

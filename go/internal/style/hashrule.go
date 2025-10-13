@@ -16,7 +16,7 @@ func Hashrule_Upload() {
 	_config.Style.Hashrules = _config.Static.Hashrule
 	hashrule := _config.Static.Hashrule
 	errors := []string{}
-	diagnostics := []_model.Refer_Diagnostic{}
+	diagnostics := []_model.File_Diagnostic{}
 
 	for key := range hashrule {
 		var hash = "#{" + key + "}"
@@ -47,7 +47,6 @@ func Hashrule_Upload() {
 	_config.Delta.Error.Hashrules = errors
 	_config.Delta.Diagnostic.Hashrules = diagnostics
 	_config.Style.Hashrules = filtered
-	_config.Manifest.Hashrules = filtered
 	_config.Delta.Report.Hashrule = X.List_Record("Active Hashrule", printmap)
 }
 
@@ -55,7 +54,7 @@ type hashrule_Import_return struct {
 	Status      bool
 	Result      string
 	Errorstring string
-	Diagnostic  _model.Refer_Diagnostic
+	Diagnostic  _model.File_Diagnostic
 }
 
 var hashpattern = _regexp.MustCompile(`(?i)#\{[a-z0-9-]+\}`)
@@ -117,7 +116,7 @@ type hashrule_Render_return struct {
 	Wrappers    []string
 	Status      bool
 	Errorstring string
-	Diagnostic  _model.Refer_Diagnostic
+	Diagnostic  _model.File_Diagnostic
 }
 
 var regex_max_width = _regexp.MustCompile(`width\s*<=`)

@@ -91,18 +91,18 @@ func Library_CacheFiles() library_StackFiles_return {
 	}
 }
 
-func Library_Update(debug bool) {
+func Library_Update() {
 	StackLibraryFiles_ := Library_CacheFiles()
 	_config.Delta.Lookup.Libraries = StackLibraryFiles_.Lookup
 
 	// Axiom update actions
 	_config.Manifest.Group.Axiom = map[string]_model.File_MetadataMap{}
 	_config.Delta.Error.Axioms = []string{}
-	_config.Delta.Diagnostic.Axioms = []_model.Refer_Diagnostic{}
+	_config.Delta.Diagnostic.Axioms = []_model.File_Diagnostic{}
 	axiom_chart := O.New[string, []string]()
 	axiom_counter := 0
 	for index, files := range StackLibraryFiles_.Axiom {
-		Cssfile_Collection_ := _style.Cssfile_Collection(files, debug)
+		Cssfile_Collection_ := _style.Cssfile_Collection(files)
 		_config.Manifest.Group.Axiom[_strconv.Itoa(index)] = Cssfile_Collection_.MetadataCollection
 		if count := len(Cssfile_Collection_.SelectorList); count > 0 {
 			axiom_counter += count
@@ -121,11 +121,11 @@ func Library_Update(debug bool) {
 	// Cluster update actions
 	_config.Manifest.Group.Cluster = map[string]_model.File_MetadataMap{}
 	_config.Delta.Error.Clusters = []string{}
-	_config.Delta.Diagnostic.Clusters = []_model.Refer_Diagnostic{}
+	_config.Delta.Diagnostic.Clusters = []_model.File_Diagnostic{}
 	cluster_chart := O.New[string, []string]()
 	cluster_counter := 0
 	for index, files := range StackLibraryFiles_.Cluster {
-		Cssfile_Collection_ := _style.Cssfile_Collection(files, debug)
+		Cssfile_Collection_ := _style.Cssfile_Collection(files)
 		_config.Manifest.Group.Cluster[_strconv.Itoa(index)] = Cssfile_Collection_.MetadataCollection
 		if count := len(Cssfile_Collection_.SelectorList); count > 0 {
 			cluster_counter += count

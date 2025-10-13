@@ -21,7 +21,7 @@ func Error_Hashrule(
 	)
 
 	preview.Set("ERROR BY", cause)
-	var diagnostic = _model.Refer_Diagnostic{
+	var diagnostic = _model.File_Diagnostic{
 		Message: S.MAKE(
 			primitive+" : "+message,
 			List_Props(preview, S.Preset.None, S.Preset.None),
@@ -38,7 +38,7 @@ func Error_Hashrule(
 
 type error_return struct {
 	Errorstring string
-	Diagnostic  _model.Refer_Diagnostic
+	Diagnostic  _model.File_Diagnostic
 }
 
 func Error_Standard(
@@ -50,7 +50,7 @@ func Error_Standard(
 		declaration,
 		S.MakeList{TypeFunc: S.List.Bullets, Intent: 1, Preset: S.Preset.Tertiary},
 	)
-	diagnostic := _model.Refer_Diagnostic{
+	diagnostic := _model.File_Diagnostic{
 		Message: message,
 		Sources: declaration,
 	}

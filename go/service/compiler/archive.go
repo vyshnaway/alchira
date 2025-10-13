@@ -14,7 +14,7 @@ import (
 )
 
 func archive_Build() _models.Config_Archive {
-	archive := _config.Archive
+	archive := &_config.Archive
 	archive.Constants = map[string]string{}
 	_style.Parse_CssSnippet(_config.Static.RootCSS, "", "", false).Variables.Range(func(k, v string) {
 		archive.Constants[k] = v
@@ -77,7 +77,7 @@ func archive_Build() _models.Config_Archive {
 	}
 
 	archive.ExportSheet = exportsheet.String()
-	return archive
+	return *archive
 }
 
 func archive_Files() map[string]string {
@@ -86,7 +86,7 @@ func archive_Files() map[string]string {
 	currentverfile := archive_Build().Version + ".json"
 	availableversions := []string{}
 	if items, err := _fileman.Path_ListFiles(_config.Path_Folder["arcversion"].Path, []string{}); err == nil {
-		availableversions = append(availableversions, items...)
+		availableversions = items
 	}
 	if _slice.Contains(availableversions, latestverfile) {
 		availableversions = append(availableversions, latestverfile)
@@ -95,22 +95,23 @@ func archive_Files() map[string]string {
 		availableversions = append(availableversions, currentverfile)
 	}
 	_sort.Strings(availableversions)
+	for i, v := range availableversions {
+		availableversions[i] = _fileman.Path_BaseName(v)
+	}
 
 	indexexport := _config.Archive
 	indexexport.ExportSheet = ""
+	indexexport.Version = ""
+	indexexport.Constants = map[string]string{}
+	indexexport.ExportClasses = []string{}
 	indexexport.Versions = availableversions
-	indexexport.Constants = _style.Cssfile_String(
-		_util.Code_Uncomment(_config.Static.RootCSS, false, true, false),
-		"", false).Variables.ToMap()
 
-	indexexportjson := _util.Code_JsonBuild(indexexport, "")
-	exportjson := _util.Code_JsonBuild(_config.Archive, "")
-	latestpath := _fileman.Path_Join(_config.Path_Folder["arcversion"].Path, latestverfile)
-	currentpath := _fileman.Path_Join(_config.Path_Folder["arcversion"].Path, currentverfile)
+	indexjson := _util.Code_JsonBuild(indexexport, "")
+	artifactjson := _util.Code_JsonBuild(_config.Archive, "")
 	artifact_files := map[string]string{
-		latestpath:                        string(exportjson),
-		currentpath:                       string(exportjson),
-		_config.Path_Json["archive"].Path: string(indexexportjson),
+		_fileman.Path_Join(_config.Path_Folder["arcversion"].Path, latestverfile):  string(artifactjson),
+		_fileman.Path_Join(_config.Path_Folder["arcversion"].Path, currentverfile): string(artifactjson),
+		_config.Path_Json["archive"].Path:                                          string(indexjson),
 	}
 
 	return artifact_files

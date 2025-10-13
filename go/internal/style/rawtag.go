@@ -22,7 +22,7 @@ func Rawtag_Upload(
 	metadata_map _model.File_MetadataMap,
 ) rawtag_Upload_return {
 	errors := []string{}
-	diagnostics := []_model.Refer_Diagnostic{}
+	diagnostics := []_model.File_Diagnostic{}
 	attachments := []string{}
 	forArtifact := file.Manifest.Lookup.Type == _model.File_Type_Artifact
 	declaration := file.TargetPath + ":" + _strconv.Itoa(raw.RowIndex) + ":" + _strconv.Itoa(raw.ColIndex)
@@ -128,15 +128,15 @@ func Rawtag_Upload(
 
 		metadata := _model.Style_Metadata{
 			Info:         raw.Comments,
-			WatchClass:   "",
-			Variables:    variables.ToMap(),
 			Skeleton:     object.Skeleton(),
 			Declarations: []string{declaration},
-			Summon:       summon,
-			Attributes:   attributes,
 		}
 		index = _action.Index_Declare(_model.Style_ClassData{
+			Variables:     variables.ToMap(),
+			Attributes:    attributes,
 			Index:         0,
+			WatchClass:    "",
+			SummonSnippet: summon,
 			Artifact:      artifact,
 			Definent:      raw.SymClasses[0],
 			SymClass:      symclass,
@@ -166,6 +166,6 @@ type rawtag_Upload_return struct {
 	Symclass    string
 	Index       int
 	Attachments []string
-	Diagnostics []_model.Refer_Diagnostic
+	Diagnostics []_model.File_Diagnostic
 	Errors      []string
 }

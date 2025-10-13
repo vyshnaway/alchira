@@ -1,4 +1,4 @@
-package types
+package models
 
 type Cache_Url struct {
 	Docs      string
@@ -70,13 +70,13 @@ type Cache_Delta_Errors struct {
 }
 
 type Cache_Delta_Diagnostics struct {
-	Artifacts []Refer_Diagnostic
-	Axioms    []Refer_Diagnostic
-	Clusters  []Refer_Diagnostic
-	TargetDir []Refer_Diagnostic
-	Multiples []Refer_Diagnostic
-	Hashrules []Refer_Diagnostic
-	Handoffs  []Refer_Diagnostic
+	Artifacts []File_Diagnostic
+	Axioms    []File_Diagnostic
+	Clusters  []File_Diagnostic
+	TargetDir []File_Diagnostic
+	Multiples []File_Diagnostic
+	Hashrules []File_Diagnostic
+	Handoffs  []File_Diagnostic
 }
 
 type Cache_Delta struct {
@@ -114,8 +114,7 @@ type Cache_Manifest_Groups struct {
 
 type Cache_Manifest struct {
 	Constants   map[string]string      `json:"constants"`
-	Hashrules   map[string]string      `json:"hashrules"`
-	Diagnostics []Refer_Diagnostic     `json:"diagnostics"`
+	Diagnostics []File_Diagnostic      `json:"diagnostics"`
 	Lookup      map[string]File_Lookup `json:"lookup"`
 	Group       Cache_Manifest_Groups  `json:"group"`
 }

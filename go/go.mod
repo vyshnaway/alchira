@@ -8,6 +8,7 @@ require (
 )
 
 require (
+	github.com/gorilla/websocket v1.5.3
 	github.com/radovskyb/watcher v1.0.7 // indirect
 	golang.org/x/sys v0.36.0 // indirect
 )

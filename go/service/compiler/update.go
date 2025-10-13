@@ -20,14 +20,10 @@ func Update_Scaffold() {
 	_config.Manifest_Reset()
 
 	_stash.Reset()
-	_stash.Artifact_Update(_config.Static.DEBUG)
-	_stash.Library_Update(_config.Static.DEBUG)
+	_stash.Artifact_Update()
+	_stash.Library_Update()
 
-	index_scanned := _style.Cssfile_String(
-		_util.Code_Uncomment(_config.Static.RootCSS, false, true, false),
-		"INDEX | ",
-		_config.Static.DEBUG,
-	)
+	index_scanned := _style.Cssfile_String(_util.Code_Uncomment(_config.Static.RootCSS, false, true, false), "INDEX | ")
 	_config.Manifest.Constants = index_scanned.Variables.ToMap()
 	for _, attachment := range index_scanned.Attachments {
 		if res := _action.Index_Find(attachment, _model.Style_ClassIndexMap{}); res.Index > 0 {
