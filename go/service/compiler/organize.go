@@ -12,7 +12,7 @@ import (
 	_strconv "strconv"
 )
 
-func accumulate() {
+func Accumulate() {
 	accumulated := _stash.Target_Accumulate()
 
 	_config.Style.Global___Index = accumulated.GlobalClasses
@@ -106,7 +106,7 @@ func Organize() (AritfactFiles map[string]string, Attachments []int) {
 		}
 	}
 
-	accumulate()
+	Accumulate()
 	artifact_files := map[string]string{}
 	tracks_ := _stash.Target_GetTracks()
 

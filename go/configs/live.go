@@ -2,6 +2,8 @@ package configs
 
 import (
 	_model "main/models"
+	"maps"
+	"slices"
 )
 
 var Static = _model.Cache_Static{
@@ -22,6 +24,7 @@ var Static = _model.Cache_Static{
 	Libraries_Saved:   map[string]string{},
 	TargetDir_Saved:   map[string]_model.Config_ProxyStorage{},
 	Artifacts_Sources: map[string]string{},
+	CustomTags:        slices.Collect(maps.Keys(Root.CustomTags)),
 }
 
 var Archive = _model.Config_Archive{

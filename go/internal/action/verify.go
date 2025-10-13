@@ -105,6 +105,7 @@ func Verify_Configs(remote_vendors bool) (Report string, Status bool) {
 			S.TASK("Updating vendor-prefixes", 1)
 			Sync_SaveVendors(config.Vendors, remote_vendors)
 
+			_config.Archive.Environment = config.Environment
 			Setup_Tweaks(config.Tweaks)
 
 			if len(config.Name) > 0 {

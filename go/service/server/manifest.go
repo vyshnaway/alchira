@@ -1,10 +1,9 @@
 package server
 
 import (
-	_config "main/configs"
+	"main/configs"
 	"main/internal/stash"
-	_models "main/models"
-	"main/package/console"
+	"main/models"
 	"main/package/fileman"
 	"maps"
 	"slices"
@@ -13,26 +12,36 @@ import (
 )
 
 type R_Manifest struct {
-	Environment  string                             `json:"enviranment"`
-	FileSwitch   string                             `json:"fileswitch"`
-	Attributes   []string                           `json:"attributes"`
-	CustomTags   []string                           `json:"customtags"`
-	Attachable   []string                           `json:"attachable"`
-	Assignable   []string                           `json:"assignable"`
-	SymclassData map[string]*_models.Style_Metadata `json:"symclassData"`
-	Locales      []string                           `json:"locales"`
-	Diagnostics  []_models.File_Diagnostic          `json:"diagnostics"`
-	Hashrules    map[string]string                  `json:"hashrules"`
-	Constants    map[string]string                  `json:"constants"`
+	Extention    string                            `json:"extention"`
+	AssistFile   bool                              `json:"assistfile"`
+	Environment  string                            `json:"environment"`
+	FileSwitch   string                            `json:"fileswitch"`
+	Locales      []string                          `json:"locales"`
+	Attributes   []string                          `json:"attributes"`
+	Attachable   []string                          `json:"attachable"`
+	Assignable   []string                          `json:"assignable"`
+	CustomTags   []string                          `json:"customtags"`
+	Hashrules    map[string]string                 `json:"hashrules"`
+	Constants    map[string]string                 `json:"constants"`
+	Diagnostics  []models.File_Diagnostic          `json:"diagnostics"`
+	SymclassData map[string]*models.Style_Metadata `json:"symclassData"`
 }
 
 func ManifestFile(filepath string) R_Manifest {
 	fileswitch := filepath
+	extention := fileman.Path_FileExtention(filepath)
+	attributes := []string{}
 	for _, tv := range stash.Cache.Targetdir {
 		if fileman.Path_IsSubpath(tv.Source, filepath) {
+			if res, ok := tv.ExtnsProps[extention]; ok {
+				attributes = res
+			}
 			fileswitch = strings.Replace(filepath, tv.Source, tv.Target, 1)
 		}
 		if fileman.Path_IsSubpath(tv.Target, filepath) {
+			if res, ok := tv.ExtnsProps[extention]; ok {
+				attributes = res
+			}
 			fileswitch = strings.Replace(filepath, tv.Target, tv.Source, 1)
 		}
 	}
@@ -48,19 +57,21 @@ func ManifestFile(filepath string) R_Manifest {
 		return result
 	}
 
-	manifest := _config.Manifest
+	constants := configs.Manifest.Constants
+	manifest := configs.Manifest
 	attachable := []string{}
 	assignable := []string{}
-	symclassData := map[string]*_models.Style_Metadata{}
+	symclassData := map[string]*models.Style_Metadata{}
 	locales := []string{}
+	assistfile := false
 
-	if nav, ok := _config.Manifest.Lookup[filepath]; ok {
-		console.Render.Raw(nav)
+	if nav, ok := configs.Manifest.Lookup[filepath]; ok {
+		assistfile = true
 		if nav.Locale != nil {
 			locales = nav.Locale
 		}
 
-		if nav.Type == _models.File_Type_Artifact {
+		if nav.Type == models.File_Type_Artifact {
 			if stash, er := manifest.Group.Artifact[nav.Id]; er {
 				for k, v := range stash {
 					attachable = append(attachable, k)
@@ -110,7 +121,7 @@ func ManifestFile(filepath string) R_Manifest {
 				}
 			}
 
-			if nav.Type != _models.File_Type_Stylesheet {
+			if nav.Type != models.File_Type_Stylesheet {
 				if stash, er := manifest.Group.Local[nav.Id]; er {
 					for k, v := range stash {
 						attachable = append(attachable, k)
@@ -122,19 +133,21 @@ func ManifestFile(filepath string) R_Manifest {
 	}
 
 Return:
-	errors := manifest.Diagnostics
-	hashrules := _config.Style.Hashrules
+	diagnostics := manifest.Diagnostics
+	hashrules := configs.Style.Hashrules
 	return R_Manifest{
-		CustomTags:   CustomTags,
-		Environment:  _config.Archive.Environment,
+		Attributes:   attributes,
+		Extention:    extention,
+		Constants:    constants,
+		AssistFile:   assistfile,
+		CustomTags:   configs.Static.CustomTags,
+		Environment:  configs.Archive.Environment,
 		Hashrules:    hashrules,
 		FileSwitch:   fileswitch,
 		Attachable:   attachable,
 		Assignable:   assignable,
 		SymclassData: symclassData,
 		Locales:      locales,
-		Diagnostics:  errors,
+		Diagnostics:  diagnostics,
 	}
 }
-
-var CustomTags = slices.Collect(maps.Keys(_config.Root.CustomAtrules))

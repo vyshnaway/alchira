@@ -17,29 +17,29 @@ import (
 	_time "time"
 )
 
-type execute_Step_enum int
+type Execute_Step_enum int
 
 const (
-	execute_Step_Exit execute_Step_enum = iota
-	execute_Step_Initialize
-	execute_Step_VerifySetupStruct
-	execute_Step_ReadRootCss
-	execute_Step_ReadLibraries
-	execute_Step_VerifyConfigs
-	execute_Step_ReadArtifacts
-	execute_Step_ReadTargets
-	execute_Step_ReadHashrule
-	execute_Step_ProcessScaffold
-	execute_Step_ProcessProxyFolders
-	execute_Step_GenerateFiles
-	execute_Step_Publish
-	execute_Step_LoopAround
+	Execute_Step_Exit Execute_Step_enum = iota
+	Execute_Step_Initialize
+	Execute_Step_VerifySetupStruct
+	Execute_Step_ReadRootCss
+	Execute_Step_ReadLibraries
+	Execute_Step_VerifyConfigs
+	Execute_Step_ReadArtifacts
+	Execute_Step_ReadTargets
+	Execute_Step_ReadHashrule
+	Execute_Step_ProcessScaffold
+	Execute_Step_ProcessProxyFolders
+	Execute_Step_GenerateFiles
+	Execute_Step_Publish
+	Execute_Step_LoopAround
 )
 
 func Execute(heading string) (Exitcode int) {
 	exitcode := 0
 	const interval = 100
-	step := execute_Step_Initialize
+	step := Execute_Step_Initialize
 	report := ""
 	report_next := false
 	outfiles := map[string]string{}
@@ -48,65 +48,65 @@ func Execute(heading string) (Exitcode int) {
 
 	for {
 		switch step {
-		case execute_Step_Initialize:
+		case Execute_Step_Initialize:
 			S.Post(S.MAKE(S.Tag.H1(heading, S.Preset.Title), []string{}))
 			fallthrough
 
-		case execute_Step_VerifySetupStruct:
+		case Execute_Step_VerifySetupStruct:
 			if res_report, res_status := _action.Verify_Setup(); res_status != _action.Verify_Setup_Status_Verified {
 				report = res_report
-				step = execute_Step_LoopAround
+				step = Execute_Step_LoopAround
 				break
 			}
 			fallthrough
 
-		case execute_Step_ReadRootCss:
+		case Execute_Step_ReadRootCss:
 			_action.Save_RootCss()
 			fallthrough
 
-		case execute_Step_ReadLibraries:
+		case Execute_Step_ReadLibraries:
 			_action.Save_Libraries()
 			fallthrough
 
-		case execute_Step_VerifyConfigs:
+		case Execute_Step_VerifyConfigs:
 			if res_report, res_status := _action.Verify_Configs(false); !res_status {
 				report = res_report
-				step = execute_Step_LoopAround
+				step = Execute_Step_LoopAround
 				break
 			}
 			fallthrough
 
-		case execute_Step_ReadArtifacts:
+		case Execute_Step_ReadArtifacts:
 			_action.Save_Artifacts()
 			fallthrough
 
-		case execute_Step_ReadTargets:
+		case Execute_Step_ReadTargets:
 			_action.Save_Targets()
 			fallthrough
 
-		case execute_Step_ReadHashrule:
+		case Execute_Step_ReadHashrule:
 			if res_report, res_status := _action.Save_Hashrule(); !res_status {
 				report = res_report
-				step = execute_Step_LoopAround
+				step = Execute_Step_LoopAround
 				break
 			} else {
 				report = ""
 			}
 			fallthrough
 
-		case execute_Step_ProcessScaffold:
+		case Execute_Step_ProcessScaffold:
 			Update_Scaffold()
 			fallthrough
 
-		case execute_Step_ProcessProxyFolders:
+		case Execute_Step_ProcessProxyFolders:
 			Build_Targets()
 			fallthrough
 
-		case execute_Step_GenerateFiles:
+		case Execute_Step_GenerateFiles:
 			outfiles, report = Generate_Files()
 			fallthrough
 
-		case execute_Step_Publish:
+		case Execute_Step_Publish:
 			if len(outfiles) > 0 {
 				save_action.Wait()
 				save_action.Add(1)
@@ -121,9 +121,9 @@ func Execute(heading string) (Exitcode int) {
 			}
 			fallthrough
 
-		case execute_Step_LoopAround:
+		case Execute_Step_LoopAround:
 			if _config.Static.WATCH {
-				step = execute_Step_LoopAround
+				step = Execute_Step_LoopAround
 
 				if watcher == nil {
 					watch_dirs := append(
@@ -162,7 +162,7 @@ func Execute(heading string) (Exitcode int) {
 				if watcher.Length() > 12 {
 					watcher.Reset()
 					watcher = nil
-					step = execute_Step_Initialize
+					step = Execute_Step_Initialize
 				} else if event := watcher.Pull(); event != nil {
 					filepath := _fileman.Path_Join(event.Folder, event.FilePath)
 
@@ -172,15 +172,15 @@ func Execute(heading string) (Exitcode int) {
 							case _config.Path_Json["configure"].Path:
 								watcher.Close()
 								watcher = nil
-								step = execute_Step_VerifyConfigs
+								step = Execute_Step_VerifyConfigs
 							case _config.Path_Css["atrules"].Path:
 							case _config.Path_Css["constants"].Path:
 							case _config.Path_Css["elements"].Path:
 							case _config.Path_Css["extends"].Path:
 								_action.Save_RootCss()
-								step = execute_Step_GenerateFiles
+								step = Execute_Step_GenerateFiles
 							case _config.Path_Json["hashrule"].Path:
-								step = execute_Step_ReadHashrule
+								step = Execute_Step_ReadHashrule
 							default:
 								if _fileman.Path_IsSubpath(event.FilePath, _config.Path_Folder["libraries"].Path) &&
 									event.Extension == "css" {
@@ -189,16 +189,16 @@ func Execute(heading string) (Exitcode int) {
 									(event.Extension == _config.Root.Extension || event.Extension == "json") {
 									_config.Static.Artifacts_Saved[filepath] = event.FileContent
 								}
-								step = execute_Step_ProcessScaffold
+								step = Execute_Step_ProcessScaffold
 							}
 						} else {
-							step = execute_Step_VerifySetupStruct
+							step = Execute_Step_VerifySetupStruct
 						}
 					} else if event.Action == _watcher.E_Action_Update || event.Action == _watcher.E_Action_Refactor {
 						Update_Target(*event)
-						step = execute_Step_GenerateFiles
+						step = Execute_Step_GenerateFiles
 					} else {
-						step = execute_Step_VerifyConfigs
+						step = Execute_Step_VerifyConfigs
 					}
 
 					heading = event.TimeStamp + " | " + event.FilePath

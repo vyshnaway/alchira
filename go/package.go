@@ -12,7 +12,7 @@ import (
 	_util "main/package/utils"
 	_compiler "main/service/compiler"
 	_server "main/service/server"
-	_os_ "os"
+	_os "os"
 	_slice "slices"
 	_strconv "strconv"
 	_string "strings"
@@ -27,13 +27,16 @@ func main() {
 	}
 
 	command := ""
-	if len(_os_.Args) > 1 {
-		command = _os_.Args[1]
+	if len(_os.Args) > 1 {
+		command = _os.Args[1]
 	}
-	argument := ""
+
+	argone := ""
+	arguments := []string{}
 	if _slice.Contains(exposedCommands, command) {
-		if len(_os_.Args) > 2 {
-			argument = _os_.Args[2]
+		if len(_os.Args) > 2 {
+			argone = _os.Args[2]
+			arguments = _os.Args[2:]
 		}
 	} else {
 		command = ""
@@ -47,7 +50,7 @@ func main() {
 	rootPackageData, rootPackageErr := _fileman.Read_Json(rootPackagePath, false)
 	if rootPackageErr != nil {
 		_fmt.Println("Bad root package.json file.")
-		_os_.Exit(1)
+		_os.Exit(1)
 	}
 	rootPackageData_ := rootPackageData.(map[string]any)
 	_config.Root.Name = _util.String_Fallback(rootPackageData_["name"], _config.Root.Name)
@@ -66,17 +69,27 @@ func main() {
 	}
 
 	_action.Setup_Environment(rootpath, workpath)
+	corecaps := _string.ToUpper(_config.Root.Name)
 
 	_config.Static.Command = command
-	_config.Static.Argument = argument
+	_config.Static.Argument = argone
 	_config.Static.DEBUG = command == "debug"
 	_config.Static.MINIFY = !_config.Static.DEBUG
-	_config.Static.WATCH = (command == "debug" || command == "preview") && (argument == "-w")
+	_config.Static.WATCH = (command == "debug" || command == "preview") && argone == "-w"
 	_config.Static.ProjectName = _util.String_Filter(projectname, []rune{}, []rune{}, []rune{})
 	_config.Static.ProjectVersion = projectversion
 
-	S.Canvas.Initialize(!_config.Static.WATCH || command == "install" || command == "server", true, 2)
-	corecaps := _string.ToUpper(_config.Root.Name)
+	S.Canvas.Initialize(!_config.Static.WATCH &&
+		_slice.Contains([]string{
+			"debug",
+			"preview",
+			"publish",
+			"init",
+			"install",
+		}, command),
+		true,
+		2,
+	)
 
 	var flagmode string
 	exitcode := 0
@@ -122,10 +135,22 @@ func main() {
 	case "server":
 		{
 			port := 0
-			if val, err := _strconv.Atoi(argument); err == nil {
+			if val, err := _strconv.Atoi(argone); err == nil {
 				port = val
 			}
-			exitcode, _ = _server.Connect(port)
+			_server.Bridge(port)
+		}
+	case "manifest":
+		{
+			res := map[string]_server.R_Manifest{}
+			if status := _server.Dryrun(_server.Execute_Step_Initialize); status {
+				for _, path := range arguments {
+					if r := _server.ManifestFile(path); r.AssistFile {
+						res[path] = r
+					}
+				}
+			}
+			S.Post(_util.Code_JsonBuild(res, ""))
 		}
 	case "install":
 		{
@@ -184,5 +209,5 @@ func main() {
 		}
 	}
 
-	_os_.Exit(exitcode)
+	_os.Exit(exitcode)
 }

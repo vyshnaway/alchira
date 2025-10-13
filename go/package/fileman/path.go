@@ -14,6 +14,15 @@ func Path_BaseName(pathString string) string {
 	return _filepath.Base(pathString)
 }
 
+// Returns basename from a pathString
+func Path_FileExtention(pathString string) string {
+	e := _filepath.Ext(pathString)
+	if len(e) > 0 {
+		e = e[1:]
+	}
+	return e
+}
+
 // Join joins any number of path elements into a single path.
 func Path_Join(pathfrags ...string) string {
 	return _filepath.Join(pathfrags...)

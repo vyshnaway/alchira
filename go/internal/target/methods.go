@@ -118,11 +118,11 @@ func (This *Class) SummonFiles(
 			var out _string.Builder
 			for _, m := range file.StyleData.TagReplacements {
 				switch m.Elid {
-				case _config.Root.CustomElements["staple"]:
+				case _config.Root.CustomTags["staple"]:
 					out.WriteString(file.Scratch[fromPos:m.Loc] + stapleBlock)
-				case _config.Root.CustomElements["summon"]:
+				case _config.Root.CustomTags["summon"]:
 					out.WriteString(file.Scratch[fromPos:m.Loc] + summonBlock)
-				case _config.Root.CustomElements["style"]:
+				case _config.Root.CustomTags["style"]:
 					out.WriteString(file.Scratch[fromPos:m.Loc] + styleBlock)
 				default:
 					out.WriteString(file.Scratch[fromPos:])

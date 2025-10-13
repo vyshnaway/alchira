@@ -94,7 +94,7 @@ func Tag_Scanner(
 				tr_Attr := _string.Trim(attr.String(), " \t\r\n")
 				tr_Value := _string.Trim(value.String(), " \t\r\n")
 				if len(styleDeclarations.Element) == 0 {
-					if elid, elok := _config.Root.CustomElements[tr_Attr]; elok {
+					if elid, elok := _config.Root.CustomTags[tr_Attr]; elok {
 						styleDeclarations.Elid = elid
 					}
 					styleDeclarations.Element = tr_Attr

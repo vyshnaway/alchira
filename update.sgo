@@ -13,21 +13,6 @@ import (
 	_map "maps"
 )
 
-func Update_Scaffold() {
-	_action.Index_Reset(0)
-
-	_config.Style_Reset()
-	_config.Delta_Reset()
-	_config.Manifest_Reset()
-
-	_stash.Reset()
-	_stash.Artifact_Update()
-	_stash.Library_Update()
-
-	index_scanned := _style.Cssfile_String(_util.Code_Uncomment(_config.Static.RootCSS, false, true, false), "")
-	_config.Manifest.Constants = index_scanned.Variables.ToMap()
-}
-
 func Update_Manifest(event _watcher.Event) {
 	rebuildManifest := false
 	switch event.Action {

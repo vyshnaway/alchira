@@ -4,7 +4,6 @@ import (
 	_config "main/configs"
 	_model "main/models"
 	_reader "main/package/reader"
-	_map "maps"
 	_regexp "regexp"
 	_slice "slices"
 	_string "strings"
@@ -35,11 +34,9 @@ type T_RawStyle struct {
 	Attributes map[string]string
 }
 
-var customElements = _slice.Collect(_map.Keys(_config.Root.CustomElements))
-
 var replacementTags = func() map[string]int {
 	res := map[string]int{}
-	for k, v := range _config.Root.CustomElements {
+	for k, v := range _config.Root.CustomTags {
 		res["<!-- "+k+" -->"] = v
 		res["<"+k+" />"] = v
 		res["<"+k+"/>"] = v
@@ -158,7 +155,7 @@ func Rider(
 							tagTrack = append(tagTrack, track)
 						}
 					}
-				} else if _slice.Contains(customElements, result.StyleDeclarations.Element) && hasDeclared {
+				} else if _slice.Contains(_config.Static.CustomTags, result.StyleDeclarations.Element) && hasDeclared {
 					result.StyleDeclarations.Attributes = result.NativeAttributes
 					tagTrack = append(tagTrack, &result.StyleDeclarations)
 				}

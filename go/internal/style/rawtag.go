@@ -116,13 +116,13 @@ func Rawtag_Upload(
 
 		summon := ""
 		attributes := map[string]string{}
-		if raw.Elid == _config.Root.CustomElements["summon"] {
+		if raw.Elid == _config.Root.CustomTags["summon"] {
 			summon = _util.Code_Strip(raw.Innertext, false, false, true, true)
 			attributes = raw.Attributes
 		}
 
 		staple := ""
-		if raw.Elid == _config.Root.CustomElements["staple"] {
+		if raw.Elid == _config.Root.CustomTags["staple"] {
 			staple = _util.Code_Strip(raw.Innertext, false, false, true, true)
 		}
 
@@ -130,23 +130,23 @@ func Rawtag_Upload(
 			Info:         raw.Comments,
 			Skeleton:     object.Skeleton(),
 			Declarations: []string{declaration},
-			Variables:     variables.ToMap(),
+			Variables:    variables.ToMap(),
 		}
 		index = _action.Index_Declare(_model.Style_ClassData{
-			Attributes:    attributes,
-			Index:         0,
-			WatchClass:    "",
-			SummonSnippet: summon,
-			Artifact:      artifact,
-			Definent:      raw.SymClasses[0],
-			SymClass:      symclass,
-			StyleObject:   object,
-			Metadata:      &metadata,
-			Attachments:   attachments,
-			DebugClass:    debugclass,
-			Declarations:  []string{declaration},
-			StapleSnippet: staple,
-			StyleSnippet:  inner_style.Result,
+			Attributes:           attributes,
+			Index:                0,
+			WatchClass:           "",
+			SummonSnippet:        summon,
+			Artifact:             artifact,
+			Definent:             raw.SymClasses[0],
+			SymClass:             symclass,
+			StyleObject:          object,
+			Metadata:             &metadata,
+			Attachments:          attachments,
+			DebugClass:           debugclass,
+			ScaffoldDeclarations: []string{declaration},
+			StapleSnippet:        staple,
+			StyleSnippet:         inner_style.Result,
 		})
 		IndexMap[symclass] = index
 		file.StyleData.UsedIn = append(file.StyleData.UsedIn, index)

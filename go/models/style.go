@@ -27,28 +27,28 @@ type Style_ExportStyle struct {
 }
 
 type Style_Metadata struct {
-	Info          []string          `json:"info"`
-	Skeleton      any               `json:"skeleton"`
-	Declarations  []string          `json:"declarations"`
-	SummonSnippet string            `json:"summonsnippet"`
-	Variables     map[string]string `json:"variables"`
+	Info          []string
+	Skeleton      any
+	Declarations  []string
+	SummonSnippet string
+	Variables     map[string]string
 }
 
 type Style_ClassData struct {
-	Attributes    map[string]string
-	WatchClass    string
-	Index         int
-	Metadata      *Style_Metadata
-	Artifact      string
-	Definent      string
-	SymClass      string
-	DebugClass    string
-	Attachments   []string
-	Declarations  []string
-	StyleObject   *css.T_Block
-	SummonSnippet string
-	StapleSnippet string
-	StyleSnippet  *css.T_Block
+	Attributes           map[string]string
+	WatchClass           string
+	Index                int
+	Metadata             *Style_Metadata
+	Artifact             string
+	Definent             string
+	SymClass             string
+	DebugClass           string
+	Attachments          []string
+	ScaffoldDeclarations []string
+	StyleObject          *css.T_Block
+	SummonSnippet        string
+	StapleSnippet        string
+	StyleSnippet         *css.T_Block
 }
 
 type Style_Dictionary map[string]map[int]string

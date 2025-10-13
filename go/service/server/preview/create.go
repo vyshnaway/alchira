@@ -1,4 +1,4 @@
-package webview
+package preview
 
 import (
 	"fmt"
@@ -19,7 +19,6 @@ func getAvailablePort(requestedPort int) (int, error) {
 		}
 	}
 
-	// Fallback: ask OS for any available port
 	ln, err := net.Listen("tcp", ":0")
 	if err != nil {
 		return 0, fmt.Errorf("no available port found")
@@ -29,17 +28,17 @@ func getAvailablePort(requestedPort int) (int, error) {
 	return port, nil
 }
 
-func Create(port int) (Exitcode int, actualPort int) {
-	foundPort, err := getAvailablePort(port)
+func Create(suggestedPort int) (deducedPort int, err error) {
+	foundPort, err := getAvailablePort(suggestedPort)
 	if err != nil || foundPort == 0 {
-		fmt.Println("Failed to find available port:", err)
-		return 1, 0
+		return 0, err
 	}
 	serveDir, _ := fileman.Path_FromRoot("view")
 
 	mux := http.NewServeMux()
 	// Always mount /ws first, so it isn't shadowed
 	mux.HandleFunc("/ws", handleWs)
+	
 	// This serves index.html for requests to "/"
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path == "/" || r.URL.Path == "/index.html" {
@@ -52,14 +51,11 @@ func Create(port int) (Exitcode int, actualPort int) {
 	srv := &http.Server{Addr: ":" + strconv.Itoa(foundPort), Handler: mux}
 
 	go func() {
-		url := fmt.Sprintf("http://localhost:%d", foundPort)
-		fmt.Printf("Web app is running. Open in browser: \033[36m%s\033[0m\n", url)
-		fmt.Printf("Serving static files from: \033[32m%s\033[0m\n", serveDir)
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			fmt.Println("HTTP server error:", err)
 		}
 	}()
 
 	runLSPStdio()
-	return 0, foundPort
+	return foundPort, nil
 }

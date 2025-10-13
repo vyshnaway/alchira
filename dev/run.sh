@@ -23,7 +23,7 @@ resolve_real_path() {
     # Print the full physical path
     # pwd -P prints the physical path, resolving symlinks in the path itself
     PHYS_DIR="$(pwd -P)"
-    # echo "$PHYS_DIR/$TARGET_FILE"
+    echo "$PHYS_DIR/$TARGET_FILE"
 }
 
 # --- 1. Path Resolution ---
