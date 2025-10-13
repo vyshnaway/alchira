@@ -88,9 +88,9 @@ func Cssfile_Collection(files []_model.File_Stash) cssfile_Collection_return {
 					Info:         []string{},
 					Skeleton:     object.Skeleton(),
 					Declarations: []string{declaration},
+					Variables:     stylescanned.Variables.ToMap(),
 				}
 				classdata := _model.Style_ClassData{
-					Variables:     stylescanned.Variables.ToMap(),
 					Attributes:    map[string]string{},
 					Index:         0,
 					SummonSnippet: "",

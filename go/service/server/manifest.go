@@ -13,13 +13,17 @@ import (
 )
 
 type R_Manifest struct {
-	FileSwitch   string                             `json:"fileswitch,omitempty"`
-	Attachable   []string                           `json:"attachable,omitempty"`
-	Assignable   []string                           `json:"assignable,omitempty"`
-	SymclassData map[string]*_models.Style_Metadata `json:"symclassData,omitempty"`
-	Locales      []string                           `json:"locales,omitempty"`
-	Diagnostics  []_models.File_Diagnostic          `json:"diagnostics,omitempty"`
+	Environment  string                             `json:"enviranment"`
+	FileSwitch   string                             `json:"fileswitch"`
+	Attributes   []string                           `json:"attributes"`
+	CustomTags   []string                           `json:"customtags"`
+	Attachable   []string                           `json:"attachable"`
+	Assignable   []string                           `json:"assignable"`
+	SymclassData map[string]*_models.Style_Metadata `json:"symclassData"`
+	Locales      []string                           `json:"locales"`
+	Diagnostics  []_models.File_Diagnostic          `json:"diagnostics"`
 	Hashrules    map[string]string                  `json:"hashrules"`
+	Constants    map[string]string                  `json:"constants"`
 }
 
 func ManifestFile(filepath string) R_Manifest {
@@ -121,6 +125,8 @@ Return:
 	errors := manifest.Diagnostics
 	hashrules := _config.Style.Hashrules
 	return R_Manifest{
+		CustomTags:   CustomTags,
+		Environment:  _config.Archive.Environment,
 		Hashrules:    hashrules,
 		FileSwitch:   fileswitch,
 		Attachable:   attachable,
@@ -130,3 +136,5 @@ Return:
 		Diagnostics:  errors,
 	}
 }
+
+var CustomTags = slices.Collect(maps.Keys(_config.Root.CustomAtrules))

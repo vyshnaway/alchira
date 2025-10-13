@@ -125,11 +125,7 @@ func main() {
 			if val, err := _strconv.Atoi(argument); err == nil {
 				port = val
 			}
-			exitcode, _ = _server.Create(port)
-		}
-	case "iamai":
-		{
-			exitcode = _server.Manifest(argument)
+			exitcode, _ = _server.Connect(port)
 		}
 	case "install":
 		{

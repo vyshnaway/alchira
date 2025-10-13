@@ -23,12 +23,12 @@ resolve_real_path() {
     # Print the full physical path
     # pwd -P prints the physical path, resolving symlinks in the path itself
     PHYS_DIR="$(pwd -P)"
-    echo "$PHYS_DIR/$TARGET_FILE"
+    # echo "$PHYS_DIR/$TARGET_FILE"
 }
 
 # --- 1. Path Resolution ---
 
-echo "Resolving paths..."
+# echo "Resolving paths..."
 PROJECT_DIR="$(pwd -P)"
 SCRIPT_PATH="$(resolve_real_path "$0")"
 SCRIPT_DIR="$(dirname "$SCRIPT_PATH")"
@@ -51,7 +51,7 @@ EXEC_PATH="$EXEC_OUT_DIR/$EXEC_FILE"
 # Create the output directory if it doesn't exist
 mkdir -p "$EXEC_OUT_DIR"
 
-echo "Building project..."
+# echo "Building project..."
 
 # Change directory to the Go source location temporarily.
 # This ensures that 'go build' correctly uses relative paths for packages 
@@ -67,6 +67,6 @@ go build -gcflags='all=-l -N' -ldflags='-s -w' -o "$EXEC_PATH"
 cd $PROJECT_DIR
 
 # Continue command with latest binary
-echo "Executing binary..."
-echo
+# echo "Executing binary..."
+# echo
 "$EXEC_PATH" "$@"

@@ -130,9 +130,9 @@ func Rawtag_Upload(
 			Info:         raw.Comments,
 			Skeleton:     object.Skeleton(),
 			Declarations: []string{declaration},
+			Variables:     variables.ToMap(),
 		}
 		index = _action.Index_Declare(_model.Style_ClassData{
-			Variables:     variables.ToMap(),
 			Attributes:    attributes,
 			Index:         0,
 			WatchClass:    "",

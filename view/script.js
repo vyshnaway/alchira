@@ -163,11 +163,36 @@ if (dragElement && widgetElement) {
     });
 }
 
+// --- WebSocket Setup ---
+const ws = new WebSocket(`ws://${location.hostname}:${location.port}/ws`);
+ws.onopen = function () {
+    console.log('WebSocket connected');
+};
+ws.onerror = function (e) {
+    console.error('WebSocket error:', e);
+};
+ws.onmessage = function (evt) {
+    const msg = JSON.parse(evt.data);
+    // Assume JSON-RPC format: { jsonrpc: "2.0", method: "updateState"/"updateOutput", result: ..., id: ... }
+    // You may need to map from msg.method/msg.result/msg.params
+    if (msg.method === 'updateState') {
+        tweakIndex[msg.params.key]?.apply(msg.params.value);
+    } else if (msg.method === 'updateOutput') {
+        try {
+            const newData = msg.result;
+            if (newData && typeof newData === "object") {
+                Object.assign(OutputData, newData);
+                OutputUpdate(true);
+            } else {
+                OutputUpdate(false);
+            }
+        } catch (e) {
+            console.error("Unable to update component!");
+        }
+    }
+};
 
-// --- Extension Logic ---
-
-const vscode = acquireVsCodeApi();
-
+// --- Tweak class modification ---
 class Tweak {
     constructor(key, applyFunction = () => { }, options = {}) {
         this.key = key;
@@ -180,32 +205,38 @@ class Tweak {
     get element() {
         if (!this._element) {
             this._element = document.getElementById(this.key);
-            this._element.addEventListener('input', () => {
-                this.export();
-            });
-            this._element.addEventListener('change', () => {
-                this.export();
-            });
+            if (this._element) {
+                this._element.addEventListener('input', () => { this.export(); });
+                this._element.addEventListener('change', () => { this.export(); });
+            }
         }
         return this._element;
     }
 
     export() {
-        if (this.element) {
-            vscode.postMessage({
-                type: 'setState',
-                key: this.key,
-                value: this.element.type === 'checkbox' ? this.element.checked : this.element.value
-            });
+        if (ws.readyState === WebSocket.OPEN && this.element) {
+            ws.send(JSON.stringify({
+                jsonrpc: "2.0",
+                method: 'setState',
+                id: Math.floor(Math.random() * 100000),
+                params: {
+                    key: this.key,
+                    value: this.element.type === 'checkbox' ? this.element.checked : this.element.value
+                }
+            }));
             this.apply();
         }
     }
 
     import() {
-        vscode.postMessage({
-            type: 'getState',
-            key: this.key
-        });
+        if (ws.readyState === WebSocket.OPEN) {
+            ws.send(JSON.stringify({
+                jsonrpc: "2.0",
+                method: 'getState',
+                id: Math.floor(Math.random() * 100000),
+                params: { key: this.key }
+            }));
+        }
     }
 }
 
@@ -272,34 +303,3 @@ const tweakIndex = tweaks.reduce((accumulator, tweak) => {
     accumulator[tweak.key] = tweak;
     return accumulator;
 }, {});
-
-window.addEventListener('message', event => {
-    const message = event.data;
-    try {
-        switch (message.type) {
-            case 'updateState': {
-                tweakIndex[message.key]?.apply(message.value)
-                break;
-            }
-            case 'updateOutput': {
-                try {
-                    const newData = JSON.parse(message.value);
-                    if (
-                        newData && (typeof newData === "object") &&
-                        (JSON.stringify(OutputData) !== message.value)
-                    ) {
-                        Object.assign(OutputData, newData);
-                        OutputUpdate(true);
-                    } else {
-                        OutputUpdate(false);
-                    }
-                } catch (e) {
-                    console.error("Unable to update component!");
-                }
-                break;
-            }
-        }
-    } catch (error) {
-        console.log('Recieved message at client but execution failed: \n', error);
-    }
-});
