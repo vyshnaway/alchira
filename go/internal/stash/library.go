@@ -96,7 +96,7 @@ func Library_Update() {
 	_config.Delta.Lookup.Libraries = StackLibraryFiles_.Lookup
 
 	// Axiom update actions
-	_config.Manifest.Group.Axiom = map[string]_model.File_MetadataMap{}
+	_config.Manifest.Group.Axiom = map[string]_model.File_SymclassIndexMap{}
 	_config.Delta.Error.Axioms = []string{}
 	_config.Delta.Diagnostic.Axioms = []_model.File_Diagnostic{}
 	axiom_chart := O.New[string, []string]()
@@ -119,7 +119,7 @@ func Library_Update() {
 	_config.Delta.Report.Axioms = X.List_Chart("Axiom: "+_strconv.Itoa(axiom_counter)+" Symclasses", axiom_chart)
 
 	// Cluster update actions
-	_config.Manifest.Group.Cluster = map[string]_model.File_MetadataMap{}
+	_config.Manifest.Group.Cluster = map[string]_model.File_SymclassIndexMap{}
 	_config.Delta.Error.Clusters = []string{}
 	_config.Delta.Diagnostic.Clusters = []_model.File_Diagnostic{}
 	cluster_chart := O.New[string, []string]()

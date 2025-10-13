@@ -19,8 +19,8 @@ func Accumulate() {
 	_config.Style.Public___Index = accumulated.PublicClasses
 	_config.Delta.Report.TargetDir = accumulated.Report
 
-	_config.Manifest.Group.Local = map[string]_model.File_MetadataMap{}
-	_config.Manifest.Group.Global = map[string]_model.File_MetadataMap{}
+	_config.Manifest.Group.Local = map[string]_model.File_SymclassIndexMap{}
+	_config.Manifest.Group.Global = map[string]_model.File_SymclassIndexMap{}
 
 	_config.Delta.Error.TargetDir = []string{}
 	_config.Delta.Lookup.TargetDir = map[string]_model.File_Lookup{}
@@ -32,7 +32,7 @@ func Accumulate() {
 		_config.Delta.Error.TargetDir = append(_config.Delta.Error.TargetDir, val.Errors...)
 		_config.Delta.Diagnostic.TargetDir = append(_config.Delta.Diagnostic.TargetDir, val.Diagnostics...)
 
-		mergedMap := make(_model.File_MetadataMap)
+		mergedMap := make(_model.File_SymclassIndexMap)
 		_map.Copy(mergedMap, val.Public)
 		_map.Copy(mergedMap, val.Global)
 		_config.Manifest.Group.Global[key] = mergedMap

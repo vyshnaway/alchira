@@ -30,7 +30,6 @@ type Style_Metadata struct {
 	Info          []string
 	Skeleton      any
 	Declarations  []string
-	SummonSnippet string
 	Variables     map[string]string
 }
 

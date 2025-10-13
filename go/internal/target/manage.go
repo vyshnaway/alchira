@@ -61,7 +61,7 @@ func (This *Class) Savefile(filepath string, content string, hashindex int) {
 			file.Manifest.Diagnostics = append(file.Manifest.Diagnostics, E.Diagnostic)
 		} else {
 			var index_map _model.Style_ClassIndexMap
-			var metadata_map _model.File_MetadataMap
+			var metadata_map _model.File_SymclassIndexMap
 			switch tagdata.Scope {
 			case _model.Style_Type_Local:
 				metadata_map = file.Manifest.Local
@@ -74,7 +74,7 @@ func (This *Class) Savefile(filepath string, content string, hashindex int) {
 				index_map = file.StyleData.PublicClasses
 			default:
 				index_map = _model.Style_ClassIndexMap{}
-				metadata_map = _model.File_MetadataMap{}
+				metadata_map = _model.File_SymclassIndexMap{}
 			}
 
 			response := _style.Rawtag_Upload(tagdata, &file, index_map, metadata_map)

@@ -19,7 +19,7 @@ func Rawtag_Upload(
 	raw *_script.T_RawStyle,
 	file *_model.File_Stash,
 	IndexMap _model.Style_ClassIndexMap,
-	metadata_map _model.File_MetadataMap,
+	metadata_map _model.File_SymclassIndexMap,
 ) rawtag_Upload_return {
 	errors := []string{}
 	diagnostics := []_model.File_Diagnostic{}
@@ -132,7 +132,7 @@ func Rawtag_Upload(
 			Declarations: []string{declaration},
 			Variables:    variables.ToMap(),
 		}
-		index = _action.Index_Declare(_model.Style_ClassData{
+		index = _action.Index_Declare(&_model.Style_ClassData{
 			Attributes:           attributes,
 			Index:                0,
 			WatchClass:           "",
@@ -150,7 +150,7 @@ func Rawtag_Upload(
 		})
 		IndexMap[symclass] = index
 		file.StyleData.UsedIn = append(file.StyleData.UsedIn, index)
-		metadata_map[symclass] = &metadata
+		metadata_map[symclass] = index
 	}
 
 	return rawtag_Upload_return{

@@ -151,7 +151,7 @@ func Delta_Reset() {
 
 var Style = _model.Cache_Style{
 	Hashrules:       map[string]string{},
-	Index_to_Data:   map[int]_model.Style_ClassData{},
+	Index_to_Data:   map[int]*_model.Style_ClassData{},
 	Global___Index:  _model.Style_ClassIndexMap{},
 	Public___Index:  _model.Style_ClassIndexMap{},
 	Library__Index:  _model.Style_ClassIndexMap{},
@@ -163,7 +163,7 @@ var Style = _model.Cache_Style{
 func Style_Reset() {
 	Style = _model.Cache_Style{
 		Hashrules:       map[string]string{},
-		Index_to_Data:   map[int]_model.Style_ClassData{},
+		Index_to_Data:   map[int]*_model.Style_ClassData{},
 		Global___Index:  _model.Style_ClassIndexMap{},
 		Public___Index:  _model.Style_ClassIndexMap{},
 		Library__Index:  _model.Style_ClassIndexMap{},
@@ -178,11 +178,11 @@ var Manifest = _model.Cache_Manifest{
 	Diagnostics: []_model.File_Diagnostic{},
 	Lookup:      map[string]_model.File_Lookup{},
 	Group: _model.Cache_Manifest_Groups{
-		Axiom:    map[string]_model.File_MetadataMap{},
-		Cluster:  map[string]_model.File_MetadataMap{},
-		Local:    map[string]_model.File_MetadataMap{},
-		Global:   map[string]_model.File_MetadataMap{},
-		Artifact: map[string]_model.File_MetadataMap{},
+		Axiom:    map[string]_model.File_SymclassIndexMap{},
+		Cluster:  map[string]_model.File_SymclassIndexMap{},
+		Local:    map[string]_model.File_SymclassIndexMap{},
+		Global:   map[string]_model.File_SymclassIndexMap{},
+		Artifact: map[string]_model.File_SymclassIndexMap{},
 	},
 }
 
@@ -192,11 +192,11 @@ func Manifest_Reset() {
 		Diagnostics: []_model.File_Diagnostic{},
 		Lookup:      map[string]_model.File_Lookup{},
 		Group: _model.Cache_Manifest_Groups{
-			Axiom:    map[string]_model.File_MetadataMap{},
-			Cluster:  map[string]_model.File_MetadataMap{},
-			Local:    map[string]_model.File_MetadataMap{},
-			Global:   map[string]_model.File_MetadataMap{},
-			Artifact: map[string]_model.File_MetadataMap{},
+			Axiom:    map[string]_model.File_SymclassIndexMap{},
+			Cluster:  map[string]_model.File_SymclassIndexMap{},
+			Local:    map[string]_model.File_SymclassIndexMap{},
+			Global:   map[string]_model.File_SymclassIndexMap{},
+			Artifact: map[string]_model.File_SymclassIndexMap{},
 		},
 	}
 }

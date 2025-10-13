@@ -44,14 +44,14 @@ func Cssfile_String(content string, initial string) R_Cssfile_Parse {
 }
 
 type cssfile_Collection_return struct {
-	MetadataCollection _model.File_MetadataMap
+	MetadataCollection _model.File_SymclassIndexMap
 	SelectorList       []string
 }
 
 func Cssfile_Collection(files []_model.File_Stash) cssfile_Collection_return {
 	selectorList := []string{}
 	selectors := map[string]int{}
-	indexMetaCollection := _model.File_MetadataMap{}
+	indexMetaCollection := _model.File_SymclassIndexMap{}
 
 	for _, file := range files {
 		for _, so := range _css.ParsePartial(_util.Code_Uncomment(file.Content, false, true, false)).All_Blocks {
@@ -114,10 +114,10 @@ func Cssfile_Collection(files []_model.File_Stash) cssfile_Collection_return {
 						}
 					}(),
 				}
-				index := _action.Index_Declare(classdata)
+				index := _action.Index_Declare(&classdata)
 				file.StyleData.UsedIn = append(file.StyleData.UsedIn, index)
 				selectors[classname] = index
-				indexMetaCollection[classname] = &metadata
+				indexMetaCollection[classname] = index
 				selectorList = append(selectorList, classname)
 			}
 		}

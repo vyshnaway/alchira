@@ -2,6 +2,7 @@ package server
 
 import (
 	"main/configs"
+	"main/internal/action"
 	"main/internal/stash"
 	"main/models"
 	"main/package/fileman"
@@ -25,6 +26,10 @@ type R_Manifest struct {
 	Constants    map[string]string                 `json:"constants"`
 	Diagnostics  []models.File_Diagnostic          `json:"diagnostics"`
 	SymclassData map[string]*models.Style_Metadata `json:"symclassData"`
+}
+
+func manifestFromIndex(index int) *models.Style_Metadata {
+	return action.Index_Fetch(index).Metadata
 }
 
 func ManifestFile(filepath string) R_Manifest {
@@ -75,7 +80,7 @@ func ManifestFile(filepath string) R_Manifest {
 			if stash, er := manifest.Group.Artifact[nav.Id]; er {
 				for k, v := range stash {
 					attachable = append(attachable, k)
-					symclassData[k] = v
+					symclassData[k] = manifestFromIndex(v)
 				}
 			}
 		} else {
@@ -83,7 +88,7 @@ func ManifestFile(filepath string) R_Manifest {
 				KK := strconv.Itoa(K)
 				for k, v := range manifest.Group.Axiom[KK] {
 					attachable = append(attachable, k)
-					symclassData[k] = v
+					symclassData[k] = manifestFromIndex(v)
 				}
 				if nav.Id == KK {
 					goto Return
@@ -97,7 +102,7 @@ func ManifestFile(filepath string) R_Manifest {
 				KK := strconv.Itoa(K)
 				for k, v := range manifest.Group.Cluster[KK] {
 					attachable = append(attachable, k)
-					symclassData[k] = v
+					symclassData[k] = manifestFromIndex(v)
 				}
 				if nav.Id == KK {
 					goto Return
@@ -110,14 +115,14 @@ func ManifestFile(filepath string) R_Manifest {
 			for _, V := range manifest.Group.Artifact {
 				for k, v := range V {
 					attachable = append(attachable, k)
-					symclassData[k] = v
+					symclassData[k] = manifestFromIndex(v)
 				}
 			}
 
 			for _, V := range manifest.Group.Global {
 				for k, v := range V {
 					attachable = append(attachable, k)
-					symclassData[k] = v
+					symclassData[k] = manifestFromIndex(v)
 				}
 			}
 
@@ -125,7 +130,7 @@ func ManifestFile(filepath string) R_Manifest {
 				if stash, er := manifest.Group.Local[nav.Id]; er {
 					for k, v := range stash {
 						attachable = append(attachable, k)
-						symclassData[k] = v
+						symclassData[k] = manifestFromIndex(v)
 					}
 				}
 			}

@@ -7,7 +7,7 @@ import (
 	_stash "main/internal/stash"
 	S "main/package/console"
 	_fileman "main/package/fileman"
-	_watcher "main/package/watcher"
+	_watcher "main/package/watchman"
 	_map "maps"
 	_os "os"
 	_signal "os/signal"

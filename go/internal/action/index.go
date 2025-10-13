@@ -12,15 +12,8 @@ var NOW = 0
 var BIN = make(map[int]struct{})
 var mu _sync.Mutex
 
-func Index_Fetch(index int) *_model.Style_ClassData {
-	mu.Lock()
-	defer mu.Unlock()
-	data := _config.Style.Index_to_Data[index]
-	return &data
-}
-
 // Index_Declare: Assigns and registers a new index
-func Index_Declare(object _model.Style_ClassData) int {
+func Index_Declare(object *_model.Style_ClassData) int {
 	mu.Lock()
 	defer mu.Unlock()
 	var idx int
@@ -73,6 +66,14 @@ func Index_Reset(after int) int {
 type index_Find_retrun struct {
 	Index int
 	Group _model.Style_Type
+	Data  *_model.Style_ClassData
+}
+
+func Index_Fetch(index int) *_model.Style_ClassData {
+	mu.Lock()
+	defer mu.Unlock()
+	data := _config.Style.Index_to_Data[index]
+	return data
 }
 
 func Index_Find(classname string, localMap _model.Style_ClassIndexMap) index_Find_retrun {
@@ -96,8 +97,11 @@ func Index_Find(classname string, localMap _model.Style_ClassIndexMap) index_Fin
 		index = idx
 		group = _model.Style_Type_Artifact
 	}
+	data := _config.Style.Index_to_Data[index]
+
 	return index_Find_retrun{
 		Index: index,
 		Group: group,
+		Data:  data,
 	}
 }

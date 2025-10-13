@@ -1,12 +1,9 @@
-package preview
+package server
 
 import (
-	"bufio"
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"os"
-	"strings"
 
 	"github.com/gorilla/websocket"
 )
@@ -27,36 +24,6 @@ type JsonRPCResponse struct {
 }
 
 var upgrader = websocket.Upgrader{}
-
-func runLSPStdio() {
-	reader := bufio.NewReader(os.Stdin)
-	writer := bufio.NewWriter(os.Stdout)
-	for {
-		line, err := reader.ReadString('\n')
-		if err != nil {
-			break
-		}
-		line = strings.TrimSpace(line)
-		if line == "" {
-			continue
-		}
-		var req JsonRPCRequest
-		if err := json.Unmarshal([]byte(line), &req); err != nil {
-			continue
-		}
-		var resp JsonRPCResponse
-		resp.JSONRPC = "2.0"
-		resp.ID = req.ID
-		if req.Method == "initialize" {
-			resp.Result = map[string]any{"capabilities": map[string]any{}}
-		} else {
-			resp.Result = fmt.Sprintf("Method: %s received", req.Method)
-		}
-		out, _ := json.Marshal(resp)
-		writer.WriteString(string(out) + "\n")
-		writer.Flush()
-	}
-}
 
 // --- State for live preview, simple in-memory ---
 var previewState = map[string]any{}

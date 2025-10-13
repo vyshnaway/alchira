@@ -9,7 +9,7 @@ import (
 	_css "main/package/css"
 	_fileman "main/package/fileman"
 	_util "main/package/utils"
-	_watcher "main/package/watcher"
+	_watcher "main/package/watchman"
 )
 
 func Update_Scaffold() {

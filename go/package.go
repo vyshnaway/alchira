@@ -138,7 +138,7 @@ func main() {
 			if val, err := _strconv.Atoi(argone); err == nil {
 				port = val
 			}
-			_server.Bridge(port)
+			_server.Connect(port)
 		}
 	case "manifest":
 		{

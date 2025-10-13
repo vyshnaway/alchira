@@ -76,7 +76,7 @@ func Artifact_Update() {
 	SaveArtifactFile_ := artifact_CacheFiles()
 	_config.Delta.Lookup.Artifacts = SaveArtifactFile_.Lookup
 
-	_config.Manifest.Group.Artifact = map[string]_model.File_MetadataMap{}
+	_config.Manifest.Group.Artifact = map[string]_model.File_SymclassIndexMap{}
 	_config.Delta.Error.Artifacts = []string{}
 	_config.Delta.Diagnostic.Artifacts = []_model.File_Diagnostic{}
 	artifact_chart := O.New[string, []string]()
@@ -84,7 +84,7 @@ func Artifact_Update() {
 	for _, file := range SaveArtifactFile_.Files {
 
 		symclasses := []string{}
-		metadatas := map[string]*_model.Style_Metadata{}
+		metadatas := _model.File_SymclassIndexMap{}
 		for _, tagstyle := range _script.Rider(&file, []string{}, _script.E_Action_Read).StylesList {
 
 			if len(tagstyle.SymClasses) == 0 {

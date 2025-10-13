@@ -29,9 +29,9 @@ func (This *Class) Accumulator() Accumulator_return {
 			Type:   _model.File_Type_Stylesheet,
 			Locale: []string{},
 		},
-		Local:       _model.File_MetadataMap{},
-		Global:      _model.File_MetadataMap{},
-		Public:      _model.File_MetadataMap{},
+		Local:       _model.File_SymclassIndexMap{},
+		Global:      _model.File_SymclassIndexMap{},
+		Public:      _model.File_SymclassIndexMap{},
 		Errors:      []string{},
 		Diagnostics: []_model.File_Diagnostic{},
 	}

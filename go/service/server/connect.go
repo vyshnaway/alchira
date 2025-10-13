@@ -2,9 +2,10 @@ package server
 
 import (
 	"bufio"
+	"encoding/json"
 	"fmt"
 	"main/package/utils"
-	"main/service/server/preview"
+	"net/http"
 	"os"
 	"strings"
 )
@@ -17,19 +18,31 @@ var DATA = struct {
 	Url:  "",
 }
 
-func Bridge(port int) {
-	if p, e := preview.Create(port); e == nil {
-		DATA.Port = p
-		DATA.Url = fmt.Sprintf("http://localhost:%d", p)
+func Connect(tryport int) {
+	// Start server
+	server, port, err := Create(tryport)
+	if err != nil {
+		fmt.Println(0)
+		return
 	}
 
-	Dryrun(Execute_Step_Initialize)
-	
+	DATA.Port = port
+	DATA.Url = fmt.Sprintf("http://localhost:%d", port)
+
+	go func() {
+		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			fmt.Println("HTTP server error:", err)
+		}
+	}()
+
+	Dryrun(Dryrun_Step_Initialize)
+
 	scanner := bufio.NewScanner(os.Stdin)
+	writer := bufio.NewWriter(os.Stdout)
+
 	for scanner.Scan() {
 		str := scanner.Text()
 		if strings.HasPrefix(str, "$ ") {
-			fmt.Println("Preview command received (not implemented)")
 			split := strings.Fields(str[2:])
 			if len(split) < 1 {
 				continue
@@ -42,18 +55,40 @@ func Bridge(port int) {
 				if len(arguments) > 0 {
 					filepath := arguments[0]
 					result := ManifestFile(filepath)
-					fmt.Println(utils.Code_JsonBuild(result, "  "))
+					fmt.Fprintln(writer, utils.Code_JsonBuild(result, ""))
 				} else {
-					fmt.Println("Error: manifest command missing argument [filepath]")
+					fmt.Fprintln(writer, "Error: manifest command missing argument [filepath]")
 				}
 			case "preview":
-				// Implement preview handling if needed
-				fmt.Println("Preview command received (not implemented)")
+				fmt.Fprintln(writer, "Preview command received (not implemented)")
 			default:
-				fmt.Printf("Unknown command: %s\n", command)
+				fmt.Fprintf(writer, "Unknown command: %s\n", command)
 			}
+			writer.Flush()
+		} else {
+			// JSON-RPC handler
+			str = strings.TrimSpace(str)
+			if str == "" {
+				continue
+			}
+			var req JsonRPCRequest
+			if err := json.Unmarshal([]byte(str), &req); err != nil {
+				continue // skip invalid JSON
+			}
+			var resp JsonRPCResponse
+			resp.JSONRPC = "2.0"
+			resp.ID = req.ID
+			if req.Method == "initialize" {
+				resp.Result = map[string]any{"capabilities": map[string]any{}}
+			} else {
+				resp.Result = fmt.Sprintf("Method: %s received", req.Method)
+			}
+			out, _ := json.Marshal(resp)
+			fmt.Fprintln(writer, string(out))
+			writer.Flush()
 		}
 	}
+
 	if err := scanner.Err(); err != nil {
 		fmt.Fprintln(os.Stderr, "Error reading from stdin:", err)
 	}

@@ -16,7 +16,7 @@ type File_Diagnostic struct {
 	Sources []string `json:"sources"`
 }
 
-type File_MetadataMap map[string]*Style_Metadata
+type File_SymclassIndexMap map[string]int
 
 type File_Source struct {
 	Title     string   `json:"title"`
@@ -50,12 +50,12 @@ type File_StyleData struct {
 }
 
 type File_LocalManifest struct {
-	Local       File_MetadataMap  `json:"local"`
-	Global      File_MetadataMap  `json:"global"`
-	Public      File_MetadataMap  `json:"public"`
-	Lookup      File_Lookup       `json:"lookup"`
-	Errors      []string          `json:"errors"`
-	Diagnostics []File_Diagnostic `json:"diagnostics"`
+	Local       File_SymclassIndexMap `json:"local"`
+	Global      File_SymclassIndexMap `json:"global"`
+	Public      File_SymclassIndexMap `json:"public"`
+	Lookup      File_Lookup           `json:"lookup"`
+	Errors      []string              `json:"errors"`
+	Diagnostics []File_Diagnostic     `json:"diagnostics"`
 }
 
 type File_Stash struct {

@@ -97,7 +97,7 @@ type Cache_Delta struct {
 
 type Cache_Style struct {
 	Hashrules       map[string]string
-	Index_to_Data   map[int]Style_ClassData
+	Index_to_Data   map[int]*Style_ClassData
 	Global___Index  Style_ClassIndexMap
 	Public___Index  Style_ClassIndexMap
 	Library__Index  Style_ClassIndexMap
@@ -107,11 +107,11 @@ type Cache_Style struct {
 }
 
 type Cache_Manifest_Groups struct {
-	Axiom    map[string]File_MetadataMap `json:"axiom"`
-	Cluster  map[string]File_MetadataMap `json:"cluster"`
-	Local    map[string]File_MetadataMap `json:"local"`
-	Global   map[string]File_MetadataMap `json:"global"`
-	Artifact map[string]File_MetadataMap `json:"artifact"`
+	Axiom    map[string]File_SymclassIndexMap `json:"axiom"`
+	Cluster  map[string]File_SymclassIndexMap `json:"cluster"`
+	Local    map[string]File_SymclassIndexMap `json:"local"`
+	Global   map[string]File_SymclassIndexMap `json:"global"`
+	Artifact map[string]File_SymclassIndexMap `json:"artifact"`
 }
 
 type Cache_Manifest struct {
