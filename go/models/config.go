@@ -21,7 +21,7 @@ type Config_ProxyStorage struct {
 type Config_Raw struct {
 	Name        string            `json:"name,omitempty"`
 	Author      string            `json:"author,omitempty"`
-	Source        string            `json:"source,omitempty"`
+	Source      string            `json:"source,omitempty"`
 	Version     string            `json:"version,omitempty"`
 	Vendors     string            `json:"vendors,omitempty"`
 	Environment string            `json:"environment,omitempty"`

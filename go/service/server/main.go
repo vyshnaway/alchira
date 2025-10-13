@@ -6,11 +6,6 @@ import (
 	"main/package/utils"
 )
 
-func Create(port int) (Exitcode int) {
-
-	return 0
-}
-
 func Manifest(filepath string) (Exitcode int) {
 	Simulate()
 
