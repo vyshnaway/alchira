@@ -14,6 +14,9 @@ import (
 )
 
 type R_Manifest struct {
+	WebviewPort  int                               `json:"webviewport"`
+	WebviewUrl   string                            `json:"webviewurl"`
+	Filepath     string                            `json:"filepath"`
 	Extention    string                            `json:"extention"`
 	AssistFile   bool                              `json:"assistfile"`
 	Environment  string                            `json:"environment"`
@@ -152,6 +155,9 @@ Return:
 	diagnostics := manifest.Diagnostics
 	hashrules := configs.Style.Hashrules
 	return R_Manifest{
+		Filepath:     filepath,
+		WebviewUrl:   DATA.Url,
+		WebviewPort:  DATA.Port,
 		Attributes:   attributes,
 		Extention:    extention,
 		Constants:    constants,

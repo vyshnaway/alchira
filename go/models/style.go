@@ -27,10 +27,10 @@ type Style_ExportStyle struct {
 }
 
 type Style_Metadata struct {
-	Info          []string
-	Skeleton      any
-	Declarations  []string
-	Variables     map[string]string
+	Info         []string          `json:"info"`
+	Skeleton     any               `json:"skeleton"`
+	Declarations []string          `json:"declarations"`
+	Variables    map[string]string `json:"variables"`
 }
 
 type Style_ClassData struct {
