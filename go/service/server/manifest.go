@@ -10,6 +10,7 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+	"sync"
 )
 
 type R_Manifest struct {
@@ -33,6 +34,9 @@ func manifestFromIndex(index int) *models.Style_Metadata {
 }
 
 func ManifestFile(filepath string) R_Manifest {
+	var mu sync.Mutex
+	mu.Lock()
+	defer mu.Unlock()
 	fileswitch := filepath
 	extention := fileman.Path_FileExtention(filepath)
 	attributes := []string{}
@@ -67,6 +71,7 @@ func ManifestFile(filepath string) R_Manifest {
 	attachable := []string{}
 	assignable := []string{}
 	symclassData := map[string]*models.Style_Metadata{}
+	SymclassIndexMap := map[string]int{}
 	locales := []string{}
 	assistfile := false
 
@@ -88,6 +93,7 @@ func ManifestFile(filepath string) R_Manifest {
 				KK := strconv.Itoa(K)
 				for k, v := range manifest.Group.Axiom[KK] {
 					attachable = append(attachable, k)
+					SymclassIndexMap[k] = v
 					symclassData[k] = manifestFromIndex(v)
 				}
 				if nav.Id == KK {
@@ -102,6 +108,7 @@ func ManifestFile(filepath string) R_Manifest {
 				KK := strconv.Itoa(K)
 				for k, v := range manifest.Group.Cluster[KK] {
 					attachable = append(attachable, k)
+					SymclassIndexMap[k] = v
 					symclassData[k] = manifestFromIndex(v)
 				}
 				if nav.Id == KK {
@@ -115,6 +122,7 @@ func ManifestFile(filepath string) R_Manifest {
 			for _, V := range manifest.Group.Artifact {
 				for k, v := range V {
 					attachable = append(attachable, k)
+					SymclassIndexMap[k] = v
 					symclassData[k] = manifestFromIndex(v)
 				}
 			}
@@ -122,6 +130,7 @@ func ManifestFile(filepath string) R_Manifest {
 			for _, V := range manifest.Group.Global {
 				for k, v := range V {
 					attachable = append(attachable, k)
+					SymclassIndexMap[k] = v
 					symclassData[k] = manifestFromIndex(v)
 				}
 			}
@@ -130,6 +139,7 @@ func ManifestFile(filepath string) R_Manifest {
 				if stash, er := manifest.Group.Local[nav.Id]; er {
 					for k, v := range stash {
 						attachable = append(attachable, k)
+						SymclassIndexMap[k] = v
 						symclassData[k] = manifestFromIndex(v)
 					}
 				}
@@ -138,6 +148,7 @@ func ManifestFile(filepath string) R_Manifest {
 	}
 
 Return:
+	DATA.SymclassIndexMap = SymclassIndexMap
 	diagnostics := manifest.Diagnostics
 	hashrules := configs.Style.Hashrules
 	return R_Manifest{

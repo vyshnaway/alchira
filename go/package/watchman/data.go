@@ -28,8 +28,8 @@ type Event struct {
 }
 
 type T_Watcher struct {
-	watcher         _watcher.Watcher
-	mutex           _sync.Mutex
+	hook            *_watcher.Watcher
+	mutex           *_sync.Mutex
 	queue           []Event
 	Close           func()
 	folderMaps      map[string]string
@@ -43,12 +43,15 @@ func (This *T_Watcher) HandleEvent(action E_Action, filePath string) {
 	event.TimeStamp = now.Format("15:04:05")
 	event.Action = action
 
-	var folder string
+	var folder = ""
 	for _, f := range This.resolvedFolders {
 		if strings.HasPrefix(filePath, f) {
 			folder = This.folderMaps[f]
 			break
 		}
+	}
+	if folder == "" {
+		return
 	}
 
 	event.Folder = folder

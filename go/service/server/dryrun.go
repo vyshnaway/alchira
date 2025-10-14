@@ -106,7 +106,7 @@ func Dryrun(step Dryrun_Step_enum) (Status bool) {
 						configs.Path_Folder["archive"].Path,
 					}
 
-					if w, err := _watcher.Create(watch_dirs, ignore_dirs, interval); err == nil {
+					if w, err := _watcher.Instant(watch_dirs, ignore_dirs, interval); err == nil {
 						watcher = w
 						sigs := make(chan _os.Signal, 1)
 						_signal.Notify(sigs, _syscall.SIGINT)

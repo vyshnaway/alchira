@@ -28,33 +28,31 @@ func New(folders, ignores []string) *T_Watcher {
 	}
 	return &T_Watcher{
 		queue:           []Event{},
-		mutex:           _sync.Mutex{},
+		mutex:           &_sync.Mutex{},
 		folderMaps:      folderMaps,
 		resolvedFolders: resolvedFolders,
 		resolvedIgnores: resolvedIgnores,
 	}
 }
 
-func Create(folders, ignores []string, interval int) (instance *T_Watcher, err error) {
-	WATCHER := New(folders, ignores)
-
-	w := _watcher.New()
-	w.SetMaxEvents(1)
-	w.FilterOps(_watcher.Move, _watcher.Remove, _watcher.Write, _watcher.Rename, _watcher.Create)
+func (This *T_Watcher) Start(interval, maxevents int) error {
+	This.hook = _watcher.New()
+	This.hook.SetMaxEvents(maxevents)
+	This.hook.FilterOps(_watcher.Move, _watcher.Remove, _watcher.Write, _watcher.Rename, _watcher.Create)
 
 	errs := []error{}
-	for _, folder := range resolvedFolders {
-		if err := w.AddRecursive(folder); err != nil {
+	for _, folder := range This.resolvedFolders {
+		if err := This.hook.AddRecursive(folder); err != nil {
 			errs = append(errs, err)
 		}
 	}
-	w.Ignore(resolvedIgnores...)
+	This.hook.Ignore(This.resolvedIgnores...)
 
 	done := make(chan struct{})
 	go func() {
 		for {
 			select {
-			case event, ok := <-w.Event:
+			case event, ok := <-This.hook.Event:
 				_fmt.Println("event")
 				if !ok {
 					return
@@ -74,8 +72,8 @@ func Create(folders, ignores []string, interval int) (instance *T_Watcher, err e
 				default:
 					act = E_Action_Access
 				}
-				WATCHER.HandleEvent(act, event.Name())
-			case err, ok := <-w.Error:
+				This.HandleEvent(act, event.Name())
+			case err, ok := <-This.hook.Error:
 				if ok {
 					_fmt.Fprintf(_os.Stderr, "Watcher error: %v\r\n", err)
 				}
@@ -86,15 +84,22 @@ func Create(folders, ignores []string, interval int) (instance *T_Watcher, err e
 	}()
 
 	go func() {
-		err := w.Start(_time.Millisecond * _time.Duration(interval))
+		err := This.hook.Start(_time.Millisecond * _time.Duration(interval))
 		if err != nil {
 			_fmt.Fprintf(_os.Stderr, "Watcher start error: %v\r\n", err)
 		}
 	}()
 
-	WATCHER.Close = func() {
+	This.Close = func() {
 		close(done)
-		w.Close()
+		This.hook.Close()
 	}
-	return &WATCHER, errors.Join(errs...)
+	return errors.Join(errs...)
+
+}
+
+func Instant(folders, ignores []string, interval int) (instance *T_Watcher, err error) {
+	w := New(folders, ignores)
+	e := w.Start(interval, 1)
+	return w, e
 }

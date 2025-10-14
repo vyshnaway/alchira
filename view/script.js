@@ -12,7 +12,6 @@ window.addEventListener('load', () => {
     }, 100);
 });
 
-
 // --- Deploy Output Fragment ----
 
 function escapeHtml(unsafe) {
@@ -27,29 +26,17 @@ function escapeHtml(unsafe) {
 const StapleElement = document.getElementById('live-preview-output-staple');
 const OutputElement = document.getElementById('live-preview-output-container');
 const SymClassNameElement = document.getElementById('live-preview-symclass');
-const IndexStylesheetElement = document.getElementById('live-preview-project-index');
-const WatchStylesheetElement = document.getElementById('live-preview-project-watch');
+const RootCssElement = document.getElementById('live-preview-root-css');
+const CompCssElement = document.getElementById('live-preview-comp-css');
 
-function refetchCSS() {
-    const timestamp = new Date().getTime();
-    [
-        IndexStylesheetElement,
-        WatchStylesheetElement
-    ].forEach(link => {
-        const href = link.getAttribute('href');
-        const newHref = href.includes('?')
-            ? href.replace(/(\?|&)t=\d+/, ('$1t=' + timestamp))
-            : (href + '?t=' + timestamp);
-        link.setAttribute('href', newHref);
-    });
-}
-
-const OutputData = {
+const ComponentData = {
     staple: "",
     summon: "",
     symclass: "",
     attributes: "",
     watchclass: "",
+    rootcss: "",
+    compcss: "",
 }
 
 const outputState = {
@@ -76,21 +63,22 @@ function OutputUpdate(updateComponent = false) {
     OutputElement.setAttribute("data-live-preview-output-container-debug", String(outputState.activateDebug))
     OutputElement.setAttribute("data-live-preview-output-container-resize", String(outputState.activateResize))
     OutputElement.setAttribute("data-live-preview-output-container-preserve", String(outputState.preserveScale))
-
-    refetchCSS();
+    RootCssElement.innerText = ComponentData.rootcss
+    CompCssElement.innerText = ComponentData.compcss
+    
     if (updateComponent) {
 
-        const snippet = (typeof OutputData.staple === "string") ? OutputData.staple : '';
-        const watchclass = (typeof OutputData.watchclass === "string") ? OutputData.watchclass : '';
-        const structure = (typeof OutputData.summon === "string" && OutputData.summon.length) ? OutputData.summon : "{Content}";
-        const selector = (typeof OutputData.symclass === "string" && OutputData.symclass.length) ? OutputData.symclass : '[N/A]';
+        const snippet = (typeof ComponentData.staple === "string") ? ComponentData.staple : '';
+        const watchclass = (typeof ComponentData.watchclass === "string") ? ComponentData.watchclass : '';
+        const structure = (typeof ComponentData.summon === "string" && ComponentData.summon.length) ? ComponentData.summon : "{Content}";
+        const selector = (typeof ComponentData.symclass === "string" && ComponentData.symclass.length) ? ComponentData.symclass : '[N/A]';
 
         StapleElement.innerHTML = snippet;
         OutputElement.innerHTML = structure;
         OutputElement.className = watchclass;
         SymClassNameElement.innerText = selector;
 
-        const attributes = JSON.parse(OutputData.attributes);
+        const attributes = JSON.parse(ComponentData.attributes);
         if (typeof attributes === "object") {
             RootMain.setAttribute("style", typeof attributes["style"] === "string" ? attributes["style"].slice(1, -1) : "")
             Object.entries(attributes).forEach(([attr, value]) => {
@@ -181,7 +169,7 @@ ws.onmessage = function (evt) {
         try {
             const newData = msg.result;
             if (newData && typeof newData === "object") {
-                Object.assign(OutputData, newData);
+                Object.assign(ComponentData, newData);
                 OutputUpdate(true);
             } else {
                 OutputUpdate(false);
@@ -197,23 +185,23 @@ class Tweak {
     constructor(key, applyFunction = () => { }, options = {}) {
         this.key = key;
         this.apply = applyFunction.bind(this);
-        this._element = null;
+        this.dom_element = this.element;
         this.options = options;
-        this.import();
+        this.getState();
     }
 
     get element() {
-        if (!this._element) {
-            this._element = document.getElementById(this.key);
-            if (this._element) {
-                this._element.addEventListener('input', () => { this.export(); });
-                this._element.addEventListener('change', () => { this.export(); });
+        if (!this.dom_element) {
+            this.dom_element = document.getElementById(this.key);
+            if (this.dom_element) {
+                this.dom_element.addEventListener('input', () => { this.setState(); });
+                this.dom_element.addEventListener('change', () => { this.setState(); });
             }
         }
-        return this._element;
+        return this.dom_element;
     }
 
-    export() {
+    setState() {
         if (ws.readyState === WebSocket.OPEN && this.element) {
             ws.send(JSON.stringify({
                 jsonrpc: "2.0",
@@ -228,7 +216,7 @@ class Tweak {
         }
     }
 
-    import() {
+    getState() {
         if (ws.readyState === WebSocket.OPEN) {
             ws.send(JSON.stringify({
                 jsonrpc: "2.0",

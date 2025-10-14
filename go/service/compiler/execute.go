@@ -136,7 +136,7 @@ func Execute(heading string) (Exitcode int) {
 					}
 
 					X.Report("Initial Build", watch_dirs, report, []string{})
-					if w, err := _watcher.Create(watch_dirs, ignore_dirs, interval); err == nil {
+					if w, err := _watcher.Instant(watch_dirs, ignore_dirs, interval); err == nil {
 						watcher = w
 						sigs := make(chan _os.Signal, 1)
 						_signal.Notify(sigs, _syscall.SIGINT)
