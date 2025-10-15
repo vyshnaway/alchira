@@ -14,6 +14,7 @@ import (
 )
 
 type R_Manifest struct {
+	LiveCursor   bool                              `json:"livecursor"`
 	WebviewPort  int                               `json:"webviewport"`
 	WebviewUrl   string                            `json:"webviewurl"`
 	Filepath     string                            `json:"filepath"`
@@ -32,11 +33,11 @@ type R_Manifest struct {
 	SymclassData map[string]*models.Style_Metadata `json:"symclassData"`
 }
 
-func manifestFromIndex(index int) *models.Style_Metadata {
-	return action.Index_Fetch(index).Metadata
-}
-
 func ManifestFile(filepath string) R_Manifest {
+	manifestFromIndex := func(index int) *models.Style_Metadata {
+		return action.Index_Fetch(index).Metadata
+	}
+
 	var mu sync.Mutex
 	mu.Lock()
 	defer mu.Unlock()
@@ -151,13 +152,14 @@ func ManifestFile(filepath string) R_Manifest {
 	}
 
 Return:
-	DATA.SymclassIndexMap = SymclassIndexMap
+	REFER.SymclassIndexMap = SymclassIndexMap
 	diagnostics := manifest.Diagnostics
 	hashrules := configs.Style.Hashrules
 	return R_Manifest{
+		LiveCursor:   REFER.LiveCursor,
 		Filepath:     filepath,
-		WebviewUrl:   DATA.Url,
-		WebviewPort:  DATA.Port,
+		WebviewUrl:   REFER.Url,
+		WebviewPort:  REFER.Port,
 		Attributes:   attributes,
 		Extention:    extention,
 		Constants:    constants,

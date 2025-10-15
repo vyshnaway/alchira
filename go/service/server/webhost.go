@@ -2,23 +2,31 @@ package server
 
 import (
 	"fmt"
+	"github.com/gorilla/websocket"
 	"main/package/fileman"
+	"main/package/watchman"
 	"net"
 	"net/http"
 	"path/filepath"
 	"strconv"
 )
 
-var DATA = struct {
+var REFER = struct {
 	Port             int
 	Url              string
+	LiveCursor       bool
 	SymclassIndexMap map[string]int
 	WebviewState     map[string]any
+	watcher          *watchman.T_Watcher
+	wstream          *websocket.Conn
 }{
 	Port:             0,
 	Url:              "",
+	LiveCursor:       false,
 	SymclassIndexMap: map[string]int{},
 	WebviewState:     map[string]any{},
+	watcher:          nil,
+	wstream:          nil,
 }
 
 // Returns an http.Server ready to Start, the found port, and any error.

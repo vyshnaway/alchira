@@ -5,10 +5,8 @@ const RootBody = document.getElementById('live-preview-body');
 const RootMain = document.getElementById('live-preview-main');
 window.addEventListener('load', () => {
     setTimeout(() => {
-        const scrollX = RootBody.scrollWidth * 0.5 - RootBody.clientWidth * 0.5;
-        const scrollY = RootBody.scrollHeight * 0.5 - RootBody.clientHeight * 0.5;
-        RootBody.scrollTo(scrollX, scrollY);
-        RootBody.parentElement.removeAttribute("style", "");
+        RootBody.parentElement.removeAttribute("style");
+        console.log("Removed vscode css defaults.")
     }, 100);
 });
 
@@ -59,23 +57,22 @@ function OutputUpdate(updateComponent = false) {
         else if (!outputState.activateResize && OutputElement.hasAttribute('style')) { OutputElement.removeAttribute('style'); }
     }
 
-    IndexStylesheetElement.disabled = !outputState.useProjectCss;
+    RootCssElement.disabled = !outputState.useProjectCss;
     OutputElement.setAttribute("data-live-preview-output-container-debug", String(outputState.activateDebug))
     OutputElement.setAttribute("data-live-preview-output-container-resize", String(outputState.activateResize))
     OutputElement.setAttribute("data-live-preview-output-container-preserve", String(outputState.preserveScale))
     RootCssElement.innerText = ComponentData.rootcss
     CompCssElement.innerText = ComponentData.compcss
-    
+
     if (updateComponent) {
 
         const snippet = (typeof ComponentData.staple === "string") ? ComponentData.staple : '';
-        const watchclass = (typeof ComponentData.watchclass === "string") ? ComponentData.watchclass : '';
         const structure = (typeof ComponentData.summon === "string" && ComponentData.summon.length) ? ComponentData.summon : "{Content}";
         const selector = (typeof ComponentData.symclass === "string" && ComponentData.symclass.length) ? ComponentData.symclass : '[N/A]';
 
         StapleElement.innerHTML = snippet;
         OutputElement.innerHTML = structure;
-        OutputElement.className = watchclass;
+        OutputElement.className = "_";
         SymClassNameElement.innerText = selector;
 
         const attributes = JSON.parse(ComponentData.attributes);
@@ -152,19 +149,21 @@ if (dragElement && widgetElement) {
 }
 
 // --- WebSocket Setup ---
+
 const ws = new WebSocket(`ws://${location.hostname}:${location.port}/ws`);
+
 ws.onopen = function () {
     console.log('WebSocket connected');
 };
 ws.onerror = function (e) {
     console.error('WebSocket error:', e);
 };
+
 ws.onmessage = function (evt) {
     const msg = JSON.parse(evt.data);
-    // Assume JSON-RPC format: { jsonrpc: "2.0", method: "updateState"/"updateOutput", result: ..., id: ... }
-    // You may need to map from msg.method/msg.result/msg.params
+    console.log(msg)
     if (msg.method === 'updateState') {
-        tweakIndex[msg.params.key]?.apply(msg.params.value);
+        tweakIndex[msg.result.key]?.apply(msg.result.value);
     } else if (msg.method === 'updateOutput') {
         try {
             const newData = msg.result;
@@ -182,23 +181,37 @@ ws.onmessage = function (evt) {
 
 // --- Tweak class modification ---
 class Tweak {
-    constructor(key, applyFunction = () => { }, options = {}) {
+    constructor(key, fallback, applyFunction = () => { }, options = {}) {
         this.key = key;
+        this.fallback = fallback;
         this.apply = applyFunction.bind(this);
         this.dom_element = this.element;
         this.options = options;
-        this.getState();
     }
 
     get element() {
         if (!this.dom_element) {
             this.dom_element = document.getElementById(this.key);
             if (this.dom_element) {
-                this.dom_element.addEventListener('input', () => { this.setState(); });
                 this.dom_element.addEventListener('change', () => { this.setState(); });
             }
         }
         return this.dom_element;
+    }
+
+    initState() {
+        if (this.element) {
+            ws.send(JSON.stringify({
+                jsonrpc: "2.0",
+                method: 'initState',
+                id: Math.floor(Math.random() * 100000),
+                params: {
+                    key: this.key,
+                    value: this.fallback,
+                }
+            }));
+            this.apply();
+        }
     }
 
     setState() {
@@ -209,27 +222,18 @@ class Tweak {
                 id: Math.floor(Math.random() * 100000),
                 params: {
                     key: this.key,
-                    value: this.element.type === 'checkbox' ? this.element.checked : this.element.value
+                    value: this.element.type === 'checkbox'
+                        ? this.element.checked
+                        : this.element.value
                 }
             }));
             this.apply();
         }
     }
-
-    getState() {
-        if (ws.readyState === WebSocket.OPEN) {
-            ws.send(JSON.stringify({
-                jsonrpc: "2.0",
-                method: 'getState',
-                id: Math.floor(Math.random() * 100000),
-                params: { key: this.key }
-            }));
-        }
-    }
 }
 
 const tweaks = [
-    new Tweak('live-preview-option-live-cursor', function (value = this.element?.checked) {
+    new Tweak('live-preview-option-live-cursor', false, function (value = this.element?.checked) {
         if (this.element && value !== undefined) {
             const valBool = typeof value === "boolean" ? value : (value === 'true');
             this.element.checked = valBool;
@@ -238,14 +242,14 @@ const tweaks = [
             OutputUpdate();
         }
     }),
-    new Tweak('live-preview-option-color-picker', function (value = this.element?.value) {
+    new Tweak('live-preview-option-color-picker', '#ffffee', function (value = this.element?.value) {
         if (this.element && value !== undefined) {
             this.element.value = value;
             document.getElementById("live-preview-body").style.setProperty("--live-preview-extension-background", value);
         }
     }),
 
-    new Tweak('live-preview-option-append-theme', function (value = this.element?.checked) {
+    new Tweak('live-preview-option-append-theme', false, function (value = this.element?.checked) {
         if (this.element && value !== undefined) {
             const valBool = typeof value === "boolean" ? value : (value === 'true');
             this.element.checked = valBool;
@@ -255,7 +259,7 @@ const tweaks = [
             OutputUpdate();
         }
     }),
-    new Tweak('live-preview-option-container-resize', function (value = this.element?.checked) {
+    new Tweak('live-preview-option-container-resize', false, function (value = this.element?.checked) {
         if (this.element && value !== undefined) {
             const valBool = typeof value === "boolean" ? value : (value === 'true');
             this.element.checked = valBool;
@@ -265,7 +269,7 @@ const tweaks = [
             OutputUpdate();
         }
     }),
-    new Tweak('live-preview-option-preserve-scale', function (value = this.element?.checked) {
+    new Tweak('live-preview-option-preserve-scale', false, function (value = this.element?.checked) {
         if (this.element && value !== undefined) {
             const valBool = typeof value === "boolean" ? value : (value === 'true');
             this.element.checked = valBool;
@@ -275,7 +279,7 @@ const tweaks = [
             OutputUpdate();
         }
     }),
-    new Tweak('live-preview-option-debug-mode', function (value = this.element?.checked) {
+    new Tweak('live-preview-option-debug-mode', false, function (value = this.element?.checked) {
         if (this.element && value !== undefined) {
             const valBool = typeof value === "boolean" ? value : (value === 'true');
             this.element.checked = valBool;
@@ -287,7 +291,10 @@ const tweaks = [
     }),
 ];
 
-const tweakIndex = tweaks.reduce((accumulator, tweak) => {
-    accumulator[tweak.key] = tweak;
-    return accumulator;
-}, {});
+const tweakIndex = {}
+ws.onopen = () => {
+    tweaks.forEach((tweak) => {
+        tweakIndex[tweak.key] = tweak;
+        tweak.initState();
+    });
+};

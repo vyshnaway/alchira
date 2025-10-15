@@ -35,7 +35,7 @@ SCRIPT_DIR="$(dirname "$SCRIPT_PATH")"
 
 # Assuming the Go source is at the root of the project structure 
 # (../ relative to the script's directory).
-ROOT_DIR="$(cd "$SCRIPT_DIR/../" && pwd -P)"
+ROOT_DIR="$(cd "$SCRIPT_DIR/../../" && pwd -P)"
 
 SRC_DIR="go"        # Directory containing Go source code
 EXEC_DIR="exec"     # Output directory for the executable

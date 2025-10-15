@@ -34,10 +34,9 @@ const (
 	Dryrun_Step_LoopAround
 )
 
-func Dryrun(step Dryrun_Step_enum) (Status bool) {
+func Dryrun(step Dryrun_Step_enum, watch bool) (Status bool) {
 	status := false
-	const interval = 200
-	var watcher *_watcher.T_Watcher
+	const interval = 10
 
 	for {
 
@@ -96,7 +95,7 @@ func Dryrun(step Dryrun_Step_enum) (Status bool) {
 			if configs.Static.WATCH {
 				step = Dryrun_Step_LoopAround
 
-				if watcher == nil {
+				if REFER.watcher == nil {
 					watch_dirs := append(
 						slices.Collect(maps.Keys(stash.Cache.Targetdir)),
 						configs.Path_Folder["scaffold"].Path,
@@ -107,7 +106,7 @@ func Dryrun(step Dryrun_Step_enum) (Status bool) {
 					}
 
 					if w, err := _watcher.Instant(watch_dirs, ignore_dirs, interval); err == nil {
-						watcher = w
+						REFER.watcher = w
 						sigs := make(chan _os.Signal, 1)
 						_signal.Notify(sigs, _syscall.SIGINT)
 
@@ -124,19 +123,19 @@ func Dryrun(step Dryrun_Step_enum) (Status bool) {
 					}
 				}
 
-				if watcher.Length() > 12 {
-					watcher.Reset()
-					watcher = nil
+				if REFER.watcher.Length() > 12 {
+					REFER.watcher.Reset()
+					REFER.watcher = nil
 					step = Dryrun_Step_Initialize
-				} else if event := watcher.Pull(); event != nil {
+				} else if event := REFER.watcher.Pull(); event != nil {
 					filepath := _fileman.Path_Join(event.Folder, event.FilePath)
 
 					if event.Folder == configs.Path_Folder["scaffold"].Path {
 						if event.Action == _watcher.E_Action_Update {
 							switch filepath {
 							case configs.Path_Json["configure"].Path:
-								watcher.Close()
-								watcher = nil
+								REFER.watcher.Close()
+								REFER.watcher = nil
 								step = Dryrun_Step_VerifyConfigs
 							case configs.Path_Css["atrules"].Path:
 							case configs.Path_Css["constants"].Path:
@@ -169,7 +168,7 @@ func Dryrun(step Dryrun_Step_enum) (Status bool) {
 				_time.Sleep(interval * _time.Millisecond)
 			}
 		}
-		if !configs.Static.WATCH {
+		if !watch {
 			break
 		}
 	}

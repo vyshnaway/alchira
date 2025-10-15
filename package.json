@@ -1,15 +1,14 @@
 {
   "name": "xcss-core",
-  "description": "A future-proof CSS-DSL abtration layer with native AI-support.",
+  "description": "New way of CSS.",
   "version": "0.1.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/yshell-dev/xcss"
   },
   "bin": {
-    "xtsc": "./dev/js/main.js",
     "xcss": "./run/script.js",
-    "xdev": "./dev/run.sh"
+    "xdev": "./go/scripts/run.sh"
   },
   "funding": {
     "type": "individual",
@@ -19,14 +18,14 @@
     "install": "node ./run/install.js",
     "go:lint": "cd go && golangci-lint run && cd ..",
     "ts:build": "tsc -p ./ts",
-    "go:build": "chmod +x ./dev/exec.sh && ./dev/exec.sh go",
-    "go:stats": "chmod +x ./dev/stats.sh && ./dev/stats.sh go"
+    "go:build": "chmod +x ./go/scripts/build.sh && ./go/scripts/build.sh go",
+    "go:stats": "chmod +x ./go/scripts/stats.sh && ./go/scripts/stats.sh go"
   },
   "bugs": {
     "url": "https://github.com/yshell-dev/xcss-online/issues"
   },
   "author": "Yshell.dev",
-  "license": "SEE LICENSE IN AGREEMENTS/LICENSE.md",
+  "license": "SEE LICENSE IN LICENSE.md",
   "homepage": "www.xcss.io",
   "keywords": [
     "css",
@@ -35,16 +34,6 @@
   ],
   "engines": {
     "node": ">=16.0.0"
-  },
-  "dependencies": {
-    "chokidar": "^4.0.3"
-  },
-  "devDependencies": {
-    "@eslint/js": "^9.13.0",
-    "@stylistic/eslint-plugin": "^2.9.0",
-    "@types/node": "^22.16.3",
-    "typescript": "^5.8.3",
-    "typescript-eslint": "^8.26.0"
   },
   "type": "module"
 }

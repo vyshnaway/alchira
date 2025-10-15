@@ -22,17 +22,8 @@ func Connect(tryport int) {
 		fmt.Println(0)
 		return
 	}
-
-	DATA.Port = port
-	DATA.Url = fmt.Sprintf("http://localhost:%d", port)
-
-	// Signal handling for cleanup
-	quit := make(chan os.Signal, 1)
-	signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
-
-	// Use a buffered chan for manual exit (no panic on double-send)
-	manualExit := make(chan struct{}, 1)
-
+	REFER.Port = port
+	REFER.Url = fmt.Sprintf("http://localhost:%d", port)
 	// Start HTTP server in background
 	serverDone := make(chan struct{})
 	go func() {
@@ -41,8 +32,17 @@ func Connect(tryport int) {
 		}
 		close(serverDone)
 	}()
+	
 
-	Dryrun(Dryrun_Step_Initialize)
+	// Signal handling for cleanup
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
+
+	// Use a buffered chan for manual exit (no panic on double-send)
+	manualExit := make(chan struct{}, 1)
+
+
+	go Dryrun(Dryrun_Step_Initialize, true)
 
 	scanner := bufio.NewScanner(os.Stdin)
 	writer := bufio.NewWriter(os.Stdout)
@@ -51,7 +51,29 @@ func Connect(tryport int) {
 	go func() {
 		for scanner.Scan() {
 			str := scanner.Text()
-			if strings.HasPrefix(str, "$ ") {
+			if strings.HasPrefix(str, "$ ") || strings.HasPrefix(str, "> ") {
+				usejsonrpc := true
+				jsongap := ""
+				if str[0] == '$' {
+					usejsonrpc = false
+					jsongap = "  "
+				}
+
+				format := func(method string, data any) string {
+					result := ""
+					if usejsonrpc {
+						result = utils.Code_JsonBuild(JsonRPCResponse{
+							JSONRPC: "2.0",
+							ID:      0,
+							Method:  method,
+							Result:  data,
+						}, jsongap)
+					} else {
+						result = utils.Code_JsonBuild(data, jsongap)
+					}
+					return result
+				}
+
 				split := strings.Fields(str[2:])
 				if len(split) < 1 {
 					continue
@@ -66,42 +88,41 @@ func Connect(tryport int) {
 						filepath = arguments[0]
 					}
 					result := ManifestFile(filepath)
-					fmt.Fprintln(writer, utils.Code_JsonBuild(result, ""))
+					fmt.Fprintln(writer, format("file-manifest", result))
 
 				case "webview":
 					if len(arguments) > 0 {
-						switch arguments[0] {
-						case "info":
-							fmt.Fprintln(writer, "Preview command received (not implemented)")
-						}
+						Component(arguments[1])
 					} else {
-						fmt.Fprintln(writer, DATA.Url)
+						fmt.Fprintln(writer, REFER.Url)
 					}
+
 				case "errors":
-					fmt.Fprintln(writer, utils.Code_JsonBuild(configs.Manifest.Diagnostics, ""))
-				case "states":
-					fmt.Fprintln(writer, utils.Code_JsonBuild(DATA, ""))
+					fmt.Fprintln(writer, format("error-list", configs.Manifest.Diagnostics))
+
 				case "exit":
-                    select { case manualExit <- struct{}{} : default: }
+					manualExit <- struct{}{}
 					return
+
 				default:
 					fmt.Fprintf(writer, "Unknown command: %s\n", command)
 				}
+
 				writer.Flush()
 			} else {
-				// JSON-RPC handler
 				str = strings.TrimSpace(str)
 				if str == "" {
 					continue
 				}
 				var req JsonRPCRequest
 				if err := json.Unmarshal([]byte(str), &req); err != nil {
-					continue // skip invalid JSON
+					continue
 				}
 				var resp JsonRPCResponse
 				resp.JSONRPC = "2.0"
 				resp.ID = req.ID
-				if req.Method == "initialize" {
+
+				if req.Method == "file-update" {
 					resp.Result = map[string]any{"capabilities": map[string]any{}}
 				} else {
 					resp.Result = fmt.Sprintf("Method: %s received", req.Method)
@@ -124,11 +145,11 @@ func Connect(tryport int) {
 	// Wait for exit signal, manual exit, or server exit
 	select {
 	case <-quit:
-		fmt.Fprintln(os.Stderr, "Shutting down server (signal received)...")
+		fmt.Fprintln(os.Stderr, "\nShutting down server (signal received)...")
 	case <-manualExit:
-		fmt.Fprintln(os.Stderr, "Shutting down server (exit command or stdin closed)...")
+		fmt.Fprintln(os.Stderr, "\nShutting down server (exit command or stdin closed)...")
 	case <-serverDone:
-		fmt.Fprintln(os.Stderr, "Server exited.")
+		fmt.Fprintln(os.Stderr, "\nServer exited.")
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
