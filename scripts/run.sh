@@ -37,7 +37,7 @@ SCRIPT_DIR="$(dirname "$SCRIPT_PATH")"
 # (../ relative to the script's directory).
 ROOT_DIR="$(cd "$SCRIPT_DIR/../../" && pwd -P)"
 
-SRC_DIR="go"        # Directory containing Go source code
+SRC_DIR="source"        # Directory containing Go source code
 EXEC_DIR="exec"     # Output directory for the executable
 EXEC_FILE="_dev_"   # Name of the output executable
 
