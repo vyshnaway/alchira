@@ -1,6 +1,7 @@
 
 # Directory structure reference
 
+```
 project-root/
   ├── cmd/
   │   ├── root.go          # Main command setup
@@ -17,12 +18,13 @@ project-root/
   ├── go.mod
   ├── go.sum
   └── README.md
+```
 
-P_ : Function Params
-T_ : Type
-R_ : Return Type
-E_ : Enum
-_* : Private Global in module
+- P_ : Function Params
+- T_ : Type
+- R_ : Return Type
+- E_ : Enum
+- _* : Private Global in module
 
 ## Return sequence for functions
 ```
