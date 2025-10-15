@@ -72,7 +72,7 @@ func (This *T_Watcher) Start(interval, maxevents int) error {
 				default:
 					act = E_Action_Access
 				}
-				This.HandleEvent(act, event.Name())
+				This.HandleEvent(act, event.Name(), "")
 			case err, ok := <-This.hook.Error:
 				if ok {
 					_fmt.Fprintf(_os.Stderr, "Watcher error: %v\r\n", err)

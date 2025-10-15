@@ -37,7 +37,8 @@ type T_Watcher struct {
 	resolvedIgnores []string
 }
 
-func (This *T_Watcher) HandleEvent(action E_Action, filePath string) {
+// If content == "", file content is refetched from path as fallback
+func (This *T_Watcher) HandleEvent(action E_Action, filePath string, content string) {
 	event := Event{}
 	now := time.Now()
 	event.TimeStamp = now.Format("15:04:05")
@@ -62,8 +63,9 @@ func (This *T_Watcher) HandleEvent(action E_Action, filePath string) {
 	}
 
 	if action == E_Action_Update {
-		data, err := _fileman.Read_File(filePath, false)
-		if err == nil {
+		if content != "" {
+			event.FileContent = content
+		} else if data, err := _fileman.Read_File(filePath, false); err == nil {
 			event.FileContent = string(data)
 		}
 	}
@@ -85,12 +87,6 @@ func (This *T_Watcher) Pull() *Event {
 	evt := This.queue[0]
 	This.queue = This.queue[1:]
 	return &evt
-}
-
-func (This *T_Watcher) Clear() {
-	This.mutex.Lock()
-	defer This.mutex.Unlock()
-	This.queue = This.queue[:0]
 }
 
 func (This *T_Watcher) Reset() {

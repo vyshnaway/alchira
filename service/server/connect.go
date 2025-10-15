@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"main/configs"
 	"main/package/utils"
+	"main/package/watchman"
 	"net/http"
 	"os"
 	"os/signal"
@@ -32,7 +33,6 @@ func Connect(tryport int) {
 		}
 		close(serverDone)
 	}()
-	
 
 	// Signal handling for cleanup
 	quit := make(chan os.Signal, 1)
@@ -40,7 +40,6 @@ func Connect(tryport int) {
 
 	// Use a buffered chan for manual exit (no panic on double-send)
 	manualExit := make(chan struct{}, 1)
-
 
 	go Dryrun(Dryrun_Step_Initialize, true)
 
@@ -122,9 +121,17 @@ func Connect(tryport int) {
 				resp.JSONRPC = "2.0"
 				resp.ID = req.ID
 
-				if req.Method == "file-update" {
-					resp.Result = map[string]any{"capabilities": map[string]any{}}
-				} else {
+				switch req.Method {
+				case "file-update":
+					type params struct {
+						filepath string
+						content  string
+					}
+					if r, ok := req.Params.(params); ok {
+						REFER.watcher.HandleEvent(watchman.E_Action_Update, r.filepath, r.content)
+						resp.Result = ManifestFile(r.filepath)
+					}
+				default:
 					resp.Result = fmt.Sprintf("Method: %s received", req.Method)
 				}
 				out, _ := json.Marshal(resp)
