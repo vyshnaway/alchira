@@ -46,7 +46,6 @@ func Connect(tryport int) {
 	scanner := bufio.NewScanner(os.Stdin)
 	writer := bufio.NewWriter(os.Stdout)
 
-	// Main input loop in its goroutine
 	go func() {
 		for scanner.Scan() {
 			str := scanner.Text()
@@ -123,17 +122,27 @@ func Connect(tryport int) {
 
 				switch req.Method {
 				case "file-update":
-					type params struct {
-						filepath string
-						content  string
+					r, ok := req.Params.(map[string]any)
+					if !ok {
+						// handle error or skip
+						break
 					}
-					if r, ok := req.Params.(params); ok {
-						REFER.watcher.HandleEvent(watchman.E_Action_Update, r.filepath, r.content)
-						resp.Result = ManifestFile(r.filepath)
+					filepathVal, ok1 := r["filepath"]
+					contentVal, ok2 := r["content"]
+					filepath, ok3 := filepathVal.(string)
+					content, ok4 := contentVal.(string)
+					if ok1 && ok2 && ok3 && ok4 {
+						if REFER.watcher != nil {
+							REFER.watcher.HandleEvent(watchman.E_Action_Update, filepath, content)
+						}
+						resp.Method = "file-manifest"
+						resp.Result = ManifestFile(filepath)
 					}
+
 				default:
 					resp.Result = fmt.Sprintf("Method: %s received", req.Method)
 				}
+
 				out, _ := json.Marshal(resp)
 				fmt.Fprintln(writer, string(out))
 				writer.Flush()

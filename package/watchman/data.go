@@ -1,12 +1,14 @@
 package watchman
 
 import (
-	_watcher "github.com/radovskyb/watcher"
+	"main/package/console"
 	_fileman "main/package/fileman"
 	_filepath "path/filepath"
 	"strings"
 	_sync "sync"
 	"time"
+
+	_watcher "github.com/radovskyb/watcher"
 )
 
 type E_Action int
@@ -45,6 +47,7 @@ func (This *T_Watcher) HandleEvent(action E_Action, filePath string, content str
 	event.Action = action
 
 	var folder = ""
+	console.Render.Raw(This)
 	for _, f := range This.resolvedFolders {
 		if strings.HasPrefix(filePath, f) {
 			folder = This.folderMaps[f]
@@ -69,6 +72,7 @@ func (This *T_Watcher) HandleEvent(action E_Action, filePath string, content str
 			event.FileContent = string(data)
 		}
 	}
+	console.Render.Raw(event)
 	This.Add(event)
 }
 
