@@ -21,8 +21,8 @@ type JsonRPCResponse struct {
 func IO_Json(method string, params any) (Response any, Error error) {
 
 	switch method {
-		
+
 	default:
-		return nil, fmt.Errorf("Invalid Method")
+		return nil, fmt.Errorf("invalid method")
 	}
 }
