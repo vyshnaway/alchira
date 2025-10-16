@@ -28,7 +28,7 @@ func Store(
 ) _model.File_Stash {
 	isLibrary := fileGroup == Store_FileGroup_Library
 	isArtifact := fileGroup == Store_FileGroup_Artifact
-	fromScaffold := fileGroup != Store_FileGroup_Target
+	fromXcaffold := fileGroup != Store_FileGroup_Target
 
 	targetPath := _fileman.Path_Join(target, filePath)
 	sourcePath := _fileman.Path_Join(source, filePath)
@@ -87,12 +87,12 @@ func Store(
 	if (idn > 0) && (extension == "css") && (norm_cluster != "-") {
 		classFront += norm_cluster
 	}
-	if fromScaffold && extension == "css" {
+	if fromXcaffold && extension == "css" {
 		classFront += _string.Repeat("$", idn)
 	}
 
 	debugClassfront := "\\|" + _util.String_Filter(targetPath, []rune{}, []rune{}, []rune{'/', '.'})
-	if fromScaffold {
+	if fromXcaffold {
 		debugClassfront = string(lookupType) + debugClassfront
 	}
 

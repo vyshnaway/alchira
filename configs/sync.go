@@ -59,15 +59,15 @@ var Sync_Agreements = map[string]_model.File_Source{
 	},
 }
 
-var Sync_Blueprint = map[string]_model.File_Source{
-	"scaffold": {
-		Frags:     []string{"blueprint", "scaffold"},
+var Sync_Scaffold = map[string]_model.File_Source{
+	"xcaffold": {
+		Frags:     []string{"scaffold", "xcaffold"},
 		Path:      "",
 		Content:   "",
 		Essential: true,
 	},
 	"libraries": {
-		Frags:     []string{"blueprint", "libraries"},
+		Frags:     []string{"scaffold", "libraries"},
 		Path:      "",
 		Content:   "",
 		Essential: true,

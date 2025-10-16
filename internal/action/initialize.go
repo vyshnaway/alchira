@@ -9,11 +9,11 @@ import (
 )
 
 func Initialize() {
-	S.STEP("Cloning scaffold to Project", 1)
+	S.STEP("Cloning xcaffold to Project", 1)
 	S.TASK("Initialized setup.", 1)
 
-	err1 := _fileman.Clone_Safe(_config.Sync_Blueprint["scaffold"].Path, _config.Path_Folder["scaffold"].Path, []string{})
-	err2 := _fileman.Clone_Safe(_config.Sync_Blueprint["libraries"].Path, _config.Path_Folder["libraries"].Path, []string{})
+	err1 := _fileman.Clone_Safe(_config.Sync_Scaffold["xcaffold"].Path, _config.Path_Folder["xcaffold"].Path, []string{})
+	err2 := _fileman.Clone_Safe(_config.Sync_Scaffold["libraries"].Path, _config.Path_Folder["libraries"].Path, []string{})
 
 	if err1 != nil {
 		S.Post(S.MAKE(

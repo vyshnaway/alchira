@@ -12,7 +12,7 @@ import (
 	_watcher "main/package/watchman"
 )
 
-func Update_Scaffold() {
+func Update_Xcaffold() {
 	_action.Index_Reset(0)
 
 	_config.Style_Reset()

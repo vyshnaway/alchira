@@ -14,9 +14,9 @@ func Setup_Environment(rootpath string, workpath string) {
 	_config.Static.RootPath = rootpath
 	_config.Static.WorkPath = workpath
 
-	for id, source := range _config.Sync_Blueprint {
+	for id, source := range _config.Sync_Scaffold {
 		source.Path = _fileman.Path_Join(append([]string{rootpath}, source.Frags...)...)
-		_config.Sync_Blueprint[id] = source
+		_config.Sync_Scaffold[id] = source
 	}
 
 	for _, group := range []map[string]_model.File_Source{

@@ -22,10 +22,10 @@ func Verify_Setup() (Report string, Status verify_Setup_Status_enum) {
 	status := Verify_Setup_Status_Uninitialized
 	report := ""
 
-	if _fileman.Path_IfDir(_config.Path_Folder["scaffold"].Path) {
+	if _fileman.Path_IfDir(_config.Path_Folder["xcaffold"].Path) {
 		_fileman.Write_File(_config.Path_Files["reference"].Path, _config.Sync_References["readme"].Content)
 		_fileman.Write_File(_config.Path_Files["guildelines"].Path, _config.Sync_References["guildelines"].Content)
-		_fileman.Clone_Safe(_config.Sync_Blueprint["scaffold"].Path, _config.Path_Folder["scaffold"].Path, []string{})
+		_fileman.Clone_Safe(_config.Sync_Scaffold["xcaffold"].Path, _config.Path_Folder["xcaffold"].Path, []string{})
 
 		errors := map[string]string{}
 		S.TASK("Verifying directory status", 1)

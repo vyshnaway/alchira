@@ -27,7 +27,7 @@ const (
 	Dryrun_Step_ReadArtifacts
 	Dryrun_Step_ReadTargets
 	Dryrun_Step_ReadHashrule
-	Dryrun_Step_ProcessScaffold
+	Dryrun_Step_ProcessXcaffold
 	Dryrun_Step_BuildManifest
 	Dryrun_Step_GenerateFiles
 	Dryrun_Step_Publish
@@ -84,8 +84,8 @@ func Dryrun(step Dryrun_Step_enum, watch bool) (*_watcher.T_Watcher, bool) {
 				}
 				fallthrough
 
-			case Dryrun_Step_ProcessScaffold:
-				compiler.Update_Scaffold()
+			case Dryrun_Step_ProcessXcaffold:
+				compiler.Update_Xcaffold()
 				fallthrough
 
 			case Dryrun_Step_BuildManifest:
@@ -100,7 +100,7 @@ func Dryrun(step Dryrun_Step_enum, watch bool) (*_watcher.T_Watcher, bool) {
 					if REFER.watcher == nil {
 						watch_dirs := append(
 							slices.Collect(maps.Keys(stash.Cache.Targetdir)),
-							configs.Path_Folder["scaffold"].Path,
+							configs.Path_Folder["xcaffold"].Path,
 						)
 						ignore_dirs := []string{
 							configs.Path_Folder["autogen"].Path,
@@ -132,7 +132,7 @@ func Dryrun(step Dryrun_Step_enum, watch bool) (*_watcher.T_Watcher, bool) {
 					} else if event := REFER.watcher.Pull(); event != nil {
 						filepath := _fileman.Path_Join(event.Folder, event.FilePath)
 
-						if event.Folder == configs.Path_Folder["scaffold"].Path {
+						if event.Folder == configs.Path_Folder["xcaffold"].Path {
 							if event.Action == _watcher.E_Action_Update {
 								switch filepath {
 								case configs.Path_Json["configure"].Path:
@@ -155,7 +155,7 @@ func Dryrun(step Dryrun_Step_enum, watch bool) (*_watcher.T_Watcher, bool) {
 										(event.Extension == configs.Root.Extension || event.Extension == "json") {
 										configs.Static.Artifacts_Saved[filepath] = event.FileContent
 									}
-									step = Dryrun_Step_ProcessScaffold
+									step = Dryrun_Step_ProcessXcaffold
 								}
 							} else {
 								step = Dryrun_Step_VerifySetupStruct

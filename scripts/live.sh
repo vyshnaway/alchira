@@ -38,7 +38,7 @@ SCRIPT_DIR="$(dirname "$SCRIPT_PATH")"
 ROOT_DIR="$(cd "$SCRIPT_DIR/../../" && pwd -P)"
 
 SRC_DIR="source"        # Directory containing Go source code
-EXEC_DIR="exec"     # Output directory for the executable
+EXEC_DIR="bin"     # Output directory for the executable
 EXEC_FILE="_dev_"   # Name of the output executable
 
 # Full absolute paths for source and output

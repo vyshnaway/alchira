@@ -43,7 +43,7 @@ type Style_ClassData struct {
 	SymClass             string
 	DebugClass           string
 	Attachments          []string
-	ScaffoldDeclarations []string
+	XcaffoldDeclarations []string
 	StyleObject          *css.T_Block
 	SummonSnippet        string
 	StapleSnippet        string

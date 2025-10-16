@@ -144,7 +144,7 @@ func Rawtag_Upload(
 			Metadata:             &metadata,
 			Attachments:          attachments,
 			DebugClass:           debugclass,
-			ScaffoldDeclarations: []string{declaration},
+			XcaffoldDeclarations: []string{declaration},
 			StapleSnippet:        staple,
 			StyleSnippet:         inner_style.Result,
 		})

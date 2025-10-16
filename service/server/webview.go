@@ -55,7 +55,7 @@ func Create(tryport int) (httpServer *http.Server, deducedPort int, err error) {
 		return nil, 0, fmt.Errorf("unable to bind port: %v", err)
 	}
 
-	serveDir, ferr := fileman.Path_FromRoot("view")
+	serveDir, ferr := fileman.Path_FromRoot("webview")
 	if ferr != nil {
 		return nil, 0, fmt.Errorf("error resolving static dir: %v", ferr)
 	}

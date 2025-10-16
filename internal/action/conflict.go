@@ -11,7 +11,7 @@ import (
 // ProxyMapDependency validates and processes proxy map dependencies
 func Conflict_Sync_Test() Verify_ProxyMapDependency_return {
 	proxymap := _config.Static.ProxyMap
-	configdir := _config.Path_Folder["scaffold"].Path
+	configdir := _config.Path_Folder["xcaffold"].Path
 
 	result := Verify_ProxyMapDependency_return{
 		Warnings: []string{},

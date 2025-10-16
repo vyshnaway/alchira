@@ -5,7 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"main/package/console"
+	// "main/package/console"
 	"main/package/utils"
 	"net/http"
 	"os"
@@ -46,7 +46,7 @@ func Connect(tryport int) {
 	writer := bufio.NewWriter(os.Stdout)
 
 	go func() {
-		// streamlock := false
+		streamlock := false
 		for scanner.Scan() {
 			str := scanner.Text()
 			str = strings.TrimSpace(str)
@@ -55,12 +55,12 @@ func Connect(tryport int) {
 			}
 
 			if strings.HasPrefix(str, "$ ") || strings.HasPrefix(str, "> ") {
-				// if !streamlock {
-				// 	continue
-				// }
+				if !streamlock {
+					continue
+				}
 
-				// streamlock = true
-				// defer func() { streamlock = false }()
+				streamlock = true
+				defer func() { streamlock = false }()
 
 				usejsonrpc := true
 				jsongap := ""

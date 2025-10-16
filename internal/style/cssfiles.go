@@ -102,7 +102,7 @@ func Cssfile_Collection(files []_model.File_Stash) cssfile_Collection_return {
 					StyleObject:          object,
 					Attachments:          attachments,
 					DebugClass:           file.DebugFront + "_" + _util.String_Filter(classname, []rune{}, []rune{}, []rune{'$', '/'}),
-					ScaffoldDeclarations: []string{declaration},
+					XcaffoldDeclarations: []string{declaration},
 					StapleSnippet:        "",
 					StyleSnippet: func() *_css.T_Block {
 						if k, v := object.GetBlock("[]"); k {
