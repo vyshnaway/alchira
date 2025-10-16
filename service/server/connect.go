@@ -5,9 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"main/configs"
 	"main/package/utils"
-	"main/package/watchman"
 	"net/http"
 	"os"
 	"os/signal"
@@ -47,9 +45,17 @@ func Connect(tryport int) {
 	writer := bufio.NewWriter(os.Stdout)
 
 	go func() {
+		streamlock := false
 		for scanner.Scan() {
 			str := scanner.Text()
 			if strings.HasPrefix(str, "$ ") || strings.HasPrefix(str, "> ") {
+				if !streamlock {
+					continue
+				}
+				
+				streamlock = true
+				defer func() { streamlock = false }()
+
 				usejsonrpc := true
 				jsongap := ""
 				if str[0] == '$' {
@@ -79,32 +85,13 @@ func Connect(tryport int) {
 				command := split[0]
 				arguments := split[1:]
 
-				switch command {
-				case "manifest":
-					filepath := ""
-					if len(arguments) > 0 {
-						filepath = arguments[0]
-					}
-					result := ManifestFile(filepath)
-					fmt.Fprintln(writer, format("manifest", result))
-
-				case "webview":
-					if len(arguments) > 0 {
-						Component(arguments[1])
-					} else {
-						fmt.Fprintln(writer, REFER.Url)
-					}
-
-				case "errors":
-					fmt.Fprintln(writer, format("error-list", configs.Manifest.Diagnostics))
-
-				case "exit":
+				response := IO_Term(command, arguments)
+				if r, k := response.(int); k && r == 0 {
 					manualExit <- struct{}{}
-					return
-
-				default:
-					fmt.Fprintf(writer, "Unknown command: %s\n", command)
 				}
+
+				responsestring := format(command, response)
+				fmt.Fprintf(writer, "%s", responsestring)
 
 				writer.Flush()
 			} else {
@@ -121,22 +108,6 @@ func Connect(tryport int) {
 				resp.ID = req.ID
 
 				switch req.Method {
-				case "file-update":
-					r, ok := req.Params.(map[string]any)
-					if !ok {
-						break
-					}
-					filepathVal, ok1 := r["filepath"]
-					contentVal, ok2 := r["content"]
-					filepath, ok3 := filepathVal.(string)
-					content, ok4 := contentVal.(string)
-					if ok1 && ok2 && ok3 && ok4 {
-						if REFER.watcher != nil {
-							REFER.watcher.HandleEvent(watchman.E_Action_Update, filepath, content)
-						}
-						resp.Method = "file-manifest"
-						resp.Result = ManifestFile(filepath)
-					}
 
 				default:
 					resp.Result = fmt.Sprintf("Method: %s received", req.Method)
