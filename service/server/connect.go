@@ -41,7 +41,7 @@ func Connect(tryport int) {
 	// Use a buffered chan for manual exit (no panic on double-send)
 	manualExit := make(chan struct{}, 1)
 
-	go Dryrun(Dryrun_Step_Initialize, true)
+	Dryrun(Dryrun_Step_Initialize, false)
 
 	scanner := bufio.NewScanner(os.Stdin)
 	writer := bufio.NewWriter(os.Stdout)
@@ -124,7 +124,6 @@ func Connect(tryport int) {
 				case "file-update":
 					r, ok := req.Params.(map[string]any)
 					if !ok {
-						// handle error or skip
 						break
 					}
 					filepathVal, ok1 := r["filepath"]

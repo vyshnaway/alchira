@@ -22,6 +22,7 @@ type R_Manifest struct {
 	AssistFile   bool                              `json:"assistfile"`
 	Environment  string                            `json:"environment"`
 	FileSwitch   string                            `json:"fileswitch"`
+	WatchFiles   []string                          `json:"watchfiles"`
 	Locales      []string                          `json:"locales"`
 	Attributes   []string                          `json:"attributes"`
 	Attachable   []string                          `json:"attachable"`
@@ -152,10 +153,16 @@ func ManifestFile(filepath string) R_Manifest {
 	}
 
 Return:
+	watchfiles := []string{}
+	for k := range configs.Manifest.Lookup {
+		watchfiles = append(watchfiles, k)
+	}
+
 	REFER.SymclassIndexMap = SymclassIndexMap
 	diagnostics := manifest.Diagnostics
 	hashrules := configs.Style.Hashrules
 	return R_Manifest{
+		WatchFiles:   watchfiles,
 		LiveCursor:   REFER.LiveCursor,
 		Filepath:     filepath,
 		WebviewUrl:   REFER.Url,
