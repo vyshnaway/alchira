@@ -1,5 +1,7 @@
 package server
 
+import "fmt"
+
 // JSON-RPC message structures
 type JsonRPCRequest struct {
 	JSONRPC string `json:"jsonrpc"`
@@ -7,6 +9,7 @@ type JsonRPCRequest struct {
 	Method  string `json:"method"`
 	Params  any    `json:"params"`
 }
+
 type JsonRPCResponse struct {
 	JSONRPC string `json:"jsonrpc"`
 	ID      any    `json:"id,omitempty"`
@@ -15,17 +18,11 @@ type JsonRPCResponse struct {
 	Error   any    `json:"error,omitempty"`
 }
 
-func IO_Json(command string, arguments []string) any {
+func IO_Json(method string, params any) (Response any, Error error) {
 
-	switch command {
-	case "manifest":
-		filepath := ""
-		if len(arguments) > 0 {
-			filepath = arguments[0]
-		}
-		return ManifestFile(filepath)
-
+	switch method {
+		
+	default:
+		return nil, fmt.Errorf("Invalid Method")
 	}
-	
-	return nil
 }

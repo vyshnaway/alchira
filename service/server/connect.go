@@ -48,11 +48,13 @@ func Connect(tryport int) {
 		streamlock := false
 		for scanner.Scan() {
 			str := scanner.Text()
+			fmt.Fprintf(writer, "%s", str)
+
 			if strings.HasPrefix(str, "$ ") || strings.HasPrefix(str, "> ") {
 				if !streamlock {
 					continue
 				}
-				
+
 				streamlock = true
 				defer func() { streamlock = false }()
 
@@ -63,7 +65,7 @@ func Connect(tryport int) {
 					jsongap = "  "
 				}
 
-				format := func(method string, data any) string {
+				format := func(method string, data any, err error) string {
 					result := ""
 					if usejsonrpc {
 						result = utils.Code_JsonBuild(JsonRPCResponse{
@@ -71,6 +73,7 @@ func Connect(tryport int) {
 							ID:      0,
 							Method:  method,
 							Result:  data,
+							Error:   err,
 						}, jsongap)
 					} else {
 						result = utils.Code_JsonBuild(data, jsongap)
@@ -85,12 +88,14 @@ func Connect(tryport int) {
 				command := split[0]
 				arguments := split[1:]
 
-				response := IO_Term(command, arguments)
-				if r, k := response.(int); k && r == 0 {
+				res, err := IO_Term(command, arguments)
+				if res == nil {
+					continue
+				} else if r, k := res.(int); k && r == 0 {
 					manualExit <- struct{}{}
 				}
 
-				responsestring := format(command, response)
+				responsestring := format(command, res, err)
 				fmt.Fprintf(writer, "%s", responsestring)
 
 				writer.Flush()
@@ -103,15 +108,11 @@ func Connect(tryport int) {
 				if err := json.Unmarshal([]byte(str), &req); err != nil {
 					continue
 				}
+
 				var resp JsonRPCResponse
 				resp.JSONRPC = "2.0"
 				resp.ID = req.ID
-
-				switch req.Method {
-
-				default:
-					resp.Result = fmt.Sprintf("Method: %s received", req.Method)
-				}
+				resp.Result, resp.Error = IO_Json(req.Method, req.Params)
 
 				out, _ := json.Marshal(resp)
 				fmt.Fprintln(writer, string(out))
