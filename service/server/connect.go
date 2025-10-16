@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"main/package/console"
 	"main/package/utils"
 	"net/http"
 	"os"
@@ -45,18 +46,21 @@ func Connect(tryport int) {
 	writer := bufio.NewWriter(os.Stdout)
 
 	go func() {
-		streamlock := false
+		// streamlock := false
 		for scanner.Scan() {
 			str := scanner.Text()
-			fmt.Fprintf(writer, "%s", str)
+			str = strings.TrimSpace(str)
+			if str == "" {
+				continue
+			}
 
 			if strings.HasPrefix(str, "$ ") || strings.HasPrefix(str, "> ") {
-				if !streamlock {
-					continue
-				}
+				// if !streamlock {
+				// 	continue
+				// }
 
-				streamlock = true
-				defer func() { streamlock = false }()
+				// streamlock = true
+				// defer func() { streamlock = false }()
 
 				usejsonrpc := true
 				jsongap := ""
@@ -100,10 +104,6 @@ func Connect(tryport int) {
 
 				writer.Flush()
 			} else {
-				str = strings.TrimSpace(str)
-				if str == "" {
-					continue
-				}
 				var req JsonRPCRequest
 				if err := json.Unmarshal([]byte(str), &req); err != nil {
 					continue
@@ -122,6 +122,7 @@ func Connect(tryport int) {
 		if err := scanner.Err(); err != nil {
 			fmt.Fprintln(os.Stderr, "Error reading from stdin:", err)
 		}
+
 		// On stdin close/EOF, trigger shutdown via manualExit as well (safe, non-blocking)
 		select {
 		case manualExit <- struct{}{}:
