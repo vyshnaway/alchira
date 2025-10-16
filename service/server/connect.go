@@ -86,7 +86,7 @@ func Connect(tryport int) {
 						filepath = arguments[0]
 					}
 					result := ManifestFile(filepath)
-					fmt.Fprintln(writer, format("file-manifest", result))
+					fmt.Fprintln(writer, format("manifest", result))
 
 				case "webview":
 					if len(arguments) > 0 {
