@@ -40,12 +40,17 @@ func Component(symclass string, context models.Style_ClassIndexMap) T_Component_
 			}
 		}
 	}
+	rootcss := ""
+	if REFER.WebviewState["live-preview-option-project-index"] == true {
+		rootcss = configs.Delta.IndexBuild
+	}
 
 	return T_Component_return{
 		Attributes: attributes,
 		Summon:     summon,
 		Staple:     staple.String(),
-		Rootcss:    configs.Delta.IndexBuild,
+		Symclass:   symclass,
+		Rootcss:    rootcss,
 		Compcss:    stylesymclass.String() + styleattach.String(),
 	}
 }

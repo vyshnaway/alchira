@@ -1,6 +1,7 @@
 package server
 
 import (
+	"encoding/json"
 	"fmt"
 	"main/package/fileman"
 	"main/package/watchman"
@@ -28,8 +29,6 @@ var REFER = struct {
 	WebviewState:     map[string]any{},
 	watcher:          nil,
 }
-
-
 
 var (
 	mutex     sync.Mutex                       // Protects clients map
@@ -80,8 +79,39 @@ func Webview_Create(tryport int) (httpServer *http.Server, deducedPort int, err 
 		}
 	})
 
-	mux.HandleFunc("/ws", handleWs)
-	// handleBroadcasts
+	mux.HandleFunc(
+		"/ws",
+		func(w http.ResponseWriter, r *http.Request) {
+			upgrader.CheckOrigin = func(r *http.Request) bool { return true }
+			ws, err := upgrader.Upgrade(w, r, nil)
+			if err != nil {
+				return
+			}
+
+			mutex.Lock()
+			clients[ws] = true
+			mutex.Unlock()
+
+			defer func() {
+				mutex.Lock()
+				delete(clients, ws)
+				mutex.Unlock()
+				ws.Close()
+			}()
+
+			for {
+				_, message, err := ws.ReadMessage()
+				if err != nil {
+					break
+				}
+				var req JsonRPCRequest
+				if err := json.Unmarshal(message, &req); err != nil {
+					continue
+				}
+				IO_Json(req)
+			}
+		},
+	)
 	go func() {
 		for {
 			msg := <-broadcast
