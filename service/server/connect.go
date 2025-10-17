@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"context"
 	"encoding/json"
+	"main/package/watchman"
 	"fmt"
 
 	"net/http"
@@ -13,6 +14,22 @@ import (
 	"syscall"
 	"time"
 )
+
+var REFER = struct {
+	Port             int
+	Url              string
+	LiveCursor       bool
+	SymclassIndexMap map[string]int
+	WebviewState     map[string]any
+	watcher          *watchman.T_Watcher
+}{
+	Port:             0,
+	Url:              "",
+	LiveCursor:       false,
+	SymclassIndexMap: map[string]int{},
+	WebviewState:     map[string]any{},
+	watcher:          nil,
+}
 
 func Connect(tryport int) {
 	// Start server
@@ -39,7 +56,7 @@ func Connect(tryport int) {
 	// Use a buffered chan for manual exit (no panic on double-send)
 	manualExit := make(chan struct{}, 1)
 
-	Dryrun(Dryrun_Step_Initialize, false)
+	REFER.watcher, _ = Dryrun(Dryrun_Step_Initialize, false)
 
 	scanner := bufio.NewScanner(os.Stdin)
 	writer := bufio.NewWriter(os.Stdout)

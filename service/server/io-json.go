@@ -4,24 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"main/models"
+	"main/package/watchman"
 	"slices"
 )
-
-// JSON-RPC message structures
-type JsonRPCRequest struct {
-	JSONRPC string `json:"jsonrpc"`
-	ID      any    `json:"id"`
-	Method  string `json:"method"`
-	Params  any    `json:"params"`
-}
-
-type JsonRPCResponse struct {
-	JSONRPC string `json:"jsonrpc"`
-	ID      any    `json:"id,omitempty"`
-	Method  string `json:"method"`
-	Result  any    `json:"result,omitempty"`
-	Error   any    `json:"error,omitempty"`
-}
 
 func IO_Json(req JsonRPCRequest) string {
 
@@ -30,12 +15,19 @@ func IO_Json(req JsonRPCRequest) string {
 	resp.ID = req.ID
 
 	switch req.Method {
-	case "manifest":
+	case "fileManifest":
 		if params_, ok := req.Params.(map[string]any); ok {
 
 			resp.Method = req.Method
 			filepath, ok1 := params_["filepath"]
 			filepath_, ok2 := filepath.(string)
+
+			content, ok5 := params_["content"]
+			content_, ok6 := content.(string)
+
+			if ok5 && ok6 {
+				REFER.watcher.HandleEvent(watchman.E_Action_Reload, filepath_, content_);
+			}
 
 			if ok1 && ok2 {
 				manifest := ManifestFile(filepath_)
@@ -105,4 +97,20 @@ func IO_Json(req JsonRPCRequest) string {
 	} else {
 		return ""
 	}
+}
+
+// JSON-RPC message structures
+type JsonRPCRequest struct {
+	JSONRPC string `json:"jsonrpc"`
+	ID      any    `json:"id"`
+	Method  string `json:"method"`
+	Params  any    `json:"params"`
+}
+
+type JsonRPCResponse struct {
+	JSONRPC string `json:"jsonrpc"`
+	ID      any    `json:"id,omitempty"`
+	Method  string `json:"method"`
+	Result  any    `json:"result,omitempty"`
+	Error   any    `json:"error,omitempty"`
 }

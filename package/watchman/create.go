@@ -53,22 +53,25 @@ func (This *T_Watcher) Start(interval, maxevents int) error {
 		for {
 			select {
 			case event, ok := <-This.hook.Event:
-				_fmt.Println("event")
 				if !ok {
 					return
 				}
 				var act E_Action
 				switch event.Op {
+					
 				case _watcher.Create:
-					fallthrough
-				case _watcher.Rename:
 					fallthrough
 				case _watcher.Write:
 					act = E_Action_Update
+
 				case _watcher.Move:
 					fallthrough
+				case _watcher.Rename:
+					fallthrough
+
 				case _watcher.Remove:
 					act = E_Action_Refactor
+
 				default:
 					act = E_Action_Access
 				}

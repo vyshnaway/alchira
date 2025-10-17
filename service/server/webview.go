@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"main/package/fileman"
-	"main/package/watchman"
 	"net"
 	"net/http"
 	"path/filepath"
@@ -13,22 +12,6 @@ import (
 
 	"github.com/gorilla/websocket"
 )
-
-var REFER = struct {
-	Port             int
-	Url              string
-	LiveCursor       bool
-	SymclassIndexMap map[string]int
-	WebviewState     map[string]any
-	watcher          *watchman.T_Watcher
-}{
-	Port:             0,
-	Url:              "",
-	LiveCursor:       false,
-	SymclassIndexMap: map[string]int{},
-	WebviewState:     map[string]any{},
-	watcher:          nil,
-}
 
 var (
 	mutex     sync.Mutex                       // Protects clients map
