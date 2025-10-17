@@ -8,21 +8,8 @@ import (
 	"main/package/utils"
 )
 
-func IO_Term(command string, arguments []string, userpc bool) (Response any) {
-
-	buildmessage := func(result any, err error) string {
-		if userpc {
-			return utils.Code_JsonBuild(JsonRPCResponse{
-				JSONRPC: "2.0",
-				ID:      0,
-				Method:  command,
-				Result:  result,
-				Error:   err,
-			}, "")
-		} else {
-			return utils.Code_JsonBuild(result, "  ")
-		}
-	}
+func IO_Term(command string, arguments []string, userpc bool) (Response string) {
+	var result any
 
 	switch command {
 	case "manifest":
@@ -30,7 +17,7 @@ func IO_Term(command string, arguments []string, userpc bool) (Response any) {
 		if len(arguments) > 0 {
 			filepath = arguments[0]
 		}
-		return buildmessage(ManifestFile(filepath), nil)
+		result = ManifestFile(filepath)
 
 	case "webview":
 		if len(arguments) > 0 {
@@ -39,15 +26,27 @@ func IO_Term(command string, arguments []string, userpc bool) (Response any) {
 				broadcast <- j
 			}
 		}
-		return buildmessage(REFER.Url, nil)
+		result = REFER.Url
 
 	case "errors":
-		return configs.Manifest.Diagnostics
+		result = configs.Manifest.Diagnostics
 
 	case "exit":
-		return 0
+		return "0"
 
 	default:
-		return nil
+		result = "invalid method"
+	}
+
+	if userpc {
+		return utils.Code_JsonBuild(JsonRPCResponse{
+			JSONRPC: "2.0",
+			ID:      0,
+			Method:  command,
+			Result:  result,
+			Error:   nil,
+		}, "")
+	} else {
+		return utils.Code_JsonBuild(result, "  ")
 	}
 }

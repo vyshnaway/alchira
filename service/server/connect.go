@@ -6,8 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 
-	// "main/package/console"
-	"main/package/utils"
 	"net/http"
 	"os"
 	"os/signal"
@@ -59,9 +57,10 @@ func Connect(tryport int) {
 				command := split[0]
 				arguments := split[1:]
 
-				if res := IO_Term(command, arguments, request[0] == '>'); res == nil {
+				res := IO_Term(command, arguments, request[0] == '>')
+				if res == "" {
 					continue
-				} else if r, k := res.(int); k && r == 0 {
+				} else if res == "0" {
 					manualExit <- struct{}{}
 				} else {
 					fmt.Fprintln(writer, res)
