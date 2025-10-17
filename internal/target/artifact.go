@@ -21,9 +21,9 @@ func Artifact(index int) _types_.Style_ExportStyle {
 		if len(style.StapleSnippet) > 0 {
 			element = "staple"
 			innertext = style.StapleSnippet
-		} else if len(style.SummonSnippet) > 0 {
+		} else if len(style.Metadata.SummonSnippet) > 0 {
 			element = "summon"
-			innertext = style.SummonSnippet
+			innertext = style.Metadata.SummonSnippet
 		} else {
 			element = "style"
 			innertext = style.StyleSnippet.Format(true)

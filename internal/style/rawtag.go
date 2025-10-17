@@ -131,12 +131,12 @@ func Rawtag_Upload(
 			Skeleton:     object.Skeleton(),
 			Declarations: []string{declaration},
 			Variables:    variables.ToMap(),
+			SummonSnippet:        summon,
 		}
 		index = _action.Index_Declare(&_model.Style_ClassData{
 			Attributes:           attributes,
 			Index:                0,
 			WatchClass:           "",
-			SummonSnippet:        summon,
 			Artifact:             artifact,
 			Definent:             raw.SymClasses[0],
 			SymClass:             symclass,

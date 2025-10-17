@@ -3,23 +3,31 @@ package server
 import (
 	"encoding/json"
 	"fmt"
-	"main/package/console"
 	"net/http"
 
 	"github.com/gorilla/websocket"
 )
-var upgrader = websocket.Upgrader{}
 
 func handleWs(w http.ResponseWriter, r *http.Request) {
-	conn, err := upgrader.Upgrade(w, r, nil)
+	upgrader.CheckOrigin = func(r *http.Request) bool { return true }
+	ws, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		return
 	}
-	REFER.wstream = conn
-	defer conn.Close()
+
+	mutex.Lock()
+	clients[ws] = true
+	mutex.Unlock()
+
+	defer func() {
+		mutex.Lock()
+		delete(clients, ws)
+		mutex.Unlock()
+		ws.Close()
+	}()
 
 	for {
-		_, message, err := conn.ReadMessage()
+		_, message, err := ws.ReadMessage()
 		if err != nil {
 			break
 		}
@@ -45,7 +53,7 @@ func handleWs(w http.ResponseWriter, r *http.Request) {
 					resp.Result = map[string]any{"key": key, "value": value}
 					resp.Method = "updateState"
 					b, _ := json.Marshal(resp)
-					conn.WriteMessage(websocket.TextMessage, b)
+					ws.WriteMessage(websocket.TextMessage, b)
 					if key == "live-preview-option-live-cursor" {
 						REFER.LiveCursor = value.(bool)
 					}
@@ -60,7 +68,7 @@ func handleWs(w http.ResponseWriter, r *http.Request) {
 					resp.Result = map[string]any{"key": key, "value": value}
 					resp.Method = "updateState"
 					b, _ := json.Marshal(resp)
-					conn.WriteMessage(websocket.TextMessage, b)
+					ws.WriteMessage(websocket.TextMessage, b)
 					if key == "live-preview-option-live-cursor" {
 						REFER.LiveCursor = value.(bool)
 					}
@@ -69,9 +77,7 @@ func handleWs(w http.ResponseWriter, r *http.Request) {
 		default:
 			resp.Result = fmt.Sprintf("Got method: %s", req.Method)
 			b, _ := json.Marshal(resp)
-			conn.WriteMessage(websocket.TextMessage, b)
+			ws.WriteMessage(websocket.TextMessage, b)
 		}
-		console.Render.Raw(req)
-		console.Render.Raw(REFER.WebviewState)
 	}
 }

@@ -27,10 +27,11 @@ type Style_ExportStyle struct {
 }
 
 type Style_Metadata struct {
-	Info         []string          `json:"info"`
-	Skeleton     any               `json:"skeleton"`
-	Declarations []string          `json:"declarations"`
-	Variables    map[string]string `json:"variables"`
+	Info          []string          `json:"info"`
+	Skeleton      any               `json:"skeleton"`
+	Declarations  []string          `json:"declarations"`
+	Variables     map[string]string `json:"variables"`
+	SummonSnippet string            `json:"summon"`
 }
 
 type Style_ClassData struct {
@@ -45,7 +46,6 @@ type Style_ClassData struct {
 	Attachments          []string
 	XcaffoldDeclarations []string
 	StyleObject          *css.T_Block
-	SummonSnippet        string
 	StapleSnippet        string
 	StyleSnippet         *css.T_Block
 }

@@ -2,13 +2,15 @@ package server
 
 import (
 	"fmt"
-	"github.com/gorilla/websocket"
 	"main/package/fileman"
 	"main/package/watchman"
 	"net"
 	"net/http"
 	"path/filepath"
 	"strconv"
+	"sync"
+
+	"github.com/gorilla/websocket"
 )
 
 var REFER = struct {
@@ -18,7 +20,6 @@ var REFER = struct {
 	SymclassIndexMap map[string]int
 	WebviewState     map[string]any
 	watcher          *watchman.T_Watcher
-	wstream          *websocket.Conn
 }{
 	Port:             0,
 	Url:              "",
@@ -26,12 +27,20 @@ var REFER = struct {
 	SymclassIndexMap: map[string]int{},
 	WebviewState:     map[string]any{},
 	watcher:          nil,
-	wstream:          nil,
 }
+
+
+
+var (
+	mutex     sync.Mutex                       // Protects clients map
+	clients   = make(map[*websocket.Conn]bool) // Connected clients
+	broadcast = make(chan []byte)              // Broadcast channel
+	upgrader  = websocket.Upgrader{}
+)
 
 // Returns an http.Server ready to Start, the found port, and any error.
 // The server serves static files from 'view', always returns index.html for '/'.
-func Create(tryport int) (httpServer *http.Server, deducedPort int, err error) {
+func Webview_Create(tryport int) (httpServer *http.Server, deducedPort int, err error) {
 	// Try requested port; fallback to OS-assigned port
 	foundPort, err := func(requestedPort int) (int, error) {
 		if requestedPort > 0 {
@@ -61,7 +70,6 @@ func Create(tryport int) (httpServer *http.Server, deducedPort int, err error) {
 	}
 
 	mux := http.NewServeMux()
-	mux.HandleFunc("/ws", handleWs)
 
 	// Serve index.html on /, and all files under serveDir
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
@@ -71,6 +79,23 @@ func Create(tryport int) (httpServer *http.Server, deducedPort int, err error) {
 			http.FileServer(http.Dir(serveDir)).ServeHTTP(w, r)
 		}
 	})
+
+	mux.HandleFunc("/ws", handleWs)
+	// handleBroadcasts
+	go func() {
+		for {
+			msg := <-broadcast
+			mutex.Lock()
+			for client := range clients {
+				err := client.WriteMessage(websocket.TextMessage, msg)
+				if err != nil {
+					client.Close()
+					delete(clients, client)
+				}
+			}
+			mutex.Unlock()
+		}
+	}()
 
 	server := &http.Server{
 		Addr:    ":" + strconv.Itoa(foundPort),

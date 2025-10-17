@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+
 	// "main/package/console"
 	"main/package/utils"
 	"net/http"
@@ -17,7 +18,7 @@ import (
 
 func Connect(tryport int) {
 	// Start server
-	server, port, err := Create(tryport)
+	server, port, err := Webview_Create(tryport)
 	if err != nil {
 		fmt.Println(0)
 		return
@@ -46,43 +47,30 @@ func Connect(tryport int) {
 	writer := bufio.NewWriter(os.Stdout)
 
 	go func() {
-		streamlock := false
 		for scanner.Scan() {
 			str := scanner.Text()
 			str = strings.TrimSpace(str)
-			if str == "" {
-				continue
+
+			jsongap := ""
+			usejsonrpc := true
+			format := func(method string, data any, err error) string {
+				if usejsonrpc {
+					return utils.Code_JsonBuild(JsonRPCResponse{
+						JSONRPC: "2.0",
+						ID:      0,
+						Method:  method,
+						Result:  data,
+						Error:   err,
+					}, jsongap)
+				} else {
+					return utils.Code_JsonBuild(data, jsongap)
+				}
 			}
 
 			if strings.HasPrefix(str, "$ ") || strings.HasPrefix(str, "> ") {
-				if !streamlock {
-					continue
-				}
-
-				streamlock = true
-				defer func() { streamlock = false }()
-
-				usejsonrpc := true
-				jsongap := ""
 				if str[0] == '$' {
 					usejsonrpc = false
 					jsongap = "  "
-				}
-
-				format := func(method string, data any, err error) string {
-					result := ""
-					if usejsonrpc {
-						result = utils.Code_JsonBuild(JsonRPCResponse{
-							JSONRPC: "2.0",
-							ID:      0,
-							Method:  method,
-							Result:  data,
-							Error:   err,
-						}, jsongap)
-					} else {
-						result = utils.Code_JsonBuild(data, jsongap)
-					}
-					return result
 				}
 
 				split := strings.Fields(str[2:])
@@ -100,7 +88,7 @@ func Connect(tryport int) {
 				}
 
 				responsestring := format(command, res, err)
-				fmt.Fprintf(writer, "%s", responsestring)
+				fmt.Fprintln(writer, responsestring)
 
 				writer.Flush()
 			} else {
@@ -109,16 +97,12 @@ func Connect(tryport int) {
 					continue
 				}
 
-				var resp JsonRPCResponse
-				resp.JSONRPC = "2.0"
-				resp.ID = req.ID
-				resp.Result, resp.Error = IO_Json(req.Method, req.Params)
-
-				out, _ := json.Marshal(resp)
+				out, _ := json.Marshal(IO_Json(req))
 				fmt.Fprintln(writer, string(out))
 				writer.Flush()
 			}
 		}
+
 		if err := scanner.Err(); err != nil {
 			fmt.Fprintln(os.Stderr, "Error reading from stdin:", err)
 		}
