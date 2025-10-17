@@ -9,7 +9,6 @@ import (
 	"maps"
 	"slices"
 	"strconv"
-	"strings"
 	"sync"
 )
 
@@ -21,13 +20,13 @@ type R_Manifest struct {
 	Extention    string                            `json:"extention"`
 	AssistFile   bool                              `json:"assistfile"`
 	Environment  string                            `json:"environment"`
-	FileSwitch   string                            `json:"fileswitch"`
 	WatchFiles   []string                          `json:"watchfiles"`
 	Locales      []string                          `json:"locales"`
 	Attributes   []string                          `json:"attributes"`
 	Attachable   []string                          `json:"attachable"`
 	Assignable   []string                          `json:"assignable"`
 	CustomTags   []string                          `json:"customtags"`
+	SwitchMap    map[string]string                 `json:"switchmap"`
 	Hashrules    map[string]string                 `json:"hashrules"`
 	Constants    map[string]string                 `json:"constants"`
 	Diagnostics  []models.File_Diagnostic          `json:"diagnostics"`
@@ -35,28 +34,22 @@ type R_Manifest struct {
 }
 
 func ManifestFile(filepath string) R_Manifest {
-	manifestFromIndex := func(index int) *models.Style_Metadata {
-		return action.Index_Fetch(index).Metadata
+	MetadataFromIndex := func(index int) *models.Style_Metadata {
+		return action.Index_Fetch(index).SrcData.Metadata
 	}
 
 	var mu sync.Mutex
 	mu.Lock()
 	defer mu.Unlock()
-	fileswitch := filepath
 	extention := fileman.Path_FileExtention(filepath)
+
 	attributes := []string{}
+	switchmap := map[string]string{}
 	for _, tv := range stash.Cache.Targetdir {
-		if fileman.Path_IsSubpath(tv.Source, filepath) {
-			if res, ok := tv.ExtnsProps[extention]; ok {
-				attributes = res
-			}
-			fileswitch = strings.Replace(filepath, tv.Source, tv.Target, 1)
-		}
-		if fileman.Path_IsSubpath(tv.Target, filepath) {
-			if res, ok := tv.ExtnsProps[extention]; ok {
-				attributes = res
-			}
-			fileswitch = strings.Replace(filepath, tv.Target, tv.Source, 1)
+		switchmap[tv.Source] = tv.Target
+		switchmap[tv.Target] = tv.Source
+		if res, ok := tv.ExtnsProps[extention]; ok {
+			attributes = res
 		}
 	}
 
@@ -90,7 +83,7 @@ func ManifestFile(filepath string) R_Manifest {
 			if stash, er := manifest.Group.Artifact[nav.Id]; er {
 				for k, v := range stash {
 					attachable = append(attachable, k)
-					symclassData[k] = manifestFromIndex(v)
+					symclassData[k] = MetadataFromIndex(v)
 				}
 			}
 		} else {
@@ -99,7 +92,7 @@ func ManifestFile(filepath string) R_Manifest {
 				for k, v := range manifest.Group.Axiom[KK] {
 					attachable = append(attachable, k)
 					SymclassIndexMap[k] = v
-					symclassData[k] = manifestFromIndex(v)
+					symclassData[k] = MetadataFromIndex(v)
 				}
 				if nav.Id == KK {
 					goto Return
@@ -114,7 +107,7 @@ func ManifestFile(filepath string) R_Manifest {
 				for k, v := range manifest.Group.Cluster[KK] {
 					attachable = append(attachable, k)
 					SymclassIndexMap[k] = v
-					symclassData[k] = manifestFromIndex(v)
+					symclassData[k] = MetadataFromIndex(v)
 				}
 				if nav.Id == KK {
 					goto Return
@@ -128,7 +121,7 @@ func ManifestFile(filepath string) R_Manifest {
 				for k, v := range V {
 					attachable = append(attachable, k)
 					SymclassIndexMap[k] = v
-					symclassData[k] = manifestFromIndex(v)
+					symclassData[k] = MetadataFromIndex(v)
 				}
 			}
 
@@ -136,7 +129,7 @@ func ManifestFile(filepath string) R_Manifest {
 				for k, v := range V {
 					attachable = append(attachable, k)
 					SymclassIndexMap[k] = v
-					symclassData[k] = manifestFromIndex(v)
+					symclassData[k] = MetadataFromIndex(v)
 				}
 			}
 
@@ -145,7 +138,7 @@ func ManifestFile(filepath string) R_Manifest {
 					for k, v := range stash {
 						attachable = append(attachable, k)
 						SymclassIndexMap[k] = v
-						symclassData[k] = manifestFromIndex(v)
+						symclassData[k] = MetadataFromIndex(v)
 					}
 				}
 			}
@@ -174,7 +167,7 @@ Return:
 		CustomTags:   configs.Static.CustomTags,
 		Environment:  configs.Archive.Environment,
 		Hashrules:    hashrules,
-		FileSwitch:   fileswitch,
+		SwitchMap:    switchmap,
 		Attachable:   attachable,
 		Assignable:   assignable,
 		SymclassData: symclassData,

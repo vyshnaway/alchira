@@ -45,7 +45,7 @@ func Rawtag_Upload(
 	index := found.Index
 	if found.Group != _model.Style_Type_Null {
 		classdata := _action.Index_Fetch(found.Index)
-		classdata.Metadata.Declarations = append(classdata.Metadata.Declarations, declaration)
+		classdata.SrcData.Metadata.Declarations = append(classdata.SrcData.Metadata.Declarations, declaration)
 	} else {
 		var scope _model.Style_Type
 		if raw.Scope == _model.Style_Type_Artifact {
@@ -127,26 +127,29 @@ func Rawtag_Upload(
 		}
 
 		metadata := _model.Style_Metadata{
-			Info:         raw.Comments,
-			Skeleton:     object.Skeleton(),
-			Declarations: []string{declaration},
-			Variables:    variables.ToMap(),
-			SummonSnippet:        summon,
+			Info:          raw.Comments,
+			Skeleton:      object.Skeleton(),
+			Declarations:  []string{declaration},
+			Variables:     variables.ToMap(),
+			SummonSnippet: summon,
 		}
-		index = _action.Index_Declare(&_model.Style_ClassData{
-			Attributes:           attributes,
-			Index:                0,
-			WatchClass:           "",
-			Artifact:             artifact,
-			Definent:             raw.SymClasses[0],
-			SymClass:             symclass,
-			StyleObject:          object,
-			Metadata:             &metadata,
-			Attachments:          attachments,
-			DebugClass:           debugclass,
-			XcaffoldDeclarations: []string{declaration},
-			StapleSnippet:        staple,
-			StyleSnippet:         inner_style.Result,
+		index = _action.Index_Declare(&_model.Cache_SymclassData{
+			Context: file,
+			SrcData: &_model.Style_ClassData{
+				Attributes:           attributes,
+				Index:                0,
+				WatchClass:           "",
+				Artifact:             artifact,
+				Definent:             raw.SymClasses[0],
+				SymClass:             symclass,
+				StyleObject:          object,
+				Metadata:             &metadata,
+				Attachments:          attachments,
+				DebugClass:           debugclass,
+				XcaffoldDeclarations: []string{declaration},
+				StapleSnippet:        staple,
+				StyleSnippet:         inner_style.Result,
+			},
 		})
 		IndexMap[symclass] = index
 		file.StyleData.UsedIn = append(file.StyleData.UsedIn, index)

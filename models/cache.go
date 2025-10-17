@@ -95,9 +95,14 @@ type Cache_Delta struct {
 	Diagnostic   Cache_Delta_Diagnostics
 }
 
+type Cache_SymclassData struct {
+	Context *File_Stash
+	SrcData *Style_ClassData
+}
+
 type Cache_Style struct {
 	Hashrules       map[string]string
-	Index_to_Data   map[int]*Style_ClassData
+	Index_to_Data   map[int]*Cache_SymclassData
 	Global___Index  Style_ClassIndexMap
 	Public___Index  Style_ClassIndexMap
 	Library__Index  Style_ClassIndexMap

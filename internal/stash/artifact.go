@@ -105,7 +105,7 @@ func Artifact_Update() {
 				artifact_counter++
 				Rawtag_Upload_ := _style_.Rawtag_Upload(tagstyle, &file, _config.Style.Artifact_Index, metadatas)
 				styledata := _action.Index_Fetch(Rawtag_Upload_.Index)
-				if len(styledata.XcaffoldDeclarations) == 1 {
+				if len(styledata.SrcData.XcaffoldDeclarations) == 1 {
 					symclasses = append(symclasses, Rawtag_Upload_.Symclass)
 				}
 				file.Manifest.Errors = append(file.Manifest.Errors, Rawtag_Upload_.Errors...)
@@ -128,6 +128,6 @@ func Artifact_Update() {
 func Aritfact_ReDeclare() {
 	for _, i := range _config.Style.Artifact_Index {
 		data := _action.Index_Fetch(i)
-		copy(data.Metadata.Declarations, data.XcaffoldDeclarations)
+		copy(data.SrcData.Metadata.Declarations, data.SrcData.XcaffoldDeclarations)
 	}
 }

@@ -151,7 +151,7 @@ func Delta_Reset() {
 
 var Style = _model.Cache_Style{
 	Hashrules:       map[string]string{},
-	Index_to_Data:   map[int]*_model.Style_ClassData{},
+	Index_to_Data:   map[int]*_model.Cache_SymclassData{},
 	Global___Index:  _model.Style_ClassIndexMap{},
 	Public___Index:  _model.Style_ClassIndexMap{},
 	Library__Index:  _model.Style_ClassIndexMap{},
@@ -163,7 +163,7 @@ var Style = _model.Cache_Style{
 func Style_Reset() {
 	Style = _model.Cache_Style{
 		Hashrules:       map[string]string{},
-		Index_to_Data:   map[int]*_model.Style_ClassData{},
+		Index_to_Data:   map[int]*_model.Cache_SymclassData{},
 		Global___Index:  _model.Style_ClassIndexMap{},
 		Public___Index:  _model.Style_ClassIndexMap{},
 		Library__Index:  _model.Style_ClassIndexMap{},

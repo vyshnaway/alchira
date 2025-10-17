@@ -56,7 +56,7 @@ func value_EvaluateIndexTraces(
 		if action == E_Action_DebugHash {
 			for _, item := range classTrace {
 				classdata := _action.Index_Fetch(item.ClassIndex)
-				classname := _fmt.Sprintf("%s%s", metaFront, classdata.DebugClass)
+				classname := _fmt.Sprintf("%s%s", metaFront, classdata.SrcData.DebugClass)
 				_config.Style.PublishIndexMap = append(_config.Style.PublishIndexMap, _model.Style_ClassIndexTrace{
 					ClassName:  "." + classname,
 					ClassIndex: item.ClassIndex,

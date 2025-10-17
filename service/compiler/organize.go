@@ -46,8 +46,8 @@ func Accumulate() {
 	_config.Delta.Error.Multiples = []string{}
 	_config.Delta.Diagnostic.Multiples = []_model.File_Diagnostic{}
 	for _, val := range _config.Style.Index_to_Data {
-		if len(val.Metadata.Declarations) > 1 {
-			error_ := K.Error_Standard("Duplicate Declarations: "+val.SymClass, val.Metadata.Declarations)
+		if len(val.SrcData.Metadata.Declarations) > 1 {
+			error_ := K.Error_Standard("Duplicate Declarations: "+val.SrcData.SymClass, val.SrcData.Metadata.Declarations)
 			_config.Delta.Error.Multiples = append(_config.Delta.Error.Multiples, error_.Errorstring)
 			_config.Delta.Diagnostic.Multiples = append(_config.Delta.Diagnostic.Multiples, error_.Diagnostic)
 		}

@@ -67,7 +67,7 @@ func (This *Class) GetTracks() GetTracks_return {
 				if found := _action.Index_Find(i, file.StyleData.LocalClasses); found.Index > 0 {
 					retraces = append(retraces, found.Index)
 					attachments = append(attachments, found.Index)
-					for _, i := range _action.Index_Fetch(found.Index).Attachments {
+					for _, i := range _action.Index_Fetch(found.Index).SrcData.Attachments {
 						if found := _action.Index_Find(i, file.StyleData.LocalClasses); found.Index > 0 {
 							attachments = append(attachments, found.Index)
 						}

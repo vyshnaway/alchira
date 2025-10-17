@@ -28,8 +28,8 @@ func library_SaveFile(filepath string, content string) {
 }
 
 type library_StackFiles_return struct {
-	Cluster [][]_model.File_Stash
-	Axiom   [][]_model.File_Stash
+	Cluster [][]*_model.File_Stash
+	Axiom   [][]*_model.File_Stash
 	Lookup  map[string]_model.File_Lookup
 }
 
@@ -51,12 +51,12 @@ func Library_CacheFiles() library_StackFiles_return {
 	}
 
 	length := 0
-	axiom_map := map[int][]_model.File_Stash{}
-	cluster_map := map[int][]_model.File_Stash{}
+	axiom_map := map[int][]*_model.File_Stash{}
+	cluster_map := map[int][]*_model.File_Stash{}
 	lookup := map[string]_model.File_Lookup{}
 
 	for path, data := range Cache.Libraries {
-		var collection map[int][]_model.File_Stash
+		var collection map[int][]*_model.File_Stash
 		switch data.Manifest.Lookup.Type {
 		case _model.File_Type_Axiom:
 			collection = axiom_map
@@ -71,9 +71,9 @@ func Library_CacheFiles() library_StackFiles_return {
 		if er == nil {
 
 			if _, exists := collection[id]; !exists {
-				collection[id] = []_model.File_Stash{data}
+				collection[id] = []*_model.File_Stash{&data}
 			} else {
-				collection[id] = append(collection[id], data)
+				collection[id] = append(collection[id], &data)
 			}
 
 			if id > length {
@@ -145,6 +145,6 @@ func Library_Update() {
 func Library_ReDeclare() {
 	for _, i := range _config.Style.Library__Index {
 		data := _action.Index_Fetch(i)
-		copy(data.Metadata.Declarations, data.XcaffoldDeclarations)
+		copy(data.SrcData.Metadata.Declarations, data.SrcData.XcaffoldDeclarations)
 	}
 }

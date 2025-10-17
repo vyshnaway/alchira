@@ -48,7 +48,7 @@ type cssfile_Collection_return struct {
 	SelectorList       []string
 }
 
-func Cssfile_Collection(files []_model.File_Stash) cssfile_Collection_return {
+func Cssfile_Collection(files []*_model.File_Stash) cssfile_Collection_return {
 	selectorList := []string{}
 	selectors := map[string]int{}
 	indexMetaCollection := _model.File_SymclassIndexMap{}
@@ -71,7 +71,7 @@ func Cssfile_Collection(files []_model.File_Stash) cssfile_Collection_return {
 
 			if index > 0 {
 				classdata := _action.Index_Fetch(index)
-				classdata.Metadata.Declarations = append(classdata.Metadata.Declarations, declaration)
+				classdata.SrcData.Metadata.Declarations = append(classdata.SrcData.Metadata.Declarations, declaration)
 			} else {
 				stylescanned := Parse_CssSnippet(
 					value,
@@ -85,13 +85,13 @@ func Cssfile_Collection(files []_model.File_Stash) cssfile_Collection_return {
 				artifact := _config.Archive.Name
 
 				metadata := _model.Style_Metadata{
-					Info:         []string{},
-					Skeleton:     object.Skeleton(),
-					Declarations: []string{declaration},
-					Variables:    stylescanned.Variables.ToMap(),
-					SummonSnippet:        "",
+					Info:          []string{},
+					Skeleton:      object.Skeleton(),
+					Declarations:  []string{declaration},
+					Variables:     stylescanned.Variables.ToMap(),
+					SummonSnippet: "",
 				}
-				classdata := _model.Style_ClassData{
+				classdata := &_model.Style_ClassData{
 					Attributes:           map[string]string{},
 					Index:                0,
 					WatchClass:           "",
@@ -114,7 +114,10 @@ func Cssfile_Collection(files []_model.File_Stash) cssfile_Collection_return {
 						}
 					}(),
 				}
-				index := _action.Index_Declare(&classdata)
+				index := _action.Index_Declare(&_model.Cache_SymclassData{
+					Context: file,
+					SrcData: classdata,
+				})
 				file.StyleData.UsedIn = append(file.StyleData.UsedIn, index)
 				selectors[classname] = index
 				indexMetaCollection[classname] = index

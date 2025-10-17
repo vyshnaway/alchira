@@ -51,9 +51,9 @@ func Generate_Files() (Files map[string]string, Report string) {
 		}
 		for _, a := range attachments {
 			data := _action.Index_Fetch(a)
-			attach_styles.Merge(data.StyleSnippet)
-			if len(data.StapleSnippet) > 0 {
-				attach_staples.WriteString(data.StapleSnippet)
+			attach_styles.Merge(data.SrcData.StyleSnippet)
+			if len(data.SrcData.StapleSnippet) > 0 {
+				attach_staples.WriteString(data.SrcData.StapleSnippet)
 			}
 		}
 		staple_sheet := attach_staples.String()
@@ -74,7 +74,7 @@ func Generate_Files() (Files map[string]string, Report string) {
 				val: _css.Render_Switched(func() *_css.T_Block {
 					result := _css.NewBlock()
 					for _, i := range _config.Style.PublishIndexMap {
-						result.SetBlock(i.ClassName, _action.Index_Fetch(i.ClassIndex).StyleObject)
+						result.SetBlock(i.ClassName, _action.Index_Fetch(i.ClassIndex).SrcData.StyleObject)
 					}
 					return result
 				}(), _config.Static.MINIFY),
@@ -119,7 +119,7 @@ func Generate_Files() (Files map[string]string, Report string) {
 				func() *_css.T_Block {
 					res := _css.NewBlock()
 					for i, d := range _config.Style.Index_to_Data {
-						res.SetBlock("."+d.WatchClass, _action.Index_Fetch(i).StyleObject)
+						res.SetBlock("."+d.SrcData.WatchClass, _action.Index_Fetch(i).SrcData.StyleObject)
 					}
 					return res
 				}(), _config.Static.MINIFY,

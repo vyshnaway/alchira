@@ -13,7 +13,7 @@ var BIN = make(map[int]struct{})
 var mu _sync.Mutex
 
 // Index_Declare: Assigns and registers a new index
-func Index_Declare(object *_model.Style_ClassData) int {
+func Index_Declare(object *_model.Cache_SymclassData) int {
 	mu.Lock()
 	defer mu.Unlock()
 	var idx int
@@ -25,9 +25,9 @@ func Index_Declare(object *_model.Style_ClassData) int {
 		NOW++
 		idx = NOW
 	}
-	object.Index = idx
+	object.SrcData.Index = idx
 	delete(BIN, idx)
-	object.WatchClass = "__" + _utils.String_EnCounter(idx)
+	object.SrcData.WatchClass = "__" + _utils.String_EnCounter(idx)
 	_config.Style.Index_to_Data[idx] = object
 	return idx
 }
@@ -66,10 +66,10 @@ func Index_Reset(after int) int {
 type index_Find_retrun struct {
 	Index int
 	Group _model.Style_Type
-	Data  *_model.Style_ClassData
+	Data  *_model.Cache_SymclassData
 }
 
-func Index_Fetch(index int) *_model.Style_ClassData {
+func Index_Fetch(index int) *_model.Cache_SymclassData {
 	mu.Lock()
 	defer mu.Unlock()
 	data := _config.Style.Index_to_Data[index]

@@ -27,15 +27,15 @@ func Component(symclass string, context models.Style_ClassIndexMap) T_Component_
 		artifact := target.Artifact(r.Index)
 		if artifact.Element == "summon" {
 			attributes = artifact.Attributes
-			summon = strings.ReplaceAll(r.Data.Metadata.SummonSnippet, symclass, "_")
-			staple.WriteString(r.Data.StapleSnippet)
-			styleattach.WriteString(css.Render_Vendored(r.Data.StyleSnippet.Flatten(), true))
-			stylesymclass.WriteString(css.Render_Vendored(r.Data.StyleSnippet.Flatten(), true))
+			summon = strings.ReplaceAll(r.Data.SrcData.Metadata.SummonSnippet, symclass, "_")
+			staple.WriteString(r.Data.SrcData.StapleSnippet)
+			styleattach.WriteString(css.Render_Vendored(r.Data.SrcData.StyleSnippet.Flatten(), true))
+			stylesymclass.WriteString(css.Render_Vendored(r.Data.SrcData.StyleSnippet.Flatten(), true))
 
-			for _, attachment := range r.Data.Attachments {
+			for _, attachment := range r.Data.SrcData.Attachments {
 				if found := action.Index_Find(attachment, context); found.Index > 0 {
-					styleattach.WriteString(css.Render_Vendored(found.Data.StyleObject.Flatten(), true))
-					staple.WriteString(found.Data.StapleSnippet)
+					styleattach.WriteString(css.Render_Vendored(found.Data.SrcData.StyleObject.Flatten(), true))
+					staple.WriteString(found.Data.SrcData.StapleSnippet)
 				}
 			}
 		}

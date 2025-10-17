@@ -18,31 +18,31 @@ func Artifact(index int) _types_.Style_ExportStyle {
 	attributes := map[string]string{}
 
 	if style := _action.Index_Fetch(index); style != nil {
-		if len(style.StapleSnippet) > 0 {
+		if len(style.SrcData.StapleSnippet) > 0 {
 			element = "staple"
-			innertext = style.StapleSnippet
-		} else if len(style.Metadata.SummonSnippet) > 0 {
+			innertext = style.SrcData.StapleSnippet
+		} else if len(style.SrcData.Metadata.SummonSnippet) > 0 {
 			element = "summon"
-			innertext = style.Metadata.SummonSnippet
+			innertext = style.SrcData.Metadata.SummonSnippet
 		} else {
 			element = "style"
-			innertext = style.StyleSnippet.Format(true)
+			innertext = style.SrcData.StyleSnippet.Format(true)
 		}
 
-		if _string.Contains(style.Definent, "$$$") {
-			symclass = style.Definent
+		if _string.Contains(style.SrcData.Definent, "$$$") {
+			symclass = style.SrcData.Definent
 		} else {
-			symclass = "$---" + _util.String_EnCounter(style.Index)
+			symclass = "$---" + _util.String_EnCounter(style.SrcData.Index)
 		}
 
-		isPublic := _string.Contains(style.SymClass, "$$$")
+		isPublic := _string.Contains(style.SrcData.SymClass, "$$$")
 		if isPublic {
-			for k, v := range style.Attributes {
+			for k, v := range style.SrcData.Attributes {
 				attributes[k] = _util.Code_Minify(v)
 			}
 		}
 
-		style.StyleObject.BlockRange(func(k string, v *_css.T_Block) {
+		style.SrcData.StyleObject.BlockRange(func(k string, v *_css.T_Block) {
 			stylesheet[k] = v.Format(true)
 		})
 
@@ -65,7 +65,7 @@ func (This *Class) GetArtifacts() map[string]_model.Style_ExportStyle {
 		for _, pubindex := range file.StyleData.PublicClasses {
 			exporting := Artifact(pubindex)
 
-			for _, a := range _action.Index_Fetch(pubindex).Attachments {
+			for _, a := range _action.Index_Fetch(pubindex).SrcData.Attachments {
 				if found := _action.Index_Find(a, file.StyleData.LocalClasses); found.Index > 0 {
 					subexporting := Artifact(found.Index)
 					exporting.Attachments = append(exporting.Attachments, subexporting.SymClass)
