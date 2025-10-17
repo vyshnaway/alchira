@@ -48,59 +48,34 @@ func Connect(tryport int) {
 
 	go func() {
 		for scanner.Scan() {
-			str := scanner.Text()
-			str = strings.TrimSpace(str)
+			request := strings.TrimSpace(scanner.Text())
 
-			jsongap := ""
-			usejsonrpc := true
-			format := func(method string, data any, err error) string {
-				if usejsonrpc {
-					return utils.Code_JsonBuild(JsonRPCResponse{
-						JSONRPC: "2.0",
-						ID:      0,
-						Method:  method,
-						Result:  data,
-						Error:   err,
-					}, jsongap)
-				} else {
-					return utils.Code_JsonBuild(data, jsongap)
-				}
-			}
+			if strings.HasPrefix(request, "$ ") || strings.HasPrefix(request, "> ") {
 
-			if strings.HasPrefix(str, "$ ") || strings.HasPrefix(str, "> ") {
-				if str[0] == '$' {
-					usejsonrpc = false
-					jsongap = "  "
-				}
-
-				split := strings.Fields(str[2:])
+				split := strings.Fields(request[2:])
 				if len(split) < 1 {
 					continue
 				}
 				command := split[0]
 				arguments := split[1:]
 
-				res, err := IO_Term(command, arguments)
-				if res == nil {
+				if res := IO_Term(command, arguments, request[0] == '>'); res == nil {
 					continue
 				} else if r, k := res.(int); k && r == 0 {
 					manualExit <- struct{}{}
+				} else {
+					fmt.Fprintln(writer, res)
 				}
-
-				responsestring := format(command, res, err)
-				fmt.Fprintln(writer, responsestring)
-
-				writer.Flush()
 			} else {
 				var req JsonRPCRequest
-				if err := json.Unmarshal([]byte(str), &req); err != nil {
+				if err := json.Unmarshal([]byte(request), &req); err != nil {
 					continue
 				}
 
-				out, _ := json.Marshal(IO_Json(req))
-				fmt.Fprintln(writer, string(out))
-				writer.Flush()
+				fmt.Fprintln(writer, IO_Json(req))
 			}
+
+			writer.Flush()
 		}
 
 		if err := scanner.Err(); err != nil {

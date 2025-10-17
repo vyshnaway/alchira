@@ -5,9 +5,24 @@ import (
 	"fmt"
 	"main/configs"
 	"main/models"
+	"main/package/utils"
 )
 
-func IO_Term(command string, arguments []string) (Response any, Error error) {
+func IO_Term(command string, arguments []string, userpc bool) (Response any) {
+
+	buildmessage := func(result any, err error) string {
+		if userpc {
+			return utils.Code_JsonBuild(JsonRPCResponse{
+				JSONRPC: "2.0",
+				ID:      0,
+				Method:  command,
+				Result:  result,
+				Error:   err,
+			}, "")
+		} else {
+			return utils.Code_JsonBuild(result, "  ")
+		}
+	}
 
 	switch command {
 	case "manifest":
@@ -15,7 +30,7 @@ func IO_Term(command string, arguments []string) (Response any, Error error) {
 		if len(arguments) > 0 {
 			filepath = arguments[0]
 		}
-		return ManifestFile(filepath), nil
+		return buildmessage(ManifestFile(filepath), nil)
 
 	case "webview":
 		if len(arguments) > 0 {
@@ -24,15 +39,15 @@ func IO_Term(command string, arguments []string) (Response any, Error error) {
 				broadcast <- j
 			}
 		}
-		return REFER.Url, nil
+		return buildmessage(REFER.Url, nil)
 
 	case "errors":
-		return configs.Manifest.Diagnostics, nil
+		return configs.Manifest.Diagnostics
 
 	case "exit":
-		return 0, nil
+		return 0
 
 	default:
-		return nil, fmt.Errorf("invalid method")
+		return nil
 	}
 }

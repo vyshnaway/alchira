@@ -22,7 +22,7 @@ type JsonRPCResponse struct {
 	Error   any    `json:"error,omitempty"`
 }
 
-func IO_Json(req JsonRPCRequest) (Response JsonRPCResponse) {
+func IO_Json(req JsonRPCRequest) string {
 
 	var resp JsonRPCResponse
 	resp.JSONRPC = "2.0"
@@ -48,7 +48,7 @@ func IO_Json(req JsonRPCRequest) (Response JsonRPCResponse) {
 				resp_.ID = req.ID
 				resp_.Method = req.Method
 				resp_.Result = Component(symclass_, models.Style_ClassIndexMap{})
-				
+
 				if message, e := json.Marshal(resp_); e == nil {
 					broadcast <- message
 				}
@@ -62,5 +62,9 @@ func IO_Json(req JsonRPCRequest) (Response JsonRPCResponse) {
 		resp.Error = fmt.Errorf("invalid method")
 	}
 
-	return resp
+	if r, e := json.Marshal(resp); e == nil {
+		return string(r)
+	} else {
+		return ""
+	}
 }
