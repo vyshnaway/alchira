@@ -22,10 +22,10 @@ type R_Manifest_IO struct {
 	Constants   map[string]string `json:"constants"`
 	AssistFile  bool              `json:"assistfile"`
 	WatchFiles  []string          `json:"watchfiles"`
+	LiveCursor  bool              `json:"livecursor"`
 }
 
 type R_Manifest_WS struct {
-	LiveCursor   bool                          `json:"livecursor"`
 	Locales      []string                      `json:"locales"`
 	Assignable   []string                      `json:"assignable"`
 	Symclasses   map[string]int                `json:"symclasses"`
@@ -34,8 +34,8 @@ type R_Manifest_WS struct {
 }
 
 func ManifestFile(filepath string) (R_Manifest_IO, R_Manifest_WS) {
-	Refer.SimulationMutex.Lock()
-	defer Refer.SimulationMutex.Unlock()
+	// Refer.SimulationMutex.Lock()
+	// defer Refer.SimulationMutex.Unlock()
 	MetadataFromIndex := func(index int) models.Style_Metadata {
 		return *action.Index_Fetch(index).SrcData.Metadata
 	}
@@ -170,8 +170,8 @@ Return:
 			SwitchMap:   switchmap,
 			WatchFiles:  watchfiles,
 			AssistFile:  assistfile,
+			LiveCursor:  Refer.LiveCursor,
 		}, R_Manifest_WS{
-			LiveCursor:   Refer.LiveCursor,
 			Assignable:   assignable,
 			Symclasses:   symclasses,
 			SymclassData: symclassdata,

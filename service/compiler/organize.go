@@ -82,6 +82,9 @@ func Accumulate() {
 	}
 }
 
+var css_class_prefix = ".\\" + string(_config.Root.CustomOperations["locale"])
+var tag_class_prefix = string(_config.Root.CustomOperations["locale"])
+
 func Organize() (AritfactFiles map[string]string, Attachments []int) {
 
 	_config.Style.ClassDictionary = _model.Style_Dictionary{}
@@ -91,7 +94,7 @@ func Organize() (AritfactFiles map[string]string, Attachments []int) {
 		for _, val := range stash.Final_Hashtrace {
 			index := val[0]
 			classid := val[1]
-			classname := "_" + _util.String_EnCounter(classid)
+			classname := css_class_prefix + _util.String_EnCounter(classid)
 			_config.Style.PublishIndexMap = append(_config.Style.PublishIndexMap, _model.Style_ClassIndexTrace{
 				ClassName:  classname,
 				ClassIndex: index,
@@ -101,7 +104,7 @@ func Organize() (AritfactFiles map[string]string, Attachments []int) {
 		for json_array, imap := range stash.List_to_GroupId {
 			_config.Style.ClassDictionary[json_array] = map[int]string{}
 			for ref, id := range stash.Group_to_Table[imap] {
-				_config.Style.ClassDictionary[json_array][ref] = "_" + _util.String_EnCounter(id)
+				_config.Style.ClassDictionary[json_array][ref] = tag_class_prefix + _util.String_EnCounter(id)
 			}
 		}
 	}

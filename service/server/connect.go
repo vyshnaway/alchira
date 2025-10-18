@@ -65,26 +65,40 @@ func Connect(tryport int) {
 	go func() {
 		scanner := bufio.NewScanner(os.Stdin)
 		writer := bufio.NewWriter(os.Stdout)
+		defer func() {
+			// Always flush the writer on exit to ensure all output is written.
+			if err := writer.Flush(); err != nil {
+				fmt.Fprintln(os.Stderr, "Error flushing writer:", err)
+			}
+		}()
+
 		go Dryrun(Dryrun_Step_Initialize, true)
 
 		for scanner.Scan() {
 			request := strings.TrimSpace(scanner.Text())
-
+			
 			if strings.HasPrefix(request, "$ ") || strings.HasPrefix(request, "> ") {
 				split := strings.Fields(request[2:])
-				if len(split) == 0 {
+				if len(split) < 1 {
 					continue
 				}
 				command := split[0]
 				arguments := split[1:]
 				res := IO_Term(command, arguments, request[0] == '>')
-
+				
 				if res == "" {
 					continue
 				} else {
-					fmt.Fprintln(writer, res)
+					_, err := fmt.Fprintln(writer, res)
+					if err != nil {
+						fmt.Fprintln(os.Stderr, "Error writing response to stdout:", err)
+						break
+					}
 					if res == "0" {
-						manualExit <- struct{}{}
+						select {
+						case manualExit <- struct{}{}:
+						default:
+						}
 						break
 					}
 				}
@@ -93,16 +107,25 @@ func Connect(tryport int) {
 				if err := json.Unmarshal([]byte(request), &req); err != nil {
 					continue
 				}
-				fmt.Fprintln(writer, IO_Json(req))
+				_, err := fmt.Fprintln(writer, IO_Json(req))
+				if err != nil {
+					fmt.Fprintln(os.Stderr, "Error writing JSON to stdout:", err)
+					break
+				}
 			}
 
-			writer.Flush()
+			// Always check and handle flush error
+			if err := writer.Flush(); err != nil {
+				fmt.Fprintln(os.Stderr, "Error flushing writer:", err)
+				break
+			}
 		}
 
 		if err := scanner.Err(); err != nil {
 			fmt.Fprintln(os.Stderr, "Error reading from stdin:", err)
 		}
 
+		// Non-blocking channel signal to prevent deadlock if already closed or sent
 		select {
 		case manualExit <- struct{}{}:
 		default:

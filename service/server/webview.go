@@ -70,7 +70,7 @@ func Webview_Create(tryport int) (httpServer *http.Server, deducedPort int, err 
 			if err != nil {
 				return
 			}
-
+			
 			mutex.Lock()
 			clients[ws] = true
 			mutex.Unlock()

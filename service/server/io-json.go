@@ -14,7 +14,6 @@ func IO_Json(req JsonRPCRequest) string {
 	var resp JsonRPCResponse
 	resp.JSONRPC = "2.0"
 	resp.ID = req.ID
-
 	switch req.Method {
 	case "fileManifest":
 		if params_, ok := req.Params.(map[string]any); ok {
@@ -30,7 +29,7 @@ func IO_Json(req JsonRPCRequest) string {
 				var sm JsonRPCResponse
 				sm.JSONRPC = "2.0"
 				sm.ID = req.ID
-				sm.Method = "updateComponent"
+				sm.Method = "styleManifest"
 				sm.Result = styleManifest
 				if message, e := json.Marshal(sm); e == nil {
 					broadcast <- message
@@ -50,8 +49,8 @@ func IO_Json(req JsonRPCRequest) string {
 					M_ComopnentUpdate.Lock()
 					Refer.LatestComponent = uc
 					M_ComopnentUpdate.Unlock()
-					break
 				}
+				break
 			}
 		}
 		resp.Error = fmt.Errorf("invalid input parameteres")
