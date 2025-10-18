@@ -142,10 +142,10 @@ func main() {
 		}
 	case "manifest":
 		{
-			res := map[string]_server.R_Manifest{}
-			if _, ok := _server.Dryrun(_server.Dryrun_Step_Initialize, false); ok {
+			res := map[string]_server.R_Manifest_IO {}
+			if ok := _server.Dryrun(_server.Dryrun_Step_Initialize, false); ok {
 				for _, path := range arguments {
-					if r := _server.ManifestFile(path); r.AssistFile {
+					if r, _ := _server.ManifestFile(path); r.AssistFile {
 						res[path] = r
 					}
 				}

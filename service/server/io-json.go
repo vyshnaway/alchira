@@ -24,22 +24,31 @@ func IO_Json(req JsonRPCRequest) string {
 			filepath_, ok2 := filepath.(string)
 
 			if ok1 && ok2 {
-				manifest, styledata := ManifestFile(filepath_)
-				resp.Result = manifest
+				fileManifest, styleManifest := ManifestFile(filepath_)
+				resp.Result = fileManifest
+
+				var sm JsonRPCResponse
+				sm.JSONRPC = "2.0"
+				sm.ID = req.ID
+				sm.Method = "updateComponent"
+				sm.Result = styleManifest
+				if message, e := json.Marshal(sm); e == nil {
+					broadcast <- message
+				}
 
 				symclass, ok3 := params_["symclass"]
 				symclass_, ok4 := symclass.(string)
-				if _, k := styledata.Symclasses[symclass_]; ok3 && ok4 && k {
-					var resp_ JsonRPCResponse
-					resp_.JSONRPC = "2.0"
-					resp_.ID = req.ID
-					resp_.Method = "updateComponent"
-					resp_.Result = Component(symclass_, models.Style_ClassIndexMap{})
-					if message, e := json.Marshal(resp_); e == nil {
+				if _, k := styleManifest.Symclasses[symclass_]; ok3 && ok4 && k {
+					var uc JsonRPCResponse
+					uc.JSONRPC = "2.0"
+					uc.ID = req.ID
+					uc.Method = "updateComponent"
+					uc.Result = Component(symclass_, models.Style_ClassIndexMap{})
+					if message, e := json.Marshal(uc); e == nil {
 						broadcast <- message
 					}
 					M_ComopnentUpdate.Lock()
-					Refer.LatestComponent = resp_
+					Refer.LatestComponent = uc
 					M_ComopnentUpdate.Unlock()
 					break
 				}

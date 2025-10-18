@@ -34,7 +34,7 @@ const (
 	Dryrun_Step_LoopAround
 )
 
-func Dryrun(step Dryrun_Step_enum, watch bool) {
+func Dryrun(step Dryrun_Step_enum, watch bool) (status bool) {
 	const interval = 10
 
 	for {
@@ -178,4 +178,6 @@ func Dryrun(step Dryrun_Step_enum, watch bool) {
 			break
 		}
 	}
+
+	return Refer.Active
 }
