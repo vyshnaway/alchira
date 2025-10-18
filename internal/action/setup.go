@@ -5,7 +5,6 @@ import (
 	_model "main/models"
 	_fileman "main/package/fileman"
 	_reflect "reflect"
-	_slice "slices"
 	_string "strings"
 )
 
@@ -20,7 +19,6 @@ func Setup_Environment(rootpath string, workpath string) {
 	}
 
 	for _, group := range []map[string]_model.File_Source{
-		_config.Path_Autogen,
 		_config.Path_Css,
 		_config.Path_Files,
 		_config.Path_Folder,
@@ -42,30 +40,6 @@ func Setup_Environment(rootpath string, workpath string) {
 		source.Url = cdn + source.Url
 		source.Path = _fileman.Path_Join(append([]string{rootpath}, source.Frags...)...)
 		_config.Sync_References[id] = source
-	}
-}
-
-func Setup_Ignorefiles() {
-	ignorepath := _config.Path_Autogen["ignore"].Path
-
-	project_ignores := []string{}
-	if result, err := _fileman.Read_File(ignorepath, false); err == nil {
-		for ig := range _string.SplitSeq(result, "\r\n") {
-			project_ignores = append(project_ignores, _string.Trim(ig, "\r\t "))
-		}
-
-	}
-
-	points := 0
-	default_ignores := _string.SplitSeq(_config.Path_Autogen["ignore"].Content, "\r\n")
-	for ignore := range default_ignores {
-		if !_slice.Contains(project_ignores, ignore) {
-			points++
-			project_ignores = append(project_ignores, ignore)
-		}
-	}
-	if points > 0 {
-		_fileman.Write_File(ignorepath, _string.Join(project_ignores, "\r\n"))
 	}
 }
 

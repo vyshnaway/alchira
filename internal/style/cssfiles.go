@@ -94,7 +94,6 @@ func Cssfile_Collection(files []*_model.File_Stash) cssfile_Collection_return {
 				classdata := &_model.Style_ClassData{
 					Attributes:           map[string]string{},
 					Index:                0,
-					WatchClass:           "",
 					Artifact:             artifact,
 					Definent:             selector,
 					SymClass:             classname,

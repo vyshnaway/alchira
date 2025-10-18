@@ -58,7 +58,7 @@ func (This *T_Watcher) Start(interval, maxevents int) error {
 				}
 				var act E_Action
 				switch event.Op {
-					
+
 				case _watcher.Create:
 					fallthrough
 				case _watcher.Write:
@@ -68,8 +68,8 @@ func (This *T_Watcher) Start(interval, maxevents int) error {
 					fallthrough
 				case _watcher.Rename:
 					fallthrough
-
 				case _watcher.Remove:
+					This.Reset()
 					act = E_Action_Refactor
 
 				default:

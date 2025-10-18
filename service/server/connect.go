@@ -56,7 +56,7 @@ func Connect(tryport int) {
 	// Use a buffered chan for manual exit (no panic on double-send)
 	manualExit := make(chan struct{}, 1)
 
-	REFER.watcher, _ = Dryrun(Dryrun_Step_Initialize, false)
+	REFER.watcher, _ = Dryrun(Dryrun_Step_Initialize, true)
 
 	scanner := bufio.NewScanner(os.Stdin)
 	writer := bufio.NewWriter(os.Stdout)

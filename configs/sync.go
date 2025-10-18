@@ -26,8 +26,8 @@ var Sync_References = map[string]_model.File_Source{
 		Frags:   []string{"changelog.md"},
 		Content: "",
 	},
-	"agentnote": {
-		Title:   "Ai Agent Note",
+	"agent": {
+		Title:   "For AiAgents",
 		Url:     "agent.md",
 		Path:    "",
 		Frags:   []string{"agent.md"},

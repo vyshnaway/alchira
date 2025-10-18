@@ -138,7 +138,6 @@ func Rawtag_Upload(
 			SrcData: &_model.Style_ClassData{
 				Attributes:           attributes,
 				Index:                0,
-				WatchClass:           "",
 				Artifact:             artifact,
 				Definent:             raw.SymClasses[0],
 				SymClass:             symclass,

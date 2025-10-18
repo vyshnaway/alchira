@@ -11,12 +11,6 @@ var Path_Folder = map[string]_model.File_Source{
 		Content:   "",
 		Essential: true,
 	},
-	"autogen": {
-		Frags:     []string{id, "autogen"},
-		Path:      "",
-		Content:   "",
-		Essential: false,
-	},
 	"artifacts": {
 		Frags:     []string{id, "artifacts"},
 		Path:      "",
@@ -114,51 +108,6 @@ var Path_Files = map[string]_model.File_Source{
 		Frags:     []string{id, "changelog.md"},
 		Path:      "",
 		Content:   "",
-		Essential: false,
-	},
-}
-
-var Path_Autogen = map[string]_model.File_Source{
-	"index": {
-		Path:      "",
-		Frags:     []string{id, "autogen", "preview", "index.css"},
-		Content:   "",
-		Essential: false,
-	},
-	"watch": {
-		Path:      "",
-		Frags:     []string{id, "autogen", "preview", "watch.css"},
-		Content:   "",
-		Essential: false,
-	},
-	"staple": {
-		Path:      "",
-		Frags:     []string{id, "autogen", "preview", "staple.htm"},
-		Content:   "",
-		Essential: false,
-	},
-	"manifest": {
-		Path:      "",
-		Frags:     []string{id, "autogen", "manifest.json"},
-		Content:   "{}",
-		Essential: false,
-	},
-	"reference": {
-		Frags:     []string{id, "autogen", "reference.md"},
-		Path:      "",
-		Content:   "",
-		Essential: false,
-	},
-	"guildelines": {
-		Frags:     []string{id, "autogen", "guildelines.md"},
-		Path:      "",
-		Content:   "",
-		Essential: false,
-	},
-	"ignore": {
-		Path:      "",
-		Frags:     []string{id, "autogen", ".gitignore"},
-		Content:   "*",
 		Essential: false,
 	},
 }

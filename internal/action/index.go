@@ -3,7 +3,6 @@ package action
 import (
 	_config "main/configs"
 	_model "main/models"
-	_utils "main/package/utils"
 	_sync "sync"
 )
 
@@ -27,7 +26,6 @@ func Index_Declare(object *_model.Cache_SymclassData) int {
 	}
 	object.SrcData.Index = idx
 	delete(BIN, idx)
-	object.SrcData.WatchClass = "__" + _utils.String_EnCounter(idx)
 	_config.Style.Index_to_Data[idx] = object
 	return idx
 }

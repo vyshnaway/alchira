@@ -4,8 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"main/models"
-	"main/package/watchman"
-	"slices"
 )
 
 func IO_Json(req JsonRPCRequest) string {
@@ -22,31 +20,25 @@ func IO_Json(req JsonRPCRequest) string {
 			filepath, ok1 := params_["filepath"]
 			filepath_, ok2 := filepath.(string)
 
-			content, ok5 := params_["content"]
-			content_, ok6 := content.(string)
-
-			if ok5 && ok6 {
-				REFER.watcher.HandleEvent(watchman.E_Action_Reload, filepath_, content_);
-			}
-
 			if ok1 && ok2 {
 				manifest := ManifestFile(filepath_)
 				resp.Result = manifest
 
 				symclass, ok3 := params_["symclass"]
 				symclass_, ok4 := symclass.(string)
-				if ok3 && ok4 && slices.Contains(manifest.Attachable, symclass_) {
-					var resp_ JsonRPCResponse
-					resp_.JSONRPC = "2.0"
-					resp_.ID = req.ID
-					resp_.Method = "updateComponent"
-					resp_.Result = Component(symclass_, models.Style_ClassIndexMap{})
+				if _, k := manifest.Symclasses[symclass_]; ok3 && ok4 && k {
+					go func() {
+						var resp_ JsonRPCResponse
+						resp_.JSONRPC = "2.0"
+						resp_.ID = req.ID
+						resp_.Method = "updateComponent"
+						resp_.Result = Component(symclass_, models.Style_ClassIndexMap{})
 
-					if message, e := json.Marshal(resp_); e == nil {
-						broadcast <- message
-					}
-
-					break
+						if message, e := json.Marshal(resp_); e == nil {
+							broadcast <- message
+						}
+					}()
+					break;
 				}
 			}
 		}

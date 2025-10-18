@@ -131,7 +131,6 @@ func Execute(heading string) (Exitcode int) {
 						_config.Path_Folder["xcaffold"].Path,
 					)
 					ignore_dirs := []string{
-						_config.Path_Folder["autogen"].Path,
 						_config.Path_Folder["archive"].Path,
 					}
 

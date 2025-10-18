@@ -113,31 +113,13 @@ func Generate_Files() (Files map[string]string, Report string) {
 			return _string.Join(frags, "")
 		}()
 
-		watch_class := ""
-		if _config.Static.WATCH {
-			watch_class = _util.Code_Strip(_css.Render_Switched(
-				func() *_css.T_Block {
-					res := _css.NewBlock()
-					for i, d := range _config.Style.Index_to_Data {
-						res.SetBlock("."+d.SrcData.WatchClass, _action.Index_Fetch(i).SrcData.StyleObject)
-					}
-					return res
-				}(), _config.Static.MINIFY,
-			)+attach_frag, true, true, false, true)
-		}
-
 		block_style := "<style>" + style_sheet + "</style>"
 		block_on := block_style + block_style
 		for _, target := range _stash.Cache.Targetdir {
 			_map.Copy(files, target.SummonFiles(style_sheet, block_style, block_on, staple_sheet))
 		}
 
-		if _config.Static.WATCH {
-			files[_config.Path_Autogen["manifest"].Path] = _util.Code_JsonBuild(_config.Manifest, "")
-			files[_config.Path_Autogen["index"].Path] = _config.Delta.IndexBuild
-			files[_config.Path_Autogen["watch"].Path] = watch_class
-			files[_config.Path_Autogen["staple"].Path] = staple_sheet
-		} else {
+		if !_config.Static.WATCH {
 			memchart := O.New[string, string]()
 			for _, i := range render_frags {
 				memchart.Set(

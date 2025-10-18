@@ -38,7 +38,6 @@ func Verify_Setup() (Report string, Status verify_Setup_Status_enum) {
 		}
 
 		for _, val := range []map[string]_model.File_Source{
-			_config.Path_Autogen,
 			_config.Path_Css,
 			_config.Path_Files,
 			_config.Path_Json,
@@ -79,7 +78,6 @@ type Verify_ProxyMapDependency_return struct {
 }
 
 func Verify_Configs(remote_vendors bool) (Report string, Status bool) {
-	Setup_Ignorefiles()
 	if data, err := _fileman.Read_File(_config.Path_Files["readme"].Path, false); err == nil {
 		_config.Archive.Readme = data
 	}

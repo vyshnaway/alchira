@@ -103,7 +103,6 @@ func Dryrun(step Dryrun_Step_enum, watch bool) (*_watcher.T_Watcher, bool) {
 							configs.Path_Folder["xcaffold"].Path,
 						)
 						ignore_dirs := []string{
-							configs.Path_Folder["autogen"].Path,
 							configs.Path_Folder["archive"].Path,
 						}
 

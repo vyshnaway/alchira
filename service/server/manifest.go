@@ -13,24 +13,24 @@ import (
 )
 
 type R_Manifest struct {
-	LiveCursor   bool                              `json:"livecursor"`
-	WebviewPort  int                               `json:"webviewport"`
-	WebviewUrl   string                            `json:"webviewurl"`
-	Filepath     string                            `json:"filepath"`
-	Extention    string                            `json:"extention"`
-	AssistFile   bool                              `json:"assistfile"`
-	Environment  string                            `json:"environment"`
-	WatchFiles   []string                          `json:"watchfiles"`
-	Locales      []string                          `json:"locales"`
-	Attributes   []string                          `json:"attributes"`
-	Attachable   []string                          `json:"attachable"`
-	Assignable   []string                          `json:"assignable"`
-	CustomTags   []string                          `json:"customtags"`
-	SwitchMap    map[string]string                 `json:"switchmap"`
-	Hashrules    map[string]string                 `json:"hashrules"`
-	Constants    map[string]string                 `json:"constants"`
-	Diagnostics  []models.File_Diagnostic          `json:"diagnostics"`
-	SymclassData map[string]*models.Style_Metadata `json:"symclassData"`
+	LiveCursor   bool                           `json:"livecursor"`
+	WebviewPort  int                            `json:"webviewport"`
+	WebviewUrl   string                         `json:"webviewurl"`
+	Filepath     string                         `json:"filepath"`
+	Extention    string                         `json:"extention"`
+	AssistFile   bool                           `json:"assistfile"`
+	Environment  string                         `json:"environment"`
+	WatchFiles   []string                       `json:"watchfiles"`
+	Locales      []string                       `json:"locales"`
+	Attributes   []string                       `json:"attributes"`
+	CustomTags   []string                       `json:"customtags"`
+	Assignable   []string                       `json:"assignable"`
+	Symclasses   map[string]int                 `json:"symclasses"`
+	SwitchMap    map[string]string              `json:"switchmap"`
+	Hashrules    map[string]string              `json:"hashrules"`
+	Constants    map[string]string              `json:"constants"`
+	Diagnostics  []models.File_Diagnostic       `json:"diagnostics"`
+	SymclassData map[int]*models.Style_Metadata `json:"symclassData"`
 }
 
 func ManifestFile(filepath string) R_Manifest {
@@ -66,9 +66,9 @@ func ManifestFile(filepath string) R_Manifest {
 
 	constants := configs.Manifest.Constants
 	manifest := configs.Manifest
-	attachable := []string{}
 	assignable := []string{}
-	symclassData := map[string]*models.Style_Metadata{}
+	_symclasses := []string{}
+	_symclassData := map[string]*models.Style_Metadata{}
 	SymclassIndexMap := map[string]int{}
 	locales := []string{}
 	assistfile := false
@@ -82,17 +82,17 @@ func ManifestFile(filepath string) R_Manifest {
 		if nav.Type == models.File_Type_Artifact {
 			if stash, er := manifest.Group.Artifact[nav.Id]; er {
 				for k, v := range stash {
-					attachable = append(attachable, k)
-					symclassData[k] = MetadataFromIndex(v)
+					_symclasses = append(_symclasses, k)
+					_symclassData[k] = MetadataFromIndex(v)
 				}
 			}
 		} else {
 			for _, K := range convertAndSort(slices.Collect(maps.Keys(manifest.Group.Axiom))) {
 				KK := strconv.Itoa(K)
 				for k, v := range manifest.Group.Axiom[KK] {
-					attachable = append(attachable, k)
+					_symclasses = append(_symclasses, k)
 					SymclassIndexMap[k] = v
-					symclassData[k] = MetadataFromIndex(v)
+					_symclassData[k] = MetadataFromIndex(v)
 				}
 				if nav.Id == KK {
 					goto Return
@@ -105,9 +105,9 @@ func ManifestFile(filepath string) R_Manifest {
 			for _, K := range convertAndSort(slices.Collect(maps.Keys(manifest.Group.Cluster))) {
 				KK := strconv.Itoa(K)
 				for k, v := range manifest.Group.Cluster[KK] {
-					attachable = append(attachable, k)
+					_symclasses = append(_symclasses, k)
 					SymclassIndexMap[k] = v
-					symclassData[k] = MetadataFromIndex(v)
+					_symclassData[k] = MetadataFromIndex(v)
 				}
 				if nav.Id == KK {
 					goto Return
@@ -119,26 +119,26 @@ func ManifestFile(filepath string) R_Manifest {
 
 			for _, V := range manifest.Group.Artifact {
 				for k, v := range V {
-					attachable = append(attachable, k)
+					_symclasses = append(_symclasses, k)
 					SymclassIndexMap[k] = v
-					symclassData[k] = MetadataFromIndex(v)
+					_symclassData[k] = MetadataFromIndex(v)
 				}
 			}
 
 			for _, V := range manifest.Group.Global {
 				for k, v := range V {
-					attachable = append(attachable, k)
+					_symclasses = append(_symclasses, k)
 					SymclassIndexMap[k] = v
-					symclassData[k] = MetadataFromIndex(v)
+					_symclassData[k] = MetadataFromIndex(v)
 				}
 			}
 
 			if nav.Type != models.File_Type_Stylesheet {
 				if stash, er := manifest.Group.Local[nav.Id]; er {
 					for k, v := range stash {
-						attachable = append(attachable, k)
+						_symclasses = append(_symclasses, k)
 						SymclassIndexMap[k] = v
-						symclassData[k] = MetadataFromIndex(v)
+						_symclassData[k] = MetadataFromIndex(v)
 					}
 				}
 			}
@@ -149,6 +149,13 @@ Return:
 	watchfiles := []string{}
 	for k := range configs.Manifest.Lookup {
 		watchfiles = append(watchfiles, k)
+	}
+
+	symclasses := map[string]int{}
+	symclassdata := map[int]*models.Style_Metadata{}
+	for i, v := range _symclasses {
+		symclasses[v] = i
+		symclassdata[i] = _symclassData[v]
 	}
 
 	REFER.SymclassIndexMap = SymclassIndexMap
@@ -168,9 +175,9 @@ Return:
 		Environment:  configs.Archive.Environment,
 		Hashrules:    hashrules,
 		SwitchMap:    switchmap,
-		Attachable:   attachable,
 		Assignable:   assignable,
-		SymclassData: symclassData,
+		Symclasses:   symclasses,
+		SymclassData: symclassdata,
 		Locales:      locales,
 		Diagnostics:  diagnostics,
 	}
