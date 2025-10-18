@@ -1,10 +1,7 @@
 package server
 
 import (
-	"encoding/json"
-	"fmt"
 	"main/configs"
-	"main/models"
 	"main/package/utils"
 )
 
@@ -17,16 +14,11 @@ func IO_Term(command string, arguments []string, userpc bool) (Response string) 
 		if len(arguments) > 0 {
 			filepath = arguments[0]
 		}
-		result = ManifestFile(filepath)
+		filedata, _ := ManifestFile(filepath)
+		result = filedata
 
 	case "webview":
-		if len(arguments) > 0 {
-			if j, e := json.Marshal(Component(arguments[1], models.Style_ClassIndexMap{})); e == nil {
-				fmt.Println(j)
-				broadcast <- j
-			}
-		}
-		result = REFER.Url
+		result = Refer.Url
 
 	case "errors":
 		result = configs.Manifest.Diagnostics

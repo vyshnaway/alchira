@@ -145,6 +145,6 @@ func Library_Update() {
 func Library_ReDeclare() {
 	for _, i := range _config.Style.Library__Index {
 		data := _action.Index_Fetch(i)
-		copy(data.SrcData.Metadata.Declarations, data.SrcData.XcaffoldDeclarations)
+		copy(data.SrcData.Metadata.Declarations, data.SrcData.BlueprintDeclarations)
 	}
 }

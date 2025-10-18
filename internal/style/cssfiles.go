@@ -92,19 +92,19 @@ func Cssfile_Collection(files []*_model.File_Stash) cssfile_Collection_return {
 					SummonSnippet: "",
 				}
 				classdata := &_model.Style_ClassData{
-					Attributes:           map[string]string{},
-					Index:                0,
-					Artifact:             artifact,
-					Definent:             selector,
-					SymClass:             classname,
-					Metadata:             &metadata,
-					NativeStyle:          object,
-					Attachments:          attachments,
-					DebugClass:           file.DebugFront + "_" + _util.String_Filter(classname, []rune{}, []rune{}, []rune{'$', '/'}),
-					XcaffoldDeclarations: []string{declaration},
-					StapleSnippet:        "",
+					Attributes:            map[string]string{},
+					Index:                 0,
+					Artifact:              artifact,
+					Definent:              selector,
+					SymClass:              classname,
+					Metadata:              &metadata,
+					NativeStyle:           object,
+					Attachments:           attachments,
+					DebugClass:            file.DebugFront + "_" + _util.String_Filter(classname, []rune{}, []rune{}, []rune{'$', '/'}),
+					BlueprintDeclarations: []string{declaration},
+					StapleSnippet:         "",
 					StyleSnippet: func() *_css.T_Block {
-						if k, v := object.GetBlock("[]"); k {
+						if o, v := object.GetBlock("[]"); o {
 							temp := _css.NewBlock()
 							temp.SetBlock(selector, v)
 							return temp

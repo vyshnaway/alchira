@@ -6,6 +6,7 @@ import (
 	_action "main/internal/action"
 	_script "main/internal/script"
 	_model "main/models"
+	"main/package/css"
 	_util "main/package/utils"
 	_regexp "regexp"
 	_strconv "strconv"
@@ -133,21 +134,27 @@ func Rawtag_Upload(
 			Variables:     variables.ToMap(),
 			SummonSnippet: summon,
 		}
+
+		stylesnippet := css.NewBlock()
+		if ok, val := inner_style.Result.GetBlock("[]"); ok {
+			stylesnippet = val
+		}
+
 		index = _action.Index_Declare(&_model.Cache_SymclassData{
 			Context: file,
 			SrcData: &_model.Style_ClassData{
-				Attributes:           attributes,
-				Index:                0,
-				Artifact:             artifact,
-				Definent:             raw.SymClasses[0],
-				SymClass:             symclass,
-				NativeStyle:          object,
-				Metadata:             &metadata,
-				Attachments:          attachments,
-				DebugClass:           debugclass,
-				XcaffoldDeclarations: []string{declaration},
-				StapleSnippet:        staple,
-				StyleSnippet:         inner_style.Result,
+				Attributes:            attributes,
+				Index:                 0,
+				Artifact:              artifact,
+				Definent:              raw.SymClasses[0],
+				SymClass:              symclass,
+				NativeStyle:           object,
+				Metadata:              &metadata,
+				Attachments:           attachments,
+				DebugClass:            debugclass,
+				BlueprintDeclarations: []string{declaration},
+				StapleSnippet:         staple,
+				StyleSnippet:          stylesnippet,
 			},
 		})
 		IndexMap[symclass] = index

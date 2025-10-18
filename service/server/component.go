@@ -43,7 +43,7 @@ func Component(symclass string, context models.Style_ClassIndexMap) T_Component_
 	}
 
 	rootcss := ""
-	if REFER.WebviewState["live-preview-option-project-index"] == true {
+	if Refer.WebviewState["live-preview-option-project-index"] == true {
 		rootcss = configs.Delta.IndexBuild
 	}
 

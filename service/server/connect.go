@@ -4,8 +4,9 @@ import (
 	"bufio"
 	"context"
 	"encoding/json"
-	"main/package/watchman"
 	"fmt"
+	"main/package/watchman"
+	"sync"
 
 	"net/http"
 	"os"
@@ -15,20 +16,25 @@ import (
 	"time"
 )
 
-var REFER = struct {
+var Refer = struct {
+	LatestComponent  any
 	Port             int
+	Active           bool
 	Url              string
 	LiveCursor       bool
 	SymclassIndexMap map[string]int
 	WebviewState     map[string]any
 	watcher          *watchman.T_Watcher
+	SimulationMutex  sync.Mutex
 }{
 	Port:             0,
 	Url:              "",
+	Active:           false,
 	LiveCursor:       false,
 	SymclassIndexMap: map[string]int{},
 	WebviewState:     map[string]any{},
 	watcher:          nil,
+	SimulationMutex:  sync.Mutex{},
 }
 
 func Connect(tryport int) {
@@ -38,8 +44,8 @@ func Connect(tryport int) {
 		fmt.Println(0)
 		return
 	}
-	REFER.Port = port
-	REFER.Url = fmt.Sprintf("http://localhost:%d", port)
+	Refer.Port = port
+	Refer.Url = fmt.Sprintf("http://localhost:%d", port)
 	// Start HTTP server in background
 	serverDone := make(chan struct{})
 	go func() {
@@ -56,38 +62,37 @@ func Connect(tryport int) {
 	// Use a buffered chan for manual exit (no panic on double-send)
 	manualExit := make(chan struct{}, 1)
 
-	REFER.watcher, _ = Dryrun(Dryrun_Step_Initialize, true)
-
-	scanner := bufio.NewScanner(os.Stdin)
-	writer := bufio.NewWriter(os.Stdout)
-
 	go func() {
+		scanner := bufio.NewScanner(os.Stdin)
+		writer := bufio.NewWriter(os.Stdout)
+		go Dryrun(Dryrun_Step_Initialize, true)
+
 		for scanner.Scan() {
 			request := strings.TrimSpace(scanner.Text())
 
 			if strings.HasPrefix(request, "$ ") || strings.HasPrefix(request, "> ") {
-
 				split := strings.Fields(request[2:])
-				if len(split) < 1 {
+				if len(split) == 0 {
 					continue
 				}
 				command := split[0]
 				arguments := split[1:]
-
 				res := IO_Term(command, arguments, request[0] == '>')
+
 				if res == "" {
 					continue
-				} else if res == "0" {
-					manualExit <- struct{}{}
 				} else {
 					fmt.Fprintln(writer, res)
+					if res == "0" {
+						manualExit <- struct{}{}
+						break
+					}
 				}
 			} else {
 				var req JsonRPCRequest
 				if err := json.Unmarshal([]byte(request), &req); err != nil {
 					continue
 				}
-
 				fmt.Fprintln(writer, IO_Json(req))
 			}
 
@@ -98,7 +103,6 @@ func Connect(tryport int) {
 			fmt.Fprintln(os.Stderr, "Error reading from stdin:", err)
 		}
 
-		// On stdin close/EOF, trigger shutdown via manualExit as well (safe, non-blocking)
 		select {
 		case manualExit <- struct{}{}:
 		default:

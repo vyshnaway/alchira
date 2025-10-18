@@ -5,7 +5,7 @@ import (
 )
 
 var Path_Folder = map[string]_model.File_Source{
-	"xcaffold": {
+	"blueprint": {
 		Frags:     []string{id},
 		Path:      "",
 		Content:   "",

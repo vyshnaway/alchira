@@ -4,7 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"main/models"
+	"sync"
 )
+
+var M_ComopnentUpdate sync.Mutex
 
 func IO_Json(req JsonRPCRequest) string {
 
@@ -21,61 +24,69 @@ func IO_Json(req JsonRPCRequest) string {
 			filepath_, ok2 := filepath.(string)
 
 			if ok1 && ok2 {
-				manifest := ManifestFile(filepath_)
+				manifest, styledata := ManifestFile(filepath_)
 				resp.Result = manifest
 
 				symclass, ok3 := params_["symclass"]
 				symclass_, ok4 := symclass.(string)
-				if _, k := manifest.Symclasses[symclass_]; ok3 && ok4 && k {
-					go func() {
-						var resp_ JsonRPCResponse
-						resp_.JSONRPC = "2.0"
-						resp_.ID = req.ID
-						resp_.Method = "updateComponent"
-						resp_.Result = Component(symclass_, models.Style_ClassIndexMap{})
-
-						if message, e := json.Marshal(resp_); e == nil {
-							broadcast <- message
-						}
-					}()
-					break;
+				if _, k := styledata.Symclasses[symclass_]; ok3 && ok4 && k {
+					var resp_ JsonRPCResponse
+					resp_.JSONRPC = "2.0"
+					resp_.ID = req.ID
+					resp_.Method = "updateComponent"
+					resp_.Result = Component(symclass_, models.Style_ClassIndexMap{})
+					if message, e := json.Marshal(resp_); e == nil {
+						broadcast <- message
+					}
+					M_ComopnentUpdate.Lock()
+					Refer.LatestComponent = resp_
+					M_ComopnentUpdate.Unlock()
+					break
 				}
 			}
 		}
 		resp.Error = fmt.Errorf("invalid input parameteres")
 
-	case "initState":
-		if m, ok := req.Params.(map[string]any); ok {
-			key, _ := m["key"].(string)
-			value := m["value"]
-			if key != "" {
-				if val, has := REFER.WebviewState[key]; has {
-					value = val
-				} else {
-					REFER.WebviewState[key] = value
-				}
-				resp.Result = map[string]any{"key": key, "value": value}
-				resp.Method = "updateState"
-				b, _ := json.Marshal(resp)
-				broadcast <- b
-				if key == "live-preview-option-live-cursor" {
-					REFER.LiveCursor = value.(bool)
-				}
-			}
+	case "updateComponent":
+		M_ComopnentUpdate.Lock()
+		if Refer.LatestComponent != nil {
+			b, _ := json.Marshal(Refer.LatestComponent)
+			broadcast <- b
 		}
+		M_ComopnentUpdate.Unlock()
 
 	case "setState":
 		if m, ok := req.Params.(map[string]any); ok {
 			key, _ := m["key"].(string)
 			value := m["value"]
 			if key != "" {
-				REFER.WebviewState[key] = value
+				Refer.WebviewState[key] = value
 				resp.Result = map[string]any{"key": key, "value": value}
 				resp.Method = "updateState"
 				b, _ := json.Marshal(resp)
 				broadcast <- b
 				if key == "live-preview-option-live-cursor" {
-					REFER.LiveCursor = value.(bool)
+					Refer.LiveCursor = value.(bool)
+				}
+			}
+		}
+
+	case "getState":
+		if m, ok := req.Params.(map[string]any); ok {
+			key, _ := m["key"].(string)
+			value := m["value"]
+			if key != "" {
+				if val, has := Refer.WebviewState[key]; has {
+					value = val
+				} else {
+					Refer.WebviewState[key] = value
+				}
+				resp.Result = map[string]any{"key": key, "value": value}
+				resp.Method = "updateState"
+				b, _ := json.Marshal(resp)
+				broadcast <- b
+				if key == "live-preview-option-live-cursor" {
+					Refer.LiveCursor = value.(bool)
 				}
 			}
 		}

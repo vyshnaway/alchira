@@ -29,7 +29,7 @@ const (
 	Execute_Step_ReadArtifacts
 	Execute_Step_ReadTargets
 	Execute_Step_ReadHashrule
-	Execute_Step_ProcessXcaffold
+	Execute_Step_ProcessBlueprint
 	Execute_Step_ProcessProxyFolders
 	Execute_Step_GenerateFiles
 	Execute_Step_Publish
@@ -94,8 +94,8 @@ func Execute(heading string) (Exitcode int) {
 			}
 			fallthrough
 
-		case Execute_Step_ProcessXcaffold:
-			Update_Xcaffold()
+		case Execute_Step_ProcessBlueprint:
+			Update_Blueprint()
 			fallthrough
 
 		case Execute_Step_ProcessProxyFolders:
@@ -128,7 +128,7 @@ func Execute(heading string) (Exitcode int) {
 				if watcher == nil {
 					watch_dirs := append(
 						_slice.Collect(_map.Keys(_stash.Cache.Targetdir)),
-						_config.Path_Folder["xcaffold"].Path,
+						_config.Path_Folder["blueprint"].Path,
 					)
 					ignore_dirs := []string{
 						_config.Path_Folder["archive"].Path,
@@ -165,7 +165,7 @@ func Execute(heading string) (Exitcode int) {
 				} else if event := watcher.Pull(); event != nil {
 					filepath := _fileman.Path_Join(event.Folder, event.FilePath)
 
-					if event.Folder == _config.Path_Folder["xcaffold"].Path {
+					if event.Folder == _config.Path_Folder["blueprint"].Path {
 						if event.Action == _watcher.E_Action_Update {
 							switch filepath {
 							case _config.Path_Json["configure"].Path:
@@ -188,7 +188,7 @@ func Execute(heading string) (Exitcode int) {
 									(event.Extension == _config.Root.Extension || event.Extension == "json") {
 									_config.Static.Artifacts_Saved[filepath] = event.FileContent
 								}
-								step = Execute_Step_ProcessXcaffold
+								step = Execute_Step_ProcessBlueprint
 							}
 						} else {
 							step = Execute_Step_VerifySetupStruct

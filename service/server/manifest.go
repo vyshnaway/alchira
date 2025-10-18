@@ -9,42 +9,40 @@ import (
 	"maps"
 	"slices"
 	"strconv"
-	"sync"
 )
 
-type R_Manifest struct {
-	LiveCursor   bool                           `json:"livecursor"`
-	WebviewPort  int                            `json:"webviewport"`
-	WebviewUrl   string                         `json:"webviewurl"`
-	Filepath     string                         `json:"filepath"`
-	Extention    string                         `json:"extention"`
-	AssistFile   bool                           `json:"assistfile"`
-	Environment  string                         `json:"environment"`
-	WatchFiles   []string                       `json:"watchfiles"`
-	Locales      []string                       `json:"locales"`
-	Attributes   []string                       `json:"attributes"`
-	CustomTags   []string                       `json:"customtags"`
-	Assignable   []string                       `json:"assignable"`
-	Symclasses   map[string]int                 `json:"symclasses"`
-	SwitchMap    map[string]string              `json:"switchmap"`
-	Hashrules    map[string]string              `json:"hashrules"`
-	Constants    map[string]string              `json:"constants"`
-	Diagnostics  []models.File_Diagnostic       `json:"diagnostics"`
-	SymclassData map[int]*models.Style_Metadata `json:"symclassData"`
+type R_Manifest_IO struct {
+	WebviewPort int               `json:"webviewport"`
+	WebviewUrl  string            `json:"webviewurl"`
+	Environment string            `json:"environment"`
+	Attributes  []string          `json:"attributes"`
+	CustomTags  []string          `json:"customtags"`
+	SwitchMap   map[string]string `json:"switchmap"`
+	Hashrules   map[string]string `json:"hashrules"`
+	Constants   map[string]string `json:"constants"`
+	AssistFile  bool              `json:"assistfile"`
+	WatchFiles  []string          `json:"watchfiles"`
 }
 
-func ManifestFile(filepath string) R_Manifest {
-	MetadataFromIndex := func(index int) *models.Style_Metadata {
-		return action.Index_Fetch(index).SrcData.Metadata
-	}
+type R_Manifest_WS struct {
+	LiveCursor   bool                          `json:"livecursor"`
+	Locales      []string                      `json:"locales"`
+	Assignable   []string                      `json:"assignable"`
+	Symclasses   map[string]int                `json:"symclasses"`
+	Diagnostics  []models.File_Diagnostic      `json:"diagnostics"`
+	SymclassData map[int]models.Style_Metadata `json:"symclassData"`
+}
 
-	var mu sync.Mutex
-	mu.Lock()
-	defer mu.Unlock()
-	extention := fileman.Path_FileExtention(filepath)
+func ManifestFile(filepath string) (R_Manifest_IO, R_Manifest_WS) {
+	Refer.SimulationMutex.Lock()
+	defer Refer.SimulationMutex.Unlock()
+	MetadataFromIndex := func(index int) models.Style_Metadata {
+		return *action.Index_Fetch(index).SrcData.Metadata
+	}
 
 	attributes := []string{}
 	switchmap := map[string]string{}
+	extention := fileman.Path_FileExtention(filepath)
 	for _, tv := range stash.Cache.Targetdir {
 		switchmap[tv.Source] = tv.Target
 		switchmap[tv.Target] = tv.Source
@@ -68,7 +66,7 @@ func ManifestFile(filepath string) R_Manifest {
 	manifest := configs.Manifest
 	assignable := []string{}
 	_symclasses := []string{}
-	_symclassData := map[string]*models.Style_Metadata{}
+	_symclassData := map[string]models.Style_Metadata{}
 	SymclassIndexMap := map[string]int{}
 	locales := []string{}
 	assistfile := false
@@ -152,33 +150,32 @@ Return:
 	}
 
 	symclasses := map[string]int{}
-	symclassdata := map[int]*models.Style_Metadata{}
+	symclassdata := map[int]models.Style_Metadata{}
 	for i, v := range _symclasses {
 		symclasses[v] = i
 		symclassdata[i] = _symclassData[v]
 	}
 
-	REFER.SymclassIndexMap = SymclassIndexMap
+	Refer.SymclassIndexMap = SymclassIndexMap
 	diagnostics := manifest.Diagnostics
 	hashrules := configs.Style.Hashrules
-	return R_Manifest{
-		WatchFiles:   watchfiles,
-		LiveCursor:   REFER.LiveCursor,
-		Filepath:     filepath,
-		WebviewUrl:   REFER.Url,
-		WebviewPort:  REFER.Port,
-		Attributes:   attributes,
-		Extention:    extention,
-		Constants:    constants,
-		AssistFile:   assistfile,
-		CustomTags:   configs.Static.CustomTags,
-		Environment:  configs.Archive.Environment,
-		Hashrules:    hashrules,
-		SwitchMap:    switchmap,
-		Assignable:   assignable,
-		Symclasses:   symclasses,
-		SymclassData: symclassdata,
-		Locales:      locales,
-		Diagnostics:  diagnostics,
-	}
+	return R_Manifest_IO{
+			WebviewUrl:  Refer.Url,
+			WebviewPort: Refer.Port,
+			Attributes:  attributes,
+			Constants:   constants,
+			CustomTags:  configs.Static.CustomTags,
+			Environment: configs.Archive.Environment,
+			Hashrules:   hashrules,
+			SwitchMap:   switchmap,
+			WatchFiles:  watchfiles,
+			AssistFile:  assistfile,
+		}, R_Manifest_WS{
+			LiveCursor:   Refer.LiveCursor,
+			Assignable:   assignable,
+			Symclasses:   symclasses,
+			SymclassData: symclassdata,
+			Locales:      locales,
+			Diagnostics:  diagnostics,
+		}
 }
