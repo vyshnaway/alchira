@@ -98,7 +98,7 @@ func Cssfile_Collection(files []*_model.File_Stash) cssfile_Collection_return {
 					Definent:             selector,
 					SymClass:             classname,
 					Metadata:             &metadata,
-					StyleObject:          object,
+					NativeStyle:          object,
 					Attachments:          attachments,
 					DebugClass:           file.DebugFront + "_" + _util.String_Filter(classname, []rune{}, []rune{}, []rune{'$', '/'}),
 					XcaffoldDeclarations: []string{declaration},

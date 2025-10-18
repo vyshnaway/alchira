@@ -141,7 +141,7 @@ func Rawtag_Upload(
 				Artifact:             artifact,
 				Definent:             raw.SymClasses[0],
 				SymClass:             symclass,
-				StyleObject:          object,
+				NativeStyle:          object,
 				Metadata:             &metadata,
 				Attachments:          attachments,
 				DebugClass:           debugclass,

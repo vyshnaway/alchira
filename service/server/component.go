@@ -21,26 +21,27 @@ type T_Component_return struct {
 func Component(symclass string, context models.Style_ClassIndexMap) T_Component_return {
 	summon := ""
 	attributes := map[string]string{}
-	var staple, stylesymclass, styleattach strings.Builder
+	var staple, nativestyle, attachstyle strings.Builder
 
 	if r := action.Index_Find(symclass, context); r.Index > 0 {
 		artifact := target.Artifact(r.Index)
-		if artifact.Element == "summon" {
-			attributes = artifact.Attributes
-			summon = strings.ReplaceAll(r.Data.SrcData.Metadata.SummonSnippet, symclass, "_")
-			staple.WriteString(r.Data.SrcData.StapleSnippet)
-			styleattach.WriteString(css.Render_Vendored(r.Data.SrcData.StyleSnippet.Flatten(), true))
-			stylesymclass.WriteString(css.Render_Vendored(r.Data.SrcData.StyleSnippet.Flatten(), true))
+		attributes = artifact.Attributes
+		summon = r.Data.SrcData.Metadata.SummonSnippet
+		staple.WriteString(r.Data.SrcData.StapleSnippet)
 
-			for _, attachment := range r.Data.SrcData.Attachments {
-				if found := action.Index_Find(attachment, context); found.Index > 0 {
-					styleattach.WriteString(css.Render_Vendored(found.Data.SrcData.StyleObject.Flatten(), true))
-					staple.WriteString(found.Data.SrcData.StapleSnippet)
-				}
+		block := css.NewBlock()
+		block.SetBlock("._", r.Data.SrcData.NativeStyle)
+		nativestyle.WriteString(css.Render_Switched(block, true))
+		attachstyle.WriteString(css.Render_Vendored(r.Data.SrcData.StyleSnippet, true))
+
+		for _, attachment := range r.Data.SrcData.Attachments {
+			if found := action.Index_Find(attachment, context); found.Index > 0 {
+				attachstyle.WriteString(css.Render_Vendored(found.Data.SrcData.NativeStyle, true))
+				staple.WriteString(found.Data.SrcData.StapleSnippet)
 			}
 		}
 	}
-	
+
 	rootcss := ""
 	if REFER.WebviewState["live-preview-option-project-index"] == true {
 		rootcss = configs.Delta.IndexBuild
@@ -52,6 +53,6 @@ func Component(symclass string, context models.Style_ClassIndexMap) T_Component_
 		Staple:     staple.String(),
 		Symclass:   symclass,
 		Rootcss:    rootcss,
-		Compcss:    stylesymclass.String() + styleattach.String(),
+		Compcss:    nativestyle.String() + attachstyle.String(),
 	}
 }

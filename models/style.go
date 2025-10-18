@@ -44,7 +44,7 @@ type Style_ClassData struct {
 	DebugClass           string
 	Attachments          []string
 	XcaffoldDeclarations []string
-	StyleObject          *css.T_Block
+	NativeStyle          *css.T_Block
 	StapleSnippet        string
 	StyleSnippet         *css.T_Block
 }

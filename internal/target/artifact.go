@@ -42,7 +42,7 @@ func Artifact(index int) _types_.Style_ExportStyle {
 			}
 		}
 
-		style.SrcData.StyleObject.BlockRange(func(k string, v *_css.T_Block) {
+		style.SrcData.NativeStyle.BlockRange(func(k string, v *_css.T_Block) {
 			stylesheet[k] = v.Format(true)
 		})
 

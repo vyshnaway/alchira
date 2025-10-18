@@ -74,7 +74,7 @@ func Generate_Files() (Files map[string]string, Report string) {
 				val: _css.Render_Switched(func() *_css.T_Block {
 					result := _css.NewBlock()
 					for _, i := range _config.Style.PublishIndexMap {
-						result.SetBlock(i.ClassName, _action.Index_Fetch(i.ClassIndex).SrcData.StyleObject)
+						result.SetBlock(i.ClassName, _action.Index_Fetch(i.ClassIndex).SrcData.NativeStyle)
 					}
 					return result
 				}(), _config.Static.MINIFY),
