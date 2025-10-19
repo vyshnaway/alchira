@@ -57,6 +57,7 @@ func (This *T_Watcher) Start(interval, maxevents int) error {
 					return
 				}
 				var act E_Action
+
 				switch event.Op {
 
 				case _watcher.Create:
@@ -75,11 +76,13 @@ func (This *T_Watcher) Start(interval, maxevents int) error {
 				default:
 					act = E_Action_Access
 				}
-				This.HandleEvent(act, event.Name(), "")
+				This.HandleEvent(act, event.Path, "")
+
 			case err, ok := <-This.hook.Error:
 				if ok {
 					_fmt.Fprintf(_os.Stderr, "Watcher error: %v\r\n", err)
 				}
+
 			case <-done:
 				return
 			}

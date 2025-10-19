@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"main/package/watchman"
-	"sync"
+	"main/service/compiler"
 
 	"net/http"
 	"os"
@@ -25,7 +25,6 @@ var Refer = struct {
 	SymclassIndexMap map[string]int
 	WebviewState     map[string]any
 	watcher          *watchman.T_Watcher
-	SimulationMutex  sync.Mutex
 }{
 	Port:             0,
 	Url:              "",
@@ -34,7 +33,6 @@ var Refer = struct {
 	SymclassIndexMap: map[string]int{},
 	WebviewState:     map[string]any{},
 	watcher:          nil,
-	SimulationMutex:  sync.Mutex{},
 }
 
 func Connect(tryport int) {
@@ -72,11 +70,11 @@ func Connect(tryport int) {
 			}
 		}()
 
-		go Dryrun(Dryrun_Step_Initialize, true)
+		go compiler.Execute("")
 
 		for scanner.Scan() {
 			request := strings.TrimSpace(scanner.Text())
-			
+
 			if strings.HasPrefix(request, "$ ") || strings.HasPrefix(request, "> ") {
 				split := strings.Fields(request[2:])
 				if len(split) < 1 {
@@ -85,7 +83,7 @@ func Connect(tryport int) {
 				command := split[0]
 				arguments := split[1:]
 				res := IO_Term(command, arguments, request[0] == '>')
-				
+
 				if res == "" {
 					continue
 				} else {

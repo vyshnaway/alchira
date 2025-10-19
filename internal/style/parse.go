@@ -3,6 +3,7 @@ package style
 import (
 	_config "main/configs"
 	_action "main/internal/action"
+	"main/package/console"
 	_css "main/package/css"
 	O "main/package/object"
 	_util "main/package/utils"
@@ -87,11 +88,13 @@ func Parse_Filter(content string) R_Parse_Filter {
 	for _, val := range ref.Operations {
 		breaks := _util.String_ZeroBreaks(val, []rune{' ', '\n', ','})
 		if len(breaks) > 0 {
-			if breaks[0] == attach_operator {
+			switch breaks[0] {
+			case attach_operator:
 				res.Attach = append(res.Attach, breaks[1:]...)
-			} else if (breaks[0]) == assign_operator {
+			case assign_operator:
 				res.Assign = append(res.Assign, breaks[1:]...)
 			}
+			console.Render.Raw(res)
 		}
 	}
 

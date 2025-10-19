@@ -40,6 +40,7 @@ type T_Watcher struct {
 
 // If content == "", file content is refetched from path as fallback
 func (This *T_Watcher) HandleEvent(action E_Action, filePath string, content string) {
+
 	event := Event{}
 	now := time.Now()
 	event.TimeStamp = now.Format("15:04:05")

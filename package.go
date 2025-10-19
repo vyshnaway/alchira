@@ -32,11 +32,11 @@ func main() {
 	}
 
 	argone := ""
-	arguments := []string{}
+	// arguments := []string{}
 	if _slice.Contains(exposedCommands, command) {
 		if len(_os.Args) > 2 {
 			argone = _os.Args[2]
-			arguments = _os.Args[2:]
+			// arguments = _os.Args[2:]
 		}
 	} else {
 		command = ""
@@ -75,7 +75,8 @@ func main() {
 	_config.Static.Argument = argone
 	_config.Static.DEBUG = command == "debug"
 	_config.Static.MINIFY = !_config.Static.DEBUG
-	_config.Static.WATCH = (command == "debug" || command == "preview") && argone == "-w"
+	_config.Static.DRYRUN = command == "server"
+	_config.Static.WATCH = ((command == "debug" || command == "preview") && argone == "-w") || command == "server"
 	_config.Static.ProjectName = _util.String_Filter(projectname, []rune{}, []rune{}, []rune{})
 	_config.Static.ProjectVersion = projectversion
 
@@ -139,18 +140,6 @@ func main() {
 				port = val
 			}
 			_server.Connect(port)
-		}
-	case "manifest":
-		{
-			res := map[string]_server.R_Manifest_IO {}
-			if ok := _server.Dryrun(_server.Dryrun_Step_Initialize, false); ok {
-				for _, path := range arguments {
-					if r, _ := _server.ManifestFile(path); r.AssistFile {
-						res[path] = r
-					}
-				}
-			}
-			S.Post(_util.Code_JsonBuild(res, ""))
 		}
 	case "install":
 		{

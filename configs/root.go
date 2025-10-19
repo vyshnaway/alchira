@@ -29,7 +29,6 @@ var Root = _model.Cache_Root{
 		"preview":  "Test build. Pass test for \"publish\" command.",
 		"publish":  "Optimized build, uses web-api.",
 		"install":  "Install external artifacts.",
-		"manifest": "Generate JSON manifest from file path arguments.",
 	},
 	Tweaks: _model.Config_Tweaks{
 		"CacheUsage": false,

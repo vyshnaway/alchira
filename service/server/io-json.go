@@ -4,6 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"main/models"
+	// "main/package/fileman"
+	// "main/package/watchman"
+	// "main/service/compiler"
 	"sync"
 )
 
@@ -23,6 +26,14 @@ func IO_Json(req JsonRPCRequest) string {
 			filepath_, ok2 := filepath.(string)
 
 			if ok1 && ok2 {
+				// abspath, err := fileman.Path_Resolves(filepath_)
+				// content, ok5 := params_["content"]
+				// content_, ok6 := content.(string)
+				// if ok5 && ok6 && err == nil {
+				// 	compiler.WATCHER.HandleEvent(watchman.E_Action_Update, abspath, content_)
+				// 	fmt.Println("evened")
+				// }
+
 				fileManifest, styleManifest := ManifestFile(filepath_)
 				resp.Result = fileManifest
 

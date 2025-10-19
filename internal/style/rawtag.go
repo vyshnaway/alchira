@@ -6,6 +6,7 @@ import (
 	_action "main/internal/action"
 	_script "main/internal/script"
 	_model "main/models"
+	"main/package/console"
 	"main/package/css"
 	_util "main/package/utils"
 	_regexp "regexp"
