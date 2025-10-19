@@ -60,8 +60,6 @@ func Archive_Reset() {
 }
 
 var Delta = _model.Cache_Delta{
-	Path:         "",
-	Content:      "",
 	FinalMessage: "",
 	PublishError: "",
 	IndexBuild:   "",

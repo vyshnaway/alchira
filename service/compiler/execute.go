@@ -6,6 +6,7 @@ import (
 	X "main/internal/console"
 	_stash "main/internal/stash"
 	S "main/package/console"
+	"main/package/fileman"
 	_fileman "main/package/fileman"
 	_watcher "main/package/watchman"
 	_map "maps"
@@ -30,9 +31,8 @@ const (
 	Execute_Step_ReadTargets
 	Execute_Step_ReadHashrule
 	Execute_Step_ProcessBlueprint
-	Execute_Step_ProcessProxyFolders
+	Execute_Step_UpdateCache
 	Execute_Step_GenerateFiles
-	Execute_Step_Publish
 	Execute_Step_LoopAround
 )
 
@@ -103,25 +103,17 @@ func Execute(heading string) (Exitcode int) {
 		case Execute_Step_ProcessBlueprint:
 			fallthrough
 
-		case Execute_Step_ProcessProxyFolders:
-
-			Update_Blueprint()
-
-			Build_Targets()
+		case Execute_Step_UpdateCache:
+			Update_Cache()
 			if _config.Static.DRYRUN {
 				Accumulate()
 			}
-
 			fallthrough
 
 		case Execute_Step_GenerateFiles:
 			if !_config.Static.DRYRUN {
 				outfiles, report = Generate_Files()
-			}
-			fallthrough
 
-		case Execute_Step_Publish:
-			if !_config.Static.DRYRUN {
 				if len(outfiles) > 0 {
 					save_action.Wait()
 					save_action.Add(1)
@@ -186,22 +178,22 @@ func Execute(heading string) (Exitcode int) {
 
 					if event.Folder == _config.Path_Folder["blueprint"].Path {
 						if event.Action == _watcher.E_Action_Update {
+
 							switch filepath {
 							case _config.Path_Json["configure"].Path:
 								WATCHER.Close()
 								WATCHER = nil
 								step = Execute_Step_VerifyConfigs
 
+							case _config.Path_Json["hashrule"].Path:
+								step = Execute_Step_ReadHashrule
+
 							case _config.Path_Css["atrules"].Path:
 							case _config.Path_Css["constants"].Path:
 							case _config.Path_Css["elements"].Path:
-
 							case _config.Path_Css["extends"].Path:
 								_action.Save_RootCss()
 								step = Execute_Step_ProcessBlueprint
-
-							case _config.Path_Json["hashrule"].Path:
-								step = Execute_Step_ReadHashrule
 
 							default:
 								if _fileman.Path_IsSubpath(_config.Path_Folder["libraries"].Path, filepath) &&
@@ -213,14 +205,25 @@ func Execute(heading string) (Exitcode int) {
 								}
 								step = Execute_Step_ProcessBlueprint
 							}
+
 						} else {
 							step = Execute_Step_VerifySetupStruct
 						}
-					} else if event.Action == _watcher.E_Action_Update || event.Action == _watcher.E_Action_Refactor {
-						Update_Target(*event)
-						step = Execute_Step_GenerateFiles
+					} else if event.Action == _watcher.E_Action_Update {
+						step = Execute_Step_UpdateCache
+						if target, ok := _config.Static.TargetDir_Saved[event.Folder]; ok && target.Stylesheet == event.FilePath {
+							target.StylesheetContent = event.FileContent
+							_config.Static.TargetDir_Saved[event.Folder] = target
+						} else if _, ok := target.Extensions[event.Extension]; ok {
+							target.Filepath_to_Content[event.FilePath] = event.FileContent
+							_config.Static.TargetDir_Saved[event.Folder] = target
+						} else {
+							outpath := _fileman.Path_Join(target.Source, event.FilePath)
+							fileman.Write_File(outpath, event.FileContent)
+							step = Execute_Step_LoopAround
+						}
 					} else {
-						step = Execute_Step_VerifyConfigs
+						step = Execute_Step_ReadTargets
 					}
 
 					heading = event.TimeStamp + " | " + event.FilePath
@@ -232,10 +235,10 @@ func Execute(heading string) (Exitcode int) {
 		}
 
 		ExecuteMutex.Unlock()
-		if !_config.Static.WATCH {
-			break
-		} else {
+		if _config.Static.WATCH {
 			_time.Sleep(interval * _time.Millisecond)
+		} else {
+			break
 		}
 	}
 
