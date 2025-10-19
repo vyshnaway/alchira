@@ -101,14 +101,17 @@ func Execute(heading string) (Exitcode int) {
 			fallthrough
 
 		case Execute_Step_ProcessBlueprint:
-			Update_Blueprint()
 			fallthrough
 
 		case Execute_Step_ProcessProxyFolders:
+
+			Update_Blueprint()
+
 			Build_Targets()
 			if _config.Static.DRYRUN {
 				Accumulate()
 			}
+
 			fallthrough
 
 		case Execute_Step_GenerateFiles:
@@ -188,19 +191,23 @@ func Execute(heading string) (Exitcode int) {
 								WATCHER.Close()
 								WATCHER = nil
 								step = Execute_Step_VerifyConfigs
+
 							case _config.Path_Css["atrules"].Path:
 							case _config.Path_Css["constants"].Path:
 							case _config.Path_Css["elements"].Path:
+
 							case _config.Path_Css["extends"].Path:
 								_action.Save_RootCss()
-								step = Execute_Step_GenerateFiles
+								step = Execute_Step_ProcessBlueprint
+
 							case _config.Path_Json["hashrule"].Path:
 								step = Execute_Step_ReadHashrule
+
 							default:
-								if _fileman.Path_IsSubpath(event.FilePath, _config.Path_Folder["libraries"].Path) &&
+								if _fileman.Path_IsSubpath(_config.Path_Folder["libraries"].Path, filepath) &&
 									event.Extension == "css" {
 									_config.Static.Libraries_Saved[filepath] = event.FileContent
-								} else if _fileman.Path_IsSubpath(filepath, _config.Path_Folder["artifacts"].Path) &&
+								} else if _fileman.Path_IsSubpath(_config.Path_Folder["artifacts"].Path, filepath) &&
 									(event.Extension == _config.Root.Extension || event.Extension == "json") {
 									_config.Static.Artifacts_Saved[filepath] = event.FileContent
 								}
@@ -221,9 +228,9 @@ func Execute(heading string) (Exitcode int) {
 				}
 
 			}
-			
+
 		}
-		
+
 		ExecuteMutex.Unlock()
 		if !_config.Static.WATCH {
 			break

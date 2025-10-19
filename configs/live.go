@@ -106,8 +106,8 @@ var Delta = _model.Cache_Delta{
 
 func Delta_Reset() {
 	Delta = _model.Cache_Delta{
-		Path:         "",
-		Content:      "",
+		// Path:         "",
+		// Content:      "",
 		FinalMessage: "",
 		PublishError: "",
 		IndexBuild:   "",

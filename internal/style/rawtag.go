@@ -6,8 +6,7 @@ import (
 	_action "main/internal/action"
 	_script "main/internal/script"
 	_model "main/models"
-	"main/package/console"
-	"main/package/css"
+	_css "main/package/css"
 	_util "main/package/utils"
 	_regexp "regexp"
 	_strconv "strconv"
@@ -136,7 +135,7 @@ func Rawtag_Upload(
 			SummonSnippet: summon,
 		}
 
-		stylesnippet := css.NewBlock()
+		stylesnippet := _css.NewBlock()
 		if ok, val := inner_style.Result.GetBlock("[]"); ok {
 			stylesnippet = val
 		}
