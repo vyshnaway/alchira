@@ -41,7 +41,7 @@ func Path_FromRoot(elem ...string) (string, error) {
 
 // Resolves returns the absolute path of the given path string.
 func Path_Resolves(pathString string) (string, error) {
-	return _filepath.Abs(pathString)
+	return _filepath.Abs(_filepath.Clean(pathString))
 }
 
 // Resolves returns the absolute path of the given path string.
@@ -101,14 +101,12 @@ func Path_IfFile(pathString string) bool {
 }
 
 // isSubpath returns true if child is a subdirectory of parent, not counting equality.
-func Path_IsSubpath(parent, child string) bool {
-	parent = _filepath.Clean(parent)
-	child = _filepath.Clean(child)
-	if len(child) <= len(parent) {
-		return false
-	}
-	// Ensure there's a path separator after the parent
-	return _strings.HasPrefix(child, parent+string(_filepath.Separator))
+func Path_HasChildPath(parent, child string) bool {
+	parent, _ = Path_Resolves(parent)
+	child, _ = Path_Resolves(child)
+	parent = parent + string(_filepath.Separator)
+	// If rel starts with "..", it's outside the parent.
+	return _strings.HasPrefix(child,parent)
 }
 
 // Path_IsIndependent checks if two folders are independent (neither is inside the other).
@@ -129,7 +127,7 @@ func Path_IsIndependent(folder1, folder2 string) (bool, error) {
 		return false, nil
 	}
 	// If one is a prefix path of the other (with path separator), not independent.
-	if Path_IsSubpath(abs1, abs2) || Path_IsSubpath(abs2, abs1) {
+	if Path_HasChildPath(abs1, abs2) || Path_HasChildPath(abs2, abs1) {
 		return false, nil
 	}
 	// Otherwise, independent.

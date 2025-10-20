@@ -152,7 +152,6 @@ func Rawtag_Upload(
 				Metadata:              &metadata,
 				Attachments:           attachments,
 				DebugClass:            debugclass,
-				BlueprintDeclarations: []string{declaration},
 				StapleSnippet:         staple,
 				StyleSnippet:          stylesnippet,
 			},

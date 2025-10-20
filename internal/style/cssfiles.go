@@ -101,7 +101,6 @@ func Cssfile_Collection(files []*_model.File_Stash) cssfile_Collection_return {
 					NativeStyle:           object,
 					Attachments:           attachments,
 					DebugClass:            file.DebugFront + "_" + _util.String_Filter(classname, []rune{}, []rune{}, []rune{'$', '/'}),
-					BlueprintDeclarations: []string{declaration},
 					StapleSnippet:         "",
 					StyleSnippet: func() *_css.T_Block {
 						if o, v := object.GetBlock("[]"); o {

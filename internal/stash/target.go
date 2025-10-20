@@ -14,9 +14,7 @@ import (
 )
 
 func Target_UpdateDirs() {
-	Library_ReDeclare()
-	Aritfact_ReDeclare()
-
+	
 	for key, data := range Cache.Targetdir {
 		data.ClearFiles()
 		delete(Cache.Targetdir, key)

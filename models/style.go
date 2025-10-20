@@ -43,7 +43,6 @@ type Style_ClassData struct {
 	SymClass              string
 	DebugClass            string
 	Attachments           []string
-	BlueprintDeclarations []string
 	NativeStyle           *css.T_Block
 	StapleSnippet         string
 	StyleSnippet          *css.T_Block

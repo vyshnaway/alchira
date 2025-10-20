@@ -6,13 +6,13 @@ import (
 	X "main/internal/console"
 	_stash "main/internal/stash"
 	S "main/package/console"
-	"main/package/fileman"
 	_fileman "main/package/fileman"
 	_watcher "main/package/watchman"
 	_map "maps"
 	_os "os"
 	_signal "os/signal"
 	_slice "slices"
+	"strconv"
 	_sync "sync"
 	_syscall "syscall"
 	_time "time"
@@ -30,7 +30,6 @@ const (
 	Execute_Step_ReadArtifacts
 	Execute_Step_ReadTargets
 	Execute_Step_ReadHashrule
-	Execute_Step_ProcessBlueprint
 	Execute_Step_UpdateCache
 	Execute_Step_GenerateFiles
 	Execute_Step_LoopAround
@@ -100,9 +99,6 @@ func Execute(heading string) (Exitcode int) {
 			}
 			fallthrough
 
-		case Execute_Step_ProcessBlueprint:
-			fallthrough
-
 		case Execute_Step_UpdateCache:
 			Update_Cache()
 			if _config.Static.DRYRUN {
@@ -123,7 +119,7 @@ func Execute(heading string) (Exitcode int) {
 					}()
 				}
 				if report_next {
-					X.Report(heading, []string{}, report, []string{})
+					// X.Report(heading, []string{}, report, []string{})
 					report_next = false
 				}
 			}
@@ -169,64 +165,82 @@ func Execute(heading string) (Exitcode int) {
 					}
 				}
 
-				if WATCHER.Length() > 12 {
-					WATCHER.Reset()
-					WATCHER = nil
-					step = Execute_Step_Initialize
-				} else if event := WATCHER.Pull(); event != nil {
-					filepath := _fileman.Path_Join(event.Folder, event.FilePath)
+				if events := WATCHER.DeBuf(); len(events) > 0 {
+					heading = ""
+					steppings := []Execute_Step_enum{}
+					for _, event := range events {
+						filepath := _fileman.Path_Join(event.Folder, event.FilePath)
+						breaknow := false
 
-					if event.Folder == _config.Path_Folder["blueprint"].Path {
-						if event.Action == _watcher.E_Action_Update {
+						if event.Folder == _config.Path_Folder["blueprint"].Path {
+							if event.Action == _watcher.E_Action_Update {
 
-							switch filepath {
-							case _config.Path_Json["configure"].Path:
-								WATCHER.Close()
-								WATCHER = nil
-								step = Execute_Step_VerifyConfigs
+								switch filepath {
+								case _config.Path_Json["configure"].Path:
+									WATCHER.Close()
+									WATCHER = nil
+									steppings = append(steppings, Execute_Step_VerifyConfigs)
+									breaknow = true
 
-							case _config.Path_Json["hashrule"].Path:
-								step = Execute_Step_ReadHashrule
+								case _config.Path_Json["hashrule"].Path:
+									steppings = append(steppings, Execute_Step_ReadHashrule)
+									breaknow = true
 
-							case _config.Path_Css["atrules"].Path:
-							case _config.Path_Css["constants"].Path:
-							case _config.Path_Css["elements"].Path:
-							case _config.Path_Css["extends"].Path:
-								_action.Save_RootCss()
-								step = Execute_Step_ProcessBlueprint
+								case _config.Path_Css["atrules"].Path:
+									fallthrough
+								case _config.Path_Css["constants"].Path:
+									fallthrough
+								case _config.Path_Css["elements"].Path:
+									fallthrough
+								case _config.Path_Css["extends"].Path:
+									_action.Save_RootCss()
+									steppings = append(steppings, Execute_Step_UpdateCache)
 
-							default:
-								if _fileman.Path_IsSubpath(_config.Path_Folder["libraries"].Path, filepath) &&
-									event.Extension == "css" {
-									_config.Static.Libraries_Saved[filepath] = event.FileContent
-								} else if _fileman.Path_IsSubpath(_config.Path_Folder["artifacts"].Path, filepath) &&
-									(event.Extension == _config.Root.Extension || event.Extension == "json") {
-									_config.Static.Artifacts_Saved[filepath] = event.FileContent
+								default:
+									if _fileman.Path_HasChildPath(_config.Path_Folder["libraries"].Path, filepath) &&
+										event.Extension == "css" {
+										_config.Static.Libraries_Saved[filepath] = event.FileContent
+									} else if _fileman.Path_HasChildPath(_config.Path_Folder["artifacts"].Path, filepath) &&
+										(event.Extension == _config.Root.Extension || event.Extension == "json") {
+										_config.Static.Artifacts_Saved[filepath] = event.FileContent
+									}
+									steppings = append(steppings, Execute_Step_UpdateCache)
 								}
-								step = Execute_Step_ProcessBlueprint
-							}
 
+							} else {
+								steppings = append(steppings, Execute_Step_VerifySetupStruct)
+								breaknow = true
+							}
+						} else if event.Action == _watcher.E_Action_Update {
+							step = Execute_Step_UpdateCache
+							if target, ok := _config.Static.TargetDir_Saved[event.Folder]; ok && target.Stylesheet == event.FilePath {
+								target.StylesheetContent = event.FileContent
+								_config.Static.TargetDir_Saved[event.Folder] = target
+								steppings = append(steppings, Execute_Step_UpdateCache)
+							} else if _, ok := target.Extensions[event.Extension]; ok {
+								target.Filepath_to_Content[event.FilePath] = event.FileContent
+								_config.Static.TargetDir_Saved[event.Folder] = target
+								steppings = append(steppings, Execute_Step_UpdateCache)
+							} else {
+								outpath := _fileman.Path_Join(target.Source, event.FilePath)
+								go _fileman.Write_File(outpath, event.FileContent)
+								steppings = append(steppings, Execute_Step_LoopAround)
+							}
 						} else {
-							step = Execute_Step_VerifySetupStruct
+							steppings = append(steppings, Execute_Step_ReadTargets)
 						}
-					} else if event.Action == _watcher.E_Action_Update {
-						step = Execute_Step_UpdateCache
-						if target, ok := _config.Static.TargetDir_Saved[event.Folder]; ok && target.Stylesheet == event.FilePath {
-							target.StylesheetContent = event.FileContent
-							_config.Static.TargetDir_Saved[event.Folder] = target
-						} else if _, ok := target.Extensions[event.Extension]; ok {
-							target.Filepath_to_Content[event.FilePath] = event.FileContent
-							_config.Static.TargetDir_Saved[event.Folder] = target
-						} else {
-							outpath := _fileman.Path_Join(target.Source, event.FilePath)
-							fileman.Write_File(outpath, event.FileContent)
-							step = Execute_Step_LoopAround
+						heading = event.TimeStamp + " | " + strconv.Itoa(len(events)) + " files changed."
+
+						if breaknow {
+							break
 						}
-					} else {
-						step = Execute_Step_ReadTargets
 					}
 
-					heading = event.TimeStamp + " | " + event.FilePath
+					for _, i := range steppings {
+						if i < step {
+							i = step
+						}
+					}
 					report_next = true
 				}
 

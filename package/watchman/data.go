@@ -3,7 +3,6 @@ package watchman
 import (
 	_fileman "main/package/fileman"
 	_filepath "path/filepath"
-	"strings"
 	_sync "sync"
 	"time"
 
@@ -43,25 +42,22 @@ func (This *T_Watcher) HandleEvent(action E_Action, filePath string, content str
 
 	event := Event{}
 	now := time.Now()
-	event.TimeStamp = now.Format("15:04:05")
 	event.Action = action
-
-	var folder = ""
-	for _, f := range This.resolvedFolders {
-		if strings.HasPrefix(filePath, f) {
-			folder = This.folderMaps[f]
-			break
-		}
-	}
-	if folder == "" {
-		return
-	}
-
-	event.Folder = folder
-	event.FilePath, _ = _filepath.Rel(folder, filePath)
 	event.Extension = _filepath.Ext(filePath)
 	if len(event.Extension) > 0 {
 		event.Extension = event.Extension[1:]
+	}
+
+	for _, parant := range This.resolvedFolders {
+		if _fileman.Path_HasChildPath(parant, filePath) {
+			event.Folder = This.folderMaps[parant]
+			event.FilePath = filePath[len(parant)+1:]
+			event.TimeStamp = now.Format("15:04:05")
+			break
+		}
+	}
+	if event.Folder == "" {
+		return
 	}
 
 	if action == E_Action_Update {
@@ -89,6 +85,17 @@ func (This *T_Watcher) Pull() *Event {
 	evt := This.queue[0]
 	This.queue = This.queue[1:]
 	return &evt
+}
+
+func (This *T_Watcher) DeBuf() []Event {
+	This.mutex.Lock()
+	defer This.mutex.Unlock()
+	if len(This.queue) == 0 {
+		return nil
+	}
+	evts := This.queue
+	This.queue = []Event{}
+	return evts
 }
 
 func (This *T_Watcher) Reset() {

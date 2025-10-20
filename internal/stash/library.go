@@ -141,10 +141,3 @@ func Library_Update() {
 	}
 	_config.Delta.Report.Clusters = X.List_Chart("Cluster: "+_strconv.Itoa(cluster_counter)+" Symclasses", cluster_chart)
 }
-
-func Library_ReDeclare() {
-	for _, i := range _config.Style.Library__Index {
-		data := _action.Index_Fetch(i)
-		copy(data.SrcData.Metadata.Declarations, data.SrcData.BlueprintDeclarations)
-	}
-}
