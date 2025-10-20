@@ -9,6 +9,8 @@ const (
 	domain = "xcss.io"
 )
 
+var locale_rune = '-'
+
 var Root = _model.Cache_Root{
 	Name:      id,
 	Version:   "0.0.0",
@@ -37,11 +39,12 @@ var Root = _model.Cache_Root{
 		"style":  1,
 		"staple": 2,
 		"summon": 3,
+		string(locale_rune): 4,
 	},
 	CustomOperations: map[string]rune{
 		"attach": '~',
 		"assign": '=',
-		"locale": '-',
+		"locale": locale_rune,
 	},
 	CustomAtrules: map[string]string{
 		"attach": "@--attach",

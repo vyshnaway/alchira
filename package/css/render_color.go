@@ -72,7 +72,7 @@ func color_Investigate(cursor *_Cursor_.Type, palette string) []float64 {
 
 		if deviance == 0 && ch == ')' {
 			break
-		} else if awaitBrace == ch {
+		} else if awaitBrace != 0 && awaitBrace == ch {
 			braceTrack = braceTrack[:len(braceTrack)-2]
 			deviance = len(braceTrack)
 			awaitBrace = _utils_.Refer.BracePair[braceTrack[deviance-1]]

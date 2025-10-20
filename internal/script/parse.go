@@ -90,7 +90,7 @@ func Rider(
 			tagStart := cursor.Active.Marker
 			result := Tag_Scanner(fileData, classProps, action, &cursor)
 			fragment := string(cursor.Runes[tagStart:result.StyleDeclarations.EndMarker])
-			hasDeclared := len(result.StyleDeclarations.Styles) > 0 || len(result.StyleDeclarations.SymClasses) > 0
+			hasDeclared := (len(result.StyleDeclarations.Styles) > 0 || len(result.StyleDeclarations.SymClasses) > 0)
 
 			if result.Ok {
 				classesList = append(classesList, result.ClassesList...)
@@ -115,7 +115,8 @@ func Rider(
 					}
 				}
 
-				if _, status := replacementTags[fragment]; (!status && result.ClassSynced) || (action == E_Action_Read && hasDeclared) {
+				if _, status := replacementTags[fragment]; (!status && result.ClassSynced) ||
+					(action == E_Action_Read && hasDeclared) {
 					if result.StyleDeclarations.Elid == 0 {
 						var strbuild _string.Builder
 						strbuild.WriteRune('<')

@@ -45,7 +45,7 @@ func ParsePartial(content string) R_Parse {
 		if ch == '\\' {
 			cursor.Increment()
 			continue
-		} else if awaitBrace == ch {
+		} else if awaitBrace != 0 && awaitBrace == ch {
 			deviance = len(braceTrack) - 1
 			braceTrack = braceTrack[:deviance]
 			if deviance > 0 {

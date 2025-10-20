@@ -70,7 +70,7 @@ func Tag_Scanner(
 				cursor.SaveFallback()
 			}
 
-			if awaitClosure == ch {
+			if awaitClosure != 0 && awaitClosure == ch {
 				deviance = len(braceTrack) - 1
 				braceTrack = braceTrack[:deviance]
 				if deviance > 0 {
@@ -99,57 +99,59 @@ func Tag_Scanner(
 					}
 					styleDeclarations.Element = tr_Attr
 					styleDeclarations.Elvalue = tr_Value
-				} else if tr_Attr == "&" {
-					if len(tr_Value) > 3 {
-						for _, line := range _string.Split(tr_Value[1:len(tr_Value)-2], "\r\n") {
-							commentTrimmed := _string.Trim(line, "\t ")
-							if len(commentTrimmed) > 0 {
-								styleDeclarations.Comments = append(styleDeclarations.Comments, commentTrimmed)
+				} else if styleDeclarations.Element[0] != '!' {
+					if tr_Attr == "&" {
+						if len(tr_Value) > 3 {
+							for _, line := range _string.Split(tr_Value[1:len(tr_Value)-2], "\r\n") {
+								commentTrimmed := _string.Trim(line, "\t ")
+								if len(commentTrimmed) > 0 {
+									styleDeclarations.Comments = append(styleDeclarations.Comments, commentTrimmed)
+								}
 							}
 						}
-					}
-				} else if symclass_regex.MatchString(tr_Attr) {
-					if len(styleDeclarations.SymClasses) == 0 {
-						if _string.Contains(tr_Attr, "$$$$") {
-							styleDeclarations.Scope = _model.Style_Type_Null
-						} else if fileData.Manifest.Lookup.Type == _model.File_Type_Artifact {
-							styleDeclarations.Scope = _model.Style_Type_Artifact
-						} else if _string.Contains(tr_Attr, "$$$") {
-							styleDeclarations.Scope = _model.Style_Type_Public
-						} else if _string.Contains(tr_Attr, "$$") {
-							styleDeclarations.Scope = _model.Style_Type_Global
-						} else {
-							styleDeclarations.Scope = _model.Style_Type_Local
+					} else if symclass_regex.MatchString(tr_Attr) {
+						if len(styleDeclarations.SymClasses) == 0 {
+							if _string.Contains(tr_Attr, "$$$$") {
+								styleDeclarations.Scope = _model.Style_Type_Null
+							} else if fileData.Manifest.Lookup.Type == _model.File_Type_Artifact {
+								styleDeclarations.Scope = _model.Style_Type_Artifact
+							} else if _string.Contains(tr_Attr, "$$$") {
+								styleDeclarations.Scope = _model.Style_Type_Public
+							} else if _string.Contains(tr_Attr, "$$") {
+								styleDeclarations.Scope = _model.Style_Type_Global
+							} else {
+								styleDeclarations.Scope = _model.Style_Type_Local
+							}
+							if styleDeclarations.Scope != _model.Style_Type_Null {
+								styleDeclarations.Styles[""] = tr_Value
+							}
 						}
-						if styleDeclarations.Scope != _model.Style_Type_Null {
-							styleDeclarations.Styles[""] = tr_Value
+						styleDeclarations.SymClasses = append(styleDeclarations.SymClasses, tr_Attr)
+					} else if _string.HasSuffix(tr_Attr, "&") {
+						if len(tr_Value) > 0 {
+							styleDeclarations.Styles[tr_Attr] = tr_Value
 						}
+					} else if _slice.Contains(classProps, tr_Attr) {
+						classSynced = true
+						value_Parse_return := value_Parse(
+							tr_Value,
+							action,
+							fileData,
+							*cursor,
+						)
+						if len(value_Parse_return.Classlist) > 0 {
+							classesList = append(classesList, value_Parse_return.Classlist)
+						}
+						if len(value_Parse_return.Attachments) > 0 {
+							attachments = append(attachments, value_Parse_return.Attachments...)
+						}
+						if len(value_Parse_return.Locales) > 0 {
+							locales = append(locales, value_Parse_return.Locales...)
+						}
+						nativeAttributes[tr_Attr] = value_Parse_return.Scribed
+					} else {
+						nativeAttributes[tr_Attr] = tr_Value
 					}
-					styleDeclarations.SymClasses = append(styleDeclarations.SymClasses, tr_Attr)
-				} else if _string.HasSuffix(tr_Attr, "&") {
-					if len(tr_Value) > 0 {
-						styleDeclarations.Styles[tr_Attr] = tr_Value
-					}
-				} else if _slice.Contains(classProps, tr_Attr) {
-					classSynced = true
-					value_Parse_return := value_Parse(
-						tr_Value,
-						action,
-						fileData,
-						*cursor,
-					)
-					if len(value_Parse_return.Classlist) > 0 {
-						classesList = append(classesList, value_Parse_return.Classlist)
-					}
-					if len(value_Parse_return.Attachments) > 0 {
-						attachments = append(attachments, value_Parse_return.Attachments...)
-					}
-					if len(value_Parse_return.Locales) > 0 {
-						locales = append(locales, value_Parse_return.Locales...)
-					}
-					nativeAttributes[tr_Attr] = value_Parse_return.Scribed
-				} else {
-					nativeAttributes[tr_Attr] = tr_Value
 				}
 
 				isVal = false

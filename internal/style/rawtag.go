@@ -12,9 +12,9 @@ import (
 	_strconv "strconv"
 	_string "strings"
 )
-
+var locale_rune = string(_config.Root.CustomOperations["locale"])
 var regex_symzero = _regexp.MustCompile(`^-\$`)
-var regex_locale = _regexp.MustCompile(`\.(.*?)` + string(_config.Root.CustomOperations["locale"]))
+var regex_locale = _regexp.MustCompile(`\.(.*?)` + locale_rune)
 
 func Rawtag_Upload(
 	raw *_script.T_RawStyle,
@@ -82,7 +82,7 @@ func Rawtag_Upload(
 					if substylescanned.Result.Len() > 0 {
 						wrapperjson := _util.Code_JsonBuild(query.Wrappers, "")
 						if !forArtifact && regex_locale.MatchString(wrapperjson) {
-							wrapperjson = " " + regex_locale.ReplaceAllString(wrapperjson, "._"+file.Label+"_")
+							wrapperjson = " " + regex_locale.ReplaceAllString(wrapperjson, ".\\"+locale_rune+file.Label+"_")
 						}
 						object.SetBlock(wrapperjson, substylescanned.Result)
 					}
