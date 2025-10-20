@@ -168,6 +168,7 @@ func Execute(heading string) (Exitcode int) {
 				if events := WATCHER.DeBuf(); len(events) > 0 {
 					heading = ""
 					steppings := []Execute_Step_enum{}
+					S.Render.Raw(events)
 					for _, event := range events {
 						filepath := _fileman.Path_Join(event.Folder, event.FilePath)
 						breaknow := false
