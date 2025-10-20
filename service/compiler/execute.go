@@ -43,7 +43,6 @@ func Execute(heading string) (Exitcode int) {
 	const interval = 100
 	step := Execute_Step_Initialize
 	report := ""
-	report_next := false
 	outfiles := map[string]string{}
 	var save_action _sync.WaitGroup
 
@@ -54,6 +53,7 @@ func Execute(heading string) (Exitcode int) {
 		case Execute_Step_Initialize:
 			if heading != "" {
 				S.Post(S.MAKE(S.Tag.H1(heading, S.Preset.Title), []string{}))
+				heading = ""
 			}
 			fallthrough
 
@@ -61,7 +61,11 @@ func Execute(heading string) (Exitcode int) {
 			if res_report, res_status := _action.Verify_Setup(); res_status != _action.Verify_Setup_Status_Verified {
 				report = res_report
 				step = Execute_Step_LoopAround
+				exitcode = 1
 				break
+			} else if WATCHER != nil {
+				WATCHER.Close()
+				WATCHER = nil
 			}
 			fallthrough
 
@@ -77,6 +81,7 @@ func Execute(heading string) (Exitcode int) {
 			if res_report, res_status := _action.Verify_Configs(false); !res_status {
 				report = res_report
 				step = Execute_Step_LoopAround
+				exitcode = 1
 				break
 			}
 			fallthrough
@@ -93,9 +98,8 @@ func Execute(heading string) (Exitcode int) {
 			if res_report, res_status := _action.Save_Hashrule(); !res_status {
 				report = res_report
 				step = Execute_Step_LoopAround
+				exitcode = 1
 				break
-			} else {
-				report = ""
 			}
 			fallthrough
 
@@ -118,10 +122,6 @@ func Execute(heading string) (Exitcode int) {
 						save_action.Done()
 					}()
 				}
-				if report_next {
-					// X.Report(heading, []string{}, report, []string{})
-					report_next = false
-				}
 			}
 			fallthrough
 
@@ -138,8 +138,7 @@ func Execute(heading string) (Exitcode int) {
 						_config.Path_Folder["archive"].Path,
 					}
 
-					X.Report("Initial Build", watch_dirs, report, []string{})
-					if w, err := _watcher.Instant(watch_dirs, ignore_dirs, interval); err == nil {
+					if w, err := _watcher.Quick(watch_dirs, ignore_dirs, interval); err == nil {
 						WATCHER = w
 
 						if !_config.Static.DRYRUN {
@@ -166,9 +165,7 @@ func Execute(heading string) (Exitcode int) {
 				}
 
 				if events := WATCHER.DeBuf(); len(events) > 0 {
-					heading = ""
 					steppings := []Execute_Step_enum{}
-					S.Render.Raw(events)
 					for _, event := range events {
 						filepath := _fileman.Path_Join(event.Folder, event.FilePath)
 						breaknow := false
@@ -178,8 +175,6 @@ func Execute(heading string) (Exitcode int) {
 
 								switch filepath {
 								case _config.Path_Json["configure"].Path:
-									WATCHER.Close()
-									WATCHER = nil
 									steppings = append(steppings, Execute_Step_VerifyConfigs)
 									breaknow = true
 
@@ -213,7 +208,6 @@ func Execute(heading string) (Exitcode int) {
 								breaknow = true
 							}
 						} else if event.Action == _watcher.E_Action_Update {
-							step = Execute_Step_UpdateCache
 							if target, ok := _config.Static.TargetDir_Saved[event.Folder]; ok && target.Stylesheet == event.FilePath {
 								target.StylesheetContent = event.FileContent
 								_config.Static.TargetDir_Saved[event.Folder] = target
@@ -239,10 +233,9 @@ func Execute(heading string) (Exitcode int) {
 
 					for _, i := range steppings {
 						if i < step {
-							i = step
+							step = i
 						}
 					}
-					report_next = true
 				}
 
 			}
@@ -251,16 +244,20 @@ func Execute(heading string) (Exitcode int) {
 
 		ExecuteMutex.Unlock()
 		if _config.Static.WATCH {
+			if !_config.Static.DRYRUN && len(report) > 0 {
+				S.Post(X.Report(heading, []string{}, report))
+				report = ""
+				heading = ""
+			}
 			_time.Sleep(interval * _time.Millisecond)
 		} else {
+			S.Post(report)
 			break
 		}
 	}
 
 	save_action.Wait()
-	if WATCHER == nil {
-		S.Post(report)
-	} else {
+	if WATCHER != nil {
 		WATCHER.Close()
 		WATCHER = nil
 	}

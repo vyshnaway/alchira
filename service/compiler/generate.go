@@ -30,7 +30,7 @@ func Generate_Files() (Files map[string]string, Report string) {
 	if _config.Static.Command == "debug" {
 		render_action = _script.E_Action_DebugHash
 	} else if _config.Static.Command == "preview" && _config.Static.WATCH {
-		render_action = _script.E_Action_WatchmodeHash
+		render_action = _script.E_Action_WatchHash
 	} else {
 		render_action = _script.E_Action_BuildHash
 	}

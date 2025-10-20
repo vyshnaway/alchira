@@ -79,6 +79,11 @@ func Accumulate() {
 			C.Tag.H2(_strconv.Itoa(len(_config.Delta.Errors))+" Errors", C.Preset.Failed),
 			errors,
 		)
+	} else {
+		_config.Delta.Report.Errors = C.MAKE(
+			C.Tag.H2("Zero Errors", C.Preset.Text),
+			errors,
+		)
 	}
 }
 
@@ -122,7 +127,7 @@ func Organize() (AritfactFiles map[string]string, Attachments []int) {
 		if len(_config.Delta.Errors) > 0 {
 			_config.Delta.FinalMessage = _strconv.Itoa(len(_config.Delta.Errors)) + " Unresolved Errors. Rectify them to proceed with 'publish' command."
 		} else {
-			_config.Delta.FinalMessage = "Preview verified with no major errors. Procceed to 'publish' using your key."
+			_config.Delta.FinalMessage = "Preview verified with no major errors. Procceed to 'publish' using a valid key."
 		}
 	} else if _config.Static.Command == "publish" {
 		if len(_config.Delta.Errors) > 0 {

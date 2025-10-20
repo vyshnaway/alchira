@@ -14,7 +14,7 @@ type E_Action int
 const (
 	E_Action_Read E_Action = iota
 	E_Action_BuildHash
-	E_Action_WatchmodeHash
+	E_Action_WatchHash
 	E_Action_DebugHash
 )
 
@@ -38,6 +38,9 @@ var replacementTags = func() map[string]int {
 	res := map[string]int{}
 	for k, v := range _config.Root.CustomTags {
 		res["<!-- "+k+" -->"] = v
+		res["<!--"+k+"-->"] = v
+		res["<!--"+k+" -->"] = v
+		res["<!-- "+k+"-->"] = v
 		res["<"+k+" />"] = v
 		res["<"+k+"/>"] = v
 	}

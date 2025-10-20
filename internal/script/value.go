@@ -42,7 +42,7 @@ func value_EvaluateIndexTraces(
 			}
 		}
 	} else {
-		if action == E_Action_WatchmodeHash {
+		if action == E_Action_WatchHash {
 			for index, item := range classTrace {
 				classname := _fmt.Sprintf("%s%d", metaFront, index)
 				_config.Style.PublishIndexMap = append(_config.Style.PublishIndexMap, _model.Style_ClassIndexTrace{
@@ -74,6 +74,10 @@ func value_EvaluateIndexTraces(
 	return classMap
 }
 
+var op_attach = _config.Root.CustomOperations["attach"]
+var op_assign = _config.Root.CustomOperations["assign"]
+var op_locale = _config.Root.CustomOperations["locale"]
+
 type value_Parse_retype struct {
 	Classlist   []string
 	Attachments []string
@@ -103,13 +107,13 @@ func value_Parse(
 		ch := rune(value[marker])
 
 		if inQuote {
-			if ch == ' ' || ch == activeQuote {
+			if (ch == ' ' || ch == activeQuote) && entry.Len() > 0 {
 				entrystring := entry.String()
-				if rune(entrystring[0]) == _config.Root.CustomOperations["attach"] {
+				if rune(entrystring[0]) == op_attach {
 					attachments = append(attachments, entrystring[1:])
-				} else if rune(entrystring[0]) == _config.Root.CustomOperations["assign"] {
+				} else if rune(entrystring[0]) == op_assign {
 					classlist = append(classlist, entrystring[1:])
-				} else if rune(entrystring[0]) == _config.Root.CustomOperations["locale"] {
+				} else if rune(entrystring[0]) == op_locale {
 					locales = append(locales, entrystring)
 				}
 				entry.Reset()
@@ -142,7 +146,7 @@ func value_Parse(
 				FileCursor.Active.RowMarker,
 				FileCursor.Active.ColMarker,
 			)
-		case E_Action_WatchmodeHash:
+		case E_Action_WatchHash:
 			metafront = _fmt.Sprintf(
 				"_%s_%d",
 				fileData.Label,
@@ -158,12 +162,12 @@ func value_Parse(
 			ch := rune(value[marker])
 
 			if inQuote {
-				if ch == ' ' || ch == activeQuote {
+				if (ch == ' ' || ch == activeQuote) && entry.Len() > 0 {
 					entrystring := entry.String()
-					if rune(entrystring[0]) != _config.Root.CustomOperations["attach"] {
-						if rune(entrystring[0]) == _config.Root.CustomOperations["locale"] {
+					if rune(entrystring[0]) != op_attach {
+						if rune(entrystring[0]) == op_locale {
 							scriber.WriteString(_fmt.Sprintf("_%s%s", fileData.Label, entrystring))
-						} else if rune(entrystring[0]) == _config.Root.CustomOperations["assign"] {
+						} else if rune(entrystring[0]) == op_assign {
 							entrystring := entrystring[1:]
 							found_Entry, found_Status := classMap[entrystring]
 							if found_Status {

@@ -104,7 +104,7 @@ func (This *T_Watcher) Start(interval, maxevents int) error {
 
 }
 
-func Instant(folders, ignores []string, interval int) (instance *T_Watcher, err error) {
+func Quick(folders, ignores []string, interval int) (instance *T_Watcher, err error) {
 	w := New(folders, ignores)
 	e := w.Start(interval, 1)
 	return w, e

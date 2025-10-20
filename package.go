@@ -20,6 +20,7 @@ import (
 )
 
 func main() {
+	defaultPort := 4096
 
 	exposedCommands := []string{}
 	for k := range _config.Root.Commands {
@@ -135,11 +136,10 @@ func main() {
 		}
 	case "server":
 		{
-			port := 0
 			if val, err := _strconv.Atoi(argone); err == nil {
-				port = val
+				defaultPort = val
 			}
-			_server.Connect(port)
+			_server.Connect(defaultPort)
 		}
 	case "install":
 		{
