@@ -70,10 +70,10 @@ func Error_Reporter(
 	var heading string
 	var itemPreset []string
 	if len(items) == 0 {
-		heading = S.Tag.H5(message_pass, S.Preset.Success)
+		heading = S.Tag.H5(message_pass, S.Preset.Success, S.Style.AS_Bold)
 		itemPreset = S.Preset.Success
 	} else {
-		heading = S.Tag.H5(message_fail, S.Preset.Failed)
+		heading = S.Tag.H5(message_fail, S.Preset.Failed, S.Style.AS_Bold)
 		itemPreset = S.Preset.Failed
 	}
 	return S.MAKE(

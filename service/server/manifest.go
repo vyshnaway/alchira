@@ -64,7 +64,6 @@ func ManifestFile(filepath string) (R_Manifest_IO, R_Manifest_WS) {
 		return result
 	}
 
-	constants := configs.Manifest.Constants
 	manifest := configs.Manifest
 	assignable := []string{}
 	_symclasses := []string{}
@@ -158,6 +157,7 @@ Return:
 		symclassdata[i] = _symclassData[v]
 	}
 
+	constants := manifest.Constants
 	Refer.SymclassIndexMap = SymclassIndexMap
 	diagnostics := manifest.Diagnostics
 	hashrules := configs.Style.Hashrules

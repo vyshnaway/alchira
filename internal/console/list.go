@@ -25,7 +25,7 @@ func List_Props(record *O.T[string, string], keystyles []string, valstyles []str
 func List_Steps(heading string, steps []string) string {
 	if len(steps) > 0 {
 		if len(heading) > 0 {
-			heading = S.Tag.H2(heading, S.Preset.Primary)
+			heading = S.Tag.H2(heading, S.Preset.Primary, S.Style.AS_Bold)
 		}
 		return S.MAKE(
 			heading,
@@ -39,7 +39,7 @@ func List_Steps(heading string, steps []string) string {
 func List_Record(heading string, record *O.T[string, string]) string {
 	if record.Len() > 0 {
 		if len(heading) > 0 {
-			heading = S.Tag.H2(heading, S.Preset.Primary)
+			heading = S.Tag.H2(heading, S.Preset.Primary, S.Style.AS_Bold)
 		}
 		return S.MAKE(
 			heading,
@@ -54,7 +54,7 @@ func List_Record(heading string, record *O.T[string, string]) string {
 func List_Catalog(heading string, items []string) string {
 	if len(items) > 0 {
 		if len(heading) > 0 {
-			heading = S.Tag.H2(heading, S.Preset.Primary)
+			heading = S.Tag.H2(heading, S.Preset.Primary, S.Style.AS_Bold)
 		}
 		return S.MAKE(
 			heading,
@@ -72,7 +72,7 @@ func List_Chart(heading string, items *O.T[string, []string]) string {
 	items.Range(func(head string, entries []string) {
 		counter += len(entries)
 		sections = append(sections, S.MAKE(
-			S.Tag.H6(head, S.Preset.Tertiary),
+			S.Tag.H6(head, S.Preset.Tertiary, S.Style.AS_Bold),
 			entries,
 			S.MakeList{TypeFunc: S.List.Catalog, Preset: S.Preset.Text},
 		))
@@ -80,7 +80,7 @@ func List_Chart(heading string, items *O.T[string, []string]) string {
 
 	if counter > 0 {
 		if len(heading) > 0 {
-			heading = S.Tag.H2(heading, S.Preset.Primary)
+			heading = S.Tag.H2(heading, S.Preset.Primary, S.Style.AS_Bold)
 			return S.MAKE(
 				heading,
 				sections,

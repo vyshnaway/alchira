@@ -117,7 +117,7 @@ func Organize() (AritfactFiles map[string]string, Attachments []int) {
 	Accumulate()
 	artifact_files := map[string]string{}
 	tracks_ := _stash.Target_GetTracks()
-
+	// _config.Delta.FinalMessage = "Confirm a clean state before triggering the production build."
 	if _config.Static.WATCH {
 		_config.Delta.FinalMessage = _strconv.Itoa(len(_config.Delta.Errors)) + " Errors."
 	} else if _config.Static.Command == "preview" {

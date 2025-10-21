@@ -17,6 +17,10 @@ var locale_rune = string(_config.Root.CustomOps["locale"])
 var regex_symzero = _regexp.MustCompile(`^[-_]\$`)
 var regex_locale = _regexp.MustCompile(`\.` + locale_rune)
 
+func rawtag_stylePreprocess(content string) string {
+	return _util.Code_Uncomment(content, true, true, false)
+}
+
 func Rawtag_Upload(
 	raw *_script.T_RawStyle,
 	file *_model.File_Stash,
@@ -58,7 +62,7 @@ func Rawtag_Upload(
 		debugclass := _fmt.Sprint(scope, file.DebugFront, "\\:", raw.RowIndex, "\\:", raw.ColIndex, "_", normalsymclass)
 
 		stylescanned := Parse_CssSnippet(
-			_util.Code_Uncomment(raw.Styles[""], true, true, false),
+			rawtag_stylePreprocess(raw.Styles[""]),
 			_fmt.Sprint(raw.Scope, " : ", declaration, " | "),
 			_fmt.Sprint(raw.SymClasses[0]),
 			false,
@@ -73,7 +77,7 @@ func Rawtag_Upload(
 				query := Hashrule_Render(key, declaration)
 				if query.Status {
 					substylescanned := Parse_CssSnippet(
-						_util.Code_Uncomment(val, true, true, false),
+						rawtag_stylePreprocess(val),
 						_fmt.Sprint(raw.Scope, " : ", declaration, " | "),
 						_fmt.Sprint(raw.SymClasses[0], " // ", key),
 						true,
@@ -96,7 +100,7 @@ func Rawtag_Upload(
 		}
 
 		inner_style := Parse_CssSnippet(
-			_util.Code_Uncomment(raw.Innertext, true, true, false),
+			rawtag_stylePreprocess(raw.Innertext),
 			_fmt.Sprint(raw.Scope, ":ATTACHMENT : ", file.FilePath, ":", raw.RowIndex, ":", raw.ColIndex, " | "),
 			raw.SymClasses[0],
 			true,

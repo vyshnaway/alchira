@@ -25,7 +25,7 @@ func MAKE(heading string, contents []string, deployments ...MakeList) string {
 	}
 	outList := []string{}
 	if len(heading) > 0 {
-		outList = append(outList, Format(heading, Preset.None, Style.AS_Bold))
+		outList = append(outList, Format(heading, Preset.None))
 	}
 	outList = append(outList, modContents...)
 	return _strings.Join(outList, "\r\n")
