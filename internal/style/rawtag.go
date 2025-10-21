@@ -13,11 +13,20 @@ import (
 	_string "strings"
 )
 
-var locale_rune = string(_config.Root.CustomOps["locale"])
+var lodash_rune = string(_config.Root.CustomOps["lodash"])
 var regex_symzero = _regexp.MustCompile(`^[-_]\$`)
-var regex_locale = _regexp.MustCompile(`\.` + locale_rune)
+var regex_lodash = _regexp.MustCompile(`\.` + lodash_rune)
 
-func rawtag_stylePreprocess(content string) string {
+var lodash_tag = "<!--" + string(_config.Root.CustomOps["lodash"]) + "-->"
+
+func rawtag_stylePreprocess(
+	content string,
+	file *_model.File_Stash,
+	export0_native1 bool,
+) string {
+	if !export0_native1 {
+		return _string.ReplaceAll(content, lodash_tag, file.Label)
+	}
 	return _util.Code_Uncomment(content, true, true, false)
 }
 
@@ -61,23 +70,31 @@ func Rawtag_Upload(
 		}
 		debugclass := _fmt.Sprint(scope, file.DebugFront, "\\:", raw.RowIndex, "\\:", raw.ColIndex, "_", normalsymclass)
 
-		stylescanned := Parse_CssSnippet(
-			rawtag_stylePreprocess(raw.Styles[""]),
+		native_scanned := Parse_CssSnippet(
+			rawtag_stylePreprocess(raw.Styles[""], file, true),
 			_fmt.Sprint(raw.Scope, " : ", declaration, " | "),
 			_fmt.Sprint(raw.SymClasses[0]),
 			false,
 		)
 
-		object := stylescanned.Result
+		export_scanned := Parse_CssSnippet(
+			rawtag_stylePreprocess(raw.Styles[""], file, false),
+			_fmt.Sprint(raw.Scope, " : ", declaration, " | "),
+			_fmt.Sprint(raw.SymClasses[0]),
+			false,
+		)
 
-		attachments := append(attachments, stylescanned.Attachments...)
-		variables := stylescanned.Variables
+		native_object := native_scanned.Result
+		export_object := export_scanned.Result
+
+		attachments := append(attachments, native_scanned.Attachments...)
+		variables := native_scanned.Variables
 		for key, val := range raw.Styles {
 			if key != "" {
 				query := Hashrule_Render(key, declaration)
 				if query.Status {
 					substylescanned := Parse_CssSnippet(
-						rawtag_stylePreprocess(val),
+						rawtag_stylePreprocess(val, file, true),
 						_fmt.Sprint(raw.Scope, " : ", declaration, " | "),
 						_fmt.Sprint(raw.SymClasses[0], " // ", key),
 						true,
@@ -86,11 +103,11 @@ func Rawtag_Upload(
 					variables.Copy(substylescanned.Variables)
 					if substylescanned.Result.Len() > 0 {
 						wrapperjson := _util.Code_JsonBuild(query.Wrappers, "")
-						if !forArtifact && regex_locale.MatchString(wrapperjson) {
-							wrapperjson = " " + regex_locale.ReplaceAllString(wrapperjson, "."+file.Label)
+						if !forArtifact && regex_lodash.MatchString(wrapperjson) {
+							wrapperjson = " " + regex_lodash.ReplaceAllString(wrapperjson, "."+file.Label)
 							_fmt.Println(wrapperjson)
 						}
-						object.SetBlock(wrapperjson, substylescanned.Result)
+						native_object.SetBlock(wrapperjson, substylescanned.Result)
 					}
 				} else {
 					errors = append(errors, query.Errorstring)
@@ -100,7 +117,7 @@ func Rawtag_Upload(
 		}
 
 		inner_style := Parse_CssSnippet(
-			rawtag_stylePreprocess(raw.Innertext),
+			rawtag_stylePreprocess(raw.Innertext, file, true),
 			_fmt.Sprint(raw.Scope, ":ATTACHMENT : ", file.FilePath, ":", raw.RowIndex, ":", raw.ColIndex, " | "),
 			raw.SymClasses[0],
 			true,
@@ -135,7 +152,7 @@ func Rawtag_Upload(
 
 		metadata := _model.Style_Metadata{
 			Info:          raw.Comments,
-			Skeleton:      object.Skeleton(),
+			Skeleton:      native_object.Skeleton(),
 			Declarations:  []string{declaration},
 			Variables:     variables.ToMap(),
 			SummonSnippet: summon,
@@ -154,7 +171,8 @@ func Rawtag_Upload(
 				Artifact:      artifact,
 				Definent:      raw.SymClasses[0],
 				SymClass:      symclass,
-				NativeStyle:   object,
+				NativeStyle:   native_object,
+				ExportStyle:   export_object,
 				Metadata:      &metadata,
 				Attachments:   attachments,
 				DebugClass:    debugclass,

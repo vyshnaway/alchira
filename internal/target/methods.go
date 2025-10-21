@@ -27,7 +27,7 @@ func (This *Class) Accumulator() Accumulator_return {
 		Lookup: _model.File_Lookup{
 			Id:     This.TargetStylesheet,
 			Type:   _model.File_Type_Stylesheet,
-			Locale: []string{},
+			Lodash: []string{},
 		},
 		Local:       _model.File_SymclassIndexMap{},
 		Global:      _model.File_SymclassIndexMap{},
@@ -124,7 +124,7 @@ func (This *Class) SummonFiles(
 					out.WriteString(file.Scratch[fromPos:m.Loc] + summonBlock)
 				case _config.Root.CustomTags["style"]:
 					out.WriteString(file.Scratch[fromPos:m.Loc] + styleBlock)
-				case _config.Root.CustomTags[string(_config.Locale_rune)]:
+				case _config.Root.CustomTags[string(_config.Lodash_rune)]:
 					out.WriteString(file.Scratch[fromPos:m.Loc] + file.Label)
 				default:
 					out.WriteString(file.Scratch[fromPos:])

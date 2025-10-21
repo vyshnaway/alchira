@@ -79,7 +79,7 @@ const content = `
 	" &="Use activation class glass-type for [data-glass-type='liquid'|'frosted']attribute">Test
 	</summon>
 
-	<div data-glass-type='liquid' class="=glass$$$container ~glass-type =glass$$--container -locale">
+	<div data-glass-type='liquid' class="=glass$$$container ~glass-type =glass$$--container -lodash">
 		Liquid Glass
 	</div>
 
@@ -90,7 +90,7 @@ const content = `
 `
 
 const content1 = `
-	<div data-glass-type='liquid' class="=glass$$$container ~glass-type =glass$$--container -locale">
+	<div data-glass-type='liquid' class="=glass$$$container ~glass-type =glass$$--container -lodash">
 `
 
 func Test_Main(t *_testing.T) {

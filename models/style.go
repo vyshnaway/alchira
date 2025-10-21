@@ -44,6 +44,7 @@ type Style_ClassData struct {
 	DebugClass            string
 	Attachments           []string
 	NativeStyle           *css.T_Block
+	ExportStyle           *css.T_Block
 	StapleSnippet         string
 	StyleSnippet          *css.T_Block
 }

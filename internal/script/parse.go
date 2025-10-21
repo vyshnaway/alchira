@@ -52,7 +52,7 @@ type parse_return struct {
 	ClassesList  [][]string
 	StylesList   []*T_RawStyle
 	Attachments  []string
-	Locales      []string
+	Lodashes     []string
 	Replacements []_model.File_TagReplacement
 }
 
@@ -69,7 +69,7 @@ func Rider(
 	tagTrack := []*T_RawStyle{}
 	classesList := [][]string{}
 	attachments := []string{}
-	locales := []string{}
+	lodashes := []string{}
 	stylesList := []*T_RawStyle{}
 
 	var content string
@@ -95,7 +95,7 @@ func Rider(
 			if result.Ok {
 				classesList = append(classesList, result.ClassesList...)
 				attachments = append(attachments, result.Attachments...)
-				locales = append(locales, result.Locales...)
+				lodashes = append(lodashes, result.Lodashes...)
 
 				if hasDeclared {
 					stylesList = append(stylesList, &result.StyleDeclarations)
@@ -184,6 +184,6 @@ func Rider(
 		ClassesList:  classesList,
 		StylesList:   stylesList,
 		Attachments:  attachments,
-		Locales:      locales,
+		Lodashes:     lodashes,
 	}
 }

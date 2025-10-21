@@ -9,7 +9,7 @@ const (
 	domain = "xcss.io"
 )
 
-var Locale_rune rune = '_'
+var Lodash_rune rune = '_'
 
 var Root = _model.Cache_Root{
 	Name:      id,
@@ -39,12 +39,12 @@ var Root = _model.Cache_Root{
 		"style":             1,
 		"staple":            2,
 		"summon":            3,
-		string(Locale_rune): 4,
+		string(Lodash_rune): 4,
 	},
 	CustomOps: map[string]rune{
 		"attach": '~',
 		"assign": '=',
-		"locale": Locale_rune,
+		"lodash": Lodash_rune,
 	},
 	CustomAtrules: map[string]string{
 		"attach": "@--attach",

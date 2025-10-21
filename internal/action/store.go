@@ -18,7 +18,7 @@ const (
 	Store_FileGroup_Target
 )
 
-var locale_rune = string(_config.Root.CustomOps["locale"])
+var lodash_rune = string(_config.Root.CustomOps["lodash"])
 
 func Store(
 	fileGroup store_FileGroup_param,
@@ -109,7 +109,7 @@ func Store(
 
 	result := _model.File_Stash{
 		LibLevel:   idn,
-		Label:      locale_rune + label + locale_rune,
+		Label:      lodash_rune + label + lodash_rune,
 		Artifact:   norm_artifact,
 		FilePath:   filePath,
 		Extension:  extension,
@@ -121,7 +121,7 @@ func Store(
 			Lookup: _model.File_Lookup{
 				Id:     lookupId,
 				Type:   lookupType,
-				Locale: []string{},
+				Lodash: []string{},
 			},
 			Local:       _model.File_SymclassIndexMap{},
 			Global:      _model.File_SymclassIndexMap{},
@@ -131,7 +131,7 @@ func Store(
 		},
 		StyleData: _model.File_StyleData{
 			UsedIn:          []int{},
-			Locales:         []string{},
+			Lodashes:        []string{},
 			Attachments:     []string{},
 			ClassTracks:     [][]string{},
 			LocalClasses:    _model.Style_ClassIndexMap{},

@@ -29,7 +29,7 @@ func (This *Class) Savefile(filepath string, content string, hashindex int) {
 		content,
 		This.Target,
 		This.Source,
-		_fmt.Sprint(This.Label, string(_config.Locale_rune), _util.String_EnCounter(hashindex)),
+		_fmt.Sprint(This.Label, string(_config.Lodash_rune), _util.String_EnCounter(hashindex)),
 	)
 
 	parse_response := _script.Rider(&file, This.ExtnsProps[file.Extension], _script.E_Action_Read)
@@ -37,11 +37,11 @@ func (This *Class) Savefile(filepath string, content string, hashindex int) {
 	file.StyleData.Attachments = parse_response.Attachments
 	file.Midway = parse_response.Scribed
 
-	file.StyleData.Locales = _util.Array_Setfront(parse_response.Locales)
+	file.StyleData.Lodashes = _util.Array_Setfront(parse_response.Lodashes)
 	file.Manifest.Lookup = _model.File_Lookup{
 		Id:     file.TargetPath,
 		Type:   _model.File_Type_Target,
-		Locale: file.StyleData.Locales,
+		Lodash: file.StyleData.Lodashes,
 	}
 
 	for _, tagdata := range parse_response.StylesList {

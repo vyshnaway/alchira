@@ -15,7 +15,7 @@ type tag_Parse_retype struct {
 	SelfClosed        bool
 	ClassSynced       bool
 	ClassesList       [][]string
-	Locales           []string
+	Lodashes          []string
 	Attachments       []string
 	NativeAttributes  map[string]string
 	StyleDeclarations T_RawStyle
@@ -31,7 +31,7 @@ func Tag_Scanner(
 ) tag_Parse_retype {
 	classesList := [][]string{}
 	attachments := []string{}
-	locales := []string{}
+	lodashes := []string{}
 	braceTrack := []rune{}
 	nativeAttributes := make(map[string]string)
 
@@ -145,8 +145,8 @@ func Tag_Scanner(
 						if len(value_Parse_return.Attachments) > 0 {
 							attachments = append(attachments, value_Parse_return.Attachments...)
 						}
-						if len(value_Parse_return.Locales) > 0 {
-							locales = append(locales, value_Parse_return.Locales...)
+						if len(value_Parse_return.Lodashes) > 0 {
+							lodashes = append(lodashes, value_Parse_return.Lodashes...)
 						}
 						nativeAttributes[tr_Attr] = value_Parse_return.Scribed
 					} else {
@@ -195,7 +195,7 @@ func Tag_Scanner(
 		SelfClosed:        selfClosed,
 		ClassSynced:       classSynced,
 		ClassesList:       classesList,
-		Locales:           locales,
+		Lodashes:          lodashes,
 		Attachments:       attachments,
 		NativeAttributes:  nativeAttributes,
 		StyleDeclarations: styleDeclarations,

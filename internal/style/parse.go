@@ -17,7 +17,10 @@ type Parse_return struct {
 	Variables   *O.T[string, string]
 }
 
-func parse_AssignMerge(classlist []string) Parse_return {
+func parse_AssignMerge(
+	classlist []string,
+	// export0_native1 bool,
+) Parse_return {
 	attachments := []string{}
 	result := _css.NewBlock()
 	variables := O.New[string, string]()

@@ -76,12 +76,12 @@ func value_EvaluateIndexTraces(
 
 var op_attach = _config.Root.CustomOps["attach"]
 var op_assign = _config.Root.CustomOps["assign"]
-var op_locale = _config.Root.CustomOps["locale"]
+var op_lodash = _config.Root.CustomOps["lodash"]
 
 type value_Parse_retype struct {
 	Classlist   []string
 	Attachments []string
-	Locales     []string
+	Lodashes    []string
 	Scribed     string
 }
 
@@ -94,7 +94,7 @@ func value_Parse(
 	classlist := []string{}
 	quotes := []rune{'\'', '`', '"'}
 	attachments := []string{}
-	locales := []string{}
+	lodashes := []string{}
 
 	var entry _string.Builder
 	scribed := value
@@ -113,8 +113,8 @@ func value_Parse(
 					attachments = append(attachments, entrystring[1:])
 				} else if rune(entrystring[0]) == op_assign {
 					classlist = append(classlist, entrystring[1:])
-				} else if rune(entrystring[0]) == op_locale {
-					locales = append(locales, entrystring)
+				} else if rune(entrystring[0]) == op_lodash {
+					lodashes = append(lodashes, entrystring)
 				}
 				entry.Reset()
 			} else {
@@ -165,7 +165,7 @@ func value_Parse(
 				if ch == ' ' || ch == activeQuote {
 					entrystring := entry.String()
 					if entry.Len() > 0 && rune(entrystring[0]) != op_attach {
-						if rune(entrystring[0]) == op_locale {
+						if rune(entrystring[0]) == op_lodash {
 							scriber.WriteString(_fmt.Sprintf("%s%s", fileData.Label, entrystring[1:]))
 						} else if rune(entrystring[0]) == op_assign {
 							entrystring := entrystring[1:]
@@ -203,7 +203,7 @@ func value_Parse(
 	return value_Parse_retype{
 		Classlist:   classlist,
 		Attachments: attachments,
-		Locales:     locales,
+		Lodashes:    lodashes,
 		Scribed:     scribed,
 	}
 }

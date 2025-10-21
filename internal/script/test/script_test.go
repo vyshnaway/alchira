@@ -127,7 +127,7 @@ func Test_Script(t *_testing.T) {
 		}
 	</style>
 
-	<div data-glass-type='liquid' class="=glass$$$container ~test$style =glass$$--container _locale">
+	<div data-glass-type='liquid' class="=glass$$$container ~test$style =glass$$--container _lodash">
 		Liquid Glass
 	</div>
 

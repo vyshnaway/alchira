@@ -99,6 +99,7 @@ func Cssfile_Collection(files []*_model.File_Stash) cssfile_Collection_return {
 					SymClass:              classname,
 					Metadata:              &metadata,
 					NativeStyle:           object,
+					ExportStyle:           object,
 					Attachments:           attachments,
 					DebugClass:            file.DebugFront + "_" + _util.String_Filter(classname, []rune{}, []rune{}, []rune{'$', '/'}),
 					StapleSnippet:         "",

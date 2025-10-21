@@ -6,12 +6,11 @@ import (
 	"testing"
 )
 
-var regex_locale = regexp.MustCompile(`\.()_`)
+var regex_lodash = regexp.MustCompile(`\.()_`)
 
-
-func Test_Locale(t *testing.T) {
+func Test_Lodash(t *testing.T) {
 	input := "._gelobe"
-	output := regex_locale.ReplaceAllString(input, "label")
+	output := regex_lodash.ReplaceAllString(input, "label")
 	fmt.Println(output) // Output: labelgelobe
 }
 

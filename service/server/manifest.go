@@ -27,7 +27,7 @@ type R_Manifest_IO struct {
 }
 
 type R_Manifest_WS struct {
-	Locales      []string                      `json:"locales"`
+	Lodashes     []string                      `json:"lodashes"`
 	Assignable   []string                      `json:"assignable"`
 	Symclasses   map[string]int                `json:"symclasses"`
 	Diagnostics  []models.File_Diagnostic      `json:"diagnostics"`
@@ -69,13 +69,13 @@ func ManifestFile(filepath string) (R_Manifest_IO, R_Manifest_WS) {
 	_symclasses := []string{}
 	_symclassData := map[string]models.Style_Metadata{}
 	SymclassIndexMap := map[string]int{}
-	locales := []string{}
+	lodashes := []string{}
 	assistfile := false
 
 	if nav, ok := configs.Manifest.Lookup[filepath]; ok {
 		assistfile = true
-		if nav.Locale != nil {
-			locales = nav.Locale
+		if nav.Lodash != nil {
+			lodashes = nav.Lodash
 		}
 
 		if nav.Type == models.File_Type_Artifact {
@@ -177,7 +177,7 @@ Return:
 			Assignable:   assignable,
 			Symclasses:   symclasses,
 			SymclassData: symclassdata,
-			Locales:      locales,
+			Lodashes:     lodashes,
 			Diagnostics:  diagnostics,
 		}
 }

@@ -30,7 +30,7 @@ type File_Source struct {
 type File_Lookup struct {
 	Id     string    `json:"id"`
 	Type   File_Type `json:"type"`
-	Locale []string  `json:"locale"`
+	Lodash []string  `json:"lodash"`
 }
 
 type File_TagReplacement struct {
@@ -40,7 +40,7 @@ type File_TagReplacement struct {
 
 type File_StyleData struct {
 	UsedIn          []int
-	Locales         []string
+	Lodashes        []string
 	Attachments     []string
 	ClassTracks     [][]string
 	LocalClasses    Style_ClassIndexMap
