@@ -73,6 +73,9 @@ func Connect(tryport int) {
 		go compiler.Execute("")
 
 		for scanner.Scan() {
+			if compiler.WATCHER == nil {
+				continue
+			}
 			request := strings.TrimSpace(scanner.Text())
 
 			if strings.HasPrefix(request, "$ ") || strings.HasPrefix(request, "> ") {
