@@ -20,7 +20,7 @@ import (
 )
 
 func main() {
-	defaultPort := 4096
+	defaultPort := 0
 
 	exposedCommands := []string{}
 	for k := range _config.Root.Commands {

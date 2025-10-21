@@ -9,6 +9,7 @@ import (
 	_style_ "main/internal/style"
 	_model "main/models"
 	O "main/package/object"
+	"main/package/utils"
 	_strconv "strconv"
 )
 
@@ -19,9 +20,9 @@ func artifact_DeleteFile(filepath string) {
 	}
 }
 
-func artifact_SaveFile(filepath string, content string) {
+func artifact_SaveFile(filepath, content, label string) {
 	artifact_DeleteFile(filepath)
-	stored := _action.Store(_action.Store_FileGroup_Artifact, filepath, content, "", "", "")
+	stored := _action.Store(_action.Store_FileGroup_Artifact, filepath, content, "", "", label)
 	Cache.Artifacts[filepath] = stored
 }
 
@@ -33,8 +34,14 @@ type artifact_StackFiles_return struct {
 
 func artifact_CacheFiles() artifact_StackFiles_return {
 	artifact_Clear()
+	i := 0
 	for filepath, content := range _config.Static.Artifacts_Saved {
-		artifact_SaveFile(filepath, content)
+		artifact_SaveFile(
+			filepath,
+			content,
+			string(_config.Locale_rune)+utils.String_EnCounter((i)),
+		)
+		i++
 	}
 
 	files := []_model.File_Stash{}

@@ -10,16 +10,16 @@ type Cache_Url struct {
 }
 
 type Cache_Root struct {
-	Name             string
-	Interval         uint
-	Version          string
-	Extension        string
-	Commands         map[string]string
-	CustomAtrules    map[string]string
-	CustomTags       map[string]int
-	CustomOperations map[string]rune
-	Url              Cache_Url
-	Tweaks           Config_Tweaks
+	Name          string
+	Interval      uint
+	Version       string
+	Extension     string
+	Commands      map[string]string
+	CustomAtrules map[string]string
+	CustomTags    map[string]int
+	CustomOps     map[string]rune
+	Url           Cache_Url
+	Tweaks        Config_Tweaks
 }
 
 type Cache_Static struct {

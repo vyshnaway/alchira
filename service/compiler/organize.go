@@ -87,8 +87,8 @@ func Accumulate() {
 	}
 }
 
-var css_class_prefix = ".\\" + string(_config.Root.CustomOperations["locale"])
-var tag_class_prefix = string(_config.Root.CustomOperations["locale"])
+var css_class_prefix = "." + string(_config.Root.CustomOps["locale"])
+var tag_class_prefix = string(_config.Root.CustomOps["locale"])
 
 func Organize() (AritfactFiles map[string]string, Attachments []int) {
 

@@ -9,13 +9,13 @@ const (
 	domain = "xcss.io"
 )
 
-var locale_rune = '-'
+var Locale_rune rune = '_'
 
 var Root = _model.Cache_Root{
 	Name:      id,
 	Version:   "0.0.0",
 	Extension: id,
-	Interval: 200,
+	Interval:  200,
 	Url: _model.Cache_Url{
 		Site:      "https://www." + domain + "/",
 		Docs:      "https://docs." + domain + "/",
@@ -25,26 +25,26 @@ var Root = _model.Cache_Root{
 		Artifacts: "https://artifact." + domain + "/",
 	},
 	Commands: map[string]string{
-		"init":     "Initiate or Update & Verify setup.",
-		"debug":    "Live build for developer environment",
-		"server":   "LSP Communication Brige.",
-		"preview":  "Test build. Pass test for \"publish\" command.",
-		"publish":  "Optimized build, uses web-api.",
-		"install":  "Install external artifacts.",
+		"init":    "Initiate or Update & Verify setup.",
+		"debug":   "Live build for developer environment",
+		"server":  "LSP Communication Brige.",
+		"preview": "Test build. Pass test for \"publish\" command.",
+		"publish": "Optimized build, uses web-api.",
+		"install": "Install external artifacts.",
 	},
 	Tweaks: _model.Config_Tweaks{
 		"CacheUsage": false,
 	},
 	CustomTags: map[string]int{
-		"style":  1,
-		"staple": 2,
-		"summon": 3,
-		string(locale_rune): 4,
+		"style":             1,
+		"staple":            2,
+		"summon":            3,
+		string(Locale_rune): 4,
 	},
-	CustomOperations: map[string]rune{
+	CustomOps: map[string]rune{
 		"attach": '~',
 		"assign": '=',
-		"locale": locale_rune,
+		"locale": Locale_rune,
 	},
 	CustomAtrules: map[string]string{
 		"attach": "@--attach",

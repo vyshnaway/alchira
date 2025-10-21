@@ -21,7 +21,7 @@ type tag_Parse_retype struct {
 	StyleDeclarations T_RawStyle
 }
 
-var symclass_regex = _regexp.MustCompile(`(?i)^[\w\-]+\$+[\w\-]+$`)
+var symclass_regex = _regexp.MustCompile(`(?i)^[\w\-_]+\$+[\w\-]+$`)
 
 func Tag_Scanner(
 	fileData *_model.File_Stash,

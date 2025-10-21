@@ -18,6 +18,8 @@ const (
 	Store_FileGroup_Target
 )
 
+var locale_rune = string(_config.Root.CustomOps["locale"])
+
 func Store(
 	fileGroup store_FileGroup_param,
 	filePath string,
@@ -107,7 +109,7 @@ func Store(
 
 	result := _model.File_Stash{
 		LibLevel:   idn,
-		Label:      label,
+		Label:      locale_rune + label + locale_rune,
 		Artifact:   norm_artifact,
 		FilePath:   filePath,
 		Extension:  extension,

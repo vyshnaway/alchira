@@ -11,8 +11,6 @@ import (
 	_util "main/package/utils"
 )
 
-var locale_rune = _config.Root.CustomTags["locale"]
-
 func (This *Class) Savefile(filepath string, content string, hashindex int) {
 	if file, ok := This.FileCache[filepath]; ok {
 		_action.Index_Dispose(file.StyleData.UsedIn...)
@@ -31,7 +29,7 @@ func (This *Class) Savefile(filepath string, content string, hashindex int) {
 		content,
 		This.Target,
 		This.Source,
-		_fmt.Sprint(This.Label, locale_rune, _util.String_EnCounter(hashindex)),
+		_fmt.Sprint(This.Label, string(_config.Locale_rune), _util.String_EnCounter(hashindex)),
 	)
 
 	parse_response := _script.Rider(&file, This.ExtnsProps[file.Extension], _script.E_Action_Read)

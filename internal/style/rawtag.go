@@ -12,9 +12,10 @@ import (
 	_strconv "strconv"
 	_string "strings"
 )
-var locale_rune = string(_config.Root.CustomOperations["locale"])
-var regex_symzero = _regexp.MustCompile(`^-\$`)
-var regex_locale = _regexp.MustCompile(`\.(.*?)` + locale_rune)
+
+var locale_rune = string(_config.Root.CustomOps["locale"])
+var regex_symzero = _regexp.MustCompile(`^[-_]\$`)
+var regex_locale = _regexp.MustCompile(`\.` + locale_rune)
 
 func Rawtag_Upload(
 	raw *_script.T_RawStyle,
@@ -82,7 +83,8 @@ func Rawtag_Upload(
 					if substylescanned.Result.Len() > 0 {
 						wrapperjson := _util.Code_JsonBuild(query.Wrappers, "")
 						if !forArtifact && regex_locale.MatchString(wrapperjson) {
-							wrapperjson = " " + regex_locale.ReplaceAllString(wrapperjson, ".\\"+locale_rune+file.Label+"_")
+							wrapperjson = " " + regex_locale.ReplaceAllString(wrapperjson, "."+file.Label)
+							_fmt.Println(wrapperjson)
 						}
 						object.SetBlock(wrapperjson, substylescanned.Result)
 					}
@@ -143,17 +145,17 @@ func Rawtag_Upload(
 		index = _action.Index_Declare(&_model.Cache_SymclassData{
 			Context: file,
 			SrcData: &_model.Style_ClassData{
-				Attributes:            attributes,
-				Index:                 0,
-				Artifact:              artifact,
-				Definent:              raw.SymClasses[0],
-				SymClass:              symclass,
-				NativeStyle:           object,
-				Metadata:              &metadata,
-				Attachments:           attachments,
-				DebugClass:            debugclass,
-				StapleSnippet:         staple,
-				StyleSnippet:          stylesnippet,
+				Attributes:    attributes,
+				Index:         0,
+				Artifact:      artifact,
+				Definent:      raw.SymClasses[0],
+				SymClass:      symclass,
+				NativeStyle:   object,
+				Metadata:      &metadata,
+				Attachments:   attachments,
+				DebugClass:    debugclass,
+				StapleSnippet: staple,
+				StyleSnippet:  stylesnippet,
 			},
 		})
 		IndexMap[symclass] = index

@@ -74,9 +74,9 @@ func value_EvaluateIndexTraces(
 	return classMap
 }
 
-var op_attach = _config.Root.CustomOperations["attach"]
-var op_assign = _config.Root.CustomOperations["assign"]
-var op_locale = _config.Root.CustomOperations["locale"]
+var op_attach = _config.Root.CustomOps["attach"]
+var op_assign = _config.Root.CustomOps["assign"]
+var op_locale = _config.Root.CustomOps["locale"]
 
 type value_Parse_retype struct {
 	Classlist   []string
@@ -162,11 +162,11 @@ func value_Parse(
 			ch := rune(value[marker])
 
 			if inQuote {
-				if (ch == ' ' || ch == activeQuote) && entry.Len() > 0 {
+				if ch == ' ' || ch == activeQuote {
 					entrystring := entry.String()
-					if rune(entrystring[0]) != op_attach {
+					if entry.Len() > 0 && rune(entrystring[0]) != op_attach {
 						if rune(entrystring[0]) == op_locale {
-							scriber.WriteString(_fmt.Sprintf("_%s%s", fileData.Label, entrystring))
+							scriber.WriteString(_fmt.Sprintf("%s%s", fileData.Label, entrystring[1:]))
 						} else if rune(entrystring[0]) == op_assign {
 							entrystring := entrystring[1:]
 							found_Entry, found_Status := classMap[entrystring]
