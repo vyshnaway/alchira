@@ -52,7 +52,7 @@ func Execute(heading string) (Exitcode int) {
 		switch step {
 		case Execute_Step_Initialize:
 			if heading != "" {
-				S.Post(S.MAKE(S.Tag.H1(heading, S.Preset.Title), []string{}))
+				S.Post(S.MAKE(S.Tag.H1(heading, S.Preset.Title, S.Style.AS_Bold), []string{}))
 				heading = ""
 			}
 			fallthrough
@@ -157,7 +157,7 @@ func Execute(heading string) (Exitcode int) {
 						}
 					} else {
 						report = S.MAKE(
-							S.Tag.H4("Unexpected error while creating watcher", S.Preset.Failed),
+							S.Tag.H4("Unexpected error while creating watcher", S.Preset.Failed, S.Style.AS_Bold),
 							[]string{S.Tag.Li(err.Error(), S.Preset.None)},
 						)
 						break

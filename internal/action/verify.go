@@ -56,7 +56,7 @@ func Verify_Setup() (Report string, Status verify_Setup_Status_enum) {
 		} else {
 			status = Verify_Setup_Status_Initialized
 			report = S.MAKE(
-				S.Tag.H4("Error Paths", S.Preset.Failed),
+				S.Tag.H4("Error Paths", S.Preset.Failed, S.Style.AS_Bold),
 				X.List_Props(O.FromMap(errors), []string{}, []string{}),
 				S.MakeList{TypeFunc: S.List.Bullets, Intent: 0, Preset: S.Preset.Failed, Styles: []string{}},
 			)

@@ -2,15 +2,41 @@ package compiler
 
 import (
 	_config "main/configs"
+	_action "main/internal/action"
 	K "main/internal/console"
 	_order_ "main/internal/order"
 	_stash "main/internal/stash"
+	_style "main/internal/style"
 	_model "main/models"
 	C "main/package/console"
+	_css "main/package/css"
 	_util "main/package/utils"
 	_map "maps"
 	_strconv "strconv"
 )
+
+func Update_Cache() {
+	_action.Index_Reset(0)
+
+	_config.Style_Reset()
+	_config.Delta_Reset()
+	_config.Manifest_Reset()
+
+	_stash.Reset()
+	_stash.Artifact_Update()
+	_stash.Library_Update()
+
+	index_scanned := _style.Cssfile_String(_util.Code_Uncomment(_config.Static.RootCSS, false, true, false), "INDEX | ")
+	_config.Manifest.Constants = index_scanned.Variables.ToMap()
+	for _, attachment := range index_scanned.Attachments {
+		if res := _action.Index_Find(attachment, _model.Style_ClassIndexMap{}); res.Index > 0 {
+			_config.Delta.IndexAttach = append(_config.Delta.IndexAttach, res.Index)
+		}
+	}
+	_config.Delta.IndexBuild = _css.Render_Sequence(index_scanned.Result, _config.Static.MINIFY)
+	_style.Hashrule_Upload()
+	_stash.Target_UpdateDirs()
+}
 
 func Accumulate() {
 	accumulated := _stash.Target_Accumulate()
@@ -76,12 +102,12 @@ func Accumulate() {
 	_config.Delta.Report.Errors = ""
 	if len(_config.Delta.Errors) > 0 {
 		_config.Delta.Report.Errors = C.MAKE(
-			C.Tag.H2(_strconv.Itoa(len(_config.Delta.Errors))+" Errors", C.Preset.Failed),
+			C.Tag.H2(_strconv.Itoa(len(_config.Delta.Errors))+" Errors", C.Preset.Failed, C.Style.AS_Bold),
 			errors,
 		)
 	} else {
 		_config.Delta.Report.Errors = C.MAKE(
-			C.Tag.H2("Zero Errors", C.Preset.Text),
+			C.Tag.H2("Zero Errors", C.Preset.Text, C.Style.AS_Bold),
 			errors,
 		)
 	}

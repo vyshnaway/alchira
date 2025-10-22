@@ -29,13 +29,13 @@ func parse_AssignMerge(
 		found := _action.Index_Find(classname, _model.Style_ClassIndexMap{})
 		if found.Group == _model.Style_Type_Library {
 			classdata := _action.Index_Fetch(found.Index)
-			classdata.SrcData.NativeStyle.PropRange(func(k, v string) {
+			classdata.SrcData.NativeRawStyle.PropRange(func(k, v string) {
 				if _string.HasPrefix(k, "--") {
 					variables.Set(k, v)
 				}
 			})
 			attachments = append(attachments, classdata.SrcData.Attachments...)
-			result.Merge(classdata.SrcData.NativeStyle)
+			result.Merge(classdata.SrcData.NativeRawStyle)
 		}
 	}
 

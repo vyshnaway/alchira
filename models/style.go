@@ -35,18 +35,20 @@ type Style_Metadata struct {
 }
 
 type Style_ClassData struct {
-	Attributes            map[string]string
-	Index                 int
-	Metadata              *Style_Metadata
-	Artifact              string
-	Definent              string
-	SymClass              string
-	DebugClass            string
-	Attachments           []string
-	NativeStyle           *css.T_Block
-	ExportStyle           *css.T_Block
-	StapleSnippet         string
-	StyleSnippet          *css.T_Block
+	Attributes        map[string]string
+	Index             int
+	Metadata          *Style_Metadata
+	Artifact          string
+	Definent          string
+	SymClass          string
+	DebugClass        string
+	Attachments       []string
+	NativeRawStyle    *css.T_Block
+	ExportRawStyle    *css.T_Block
+	NativeStaple      string
+	ExportStaple      string
+	NativeAttachStyle *css.T_Block
+	ExportAttachStyle *css.T_Block
 }
 
 type Style_Dictionary map[string]map[int]string

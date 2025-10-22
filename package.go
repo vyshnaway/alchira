@@ -144,6 +144,7 @@ func main() {
 	case "install":
 		{
 			S.Post(S.Tag.H3("Installing Artifacts", S.Preset.Primary, S.Style.AS_Bold))
+			S.Post("\n")
 			setup_report, setup_status := _action.Verify_Setup()
 
 			switch setup_status {
@@ -154,12 +155,13 @@ func main() {
 				fallthrough
 			case _action.Verify_Setup_Status_Verified:
 				if config_message, config_ok := _action.Verify_Configs(true); config_ok {
-					if update_ok, update_message, update_files := _compiler.Artifact_Install(); update_ok {
-						S.Post(update_message)
+					update_ok, update_message, update_files := _compiler.Artifact_Install()
+					if update_ok {
 						_fileman.Write_Bulk(update_files)
 						S.Post(S.Tag.H4("Artifacts Updated", S.Preset.Success, S.Style.AS_Bold))
 					} else {
 						S.Post(S.Tag.H4("Artifacts not updated due to pending errors on dryrun.", S.Preset.Failed, S.Style.AS_Bold))
+						S.Post(update_message)
 						exitcode = 1
 					}
 				} else {
@@ -173,7 +175,7 @@ func main() {
 			_action.Sync_RootDocs()
 
 			S.Post(S.MAKE(
-				S.Tag.H1(corecaps, S.Preset.Title),
+				S.Tag.H1(corecaps+" @ v"+_config.Root.Version, S.Preset.Title, S.Style.AS_Bold),
 				[]string{_string.Trim(_config.Sync_References["alerts"].Content, "\t\r\n ")},
 			))
 
@@ -193,7 +195,7 @@ func main() {
 					}
 					return res
 				}()),
-				S.Tag.H4("For more information visit : "+_config.Root.Url.Site, S.Preset.Tertiary),
+				S.Tag.H4("For more information visit : "+_config.Root.Url.Site, S.Preset.Tertiary, S.Style.AS_Bold),
 			}))
 		}
 	}

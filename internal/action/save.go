@@ -57,7 +57,7 @@ func Save_Hashrule() (Report string, Status bool) {
 	}
 
 	report := S.MAKE(
-		S.Tag.H4("Hashrule error: "+hashrule_path, S.Preset.Failed),
+		S.Tag.H4("Hashrule error: "+hashrule_path, S.Preset.Failed, S.Style.AS_Bold),
 		errors,
 		S.MakeList{TypeFunc: S.List.Bullets, Intent: 0, Preset: S.Preset.Failed, Styles: []string{S.Style.AS_Bold}},
 	)

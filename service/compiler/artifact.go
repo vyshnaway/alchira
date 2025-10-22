@@ -92,7 +92,7 @@ func artifact_Fetch(identifier string, source string) (Files map[string]string, 
 func Artifact_Install() (Status bool, Report string, Files map[string]string) {
 	files := map[string]string{}
 	responses := map[string]string{}
-	status := false
+	status := true
 	report := ""
 
 	if _config.Static.Artifacts_Sources != nil {
@@ -108,6 +108,7 @@ func Artifact_Install() (Status bool, Report string, Files map[string]string) {
 					responses[identifier] = S.Tag.Span("Successfull", S.Preset.Success)
 				} else {
 					responses[identifier] = S.Tag.Span("Unavailable", S.Preset.Failed)
+					status = false
 				}
 			}()
 		}
@@ -120,5 +121,6 @@ func Artifact_Install() (Status bool, Report string, Files map[string]string) {
 		X.List_Props(object.FromMap(responses), S.Preset.None, S.Preset.None),
 		S.MakeList{Intent: 0, TypeFunc: S.List.Bullets, Preset: S.Preset.Text},
 	)
+
 	return status, report, files
 }

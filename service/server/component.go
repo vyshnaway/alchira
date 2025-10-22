@@ -27,24 +27,19 @@ func Component(symclass string, context models.Style_ClassIndexMap) T_Component_
 		artifact := target.Artifact(r.Index)
 		attributes = artifact.Attributes
 		summon = r.Data.SrcData.Metadata.SummonSnippet
-		staple.WriteString(r.Data.SrcData.StapleSnippet)
+		staple.WriteString(r.Data.SrcData.NativeStaple)
 
 		block := css.NewBlock()
-		block.SetBlock("._", r.Data.SrcData.NativeStyle)
+		block.SetBlock("._", r.Data.SrcData.NativeRawStyle)
 		nativestyle.WriteString(css.Render_Switched(block, true))
-		attachstyle.WriteString(css.Render_Vendored(r.Data.SrcData.StyleSnippet, true))
+		attachstyle.WriteString(css.Render_Vendored(r.Data.SrcData.NativeAttachStyle, true))
 
 		for _, attachment := range r.Data.SrcData.Attachments {
 			if found := action.Index_Find(attachment, context); found.Index > 0 {
-				attachstyle.WriteString(css.Render_Vendored(found.Data.SrcData.NativeStyle, true))
-				staple.WriteString(found.Data.SrcData.StapleSnippet)
+				attachstyle.WriteString(css.Render_Vendored(found.Data.SrcData.NativeRawStyle, true))
+				staple.WriteString(found.Data.SrcData.NativeStaple)
 			}
 		}
-	}
-
-	rootcss := ""
-	if Refer.WebviewState["live-preview-option-project-index"] == true {
-		rootcss = configs.Delta.IndexBuild
 	}
 
 	return T_Component_return{
@@ -52,7 +47,7 @@ func Component(symclass string, context models.Style_ClassIndexMap) T_Component_
 		Summon:     summon,
 		Staple:     staple.String(),
 		Symclass:   symclass,
-		Rootcss:    rootcss,
+		Rootcss:    configs.Delta.IndexBuild,
 		Compcss:    nativestyle.String() + attachstyle.String(),
 	}
 }

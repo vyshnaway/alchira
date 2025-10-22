@@ -92,18 +92,18 @@ func Cssfile_Collection(files []*_model.File_Stash) cssfile_Collection_return {
 					SummonSnippet: "",
 				}
 				classdata := &_model.Style_ClassData{
-					Attributes:            map[string]string{},
-					Index:                 0,
-					Artifact:              artifact,
-					Definent:              selector,
-					SymClass:              classname,
-					Metadata:              &metadata,
-					NativeStyle:           object,
-					ExportStyle:           object,
-					Attachments:           attachments,
-					DebugClass:            file.DebugFront + "_" + _util.String_Filter(classname, []rune{}, []rune{}, []rune{'$', '/'}),
-					StapleSnippet:         "",
-					StyleSnippet: func() *_css.T_Block {
+					Attributes:     map[string]string{},
+					Index:          0,
+					Artifact:       artifact,
+					Definent:       selector,
+					SymClass:       classname,
+					Metadata:       &metadata,
+					NativeRawStyle: object,
+					ExportRawStyle: object,
+					Attachments:    attachments,
+					DebugClass:     file.DebugFront + "_" + _util.String_Filter(classname, []rune{}, []rune{}, []rune{'$', '/'}),
+					NativeStaple:   "",
+					NativeAttachStyle: func() *_css.T_Block {
 						if o, v := object.GetBlock("[]"); o {
 							temp := _css.NewBlock()
 							temp.SetBlock(selector, v)

@@ -47,9 +47,9 @@ func Generate_Files() (Files map[string]string, Report string) {
 	}
 	for _, a := range attachments {
 		data := _action.Index_Fetch(a)
-		attach_styles.Merge(data.SrcData.StyleSnippet)
-		if len(data.SrcData.StapleSnippet) > 0 {
-			attach_staples.WriteString(data.SrcData.StapleSnippet)
+		attach_styles.Merge(data.SrcData.NativeAttachStyle)
+		if len(data.SrcData.NativeStaple) > 0 {
+			attach_staples.WriteString(data.SrcData.NativeStaple)
 		}
 	}
 	staple_sheet := attach_staples.String()
@@ -70,7 +70,7 @@ func Generate_Files() (Files map[string]string, Report string) {
 			val: _css.Render_Switched(func() *_css.T_Block {
 				result := _css.NewBlock()
 				for _, i := range _config.Style.PublishIndexMap {
-					result.SetBlock(i.ClassName, _action.Index_Fetch(i.ClassIndex).SrcData.NativeStyle)
+					result.SetBlock(i.ClassName, _action.Index_Fetch(i.ClassIndex).SrcData.NativeRawStyle)
 				}
 				return result
 			}(), _config.Static.MINIFY),
@@ -131,9 +131,9 @@ func Generate_Files() (Files map[string]string, Report string) {
 		_config.Delta.Report.MemChart = func() string {
 			var heading string
 			if len(_config.Delta.Errors) > 0 {
-				heading = S.Tag.H2(_config.Delta.FinalMessage, S.Preset.Failed)
+				heading = S.Tag.H2(_config.Delta.FinalMessage, S.Preset.Failed, S.Style.AS_Bold)
 			} else {
-				heading = S.Tag.H2(_config.Delta.FinalMessage, S.Preset.Success)
+				heading = S.Tag.H2(_config.Delta.FinalMessage, S.Preset.Success, S.Style.AS_Bold)
 			}
 			return S.MAKE(
 				heading,
