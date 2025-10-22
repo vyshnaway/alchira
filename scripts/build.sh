@@ -2,7 +2,7 @@
 
 TIME_STAMP=$(date +%s)
 
-OUT_DIR=exec
+OUT_DIR=bin
 SRC_DIR=source
 
 echo "Cleaning up existing binaries..."
