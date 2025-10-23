@@ -103,10 +103,7 @@ func Accumulate() {
 			errors,
 		)
 	} else {
-		_config.Delta.Report.Errors = C.MAKE(
-			C.Tag.H2("Zero Errors", C.Preset.Text, C.Style.AS_Bold),
-			errors,
-		)
+		_config.Delta.Report.Errors = ""
 	}
 }
 
@@ -140,10 +137,10 @@ func Organize() (AritfactFiles map[string]string, Attachments []int) {
 	Accumulate()
 	artifact_files := map[string]string{}
 	tracks_ := _stash.Target_GetTracks()
-	// _config.Delta.FinalMessage = "Confirm a clean state before triggering the production build."
-	if _config.Static.WATCH {
-		_config.Delta.FinalMessage = _strconv.Itoa(len(_config.Delta.Errors)) + " Errors."
-	} else if _config.Static.Command == "preview" {
+	_config.Delta.FinalMessage = _strconv.Itoa(len(_config.Delta.Errors)) + " Errors."
+
+	switch _config.Static.Command {
+	case "preview":
 		res, _ := _order_.Optimize(tracks_.ClassTracks, false, _config.Static.Argument, _model.Config_Archive{})
 		SaveClassRefs(*res.Result)
 
@@ -152,7 +149,7 @@ func Organize() (AritfactFiles map[string]string, Attachments []int) {
 		} else {
 			_config.Delta.FinalMessage = "Preview verified with no major errors. Procceed to 'publish' using a valid key."
 		}
-	} else if _config.Static.Command == "publish" {
+	case "publish":
 		if len(_config.Delta.Errors) > 0 {
 			res, _ := _order_.Optimize(tracks_.ClassTracks, false, _config.Static.Argument, archive_Build())
 			SaveClassRefs(*res.Result)

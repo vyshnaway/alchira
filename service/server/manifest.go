@@ -19,14 +19,14 @@ type R_Manifest_IO struct {
 	Attributes  []string          `json:"attributes"`
 	CustomTags  []string          `json:"customtags"`
 	SwitchMap   map[string]string `json:"switchmap"`
-	Hashrules   map[string]string `json:"hashrules"`
-	Constants   map[string]string `json:"constants"`
 	AssistFile  bool              `json:"assistfile"`
 	WatchFiles  []string          `json:"watchfiles"`
 	LiveCursor  bool              `json:"livecursor"`
 }
 
 type R_Manifest_WS struct {
+	Hashrules    map[string]string             `json:"hashrules"`
+	Constants    map[string]string             `json:"constants"`
 	Lodashes     []string                      `json:"lodashes"`
 	Assignable   []string                      `json:"assignable"`
 	Symclasses   map[string]int                `json:"symclasses"`
@@ -165,15 +165,15 @@ Return:
 			WebviewUrl:  Refer.Url,
 			WebviewPort: Refer.Port,
 			Attributes:  attributes,
-			Constants:   constants,
 			CustomTags:  configs.Static.CustomTags,
 			Environment: configs.Archive.Environment,
-			Hashrules:   hashrules,
 			SwitchMap:   switchmap,
 			WatchFiles:  watchfiles,
 			AssistFile:  assistfile,
 			LiveCursor:  Refer.LiveCursor,
 		}, R_Manifest_WS{
+			Hashrules:    hashrules,
+			Constants:    constants,
 			Assignable:   assignable,
 			Symclasses:   symclasses,
 			SymclassData: symclassdata,

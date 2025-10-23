@@ -114,7 +114,7 @@ func Generate_Files() (Files map[string]string, Report string) {
 		_map.Copy(files, target.SummonFiles(style_sheet, block_style, block_on, staple_sheet))
 	}
 
-	if !_config.Static.WATCH && !_config.Static.DEBUG {
+	if !_config.Static.WATCH {
 		memchart := O.New[string, string]()
 		for _, i := range render_frags {
 			memchart.Set(
