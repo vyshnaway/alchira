@@ -76,7 +76,7 @@ func main() {
 	_config.Static.Argument = argone
 	_config.Static.DEBUG = command == "debug"
 	_config.Static.MINIFY = !_config.Static.DEBUG
-	_config.Static.DRYRUN = command == "server"
+	_config.Static.SERVER = command == "server"
 	_config.Static.WATCH = ((command == "debug" || command == "preview") && argone == "-w") || command == "server"
 	_config.Static.ProjectName = _util.String_Filter(projectname, []rune{}, []rune{}, []rune{})
 	_config.Static.ProjectVersion = projectversion

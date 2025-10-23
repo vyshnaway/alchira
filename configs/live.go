@@ -10,7 +10,7 @@ var Static = _model.Cache_Static{
 	WATCH:             false,
 	DEBUG:             false,
 	MINIFY:            false,
-	DRYRUN:            false,
+	SERVER:            false,
 	ProjectName:       "",
 	ProjectVersion:    "",
 	Command:           "",

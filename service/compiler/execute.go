@@ -105,15 +105,14 @@ func Execute(heading string) (Exitcode int) {
 
 		case Execute_Step_UpdateCache:
 			Update_Cache()
-			if _config.Static.DRYRUN {
+			if _config.Static.SERVER {
 				Accumulate()
 			}
 			fallthrough
 
 		case Execute_Step_GenerateFiles:
-			if !_config.Static.DRYRUN {
+			if !_config.Static.SERVER {
 				outfiles, report = Generate_Files()
-
 				if len(outfiles) > 0 {
 					save_action.Wait()
 					save_action.Add(1)
@@ -141,7 +140,7 @@ func Execute(heading string) (Exitcode int) {
 					if w, err := _watcher.Quick(watch_dirs, ignore_dirs, interval); err == nil {
 						WATCHER = w
 
-						if !_config.Static.DRYRUN {
+						if !_config.Static.SERVER {
 							sigs := make(chan _os.Signal, 1)
 							_signal.Notify(sigs, _syscall.SIGINT)
 
@@ -244,7 +243,7 @@ func Execute(heading string) (Exitcode int) {
 
 		ExecuteMutex.Unlock()
 		if _config.Static.WATCH {
-			if !_config.Static.DRYRUN && len(report) > 0 {
+			if !_config.Static.SERVER && len(report) > 0 {
 				S.Post(X.Report(heading, []string{}, report))
 				report = ""
 				heading = ""

@@ -21,6 +21,7 @@ import (
 func Generate_Files() (Files map[string]string, Report string) {
 	files := map[string]string{}
 
+	// Initializing attachments with file binds.
 	artifact_files, attachments := Organize()
 	attachments = append(attachments, _config.Delta.IndexAttach...)
 	_map.Copy(files, artifact_files)

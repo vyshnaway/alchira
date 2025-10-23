@@ -104,6 +104,7 @@ func Sync_ProxyMapDirs(proxyMaps []_model.Config_ProxyMap) map[string]_model.Con
 				_slice.Collect(_map.Keys(proxystorage.Extensions)),
 				[]string{_config.Root.Extension},
 				[]string{proxystorage.Stylesheet},
+				!_config.Static.SERVER,
 			)
 			if err == nil && len(fileContents) > 0 {
 				proxystorage.Filepath_to_Content = fileContents

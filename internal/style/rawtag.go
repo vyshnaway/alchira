@@ -186,12 +186,12 @@ func Rawtag_Upload(
 				Metadata:          &metadata,
 				Attachments:       attachments,
 				DebugClass:        debugclass,
-				ExportStaple:      exportStaple, //
-				NativeStaple:      nativeStaple, //
+				ExportStaple:      exportStaple,
+				NativeStaple:      nativeStaple,
 				ExportRawStyle:    exportRawStyle,
 				NativeRawStyle:    nativeRawStyle,
-				ExportAttachStyle: exportAttachStyle, //
-				NativeAttachStyle: nativeAttachStyle, //
+				ExportAttachStyle: exportAttachStyle,
+				NativeAttachStyle: nativeAttachStyle,
 			},
 		})
 

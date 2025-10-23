@@ -26,7 +26,7 @@ type Cache_Static struct {
 	WATCH             bool
 	DEBUG             bool
 	MINIFY            bool
-	DRYRUN            bool
+	SERVER            bool
 	Command           string
 	Argument          string
 	RootCSS           string
