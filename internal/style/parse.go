@@ -11,7 +11,7 @@ import (
 	_model "main/models"
 )
 
-type Parse_return struct {
+type R_Parse struct {
 	Result      *_css.T_Block
 	Attachments []string
 	Variables   *O.T[string, string]
@@ -20,7 +20,7 @@ type Parse_return struct {
 func parse_AssignMerge(
 	classlist []string,
 	// export0_native1 bool,
-) Parse_return {
+) R_Parse {
 	attachments := []string{}
 	result := _css.NewBlock()
 	variables := O.New[string, string]()
@@ -39,7 +39,7 @@ func parse_AssignMerge(
 		}
 	}
 
-	return Parse_return{
+	return R_Parse{
 		Result:      result,
 		Attachments: attachments,
 		Variables:   variables,
@@ -122,7 +122,7 @@ func Parse_CssSnippet(
 	initial string,
 	srcselector string,
 	flatten bool,
-) Parse_return {
+) R_Parse {
 
 	scanned := Parse_Filter(content)
 	assigned := parse_AssignMerge(scanned.Assign)
@@ -172,7 +172,7 @@ func Parse_CssSnippet(
 		target.SetBlock(key, sub_result.Result)
 	})
 
-	return Parse_return{
+	return R_Parse{
 		Result:      output,
 		Attachments: attachments,
 		Variables:   variables,

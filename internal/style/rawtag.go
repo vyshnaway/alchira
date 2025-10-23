@@ -13,21 +13,33 @@ import (
 	_string "strings"
 )
 
+var lodash_tag = "<!--" + lodash_rune + "-->"
 var lodash_rune = string(_config.Root.CustomOps["lodash"])
-var regex_symzero = _regexp.MustCompile(`^[-_]\$`)
-var regex_lodash = _regexp.MustCompile(`\.` + lodash_rune)
+var lodash_regex = _regexp.MustCompile(`\.` + lodash_rune)
+var symzero_regex = _regexp.MustCompile(`^[-_]\$`)
 
-var lodash_tag = "<!--" + string(_config.Root.CustomOps["lodash"]) + "-->"
-
-func rawtag_stylePreprocess(
+func lodashstyle_process(
 	content string,
 	file *_model.File_Stash,
-	export0_native1 bool,
-) string {
-	if !export0_native1 {
-		return _string.ReplaceAll(content, lodash_tag, file.Label)
-	}
-	return _util.Code_Uncomment(content, true, true, false)
+	flatten bool,
+	initial string,
+	selector string,
+) (
+	NativeResult R_Parse,
+	AttachResult R_Parse,
+) {
+	lodash_replaced := _string.ReplaceAll(content, lodash_tag, file.Label)
+	nativeAttachResult := Parse_CssSnippet(
+		_util.Code_Uncomment(lodash_replaced, true, true, false),
+		selector, initial, flatten,
+	)
+
+	exportAttachResult := Parse_CssSnippet(
+		_util.Code_Uncomment(content, true, true, false),
+		selector, initial, flatten,
+	)
+
+	return nativeAttachResult, exportAttachResult
 }
 
 func Rawtag_Upload(
@@ -35,7 +47,7 @@ func Rawtag_Upload(
 	file *_model.File_Stash,
 	IndexMap _model.Style_ClassIndexMap,
 	metadata_map _model.File_SymclassIndexMap,
-) rawtag_Upload_return {
+) R_Rawtag_Upload {
 	errors := []string{}
 	diagnostics := []_model.File_Diagnostic{}
 	attachments := []string{}
@@ -44,16 +56,16 @@ func Rawtag_Upload(
 
 	symzero := ""
 	if len(raw.SymClasses) > 0 {
-		symzero = regex_symzero.ReplaceAllString(raw.SymClasses[0], "$")
+		symzero = symzero_regex.ReplaceAllString(raw.SymClasses[0], "$")
 	}
-	var normalsymclass string
+	var normalized_symclass string
 	symclass := file.ClassFront
 	if forArtifact {
 		symclass += _string.ReplaceAll(symzero, "$$$", "$")
-		normalsymclass = _util.String_Filter(symclass, []rune{}, []rune{}, []rune{'$', '/'})
+		normalized_symclass = _util.String_Filter(symclass, []rune{}, []rune{}, []rune{'$', '/'})
 	} else {
 		symclass += string(symzero)
-		normalsymclass = _util.String_Filter(symclass, []rune{}, []rune{}, []rune{'$'})
+		normalized_symclass = _util.String_Filter(symclass, []rune{}, []rune{}, []rune{'$'})
 	}
 
 	found := _action.Index_Find(symclass, IndexMap)
@@ -68,24 +80,13 @@ func Rawtag_Upload(
 		} else {
 			scope = raw.Scope
 		}
-		debugclass := _fmt.Sprint(scope, file.DebugFront, "\\:", raw.RowIndex, "\\:", raw.ColIndex, "_", normalsymclass)
+		debugclass := _fmt.Sprint(scope, file.DebugFront, "\\:", raw.RowIndex, "\\:", raw.ColIndex, "_", normalized_symclass)
 
-		native_scanned := Parse_CssSnippet(
-			rawtag_stylePreprocess(raw.Styles[""], file, true),
-			_fmt.Sprint(raw.Scope, " : ", declaration, " | "),
-			_fmt.Sprint(raw.SymClasses[0]),
-			false,
+		native_scanned, export_scanned := lodashstyle_process(raw.Styles[""], file, false,
+			_fmt.Sprint(raw.Scope, " : ", declaration, " | "), raw.SymClasses[0],
 		)
-
-		export_scanned := Parse_CssSnippet(
-			rawtag_stylePreprocess(raw.Styles[""], file, false),
-			_fmt.Sprint(raw.Scope, " : ", declaration, " | "),
-			_fmt.Sprint(raw.SymClasses[0]),
-			false,
-		)
-
-		native_object := native_scanned.Result
-		export_object := export_scanned.Result
+		nativeRawStyle := native_scanned.Result
+		exportRawStyle := export_scanned.Result
 
 		attachments := append(attachments, native_scanned.Attachments...)
 		variables := native_scanned.Variables
@@ -93,21 +94,22 @@ func Rawtag_Upload(
 			if key != "" {
 				query := Hashrule_Render(key, declaration)
 				if query.Status {
-					substylescanned := Parse_CssSnippet(
-						rawtag_stylePreprocess(val, file, true),
+					native_scanned, export_scanned := lodashstyle_process(val, file, true,
 						_fmt.Sprint(raw.Scope, " : ", declaration, " | "),
 						_fmt.Sprint(raw.SymClasses[0], " // ", key),
-						true,
 					)
-					attachments = append(attachments, substylescanned.Attachments...)
-					variables.Copy(substylescanned.Variables)
-					if substylescanned.Result.Len() > 0 {
+
+					attachments = append(attachments, native_scanned.Attachments...)
+					variables.Copy(native_scanned.Variables)
+
+					if native_scanned.Result.Len() > 0 {
 						wrapperjson := _util.Code_JsonBuild(query.Wrappers, "")
-						if !forArtifact && regex_lodash.MatchString(wrapperjson) {
-							wrapperjson = " " + regex_lodash.ReplaceAllString(wrapperjson, "."+file.Label)
-							_fmt.Println(wrapperjson)
+						if !forArtifact && lodash_regex.MatchString(wrapperjson) {
+							wrapperjson = " " + lodash_regex.ReplaceAllString(wrapperjson, "."+file.Label)
+						} else {
+							exportRawStyle.SetBlock(wrapperjson, export_scanned.Result)
 						}
-						native_object.SetBlock(wrapperjson, substylescanned.Result)
+						nativeRawStyle.SetBlock(wrapperjson, native_scanned.Result)
 					}
 				} else {
 					errors = append(errors, query.Errorstring)
@@ -115,16 +117,6 @@ func Rawtag_Upload(
 				}
 			}
 		}
-
-		inner_style := Parse_CssSnippet(
-			rawtag_stylePreprocess(raw.Innertext, file, true),
-			_fmt.Sprint(raw.Scope, ":ATTACHMENT : ", file.FilePath, ":", raw.RowIndex, ":", raw.ColIndex, " | "),
-			raw.SymClasses[0],
-			true,
-		)
-
-		attachments = append(attachments, inner_style.Attachments...)
-		variables.Copy(inner_style.Variables)
 
 		artifact := _config.Archive.Name
 		if forArtifact {
@@ -138,6 +130,36 @@ func Rawtag_Upload(
 			}
 		}
 
+		exportAttachStyle := _css.NewBlock()
+		nativeAttachStyle := _css.NewBlock()
+		if raw.Elid == _config.Root.CustomTags["style"] {
+			nativeAttachResult, exportAttachResult := lodashstyle_process(raw.Innertext, file, true,
+				_fmt.Sprint(raw.Scope, ":ATTACHMENT : ", file.FilePath, ":", raw.RowIndex, ":", raw.ColIndex, " | "),
+				raw.SymClasses[0],
+			)
+
+			attachments = append(attachments, nativeAttachResult.Attachments...)
+			attachments = append(attachments, exportAttachResult.Attachments...)
+
+			variables.Copy(nativeAttachResult.Variables)
+			variables.Copy(exportAttachResult.Variables)
+
+			if ok, val := nativeAttachResult.Result.GetBlock("[]"); ok {
+				nativeAttachStyle = val
+			}
+
+			if ok, val := exportAttachResult.Result.GetBlock("[]"); ok {
+				nativeAttachStyle = val
+			}
+		}
+
+		exportStaple := ""
+		nativeStaple := ""
+		if raw.Elid == _config.Root.CustomTags["staple"] {
+			exportStaple = _util.Code_Strip(raw.Innertext, false, false, false, true)
+			nativeStaple = _string.ReplaceAll(exportStaple, lodash_tag, file.Label)
+		}
+
 		summon := ""
 		attributes := map[string]string{}
 		if raw.Elid == _config.Root.CustomTags["summon"] {
@@ -145,22 +167,12 @@ func Rawtag_Upload(
 			attributes = raw.Attributes
 		}
 
-		staple := ""
-		if raw.Elid == _config.Root.CustomTags["staple"] {
-			staple = _util.Code_Strip(raw.Innertext, false, false, true, true)
-		}
-
 		metadata := _model.Style_Metadata{
 			Info:          raw.Comments,
-			Skeleton:      native_object.Skeleton(),
+			Skeleton:      nativeRawStyle.Skeleton(),
 			Declarations:  []string{declaration},
 			Variables:     variables.ToMap(),
 			SummonSnippet: summon,
-		}
-
-		stylesnippet := _css.NewBlock()
-		if ok, val := inner_style.Result.GetBlock("[]"); ok {
-			stylesnippet = val
 		}
 
 		index = _action.Index_Declare(&_model.Cache_SymclassData{
@@ -171,21 +183,23 @@ func Rawtag_Upload(
 				Artifact:          artifact,
 				Definent:          raw.SymClasses[0],
 				SymClass:          symclass,
-				NativeRawStyle:    native_object,
-				ExportRawStyle:    export_object,
 				Metadata:          &metadata,
 				Attachments:       attachments,
 				DebugClass:        debugclass,
-				NativeStaple:      staple,
-				NativeAttachStyle: stylesnippet,
+				ExportStaple:      exportStaple, //
+				NativeStaple:      nativeStaple, //
+				ExportRawStyle:    exportRawStyle,
+				NativeRawStyle:    nativeRawStyle,
+				ExportAttachStyle: exportAttachStyle, //
+				NativeAttachStyle: nativeAttachStyle, //
 			},
 		})
-		IndexMap[symclass] = index
+
 		file.StyleData.UsedIn = append(file.StyleData.UsedIn, index)
 		metadata_map[symclass] = index
 	}
 
-	return rawtag_Upload_return{
+	return R_Rawtag_Upload{
 		Symclass:    symclass,
 		Index:       index,
 		Attachments: attachments,
@@ -194,7 +208,7 @@ func Rawtag_Upload(
 	}
 }
 
-type rawtag_Upload_return struct {
+type R_Rawtag_Upload struct {
 	Symclass    string
 	Index       int
 	Attachments []string

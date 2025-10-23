@@ -5,21 +5,22 @@ import (
 	_action "main/internal/action"
 	_script "main/internal/script"
 	_model "main/models"
+	"main/package/utils"
 	_map "maps"
+	"slices"
 	_string "strings"
 )
 
 type Accumulator_return struct {
-	Report        string
-	GlobalClasses map[string]int
-	PublicClasses map[string]int
+	GlobalClasses []string
+	PublicClasses []string
 	FileManifests map[string]_model.File_LocalManifest
 }
 
 func (This *Class) Accumulator() Accumulator_return {
 	accumulate := Accumulator_return{
-		GlobalClasses: map[string]int{},
-		PublicClasses: map[string]int{},
+		GlobalClasses: []string{},
+		PublicClasses: []string{},
 		FileManifests: map[string]_model.File_LocalManifest{},
 	}
 
@@ -36,11 +37,15 @@ func (This *Class) Accumulator() Accumulator_return {
 		Diagnostics: []_model.File_Diagnostic{},
 	}
 
+	publics := []string{}
+	globals := []string{}
 	for _, file := range This.FileCache {
 		accumulate.FileManifests[file.Manifest.Lookup.Id] = file.Manifest
-		_map.Copy(accumulate.GlobalClasses, file.StyleData.GlobalClasses)
-		_map.Copy(accumulate.PublicClasses, file.StyleData.PublicClasses)
+		publics = append(publics, slices.Collect(_map.Keys(file.StyleData.PublicClasses))...)
+		globals = append(globals, slices.Collect(_map.Keys(file.StyleData.GlobalClasses))...)
 	}
+	accumulate.GlobalClasses = utils.String_Unique(globals)
+	accumulate.PublicClasses = utils.String_Unique(publics)
 
 	return accumulate
 }

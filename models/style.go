@@ -43,10 +43,10 @@ type Style_ClassData struct {
 	SymClass          string
 	DebugClass        string
 	Attachments       []string
-	NativeRawStyle    *css.T_Block
-	ExportRawStyle    *css.T_Block
 	NativeStaple      string
 	ExportStaple      string
+	NativeRawStyle    *css.T_Block
+	ExportRawStyle    *css.T_Block
 	NativeAttachStyle *css.T_Block
 	ExportAttachStyle *css.T_Block
 }

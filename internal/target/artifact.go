@@ -18,15 +18,15 @@ func Artifact(index int) _types_.Style_ExportStyle {
 	attributes := map[string]string{}
 
 	if style := _action.Index_Fetch(index); style != nil {
-		if len(style.SrcData.NativeStaple) > 0 {
+		if len(style.SrcData.ExportStaple) > 0 {
 			element = "staple"
-			innertext = style.SrcData.NativeStaple
+			innertext = style.SrcData.ExportStaple
 		} else if len(style.SrcData.Metadata.SummonSnippet) > 0 {
 			element = "summon"
 			innertext = style.SrcData.Metadata.SummonSnippet
 		} else {
 			element = "style"
-			innertext = style.SrcData.NativeAttachStyle.Format(true)
+			innertext = style.SrcData.ExportAttachStyle.Format(true)
 		}
 
 		if _string.Contains(style.SrcData.Definent, "$$$") {

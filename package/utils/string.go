@@ -137,3 +137,16 @@ func String_PadStart(s string, width int, padChar rune) string {
 	}
 	return s + _strings.Repeat(string(padChar), width-len(s))
 }
+
+func String_Unique[T comparable](input []T) []T {
+	set := make(map[T]struct{})
+	var result []T
+
+	for _, val := range input {
+		if _, exists := set[val]; !exists {
+			set[val] = struct{}{}
+			result = append(result, val)
+		}
+	}
+	return result
+}

@@ -180,13 +180,19 @@ func Render_Switched(refmap *T_Block, minify bool) string {
 				}
 
 				temp := v1
-				finalindex := len(wrappers)
+				finalIndex := len(wrappers)
 				wrappers = append(wrappers, k0)
 				_slice.Reverse(wrappers)
-				for index, wrapper := range wrappers {
-					if index != finalindex && wrapper[0] != '&' && wrappers[index+1][0] != '@' {
-						wrapper = "& " + wrapper
+
+				for index := 0; index < len(wrappers); index++ {
+					wrapper := wrappers[index]
+
+					if index != finalIndex && wrapper != "" && wrapper[0] != '&' {
+						if index+1 < len(wrappers) && wrappers[index+1] != "" && wrappers[index+1][0] != '@' {
+							wrapper = "& " + wrapper
+						}
 					}
+
 					t := temp
 					temp = NewBlock()
 					temp.SetBlock(wrapper, t)

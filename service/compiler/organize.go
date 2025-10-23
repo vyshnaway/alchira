@@ -39,11 +39,8 @@ func Update_Cache() {
 }
 
 func Accumulate() {
-	accumulated := _stash.Target_Accumulate()
-
-	_config.Style.Global___Index = accumulated.GlobalClasses
-	_config.Style.Public___Index = accumulated.PublicClasses
-	_config.Delta.Report.TargetDir = accumulated.Report
+	filemanifest, targetReport := _stash.Target_Accumulate()
+	_config.Delta.Report.TargetDir = targetReport
 
 	_config.Manifest.Group.Local = map[string]_model.File_SymclassIndexMap{}
 	_config.Manifest.Group.Global = map[string]_model.File_SymclassIndexMap{}
@@ -52,7 +49,7 @@ func Accumulate() {
 	_config.Delta.Lookup.TargetDir = map[string]_model.File_Lookup{}
 	_config.Delta.Diagnostic.TargetDir = []_model.File_Diagnostic{}
 
-	for key, val := range accumulated.FileManifests {
+	for key, val := range filemanifest {
 		_config.Manifest.Group.Local[key] = val.Local
 		_config.Delta.Lookup.TargetDir[key] = val.Lookup
 		_config.Delta.Error.TargetDir = append(_config.Delta.Error.TargetDir, val.Errors...)

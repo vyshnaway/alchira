@@ -19,7 +19,6 @@ import (
 )
 
 func Generate_Files() (Files map[string]string, Report string) {
-
 	files := map[string]string{}
 
 	artifact_files, attachments := Organize()
@@ -145,6 +144,11 @@ func Generate_Files() (Files map[string]string, Report string) {
 			)
 		}()
 	}
+
+	_config.Delta.Report.Constants = X.List_Catalog(
+		"Root Constants",
+		_slice.Collect(_map.Keys(_config.Manifest.Constants)),
+	)
 
 	var builder _string.Builder
 	for _, s := range []string{

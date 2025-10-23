@@ -5,8 +5,8 @@ import (
 	_config "main/configs"
 	_target "main/internal/target"
 	_model "main/models"
+	S "main/package/console"
 	_util "main/package/utils"
-	_string "strings"
 )
 
 type type_Cache struct {
@@ -55,5 +55,6 @@ func UtilsGetUsage() string {
 	for k, v := range chart {
 		result = append(result, _fmt.Sprintf("%s : %.2f Kb", k, float64(v)))
 	}
-	return _string.Join(result, "\r\n")
+
+	return S.MAKE("", result, S.MakeList{Preset: S.Preset.Tertiary, TypeFunc: S.List.Catalog})
 }

@@ -60,24 +60,31 @@ func (This *Class) Savefile(filepath string, content string, hashindex int) {
 			file.Manifest.Errors = append(file.Manifest.Errors, E.Errorstring)
 			file.Manifest.Diagnostics = append(file.Manifest.Diagnostics, E.Diagnostic)
 		} else {
-			var index_map _model.Style_ClassIndexMap
+			var loc_index_map _model.Style_ClassIndexMap
+			var ref_index_map _model.Style_ClassIndexMap
 			var metadata_map _model.File_SymclassIndexMap
 			switch tagdata.Scope {
 			case _model.Style_Type_Local:
 				metadata_map = file.Manifest.Local
-				index_map = file.StyleData.LocalClasses
+				loc_index_map = file.StyleData.LocalClasses
 			case _model.Style_Type_Global:
 				metadata_map = file.Manifest.Global
-				index_map = file.StyleData.GlobalClasses
+				loc_index_map = file.StyleData.GlobalClasses
+				ref_index_map = _config.Style.Global___Index
 			case _model.Style_Type_Public:
 				metadata_map = file.Manifest.Public
-				index_map = file.StyleData.PublicClasses
+				loc_index_map = file.StyleData.PublicClasses
+				ref_index_map = _config.Style.Public___Index
 			default:
-				index_map = _model.Style_ClassIndexMap{}
+				loc_index_map = _model.Style_ClassIndexMap{}
 				metadata_map = _model.File_SymclassIndexMap{}
 			}
 
-			response := _style.Rawtag_Upload(tagdata, &file, index_map, metadata_map)
+			response := _style.Rawtag_Upload(tagdata, &file, loc_index_map, metadata_map)
+			loc_index_map[response.Symclass] = response.Index
+			if ref_index_map != nil {
+				ref_index_map[response.Symclass] = response.Index;
+			}
 
 			file.Manifest.Errors = append(file.Manifest.Errors, response.Errors...)
 			file.Manifest.Diagnostics = append(file.Manifest.Diagnostics, response.Diagnostics...)

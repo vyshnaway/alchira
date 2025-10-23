@@ -111,10 +111,11 @@ func Artifact_Update() {
 			} else {
 				artifact_counter++
 				Rawtag_Upload_ := _style_.Rawtag_Upload(tagstyle, &file, _config.Style.Artifact_Index, metadatas)
-				styledata := _action.Index_Fetch(Rawtag_Upload_.Index)
-				if len(styledata.SrcData.Metadata.Declarations) == 1 {
+				if _, k := _config.Style.Artifact_Index[Rawtag_Upload_.Symclass]; !k {
 					symclasses = append(symclasses, Rawtag_Upload_.Symclass)
+					_config.Style.Artifact_Index[Rawtag_Upload_.Symclass] = Rawtag_Upload_.Index
 				}
+
 				file.Manifest.Errors = append(file.Manifest.Errors, Rawtag_Upload_.Errors...)
 				file.Manifest.Diagnostics = append(file.Manifest.Diagnostics, Rawtag_Upload_.Diagnostics...)
 			}

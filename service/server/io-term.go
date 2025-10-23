@@ -23,9 +23,6 @@ func IO_Term(command string, arguments []string, userpc bool) (Response string) 
 	case "errors":
 		result = configs.Manifest.Diagnostics
 
-	case "classcounter":
-		result = len(configs.Style.Index_to_Data)
-
 	case "exit":
 		return "0"
 

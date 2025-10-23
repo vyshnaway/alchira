@@ -106,18 +106,18 @@ func tag_Tab(repeat int, preset []string, styles ...string) string {
 }
 
 var Tag = struct {
-	H1   func(string, []string, ...string) string
-	H2   func(string, []string, ...string) string
-	H3   func(string, []string, ...string) string
-	H4   func(string, []string, ...string) string
-	H5   func(string, []string, ...string) string
-	H6   func(string, []string, ...string) string
-	P    func(string, []string, ...string) string
-	Span func(string, []string, ...string) string
-	Li   func(string, []string, ...string) string
-	Hr   func(string, []string, ...string) string
-	Br   func(int, []string, ...string) string
-	Tab  func(int, []string, ...string) string
+	H1   func(content string, preset []string, styles ...string) string
+	H2   func(content string, preset []string, styles ...string) string
+	H3   func(content string, preset []string, styles ...string) string
+	H4   func(content string, preset []string, styles ...string) string
+	H5   func(content string, preset []string, styles ...string) string
+	H6   func(content string, preset []string, styles ...string) string
+	P    func(content string, preset []string, styles ...string) string
+	Span func(content string, preset []string, styles ...string) string
+	Li   func(content string, preset []string, styles ...string) string
+	Hr   func(content string, preset []string, styles ...string) string
+	Br   func(repeat int,preset []string,styles ...string) string
+	Tab  func(repeat int,preset []string,styles ...string) string
 }{
 	H1:   tag_H1,
 	H2:   tag_H2,

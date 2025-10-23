@@ -9,12 +9,11 @@ import (
 	O "main/package/object"
 	_util "main/package/utils"
 	_map "maps"
-	_slice "slices"
 	_strconv "strconv"
 )
 
 func Target_UpdateDirs() {
-	
+
 	for key, data := range Cache.Targetdir {
 		data.ClearFiles()
 		delete(Cache.Targetdir, key)
@@ -39,32 +38,38 @@ func Target_UpdateDirs() {
 	}
 }
 
-func Target_Accumulate() _target.Accumulator_return {
-	accumulated := _target.Accumulator_return{
-		GlobalClasses: map[string]int{},
-		PublicClasses: map[string]int{},
-		FileManifests: map[string]_model.File_LocalManifest{},
-	}
+func Target_Accumulate() (
+	FileManifests map[string]_model.File_LocalManifest,
+	Report string,
+) {
+	global_counter := 0
+	public_counter := 0
+	globals := O.New[string, []string]()
+	publics := O.New[string, []string]()
+	fileManifests := map[string]_model.File_LocalManifest{}
 
-	sections := O.New[string, []string]()
 	for _, target := range Cache.Targetdir {
+
 		C := target.Accumulator()
-		_map.Copy(accumulated.GlobalClasses, C.GlobalClasses)
-		_map.Copy(accumulated.PublicClasses, C.PublicClasses)
-		_map.Copy(accumulated.FileManifests, C.FileManifests)
-		symclasses := append(
-			_slice.Collect(_map.Keys(C.GlobalClasses)),
-			_slice.Collect(_map.Keys(C.PublicClasses))...,
+		global_counter += len(C.GlobalClasses)
+		public_counter += len(C.PublicClasses)
+		_map.Copy(fileManifests, C.FileManifests)
+
+		globals.Set(
+			"["+target.Target+" -> "+target.Source+"]: "+_strconv.Itoa(len(C.GlobalClasses)),
+			C.GlobalClasses,
 		)
-		sections.Set(
-			"["+target.Target+" -> "+target.Source+"]: "+_strconv.Itoa(len(symclasses)),
-			symclasses,
+		publics.Set(
+			"["+target.Target+" -> "+target.Source+"]: "+_strconv.Itoa(len(C.PublicClasses)),
+			C.PublicClasses,
 		)
 	}
-	counter := len(accumulated.GlobalClasses) + len(accumulated.PublicClasses)
-	accumulated.Report = X.List_Chart("Globals: "+_strconv.Itoa(counter)+" Symclasses", sections)
 
-	return accumulated
+	counter := global_counter + public_counter
+	report :=
+		X.List_Chart("Globals: "+_strconv.Itoa(counter)+" Symclasses", globals) +
+		X.List_Chart("Publics: "+_strconv.Itoa(counter)+" Symclasses", publics)
+	return fileManifests, report
 }
 
 func Target_GetTracks() _target.GetTracks_return {

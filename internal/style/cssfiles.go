@@ -8,7 +8,6 @@ import (
 
 	_model "main/models"
 	_util "main/package/utils"
-	_map "maps"
 )
 
 type R_Cssfile_Parse struct {
@@ -46,6 +45,7 @@ func Cssfile_String(content string, initial string) R_Cssfile_Parse {
 type cssfile_Collection_return struct {
 	MetadataCollection _model.File_SymclassIndexMap
 	SelectorList       []string
+	SelectorMap        map[string]int
 }
 
 func Cssfile_Collection(files []*_model.File_Stash) cssfile_Collection_return {
@@ -125,10 +125,10 @@ func Cssfile_Collection(files []*_model.File_Stash) cssfile_Collection_return {
 		}
 	}
 
-	_map.Copy(_config.Style.Library__Index, selectors)
 
 	return cssfile_Collection_return{
 		MetadataCollection: indexMetaCollection,
 		SelectorList:       selectorList,
+		SelectorMap:        selectors,
 	}
 }
