@@ -9,6 +9,7 @@ import (
 	_style "main/internal/style"
 	_model "main/models"
 	_util "main/package/utils"
+	"maps"
 )
 
 func (This *Class) Savefile(filepath string, content string, hashindex int) {
@@ -32,12 +33,12 @@ func (This *Class) Savefile(filepath string, content string, hashindex int) {
 		_fmt.Sprint(This.Label, string(_config.Lodash_rune), _util.String_EnCounter(hashindex)),
 	)
 
-	parse_response := _script.Rider(&file, This.ExtnsProps[file.Extension], _script.E_Action_Read)
+	parse_response := _script.Rider(file, This.ExtnsProps[file.Extension], _script.E_Action_Read)
 	file.StyleData.ClassTracks = parse_response.ClassesList
 	file.StyleData.Attachments = parse_response.Attachments
 	file.Midway = parse_response.Scribed
 
-	file.Manifest.Lookup = _model.File_Lookup{
+	file.Lookup = _model.File_Lookup{
 		Id:   file.TargetPath,
 		Type: _model.File_Type_Target,
 	}
@@ -48,29 +49,29 @@ func (This *Class) Savefile(filepath string, content string, hashindex int) {
 				"Symclass missing declaration scope.",
 				[]string{_fmt.Sprint(file.TargetPath, ":", tagdata.RowIndex, ":", tagdata.ColIndex)},
 			)
-			file.Manifest.Errors = append(file.Manifest.Errors, E.Errorstring)
-			file.Manifest.Diagnostics = append(file.Manifest.Diagnostics, E.Diagnostic)
+			file.Errors = append(file.Errors, E.Errorstring)
+			file.Diagnostics = append(file.Diagnostics, E.Diagnostic)
 		} else if len(tagdata.SymClasses) > 1 {
 			E := X.Error_Standard(
 				"Multiple SymClasses declaration scope.",
 				[]string{_fmt.Sprint(file.TargetPath, ":", tagdata.RowIndex, ":", tagdata.ColIndex)},
 			)
-			file.Manifest.Errors = append(file.Manifest.Errors, E.Errorstring)
-			file.Manifest.Diagnostics = append(file.Manifest.Diagnostics, E.Diagnostic)
+			file.Errors = append(file.Errors, E.Errorstring)
+			file.Diagnostics = append(file.Diagnostics, E.Diagnostic)
 		} else {
 			var loc_index_map _model.Style_ClassIndexMap
 			var ref_index_map _model.Style_ClassIndexMap
 			var metadata_map _model.File_SymclassIndexMap
 			switch tagdata.Scope {
 			case _model.Style_Type_Local:
-				metadata_map = file.Manifest.Locals
+				metadata_map = file.LocalMap
 				loc_index_map = file.StyleData.LocalClasses
 			case _model.Style_Type_Global:
-				metadata_map = file.Manifest.Globals
+				metadata_map = file.GlobalMap
 				loc_index_map = file.StyleData.GlobalClasses
 				ref_index_map = _config.Style.Global___Index
 			case _model.Style_Type_Public:
-				metadata_map = file.Manifest.Publics
+				metadata_map = file.PublicMap
 				loc_index_map = file.StyleData.PublicClasses
 				ref_index_map = _config.Style.Public___Index
 			default:
@@ -78,18 +79,22 @@ func (This *Class) Savefile(filepath string, content string, hashindex int) {
 				metadata_map = _model.File_SymclassIndexMap{}
 			}
 
-			response := _style.Rawtag_Upload(tagdata, &file, loc_index_map, metadata_map)
+			response := _style.Rawtag_Upload(tagdata, file, loc_index_map, metadata_map)
 			loc_index_map[response.Symclass] = response.Index
 			if ref_index_map != nil {
 				ref_index_map[response.Symclass] = response.Index
 			}
 
-			file.Manifest.Errors = append(file.Manifest.Errors, response.Errors...)
-			file.Manifest.Diagnostics = append(file.Manifest.Diagnostics, response.Diagnostics...)
+			file.Errors = append(file.Errors, response.Errors...)
+			file.Diagnostics = append(file.Diagnostics, response.Diagnostics...)
 		}
 	}
+	
+	maps.Copy(file.MixedMap, file.LocalMap)
+	maps.Copy(file.MixedMap, file.GlobalMap)
+	maps.Copy(file.MixedMap, file.PublicMap)
 
-	This.FileCache[filepath] = &file
+	This.FileCache[filepath] = file
 }
 
 func (This *Class) UpdateCache() {

@@ -10,22 +10,22 @@ import (
 )
 
 type type_Cache struct {
-	Libraries map[string]_model.File_Stash
-	Artifacts map[string]_model.File_Stash
-	Targetdir map[string]_target.Class
+	Libraries map[string]*_model.File_Stash
+	Artifacts map[string]*_model.File_Stash
+	Targetdir map[string]*_target.Class
 }
 
 var Cache = type_Cache{
-	Libraries: map[string]_model.File_Stash{},
-	Artifacts: map[string]_model.File_Stash{},
-	Targetdir: map[string]_target.Class{},
+	Libraries: map[string]*_model.File_Stash{},
+	Artifacts: map[string]*_model.File_Stash{},
+	Targetdir: map[string]*_target.Class{},
 }
 
 func Reset() {
 	Cache = type_Cache{
-		Libraries: map[string]_model.File_Stash{},
-		Artifacts: map[string]_model.File_Stash{},
-		Targetdir: map[string]_target.Class{},
+		Libraries: map[string]*_model.File_Stash{},
+		Artifacts: map[string]*_model.File_Stash{},
+		Targetdir: map[string]*_target.Class{},
 	}
 }
 

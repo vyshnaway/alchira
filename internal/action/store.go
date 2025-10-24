@@ -27,7 +27,7 @@ func Store(
 	target string,
 	source string,
 	label string,
-) _model.File_Stash {
+) *_model.File_Stash {
 	isLibrary := fileGroup == Store_FileGroup_Library
 	isArtifact := fileGroup == Store_FileGroup_Artifact
 	fromBlueprint := fileGroup != Store_FileGroup_Target
@@ -117,17 +117,18 @@ func Store(
 		TargetPath: targetPath,
 		ClassFront: classFront,
 		DebugFront: debugClassfront,
-		Manifest: _model.File_LocalManifest{
-			Lookup: _model.File_Lookup{
-				Id:   lookupId,
-				Type: lookupType,
-			},
-			Locals:      _model.File_SymclassIndexMap{},
-			Globals:     _model.File_SymclassIndexMap{},
-			Publics:     _model.File_SymclassIndexMap{},
-			Errors:      []string{},
-			Diagnostics: []_model.File_Diagnostic{},
+
+		Lookup: _model.File_Lookup{
+			Id:   lookupId,
+			Type: lookupType,
 		},
+		LocalMap:    _model.File_SymclassIndexMap{},
+		GlobalMap:   _model.File_SymclassIndexMap{},
+		PublicMap:   _model.File_SymclassIndexMap{},
+		MixedMap:    _model.File_SymclassIndexMap{},
+		Errors:      []string{},
+		Diagnostics: []_model.File_Diagnostic{},
+
 		StyleData: _model.File_StyleData{
 			UsedIn:          []int{},
 			Attachments:     map[string]bool{},
@@ -142,5 +143,5 @@ func Store(
 		Scratch: "",
 	}
 
-	return result
+	return &result
 }

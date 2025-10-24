@@ -15,32 +15,22 @@ import (
 type Accumulator_return struct {
 	GlobalClasses []string
 	PublicClasses []string
-	FileManifests map[string]_model.File_LocalManifest
+	ContextMap    map[string]*_model.File_Stash
 }
 
 func (This *Class) Accumulator() Accumulator_return {
 	accumulate := Accumulator_return{
 		GlobalClasses: []string{},
 		PublicClasses: []string{},
-		FileManifests: map[string]_model.File_LocalManifest{},
+		ContextMap:    map[string]*_model.File_Stash{},
 	}
 
-	accumulate.FileManifests[This.TargetStylesheet] = _model.File_LocalManifest{
-		Lookup: _model.File_Lookup{
-			Id:   This.TargetStylesheet,
-			Type: _model.File_Type_Stylesheet,
-		},
-		Locals:      _model.File_SymclassIndexMap{},
-		Globals:     _model.File_SymclassIndexMap{},
-		Publics:     _model.File_SymclassIndexMap{},
-		Errors:      []string{},
-		Diagnostics: []_model.File_Diagnostic{},
-	}
+	accumulate.ContextMap[This.TargetStylesheet] = This.StylesheetContext
 
 	publics := []string{}
 	globals := []string{}
 	for _, file := range This.FileCache {
-		accumulate.FileManifests[file.Manifest.Lookup.Id] = file.Manifest
+		accumulate.ContextMap[file.Lookup.Id] = file
 		publics = append(publics, slices.Collect(_map.Keys(file.StyleData.PublicClasses))...)
 		globals = append(globals, slices.Collect(_map.Keys(file.StyleData.GlobalClasses))...)
 	}
@@ -58,6 +48,13 @@ type GetTracks_return struct {
 func (This *Class) GetTracks() GetTracks_return {
 	classtracks := [][]int{}
 	attachments := map[int]bool{}
+
+	scd := This.StylesheetContext.StyleData
+	for i := range scd.Attachments {
+		if found := _action.Index_Find(i, scd.LocalClasses); found.Index > 0 {
+			attachments[found.Index] = true
+		}
+	}
 
 	for _, file := range This.FileCache {
 		attachstrings := map[string]bool{}

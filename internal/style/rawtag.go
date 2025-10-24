@@ -52,7 +52,7 @@ func Rawtag_Upload(
 	errors := []string{}
 	diagnostics := []_model.File_Diagnostic{}
 	attachments := map[string]bool{}
-	forArtifact := file.Manifest.Lookup.Type == _model.File_Type_Artifact
+	forArtifact := file.Lookup.Type == _model.File_Type_Artifact
 	declaration := file.TargetPath + ":" + _strconv.Itoa(raw.RowIndex) + ":" + _strconv.Itoa(raw.ColIndex)
 
 	symzero := ""

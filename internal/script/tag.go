@@ -113,7 +113,7 @@ func Tag_Scanner(
 						if len(styleDeclarations.SymClasses) == 0 {
 							if _string.Contains(tr_Attr, "$$$$") {
 								styleDeclarations.Scope = _model.Style_Type_Null
-							} else if fileData.Manifest.Lookup.Type == _model.File_Type_Artifact {
+							} else if fileData.Lookup.Type == _model.File_Type_Artifact {
 								styleDeclarations.Scope = _model.Style_Type_Artifact
 							} else if _string.Contains(tr_Attr, "$$$") {
 								styleDeclarations.Scope = _model.Style_Type_Public

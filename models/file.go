@@ -47,28 +47,25 @@ type File_StyleData struct {
 	TagReplacements []File_TagReplacement
 }
 
-type File_LocalManifest struct {
-	Locals      File_SymclassIndexMap `json:"local"`
-	Globals     File_SymclassIndexMap `json:"global"`
-	Publics     File_SymclassIndexMap `json:"public"`
-	Lookup      File_Lookup           `json:"lookup"`
-	Errors      []string              `json:"errors"`
-	Diagnostics []File_Diagnostic     `json:"diagnostics"`
-}
-
 type File_Stash struct {
-	LibLevel   int
-	Artifact   string
-	FilePath   string
-	Extension  string
-	ClassFront string
-	SourcePath string
-	TargetPath string
-	Content    string
-	Midway     string
-	Scratch    string
-	Label      string
-	DebugFront string
-	StyleData  File_StyleData
-	Manifest   File_LocalManifest
+	LibLevel    int
+	Artifact    string
+	FilePath    string
+	Extension   string
+	ClassFront  string
+	SourcePath  string
+	TargetPath  string
+	Content     string
+	Midway      string
+	Scratch     string
+	Label       string
+	DebugFront  string
+	StyleData   File_StyleData
+	MixedMap    File_SymclassIndexMap
+	LocalMap    File_SymclassIndexMap
+	GlobalMap   File_SymclassIndexMap
+	PublicMap   File_SymclassIndexMap
+	Lookup      File_Lookup
+	Errors      []string
+	Diagnostics []File_Diagnostic
 }

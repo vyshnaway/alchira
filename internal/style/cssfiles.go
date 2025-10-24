@@ -76,7 +76,7 @@ func Cssfile_Collection(files []*_model.File_Stash) cssfile_Collection_return {
 			} else {
 				stylescanned := Parse_CssSnippet(
 					value,
-					string(file.Manifest.Lookup.Type)+" : "+file.FilePath+" | ",
+					string(file.Lookup.Type)+" : "+file.FilePath+" | ",
 					selector,
 					false,
 				)

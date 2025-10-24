@@ -20,7 +20,7 @@ func Target_UpdateDirs() {
 		data.ClearFiles()
 		delete(Cache.Targetdir, key)
 	}
-	Cache.Targetdir = map[string]_target.Class{}
+	Cache.Targetdir = map[string]*_target.Class{}
 
 	for c, i := range _config.Style.Public___Index {
 		_action.Index_Dispose(i)
@@ -41,21 +41,21 @@ func Target_UpdateDirs() {
 }
 
 func Target_Accumulate() (
-	FileManifests map[string]_model.File_LocalManifest,
+	ContextMap map[string]*_model.File_Stash,
 	Report string,
 ) {
 	global_counter := 0
 	public_counter := 0
 	globals := O.New[string, []string]()
 	publics := O.New[string, []string]()
-	fileManifests := map[string]_model.File_LocalManifest{}
+	contextMaps := map[string]*_model.File_Stash{}
 
 	for _, target := range Cache.Targetdir {
 
 		C := target.Accumulator()
 		global_counter += len(C.GlobalClasses)
 		public_counter += len(C.PublicClasses)
-		_map.Copy(fileManifests, C.FileManifests)
+		_map.Copy(contextMaps, C.ContextMap)
 
 		globals.Set(
 			"["+target.Target+" -> "+target.Source+"]: "+_strconv.Itoa(len(C.GlobalClasses)),
@@ -71,7 +71,7 @@ func Target_Accumulate() (
 	report :=
 		X.List_Chart("Globals: "+_strconv.Itoa(counter)+" Symclasses", globals) +
 			X.List_Chart("Publics: "+_strconv.Itoa(counter)+" Symclasses", publics)
-	return fileManifests, report
+	return contextMaps, report
 }
 
 func Target_GetTracks() _target.GetTracks_return {
@@ -90,7 +90,7 @@ func Target_GetTracks() _target.GetTracks_return {
 	}
 }
 
-func Target_SyncClassNames()  {
+func Target_SyncClassNames() {
 
 	var render_action script.E_Action
 	if _config.Static.Command == "debug" {

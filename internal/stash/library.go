@@ -58,7 +58,7 @@ func Library_CacheFiles() library_StackFiles_return {
 
 	for path, data := range Cache.Libraries {
 		var collection map[int][]*_model.File_Stash
-		switch data.Manifest.Lookup.Type {
+		switch data.Lookup.Type {
 		case _model.File_Type_Axiom:
 			collection = axiom_map
 		case _model.File_Type_Cluster:
@@ -66,15 +66,15 @@ func Library_CacheFiles() library_StackFiles_return {
 		default:
 			continue
 		}
-		lookup[path] = data.Manifest.Lookup
-		id, er := _strconv.Atoi(data.Manifest.Lookup.Id)
+		lookup[path] = data.Lookup
+		id, er := _strconv.Atoi(data.Lookup.Id)
 
 		if er == nil {
 
 			if _, exists := collection[id]; !exists {
-				collection[id] = []*_model.File_Stash{&data}
+				collection[id] = []*_model.File_Stash{data}
 			} else {
-				collection[id] = append(collection[id], &data)
+				collection[id] = append(collection[id], data)
 			}
 
 			if id > length {
@@ -114,8 +114,8 @@ func Library_Update() {
 			)
 		}
 		for _, file := range files {
-			_config.Delta.Error.Axioms = append(_config.Delta.Error.Axioms, file.Manifest.Errors...)
-			_config.Delta.Diagnostic.Axioms = append(_config.Delta.Diagnostic.Axioms, file.Manifest.Diagnostics...)
+			_config.Delta.Error.Axioms = append(_config.Delta.Error.Axioms, file.Errors...)
+			_config.Delta.Diagnostic.Axioms = append(_config.Delta.Diagnostic.Axioms, file.Diagnostics...)
 		}
 	}
 	_config.Delta.Report.Axioms = X.List_Chart("Axiom: "+_strconv.Itoa(axiom_counter)+" Symclasses", axiom_chart)
@@ -138,8 +138,8 @@ func Library_Update() {
 			)
 		}
 		for _, file := range files {
-			_config.Delta.Error.Clusters = append(_config.Delta.Error.Clusters, file.Manifest.Errors...)
-			_config.Delta.Diagnostic.Clusters = append(_config.Delta.Diagnostic.Clusters, file.Manifest.Diagnostics...)
+			_config.Delta.Error.Clusters = append(_config.Delta.Error.Clusters, file.Errors...)
+			_config.Delta.Diagnostic.Clusters = append(_config.Delta.Diagnostic.Clusters, file.Diagnostics...)
 		}
 	}
 	_config.Delta.Report.Clusters = X.List_Chart("Cluster: "+_strconv.Itoa(cluster_counter)+" Symclasses", cluster_chart)

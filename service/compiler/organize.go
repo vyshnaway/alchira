@@ -51,14 +51,14 @@ func Accumulate() {
 	_config.Delta.Diagnostic.TargetDir = []_model.File_Diagnostic{}
 
 	for key, val := range filemanifest {
-		_config.Manifest.Group.Local[key] = val.Locals
+		_config.Manifest.Group.Local[key] = val.LocalMap
 		_config.Delta.Lookup.TargetDir[key] = val.Lookup
 		_config.Delta.Error.TargetDir = append(_config.Delta.Error.TargetDir, val.Errors...)
 		_config.Delta.Diagnostic.TargetDir = append(_config.Delta.Diagnostic.TargetDir, val.Diagnostics...)
 
 		mergedMap := make(_model.File_SymclassIndexMap)
-		_map.Copy(mergedMap, val.Publics)
-		_map.Copy(mergedMap, val.Globals)
+		_map.Copy(mergedMap, val.PublicMap)
+		_map.Copy(mergedMap, val.GlobalMap)
 		_config.Manifest.Group.Global[key] = mergedMap
 	}
 

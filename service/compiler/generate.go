@@ -6,8 +6,6 @@ import (
 	_action "main/internal/action"
 	X "main/internal/console"
 	_stash "main/internal/stash"
-	_style "main/internal/style"
-	_model "main/models"
 	S "main/package/console"
 	_css "main/package/css"
 	O "main/package/object"
@@ -24,22 +22,17 @@ func Generate_Files() (Files map[string]string, Report string) {
 
 	class_frag := _css.Render_Switched(func() *_css.T_Block {
 		result := _css.NewBlock()
-		for _, i := range _config.Style.PublishIndexMap {
-			result.SetBlock(i.ClassName, _action.Index_Fetch(i.ClassIndex).SrcData.NativeRawStyle)
-		}
+		S.Render.Raw(_config.Style.PublishIndexMap)
+		// for _, i := range _config.Style.PublishIndexMap {
+		// 	result.SetBlock(i.ClassName, _action.Index_Fetch(i.ClassIndex).SrcData.NativeRawStyle)
+		// }
 		return result
 	}(), _config.Static.MINIFY)
 
 	appendix_frag := _css.Render_Sequence(func() *_css.T_BlockSeq {
 		result := _css.NewBlockSeq()
 		for _, cache := range _stash.Cache.Targetdir {
-			scanned := _style.Cssfile_String(cache.StylesheetContent, `APPENDIX : `+cache.Stylesheet+" | ")
-			result.Append(scanned.Result.Units...)
-			for attachment := range scanned.Attachments {
-				if res := _action.Index_Find(attachment, _model.Style_ClassIndexMap{}); res.Index > 0 {
-					attachments[res.Index] = true
-				}
-			}
+			result.Append(cache.StylesheetBlockSeq.Units...)
 		}
 		return result
 	}(), _config.Static.MINIFY)
