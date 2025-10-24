@@ -168,7 +168,7 @@ func Execute(heading string) (Exitcode int) {
 					for _, event := range events {
 						filepath := _fileman.Path_Join(event.Folder, event.FilePath)
 						breaknow := false
-
+						S.Render.Raw(event)
 						if event.Folder == _config.Path_Folder["blueprint"].Path {
 							if event.Action == _watcher.E_Action_Update {
 

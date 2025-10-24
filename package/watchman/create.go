@@ -28,6 +28,7 @@ func New(folders, ignores []string) *T_Watcher {
 	}
 	return &T_Watcher{
 		queue:           []Event{},
+		status:          true,
 		mutex:           &_sync.Mutex{},
 		folderMaps:      folderMaps,
 		resolvedFolders: resolvedFolders,
@@ -38,7 +39,6 @@ func New(folders, ignores []string) *T_Watcher {
 func (This *T_Watcher) Start(interval, maxevents int) error {
 	This.hook = _watcher.New()
 	This.hook.SetMaxEvents(maxevents)
-	This.hook.FilterOps(_watcher.Move, _watcher.Remove, _watcher.Write, _watcher.Rename, _watcher.Create)
 
 	errs := []error{}
 	for _, folder := range This.resolvedFolders {
@@ -65,17 +65,11 @@ func (This *T_Watcher) Start(interval, maxevents int) error {
 				case _watcher.Write:
 					act = E_Action_Update
 
-				case _watcher.Move:
-					fallthrough
-				case _watcher.Rename:
-					fallthrough
-				case _watcher.Remove:
+				default:
 					This.Reset()
 					act = E_Action_Refactor
-
-				default:
-					act = E_Action_Access
 				}
+
 				This.HandleEvent(act, event.Path, "")
 
 			case err, ok := <-This.hook.Error:
@@ -96,8 +90,20 @@ func (This *T_Watcher) Start(interval, maxevents int) error {
 		}
 	}()
 
+	go func() {
+		for {
+			_time.Sleep(12 * _time.Second)
+			if This.status {
+				This.HandleEvent(E_Action_Refactor, "", "")
+			} else {
+				break
+			}
+		}
+	}()
+
 	This.Close = func() {
 		close(done)
+		This.status = false
 		This.hook.Close()
 	}
 	return errors.Join(errs...)

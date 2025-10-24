@@ -171,5 +171,5 @@ func Organize() (AritfactFiles map[string]string, Attachments []int) {
 		}
 	}
 
-	return artifact_files, tracks_.Attachments
+	return artifact_files, append(tracks_.Attachments, _config.Delta.IndexAttach...)
 }

@@ -31,6 +31,7 @@ type T_Watcher struct {
 	hook            *_watcher.Watcher
 	mutex           *_sync.Mutex
 	queue           []Event
+	status          bool
 	Close           func()
 	folderMaps      map[string]string
 	resolvedFolders []string
@@ -56,17 +57,13 @@ func (This *T_Watcher) HandleEvent(action E_Action, filePath string, content str
 			break
 		}
 	}
-	if event.Folder == "" {
-		return
+
+	if content != "" {
+		event.FileContent = content
+	} else if data, err := _fileman.Read_File(filePath, false); err == nil {
+		event.FileContent = string(data)
 	}
 
-	if action == E_Action_Update {
-		if content != "" {
-			event.FileContent = content
-		} else if data, err := _fileman.Read_File(filePath, false); err == nil {
-			event.FileContent = string(data)
-		}
-	}
 	This.Add(event)
 }
 

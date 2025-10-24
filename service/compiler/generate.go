@@ -19,12 +19,8 @@ import (
 )
 
 func Generate_Files() (Files map[string]string, Report string) {
-	files := map[string]string{}
 
-	// Initializing attachments with file binds.
-	artifact_files, attachments := Organize()
-	attachments = append(attachments, _config.Delta.IndexAttach...)
-	_map.Copy(files, artifact_files)
+	files, attachments := Organize()
 
 	var render_action _script.E_Action
 	if _config.Static.Command == "debug" {
@@ -34,46 +30,59 @@ func Generate_Files() (Files map[string]string, Report string) {
 	} else {
 		render_action = _script.E_Action_BuildHash
 	}
+
 	for _, target := range _stash.Cache.Targetdir {
 		target.SyncClassnames(render_action)
 	}
 
-	var attach_staples _string.Builder
-	attach_styles := _css.NewBlock()
-	if _config.Static.WATCH {
-		attachments = _slice.Collect(_map.Keys(_config.Style.Index_to_Data))
-	} else {
-		attachments = _util.Array_Setback(attachments)
-	}
-	for _, a := range attachments {
-		data := _action.Index_Fetch(a)
-		attach_styles.Merge(data.SrcData.NativeAttachStyle)
-		if len(data.SrcData.NativeStaple) > 0 {
-			attach_staples.WriteString(data.SrcData.NativeStaple)
+	class_frag := _css.Render_Switched(func() *_css.T_Block {
+		result := _css.NewBlock()
+		for _, i := range _config.Style.PublishIndexMap {
+			result.SetBlock(i.ClassName, _action.Index_Fetch(i.ClassIndex).SrcData.NativeRawStyle)
 		}
-	}
+		return result
+	}(), _config.Static.MINIFY)
+
+	appendix_frag := _css.Render_Sequence(func() *_css.T_BlockSeq {
+		result := _css.NewBlockSeq()
+		for _, cache := range _stash.Cache.Targetdir {
+			scanned := _style.Cssfile_String(cache.StylesheetContent, `APPENDIX : `+cache.Stylesheet+" | ")
+			result.Append(scanned.Result.Units...)
+			for _, attachment := range scanned.Attachments {
+				if res := _action.Index_Find(attachment, _model.Style_ClassIndexMap{}); res.Index > 0 {
+					attachments = append(attachments, res.Index)
+				}
+			}
+		}
+		return result
+	}(), _config.Static.MINIFY)
+
+	var attach_staples _string.Builder
+	attach_frag := _css.Render_Vendored(func() *_css.T_Block {
+		attach_styles := _css.NewBlock()
+		// attachments = _util.Array_Setback(attachments)
+		// for _, a := range attachments {
+		// 	data := _action.Index_Fetch(a)
+		// 	attach_styles.Merge(data.SrcData.NativeAttachStyle)
+		// 	if len(data.SrcData.NativeStaple) > 0 {
+		// 		attach_staples.WriteString(data.SrcData.NativeStaple)
+		// 	}
+		// }
+		return attach_styles
+	}(), _config.Static.MINIFY)
 	staple_sheet := attach_staples.String()
 
-	type t_frag struct {
+	render_frags := []struct {
 		key string
 		val string
-	}
-
-	attach_frag := _css.Render_Vendored(attach_styles, _config.Static.MINIFY)
-	render_frags := []t_frag{
+	}{
 		{
 			key: "Root",
 			val: _config.Delta.IndexBuild,
 		},
 		{
 			key: "Class",
-			val: _css.Render_Switched(func() *_css.T_Block {
-				result := _css.NewBlock()
-				for _, i := range _config.Style.PublishIndexMap {
-					result.SetBlock(i.ClassName, _action.Index_Fetch(i.ClassIndex).SrcData.NativeRawStyle)
-				}
-				return result
-			}(), _config.Static.MINIFY),
+			val: class_frag,
 		},
 		{
 			key: "Attach",
@@ -81,19 +90,7 @@ func Generate_Files() (Files map[string]string, Report string) {
 		},
 		{
 			key: "Appendix",
-			val: _css.Render_Sequence(func() *_css.T_BlockSeq {
-				appendix_styles := _css.NewBlockSeq()
-				for _, cache := range _stash.Cache.Targetdir {
-					scanned := _style.Cssfile_String(cache.StylesheetContent, `APPENDIX : `+cache.Stylesheet+" | ")
-					appendix_styles.Append(scanned.Result.Units...)
-					for _, attachment := range scanned.Attachments {
-						if res := _action.Index_Find(attachment, _model.Style_ClassIndexMap{}); res.Index > 0 {
-							attachments = append(attachments, res.Index)
-						}
-					}
-				}
-				return appendix_styles
-			}(), _config.Static.MINIFY),
+			val: appendix_frag,
 		},
 	}
 
