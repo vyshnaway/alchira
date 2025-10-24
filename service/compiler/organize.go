@@ -11,6 +11,7 @@ import (
 	C "main/package/console"
 	_css "main/package/css"
 	_util "main/package/utils"
+	"maps"
 	_map "maps"
 	_strconv "strconv"
 )
@@ -28,9 +29,9 @@ func Update_Cache() {
 
 	index_scanned := _style.Cssfile_String(_util.Code_Uncomment(_config.Static.RootCSS, false, true, false), "INDEX | ")
 	_config.Manifest.Constants = index_scanned.Variables.ToMap()
-	for _, attachment := range index_scanned.Attachments {
+	for attachment := range index_scanned.Attachments {
 		if res := _action.Index_Find(attachment, _model.Style_ClassIndexMap{}); res.Index > 0 {
-			_config.Delta.IndexAttach = append(_config.Delta.IndexAttach, res.Index)
+			_config.Delta.IndexAttach[res.Index] = true
 		}
 	}
 	_config.Delta.IndexBuild = _css.Render_Sequence(index_scanned.Result, _config.Static.MINIFY)
@@ -50,14 +51,14 @@ func Accumulate() {
 	_config.Delta.Diagnostic.TargetDir = []_model.File_Diagnostic{}
 
 	for key, val := range filemanifest {
-		_config.Manifest.Group.Local[key] = val.Local
+		_config.Manifest.Group.Local[key] = val.Locals
 		_config.Delta.Lookup.TargetDir[key] = val.Lookup
 		_config.Delta.Error.TargetDir = append(_config.Delta.Error.TargetDir, val.Errors...)
 		_config.Delta.Diagnostic.TargetDir = append(_config.Delta.Diagnostic.TargetDir, val.Diagnostics...)
 
 		mergedMap := make(_model.File_SymclassIndexMap)
-		_map.Copy(mergedMap, val.Public)
-		_map.Copy(mergedMap, val.Global)
+		_map.Copy(mergedMap, val.Publics)
+		_map.Copy(mergedMap, val.Globals)
 		_config.Manifest.Group.Global[key] = mergedMap
 	}
 
@@ -110,7 +111,7 @@ func Accumulate() {
 var css_class_prefix = "." + string(_config.Root.CustomOps["lodash"])
 var tag_class_prefix = string(_config.Root.CustomOps["lodash"])
 
-func Organize() (AritfactFiles map[string]string, Attachments []int) {
+func Organize() (AritfactFiles map[string]string, Attachments map[int]bool) {
 
 	_config.Style.ClassDictionary = _model.Style_Dictionary{}
 	_config.Style.PublishIndexMap = []_model.Style_ClassIndexTrace{}
@@ -171,5 +172,8 @@ func Organize() (AritfactFiles map[string]string, Attachments []int) {
 		}
 	}
 
-	return artifact_files, append(tracks_.Attachments, _config.Delta.IndexAttach...)
+	attachments := tracks_.Attachments
+	maps.Copy(attachments, _config.Delta.IndexAttach)
+
+	return artifact_files, attachments
 }

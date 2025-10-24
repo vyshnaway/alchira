@@ -5,6 +5,7 @@ import (
 	_action "main/internal/action"
 	_css "main/package/css"
 	O "main/package/object"
+	"maps"
 
 	_model "main/models"
 	_util "main/package/utils"
@@ -12,7 +13,7 @@ import (
 
 type R_Cssfile_Parse struct {
 	Result      *_css.T_BlockSeq
-	Attachments []string
+	Attachments map[string]bool
 	Variables   *O.T[string, string]
 }
 
@@ -24,14 +25,14 @@ func Cssfile_String(content string, initial string) R_Cssfile_Parse {
 	}
 
 	variables := O.New[string, string]()
-	attachments := []string{}
+	attachments := map[string]bool{}
 	for _, kv := range scanned.All_Blocks {
 		key := kv[0]
 		val := kv[1]
 		res := Parse_CssSnippet(val, initial, key, true)
 
 		variables.Copy(res.Variables)
-		attachments = append(attachments, res.Attachments...)
+		maps.Copy(attachments, res.Attachments)
 		result.AddNewBlock(key, res.Result)
 	}
 
@@ -81,7 +82,15 @@ func Cssfile_Collection(files []*_model.File_Stash) cssfile_Collection_return {
 				)
 				attachments := stylescanned.Attachments
 				object := stylescanned.Result
-
+				attach_style := func() *_css.T_Block {
+					if o, v := object.GetBlock("[]"); o {
+						temp := _css.NewBlock()
+						temp.SetBlock(selector, v)
+						return temp
+					} else {
+						return _css.NewBlock()
+					}
+				}()
 				artifact := _config.Archive.Name
 
 				metadata := _model.Style_Metadata{
@@ -92,26 +101,19 @@ func Cssfile_Collection(files []*_model.File_Stash) cssfile_Collection_return {
 					SummonSnippet: "",
 				}
 				classdata := &_model.Style_ClassData{
-					Attributes:     map[string]string{},
-					Index:          0,
-					Artifact:       artifact,
-					Definent:       selector,
-					SymClass:       classname,
-					Metadata:       &metadata,
-					NativeRawStyle: object,
-					ExportRawStyle: object,
-					Attachments:    attachments,
-					DebugClass:     file.DebugFront + "_" + _util.String_Filter(classname, []rune{}, []rune{}, []rune{'$', '/'}),
-					NativeStaple:   "",
-					NativeAttachStyle: func() *_css.T_Block {
-						if o, v := object.GetBlock("[]"); o {
-							temp := _css.NewBlock()
-							temp.SetBlock(selector, v)
-							return temp
-						} else {
-							return _css.NewBlock()
-						}
-					}(),
+					Attributes:        map[string]string{},
+					Index:             0,
+					Artifact:          artifact,
+					Definent:          selector,
+					SymClass:          classname,
+					Metadata:          &metadata,
+					NativeRawStyle:    object,
+					ExportRawStyle:    object,
+					Attachments:       attachments,
+					DebugClass:        file.DebugFront + "_" + _util.String_Filter(classname, []rune{}, []rune{}, []rune{'$', '/'}),
+					NativeStaple:      "",
+					NativeAttachStyle: attach_style,
+					ExportAttachStyle: attach_style,
 				}
 				index := _action.Index_Declare(&_model.Cache_SymclassData{
 					Context: file,
@@ -124,7 +126,6 @@ func Cssfile_Collection(files []*_model.File_Stash) cssfile_Collection_return {
 			}
 		}
 	}
-
 
 	return cssfile_Collection_return{
 		MetadataCollection: indexMetaCollection,

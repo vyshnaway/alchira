@@ -51,8 +51,7 @@ type parse_return struct {
 	Scribed      string
 	ClassesList  [][]string
 	StylesList   []*T_RawStyle
-	Attachments  []string
-	Lodashes     []string
+	Attachments  map[string]bool
 	Replacements []_model.File_TagReplacement
 }
 
@@ -68,8 +67,7 @@ func Rider(
 	replacements := []_model.File_TagReplacement{}
 	tagTrack := []*T_RawStyle{}
 	classesList := [][]string{}
-	attachments := []string{}
-	lodashes := []string{}
+	attachments := map[string]bool{}
 	stylesList := []*T_RawStyle{}
 
 	var content string
@@ -94,9 +92,10 @@ func Rider(
 
 			if result.Ok {
 				classesList = append(classesList, result.ClassesList...)
-				attachments = append(attachments, result.Attachments...)
-				lodashes = append(lodashes, result.Lodashes...)
-
+				for _, a := range result.Attachments {
+					attachments[a] = true
+				}
+				
 				if hasDeclared {
 					stylesList = append(stylesList, &result.StyleDeclarations)
 				} else if elid, status := replacementTags[fragment]; status && len(tagTrack) == 0 && action != E_Action_Read {
@@ -184,6 +183,5 @@ func Rider(
 		ClassesList:  classesList,
 		StylesList:   stylesList,
 		Attachments:  attachments,
-		Lodashes:     lodashes,
 	}
 }

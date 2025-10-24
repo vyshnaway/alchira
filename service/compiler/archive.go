@@ -7,6 +7,7 @@ import (
 	_models "main/models"
 	_fileman "main/package/fileman"
 	_util "main/package/utils"
+	"maps"
 	_map "maps"
 	_slice "slices"
 	_sort "sort"
@@ -43,8 +44,9 @@ func archive_Build() _models.Config_Archive {
 		exportsheet.WriteString(data.SymClass)
 
 		v := data.Stylesheet["[]"]
+		attachments := _slice.Collect(maps.Keys(data.Attachments))
 		if len(data.Attachments) > 0 {
-			v = string(_config.Root.CustomOps["attach"]) + " " + _string.Join(data.Attachments, " ") + ";" + v
+			v = string(_config.Root.CustomOps["attach"]) + " " + _string.Join(attachments, " ") + ";" + v
 		}
 		if len(v) > 0 {
 			exportsheet.WriteString("=\"" + v + "\"")

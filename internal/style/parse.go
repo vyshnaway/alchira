@@ -6,6 +6,7 @@ import (
 	_css "main/package/css"
 	O "main/package/object"
 	_util "main/package/utils"
+	"maps"
 	_string "strings"
 
 	_model "main/models"
@@ -13,7 +14,7 @@ import (
 
 type R_Parse struct {
 	Result      *_css.T_Block
-	Attachments []string
+	Attachments map[string]bool
 	Variables   *O.T[string, string]
 }
 
@@ -21,7 +22,7 @@ func parse_AssignMerge(
 	classlist []string,
 	// export0_native1 bool,
 ) R_Parse {
-	attachments := []string{}
+	attachments := map[string]bool{}
 	result := _css.NewBlock()
 	variables := O.New[string, string]()
 
@@ -34,7 +35,7 @@ func parse_AssignMerge(
 					variables.Set(k, v)
 				}
 			})
-			attachments = append(attachments, classdata.SrcData.Attachments...)
+			maps.Copy(attachments, classdata.SrcData.Attachments)
 			result.Merge(classdata.SrcData.NativeRawStyle)
 		}
 	}
@@ -129,7 +130,10 @@ func Parse_CssSnippet(
 	variables := assigned.Variables
 	variables.Copy(scanned.Variables)
 
-	attachments := append(assigned.Attachments, scanned.Attach...)
+	attachments := assigned.Attachments
+	for _, i := range scanned.Attach {
+		attachments[i] = true
+	}
 
 	propmap := _css.NewBlock()
 	assigned.Variables.Range(func(k, v string) {
@@ -168,7 +172,7 @@ func Parse_CssSnippet(
 	scanned.Blocks.Range(func(key, val string) {
 		sub_result := Parse_CssSnippet(val, initial, srcselector+" / "+key, true)
 		variables.Copy(sub_result.Variables)
-		attachments = append(attachments, sub_result.Attachments...)
+		maps.Copy(attachments, sub_result.Attachments)
 		target.SetBlock(key, sub_result.Result)
 	})
 

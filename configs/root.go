@@ -26,6 +26,7 @@ var Root = _model.Cache_Root{
 	},
 	Commands: map[string]string{
 		"init":    "Initiate or Update & Verify setup.",
+		"iamai":   "Let ai agents start here.",
 		"debug":   "Live build for developer environment",
 		"server":  "LSP Communication Brige.",
 		"preview": "Test build. Pass test for \"publish\" command.",

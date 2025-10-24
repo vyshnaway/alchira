@@ -4,10 +4,12 @@ import (
 	_config "main/configs"
 	_action "main/internal/action"
 	X "main/internal/console"
+	"main/internal/script"
 	_target "main/internal/target"
 	_model "main/models"
 	O "main/package/object"
 	_util "main/package/utils"
+	"maps"
 	_map "maps"
 	_strconv "strconv"
 )
@@ -68,22 +70,38 @@ func Target_Accumulate() (
 	counter := global_counter + public_counter
 	report :=
 		X.List_Chart("Globals: "+_strconv.Itoa(counter)+" Symclasses", globals) +
-		X.List_Chart("Publics: "+_strconv.Itoa(counter)+" Symclasses", publics)
+			X.List_Chart("Publics: "+_strconv.Itoa(counter)+" Symclasses", publics)
 	return fileManifests, report
 }
 
 func Target_GetTracks() _target.GetTracks_return {
 	classtracks := [][]int{}
-	attachments := []int{}
+	attachments := map[int]bool{}
 
 	for _, target := range Cache.Targetdir {
 		tracks_ := target.GetTracks()
 		classtracks = append(classtracks, tracks_.ClassTracks...)
-		attachments = append(attachments, tracks_.Attachments...)
+		maps.Copy(attachments, tracks_.Attachments)
 	}
 
 	return _target.GetTracks_return{
 		Attachments: attachments,
 		ClassTracks: classtracks,
+	}
+}
+
+func Target_SyncClassNames()  {
+
+	var render_action script.E_Action
+	if _config.Static.Command == "debug" {
+		render_action = script.E_Action_DebugHash
+	} else if _config.Static.Command == "preview" && _config.Static.WATCH {
+		render_action = script.E_Action_WatchHash
+	} else {
+		render_action = script.E_Action_BuildHash
+	}
+
+	for _, target := range Cache.Targetdir {
+		target.SyncClassnames(render_action)
 	}
 }

@@ -37,11 +37,9 @@ func (This *Class) Savefile(filepath string, content string, hashindex int) {
 	file.StyleData.Attachments = parse_response.Attachments
 	file.Midway = parse_response.Scribed
 
-	file.StyleData.Lodashes = _util.Array_Setfront(parse_response.Lodashes)
 	file.Manifest.Lookup = _model.File_Lookup{
-		Id:     file.TargetPath,
-		Type:   _model.File_Type_Target,
-		Lodash: file.StyleData.Lodashes,
+		Id:   file.TargetPath,
+		Type: _model.File_Type_Target,
 	}
 
 	for _, tagdata := range parse_response.StylesList {
@@ -65,14 +63,14 @@ func (This *Class) Savefile(filepath string, content string, hashindex int) {
 			var metadata_map _model.File_SymclassIndexMap
 			switch tagdata.Scope {
 			case _model.Style_Type_Local:
-				metadata_map = file.Manifest.Local
+				metadata_map = file.Manifest.Locals
 				loc_index_map = file.StyleData.LocalClasses
 			case _model.Style_Type_Global:
-				metadata_map = file.Manifest.Global
+				metadata_map = file.Manifest.Globals
 				loc_index_map = file.StyleData.GlobalClasses
 				ref_index_map = _config.Style.Global___Index
 			case _model.Style_Type_Public:
-				metadata_map = file.Manifest.Public
+				metadata_map = file.Manifest.Publics
 				loc_index_map = file.StyleData.PublicClasses
 				ref_index_map = _config.Style.Public___Index
 			default:
@@ -83,7 +81,7 @@ func (This *Class) Savefile(filepath string, content string, hashindex int) {
 			response := _style.Rawtag_Upload(tagdata, &file, loc_index_map, metadata_map)
 			loc_index_map[response.Symclass] = response.Index
 			if ref_index_map != nil {
-				ref_index_map[response.Symclass] = response.Index;
+				ref_index_map[response.Symclass] = response.Index
 			}
 
 			file.Manifest.Errors = append(file.Manifest.Errors, response.Errors...)
