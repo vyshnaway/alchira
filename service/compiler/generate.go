@@ -15,19 +15,64 @@ import (
 	_string "strings"
 )
 
+func ClearUnwantedCache() (
+	Report string,
+	ErrLen int,
+	FinalMessage string,
+	IndexFrag string,
+) {
+
+	indexes := map[int]bool{}
+	for _, i := range _config.Style.PublishIndexMap {
+		for _, j := range i {
+			indexes[j.ClassIndex] = true
+		}
+	}
+
+	for i := range _config.Style.PublishIndexMap {
+		if _, k := indexes[i]; !k {
+			delete(_config.Style.Index_to_Data, i)
+		}
+	}
+
+	_config.Delta.Report.Constants = X.List_Catalog(
+		"Root Constants",
+		_slice.Collect(_map.Keys(_config.Manifest.Constants)),
+	)
+
+	var builder _string.Builder
+	for _, s := range []string{
+		_config.Delta.Report.Axioms,
+		_config.Delta.Report.Clusters,
+		_config.Delta.Report.Artifacts,
+		_config.Delta.Report.TargetDir,
+		_config.Delta.Report.Constants,
+		_config.Delta.Report.Hashrule,
+		_config.Delta.Report.Errors,
+		_config.Delta.Report.MemChart,
+	} {
+		if len(s) > 0 {
+			builder.WriteString(s)
+			builder.WriteRune('\r')
+			builder.WriteRune('\n')
+		}
+	}
+	report := builder.String()
+	errLen := len(_config.Delta.Errors)
+	index_frag := _config.Delta.IndexBuild
+	finalMessage := _config.Delta.FinalMessage
+
+	_config.Delta_Reset()
+	_config.Archive_Reset()
+	_config.Manifest_Reset()
+
+	return report, errLen, finalMessage, index_frag
+}
+
 func Generate_Files() (Files map[string]string, Report string) {
 
 	files, attachments := Organize()
 	_stash.Target_SyncClassNames()
-
-	class_frag := _css.Render_Switched(func() *_css.T_Block {
-		result := _css.NewBlock()
-		S.Render.Raw(_config.Style.PublishIndexMap)
-		// for _, i := range _config.Style.PublishIndexMap {
-		// 	result.SetBlock(i.ClassName, _action.Index_Fetch(i.ClassIndex).SrcData.NativeRawStyle)
-		// }
-		return result
-	}(), _config.Static.MINIFY)
 
 	appendix_frag := _css.Render_Sequence(func() *_css.T_BlockSeq {
 		result := _css.NewBlockSeq()
@@ -37,37 +82,42 @@ func Generate_Files() (Files map[string]string, Report string) {
 		return result
 	}(), _config.Static.MINIFY)
 
-	attach_styles := _css.NewBlock()
-	var attach_staples _string.Builder
-	for a := range attachments {
-		if data := _action.Index_Fetch(a); data != nil {
-			attach_styles.Merge(data.SrcData.NativeAttachStyle)
-			attach_staples.WriteString(data.SrcData.NativeStaple)
+	attach_frag, staple_sheet := func() (string, string) {
+		attach_styles := _css.NewBlock()
+		var attach_staples _string.Builder
+		for a := range attachments {
+			if data := _action.Index_Fetch(a); data != nil {
+				attach_styles.Merge(data.SrcData.NativeAttachStyle)
+				attach_staples.WriteString(data.SrcData.NativeStaple)
+			}
 		}
+		attach_frag := _css.Render_Vendored(attach_styles, _config.Static.MINIFY)
+		staple_sheet := attach_staples.String()
+		return attach_frag, staple_sheet
+	}()
+
+	report, errLen, finalMessage, index_frag := ClearUnwantedCache()
+	var class_builder _string.Builder
+
+	for _, i := range _config.Style.PublishIndexMap {
+		class_builder.WriteString(_css.Render_Switched(func() *_css.T_Block {
+			result := _css.NewBlock()
+			for _, j := range i {
+				result.SetBlock(j.ClassName, _action.Index_Fetch(j.ClassIndex).SrcData.NativeRawStyle)
+			}
+			return result
+		}(), _config.Static.MINIFY))
 	}
-	attach_frag := _css.Render_Vendored(attach_styles, _config.Static.MINIFY)
-	staple_sheet := attach_staples.String()
+	class_frag := class_builder.String()
 
 	render_frags := []struct {
 		key string
 		val string
 	}{
-		{
-			key: "Root",
-			val: _config.Delta.IndexBuild,
-		},
-		{
-			key: "Class",
-			val: class_frag,
-		},
-		{
-			key: "Attach",
-			val: attach_frag,
-		},
-		{
-			key: "Appendix",
-			val: appendix_frag,
-		},
+		{key: "Root", val: index_frag},
+		{key: "Class", val: class_frag},
+		{key: "Attach", val: attach_frag},
+		{key: "Appendix", val: appendix_frag},
 	}
 
 	style_sheet := func() string {
@@ -89,24 +139,26 @@ func Generate_Files() (Files map[string]string, Report string) {
 	}
 
 	if !_config.Static.WATCH {
-		memchart := O.New[string, string]()
-		for _, i := range render_frags {
-			memchart.Set(
-				i.key,
-				_fmt.Sprintf("%9s", _fmt.Sprintf("%v Kb", _util.String_Memory(i.val))),
-			)
-		}
-		memchart.Set(
-			"",
-			_fmt.Sprintf("%9s", _fmt.Sprintf("%v Kb", _util.String_Memory(style_sheet))),
-		)
+		report += func() string {
 
-		_config.Delta.Report.MemChart = func() string {
+			memchart := O.New[string, string]()
+			for _, i := range render_frags {
+				memchart.Set(
+					i.key,
+					_fmt.Sprintf("%9s", _fmt.Sprintf("%v Kb", _util.String_Memory(i.val))),
+				)
+			}
+
+			memchart.Set(
+				"",
+				_fmt.Sprintf("%9s", _fmt.Sprintf("%v Kb", _util.String_Memory(style_sheet))),
+			)
+
 			var heading string
-			if len(_config.Delta.Errors) > 0 {
-				heading = S.Tag.H2(_config.Delta.FinalMessage, S.Preset.Failed, S.Style.AS_Bold)
+			if errLen > 0 {
+				heading = S.Tag.H2(finalMessage, S.Preset.Failed, S.Style.AS_Bold)
 			} else {
-				heading = S.Tag.H2(_config.Delta.FinalMessage, S.Preset.Success, S.Style.AS_Bold)
+				heading = S.Tag.H2(finalMessage, S.Preset.Success, S.Style.AS_Bold)
 			}
 			return S.MAKE(
 				heading,
@@ -118,31 +170,6 @@ func Generate_Files() (Files map[string]string, Report string) {
 			)
 		}()
 	}
-
-	_config.Delta.Report.Constants = X.List_Catalog(
-		"Root Constants",
-		_slice.Collect(_map.Keys(_config.Manifest.Constants)),
-	)
-
-	var builder _string.Builder
-	for _, s := range []string{
-		_config.Delta.Report.Axioms,
-		_config.Delta.Report.Clusters,
-		_config.Delta.Report.Artifacts,
-		_config.Delta.Report.TargetDir,
-		_config.Delta.Report.Constants,
-		_config.Delta.Report.Hashrule,
-		_config.Delta.Report.Errors,
-		_config.Delta.Report.MemChart,
-		_config.Delta.Report.Footer,
-	} {
-		if len(s) > 0 {
-			builder.WriteString(s)
-			builder.WriteRune('\r')
-			builder.WriteRune('\n')
-		}
-	}
-	report := builder.String()
 
 	return files, report
 }

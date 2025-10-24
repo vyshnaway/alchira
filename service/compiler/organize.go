@@ -11,7 +11,6 @@ import (
 	C "main/package/console"
 	_css "main/package/css"
 	_util "main/package/utils"
-	"maps"
 	_map "maps"
 	_strconv "strconv"
 )
@@ -114,17 +113,22 @@ var tag_class_prefix = string(_config.Root.CustomOps["lodash"])
 func Organize() (AritfactFiles map[string]string, Attachments map[int]bool) {
 
 	_config.Style.ClassDictionary = _model.Style_Dictionary{}
-	_config.Style.PublishIndexMap = []_model.Style_ClassIndexTrace{}
+	_config.Style.PublishIndexMap = [][]_model.Style_ClassIndexTrace{}
 
 	SaveClassRefs := func(stash _order_.R_Preview) {
-		for _, val := range stash.Final_Hashtrace {
-			index := val[0]
-			classid := val[1]
-			classname := css_class_prefix + _util.String_EnCounter(classid)
-			_config.Style.PublishIndexMap = append(_config.Style.PublishIndexMap, _model.Style_ClassIndexTrace{
-				ClassName:  classname,
-				ClassIndex: index,
-			})
+		for _, temp_trace := range stash.Final_Hashtrace {
+			tempPubMap := []_model.Style_ClassIndexTrace{}
+			for _, val := range temp_trace {
+				index := val[0]
+				classid := val[1]
+
+				classname := css_class_prefix + _util.String_EnCounter(classid)
+				tempPubMap = append(tempPubMap, _model.Style_ClassIndexTrace{
+					ClassName:  classname,
+					ClassIndex: index,
+				})
+			}
+			_config.Style.PublishIndexMap = append(_config.Style.PublishIndexMap, tempPubMap)
 		}
 
 		for json_array, imap := range stash.List_to_GroupId {
@@ -173,7 +177,7 @@ func Organize() (AritfactFiles map[string]string, Attachments map[int]bool) {
 	}
 
 	attachments := tracks_.Attachments
-	maps.Copy(attachments, _config.Delta.IndexAttach)
+	_map.Copy(attachments, _config.Delta.IndexAttach)
 
 	return artifact_files, attachments
 }

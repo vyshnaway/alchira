@@ -42,10 +42,12 @@ func value_EvaluateIndexTraces(
 			}
 		}
 	} else {
+		temp_map := []_model.Style_ClassIndexTrace{}
+
 		if action == E_Action_WatchHash {
 			for index, item := range classTrace {
 				classname := _fmt.Sprintf("%s%d", metaFront, index)
-				_config.Style.PublishIndexMap = append(_config.Style.PublishIndexMap, _model.Style_ClassIndexTrace{
+				temp_map = append(temp_map, _model.Style_ClassIndexTrace{
 					ClassName:  "." + classname,
 					ClassIndex: item.ClassIndex,
 				})
@@ -57,7 +59,7 @@ func value_EvaluateIndexTraces(
 			for _, item := range classTrace {
 				classdata := _action.Index_Fetch(item.ClassIndex)
 				classname := _fmt.Sprintf("%s%s", metaFront, classdata.SrcData.DebugClass)
-				_config.Style.PublishIndexMap = append(_config.Style.PublishIndexMap, _model.Style_ClassIndexTrace{
+				temp_map = append(temp_map, _model.Style_ClassIndexTrace{
 					ClassName:  "." + classname,
 					ClassIndex: item.ClassIndex,
 				})
@@ -68,6 +70,10 @@ func value_EvaluateIndexTraces(
 					[]rune{},
 				)
 			}
+		}
+
+		if len(temp_map) > 0 {
+			_config.Style.PublishIndexMap = append(_config.Style.PublishIndexMap, temp_map)
 		}
 	}
 

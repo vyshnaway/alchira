@@ -73,7 +73,6 @@ var Delta = _model.Cache_Delta{
 		Hashrule:  "",
 		Errors:    "",
 		MemChart:  "",
-		Footer:    "",
 	},
 	Lookup: _model.Cache_Delta_Lookup{
 		Artifacts: map[string]_model.File_Lookup{},
@@ -117,7 +116,6 @@ func Delta_Reset() {
 			Hashrule:  "",
 			Errors:    "",
 			MemChart:  "",
-			Footer:    "",
 		},
 		Lookup: _model.Cache_Delta_Lookup{
 			Artifacts: map[string]_model.File_Lookup{},
@@ -154,7 +152,7 @@ var Style = _model.Cache_Style{
 	Library__Index:  _model.Style_ClassIndexMap{},
 	Artifact_Index:  _model.Style_ClassIndexMap{},
 	ClassDictionary: _model.Style_Dictionary{},
-	PublishIndexMap: []_model.Style_ClassIndexTrace{},
+	PublishIndexMap: [][]_model.Style_ClassIndexTrace{},
 }
 
 func Style_Reset() {
@@ -166,7 +164,7 @@ func Style_Reset() {
 		Library__Index:  _model.Style_ClassIndexMap{},
 		Artifact_Index:  _model.Style_ClassIndexMap{},
 		ClassDictionary: _model.Style_Dictionary{},
-		PublishIndexMap: []_model.Style_ClassIndexTrace{},
+		PublishIndexMap: [][]_model.Style_ClassIndexTrace{},
 	}
 }
 

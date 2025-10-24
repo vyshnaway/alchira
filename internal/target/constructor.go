@@ -55,10 +55,10 @@ func New(storage _model.Config_ProxyStorage, label string) *Class {
 		FileCache:          map[string]*_model.File_Stash{},
 	}
 
-	index := 1
+	i := 1
 	for filepath, filecontent := range storage.Filepath_to_Content {
-		This.Savefile(filepath, filecontent, index)
-		index++
+		This.Savefile(filepath, filecontent, i)
+		i++
 	}
 
 	return &This

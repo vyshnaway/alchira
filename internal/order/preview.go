@@ -10,7 +10,7 @@ type R_Preview struct {
 	ClassLists      [][]int             `json:"classlist"`
 	List_to_GroupId map[string]int      `json:"listToGroup"`
 	Group_to_Table  map[int]map[int]int `json:"groupToMap"`
-	Final_Hashtrace [][2]int            `json:"recompClasslist"`
+	Final_Hashtrace [][][2]int          `json:"recompClasslist"`
 }
 
 func Preview(classtrace [][]int, merge bool) *R_Preview {
@@ -18,7 +18,7 @@ func Preview(classtrace [][]int, merge bool) *R_Preview {
 	counter := 0
 	refindex := 0
 	finalists := [][]int{}
-	final_hashtrace := [][2]int{}
+	final_hashtrace := [][][2]int{}
 	sorted_classtrace := [][]int{}
 	list_to_group := make(map[string]int)
 	group_to_table := make(map[int]map[int]int)
@@ -52,23 +52,24 @@ func Preview(classtrace [][]int, merge bool) *R_Preview {
 	}
 
 	for jsonref, classlists := range grouped_classtrace {
-
+		temptrace := [][2]int{}
 		reftable := make(map[int]int)
+
 		if seq, err := _utils_.Code_JsonParse[[]int](jsonref); err == nil {
 			finalists = append(finalists, seq)
 			for _, item := range seq {
 				counter++
 				reftable[item] = counter
-				final_hashtrace = append(final_hashtrace, [2]int{item, counter})
+				temptrace = append(temptrace, [2]int{item, counter})
 			}
 		}
-
 		for _, arr := range classlists {
 			arrJSON, _ := _json_.Marshal(arr)
 			arrString := string(arrJSON)
 			list_to_group[arrString] = refindex
 		}
-
+		
+		final_hashtrace = append(final_hashtrace, temptrace)
 		group_to_table[refindex] = reftable
 		refindex++
 	}

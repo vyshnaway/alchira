@@ -39,7 +39,7 @@ func artifact_CacheFiles() artifact_StackFiles_return {
 		artifact_SaveFile(
 			filepath,
 			content,
-			string(_config.Lodash_rune)+utils.String_EnCounter((i)),
+			string(_config.Lodash_rune)+utils.String_EnCounter(i),
 		)
 		i++
 	}

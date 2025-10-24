@@ -53,7 +53,6 @@ type Cache_Delta_Report struct {
 	Hashrule  string
 	Errors    string
 	MemChart  string
-	Footer    string
 }
 
 type Cache_Delta_Lookup struct {
@@ -107,7 +106,7 @@ type Cache_Style struct {
 	Library__Index  Style_ClassIndexMap
 	Artifact_Index  Style_ClassIndexMap
 	ClassDictionary Style_Dictionary
-	PublishIndexMap []Style_ClassIndexTrace
+	PublishIndexMap [][]Style_ClassIndexTrace
 }
 
 type Cache_Manifest_Groups struct {
