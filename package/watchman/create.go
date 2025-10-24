@@ -36,7 +36,10 @@ func New(folders, ignores []string) *T_Watcher {
 	}
 }
 
-func (This *T_Watcher) Start(interval, maxevents int) error {
+func (This *T_Watcher) Start(maxevents, pollInterval, refreshInterval int) error {
+
+	This.PollInterval = pollInterval
+	This.RefreshInterval = refreshInterval
 	This.hook = _watcher.New()
 	This.hook.SetMaxEvents(maxevents)
 
@@ -84,7 +87,7 @@ func (This *T_Watcher) Start(interval, maxevents int) error {
 	}()
 
 	go func() {
-		err := This.hook.Start(_time.Millisecond * _time.Duration(interval))
+		err := This.hook.Start(_time.Millisecond * _time.Duration(This.PollInterval))
 		if err != nil {
 			_fmt.Fprintf(_os.Stderr, "Watcher start error: %v\r\n", err)
 		}
@@ -92,9 +95,9 @@ func (This *T_Watcher) Start(interval, maxevents int) error {
 
 	go func() {
 		for {
-			_time.Sleep(12 * _time.Second)
+			_time.Sleep(_time.Millisecond * _time.Duration(refreshInterval))
 			if This.status {
-				This.HandleEvent(E_Action_Refactor, "", "")
+				This.Rebuild()
 			} else {
 				break
 			}
@@ -110,8 +113,8 @@ func (This *T_Watcher) Start(interval, maxevents int) error {
 
 }
 
-func Quick(folders, ignores []string, interval int) (instance *T_Watcher, err error) {
+func Quick(folders, ignores []string, pollInterval, refreshInterval int) (instance *T_Watcher, err error) {
 	w := New(folders, ignores)
-	e := w.Start(interval, 1)
+	e := w.Start(1, pollInterval, refreshInterval)
 	return w, e
 }

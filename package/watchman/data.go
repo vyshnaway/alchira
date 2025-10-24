@@ -36,6 +36,8 @@ type T_Watcher struct {
 	folderMaps      map[string]string
 	resolvedFolders []string
 	resolvedIgnores []string
+	PollInterval    int
+	RefreshInterval int
 }
 
 // If content == "", file content is refetched from path as fallback
@@ -99,6 +101,10 @@ func (This *T_Watcher) Reset() {
 	This.mutex.Lock()
 	defer This.mutex.Unlock()
 	This.queue = []Event{}
+}
+
+func (This *T_Watcher) Rebuild() {
+	This.HandleEvent(E_Action_Refactor, "", "")
 }
 
 func (This *T_Watcher) Length() int {

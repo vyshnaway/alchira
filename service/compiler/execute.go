@@ -137,7 +137,7 @@ func Execute(heading string) (Exitcode int) {
 						_config.Path_Folder["archive"].Path,
 					}
 
-					if w, err := _watcher.Quick(watch_dirs, ignore_dirs, interval); err == nil {
+					if w, err := _watcher.Quick(watch_dirs, ignore_dirs, 120, 12000); err == nil {
 						WATCHER = w
 
 						if !_config.Static.SERVER {
@@ -168,7 +168,7 @@ func Execute(heading string) (Exitcode int) {
 					for _, event := range events {
 						filepath := _fileman.Path_Join(event.Folder, event.FilePath)
 						breaknow := false
-						S.Render.Raw(event)
+						
 						if event.Folder == _config.Path_Folder["blueprint"].Path {
 							if event.Action == _watcher.E_Action_Update {
 
