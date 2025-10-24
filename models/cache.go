@@ -86,7 +86,7 @@ type Cache_Delta struct {
 	PublishError string
 	FinalMessage string
 	Errors       []string
-	IndexAttach  []int
+	IndexAttach  map[int]bool
 	IndexBuild   string
 	Report       Cache_Delta_Report
 	Lookup       Cache_Delta_Lookup

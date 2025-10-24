@@ -81,7 +81,6 @@ var op_lodash = _config.Root.CustomOps["lodash"]
 type value_Parse_retype struct {
 	Classlist   []string
 	Attachments []string
-	Lodashes    []string
 	Scribed     string
 }
 
@@ -94,7 +93,6 @@ func value_Parse(
 	classlist := []string{}
 	quotes := []rune{'\'', '`', '"'}
 	attachments := []string{}
-	lodashes := []string{}
 
 	var entry _string.Builder
 	scribed := value
@@ -113,8 +111,6 @@ func value_Parse(
 					attachments = append(attachments, entrystring[1:])
 				} else if rune(entrystring[0]) == op_assign {
 					classlist = append(classlist, entrystring[1:])
-				} else if rune(entrystring[0]) == op_lodash {
-					lodashes = append(lodashes, entrystring)
 				}
 				entry.Reset()
 			} else {
@@ -147,11 +143,7 @@ func value_Parse(
 				FileCursor.Active.ColMarker,
 			)
 		case E_Action_WatchHash:
-			metafront = _fmt.Sprintf(
-				"_%s_%d",
-				fileData.Label,
-				FileCursor.Active.Cycle,
-			)
+			metafront = _fmt.Sprintf("%s%d", fileData.Label, FileCursor.Active.Cycle)
 		default:
 			metafront = ""
 		}
@@ -203,7 +195,6 @@ func value_Parse(
 	return value_Parse_retype{
 		Classlist:   classlist,
 		Attachments: attachments,
-		Lodashes:    lodashes,
 		Scribed:     scribed,
 	}
 }

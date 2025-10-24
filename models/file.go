@@ -28,9 +28,8 @@ type File_Source struct {
 }
 
 type File_Lookup struct {
-	Id     string    `json:"id"`
-	Type   File_Type `json:"type"`
-	Lodash []string  `json:"lodash"`
+	Id   string    `json:"id"`
+	Type File_Type `json:"type"`
 }
 
 type File_TagReplacement struct {
@@ -40,8 +39,7 @@ type File_TagReplacement struct {
 
 type File_StyleData struct {
 	UsedIn          []int
-	Lodashes        []string
-	Attachments     []string
+	Attachments     map[string]bool
 	ClassTracks     [][]string
 	LocalClasses    Style_ClassIndexMap
 	GlobalClasses   Style_ClassIndexMap
@@ -50,9 +48,9 @@ type File_StyleData struct {
 }
 
 type File_LocalManifest struct {
-	Local       File_SymclassIndexMap `json:"local"`
-	Global      File_SymclassIndexMap `json:"global"`
-	Public      File_SymclassIndexMap `json:"public"`
+	Locals      File_SymclassIndexMap `json:"local"`
+	Globals     File_SymclassIndexMap `json:"global"`
+	Publics     File_SymclassIndexMap `json:"public"`
 	Lookup      File_Lookup           `json:"lookup"`
 	Errors      []string              `json:"errors"`
 	Diagnostics []File_Diagnostic     `json:"diagnostics"`

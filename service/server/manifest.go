@@ -74,9 +74,6 @@ func ManifestFile(filepath string) (R_Manifest_IO, R_Manifest_WS) {
 
 	if nav, ok := configs.Manifest.Lookup[filepath]; ok {
 		assistfile = true
-		if nav.Lodash != nil {
-			lodashes = nav.Lodash
-		}
 
 		if nav.Type == models.File_Type_Artifact {
 			if stash, er := manifest.Group.Artifact[nav.Id]; er {

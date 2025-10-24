@@ -76,8 +76,8 @@ func main() {
 	_config.Static.Argument = argone
 	_config.Static.DEBUG = command == "debug"
 	_config.Static.MINIFY = !_config.Static.DEBUG
-	_config.Static.SERVER = command == "server"
-	_config.Static.WATCH = ((command == "debug" || command == "preview") && argone == "-w") || command == "server"
+	_config.Static.SERVER = command == "server" || command == "iamai"
+	_config.Static.WATCH = ((command == "debug" || command == "preview") && argone == "-w") || command == "server" || command == "iamai"
 	_config.Static.ProjectName = _util.String_Filter(projectname, []rune{}, []rune{}, []rune{})
 	_config.Static.ProjectVersion = projectversion
 
@@ -133,6 +133,15 @@ func main() {
 	case "publish":
 		{
 			exitcode = _compiler.Execute(corecaps + " : " + "Publishing for Production")
+		}
+	case "iamai":
+		{
+			_action.Sync_RootDocs()
+			S.Post(_config.Sync_References["agent"].Content)
+			if val, err := _strconv.Atoi(argone); err == nil {
+				defaultPort = val
+			}
+			_server.Connect(defaultPort)
 		}
 	case "server":
 		{

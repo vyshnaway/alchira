@@ -54,7 +54,7 @@ func Artifact(index int) _types_.Style_ExportStyle {
 		InnerText:   innertext,
 		Stylesheet:  stylesheet,
 		Attributes:  attributes,
-		Attachments: []string{},
+		Attachments: map[string]bool{},
 	}
 }
 
@@ -65,10 +65,10 @@ func (This *Class) GetArtifacts() map[string]_model.Style_ExportStyle {
 		for _, pubindex := range file.StyleData.PublicClasses {
 			exporting := Artifact(pubindex)
 
-			for _, a := range _action.Index_Fetch(pubindex).SrcData.Attachments {
+			for a := range _action.Index_Fetch(pubindex).SrcData.Attachments {
 				if found := _action.Index_Find(a, file.StyleData.LocalClasses); found.Index > 0 {
 					subexporting := Artifact(found.Index)
-					exporting.Attachments = append(exporting.Attachments, subexporting.SymClass)
+					exporting.Attachments[subexporting.SymClass] = true
 					exports[subexporting.SymClass] = subexporting
 				}
 			}

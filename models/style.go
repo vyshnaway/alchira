@@ -23,7 +23,7 @@ type Style_ExportStyle struct {
 	InnerText   string
 	Stylesheet  map[string]string
 	Attributes  map[string]string
-	Attachments []string
+	Attachments map[string]bool
 }
 
 type Style_Metadata struct {
@@ -42,7 +42,7 @@ type Style_ClassData struct {
 	Definent          string
 	SymClass          string
 	DebugClass        string
-	Attachments       []string
+	Attachments       map[string]bool
 	NativeStaple      string
 	ExportStaple      string
 	NativeRawStyle    *css.T_Block

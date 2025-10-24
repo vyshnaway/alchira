@@ -5,7 +5,6 @@ import (
 	_config "main/configs"
 	_action "main/internal/action"
 	X "main/internal/console"
-	_script "main/internal/script"
 	_stash "main/internal/stash"
 	_style "main/internal/style"
 	_model "main/models"
@@ -21,19 +20,7 @@ import (
 func Generate_Files() (Files map[string]string, Report string) {
 
 	files, attachments := Organize()
-
-	var render_action _script.E_Action
-	if _config.Static.Command == "debug" {
-		render_action = _script.E_Action_DebugHash
-	} else if _config.Static.Command == "preview" && _config.Static.WATCH {
-		render_action = _script.E_Action_WatchHash
-	} else {
-		render_action = _script.E_Action_BuildHash
-	}
-
-	for _, target := range _stash.Cache.Targetdir {
-		target.SyncClassnames(render_action)
-	}
+	_stash.Target_SyncClassNames()
 
 	class_frag := _css.Render_Switched(func() *_css.T_Block {
 		result := _css.NewBlock()
@@ -48,28 +35,24 @@ func Generate_Files() (Files map[string]string, Report string) {
 		for _, cache := range _stash.Cache.Targetdir {
 			scanned := _style.Cssfile_String(cache.StylesheetContent, `APPENDIX : `+cache.Stylesheet+" | ")
 			result.Append(scanned.Result.Units...)
-			for _, attachment := range scanned.Attachments {
+			for attachment := range scanned.Attachments {
 				if res := _action.Index_Find(attachment, _model.Style_ClassIndexMap{}); res.Index > 0 {
-					attachments = append(attachments, res.Index)
+					attachments[res.Index] = true
 				}
 			}
 		}
 		return result
 	}(), _config.Static.MINIFY)
 
+	attach_styles := _css.NewBlock()
 	var attach_staples _string.Builder
-	attach_frag := _css.Render_Vendored(func() *_css.T_Block {
-		attach_styles := _css.NewBlock()
-		// attachments = _util.Array_Setback(attachments)
-		// for _, a := range attachments {
-		// 	data := _action.Index_Fetch(a)
-		// 	attach_styles.Merge(data.SrcData.NativeAttachStyle)
-		// 	if len(data.SrcData.NativeStaple) > 0 {
-		// 		attach_staples.WriteString(data.SrcData.NativeStaple)
-		// 	}
-		// }
-		return attach_styles
-	}(), _config.Static.MINIFY)
+	for a := range attachments {
+		if data := _action.Index_Fetch(a); data != nil {
+			attach_styles.Merge(data.SrcData.NativeAttachStyle)
+			attach_staples.WriteString(data.SrcData.NativeStaple)
+		}
+	}
+	attach_frag := _css.Render_Vendored(attach_styles, _config.Static.MINIFY)
 	staple_sheet := attach_staples.String()
 
 	render_frags := []struct {

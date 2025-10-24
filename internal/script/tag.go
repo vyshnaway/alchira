@@ -145,9 +145,6 @@ func Tag_Scanner(
 						if len(value_Parse_return.Attachments) > 0 {
 							attachments = append(attachments, value_Parse_return.Attachments...)
 						}
-						if len(value_Parse_return.Lodashes) > 0 {
-							lodashes = append(lodashes, value_Parse_return.Lodashes...)
-						}
 						nativeAttributes[tr_Attr] = value_Parse_return.Scribed
 					} else {
 						nativeAttributes[tr_Attr] = tr_Value

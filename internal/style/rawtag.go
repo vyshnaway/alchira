@@ -8,6 +8,7 @@ import (
 	_model "main/models"
 	_css "main/package/css"
 	_util "main/package/utils"
+	"maps"
 	_regexp "regexp"
 	_strconv "strconv"
 	_string "strings"
@@ -50,7 +51,7 @@ func Rawtag_Upload(
 ) R_Rawtag_Upload {
 	errors := []string{}
 	diagnostics := []_model.File_Diagnostic{}
-	attachments := []string{}
+	attachments := map[string]bool{}
 	forArtifact := file.Manifest.Lookup.Type == _model.File_Type_Artifact
 	declaration := file.TargetPath + ":" + _strconv.Itoa(raw.RowIndex) + ":" + _strconv.Itoa(raw.ColIndex)
 
@@ -88,7 +89,7 @@ func Rawtag_Upload(
 		nativeRawStyle := native_scanned.Result
 		exportRawStyle := export_scanned.Result
 
-		attachments := append(attachments, native_scanned.Attachments...)
+		maps.Copy(attachments, native_scanned.Attachments)
 		variables := native_scanned.Variables
 		for key, val := range raw.Styles {
 			if key != "" {
@@ -99,7 +100,7 @@ func Rawtag_Upload(
 						_fmt.Sprint(raw.SymClasses[0], " // ", key),
 					)
 
-					attachments = append(attachments, native_scanned.Attachments...)
+					maps.Copy(attachments, native_scanned.Attachments)
 					variables.Copy(native_scanned.Variables)
 
 					if native_scanned.Result.Len() > 0 {
@@ -121,13 +122,15 @@ func Rawtag_Upload(
 		artifact := _config.Archive.Name
 		if forArtifact {
 			artifact = file.Artifact
-			for i, v := range attachments {
+			attachmods := map[string]bool{}
+			for v := range attachments {
 				if _string.Contains(v, "$$$") {
-					attachments[i] = file.ClassFront + _string.ReplaceAll(v, "$$$", "$")
+					attachmods[file.ClassFront+_string.ReplaceAll(v, "$$$", "$")] = true
 				} else {
-					attachments[i] = file.ClassFront + "$/" + v
+					attachments[file.ClassFront+"$/"+v] = true
 				}
 			}
+			attachments = attachmods
 		}
 
 		exportAttachStyle := _css.NewBlock()
@@ -138,8 +141,8 @@ func Rawtag_Upload(
 				raw.SymClasses[0],
 			)
 
-			attachments = append(attachments, nativeAttachResult.Attachments...)
-			attachments = append(attachments, exportAttachResult.Attachments...)
+			maps.Copy(attachments, nativeAttachResult.Attachments)
+			maps.Copy(attachments, exportAttachResult.Attachments)
 
 			variables.Copy(nativeAttachResult.Variables)
 			variables.Copy(exportAttachResult.Variables)
@@ -211,7 +214,7 @@ func Rawtag_Upload(
 type R_Rawtag_Upload struct {
 	Symclass    string
 	Index       int
-	Attachments []string
+	Attachments map[string]bool
 	Diagnostics []_model.File_Diagnostic
 	Errors      []string
 }

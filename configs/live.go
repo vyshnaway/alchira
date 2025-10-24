@@ -63,7 +63,7 @@ var Delta = _model.Cache_Delta{
 	FinalMessage: "",
 	PublishError: "",
 	IndexBuild:   "",
-	IndexAttach:  []int{},
+	IndexAttach:  map[int]bool{},
 	Report: _model.Cache_Delta_Report{
 		Artifacts: "",
 		Axioms:    "",
@@ -104,12 +104,10 @@ var Delta = _model.Cache_Delta{
 
 func Delta_Reset() {
 	Delta = _model.Cache_Delta{
-		// Path:         "",
-		// Content:      "",
 		FinalMessage: "",
 		PublishError: "",
 		IndexBuild:   "",
-		IndexAttach:  []int{},
+		IndexAttach:  map[int]bool{},
 		Report: _model.Cache_Delta_Report{
 			Artifacts: "",
 			Axioms:    "",
