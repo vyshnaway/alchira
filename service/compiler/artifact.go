@@ -10,7 +10,10 @@ import (
 	_fileman "main/package/fileman"
 	"main/package/object"
 	"main/package/utils"
+	"maps"
 	_map "maps"
+	"slices"
+	"sort"
 	_string "strings"
 	_sync "sync"
 )
@@ -19,7 +22,7 @@ func artifact_Fetch(identifier string, source string) (Files map[string]string, 
 	files := map[string]string{}
 	artifactspath := _config.Path_Folder["artifacts"].Path
 
-	status, artifcact := func() (Ok bool, result _model.Config_Archive) {
+	status, artifact := func() (Ok bool, result _model.Config_Archive) {
 		var r _model.Config_Archive
 
 		if str, err := _fileman.Read_File(source, true); err == nil {
@@ -51,25 +54,25 @@ func artifact_Fetch(identifier string, source string) (Files map[string]string, 
 
 	if status {
 
-		if artifcact.Readme != "" {
-			files[_fileman.Path_Join(artifactspath, identifier, `readme.md`)] = artifcact.Readme
-			artifcact.Readme = ""
+		if artifact.Readme != "" {
+			files[_fileman.Path_Join(artifactspath, identifier, `readme.md`)] = artifact.Readme
+			artifact.Readme = ""
 		}
 
-		if artifcact.Licence != "" {
-			files[_fileman.Path_Join(artifactspath, identifier, `licence.md`)] = artifcact.Licence
-			artifcact.Licence = ""
+		if artifact.Licence != "" {
+			files[_fileman.Path_Join(artifactspath, identifier, `licence.md`)] = artifact.Licence
+			artifact.Licence = ""
 		}
 
-		if artifcact.ExportSheet != "" {
+		if artifact.ExportSheet != "" {
 			lines := []string{
-				_fmt.Sprintf("# %s@%s : Available SymClasses", artifcact.Name, artifcact.Version),
+				_fmt.Sprintf("# %s@%s : Available SymClasses", artifact.Name, artifact.Version),
 				"",
 			}
 
 			// If there are ExportClasses, map to lines
-			if len(artifcact.ExportClasses) > 0 {
-				for _, i := range artifcact.ExportClasses {
+			if len(artifact.ExportClasses) > 0 {
+				for _, i := range artifact.ExportClasses {
 					if _string.Contains(i, "$$$") {
 						lines = append(lines, _fmt.Sprintf("> /%s/%s", identifier, _string.Replace(i, "$$$", "$", 1)))
 					} else {
@@ -80,16 +83,35 @@ func artifact_Fetch(identifier string, source string) (Files map[string]string, 
 
 			lines = append(lines, "")
 			lines = append(lines, "")
+			lines = append(lines, "# Design Tokens")
+			lines = append(lines, "")
+			lines = append(lines, "```css")
+			lines = append(lines, "")
+			lines = append(lines, ":root {")
+			c := slices.Collect(maps.Keys(artifact.Constants))
+			sort.Strings(c)
+			for _, k := range c {
+				v := artifact.Constants[k]
+				lines = append(lines, _fmt.Sprint("  ", k, ": ", v, ";"))
+			}
+			lines = append(lines, "}")
+			lines = append(lines, "")
+			lines = append(lines, "```")
+
+			lines = append(lines, "")
+			lines = append(lines, "")
 			lines = append(lines, "# Declarations")
 			lines = append(lines, "")
-			lines = append(lines, artifcact.ExportSheet)
+			lines = append(lines, "```html")
+			lines = append(lines, artifact.ExportSheet)
+			lines = append(lines, "```")
 
 			files[_fileman.Path_Join(artifactspath, identifier, identifier+"."+_config.Root.Extension)] = _string.Join(lines, "\r\n")
-			artifcact.ExportSheet = ""
+			artifact.ExportSheet = ""
 		}
-		
-		artifcact.Source = source
-		files[_fileman.Path_Join(artifactspath, identifier, identifier+".json")] = utils.Code_JsonBuild(artifcact, "  ")
+
+		artifact.Source = source
+		files[_fileman.Path_Join(artifactspath, identifier, identifier+".json")] = utils.Code_JsonBuild(artifact, "  ")
 	}
 
 	return files, status

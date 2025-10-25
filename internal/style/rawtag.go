@@ -8,7 +8,7 @@ import (
 	_model "main/models"
 	_css "main/package/css"
 	_util "main/package/utils"
-	"maps"
+	_map "maps"
 	_regexp "regexp"
 	_strconv "strconv"
 	_string "strings"
@@ -29,14 +29,15 @@ func lodashstyle_process(
 	NativeResult R_Parse,
 	AttachResult R_Parse,
 ) {
-	lodash_replaced := _string.ReplaceAll(content, lodash_tag, file.Label)
+	native := _string.ReplaceAll(content, lodash_tag, file.Label)
 	nativeAttachResult := Parse_CssSnippet(
-		_util.Code_Uncomment(lodash_replaced, true, true, false),
+		_util.Code_Uncomment(native, true, true, false),
 		selector, initial, flatten,
 	)
 
+	export := _string.ReplaceAll(content, lodash_tag, lodash_tag+file.Label)
 	exportAttachResult := Parse_CssSnippet(
-		_util.Code_Uncomment(content, true, true, false),
+		_util.Code_Uncomment(export, true, true, false),
 		selector, initial, flatten,
 	)
 
@@ -89,7 +90,7 @@ func Rawtag_Upload(
 		nativeRawStyle := native_scanned.Result
 		exportRawStyle := export_scanned.Result
 
-		maps.Copy(attachments, native_scanned.Attachments)
+		_map.Copy(attachments, native_scanned.Attachments)
 		variables := native_scanned.Variables
 		for key, val := range raw.Styles {
 			if key != "" {
@@ -100,7 +101,7 @@ func Rawtag_Upload(
 						_fmt.Sprint(raw.SymClasses[0], " // ", key),
 					)
 
-					maps.Copy(attachments, native_scanned.Attachments)
+					_map.Copy(attachments, native_scanned.Attachments)
 					variables.Copy(native_scanned.Variables)
 
 					if native_scanned.Result.Len() > 0 {
@@ -141,8 +142,8 @@ func Rawtag_Upload(
 				raw.SymClasses[0],
 			)
 
-			maps.Copy(attachments, nativeAttachResult.Attachments)
-			maps.Copy(attachments, exportAttachResult.Attachments)
+			_map.Copy(attachments, nativeAttachResult.Attachments)
+			_map.Copy(attachments, exportAttachResult.Attachments)
 
 			variables.Copy(nativeAttachResult.Variables)
 			variables.Copy(exportAttachResult.Variables)
@@ -159,8 +160,9 @@ func Rawtag_Upload(
 		exportStaple := ""
 		nativeStaple := ""
 		if raw.Elid == _config.Root.CustomTags["staple"] {
-			exportStaple = _util.Code_Strip(raw.Innertext, false, false, false, true)
-			nativeStaple = _string.ReplaceAll(exportStaple, lodash_tag, file.Label)
+			stripped := _util.Code_Strip(raw.Innertext, false, false, false, true)
+			exportStaple = _string.ReplaceAll(stripped, lodash_tag, lodash_tag+file.Label)
+			nativeStaple = _string.ReplaceAll(stripped, lodash_tag, file.Label)
 		}
 
 		summon := ""

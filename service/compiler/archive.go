@@ -27,14 +27,23 @@ func archive_Build() _models.Config_Archive {
 
 	var exportsheet _string.Builder
 	for _, data := range exportdata {
+		exportsheet.WriteString("\r\n")
+		
 		if _string.Contains(data.SymClass, "$$$") {
 			archive.ExportClasses = append(archive.ExportClasses, data.SymClass)
 		}
 
-		exportsheet.WriteString("\r\n\r\n")
-
 		exportsheet.WriteString("<")
 		exportsheet.WriteString(data.Element)
+		for k, v := range data.Attributes {
+			exportsheet.WriteString(" ")
+			exportsheet.WriteString(k)
+			if len(v) > 0 {
+				exportsheet.WriteString("=")
+				exportsheet.WriteString(v)
+			}
+		}
+
 		exportsheet.WriteString(" ")
 		if data.SymClass[0] == '$' {
 			exportsheet.WriteString("-")
@@ -47,12 +56,13 @@ func archive_Build() _models.Config_Archive {
 			v = string(_config.Root.CustomOps["attach"]) + " " + _string.Join(attachments, " ") + ";" + v
 		}
 		if len(v) > 0 {
-			exportsheet.WriteString("=\"" + v + "\"")
+			exportsheet.WriteString("={" + v + "}")
 		}
 
 		for key, val := range data.Stylesheet {
 			if key != "[]" && key[0] != ' ' {
 				if arr, err := _util.Code_JsonParse[[]string](key); err == nil {
+					exportsheet.WriteString(" ")
 					exportsheet.WriteString("{")
 					exportsheet.WriteString(_string.Join(arr, "}&{"))
 					exportsheet.WriteString("}&=")
@@ -61,19 +71,13 @@ func archive_Build() _models.Config_Archive {
 			}
 		}
 
-		for k, v := range data.Attributes {
-			exportsheet.WriteString(" ")
-			exportsheet.WriteString(k)
-			if len(v) > 0 {
-				exportsheet.WriteString("=")
-				exportsheet.WriteString(v)
-			}
-		}
 		exportsheet.WriteString(">")
 
 		exportsheet.WriteString(data.InnerText)
 
 		exportsheet.WriteString("</" + data.Element + ">")
+
+		exportsheet.WriteString("\r\n")
 	}
 
 	archive.ExportSheet = exportsheet.String()
