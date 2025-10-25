@@ -35,7 +35,7 @@ func Artifact(index int) _types_.Style_ExportStyle {
 			symclass = "$---" + _util.String_EnCounter(style.SrcData.Index)
 		}
 
-		isPublic := _string.Contains(style.SrcData.SymClass, "$$$")
+		isPublic := _string.Contains(style.SrcData.Definent, "$$$")
 		if isPublic {
 			for k, v := range style.SrcData.Attributes {
 				attributes[k] = _util.Code_Minify(v)

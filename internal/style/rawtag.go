@@ -63,7 +63,11 @@ func Rawtag_Upload(
 	var normalized_symclass string
 	symclass := file.ClassFront
 	if forArtifact {
-		symclass += _string.ReplaceAll(symzero, "$$$", "$")
+		if !_string.Contains(symzero, "$$$") {
+			symclass += "$/" + symzero
+		} else {
+			symclass += _string.ReplaceAll(symzero, "$$$", "$")
+		}
 		normalized_symclass = _util.String_Filter(symclass, []rune{}, []rune{}, []rune{'$', '/'})
 	} else {
 		symclass += string(symzero)
@@ -128,7 +132,7 @@ func Rawtag_Upload(
 				if _string.Contains(v, "$$$") {
 					attachmods[file.ClassFront+_string.ReplaceAll(v, "$$$", "$")] = true
 				} else {
-					attachments[file.ClassFront+"$/"+v] = true
+					attachmods[file.ClassFront+"$/"+v] = true
 				}
 			}
 			attachments = attachmods
