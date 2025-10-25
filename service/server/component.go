@@ -37,7 +37,7 @@ func Component(symclass string, context models.Style_ClassIndexMap) T_Component_
 		for attachment := range r.Data.SrcData.Attachments {
 			if found := action.Index_Find(attachment, context); found.Index > 0 {
 				attachstyle.WriteString(css.Render_Vendored(found.Data.SrcData.NativeRawStyle, true))
-				staple.WriteString(found.Data.SrcData.NativeStaple)
+				staple.WriteString(found.Data.SrcData.NativeStaple) 
 			}
 		}
 	}

@@ -44,17 +44,6 @@ func value_EvaluateIndexTraces(
 	} else {
 		temp_map := []_model.Style_ClassIndexTrace{}
 
-		if action == E_Action_MinifyHash {
-			for index, item := range classTrace {
-				classname := _fmt.Sprintf("%s%d", metaFront, index)
-				temp_map = append(temp_map, _model.Style_ClassIndexTrace{
-					ClassName:  "." + classname,
-					ClassIndex: item.ClassIndex,
-				})
-				classMap[item.ClassName] = classname
-			}
-		}
-
 		if action == E_Action_DebugHash {
 			for _, item := range classTrace {
 				classdata := _action.Index_Fetch(item.ClassIndex)
@@ -139,19 +128,14 @@ func value_Parse(
 		activeQuote = ' '
 		inQuote = false
 
-		var metafront string
-		switch action {
-		case E_Action_DebugHash:
+		metafront := ""
+		if action == E_Action_DebugHash {
 			metafront = _fmt.Sprintf(
 				"TAG%s\\:%d\\:%d__",
 				fileData.DebugFront,
 				FileCursor.Active.RowMarker,
 				FileCursor.Active.ColMarker,
 			)
-		case E_Action_MinifyHash:
-			metafront = _fmt.Sprintf("%s%d", fileData.Label, FileCursor.Active.Cycle)
-		default:
-			metafront = ""
 		}
 
 		classMap := value_EvaluateIndexTraces(action, metafront, classlist, fileData.StyleData.LocalClasses)

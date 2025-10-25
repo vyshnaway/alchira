@@ -13,9 +13,11 @@ func prefix_ForAttribute(content string, prefixes []string) *O.T[string, string]
 	result := O.New[string, string]()
 
 	if attrStat {
-		for vendor, value := range attrVals {
+		for vendor, values := range attrVals {
 			if _slice.Contains(prefixes, vendor) {
-				result.Set(vendor, value)
+				for _, val := range values {
+					result.Set(vendor, val)
+				}
 			}
 		}
 	}
@@ -26,7 +28,7 @@ func prefix_ForAttribute(content string, prefixes []string) *O.T[string, string]
 
 func prefix_ForValues(attribute string, value string, prefixes []string) *O.T[string, string] {
 	cleanValue := _util.Code_Uncomment(value, false, true, false)
-	var venVals map[string]string
+	var venVals map[string][]string
 	var venStat = false
 	if attrMap, ok := Vendor_Refer.Values[attribute]; ok {
 		venVals, venStat = attrMap[cleanValue]
@@ -34,9 +36,11 @@ func prefix_ForValues(attribute string, value string, prefixes []string) *O.T[st
 
 	result := O.New[string, string]()
 	if venStat {
-		for vendor, val := range venVals {
+		for vendor, values := range venVals {
 			if _slice.Contains(prefixes, vendor) {
-				result.Set(vendor, _string.Replace(value, cleanValue, val, 1))
+				for _, val := range values {
+					result.Set(vendor, _string.Replace(value, cleanValue, val, 1))
+				}
 			}
 		}
 	}
@@ -76,8 +80,10 @@ func prefix_ForAtRule(content string, prefixes []string) *O.T[string, string] {
 	result := O.New[string, string]()
 	for _, group := range prefixes {
 		if rval, rbool := Vendor_Refer.Atrules[rule]; rbool {
-			if gval, gbool := rval[group]; gbool {
-				result.Set(group, gval+data)
+			if gvalues, gbool := rval[group]; gbool {
+				for _, gval := range gvalues {
+					result.Set(group, gval+data)
+				}
 			}
 		}
 	}
@@ -107,9 +113,11 @@ func prefix_ForPseudos(content string, prefixes []string) []string {
 			score := 0
 			value := regex_pseuods.ReplaceAllStringFunc(str, func(selector string) string {
 				if sVal, sStat := Vendor_Refer.Pseudos[selector]; sStat {
-					if gVal, gStat := sVal[group]; gStat {
-						score++
-						return gVal
+					if gValues, gStat := sVal[group]; gStat {
+						for _, gval := range gValues {
+							score++
+							return gval
+						}
 					}
 				}
 

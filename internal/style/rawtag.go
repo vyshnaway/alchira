@@ -170,11 +170,19 @@ func Rawtag_Upload(
 			attributes = raw.Attributes
 		}
 
+		comments := raw.Comments
+		if len(comments) == 0 {
+			comments = nil
+		}
+		vars := variables.ToMap()
+		if len(vars) == 0 {
+			vars = nil
+		}
 		metadata := _model.Style_Metadata{
-			Info:          raw.Comments,
+			Info:          comments,
 			Skeleton:      nativeRawStyle.Skeleton(),
 			Declarations:  []string{declaration},
-			Variables:     variables.ToMap(),
+			Variables:     vars,
 			SummonSnippet: summon,
 		}
 

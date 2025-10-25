@@ -166,8 +166,8 @@ func Organize() (AritfactFiles map[string]string, Attachments map[int]bool) {
 			res, _ := _order_.Optimize(tracks_.ClassTracks, true, _config.Static.Argument, archive)
 			SaveClassRefs(*res.Result)
 
+			artifact_files = archive_Files()
 			if res.Status {
-				artifact_files = archive_Files()
 				_config.Delta.FinalMessage = "Build Success."
 			} else {
 				_config.Delta.PublishError = res.Message

@@ -6,6 +6,7 @@ import (
 	_action "main/internal/action"
 	X "main/internal/console"
 	_stash "main/internal/stash"
+	"main/models"
 	S "main/package/console"
 	_css "main/package/css"
 	O "main/package/object"
@@ -34,6 +35,16 @@ func ClearUnwantedCache() (
 			delete(_config.Style.Index_to_Data, i)
 		}
 	}
+
+	pubInLt := 24
+	newPubIn := [][]models.Style_ClassIndexTrace{}
+	for _, A := range _config.Style.PublishIndexMap {
+		for i := 0; i < len(A); i += pubInLt {
+			end := min(i + pubInLt, len(A))
+			newPubIn = append(newPubIn, A[i:end])
+		}
+	}
+	_config.Style.PublishIndexMap = newPubIn
 
 	_config.Delta.Report.Constants = X.List_Catalog(
 		"Root Constants",

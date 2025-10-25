@@ -9,7 +9,6 @@ import (
 	_util "main/package/utils"
 	_map "maps"
 	_slice "slices"
-	_sort "sort"
 	_string "strings"
 )
 
@@ -85,19 +84,16 @@ func archive_Files() map[string]string {
 
 	latestverfile := "latest.json"
 	currentverfile := archive_Build().Version + ".json"
-	availableversions := []string{}
+
+	availableversions := []string{latestverfile, currentverfile}
 	if items, err := _fileman.Path_ListFiles(_config.Path_Folder["arcversion"].Path, []string{}); err == nil {
-		availableversions = items
-	}
-	if _slice.Contains(availableversions, latestverfile) {
-		availableversions = append(availableversions, latestverfile)
-	}
-	if _slice.Contains(availableversions, currentverfile) {
-		availableversions = append(availableversions, currentverfile)
-	}
-	_sort.Strings(availableversions)
-	for i, v := range availableversions {
-		availableversions[i] = _fileman.Path_BaseName(v)
+		for _, i := range items {
+			basename := _fileman.Path_BaseName(i)
+			if !_slice.Contains(availableversions, basename) {
+				availableversions = append(availableversions, basename)
+			}
+		}
+
 	}
 
 	indexexport := _config.Archive

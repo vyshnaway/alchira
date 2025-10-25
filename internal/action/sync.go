@@ -64,6 +64,7 @@ func Sync_SaveVendors(vendor_source string, try_remote bool) {
 				return r
 			}
 		}
+		
 		if r, e := _fileman.Read_File(vendor_path, false); e == nil {
 			return r
 		}

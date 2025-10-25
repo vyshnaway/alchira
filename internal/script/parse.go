@@ -14,7 +14,6 @@ type E_Action int
 const (
 	E_Action_Read E_Action = iota
 	E_Action_BuildHash
-	E_Action_MinifyHash
 	E_Action_DebugHash
 )
 

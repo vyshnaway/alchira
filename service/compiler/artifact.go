@@ -1,6 +1,7 @@
 package compiler
 
 import (
+	"encoding/json"
 	_fmt "fmt"
 	_config "main/configs"
 	X "main/internal/console"
@@ -8,6 +9,7 @@ import (
 	S "main/package/console"
 	_fileman "main/package/fileman"
 	"main/package/object"
+	"main/package/utils"
 	_map "maps"
 	_string "strings"
 	_sync "sync"
@@ -17,56 +19,57 @@ func artifact_Fetch(identifier string, source string) (Files map[string]string, 
 	files := map[string]string{}
 	artifactspath := _config.Path_Folder["artifacts"].Path
 
-	status, fetched := func() (Ok bool, result _model.Config_Archive) {
-		var res_nil _model.Config_Archive
+	status, artifcact := func() (Ok bool, result _model.Config_Archive) {
+		var r _model.Config_Archive
 
-		if res, err := _fileman.Read_Json(source, true); err == nil {
-			if r, ok := res.(_model.Config_Archive); ok {
-				return true, r
+		if str, err := _fileman.Read_File(source, true); err == nil {
+			if e := json.Unmarshal([]byte(str), &r); e != nil {
+				return false, r
 			}
-			return false, res_nil
-		}
-
-		parts := _string.Split(source, "@")
-		name := parts[0]
-		var version string
-		if len(parts) > 1 {
-			version = parts[1]
+			return true, r
 		} else {
-			version = "latest"
-		}
-		official_src := _config.Root.Url.Artifacts + name + "/" + version
 
-		if res, err := _fileman.Read_Json(official_src, true); err == nil {
-			if r, ok := res.(_model.Config_Archive); ok {
-				return ok, r
+			parts := _string.Split(source, "@")
+			name := parts[0]
+			var version string
+			if len(parts) > 1 {
+				version = parts[1]
+			} else {
+				version = "latest"
 			}
-		}
+			official_src := _config.Root.Url.Artifacts + name + "/" + version
 
-		return false, res_nil
+			if res, err := _fileman.Read_Json(official_src, true); err == nil {
+				if r, ok := res.(_model.Config_Archive); ok {
+					return ok, r
+				}
+			}
+
+			return false, r
+		}
 	}()
 
 	if status {
 
-		if fetched.Readme != "" {
-			files[_fileman.Path_Join(artifactspath, identifier, `readme.md`)] = fetched.Readme
-			fetched.Readme = ""
+		if artifcact.Readme != "" {
+			files[_fileman.Path_Join(artifactspath, identifier, `readme.md`)] = artifcact.Readme
+			artifcact.Readme = ""
 		}
 
-		if fetched.Licence != "" {
-			files[_fileman.Path_Join(artifactspath, identifier, `licence.md`)] = fetched.Licence
-			fetched.Licence = ""
+		if artifcact.Licence != "" {
+			files[_fileman.Path_Join(artifactspath, identifier, `licence.md`)] = artifcact.Licence
+			artifcact.Licence = ""
 		}
 
-		if fetched.ExportSheet != "" {
+		if artifcact.ExportSheet != "" {
 			lines := []string{
-				_fmt.Sprintf("# %s@%s : Available SymClasses", fetched.Name, fetched.Version),
+				_fmt.Sprintf("# %s@%s : Available SymClasses", artifcact.Name, artifcact.Version),
 				"",
 			}
 
 			// If there are ExportClasses, map to lines
-			if len(fetched.ExportClasses) > 0 {
-				for _, i := range fetched.ExportClasses {
+			if len(artifcact.ExportClasses) > 0 {
+				for _, i := range artifcact.ExportClasses {
 					if _string.Contains(i, "$$$") {
 						lines = append(lines, _fmt.Sprintf("> /%s/%s", identifier, _string.Replace(i, "$$$", "$", 1)))
 					} else {
@@ -79,11 +82,14 @@ func artifact_Fetch(identifier string, source string) (Files map[string]string, 
 			lines = append(lines, "")
 			lines = append(lines, "# Declarations")
 			lines = append(lines, "")
-			lines = append(lines, fetched.ExportSheet)
+			lines = append(lines, artifcact.ExportSheet)
 
 			files[_fileman.Path_Join(artifactspath, identifier, identifier+"."+_config.Root.Extension)] = _string.Join(lines, "\r\n")
-			fetched.ExportSheet = ""
+			artifcact.ExportSheet = ""
 		}
+		
+		artifcact.Source = source
+		files[_fileman.Path_Join(artifactspath, identifier, identifier+".json")] = utils.Code_JsonBuild(artifcact, "  ")
 	}
 
 	return files, status

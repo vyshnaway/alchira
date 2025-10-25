@@ -93,11 +93,15 @@ func Cssfile_Collection(files []*_model.File_Stash) cssfile_Collection_return {
 				}()
 				artifact := _config.Archive.Name
 
+				vars := stylescanned.Variables.ToMap()
+				if len(vars) == 0 {
+					vars = nil
+				}
 				metadata := _model.Style_Metadata{
-					Info:          []string{},
+					Info:          nil,
 					Skeleton:      object.Skeleton(),
 					Declarations:  []string{declaration},
-					Variables:     stylescanned.Variables.ToMap(),
+					Variables:     vars,
 					SummonSnippet: "",
 				}
 				classdata := &_model.Style_ClassData{
