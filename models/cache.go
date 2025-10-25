@@ -11,7 +11,6 @@ type Cache_Url struct {
 
 type Cache_Root struct {
 	Name          string
-	Interval      uint
 	Version       string
 	Extension     string
 	Commands      map[string]string

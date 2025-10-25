@@ -44,7 +44,7 @@ func value_EvaluateIndexTraces(
 	} else {
 		temp_map := []_model.Style_ClassIndexTrace{}
 
-		if action == E_Action_WatchHash {
+		if action == E_Action_MinifyHash {
 			for index, item := range classTrace {
 				classname := _fmt.Sprintf("%s%d", metaFront, index)
 				temp_map = append(temp_map, _model.Style_ClassIndexTrace{
@@ -148,7 +148,7 @@ func value_Parse(
 				FileCursor.Active.RowMarker,
 				FileCursor.Active.ColMarker,
 			)
-		case E_Action_WatchHash:
+		case E_Action_MinifyHash:
 			metafront = _fmt.Sprintf("%s%d", fileData.Label, FileCursor.Active.Cycle)
 		default:
 			metafront = ""

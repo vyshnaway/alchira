@@ -33,11 +33,9 @@ func main() {
 	}
 
 	argone := ""
-	// arguments := []string{}
 	if _slice.Contains(exposedCommands, command) {
 		if len(_os.Args) > 2 {
 			argone = _os.Args[2]
-			// arguments = _os.Args[2:]
 		}
 	} else {
 		command = ""
@@ -77,7 +75,8 @@ func main() {
 	_config.Static.DEBUG = command == "debug"
 	_config.Static.MINIFY = !_config.Static.DEBUG
 	_config.Static.SERVER = command == "server" || command == "iamai"
-	_config.Static.WATCH = ((command == "debug" || command == "preview") && argone == "-w") || command == "server" || command == "iamai"
+	_config.Static.WATCH = command == "server" || command == "iamai" ||
+		((command == "debug" || command == "preview") && argone == "-w")
 	_config.Static.ProjectName = _util.String_Filter(projectname, []rune{}, []rune{}, []rune{})
 	_config.Static.ProjectVersion = projectversion
 

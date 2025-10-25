@@ -96,8 +96,6 @@ func Target_SyncClassNames() {
 	var render_action script.E_Action
 	if _config.Static.Command == "debug" {
 		render_action = script.E_Action_DebugHash
-	} else if _config.Static.Command == "preview" && _config.Static.WATCH {
-		render_action = script.E_Action_WatchHash
 	} else {
 		render_action = script.E_Action_BuildHash
 	}

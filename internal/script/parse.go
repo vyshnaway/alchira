@@ -14,7 +14,7 @@ type E_Action int
 const (
 	E_Action_Read E_Action = iota
 	E_Action_BuildHash
-	E_Action_WatchHash
+	E_Action_MinifyHash
 	E_Action_DebugHash
 )
 
@@ -95,7 +95,7 @@ func Rider(
 				for _, a := range result.Attachments {
 					attachments[a] = true
 				}
-				
+
 				if hasDeclared {
 					stylesList = append(stylesList, &result.StyleDeclarations)
 				} else if elid, status := replacementTags[fragment]; status && len(tagTrack) == 0 && action != E_Action_Read {
