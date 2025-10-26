@@ -25,12 +25,18 @@ jobs:
           token: ${{ secrets.CROSS_REPO_TOKEN }}
           path: core_repo
 
-      - name: Get version from xcss-core & publish package to npm
-        id: core-setup
-        continue-on-error: true
+      - name: Get version from xcss-core
+        id: corever
         run: |
           cd core_repo
           echo "version=v$(jq -r .version package.json)" >> $GITHUB_OUTPUT
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.XCSS_NPM_PAT }}
+
+      - name: Publish package to npm
+        id: corepub
+        continue-on-error: true
+        run: |
           npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.XCSS_NPM_PAT }}
