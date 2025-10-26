@@ -1,0 +1,34 @@
+name: Publish Release to Another Repo
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  cross-release:
+    runs-on: ubuntu-latest
+    if: ${{ github.ref == 'refs/heads/main' }}
+
+    steps:
+      - name: Checkout xcss-core (read-only)
+        uses: actions/checkout@v5
+        with:
+          repository: yshell-dev/xcss-core
+          token: ${{ secrets.CROSS_REPO_TOKEN }}
+          path: core
+
+      - name: Install dependencies (optional, if needed)
+        run: npm install
+        working-directory: core
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.XCSS_NPM_PAT }}
+
+      - name: Publish package to npm
+        id: npm-publish
+        continue-on-error: true
+        run: npm publish --access public
+        working-directory: core
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.XCSS_NPM_PAT }}
