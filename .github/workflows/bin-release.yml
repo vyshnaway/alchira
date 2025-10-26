@@ -31,7 +31,6 @@ jobs:
         run: |
           cd core_repo
           echo "version=v$(jq -r .version package.json)" >> $GITHUB_OUTPUT
-          npm ci
           npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.XCSS_NPM_PAT }}
