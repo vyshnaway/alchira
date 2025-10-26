@@ -27,8 +27,8 @@ GOOS=windows GOARCH=amd64 go build -buildvcs=false -ldflags='-s -w' -o ../$OUT_D
 # echo "Building for Windows (ARM64)..."
 # # GOOS=windows GOARCH=arm64 go build -buildvcs=false -ldflags='-s -w' -o ../$OUT_DIR/windows-arm64.exe
 
-echo "Building for Windows (386)..."
-GOOS=windows GOARCH=386 go build -buildvcs=false -ldflags='-s -w' -o ../$OUT_DIR/windows-386.exe
+# echo "Building for Windows (386)..."
+# GOOS=windows GOARCH=386 go build -buildvcs=false -ldflags='-s -w' -o ../$OUT_DIR/windows-386.exe
 
 echo "Building for macOS (AMD64)..."
 GOOS=darwin GOARCH=amd64 go build -buildvcs=false -ldflags='-s -w' -o ../$OUT_DIR/darwin-amd64
