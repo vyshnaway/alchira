@@ -1,4 +1,4 @@
-name: Release Binary to Core-Repo
+name: Release Binary
 
 on:
   # push:

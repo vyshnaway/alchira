@@ -1,17 +1,29 @@
 name: Publish to NPM
 
 on:
-  workflow_dispatch:
-
-permissions:
-  contents: write
+  release:
+    types: [created]
 
 jobs:
-  cross-release:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+  publish-npm:
+    needs: build
     runs-on: ubuntu-latest
     if: ${{ github.ref == 'refs/heads/main' }}
 
     steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: https://registry.npmjs.org/
       - name: Checkout xcss-core (read-only)
         uses: actions/checkout@v5
         with:
@@ -19,15 +31,8 @@ jobs:
           token: ${{ secrets.CROSS_REPO_TOKEN }}
           path: core
 
-      - name: Install dependencies (optional, if needed)
-        run: npm install
-        working-directory: core
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.XCSS_NPM_PAT }}
-
       - name: Publish package to npm
         id: npm-publish
-        continue-on-error: true
         run: npm publish --access public
         working-directory: core
         env:
