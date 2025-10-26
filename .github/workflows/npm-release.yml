@@ -34,7 +34,9 @@ jobs:
 
       - name: Publish package to npm
         id: npm-publish
-        run: npm publish --access public
+        run: |
+          npm pkg fix 
+          npm publish --access public
         working-directory: core
         env:
           NODE_AUTH_TOKEN: ${{ secrets.XCSS_NPM_PAT }}
