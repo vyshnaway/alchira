@@ -14,7 +14,6 @@ import (
 	_server "main/service/server"
 	_os "os"
 	_filepath "path/filepath"
-	_runtime "runtime"
 	_slice "slices"
 	_strconv "strconv"
 	_string "strings"
@@ -23,8 +22,9 @@ import (
 
 // Path_FromRoot joins the given path elements to the calculated root directory.
 func Path_FromRoot(elem ...string) (string, error) {
-	_, filename, _, ok := _runtime.Caller(0)
-	if !ok {
+	filename, err := _os.Executable()
+
+	if err != nil {
 		return "", _fmt.Errorf("failed to get current file path for root calculation")
 	}
 	root := _filepath.Join(_filepath.Dir(filename), "..")
