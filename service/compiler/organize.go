@@ -18,11 +18,11 @@ import (
 func Update_Cache() {
 	_action.Index_Reset(0)
 
+	_stash.Reset()
 	_config.Style_Reset()
 	_config.Delta_Reset()
 	_config.Manifest_Reset()
 
-	_stash.Reset()
 	_stash.Artifact_Update()
 	_stash.Library_Update()
 
@@ -35,7 +35,9 @@ func Update_Cache() {
 	}
 	_config.Delta.IndexBuild = _css.Render_Sequence(index_scanned.Result, _config.Static.MINIFY)
 	_style.Hashrule_Upload()
+	_stash.SaveHandoffErrors()
 	_stash.Target_UpdateDirs()
+
 }
 
 func Accumulate() {

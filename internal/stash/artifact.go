@@ -1,6 +1,7 @@
 package stash
 
 import (
+	"encoding/json"
 	_fmt "fmt"
 	_config "main/configs"
 	_action "main/internal/action"
@@ -67,6 +68,8 @@ func artifact_CacheFiles() artifact_StackFiles_return {
 }
 
 func artifact_Clear() {
+	Cache.Handoffs = map[string]map[string]string{}
+
 	for s, i := range _config.Style.Artifact_Index {
 		_action.Index_Dispose(i)
 		delete(_config.Style.Artifact_Index, s)
@@ -82,12 +85,22 @@ func Artifact_Update() {
 	SaveArtifactFile_ := artifact_CacheFiles()
 	_config.Delta.Lookup.Artifacts = SaveArtifactFile_.Lookup
 
+	for _, file := range SaveArtifactFile_.Handoff {
+		var archive _model.Config_Archive
+		if err := json.Unmarshal([]byte(file.Content), &archive); err == nil {
+			if archive.Constants != nil {
+				Cache.Handoffs[file.FilePath] = archive.Constants
+			}
+		}
+	}
+
 	_config.Manifest.Group.Artifact = map[string]_model.File_SymclassIndexMap{}
 	_config.Delta.Error.Artifacts = []string{}
 	_config.Delta.Diagnostic.Artifacts = []_model.File_Diagnostic{}
 	artifact_chart := O.New[string, []string]()
 	artifact_counter := 0
 	for _, file := range SaveArtifactFile_.Files {
+		Cache.Artifacts[file.FilePath] = file
 
 		symclasses := []string{}
 		metadatas := _model.File_SymclassIndexMap{}
