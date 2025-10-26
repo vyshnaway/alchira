@@ -3,13 +3,11 @@
 TIME_STAMP=$(date +%s)
 
 OUT_DIR=bin
-SRC_DIR=source
 
 echo "Cleaning up existing binaries..."
 rm -rf ./$OUT_DIR/*
 
 echo "Changing to gosource directory..."
-cd $SRC_DIR
 pwd
 
 echo "Building for Linux (AMD64)..."
