@@ -83,6 +83,7 @@ func (This *Class) Savefile(filepath string, content string, hashindex int) {
 			loc_index_map[response.Symclass] = response.Index
 			if ref_index_map != nil {
 				ref_index_map[response.Symclass] = response.Index
+				ref_index_map[response.Symclass] = response.Index
 			}
 
 			file.Errors = append(file.Errors, response.Errors...)

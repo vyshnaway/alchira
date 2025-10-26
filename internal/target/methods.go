@@ -67,11 +67,19 @@ func (This *Class) GetTracks() GetTracks_return {
 					retraces = append(retraces, found.Index)
 					attachments[found.Index] = true
 					maps.Copy(attachstrings, found.Data.SrcData.Attachments)
+					attachments[found.Index] = true
+					maps.Copy(attachstrings, found.Data.SrcData.Attachments)
 				}
 			}
 
 			if len(retraces) > 0 {
 				classtracks = append(classtracks, retraces)
+			}
+		}
+
+		for i := range attachstrings {
+			if found := _action.Index_Find(i, file.StyleData.LocalClasses); found.Index > 0 {
+				attachments[found.Index] = true
 			}
 		}
 

@@ -176,8 +176,6 @@ func Organize() (AritfactFiles map[string]string, Attachments map[int]bool) {
 		}
 	}
 
-	attachments := tracks_.Attachments
-	_map.Copy(attachments, _config.Delta.IndexAttach)
-
-	return artifact_files, attachments
+	_map.Copy(tracks_.Attachments, _config.Delta.IndexAttach)
+	return artifact_files, tracks_.Attachments
 }
