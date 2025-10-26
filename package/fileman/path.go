@@ -5,7 +5,6 @@ import (
 	_fs "io/fs"
 	_os "os"
 	_filepath "path/filepath"
-	_runtime "runtime"
 	_strings "strings"
 )
 
@@ -26,17 +25,6 @@ func Path_FileExtention(pathString string) string {
 // Join joins any number of path elements into a single path.
 func Path_Join(pathfrags ...string) string {
 	return _filepath.Join(pathfrags...)
-}
-
-// Path_FromRoot joins the given path elements to the calculated root directory.
-func Path_FromRoot(elem ...string) (string, error) {
-	_, filename, _, ok := _runtime.Caller(0)
-	if !ok {
-		return "", _fmt.Errorf("failed to get current file path for root calculation")
-	}
-	root := _filepath.Join(_filepath.Dir(filename), "..", "..", "..")
-	joined := _filepath.Join(root, _filepath.Join(elem...))
-	return joined, nil
 }
 
 // Resolves returns the absolute path of the given path string.

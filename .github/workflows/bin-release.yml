@@ -1,6 +1,9 @@
 name: Release Binary to Core-Repo
 
 on:
+  # push:
+  #   branches:
+  #     - main
   workflow_dispatch:
 
 permissions:

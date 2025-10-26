@@ -25,7 +25,7 @@ func Verify_Setup() (Report string, Status verify_Setup_Status_enum) {
 	if _fileman.Path_IfDir(_config.Path_Folder["blueprint"].Path) {
 		_fileman.Write_File(_config.Path_Files["reference"].Path, _config.Sync_References["readme"].Content)
 		_fileman.Write_File(_config.Path_Files["guildelines"].Path, _config.Sync_References["guildelines"].Content)
-		_fileman.Clone_Safe(_config.Sync_Scaffold["blueprint"].Path, _config.Path_Folder["blueprint"].Path, []string{})
+		_fileman.Clone_Safe(_config.Root_Scaffold["blueprint"].Path, _config.Path_Folder["blueprint"].Path, []string{})
 
 		errors := map[string]string{}
 		S.TASK("Verifying directory status", 1)

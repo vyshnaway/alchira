@@ -3,7 +3,7 @@ package server
 import (
 	"encoding/json"
 	"fmt"
-	"main/package/fileman"
+	"main/configs"
 	"net"
 	"net/http"
 	"path/filepath"
@@ -46,12 +46,9 @@ func Webview_Create(tryport int) (httpServer *http.Server, deducedPort int, err 
 		return nil, 0, fmt.Errorf("unable to bind port: %v", err)
 	}
 
-	serveDir, ferr := fileman.Path_FromRoot("webview")
-	if ferr != nil {
-		return nil, 0, fmt.Errorf("error resolving static dir: %v", ferr)
-	}
-
+	
 	mux := http.NewServeMux()
+	serveDir :=configs.Root_Scaffold["webview"].Path
 
 	// Serve index.html on /, and all files under serveDir
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {

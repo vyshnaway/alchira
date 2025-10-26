@@ -13,11 +13,24 @@ import (
 	_compiler "main/service/compiler"
 	_server "main/service/server"
 	_os "os"
+	_filepath "path/filepath"
+	_runtime "runtime"
 	_slice "slices"
 	_strconv "strconv"
 	_string "strings"
 	_sync "sync"
 )
+
+// Path_FromRoot joins the given path elements to the calculated root directory.
+func Path_FromRoot(elem ...string) (string, error) {
+	_, filename, _, ok := _runtime.Caller(0)
+	if !ok {
+		return "", _fmt.Errorf("failed to get current file path for root calculation")
+	}
+	root := _filepath.Join(_filepath.Dir(filename), "..")
+	joined := _filepath.Join(root, _filepath.Join(elem...))
+	return joined, nil
+}
 
 func main() {
 	defaultPort := 0
@@ -43,17 +56,17 @@ func main() {
 
 	workpath := "."
 	workPackagePath := "package.json"
-	rootpath, _ := _fileman.Path_FromRoot(".")
-	rootPackagePath, _ := _fileman.Path_FromRoot("package.json")
+	rootpath, _ := Path_FromRoot(".")
+	rootPackagePath, _ := Path_FromRoot("package.json")
 
 	rootPackageData, rootPackageErr := _fileman.Read_Json(rootPackagePath, false)
-	if rootPackageErr != nil {
-		_fmt.Println("Bad root package.json file.")
-		_os.Exit(1)
+	if rootPackageErr == nil {
+		rootPackageData_ := rootPackageData.(map[string]any)
+		_config.Root.Name = _util.String_Fallback(rootPackageData_["name"], _config.Root.Name)
+		_config.Root.Version = _util.String_Fallback(rootPackageData_["version"], _config.Root.Version)
+	} else {
+		_fmt.Println("Error Json: " + rootPackagePath)
 	}
-	rootPackageData_ := rootPackageData.(map[string]any)
-	_config.Root.Name = _util.String_Fallback(rootPackageData_["name"], _config.Root.Name)
-	_config.Root.Version = _util.String_Fallback(rootPackageData_["version"], _config.Root.Version)
 
 	projectname := "-"
 	projectversion := "0.0.0"

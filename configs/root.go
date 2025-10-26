@@ -51,3 +51,24 @@ var Root = _model.Cache_Root{
 		"assign": "@--assign",
 	},
 }
+
+var Root_Scaffold = map[string]_model.File_Source{
+	"blueprint": {
+		Frags:     []string{"scaffold", "blueprint"},
+		Path:      "",
+		Content:   "",
+		Essential: true,
+	},
+	"libraries": {
+		Frags:     []string{"scaffold", "libraries"},
+		Path:      "",
+		Content:   "",
+		Essential: true,
+	},
+	"webview": {
+		Frags:     []string{"webview"},
+		Path:      "",
+		Content:   "",
+		Essential: true,
+	},
+}
