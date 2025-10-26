@@ -2,8 +2,8 @@ name: Publish Release to Another Repo
 
 on:
   push:
-    tags:
-      - 'v*'
+    branches:
+      - main
   workflow_dispatch:
 
 permissions:
@@ -12,10 +12,25 @@ permissions:
 jobs:
   cross-release:
     runs-on: ubuntu-latest
+    if: ${{ github.ref == 'refs/heads/main' }}
 
     steps:
-      - name: Checkout private submodule repository
+      - name: Checkout current repo
         uses: actions/checkout@v5
+
+      - name: Checkout xcss-core (read-only)
+        uses: actions/checkout@v5
+        with:
+          repository: yshell-dev/xcss-core
+          token: ${{ secrets.CROSS_REPO_TOKEN }}
+          path: core_repo
+
+      - name: Read version from xcss-core
+        id: corever
+        run: echo "version=v$(jq -r .version core_repo/package.json)" >> $GITHUB_OUTPUT
+
+      - name: Switch back to current repository
+        run: cd "${GITHUB_WORKSPACE}"
 
       - name: Run build script
         run: |
@@ -27,11 +42,14 @@ jobs:
           mkdir -p artifacts
           cp -r ../bin/* artifacts/
 
-      - name: Publish release in another repo
+      - name: Publish release back to xcss-core
         uses: softprops/action-gh-release@v2
         with:
           repository: yshell-dev/xcss-core
           token: ${{ secrets.CROSS_REPO_TOKEN }}
+          tag_name: ${{ steps.corever.outputs.version }}
+          name: Release ${{ steps.corever.outputs.version }}
+          body_path: ./release.md
           files: artifacts/**
         env:
           GITHUB_TOKEN: ${{ secrets.CROSS_REPO_TOKEN }}
