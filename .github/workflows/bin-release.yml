@@ -1,4 +1,4 @@
-name: Publish Release to Another Repo
+name: Release Binary to Core-Repo
 
 on:
   workflow_dispatch:
