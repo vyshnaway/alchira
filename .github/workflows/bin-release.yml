@@ -22,7 +22,7 @@ jobs:
         uses: actions/checkout@v5
         with:
           repository: yshell-dev/xcss-core
-          token: ${{ secrets.CROSS_REPO_TOKEN }}
+          token: ${{ secrets.XCSS_CROSS_ACCESS }}
           path: core_repo
 
       - name: Read version from xcss-core
@@ -46,10 +46,10 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           repository: yshell-dev/xcss-core
-          token: ${{ secrets.CROSS_REPO_TOKEN }}
+          token: ${{ secrets.XCSS_CROSS_ACCESS }}
           tag_name: ${{ steps.corever.outputs.version }}
           name: Release ${{ steps.corever.outputs.version }}
           body_path: ./release.md
           files: artifacts/**
         env:
-          GITHUB_TOKEN: ${{ secrets.CROSS_REPO_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.XCSS_CROSS_ACCESS }}
