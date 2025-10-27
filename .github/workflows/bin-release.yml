@@ -44,13 +44,26 @@ jobs:
           mkdir -p artifacts
           cp -r ../bin/* artifacts/
 
-      - name: Publish release back to xcss-core
+      - name: Publish release (version tag)
         uses: softprops/action-gh-release@v2
         with:
           repository: yshell-dev/xcss-core
           token: ${{ secrets.CROSS_REPO_TOKEN }}
           tag_name: ${{ steps.pacver.outputs.version }}
           name: Release ${{ steps.pacver.outputs.version }}
+          body_path: ./release.md
+          files: artifacts/**
+          overwrite_files: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.CROSS_REPO_TOKEN }}
+
+      - name: Publish release (latest tag)
+        uses: softprops/action-gh-release@v2
+        with:
+          repository: yshell-dev/xcss-core
+          token: ${{ secrets.CROSS_REPO_TOKEN }}
+          tag_name: latest
+          name: Release latest
           body_path: ./release.md
           files: artifacts/**
           overwrite_files: true
