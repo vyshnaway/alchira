@@ -3,7 +3,6 @@ package server
 import (
 	"main/configs"
 	"main/package/utils"
-	"main/service/compiler"
 )
 
 func IO_Term(command string, arguments []string, userpc bool) (Response string) {
@@ -20,10 +19,6 @@ func IO_Term(command string, arguments []string, userpc bool) (Response string) 
 
 	case "webview":
 		result = Refer.Url
-
-	case "rebuild":
-		compiler.WATCHER.Rebuild()
-		result = true
 
 	case "errors":
 		result = configs.Manifest.Diagnostics
