@@ -14,6 +14,7 @@ import (
 	_slice "slices"
 	"strconv"
 	_sync "sync"
+	_atomic "sync/atomic"
 	_syscall "syscall"
 	_time "time"
 )
@@ -35,32 +36,37 @@ const (
 	Execute_Step_LoopAround
 )
 
-var ExecuteMutex _sync.Mutex
 var WATCHER *_watcher.T_Watcher
+var ExecuteMutex _sync.Mutex
+var RebuildFlag _atomic.Bool
+var RebuildTicker *_time.Ticker
+var RebuildTickerReset func()
+
+func startRebuildTicker(intervalMs int) {
+	var tickerDuration _time.Duration
+	RebuildTickerReset = func() { tickerDuration = _time.Duration(intervalMs) * _time.Millisecond }
+	RebuildTickerReset()
+
+	go func() {
+		RebuildTicker = _time.NewTicker(tickerDuration)
+		defer RebuildTicker.Stop()
+
+		for range RebuildTicker.C {
+			RebuildFlag.Store(true)
+		}
+	}()
+}
 
 func Execute(heading string) (Exitcode int) {
 	exitcode := 0
-	const interval = 100
 	step := Execute_Step_Initialize
 	report := ""
 	outfiles := map[string]string{}
-	running := true
 	showReport := true
-	RebuildTrigger := false
 	var save_action _sync.WaitGroup
 
 	if _config.Static.WATCH && _config.Root.RebuildInterval > 0 {
-		S.Post("Boo")
-		S.Post("Boo")
-		S.Post("Boo")
-		S.Post("Boo")
-		S.Post("Boo")
-		go func(rebuildIntervalInSec int) {
-			for running {
-				RebuildTrigger = true
-				_time.Sleep(_time.Duration(rebuildIntervalInSec) * _time.Second)
-			}
-		}(_config.Root.RebuildInterval)
+		startRebuildTicker(_config.Root.RebuildInterval)
 	}
 
 	for {
@@ -75,17 +81,17 @@ func Execute(heading string) (Exitcode int) {
 			fallthrough
 
 		case Execute_Step_VerifySetupStruct:
-			S.Post("yah")
-			if RebuildTrigger {
+			if RebuildFlag.Load() {
 				showReport = false
-				RebuildTrigger = false
+				RebuildFlag.Store(false)
 			}
-			if WATCHER != nil {
-				WATCHER.Reset()
+			if RebuildTicker != nil {
+				RebuildTickerReset()
 			}
 			if res_report, res_status := _action.Verify_Setup(); res_status != _action.Verify_Setup_Status_Verified {
 				report = res_report
 				step = Execute_Step_LoopAround
+				showReport = true
 				exitcode = 1
 				break
 			} else if WATCHER != nil {
@@ -161,8 +167,8 @@ func Execute(heading string) (Exitcode int) {
 						_config.Path_Folder["archive"].Path,
 					}
 
-					if w, err := _watcher.Quick(watch_dirs, ignore_dirs, 120); err == nil {
-						WATCHER = w
+					if watcher, err := _watcher.Quick(watch_dirs, ignore_dirs, _config.Root.PollingInterval); err == nil {
+						WATCHER = watcher
 
 						if !_config.Static.SERVER {
 							sigs := make(chan _os.Signal, 1)
@@ -170,13 +176,12 @@ func Execute(heading string) (Exitcode int) {
 
 							go func() {
 								<-sigs
-								if w != nil {
-									w.Close()
-									w = nil
-									running = false
+								if watcher != nil {
+									watcher.Close()
+									watcher = nil
 									S.Render.Write("\r\n", 2)
 								}
-								_os.Exit(0)
+								_os.Exit(1)
 							}()
 						}
 					} else {
@@ -189,7 +194,7 @@ func Execute(heading string) (Exitcode int) {
 				}
 
 				step = Execute_Step_LoopAround
-				if RebuildTrigger {
+				if RebuildFlag.Load() {
 					step = Execute_Step_VerifySetupStruct
 				} else if events := WATCHER.DeBuf(); len(events) > 0 {
 					steppings := []Execute_Step_enum{}
@@ -265,21 +270,18 @@ func Execute(heading string) (Exitcode int) {
 						}
 					}
 				}
-
 			}
-
 		}
 
 		ExecuteMutex.Unlock()
 		if _config.Static.WATCH {
 			if !_config.Static.SERVER && len(report) > 0 && showReport {
 				S.Post(X.Report(heading, []string{}, report))
-				report = ""
-				heading = ""
-			} else {
-				showReport = true
 			}
-			_time.Sleep(interval * _time.Millisecond)
+			report = ""
+			heading = ""
+			showReport = true
+			_time.Sleep(_time.Duration(_config.Root.WaitingInterval) * _time.Millisecond)
 		} else {
 			S.Post(report)
 			break

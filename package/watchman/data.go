@@ -1,12 +1,12 @@
 package watchman
 
 import (
+	_fsnotify "github.com/fsnotify/fsnotify"
+	_watcher "github.com/radovskyb/watcher"
 	_fileman "main/package/fileman"
 	_filepath "path/filepath"
 	_sync "sync"
-	"time"
-
-	_watcher "github.com/radovskyb/watcher"
+	_time "time"
 )
 
 type E_Action int
@@ -28,7 +28,8 @@ type Event struct {
 }
 
 type T_Watcher struct {
-	hook            *_watcher.Watcher
+	PolledWatcher   *_watcher.Watcher
+	NotifyWatcher   *_fsnotify.Watcher
 	mutex           *_sync.Mutex
 	queue           []Event
 	status          bool
@@ -43,7 +44,7 @@ type T_Watcher struct {
 func (This *T_Watcher) HandleEvent(action E_Action, filePath string, content string) {
 
 	event := Event{}
-	now := time.Now()
+	now := _time.Now()
 	event.Action = action
 	event.Extension = _filepath.Ext(filePath)
 	if len(event.Extension) > 0 {

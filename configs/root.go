@@ -15,7 +15,9 @@ var Root = _model.Cache_Root{
 	Name:            id,
 	Version:         "0.0.0",
 	Extension:       id,
-	RebuildInterval: 0,
+	RebuildInterval: 60000,
+	PollingInterval: 1000,
+	WaitingInterval: 100,
 	Url: _model.Cache_Url{
 		Site:      "https://www." + domain + "/",
 		Docs:      "https://docs." + domain + "/",

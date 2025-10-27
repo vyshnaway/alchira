@@ -5,9 +5,11 @@ import (
 	_fmt "fmt"
 	"main/package/fileman"
 	_os "os"
+	_filepath "path/filepath"
 	_sync "sync"
 	_time "time"
 
+	_fsnotify "github.com/fsnotify/fsnotify"
 	_watcher "github.com/radovskyb/watcher"
 )
 
@@ -37,24 +39,83 @@ func New(folders, ignores []string) *T_Watcher {
 }
 
 func (This *T_Watcher) Start(maxevents, pollInterval int) error {
+	done := make(chan struct{})
+
+	// fs Notify watcher
+
+	if watcher, e := _fsnotify.NewWatcher(); e == nil {
+		for _, folder := range This.resolvedFolders {
+			_filepath.Walk(folder, func(path string, info _os.FileInfo, err error) error {
+				if info.IsDir() {
+					watcher.Add(path)
+				}
+				return nil
+			})
+
+			watcher.Add(folder)
+		}
+		This.NotifyWatcher = watcher
+
+		go func() {
+			for {
+				select {
+				case event, ok := <-This.NotifyWatcher.Events:
+					if !ok {
+						continue
+					}
+
+					var act E_Action
+
+					switch {
+					case event.Op&_fsnotify.Create == _fsnotify.Create:
+						info, err := _os.Stat(event.Name)
+						if err == nil && info.IsDir() {
+							This.Reset()
+							act = E_Action_Refactor
+						} else {
+							act = E_Action_Update
+						}
+						
+					case event.Op&_fsnotify.Write == _fsnotify.Write:
+						act = E_Action_Update
+
+					default:
+						This.Reset()
+						act = E_Action_Refactor
+					}
+
+					This.HandleEvent(act, event.Name, "")
+
+				case err, ok := <-This.NotifyWatcher.Errors:
+					if ok {
+						_fmt.Fprintf(_os.Stderr, "Watcher error: %v\r\n", err)
+					}
+
+				case <-done:
+					return
+				}
+			}
+		}()
+	}
+
+	// Fallback low fidelity polling watcher
 
 	This.PollInterval = pollInterval
-	This.hook = _watcher.New()
-	This.hook.SetMaxEvents(maxevents)
+	This.PolledWatcher = _watcher.New()
+	This.PolledWatcher.SetMaxEvents(maxevents)
 
 	errs := []error{}
 	for _, folder := range This.resolvedFolders {
-		if err := This.hook.AddRecursive(folder); err != nil {
+		if err := This.PolledWatcher.AddRecursive(folder); err != nil {
 			errs = append(errs, err)
 		}
 	}
-	This.hook.Ignore(This.resolvedIgnores...)
+	This.PolledWatcher.Ignore(This.resolvedIgnores...)
 
-	done := make(chan struct{})
 	go func() {
 		for {
 			select {
-			case event, ok := <-This.hook.Event:
+			case event, ok := <-This.PolledWatcher.Event:
 				if !ok {
 					return
 				}
@@ -74,7 +135,7 @@ func (This *T_Watcher) Start(maxevents, pollInterval int) error {
 
 				This.HandleEvent(act, event.Path, "")
 
-			case err, ok := <-This.hook.Error:
+			case err, ok := <-This.PolledWatcher.Error:
 				if ok {
 					_fmt.Fprintf(_os.Stderr, "Watcher error: %v\r\n", err)
 				}
@@ -86,16 +147,21 @@ func (This *T_Watcher) Start(maxevents, pollInterval int) error {
 	}()
 
 	go func() {
-		err := This.hook.Start(_time.Millisecond * _time.Duration(This.PollInterval))
+		err := This.PolledWatcher.Start(_time.Millisecond * _time.Duration(This.PollInterval))
 		if err != nil {
 			_fmt.Fprintf(_os.Stderr, "Watcher start error: %v\r\n", err)
 		}
 	}()
 
 	This.Close = func() {
-		close(done)
+		// close(done)
 		This.status = false
-		This.hook.Close()
+		if This.PolledWatcher != nil {
+			This.PolledWatcher.Close()
+		}
+		if This.NotifyWatcher != nil {
+			This.NotifyWatcher.Close()
+		}
 	}
 	return errors.Join(errs...)
 

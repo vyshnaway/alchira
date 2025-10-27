@@ -92,7 +92,6 @@ func main() {
 		((command == "debug" || command == "preview") && argone == "-w")
 	_config.Static.ProjectName = _util.String_Filter(projectname, []rune{}, []rune{}, []rune{})
 	_config.Static.ProjectVersion = projectversion
-	_config.Root.RebuildInterval = 20
 
 
 	S.Canvas.Initialize(!_config.Static.WATCH &&

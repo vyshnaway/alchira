@@ -20,6 +20,8 @@ type Cache_Root struct {
 	Url             Cache_Url
 	Tweaks          Config_Tweaks
 	RebuildInterval int
+	PollingInterval int
+	WaitingInterval int
 }
 
 type Cache_Static struct {
