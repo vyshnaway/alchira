@@ -181,6 +181,7 @@ func Execute(heading string) (Exitcode int) {
 									watcher = nil
 									S.Render.Write("\r\n", 2)
 								}
+								save_action.Wait()
 								_os.Exit(1)
 							}()
 						}
