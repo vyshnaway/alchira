@@ -87,7 +87,7 @@ func main() {
 	_config.Static.Argument = argone
 	_config.Static.ProjectVersion = projectversion
 	_config.Static.ProjectName = _util.String_Filter(projectname, []rune{}, []rune{}, []rune{})
-	
+
 	_config.Static.DEBUG = command == "debug"
 	_config.Static.MINIFY = !_config.Static.DEBUG
 	_config.Static.SERVER = command == "server" || command == "iamai"

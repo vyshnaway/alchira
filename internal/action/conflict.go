@@ -24,7 +24,6 @@ func Conflict_Sync_Test() Verify_ProxyMapDependency_return {
 
 	for index, ip := range proxymap {
 		wg.Add(1)
-
 		go func(i int, m _model.Config_ProxyMap) {
 			defer wg.Done()
 
@@ -46,31 +45,42 @@ func Conflict_Sync_Test() Verify_ProxyMapDependency_return {
 			source_type, source_err := _fileman.Path_Check(m.Source)
 			target_type, target_err := _fileman.Path_Check(m.Target)
 
-			if target_type == _fileman.Path_Check_Type_Dir && (source_type == _fileman.Path_Check_Type_Nil || source_type == _fileman.Path_Check_Type_Dir) {
-				if err := _fileman.Clone_Safe(m.Target, m.Source, []string{}); err == nil {
-					notification_channel <- _fmt.Sprintf("[%d]:\"%s\" cloned from [%d]:\"%s\"", i, m.Source, i, m.Target)
-				}
-			}
-			if source_type == _fileman.Path_Check_Type_Dir && target_type == _fileman.Path_Check_Type_Nil {
-				if err := _fileman.Clone_Safe(m.Source, m.Target, []string{}); err == nil {
-					notification_channel <- _fmt.Sprintf("[%d]:\"%s\" cloned from [%d]:\"%s\"", i, m.Target, i, m.Source)
-				}
+			if source_err != nil {
+				warning_channel <- _fmt.Sprintf("[%d]:source:\"%s\" %s.", i, m.Source, source_err)
+				return
+			} else if target_err != nil {
+				warning_channel <- _fmt.Sprintf("[%d]:target:\"%s\" %s.", i, m.Target, target_err)
+				return
 			}
 
-			if source_type != _fileman.Path_Check_Type_Dir && source_type != _fileman.Path_Check_Type_Nil {
-				if source_err == nil {
-					warning_channel <- _fmt.Sprintf("[%d]:source:\"%s\" dir unavailable.", i, m.Source)
-				} else {
-					warning_channel <- _fmt.Sprintf("[%d]:source:\"%s\" %s.", i, m.Source, source_err)
+			if target_type == _fileman.Path_Check_Type_Dir {
+				if !(source_type == _fileman.Path_Check_Type_Nil || source_type == _fileman.Path_Check_Type_Dir) {
+					warning_channel <- _fmt.Sprintf("Invalid index of [%d]:\"%s\"", i, m.Source)
+					return
+				} else if !_config.Static.SERVER {
+					if err := _fileman.Clone_Safe(m.Target, m.Source, []string{}); err == nil {
+						notification_channel <- _fmt.Sprintf("[%d]:\"%s\" cloned from [%d]:\"%s\"", i, m.Source, i, m.Target)
+					} else {
+						warning_channel <- _fmt.Sprintf("[%d]:\"%s\" clone from [%d] failed:\"%s\"", i, m.Source, i, m.Target)
+						return
+					}
 				}
-			}
-
-			if target_type != _fileman.Path_Check_Type_Dir && target_type != _fileman.Path_Check_Type_Nil {
-				if target_err == nil {
-					warning_channel <- _fmt.Sprintf("[%d]:target:\"%s\" dir unavailable.", i, m.Source)
-				} else {
-					warning_channel <- _fmt.Sprintf("[%d]:target:\"%s\" %s.", i, m.Target, target_err)
+			} else if source_type == _fileman.Path_Check_Type_Dir {
+				if target_type != _fileman.Path_Check_Type_Nil {
+					warning_channel <- _fmt.Sprintf("Invalid index of [%d]:\"%s\"", i, m.Target)
+					return
+				} else if !_config.Static.SERVER {
+					if err := _fileman.Clone_Safe(m.Source, m.Target, []string{}); err == nil {
+						notification_channel <- _fmt.Sprintf("[%d]:\"%s\" cloned from [%d]:\"%s\"", i, m.Target, i, m.Source)
+					} else {
+						warning_channel <- _fmt.Sprintf("[%d]:\"%s\" clone from [%d] failed:\"%s\"", i, m.Target, i, m.Source)
+						return
+					}
 				}
+			} else {
+				warning_channel <- _fmt.Sprintf("[%d]:source:\"%s\" dir unavailable.", i, m.Source)
+				warning_channel <- _fmt.Sprintf("[%d]:target:\"%s\" dir unavailable.", i, m.Target)
+				return
 			}
 
 			source_isdir := _fileman.Path_IfDir(m.Source)
@@ -118,11 +128,11 @@ func Conflict_Sync_Test() Verify_ProxyMapDependency_return {
 		}(index, ip)
 	}
 
-	go func() {
-		wg.Wait()
-		close(warning_channel)
-		close(notification_channel)
-	}()
+	// go func() {
+	wg.Wait()
+	close(warning_channel)
+	close(notification_channel)
+	// }()
 
 	for w := range warning_channel {
 		result.Warnings = append(result.Warnings, w)
