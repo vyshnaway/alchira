@@ -97,7 +97,7 @@ func Cssfile_Collection(files []*_model.File_Stash) cssfile_Collection_return {
 				if len(vars) == 0 {
 					vars = nil
 				}
-				metadata := _model.Style_Metadata{
+				metadata := &_model.Style_Metadata{
 					Info:          nil,
 					Skeleton:      object.Skeleton(),
 					Declarations:  []string{declaration},
@@ -110,7 +110,7 @@ func Cssfile_Collection(files []*_model.File_Stash) cssfile_Collection_return {
 					Artifact:          artifact,
 					Definent:          selector,
 					SymClass:          classname,
-					Metadata:          &metadata,
+					Metadata:          metadata,
 					NativeRawStyle:    object,
 					ExportRawStyle:    object,
 					Attachments:       attachments,

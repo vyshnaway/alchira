@@ -11,6 +11,7 @@ var Static = _model.Cache_Static{
 	DEBUG:             false,
 	MINIFY:            false,
 	SERVER:            false,
+	EXPORT:            false,
 	ProjectName:       "",
 	ProjectVersion:    "",
 	Command:           "",

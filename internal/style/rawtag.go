@@ -35,11 +35,14 @@ func lodashstyle_process(
 		selector, initial, flatten,
 	)
 
-	export := _string.ReplaceAll(content, lodash_tag, lodash_tag+file.Label)
-	exportAttachResult := Parse_CssSnippet(
-		_util.Code_Uncomment(export, true, true, false),
-		selector, initial, flatten,
-	)
+	exportAttachResult := nativeAttachResult
+	if _config.Static.EXPORT {
+		export := _string.ReplaceAll(content, lodash_tag, lodash_tag+file.Label)
+		exportAttachResult = Parse_CssSnippet(
+			_util.Code_Uncomment(export, true, true, false),
+			selector, initial, flatten,
+		)
+	}
 
 	return nativeAttachResult, exportAttachResult
 }
@@ -147,17 +150,15 @@ func Rawtag_Upload(
 			)
 
 			_map.Copy(attachments, nativeAttachResult.Attachments)
-			_map.Copy(attachments, exportAttachResult.Attachments)
-
 			variables.Copy(nativeAttachResult.Variables)
-			variables.Copy(exportAttachResult.Variables)
-
 			if ok, val := nativeAttachResult.Result.GetBlock("[]"); ok {
 				nativeAttachStyle = val
 			}
-
+			
+			_map.Copy(attachments, exportAttachResult.Attachments)
+			variables.Copy(exportAttachResult.Variables)
 			if ok, val := exportAttachResult.Result.GetBlock("[]"); ok {
-				nativeAttachStyle = val
+				exportAttachStyle = val
 			}
 		}
 
@@ -184,7 +185,7 @@ func Rawtag_Upload(
 		if len(vars) == 0 {
 			vars = nil
 		}
-		metadata := _model.Style_Metadata{
+		metadata := &_model.Style_Metadata{
 			Info:          comments,
 			Skeleton:      nativeRawStyle.Skeleton(),
 			Declarations:  []string{declaration},
@@ -200,7 +201,7 @@ func Rawtag_Upload(
 				Artifact:          artifact,
 				Definent:          raw.SymClasses[0],
 				SymClass:          symclass,
-				Metadata:          &metadata,
+				Metadata:          metadata,
 				Attachments:       attachments,
 				DebugClass:        debugclass,
 				ExportStaple:      exportStaple,

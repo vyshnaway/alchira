@@ -29,6 +29,7 @@ type Cache_Static struct {
 	DEBUG             bool
 	MINIFY            bool
 	SERVER            bool
+	EXPORT            bool
 	Command           string
 	Argument          string
 	RootCSS           string

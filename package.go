@@ -85,14 +85,14 @@ func main() {
 
 	_config.Static.Command = command
 	_config.Static.Argument = argone
+	_config.Static.ProjectVersion = projectversion
+	_config.Static.ProjectName = _util.String_Filter(projectname, []rune{}, []rune{}, []rune{})
+	
 	_config.Static.DEBUG = command == "debug"
 	_config.Static.MINIFY = !_config.Static.DEBUG
 	_config.Static.SERVER = command == "server" || command == "iamai"
-	_config.Static.WATCH = command == "server" || command == "iamai" ||
-		((command == "debug" || command == "preview") && argone == "-w")
-	_config.Static.ProjectName = _util.String_Filter(projectname, []rune{}, []rune{}, []rune{})
-	_config.Static.ProjectVersion = projectversion
-
+	_config.Static.EXPORT = _config.Static.SERVER || command == "publish"
+	_config.Static.WATCH = _config.Static.SERVER || ((command == "debug" || command == "preview") && argone == "-w")
 
 	S.Canvas.Initialize(!_config.Static.WATCH &&
 		_slice.Contains([]string{

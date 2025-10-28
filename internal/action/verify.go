@@ -128,6 +128,8 @@ func Verify_Configs(remote_vendors bool) (Report string, Status bool) {
 				_config.Static.ProxyMap = config.ProxyMap
 			}
 		}
+	} else {
+		errors = append(errors, "Bad Config file: "+ config_path)
 	}
 
 	conflict_sync := Conflict_Sync_Test()
@@ -151,5 +153,4 @@ func Verify_Configs(remote_vendors bool) (Report string, Status bool) {
 
 		return report, Status
 	}
-
 }
