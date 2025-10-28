@@ -23,15 +23,14 @@ func Verify_Setup() (Report string, Status verify_Setup_Status_enum) {
 	report := ""
 
 	if _fileman.Path_IfDir(_config.Path_Folder["blueprint"].Path) {
-		_fileman.Write_File(_config.Path_Files["reference"].Path, _config.Sync_References["readme"].Content)
-		_fileman.Write_File(_config.Path_Files["guildelines"].Path, _config.Sync_References["guildelines"].Content)
 		_fileman.Clone_Safe(_config.Root_Scaffold["blueprint"].Path, _config.Path_Folder["blueprint"].Path, []string{})
 
 		errors := map[string]string{}
 		S.TASK("Verifying directory status", 1)
 
 		for _, v := range _config.Path_Folder {
-			if v.Essential && !_fileman.Path_IfDir(v.Path) {
+			stat, _ := _fileman.Path_Check(v.Path)
+			if !(stat == _fileman.Path_Check_Type_Dir || (!v.Essential && stat == _fileman.Path_Check_Type_Nil)) {
 				S.STEP("Path: "+v.Path, 1)
 				errors[v.Path] = "Folder not found."
 			}
@@ -43,7 +42,8 @@ func Verify_Setup() (Report string, Status verify_Setup_Status_enum) {
 			_config.Path_Json,
 		} {
 			for _, v := range val {
-				if v.Essential && !_fileman.Path_IfFile(v.Path) {
+				stat, _ := _fileman.Path_Check(v.Path)
+				if !(stat == _fileman.Path_Check_Type_Txt || (!v.Essential && stat == _fileman.Path_Check_Type_Nil)) {
 					S.STEP("Path: "+v.Path, 1)
 					errors[v.Path] = "File not found."
 				}

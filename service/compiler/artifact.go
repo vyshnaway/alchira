@@ -8,12 +8,11 @@ import (
 	_model "main/models"
 	S "main/package/console"
 	_fileman "main/package/fileman"
-	"main/package/object"
-	"main/package/utils"
-	"maps"
+	_object "main/package/object"
+	_util "main/package/utils"
 	_map "maps"
-	"slices"
-	"sort"
+	_slice "slices"
+	_sort "sort"
 	_string "strings"
 	_sync "sync"
 )
@@ -88,8 +87,8 @@ func artifact_Fetch(identifier string, source string) (Files map[string]string, 
 			lines = append(lines, "```css")
 			lines = append(lines, "")
 			lines = append(lines, ":root {")
-			c := slices.Collect(maps.Keys(artifact.Constants))
-			sort.Strings(c)
+			c := _slice.Collect(_map.Keys(artifact.Constants))
+			_sort.Strings(c)
 			for _, k := range c {
 				v := artifact.Constants[k]
 				lines = append(lines, _fmt.Sprint("  ", k, ": ", v, ";"))
@@ -111,7 +110,7 @@ func artifact_Fetch(identifier string, source string) (Files map[string]string, 
 		}
 
 		artifact.Source = source
-		files[_fileman.Path_Join(artifactspath, identifier, identifier+".json")] = utils.Code_JsonBuild(artifact, "  ")
+		files[_fileman.Path_Join(artifactspath, identifier, identifier+".json")] = _util.Code_JsonBuild(artifact, "  ")
 	}
 
 	return files, status
@@ -146,7 +145,7 @@ func Artifact_Install() (Status bool, Report string, Files map[string]string) {
 
 	report = S.MAKE(
 		"",
-		X.List_Props(object.FromMap(responses), S.Preset.None, S.Preset.None),
+		X.List_Props(_object.FromMap(responses), S.Preset.None, S.Preset.None),
 		S.MakeList{Intent: 0, TypeFunc: S.List.Bullets, Preset: S.Preset.Text},
 	)
 

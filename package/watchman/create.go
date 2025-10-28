@@ -45,12 +45,14 @@ func (This *T_Watcher) Start(maxevents, pollInterval int) error {
 
 	if watcher, e := _fsnotify.NewWatcher(); e == nil {
 		for _, folder := range This.resolvedFolders {
-			_filepath.Walk(folder, func(path string, info _os.FileInfo, err error) error {
-				if info.IsDir() {
-					watcher.Add(path)
-				}
-				return nil
-			})
+			if fileman.Path_IfDir(folder) {
+				_filepath.Walk(folder, func(path string, info _os.FileInfo, err error) error {
+					if info.IsDir() {
+						watcher.Add(path)
+					}
+					return nil
+				})
+			}
 
 			watcher.Add(folder)
 		}

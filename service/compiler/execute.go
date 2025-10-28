@@ -88,15 +88,24 @@ func Execute(heading string) (Exitcode int) {
 			if RebuildTicker != nil {
 				RebuildTickerReset()
 			}
-			if res_report, res_status := _action.Verify_Setup(); res_status != _action.Verify_Setup_Status_Verified {
-				report = res_report
+			res_report, res_status := _action.Verify_Setup()
+			if res_status == _action.Verify_Setup_Status_Verified {
+				if WATCHER != nil {
+					WATCHER.Close()
+					WATCHER = nil
+				}
 				step = Execute_Step_LoopAround
-				showReport = true
-				exitcode = 1
-				break
-			} else if WATCHER != nil {
-				WATCHER.Close()
-				WATCHER = nil
+			} else {
+				if res_status == _action.Verify_Setup_Status_Initialized {
+					exitcode = 1
+					report = res_report
+				} else {
+					exitcode = 1
+					showReport = true
+					report = res_report
+					_config.Static.WATCH = false
+					break
+				}
 			}
 			fallthrough
 
@@ -197,77 +206,79 @@ func Execute(heading string) (Exitcode int) {
 				step = Execute_Step_LoopAround
 				if RebuildFlag.Load() {
 					step = Execute_Step_VerifySetupStruct
-				} else if events := WATCHER.DeBuf(); len(events) > 0 {
-					steppings := []Execute_Step_enum{}
-					for _, event := range events {
+				} else if WATCHER != nil {
+					if events := WATCHER.DeBuf(); len(events) > 0 {
+						steppings := []Execute_Step_enum{}
+						for _, event := range events {
 
-						filepath := _fileman.Path_Join(event.Folder, event.FilePath)
-						breaknow := false
+							filepath := _fileman.Path_Join(event.Folder, event.FilePath)
+							breaknow := false
 
-						if event.Folder == _config.Path_Folder["blueprint"].Path {
-							if event.Action == _watcher.E_Action_Update {
+							if event.Folder == _config.Path_Folder["blueprint"].Path {
+								if event.Action == _watcher.E_Action_Update {
 
-								switch filepath {
-								case _config.Path_Json["configure"].Path:
-									steppings = append(steppings, Execute_Step_VerifyConfigs)
-									breaknow = true
+									switch filepath {
+									case _config.Path_Json["configure"].Path:
+										steppings = append(steppings, Execute_Step_VerifyConfigs)
+										breaknow = true
 
-								case _config.Path_Json["hashrule"].Path:
-									steppings = append(steppings, Execute_Step_ReadHashrule)
-									breaknow = true
+									case _config.Path_Json["hashrule"].Path:
+										steppings = append(steppings, Execute_Step_ReadHashrule)
+										breaknow = true
 
-								case _config.Path_Css["atrules"].Path:
-									fallthrough
-								case _config.Path_Css["constants"].Path:
-									fallthrough
-								case _config.Path_Css["elements"].Path:
-									fallthrough
-								case _config.Path_Css["extends"].Path:
-									_action.Save_RootCss()
-									steppings = append(steppings, Execute_Step_UpdateCache)
+									case _config.Path_Css["atrules"].Path:
+										fallthrough
+									case _config.Path_Css["constants"].Path:
+										fallthrough
+									case _config.Path_Css["elements"].Path:
+										fallthrough
+									case _config.Path_Css["extends"].Path:
+										_action.Save_RootCss()
+										steppings = append(steppings, Execute_Step_UpdateCache)
 
-								default:
-									if _fileman.Path_HasChildPath(_config.Path_Folder["libraries"].Path, filepath) &&
-										event.Extension == "css" {
-										_config.Static.Libraries_Saved[filepath] = event.FileContent
-									} else if _fileman.Path_HasChildPath(_config.Path_Folder["artifacts"].Path, filepath) &&
-										(event.Extension == _config.Root.Extension || event.Extension == "json") {
-										_config.Static.Artifacts_Saved[filepath] = event.FileContent
+									default:
+										if _fileman.Path_HasChildPath(_config.Path_Folder["libraries"].Path, filepath) &&
+											event.Extension == "css" {
+											_config.Static.Libraries_Saved[filepath] = event.FileContent
+										} else if _fileman.Path_HasChildPath(_config.Path_Folder["artifacts"].Path, filepath) &&
+											(event.Extension == _config.Root.Extension || event.Extension == "json") {
+											_config.Static.Artifacts_Saved[filepath] = event.FileContent
+										}
+										steppings = append(steppings, Execute_Step_UpdateCache)
 									}
-									steppings = append(steppings, Execute_Step_UpdateCache)
+
+								} else {
+									steppings = append(steppings, Execute_Step_VerifySetupStruct)
+									breaknow = true
 								}
-
+							} else if event.Action == _watcher.E_Action_Update {
+								if target, ok := _config.Static.TargetDir_Saved[event.Folder]; ok && target.Stylesheet == event.FilePath {
+									target.StylesheetContent = event.FileContent
+									_config.Static.TargetDir_Saved[event.Folder] = target
+									steppings = append(steppings, Execute_Step_UpdateCache)
+								} else if _, ok := target.Extensions[event.Extension]; ok {
+									target.Filepath_to_Content[event.FilePath] = event.FileContent
+									_config.Static.TargetDir_Saved[event.Folder] = target
+									steppings = append(steppings, Execute_Step_UpdateCache)
+								} else {
+									outpath := _fileman.Path_Join(target.Source, event.FilePath)
+									go _fileman.Write_File(outpath, event.FileContent)
+									steppings = append(steppings, Execute_Step_LoopAround)
+								}
 							} else {
-								steppings = append(steppings, Execute_Step_VerifySetupStruct)
-								breaknow = true
+								steppings = append(steppings, Execute_Step_ReadTargets)
 							}
-						} else if event.Action == _watcher.E_Action_Update {
-							if target, ok := _config.Static.TargetDir_Saved[event.Folder]; ok && target.Stylesheet == event.FilePath {
-								target.StylesheetContent = event.FileContent
-								_config.Static.TargetDir_Saved[event.Folder] = target
-								steppings = append(steppings, Execute_Step_UpdateCache)
-							} else if _, ok := target.Extensions[event.Extension]; ok {
-								target.Filepath_to_Content[event.FilePath] = event.FileContent
-								_config.Static.TargetDir_Saved[event.Folder] = target
-								steppings = append(steppings, Execute_Step_UpdateCache)
-							} else {
-								outpath := _fileman.Path_Join(target.Source, event.FilePath)
-								go _fileman.Write_File(outpath, event.FileContent)
-								steppings = append(steppings, Execute_Step_LoopAround)
+							heading = event.TimeStamp + " | " + strconv.Itoa(len(events)) + " files changed."
+
+							if breaknow {
+								break
 							}
-						} else {
-							steppings = append(steppings, Execute_Step_ReadTargets)
 						}
-						heading = event.TimeStamp + " | " + strconv.Itoa(len(events)) + " files changed."
 
-						if breaknow {
-							break
-						}
-					}
-
-					for _, i := range steppings {
-						if i < step {
-							step = i
+						for _, i := range steppings {
+							if i < step {
+								step = i
+							}
 						}
 					}
 				}
