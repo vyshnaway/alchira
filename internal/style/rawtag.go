@@ -51,10 +51,9 @@ func Rawtag_Upload(
 	raw *_script.T_RawStyle,
 	file *_model.File_Stash,
 	IndexMap _model.Style_ClassIndexMap,
-	metadata_map _model.Style_ClassIndexMap,
 ) R_Rawtag_Upload {
 	errors := make([]string, 0, 4)
-	diagnostics := make([]_model.File_Diagnostic, 0, 4)
+	diagnostics := make([]*_model.File_Diagnostic, 0, 4)
 	attachments := make(map[string]bool, 12)
 	forArtifact := file.Lookup.Type == _model.File_Type_Artifact
 	declaration := file.TargetPath + ":" + _strconv.Itoa(raw.RowIndex) + ":" + _strconv.Itoa(raw.ColIndex)
@@ -123,7 +122,7 @@ func Rawtag_Upload(
 					}
 				} else {
 					errors = append(errors, query.Errorstring)
-					diagnostics = append(diagnostics, query.Diagnostic)
+					diagnostics = append(diagnostics, &query.Diagnostic)
 				}
 			}
 		}
@@ -215,7 +214,6 @@ func Rawtag_Upload(
 		})
 
 		file.StyleData.UsedIn = append(file.StyleData.UsedIn, index)
-		metadata_map[symclass] = index
 	}
 
 	return R_Rawtag_Upload{
@@ -231,6 +229,6 @@ type R_Rawtag_Upload struct {
 	Symclass    string
 	Index       int
 	Attachments map[string]bool
-	Diagnostics []_model.File_Diagnostic
+	Diagnostics []*_model.File_Diagnostic
 	Errors      []string
 }

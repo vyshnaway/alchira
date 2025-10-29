@@ -5,10 +5,9 @@ import (
 	_action "main/internal/action"
 	_script "main/internal/script"
 	_model "main/models"
-	"main/package/utils"
-	"maps"
+	_util "main/package/utils"
 	_map "maps"
-	"slices"
+	_slice "slices"
 	_string "strings"
 )
 
@@ -31,11 +30,11 @@ func (This *Class) Accumulator() Accumulator_return {
 	globals := []string{}
 	for _, file := range This.FileCache {
 		accumulate.ContextMap[file.Lookup.Id] = file
-		publics = append(publics, slices.Collect(_map.Keys(file.StyleData.PublicClasses))...)
-		globals = append(globals, slices.Collect(_map.Keys(file.StyleData.GlobalClasses))...)
+		publics = append(publics, _slice.Collect(_map.Keys(file.StyleData.PublicMap))...)
+		globals = append(globals, _slice.Collect(_map.Keys(file.StyleData.GlobalMap))...)
 	}
-	accumulate.GlobalClasses = utils.String_Unique(globals)
-	accumulate.PublicClasses = utils.String_Unique(publics)
+	accumulate.GlobalClasses = _util.String_Unique(globals)
+	accumulate.PublicClasses = _util.String_Unique(publics)
 
 	return accumulate
 }
@@ -51,24 +50,24 @@ func (This *Class) GetTracks() GetTracks_return {
 
 	scd := This.StylesheetContext.StyleData
 	for i := range scd.Attachments {
-		if found := _action.Index_Find(i, scd.LocalClasses); found.Index > 0 {
+		if found := _action.Index_Find(i, scd.LocalMap); found.Index > 0 {
 			attachments[found.Index] = true
 		}
 	}
 
 	for _, file := range This.FileCache {
 		attachstrings := map[string]bool{}
-		maps.Copy(attachstrings, file.StyleData.Attachments)
+		_map.Copy(attachstrings, file.StyleData.Attachments)
 
 		for _, track := range file.StyleData.ClassTracks {
 			retraces := []int{}
 			for _, i := range track {
-				if found := _action.Index_Find(i, file.StyleData.LocalClasses); found.Index > 0 {
+				if found := _action.Index_Find(i, file.StyleData.LocalMap); found.Index > 0 {
 					retraces = append(retraces, found.Index)
 					attachments[found.Index] = true
-					maps.Copy(attachstrings, found.Data.SrcData.Attachments)
+					_map.Copy(attachstrings, found.Data.SrcData.Attachments)
 					attachments[found.Index] = true
-					maps.Copy(attachstrings, found.Data.SrcData.Attachments)
+					_map.Copy(attachstrings, found.Data.SrcData.Attachments)
 				}
 			}
 
@@ -78,13 +77,13 @@ func (This *Class) GetTracks() GetTracks_return {
 		}
 
 		for i := range attachstrings {
-			if found := _action.Index_Find(i, file.StyleData.LocalClasses); found.Index > 0 {
+			if found := _action.Index_Find(i, file.StyleData.LocalMap); found.Index > 0 {
 				attachments[found.Index] = true
 			}
 		}
 
 		for i := range attachstrings {
-			if found := _action.Index_Find(i, file.StyleData.LocalClasses); found.Index > 0 {
+			if found := _action.Index_Find(i, file.StyleData.LocalMap); found.Index > 0 {
 				attachments[found.Index] = true
 			}
 		}

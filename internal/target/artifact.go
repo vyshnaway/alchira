@@ -3,13 +3,12 @@ package target
 import (
 	_action "main/internal/action"
 	_model "main/models"
-	_types_ "main/models"
 	_css "main/package/css"
 	_util "main/package/utils"
 	_string "strings"
 )
 
-func Artifact(index int) _types_.Style_ExportStyle {
+func Artifact(index int) _model.Style_ExportStyle {
 
 	element := ""
 	innertext := ""
@@ -48,7 +47,7 @@ func Artifact(index int) _types_.Style_ExportStyle {
 
 	}
 
-	return _types_.Style_ExportStyle{
+	return _model.Style_ExportStyle{
 		Element:     element,
 		SymClass:    symclass,
 		InnerText:   innertext,
@@ -62,11 +61,11 @@ func (This *Class) GetArtifacts() map[string]_model.Style_ExportStyle {
 	exports := map[string]_model.Style_ExportStyle{}
 
 	for _, file := range This.FileCache {
-		for _, pubindex := range file.StyleData.PublicClasses {
+		for _, pubindex := range file.StyleData.PublicMap {
 			exporting := Artifact(pubindex)
 
 			for a := range _action.Index_Fetch(pubindex).SrcData.Attachments {
-				if found := _action.Index_Find(a, file.StyleData.LocalClasses); found.Index > 0 {
+				if found := _action.Index_Find(a, file.StyleData.PublicMap); found.Index > 0 {
 					subexporting := Artifact(found.Index)
 					exporting.Attachments[subexporting.SymClass] = true
 					exports[subexporting.SymClass] = subexporting

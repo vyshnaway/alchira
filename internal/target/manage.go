@@ -15,10 +15,10 @@ import (
 func (This *Class) Savefile(filepath string, content string, hashindex int) {
 	if file, ok := This.FileCache[filepath]; ok {
 		_action.Index_Dispose(file.StyleData.UsedIn...)
-		for key := range This.FileCache[filepath].StyleData.GlobalClasses {
+		for key := range This.FileCache[filepath].StyleData.GlobalMap {
 			delete(_config.Style.Global___Index, key)
 		}
-		for key := range This.FileCache[filepath].StyleData.GlobalClasses {
+		for key := range This.FileCache[filepath].StyleData.GlobalMap {
 			delete(_config.Style.Public___Index, key)
 		}
 		delete(This.FileCache, filepath)
@@ -50,36 +50,31 @@ func (This *Class) Savefile(filepath string, content string, hashindex int) {
 				[]string{_fmt.Sprint(file.TargetPath, ":", tagdata.RowIndex, ":", tagdata.ColIndex)},
 			)
 			file.Errors = append(file.Errors, E.Errorstring)
-			file.Diagnostics = append(file.Diagnostics, E.Diagnostic)
+			file.Diagnostics = append(file.Diagnostics, &E.Diagnostic)
 		} else if len(tagdata.SymClasses) > 1 {
 			E := X.Error_Standard(
 				"Multiple SymClasses declaration scope.",
 				[]string{_fmt.Sprint(file.TargetPath, ":", tagdata.RowIndex, ":", tagdata.ColIndex)},
 			)
 			file.Errors = append(file.Errors, E.Errorstring)
-			file.Diagnostics = append(file.Diagnostics, E.Diagnostic)
+			file.Diagnostics = append(file.Diagnostics, &E.Diagnostic)
 		} else {
 			var loc_index_map _model.Style_ClassIndexMap
 			var ref_index_map _model.Style_ClassIndexMap
-			var metadata_map _model.Style_ClassIndexMap
 			switch tagdata.Scope {
 			case _model.Style_Type_Local:
-				metadata_map = file.LocalMap
-				loc_index_map = file.StyleData.LocalClasses
+				loc_index_map = file.StyleData.LocalMap
 			case _model.Style_Type_Global:
-				metadata_map = file.GlobalMap
-				loc_index_map = file.StyleData.GlobalClasses
+				loc_index_map = file.StyleData.GlobalMap
 				ref_index_map = _config.Style.Global___Index
 			case _model.Style_Type_Public:
-				metadata_map = file.PublicMap
-				loc_index_map = file.StyleData.PublicClasses
+				loc_index_map = file.StyleData.PublicMap
 				ref_index_map = _config.Style.Public___Index
 			default:
 				loc_index_map = _model.Style_ClassIndexMap{}
-				metadata_map = _model.Style_ClassIndexMap{}
 			}
 
-			response := _style.Rawtag_Upload(tagdata, file, loc_index_map, metadata_map)
+			response := _style.Rawtag_Upload(tagdata, file, loc_index_map)
 			loc_index_map[response.Symclass] = response.Index
 			if ref_index_map != nil {
 				ref_index_map[response.Symclass] = response.Index
@@ -91,9 +86,9 @@ func (This *Class) Savefile(filepath string, content string, hashindex int) {
 		}
 	}
 
-	maps.Copy(file.MixedMap, file.LocalMap)
-	maps.Copy(file.MixedMap, file.GlobalMap)
-	maps.Copy(file.MixedMap, file.PublicMap)
+	maps.Copy(file.StyleData.MixedMap, file.StyleData.LocalMap)
+	maps.Copy(file.StyleData.MixedMap, file.StyleData.GlobalMap)
+	maps.Copy(file.StyleData.MixedMap, file.StyleData.PublicMap)
 
 	This.FileCache[filepath] = file
 }
