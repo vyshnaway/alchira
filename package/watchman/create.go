@@ -34,6 +34,7 @@ type T_Watcher struct {
 	mutex           *_sync.Mutex
 	queue           []*Event
 	close           chan struct{}
+	Status          bool
 	Close           func()
 	PollIntervalMs  int
 	ignoredFolders  map[string]string
@@ -53,6 +54,7 @@ func New() *T_Watcher {
 		queue:           []*Event{},
 		close:           make(chan struct{}),
 		Close:           func() {},
+		Status:          false,
 		PollIntervalMs:  0,
 		ignoredFolders:  map[string]string{},
 		watchingFolders: map[string]string{},
@@ -152,6 +154,7 @@ func (This *T_Watcher) Start() {
 	}()
 
 	This.Close = func() {
+		This.Status = false
 		if This.polledWatcher != nil {
 			This.polledWatcher.Close()
 		}
@@ -160,13 +163,4 @@ func (This *T_Watcher) Start() {
 		}
 	}
 
-}
-
-func Quick(folders, ignores []string, pollIntervalMs int) *T_Watcher {
-	w := New()
-	w.Add_WatchingFolder(folders)
-	w.Add_IgnoredFolder(ignores)
-	w.PollIntervalMs = pollIntervalMs
-	w.Start()
-	return w
 }

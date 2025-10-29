@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"main/configs"
 	"main/package/watchman"
 	"main/service/compiler"
 
@@ -73,7 +74,7 @@ func Connect(tryport int) {
 		go compiler.Execute("")
 
 		for scanner.Scan() {
-			if compiler.WATCHER == nil {
+			if configs.Static.Watchman.Status == false {
 				continue
 			}
 			request := strings.TrimSpace(scanner.Text())

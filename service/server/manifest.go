@@ -6,7 +6,6 @@ import (
 	"main/internal/stash"
 	"main/models"
 	"main/package/fileman"
-	"main/service/compiler"
 	"maps"
 	"slices"
 	"strconv"
@@ -35,8 +34,8 @@ type R_Manifest_WS struct {
 }
 
 func ManifestFile(filepath string) (R_Manifest_IO, R_Manifest_WS) {
-	compiler.ExecuteMutex.Lock()
-	defer compiler.ExecuteMutex.Unlock()
+	configs.Static.ExecuteMutex.Lock()
+	defer configs.Static.ExecuteMutex.Unlock()
 
 	MetadataFromIndex := func(index int) models.Style_Metadata {
 		return *action.Index_Fetch(index).SrcData.Metadata

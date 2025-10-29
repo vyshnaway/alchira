@@ -3,10 +3,10 @@ package server
 import (
 	"encoding/json"
 	"fmt"
+	"main/configs"
 	"main/models"
 	"main/package/fileman"
 	"main/package/watchman"
-	"main/service/compiler"
 	"sync"
 )
 
@@ -30,7 +30,7 @@ func IO_Json(req JsonRPCRequest) string {
 				content, ok5 := params_["content"]
 				content_, ok6 := content.(string)
 				if ok5 && ok6 && err == nil {
-					compiler.WATCHER.HandleEvent(watchman.E_Action_Update, abspath, content_)
+					configs.Static.Watchman.HandleEvent(watchman.E_Action_Update, abspath, content_)
 				}
 
 				fileManifest, styleManifest := ManifestFile(filepath_)

@@ -12,7 +12,7 @@ import (
 	_os "os"
 	_signal "os/signal"
 	_slice "slices"
-	"strconv"
+	_strconv "strconv"
 	_sync "sync"
 	_syscall "syscall"
 	_time "time"
@@ -41,11 +41,11 @@ func startRebuildTicker(intervalMs int) func() {
 	RebuildTickerReset()
 
 	go func() {
-		RebuildTicker = _time.NewTicker(tickerDuration)
-		defer RebuildTicker.Stop()
+		_config.Static.RebuildTicker = _time.NewTicker(tickerDuration)
+		defer _config.Static.RebuildTicker.Stop()
 
-		for range RebuildTicker.C {
-			RebuildFlag.Store(true)
+		for range _config.Static.RebuildTicker.C {
+			_config.Static.RebuildFlag.Store(true)
 		}
 	}()
 
@@ -59,14 +59,17 @@ func Execute(heading string) (Exitcode int) {
 	outfiles := map[string]string{}
 	showReport := true
 	var save_action _sync.WaitGroup
-	
+
 	var RebuildTickerReset func()
 	if _config.Static.WATCH && _config.Root.RebuildInterval > 0 {
 		RebuildTickerReset = startRebuildTicker(_config.Root.RebuildInterval)
 	}
 
+	watchman := _config.Static.Watchman
+	watchman.PollIntervalMs = _config.Root.PollingInterval
+
 	for {
-		ExecuteMutex.Lock()
+		_config.Static.ExecuteMutex.Lock()
 
 		switch step {
 		case Execute_Step_Initialize:
@@ -77,20 +80,17 @@ func Execute(heading string) (Exitcode int) {
 			fallthrough
 
 		case Execute_Step_VerifySetupStruct:
-			if RebuildFlag.Load() {
+			if _config.Static.RebuildFlag.Load() {
 				_config.Reset(true)
 				showReport = false
-				RebuildFlag.Store(false)
+				_config.Static.RebuildFlag.Store(false)
 			}
-			if RebuildTicker != nil {
+			if _config.Static.RebuildTicker != nil {
 				RebuildTickerReset()
 			}
 			res_report, res_status := _action.Verify_Setup()
 			if res_status == _action.Verify_Setup_Status_Verified {
-				if WATCHER != nil {
-					WATCHER.Close()
-					WATCHER = nil
-				}
+				watchman.Reset()
 				step = Execute_Step_LoopAround
 			} else {
 				if res_status == _action.Verify_Setup_Status_Initialized {
@@ -164,47 +164,37 @@ func Execute(heading string) (Exitcode int) {
 		case Execute_Step_LoopAround:
 			if _config.Static.WATCH {
 
-				if WATCHER == nil {
-					watch_dirs := append(
+				if !watchman.Status {
+					watchman.Add_WatchingFolder(append(
 						_slice.Collect(_map.Keys(_stash.Cache.Targetdir)),
 						_config.Path_Folder["blueprint"].Path,
-					)
-					ignore_dirs := []string{
+					))
+					watchman.Add_IgnoredFolder([]string{
 						_config.Path_Folder["archive"].Path,
+					})
+
+					watchman.Start()
+
+					if !_config.Static.SERVER {
+						sigs := make(chan _os.Signal, 1)
+						_signal.Notify(sigs, _syscall.SIGINT)
+
+						go func() {
+							<-sigs
+							watchman.Close()
+							S.Render.Write("\r\n", 2)
+							save_action.Wait()
+							_os.Exit(1)
+						}()
 					}
 
-					if watcher, err := _watcher.Quick(watch_dirs, ignore_dirs, _config.Root.PollingInterval); err == nil {
-						WATCHER = watcher
-
-						if !_config.Static.SERVER {
-							sigs := make(chan _os.Signal, 1)
-							_signal.Notify(sigs, _syscall.SIGINT)
-
-							go func() {
-								<-sigs
-								if watcher != nil {
-									watcher.Close()
-									watcher = nil
-									S.Render.Write("\r\n", 2)
-								}
-								save_action.Wait()
-								_os.Exit(1)
-							}()
-						}
-					} else {
-						report = S.MAKE(
-							S.Tag.H4("Unexpected error while creating watcher", S.Preset.Failed, S.Style.AS_Bold),
-							[]string{S.Tag.Li(err.Error(), S.Preset.None)},
-						)
-						break
-					}
 				}
 
 				step = Execute_Step_LoopAround
-				if RebuildFlag.Load() {
+				if _config.Static.RebuildFlag.Load() {
 					step = Execute_Step_VerifySetupStruct
-				} else if WATCHER != nil {
-					if events := WATCHER.DeBuf(); len(events) > 0 {
+				} else if watchman.Status {
+					if events := watchman.DeBuf(); len(events) > 0 {
 						steppings := []Execute_Step_enum{}
 						for _, event := range events {
 
@@ -265,7 +255,7 @@ func Execute(heading string) (Exitcode int) {
 							} else {
 								steppings = append(steppings, Execute_Step_ReadTargets)
 							}
-							heading = event.TimeStamp + " | " + strconv.Itoa(len(events)) + " files changed."
+							heading = event.TimeStamp + " | " + _strconv.Itoa(len(events)) + " files changed."
 
 							if breaknow {
 								break
@@ -282,7 +272,7 @@ func Execute(heading string) (Exitcode int) {
 			}
 		}
 
-		ExecuteMutex.Unlock()
+		_config.Static.ExecuteMutex.Unlock()
 		if _config.Static.WATCH {
 			if !_config.Static.SERVER && len(report) > 0 && showReport {
 				S.Post(X.Report(heading, []string{}, report))
@@ -298,10 +288,7 @@ func Execute(heading string) (Exitcode int) {
 	}
 
 	save_action.Wait()
-	if WATCHER != nil {
-		WATCHER.Close()
-		WATCHER = nil
-	}
+	watchman.Close()
 
 	return exitcode
 }
