@@ -24,7 +24,7 @@ func TestOrderPreview(t *_testing.T) {
 	}
 
 	// Test preview operation
-	result, err := _order.Optimize(sequences, false, "", artifact)
+	result, err := _order.Optimize(sequences, false, "", &artifact)
 
 	// Assertions
 	if err != nil {

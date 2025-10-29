@@ -8,46 +8,44 @@ import (
 	_string "strings"
 )
 
-func Artifact(index int) _model.Style_ExportStyle {
+func Artifact(index int) *_model.Style_ExportStyle {
+	style := _action.Index_Fetch(index)
 
 	element := ""
 	innertext := ""
 	symclass := ""
-	stylesheet := map[string]string{}
-	attributes := map[string]string{}
+	stylesheet := make(map[string]string, style.SrcData.ExportRawStyle.BlockLen())
+	attributes := make(map[string]string, len(style.SrcData.Attributes))
 
-	if style := _action.Index_Fetch(index); style != nil {
-		if len(style.SrcData.ExportStaple) > 0 {
-			element = "staple"
-			innertext = style.SrcData.ExportStaple
-		} else if len(style.SrcData.Metadata.SummonSnippet) > 0 {
-			element = "summon"
-			innertext = style.SrcData.Metadata.SummonSnippet
-		} else {
-			element = "style"
-			innertext = style.SrcData.ExportAttachStyle.Format(true)
-		}
-
-		if _string.Contains(style.SrcData.Definent, "$$$") {
-			symclass = style.SrcData.Definent
-		} else {
-			symclass = "$---" + _util.String_EnCounter(style.SrcData.Index)
-		}
-
-		isPublic := _string.Contains(style.SrcData.Definent, "$$$")
-		if isPublic {
-			for k, v := range style.SrcData.Attributes {
-				attributes[k] = _util.Code_Minify(v)
-			}
-		}
-
-		style.SrcData.ExportRawStyle.BlockRange(func(k string, v *_css.T_Block) {
-			stylesheet[k] = v.Format(true)
-		})
-
+	if len(style.SrcData.ExportStaple) > 0 {
+		element = "staple"
+		innertext = style.SrcData.ExportStaple
+	} else if len(style.SrcData.Metadata.SummonSnippet) > 0 {
+		element = "summon"
+		innertext = style.SrcData.Metadata.SummonSnippet
+	} else {
+		element = "style"
+		innertext = style.SrcData.ExportAttachStyle.Format(true)
 	}
 
-	return _model.Style_ExportStyle{
+	if _string.Contains(style.SrcData.Definent, "$$$") {
+		symclass = style.SrcData.Definent
+	} else {
+		symclass = "$---" + _util.String_EnCounter(style.SrcData.Index)
+	}
+
+	isPublic := _string.Contains(style.SrcData.Definent, "$$$")
+	if isPublic {
+		for k, v := range style.SrcData.Attributes {
+			attributes[k] = _util.Code_Minify(v)
+		}
+	}
+
+	style.SrcData.ExportRawStyle.BlockRange(func(k string, v *_css.T_Block) {
+		stylesheet[k] = v.Format(true)
+	})
+
+	return &_model.Style_ExportStyle{
 		Element:     element,
 		SymClass:    symclass,
 		InnerText:   innertext,
@@ -57,8 +55,8 @@ func Artifact(index int) _model.Style_ExportStyle {
 	}
 }
 
-func (This *Class) GetArtifacts() map[string]_model.Style_ExportStyle {
-	exports := map[string]_model.Style_ExportStyle{}
+func (This *Class) GetArtifacts() map[string]*_model.Style_ExportStyle {
+	exports := map[string]*_model.Style_ExportStyle{}
 
 	for _, file := range This.FileCache {
 		for _, pubindex := range file.StyleData.PublicMap {

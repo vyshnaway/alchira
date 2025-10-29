@@ -8,7 +8,6 @@ import (
 	_style "main/internal/style"
 	_model "main/models"
 	O "main/package/object"
-	_util "main/package/utils"
 	_map "maps"
 	_strconv "strconv"
 )
@@ -31,7 +30,7 @@ func library_SaveFile(filepath string, content string) {
 type library_StackFiles_return struct {
 	Cluster [][]*_model.File_Stash
 	Axiom   [][]*_model.File_Stash
-	Lookup  map[string]_model.File_Lookup
+	Lookup  map[string]*_model.File_Lookup
 }
 
 func library_Clear() {
@@ -54,7 +53,7 @@ func Library_CacheFiles() library_StackFiles_return {
 	length := 0
 	axiom_map := map[int][]*_model.File_Stash{}
 	cluster_map := map[int][]*_model.File_Stash{}
-	lookup := map[string]_model.File_Lookup{}
+	lookup := map[string]*_model.File_Lookup{}
 
 	for path, data := range Cache.Libraries {
 		var collection map[int][]*_model.File_Stash
@@ -66,7 +65,7 @@ func Library_CacheFiles() library_StackFiles_return {
 		default:
 			continue
 		}
-		lookup[path] = data.Lookup
+		lookup[path] = &data.Lookup
 		id, er := _strconv.Atoi(data.Lookup.Id)
 
 		if er == nil {
@@ -82,8 +81,8 @@ func Library_CacheFiles() library_StackFiles_return {
 			}
 		}
 	}
-	axiom := _util.Array_FromNumberMap(axiom_map, length)
-	cluster := _util.Array_FromNumberMap(cluster_map, length)
+	axiom := Array_FromNumberMap(axiom_map, length)
+	cluster := Array_FromNumberMap(cluster_map, length)
 
 	return library_StackFiles_return{
 		Cluster: cluster,
@@ -99,8 +98,8 @@ func Library_Update() {
 	// Axiom update actions
 	_config.Manifest.Group.Axiom = map[string]_model.Style_ClassIndexMap{}
 	_config.Delta.Error.Axioms = []string{}
-	_config.Delta.Diagnostic.Axioms = []_model.File_Diagnostic{}
-	axiom_chart := O.New[string, []string]()
+	_config.Delta.Diagnostic.Axioms = []*_model.File_Diagnostic{}
+	axiom_chart := O.New[string, []string](len(StackLibraryFiles_.Axiom))
 	axiom_counter := 0
 	for index, files := range StackLibraryFiles_.Axiom {
 		Cssfile_Collection_ := _style.Cssfile_Collection(files)
@@ -123,8 +122,8 @@ func Library_Update() {
 	// Cluster update actions
 	_config.Manifest.Group.Cluster = map[string]_model.Style_ClassIndexMap{}
 	_config.Delta.Error.Clusters = []string{}
-	_config.Delta.Diagnostic.Clusters = []_model.File_Diagnostic{}
-	cluster_chart := O.New[string, []string]()
+	_config.Delta.Diagnostic.Clusters = []*_model.File_Diagnostic{}
+	cluster_chart := O.New[string, []string](len(StackLibraryFiles_.Cluster))
 	cluster_counter := 0
 	for index, files := range StackLibraryFiles_.Cluster {
 		Cssfile_Collection_ := _style.Cssfile_Collection(files)

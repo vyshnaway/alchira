@@ -30,7 +30,7 @@ type R_Manifest_WS struct {
 	Lodashes     []string                      `json:"lodashes"`
 	Assignable   []string                      `json:"assignable"`
 	Symclasses   map[string]int                `json:"symclasses"`
-	Diagnostics  []models.File_Diagnostic      `json:"diagnostics"`
+	Diagnostics  []*models.File_Diagnostic     `json:"diagnostics"`
 	SymclassData map[int]models.Style_Metadata `json:"symclassData"`
 }
 

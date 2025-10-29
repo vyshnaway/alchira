@@ -47,8 +47,8 @@ func Target_Accumulate() (
 ) {
 	global_counter := 0
 	public_counter := 0
-	globals := O.New[string, []string]()
-	publics := O.New[string, []string]()
+	globals := O.New[string, []string](len(Cache.Targetdir))
+	publics := O.New[string, []string](len(Cache.Targetdir))
 	contextMaps := map[string]*_model.File_Stash{}
 
 	for _, target := range Cache.Targetdir {

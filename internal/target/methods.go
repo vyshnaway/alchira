@@ -5,7 +5,6 @@ import (
 	_action "main/internal/action"
 	_script "main/internal/script"
 	_model "main/models"
-	_util "main/package/utils"
 	_map "maps"
 	_slice "slices"
 	_string "strings"
@@ -19,22 +18,15 @@ type Accumulator_return struct {
 
 func (This *Class) Accumulator() Accumulator_return {
 	accumulate := Accumulator_return{
-		GlobalClasses: []string{},
-		PublicClasses: []string{},
+		GlobalClasses: _slice.Collect(_map.Keys(This.PublicMap)),
+		PublicClasses: _slice.Collect(_map.Keys(This.GlobalMap)),
 		ContextMap:    map[string]*_model.File_Stash{},
 	}
 
 	accumulate.ContextMap[This.TargetStylesheet] = This.StylesheetContext
-
-	publics := []string{}
-	globals := []string{}
 	for _, file := range This.FileCache {
 		accumulate.ContextMap[file.Lookup.Id] = file
-		publics = append(publics, _slice.Collect(_map.Keys(file.StyleData.PublicMap))...)
-		globals = append(globals, _slice.Collect(_map.Keys(file.StyleData.GlobalMap))...)
 	}
-	accumulate.GlobalClasses = _util.String_Unique(globals)
-	accumulate.PublicClasses = _util.String_Unique(publics)
 
 	return accumulate
 }
@@ -45,8 +37,8 @@ type GetTracks_return struct {
 }
 
 func (This *Class) GetTracks() GetTracks_return {
-	classtracks := [][]int{}
-	attachments := map[int]bool{}
+	classtracks := make([][]int, 24*len(This.FileCache))
+	attachments := make(map[int]bool, 8)
 
 	scd := This.StylesheetContext.StyleData
 	for i := range scd.Attachments {
@@ -56,7 +48,7 @@ func (This *Class) GetTracks() GetTracks_return {
 	}
 
 	for _, file := range This.FileCache {
-		attachstrings := map[string]bool{}
+		attachstrings := make(map[string]bool, len(file.StyleData.Attachments))
 		_map.Copy(attachstrings, file.StyleData.Attachments)
 
 		for _, track := range file.StyleData.ClassTracks {
@@ -118,7 +110,8 @@ func (This *Class) SummonFiles(
 	summonBlock string,
 	stapleBlock string,
 ) map[string]string {
-	savefiles := map[string]string{This.SourceStylesheet: stylesheet}
+	savefiles := make(map[string]string, len(This.FileCache)+1)
+	savefiles[This.SourceStylesheet] = stylesheet
 
 	for _, file := range This.FileCache {
 		if file.Extension != _config.Root.Extension {

@@ -111,13 +111,18 @@ func (This *T_Watcher) Reset() {
 	This.mutex.Lock()
 	defer This.mutex.Unlock()
 	This.queue = []*Event{}
+
 	This.polledWatcher.Close()
 	This.polledWatcher = _watcher.New()
+
 	This.notifyWatcher.Close()
 	This.notifyWatcher = nil
 	if watcher, e := _fsnotify.NewWatcher(); e == nil {
 		This.notifyWatcher = watcher
 	}
+
+	This.ignoredFolders = map[string]string{}
+	This.watchingFolders = map[string]string{}
 }
 
 func (This *T_Watcher) Length() int {

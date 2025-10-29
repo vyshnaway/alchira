@@ -13,11 +13,13 @@ type T_Block struct {
 }
 
 func NewBlock(prop_size, block_size int) *T_Block {
+	p := _util.Number_AbsInt(prop_size) + 1
+	b := _util.Number_AbsInt(block_size) + 1
 	return &T_Block{
-		Prop_keys:  make([]string, 0, _util.Number_AbsInt(prop_size)+1),
-		Prop_vals:  make([]string, 0, _util.Number_AbsInt(prop_size)+1),
-		Block_keys: make([]string, 0, _util.Number_AbsInt(block_size)+1),
-		Block_vals: make([]*T_Block, 0, _util.Number_AbsInt(block_size)+1),
+		Prop_keys:  make([]string, 0, p),
+		Prop_vals:  make([]string, 0, p),
+		Block_keys: make([]string, 0, b),
+		Block_vals: make([]*T_Block, 0, b),
 	}
 }
 

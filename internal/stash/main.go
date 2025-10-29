@@ -49,23 +49,28 @@ func SaveHandoffErrors() {
 				"Unresolved tokens: "+K,
 				console.List_Props(O.FromUnorderedMap(temp), S.Preset.Primary, S.Preset.Text),
 			)
-			_config.Delta.Diagnostic.Handoffs = append(_config.Delta.Diagnostic.Handoffs, r.Diagnostic)
+			_config.Delta.Diagnostic.Handoffs = append(_config.Delta.Diagnostic.Handoffs, &r.Diagnostic)
 			_config.Delta.Error.Handoffs = append(_config.Delta.Error.Handoffs, r.Errorstring)
 		}
 	}
 }
 
 func UtilsGetUsage() string {
+	measureMemory := func(data any) float64 {
+		r, _ := _util.Code_JsoncBuild(data, "")
+		return _util.String_Memory(r)
+	}
+
 	chart := map[string]float64{
-		"Files":  _util.String_Memory(_util.Code_JsoncBuild(Cache, "")),
-		"Root":   _util.String_Memory(_util.Code_JsoncBuild(_config.Root, "")),
-		"Delta":  _util.String_Memory(_util.Code_JsoncBuild(_config.Delta, "")),
-		"Class":  _util.String_Memory(_util.Code_JsoncBuild(_config.Style, "")),
-		"Static": _util.String_Memory(_util.Code_JsoncBuild(_config.Static, "")),
+		"Files":  measureMemory(Cache),
+		"Root":   measureMemory(_config.Root),
+		"Delta":  measureMemory(_config.Delta),
+		"Class":  measureMemory(_config.Style),
+		"Static": measureMemory(_config.Static),
 		"Proxy": func() float64 {
 			total := 0.0
 			for _, c := range _config.Saved.TargetDir_Saved {
-				total += _util.String_Memory(_util.Code_JsoncBuild(c, ""))
+				total += measureMemory(c)
 			}
 			return total
 		}(),

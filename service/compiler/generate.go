@@ -1,6 +1,7 @@
 package compiler
 
 import (
+	"fmt"
 	_fmt "fmt"
 	_config "main/configs"
 	_action "main/internal/action"
@@ -23,7 +24,7 @@ func ClearUnwantedCache() (
 	IndexFrag string,
 ) {
 
-	indexes := map[int]bool{}
+	indexes := make(map[int]bool, 64)
 	for _, i := range _config.Style.PublishIndexMap {
 		for _, j := range i {
 			indexes[j.ClassIndex] = true
@@ -37,7 +38,7 @@ func ClearUnwantedCache() (
 	}
 
 	pubInLt := 24
-	newPubIn := [][]models.Style_ClassIndexTrace{}
+	newPubIn := make([][]models.Style_ClassIndexTrace, 24)
 	for _, A := range _config.Style.PublishIndexMap {
 		for i := 0; i < len(A); i += pubInLt {
 			end := min(i+pubInLt, len(A))
@@ -86,7 +87,7 @@ func Generate_Files() (Files map[string]string, Report string) {
 	_stash.Target_SyncClassNames()
 
 	appendix_frag := _css.Render_Sequence(func() *_css.T_BlockSeq {
-		result := _css.NewBlockSeq()
+		result := _css.NewBlockSeq(len(_stash.Cache.Targetdir) * 8)
 		for _, cache := range _stash.Cache.Targetdir {
 			result.Append(cache.StylesheetBlockSeq.Units...)
 		}
@@ -94,7 +95,7 @@ func Generate_Files() (Files map[string]string, Report string) {
 	}(), _config.Static.MINIFY)
 
 	attach_frag, staple_sheet := func() (string, string) {
-		attach_styles := _css.NewBlock()
+		attach_styles := _css.NewBlock(len(attachments), len(attachments))
 		var attach_staples _string.Builder
 		for a := range attachments {
 			if data := _action.Index_Fetch(a); data != nil {
@@ -112,7 +113,7 @@ func Generate_Files() (Files map[string]string, Report string) {
 
 	for _, i := range _config.Style.PublishIndexMap {
 		class_builder.WriteString(_css.Render_Switched(func() *_css.T_Block {
-			result := _css.NewBlock()
+			result := _css.NewBlock(0, len(i))
 			for _, j := range i {
 				result.SetBlock(j.ClassName, _action.Index_Fetch(j.ClassIndex).SrcData.NativeRawStyle)
 			}
@@ -143,7 +144,7 @@ func Generate_Files() (Files map[string]string, Report string) {
 		return _string.Join(frags, "")
 	}()
 
-	block_style := "<style>" + style_sheet + "</style>"
+	block_style := fmt.Sprint("<style>", style_sheet, "</style>")
 	block_on := block_style + block_style
 	for _, target := range _stash.Cache.Targetdir {
 		_map.Copy(files, target.SummonFiles(style_sheet, block_style, block_on, staple_sheet))
@@ -152,7 +153,7 @@ func Generate_Files() (Files map[string]string, Report string) {
 	if !_config.Static.WATCH {
 		report += func() string {
 
-			memchart := O.New[string, string]()
+			memchart := O.New[string, string](len(render_frags) + 1)
 			for _, i := range render_frags {
 				memchart.Set(
 					i.key,

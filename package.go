@@ -112,10 +112,11 @@ func main() {
 		flagmode = "Build"
 	}
 
+	_config.Reset(false)
+
 	switch _config.Static.Command {
 	case "init":
 		{
-			_config.Reset()
 			var wg _sync.WaitGroup
 			wg.Add(2)
 			go func() { _action.Sync_RootDocs(); wg.Done() }()
@@ -203,14 +204,14 @@ func main() {
 			S.Post(S.MAKE("", []string{
 				X.List_Record("Available Commands", O.FromUnorderedMap(_config.Root.Commands)),
 				X.List_Record("Agreements", func() *O.T[string, string] {
-					res := O.New[string, string]()
+					res := O.New[string, string](len(_config.Sync_Agreements))
 					for _, data := range _config.Sync_Agreements {
 						res.Set(data.Title, data.Path)
 					}
 					return res
 				}()),
 				X.List_Record("References", func() *O.T[string, string] {
-					res := O.New[string, string]()
+					res := O.New[string, string](len(_config.Sync_References))
 					for _, data := range _config.Sync_References {
 						res.Set(data.Title, data.Path)
 					}

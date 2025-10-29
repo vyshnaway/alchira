@@ -1,5 +1,12 @@
 package models
 
+import (
+	"main/package/watchman"
+	"sync"
+	"sync/atomic"
+	"time"
+)
+
 type Cache_Url struct {
 	Docs      string
 	Site      string
@@ -39,6 +46,10 @@ type Cache_Static struct {
 	ProjectVersion  string
 	CustomTags      []string
 	ReplacementTags map[string]int
+	Watchman        *watchman.T_Watcher
+	ExecuteMutex    sync.Mutex
+	RebuildFlag     atomic.Bool
+	RebuildTicker   *time.Ticker
 }
 
 type Cache_Saved struct {

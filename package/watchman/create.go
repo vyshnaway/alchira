@@ -152,7 +152,6 @@ func (This *T_Watcher) Start() {
 	}()
 
 	This.Close = func() {
-		// close(done)
 		if This.polledWatcher != nil {
 			This.polledWatcher.Close()
 		}

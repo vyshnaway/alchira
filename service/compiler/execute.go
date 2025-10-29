@@ -14,7 +14,6 @@ import (
 	_slice "slices"
 	"strconv"
 	_sync "sync"
-	_atomic "sync/atomic"
 	_syscall "syscall"
 	_time "time"
 )
@@ -36,15 +35,9 @@ const (
 	Execute_Step_LoopAround
 )
 
-var WATCHER *_watcher.T_Watcher
-var ExecuteMutex _sync.Mutex
-var RebuildFlag _atomic.Bool
-var RebuildTicker *_time.Ticker
-var RebuildTickerReset func()
-
-func startRebuildTicker(intervalMs int) {
+func startRebuildTicker(intervalMs int) func() {
 	var tickerDuration _time.Duration
-	RebuildTickerReset = func() { tickerDuration = _time.Duration(intervalMs) * _time.Millisecond }
+	RebuildTickerReset := func() { tickerDuration = _time.Duration(intervalMs) * _time.Millisecond }
 	RebuildTickerReset()
 
 	go func() {
@@ -55,6 +48,8 @@ func startRebuildTicker(intervalMs int) {
 			RebuildFlag.Store(true)
 		}
 	}()
+
+	return RebuildTickerReset
 }
 
 func Execute(heading string) (Exitcode int) {
@@ -64,9 +59,10 @@ func Execute(heading string) (Exitcode int) {
 	outfiles := map[string]string{}
 	showReport := true
 	var save_action _sync.WaitGroup
-
+	
+	var RebuildTickerReset func()
 	if _config.Static.WATCH && _config.Root.RebuildInterval > 0 {
-		startRebuildTicker(_config.Root.RebuildInterval)
+		RebuildTickerReset = startRebuildTicker(_config.Root.RebuildInterval)
 	}
 
 	for {
@@ -81,8 +77,8 @@ func Execute(heading string) (Exitcode int) {
 			fallthrough
 
 		case Execute_Step_VerifySetupStruct:
-			_config.Reset()
 			if RebuildFlag.Load() {
+				_config.Reset(true)
 				showReport = false
 				RebuildFlag.Store(false)
 			}

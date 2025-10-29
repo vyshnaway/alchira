@@ -1,9 +1,13 @@
 package configs
 
 import (
-	_model "main/models"
-	_maps "maps"
-	_slices "slices"
+	"main/models"
+	"main/package/watchman"
+	"maps"
+	"slices"
+	"sync"
+	"sync/atomic"
+	"time"
 )
 
 const (
@@ -13,7 +17,7 @@ const (
 
 var Lodash_rune rune = '_'
 
-var Root = _model.Cache_Root{
+var Root = models.Cache_Root{
 	Name:            id,
 	Version:         "0.0.0",
 	Extension:       id,
@@ -22,7 +26,7 @@ var Root = _model.Cache_Root{
 	WaitingInterval: 100,
 	WebsocketPort:   0,
 
-	Url: _model.Cache_Url{
+	Url: models.Cache_Url{
 		Site:      "https://www." + domain + "/",
 		Docs:      "https://docs." + domain + "/",
 		Worker:    "https://worker." + domain + "/",
@@ -39,7 +43,7 @@ var Root = _model.Cache_Root{
 		"publish": "Optimized build, uses web-api.",
 		"install": "Install external artifacts.",
 	},
-	Tweaks: _model.Config_Tweaks{
+	Tweaks: models.Config_Tweaks{
 		"CacheUsage": false,
 	},
 	CustomTags: map[string]int{
@@ -59,7 +63,7 @@ var Root = _model.Cache_Root{
 	},
 }
 
-var Static = _model.Cache_Static{
+var Static = models.Cache_Static{
 	WATCH:          false,
 	DEBUG:          false,
 	MINIFY:         false,
@@ -71,7 +75,7 @@ var Static = _model.Cache_Static{
 	WorkPath:       "",
 	ProjectName:    "",
 	ProjectVersion: "",
-	CustomTags:     _slices.Collect(_maps.Keys(Root.CustomTags)),
+	CustomTags:     slices.Collect(maps.Keys(Root.CustomTags)),
 	ReplacementTags: func() map[string]int {
 		res := map[string]int{}
 		for k, v := range Root.CustomTags {
@@ -84,9 +88,13 @@ var Static = _model.Cache_Static{
 		}
 		return res
 	}(),
+	Watchman:      &watchman.T_Watcher{},
+	ExecuteMutex:  sync.Mutex{},
+	RebuildFlag:   atomic.Bool{},
+	RebuildTicker: &time.Ticker{},
 }
 
-var Root_Scaffold = map[string]_model.File_Source{
+var Root_Scaffold = map[string]models.File_Source{
 	"blueprint": {
 		Frags:     []string{"scaffold", "blueprint"},
 		Path:      "",

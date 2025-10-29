@@ -30,15 +30,18 @@ func IO_Term(command string, arguments []string, userpc bool) (Response string) 
 		result = "invalid method"
 	}
 
+	var r string
 	if userpc {
-		return utils.Code_JsoncBuild(JsonRPCResponse{
+		r, _ = utils.Code_JsoncBuild(JsonRPCResponse{
 			JSONRPC: "2.0",
 			ID:      0,
 			Method:  command,
 			Result:  result,
 			Error:   nil,
 		}, "")
+
 	} else {
-		return utils.Code_JsoncBuild(result, "  ")
+		r, _ = utils.Code_JsoncBuild(result, "  ")
 	}
+	return r
 }

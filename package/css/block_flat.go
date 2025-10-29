@@ -148,8 +148,8 @@ func (This *T_Block) flatten(parent string) (Res *T_Block) {
 	return all
 }
 
-func (This *T_Block) Flatten() (Res *T_Block) {
-	all := NewBlock(Res.PropLen(), Res.BlockLen())
+func (This *T_Block) Flatten() (*T_Block) {
+	all := NewBlock(This.PropLen(), This.BlockLen())
 
 	This.PropRange(func(k string, v string) {
 		all.SetProp(k, v)

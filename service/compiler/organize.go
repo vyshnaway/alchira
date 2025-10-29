@@ -16,13 +16,11 @@ import (
 )
 
 func Update_Cache() {
-	_action.Index_Reset(0)
-
-	_stash.Reset()
-	_config.Style_Reset()
 	_config.Delta_Reset()
+	_config.Style_Reset()
 	_config.Manifest_Reset()
 
+	_stash.Reset()
 	_stash.Artifact_Update()
 	_stash.Library_Update()
 
@@ -48,37 +46,37 @@ func Accumulate() {
 	_config.Manifest.Group.Global = map[string]_model.Style_ClassIndexMap{}
 
 	_config.Delta.Error.TargetDir = []string{}
-	_config.Delta.Lookup.TargetDir = map[string]_model.File_Lookup{}
-	_config.Delta.Diagnostic.TargetDir = []_model.File_Diagnostic{}
+	_config.Delta.Lookup.TargetDir = map[string]*_model.File_Lookup{}
+	_config.Delta.Diagnostic.TargetDir = []*_model.File_Diagnostic{}
 
 	for key, val := range filemanifest {
-		_config.Manifest.Group.Local[key] = val.LocalMap
-		_config.Delta.Lookup.TargetDir[key] = val.Lookup
+		_config.Manifest.Group.Local[key] = val.StyleData.LocalMap
+		_config.Delta.Lookup.TargetDir[key] = &val.Lookup
 		_config.Delta.Error.TargetDir = append(_config.Delta.Error.TargetDir, val.Errors...)
 		_config.Delta.Diagnostic.TargetDir = append(_config.Delta.Diagnostic.TargetDir, val.Diagnostics...)
 
 		mergedMap := make(_model.Style_ClassIndexMap)
-		_map.Copy(mergedMap, val.PublicMap)
-		_map.Copy(mergedMap, val.GlobalMap)
+		_map.Copy(mergedMap, val.StyleData.PublicMap)
+		_map.Copy(mergedMap, val.StyleData.GlobalMap)
 		_config.Manifest.Group.Global[key] = mergedMap
 	}
 
-	_config.Manifest.Lookup = map[string]_model.File_Lookup{}
+	_config.Manifest.Lookup = map[string]*_model.File_Lookup{}
 	_map.Copy(_config.Manifest.Lookup, _config.Delta.Lookup.Artifacts)
 	_map.Copy(_config.Manifest.Lookup, _config.Delta.Lookup.Libraries)
 	_map.Copy(_config.Manifest.Lookup, _config.Delta.Lookup.TargetDir)
 
 	_config.Delta.Error.Multiples = []string{}
-	_config.Delta.Diagnostic.Multiples = []_model.File_Diagnostic{}
+	_config.Delta.Diagnostic.Multiples = []*_model.File_Diagnostic{}
 	for _, val := range _config.Style.Index_Data {
 		if len(val.SrcData.Metadata.Declarations) > 1 {
 			error_ := K.Error_Standard("Duplicate Declarations: "+val.SrcData.SymClass, val.SrcData.Metadata.Declarations)
 			_config.Delta.Error.Multiples = append(_config.Delta.Error.Multiples, error_.Errorstring)
-			_config.Delta.Diagnostic.Multiples = append(_config.Delta.Diagnostic.Multiples, error_.Diagnostic)
+			_config.Delta.Diagnostic.Multiples = append(_config.Delta.Diagnostic.Multiples, &error_.Diagnostic)
 		}
 	}
 
-	diagnostics := []_model.File_Diagnostic{}
+	diagnostics := []*_model.File_Diagnostic{}
 	diagnostics = append(diagnostics, _config.Delta.Diagnostic.Hashrules...)
 	diagnostics = append(diagnostics, _config.Delta.Diagnostic.Artifacts...)
 	diagnostics = append(diagnostics, _config.Delta.Diagnostic.Handoffs...)
@@ -148,7 +146,7 @@ func Organize() (AritfactFiles map[string]string, Attachments map[int]bool) {
 
 	switch _config.Static.Command {
 	case "preview":
-		res, _ := _order_.Optimize(tracks_.ClassTracks, false, _config.Static.Argument, _model.Config_Archive{})
+		res, _ := _order_.Optimize(tracks_.ClassTracks, false, _config.Static.Argument, &_model.Config_Archive{})
 		SaveClassRefs(*res.Result)
 
 		if len(_config.Delta.Errors) > 0 {

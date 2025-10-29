@@ -29,7 +29,7 @@ func artifact_SaveFile(filepath, content, label string) {
 
 type artifact_StackFiles_return struct {
 	Files   []*_model.File_Stash
-	Lookup  map[string]_model.File_Lookup
+	Lookup  map[string]*_model.File_Lookup
 	Handoff []*_model.File_Stash
 }
 
@@ -45,14 +45,14 @@ func artifact_CacheFiles() artifact_StackFiles_return {
 		i++
 	}
 
-	files := []*_model.File_Stash{}
-	lookup := map[string]_model.File_Lookup{}
-	handoff := []*_model.File_Stash{}
+	files := make([]*_model.File_Stash, len(Cache.Artifacts))
+	lookup := make(map[string]*_model.File_Lookup, len(Cache.Artifacts))
+	handoff := make([]*_model.File_Stash, len(Cache.Artifacts))
 
 	for path, data := range Cache.Artifacts {
 
 		if data.Lookup.Type == _model.File_Type_Artifact {
-			lookup[path] = data.Lookup
+			lookup[path] = &data.Lookup
 			files = append(files, data)
 		} else {
 			handoff = append(handoff, data)
@@ -68,7 +68,7 @@ func artifact_CacheFiles() artifact_StackFiles_return {
 }
 
 func artifact_Clear() {
-	Cache.Handoffs = map[string]map[string]string{}
+	Cache.Handoffs = make(map[string]map[string]string, len(_config.Style.Artifact_Index))
 
 	for s, i := range _config.Style.Artifact_Index {
 		_action.Index_Dispose(i)
@@ -96,8 +96,8 @@ func Artifact_Update() {
 
 	_config.Manifest.Group.Artifact = map[string]_model.Style_ClassIndexMap{}
 	_config.Delta.Error.Artifacts = []string{}
-	_config.Delta.Diagnostic.Artifacts = []_model.File_Diagnostic{}
-	artifact_chart := O.New[string, []string]()
+	_config.Delta.Diagnostic.Artifacts = []*_model.File_Diagnostic{}
+	artifact_chart := O.New[string, []string](len(SaveArtifactFile_.Files))
 	artifact_counter := 0
 	for _, file := range SaveArtifactFile_.Files {
 		Cache.Artifacts[file.FilePath] = file
@@ -112,17 +112,17 @@ func Artifact_Update() {
 					[]string{_fmt.Sprint(file.FilePath, ":", tagstyle.RowIndex, ":", tagstyle.ColIndex)},
 				)
 				file.Errors = append(file.Errors, E.Errorstring)
-				file.Diagnostics = append(file.Diagnostics, E.Diagnostic)
+				file.Diagnostics = append(file.Diagnostics, &E.Diagnostic)
 			} else if len(tagstyle.SymClasses) > 1 {
 				E := X.Error_Standard(
 					"Multiple SymClasses declaration scope.",
 					[]string{_fmt.Sprint(file.FilePath, ":", tagstyle.RowIndex, ":", tagstyle.ColIndex)},
 				)
 				file.Errors = append(file.Errors, E.Errorstring)
-				file.Diagnostics = append(file.Diagnostics, E.Diagnostic)
+				file.Diagnostics = append(file.Diagnostics, &E.Diagnostic)
 			} else {
 				artifact_counter++
-				Rawtag_Upload_ := _style_.Rawtag_Upload(tagstyle, file, _config.Style.Artifact_Index, metadatas)
+				Rawtag_Upload_ := _style_.Rawtag_Upload(tagstyle, file, _config.Style.Artifact_Index)
 				if _, k := _config.Style.Artifact_Index[Rawtag_Upload_.Symclass]; !k {
 					symclasses = append(symclasses, Rawtag_Upload_.Symclass)
 					_config.Style.Artifact_Index[Rawtag_Upload_.Symclass] = Rawtag_Upload_.Index

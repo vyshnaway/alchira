@@ -85,6 +85,5 @@ const content = `
 func Test_Partials(t *_testing.T) {
     configs.Reset(false)
 	res1 := _style.Parse_CssSnippet(content, "initial", "selector", true)
-	res1.Result.Print()
 	_console.Render.Raw(_css.Render_Vendored(res1.Result, true))
 }

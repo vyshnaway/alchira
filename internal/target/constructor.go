@@ -24,6 +24,9 @@ type Class struct {
 	ExtnsProps         map[string][]string
 	StylesheetContext  *_model.File_Stash
 	StylesheetBlockSeq *css.T_BlockSeq
+	MixedMap           _model.Style_ClassIndexMap
+	GlobalMap          _model.Style_ClassIndexMap
+	PublicMap          _model.Style_ClassIndexMap
 	FileCache          map[string]*_model.File_Stash
 }
 
@@ -53,6 +56,9 @@ func New(storage _model.Config_ProxyStorage, label string) *Class {
 		Extensions:         _slice.Collect(_map.Keys(storage.Extensions)),
 		ExtnsProps:         storage.Extensions,
 		FileCache:          map[string]*_model.File_Stash{},
+		MixedMap:           make(_model.Style_ClassIndexMap, len(storage.Filepath_to_Content)*12),
+		GlobalMap:          make(_model.Style_ClassIndexMap, len(storage.Filepath_to_Content)*12),
+		PublicMap:          make(_model.Style_ClassIndexMap, len(storage.Filepath_to_Content)*12),
 	}
 
 	i := 1

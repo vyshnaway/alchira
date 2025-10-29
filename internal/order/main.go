@@ -40,7 +40,7 @@ func Optimize(
 	sequences [][]int,
 	publish bool,
 	argument string,
-	artifact _model.Config_Archive,
+	artifact *_model.Config_Archive,
 ) (*R_Optimize, error) {
 
 	// Initialize response with preview defaults

@@ -90,6 +90,11 @@ func (This *Class) Savefile(filepath string, content string, hashindex int) {
 	maps.Copy(file.StyleData.MixedMap, file.StyleData.GlobalMap)
 	maps.Copy(file.StyleData.MixedMap, file.StyleData.PublicMap)
 
+	maps.Copy(This.GlobalMap, file.StyleData.GlobalMap)
+	maps.Copy(This.PublicMap, file.StyleData.PublicMap)
+	maps.Copy(This.MixedMap, file.StyleData.GlobalMap)
+	maps.Copy(This.MixedMap, file.StyleData.PublicMap)
+
 	This.FileCache[filepath] = file
 }
 

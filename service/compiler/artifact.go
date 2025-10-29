@@ -18,7 +18,7 @@ import (
 )
 
 func artifact_Fetch(identifier string, source string) (Files map[string]string, Status bool) {
-	files := map[string]string{}
+	files := make(map[string]string, 4)
 	artifactspath := _config.Path_Folder["artifacts"].Path
 
 	status, artifact := func() (Ok bool, result _model.Config_Archive) {
@@ -110,7 +110,7 @@ func artifact_Fetch(identifier string, source string) (Files map[string]string, 
 		}
 
 		artifact.Source = source
-		files[_fileman.Path_Join(artifactspath, identifier, identifier+".json")] = _util.Code_JsoncBuild(artifact, "  ")
+		files[_fileman.Path_Join(artifactspath, identifier, identifier+".json")], _ = _util.Code_JsoncBuild(artifact, "  ")
 	}
 
 	return files, status

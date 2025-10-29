@@ -12,15 +12,15 @@ import (
 	_string "strings"
 )
 
-func archive_Build() _models.Config_Archive {
-	archive := &_config.Archive
+func archive_Build() *_models.Config_Archive {
+	archive := *_config.Archive
 	archive.Constants = map[string]string{}
 	_style.Parse_CssSnippet(_config.Saved.RootCSS, "", "", false).Variables.Range(func(k, v string) {
 		archive.Constants[k] = v
 	})
 	archive.ExportClasses = []string{}
 
-	exportdata := map[string]_models.Style_ExportStyle{}
+	exportdata := map[string]*_models.Style_ExportStyle{}
 	for _, val := range _stash.Cache.Targetdir {
 		_map.Copy(exportdata, val.GetArtifacts())
 	}
@@ -70,24 +70,23 @@ func archive_Build() _models.Config_Archive {
 				}
 			}
 		}
-
 		exportsheet.WriteString(">")
 
 		exportsheet.WriteString(data.InnerText)
 
 		exportsheet.WriteString("</" + data.Element + ">")
-
 		exportsheet.WriteString("\r\n")
 	}
 
 	archive.ExportSheet = exportsheet.String()
-	return *archive
+	return &archive
 }
 
 func archive_Files() map[string]string {
+	archive := archive_Build()
 
 	latestverfile := "latest.json"
-	currentverfile := archive_Build().Version + ".json"
+	currentverfile := archive.Version + ".json"
 
 	availableversions := []string{latestverfile, currentverfile}
 	if items, err := _fileman.Path_ListFiles(_config.Path_Folder["arcversion"].Path, []string{}); err == nil {
@@ -107,8 +106,8 @@ func archive_Files() map[string]string {
 	indexexport.ExportClasses = []string{}
 	indexexport.Versions = availableversions
 
-	indexjson := _util.Code_JsoncBuild(indexexport, "")
-	artifactjson := _util.Code_JsoncBuild(_config.Archive, "")
+	indexjson, _ := _util.Code_JsoncBuild(indexexport, "")
+	artifactjson, _ := _util.Code_JsoncBuild(_config.Archive, "")
 	artifact_files := map[string]string{
 		_fileman.Path_Join(_config.Path_Folder["arcversion"].Path, latestverfile):  string(artifactjson),
 		_fileman.Path_Join(_config.Path_Folder["arcversion"].Path, currentverfile): string(artifactjson),
