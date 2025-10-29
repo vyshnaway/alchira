@@ -47,7 +47,7 @@ func SaveHandoffErrors() {
 		if len(temp) > 0 {
 			r := console.Error_Standard(
 				"Unresolved tokens: "+K,
-				console.List_Props(O.FromMap(temp), S.Preset.Primary, S.Preset.Text),
+				console.List_Props(O.FromUnorderedMap(temp), S.Preset.Primary, S.Preset.Text),
 			)
 			_config.Delta.Diagnostic.Handoffs = append(_config.Delta.Diagnostic.Handoffs, r.Diagnostic)
 			_config.Delta.Error.Handoffs = append(_config.Delta.Error.Handoffs, r.Errorstring)
@@ -57,15 +57,15 @@ func SaveHandoffErrors() {
 
 func UtilsGetUsage() string {
 	chart := map[string]float64{
-		"Files":  _util.String_Memory(_util.Code_JsonBuild(Cache, "")),
-		"Root":   _util.String_Memory(_util.Code_JsonBuild(_config.Root, "")),
-		"Delta":  _util.String_Memory(_util.Code_JsonBuild(_config.Delta, "")),
-		"Class":  _util.String_Memory(_util.Code_JsonBuild(_config.Style, "")),
-		"Static": _util.String_Memory(_util.Code_JsonBuild(_config.Static, "")),
+		"Files":  _util.String_Memory(_util.Code_JsoncBuild(Cache, "")),
+		"Root":   _util.String_Memory(_util.Code_JsoncBuild(_config.Root, "")),
+		"Delta":  _util.String_Memory(_util.Code_JsoncBuild(_config.Delta, "")),
+		"Class":  _util.String_Memory(_util.Code_JsoncBuild(_config.Style, "")),
+		"Static": _util.String_Memory(_util.Code_JsoncBuild(_config.Static, "")),
 		"Proxy": func() float64 {
 			total := 0.0
-			for _, c := range _config.Static.TargetDir_Saved {
-				total += _util.String_Memory(_util.Code_JsonBuild(c, ""))
+			for _, c := range _config.Saved.TargetDir_Saved {
+				total += _util.String_Memory(_util.Code_JsoncBuild(c, ""))
 			}
 			return total
 		}(),

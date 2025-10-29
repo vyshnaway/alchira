@@ -55,7 +55,7 @@ func Initialize() {
 		},
 	))
 
-	S.Post(X.List_Record("Available Commands", O.FromMap(_config.Root.Commands)))
+	S.Post(X.List_Record("Available Commands", O.FromUnorderedMap(_config.Root.Commands)))
 
 	if len(_config.Root.Version) > 0 && _config.Root.Version[0] == '0' {
 		S.Post(

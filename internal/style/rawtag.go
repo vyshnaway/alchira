@@ -51,11 +51,11 @@ func Rawtag_Upload(
 	raw *_script.T_RawStyle,
 	file *_model.File_Stash,
 	IndexMap _model.Style_ClassIndexMap,
-	metadata_map _model.File_SymclassIndexMap,
+	metadata_map _model.Style_ClassIndexMap,
 ) R_Rawtag_Upload {
-	errors := []string{}
-	diagnostics := []_model.File_Diagnostic{}
-	attachments := map[string]bool{}
+	errors := make([]string, 0, 4)
+	diagnostics := make([]_model.File_Diagnostic, 0, 4)
+	attachments := make(map[string]bool, 12)
 	forArtifact := file.Lookup.Type == _model.File_Type_Artifact
 	declaration := file.TargetPath + ":" + _strconv.Itoa(raw.RowIndex) + ":" + _strconv.Itoa(raw.ColIndex)
 
@@ -112,13 +112,14 @@ func Rawtag_Upload(
 					variables.Copy(native_scanned.Variables)
 
 					if native_scanned.Result.Len() > 0 {
-						wrapperjson := _util.Code_JsonBuild(query.Wrappers, "")
-						if !forArtifact && lodash_regex.MatchString(wrapperjson) {
-							wrapperjson = " " + lodash_regex.ReplaceAllString(wrapperjson, "."+file.Label)
-						} else {
-							exportRawStyle.SetBlock(wrapperjson, export_scanned.Result)
+						if wrapperjson, err := _util.Code_JsoncBuild(query.Wrappers, ""); err == nil {
+							if !forArtifact && lodash_regex.MatchString(wrapperjson) {
+								wrapperjson = " " + lodash_regex.ReplaceAllString(wrapperjson, "."+file.Label)
+							} else {
+								exportRawStyle.SetBlock(wrapperjson, export_scanned.Result)
+							}
+							nativeRawStyle.SetBlock(wrapperjson, native_scanned.Result)
 						}
-						nativeRawStyle.SetBlock(wrapperjson, native_scanned.Result)
 					}
 				} else {
 					errors = append(errors, query.Errorstring)
@@ -130,7 +131,7 @@ func Rawtag_Upload(
 		artifact := _config.Archive.Name
 		if forArtifact {
 			artifact = file.Artifact
-			attachmods := map[string]bool{}
+			attachmods := make(map[string]bool, len(attachments))
 			for v := range attachments {
 				if _string.Contains(v, "$$$") {
 					attachmods[file.ClassFront+_string.ReplaceAll(v, "$$$", "$")] = true
@@ -141,8 +142,8 @@ func Rawtag_Upload(
 			attachments = attachmods
 		}
 
-		exportAttachStyle := _css.NewBlock()
-		nativeAttachStyle := _css.NewBlock()
+		exportAttachStyle := _css.NewBlock(8, 2)
+		nativeAttachStyle := _css.NewBlock(8, 2)
 		if raw.Elid == _config.Root.CustomTags["style"] {
 			nativeAttachResult, exportAttachResult := lodashstyle_process(raw.Innertext, file, true,
 				_fmt.Sprint(raw.Scope, ":ATTACHMENT : ", file.FilePath, ":", raw.RowIndex, ":", raw.ColIndex, " | "),
@@ -151,13 +152,13 @@ func Rawtag_Upload(
 
 			_map.Copy(attachments, nativeAttachResult.Attachments)
 			variables.Copy(nativeAttachResult.Variables)
-			if ok, val := nativeAttachResult.Result.GetBlock("[]"); ok {
+			if i, val := nativeAttachResult.Result.GetBlock("[]"); i > -1 {
 				nativeAttachStyle = val
 			}
-			
+
 			_map.Copy(attachments, exportAttachResult.Attachments)
 			variables.Copy(exportAttachResult.Variables)
-			if ok, val := exportAttachResult.Result.GetBlock("[]"); ok {
+			if i, val := exportAttachResult.Result.GetBlock("[]"); i > -1 {
 				exportAttachStyle = val
 			}
 		}

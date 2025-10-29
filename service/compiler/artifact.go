@@ -110,7 +110,7 @@ func artifact_Fetch(identifier string, source string) (Files map[string]string, 
 		}
 
 		artifact.Source = source
-		files[_fileman.Path_Join(artifactspath, identifier, identifier+".json")] = _util.Code_JsonBuild(artifact, "  ")
+		files[_fileman.Path_Join(artifactspath, identifier, identifier+".json")] = _util.Code_JsoncBuild(artifact, "  ")
 	}
 
 	return files, status
@@ -122,10 +122,10 @@ func Artifact_Install() (Status bool, Report string, Files map[string]string) {
 	status := true
 	report := ""
 
-	if _config.Static.Artifacts_Sources != nil {
+	if _config.Saved.Artifacts_Sources != nil {
 		var wg _sync.WaitGroup
 
-		for identifier, source := range _config.Static.Artifacts_Sources {
+		for identifier, source := range _config.Saved.Artifacts_Sources {
 			wg.Add(1)
 
 			func() {
@@ -145,7 +145,7 @@ func Artifact_Install() (Status bool, Report string, Files map[string]string) {
 
 	report = S.MAKE(
 		"",
-		X.List_Props(_object.FromMap(responses), S.Preset.None, S.Preset.None),
+		X.List_Props(_object.FromUnorderedMap(responses), S.Preset.None, S.Preset.None),
 		S.MakeList{Intent: 0, TypeFunc: S.List.Bullets, Preset: S.Preset.Text},
 	)
 

@@ -1,11 +1,8 @@
 package watchman
 
 import (
-	"errors"
 	_fmt "fmt"
-	"main/package/fileman"
 	_os "os"
-	_filepath "path/filepath"
 	_sync "sync"
 	_time "time"
 
@@ -13,59 +10,65 @@ import (
 	_watcher "github.com/radovskyb/watcher"
 )
 
-func New(folders, ignores []string) *T_Watcher {
-	folderMaps := map[string]string{}
-	for _, folder := range folders {
-		abs, _ := fileman.Path_Resolves(folder)
-		folderMaps[abs] = folder
+type E_Action int
+
+const (
+	E_Action_Reload E_Action = iota
+	E_Action_Access
+	E_Action_Update
+	E_Action_Refactor
+)
+
+type Event struct {
+	Action      E_Action
+	TimeStamp   string
+	Folder      string
+	FilePath    string
+	FileContent string
+	Extension   string
+}
+
+type T_Watcher struct {
+	polledWatcher   *_watcher.Watcher
+	notifyWatcher   *_fsnotify.Watcher
+	mutex           *_sync.Mutex
+	queue           []*Event
+	close           chan struct{}
+	Close           func()
+	PollIntervalMs  int
+	ignoredFolders  map[string]string
+	watchingFolders map[string]string
+}
+
+func New() *T_Watcher {
+	var notifyWatcher *_fsnotify.Watcher = nil
+	if watcher, e := _fsnotify.NewWatcher(); e == nil {
+		notifyWatcher = watcher
 	}
-	var resolvedFolders []string
-	for k := range folderMaps {
-		resolvedFolders = append(resolvedFolders, k)
-	}
-	var resolvedIgnores []string
-	for _, p := range ignores {
-		abs, _ := fileman.Path_Resolves(p)
-		resolvedIgnores = append(resolvedIgnores, abs)
-	}
+
 	return &T_Watcher{
-		queue:           []Event{},
-		status:          true,
+		notifyWatcher:   notifyWatcher,
+		polledWatcher:   _watcher.New(),
 		mutex:           &_sync.Mutex{},
-		folderMaps:      folderMaps,
-		resolvedFolders: resolvedFolders,
-		resolvedIgnores: resolvedIgnores,
+		queue:           []*Event{},
+		close:           make(chan struct{}),
+		Close:           func() {},
+		PollIntervalMs:  0,
+		ignoredFolders:  map[string]string{},
+		watchingFolders: map[string]string{},
 	}
 }
 
-func (This *T_Watcher) Start(maxevents, pollInterval int) error {
-	done := make(chan struct{})
+func (This *T_Watcher) Start() {
 
-	// fs Notify watcher
-
-	if watcher, e := _fsnotify.NewWatcher(); e == nil {
-		for _, folder := range This.resolvedFolders {
-			if fileman.Path_IfDir(folder) {
-				_filepath.Walk(folder, func(path string, info _os.FileInfo, err error) error {
-					if info.IsDir() {
-						watcher.Add(path)
-					}
-					return nil
-				})
-			}
-
-			watcher.Add(folder)
-		}
-		This.NotifyWatcher = watcher
-
+	if This.notifyWatcher != nil {
 		go func() {
 			for {
 				select {
-				case event, ok := <-This.NotifyWatcher.Events:
+				case event, ok := <-This.notifyWatcher.Events:
 					if !ok {
 						continue
 					}
-
 					var act E_Action
 
 					switch {
@@ -77,7 +80,7 @@ func (This *T_Watcher) Start(maxevents, pollInterval int) error {
 						} else {
 							act = E_Action_Update
 						}
-						
+
 					case event.Op&_fsnotify.Write == _fsnotify.Write:
 						act = E_Action_Update
 
@@ -88,45 +91,38 @@ func (This *T_Watcher) Start(maxevents, pollInterval int) error {
 
 					This.HandleEvent(act, event.Name, "")
 
-				case err, ok := <-This.NotifyWatcher.Errors:
+				case err, ok := <-This.notifyWatcher.Errors:
 					if ok {
 						_fmt.Fprintf(_os.Stderr, "Watcher error: %v\r\n", err)
 					}
 
-				case <-done:
+				case <-This.close:
 					return
 				}
 			}
 		}()
 	}
 
-	// Fallback low fidelity polling watcher
-
-	This.PollInterval = pollInterval
-	This.PolledWatcher = _watcher.New()
-	This.PolledWatcher.SetMaxEvents(maxevents)
-
-	errs := []error{}
-	for _, folder := range This.resolvedFolders {
-		if err := This.PolledWatcher.AddRecursive(folder); err != nil {
-			errs = append(errs, err)
-		}
-	}
-	This.PolledWatcher.Ignore(This.resolvedIgnores...)
-
 	go func() {
 		for {
 			select {
-			case event, ok := <-This.PolledWatcher.Event:
+			case event, ok := <-This.polledWatcher.Event:
 				if !ok {
-					return
+					continue
 				}
 				var act E_Action
 
 				switch event.Op {
 
 				case _watcher.Create:
-					fallthrough
+					info, err := _os.Stat(event.Path)
+					if err == nil && info.IsDir() {
+						This.Reset()
+						act = E_Action_Refactor
+					} else {
+						act = E_Action_Update
+					}
+
 				case _watcher.Write:
 					act = E_Action_Update
 
@@ -137,19 +133,19 @@ func (This *T_Watcher) Start(maxevents, pollInterval int) error {
 
 				This.HandleEvent(act, event.Path, "")
 
-			case err, ok := <-This.PolledWatcher.Error:
+			case err, ok := <-This.polledWatcher.Error:
 				if ok {
 					_fmt.Fprintf(_os.Stderr, "Watcher error: %v\r\n", err)
 				}
 
-			case <-done:
+			case <-This.close:
 				return
 			}
 		}
 	}()
 
 	go func() {
-		err := This.PolledWatcher.Start(_time.Millisecond * _time.Duration(This.PollInterval))
+		err := This.polledWatcher.Start(_time.Millisecond * _time.Duration(This.PollIntervalMs))
 		if err != nil {
 			_fmt.Fprintf(_os.Stderr, "Watcher start error: %v\r\n", err)
 		}
@@ -157,20 +153,21 @@ func (This *T_Watcher) Start(maxevents, pollInterval int) error {
 
 	This.Close = func() {
 		// close(done)
-		This.status = false
-		if This.PolledWatcher != nil {
-			This.PolledWatcher.Close()
+		if This.polledWatcher != nil {
+			This.polledWatcher.Close()
 		}
-		if This.NotifyWatcher != nil {
-			This.NotifyWatcher.Close()
+		if This.notifyWatcher != nil {
+			This.notifyWatcher.Close()
 		}
 	}
-	return errors.Join(errs...)
 
 }
 
-func Quick(folders, ignores []string, pollInterval int) (instance *T_Watcher, err error) {
-	w := New(folders, ignores)
-	e := w.Start(1, pollInterval)
-	return w, e
+func Quick(folders, ignores []string, pollIntervalMs int) *T_Watcher {
+	w := New()
+	w.Add_WatchingFolder(folders)
+	w.Add_IgnoredFolder(ignores)
+	w.PollIntervalMs = pollIntervalMs
+	w.Start()
+	return w
 }

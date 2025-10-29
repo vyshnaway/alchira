@@ -47,7 +47,7 @@ func library_Clear() {
 func Library_CacheFiles() library_StackFiles_return {
 
 	library_Clear()
-	for filepath, content := range _config.Static.Libraries_Saved {
+	for filepath, content := range _config.Saved.Libraries_Saved {
 		library_SaveFile(filepath, content)
 	}
 
@@ -97,7 +97,7 @@ func Library_Update() {
 	_config.Delta.Lookup.Libraries = StackLibraryFiles_.Lookup
 
 	// Axiom update actions
-	_config.Manifest.Group.Axiom = map[string]_model.File_SymclassIndexMap{}
+	_config.Manifest.Group.Axiom = map[string]_model.Style_ClassIndexMap{}
 	_config.Delta.Error.Axioms = []string{}
 	_config.Delta.Diagnostic.Axioms = []_model.File_Diagnostic{}
 	axiom_chart := O.New[string, []string]()
@@ -105,7 +105,7 @@ func Library_Update() {
 	for index, files := range StackLibraryFiles_.Axiom {
 		Cssfile_Collection_ := _style.Cssfile_Collection(files)
 		_map.Copy(_config.Style.Library__Index, Cssfile_Collection_.SelectorMap)
-		_config.Manifest.Group.Axiom[_strconv.Itoa(index)] = Cssfile_Collection_.MetadataCollection
+		_config.Manifest.Group.Axiom[_strconv.Itoa(index)] = Cssfile_Collection_.SelectorMap
 		if count := len(Cssfile_Collection_.SelectorList); count > 0 {
 			axiom_counter += count
 			axiom_chart.Set(
@@ -119,9 +119,9 @@ func Library_Update() {
 		}
 	}
 	_config.Delta.Report.Axioms = X.List_Chart("Axiom: "+_strconv.Itoa(axiom_counter)+" Symclasses", axiom_chart)
-	
+
 	// Cluster update actions
-	_config.Manifest.Group.Cluster = map[string]_model.File_SymclassIndexMap{}
+	_config.Manifest.Group.Cluster = map[string]_model.Style_ClassIndexMap{}
 	_config.Delta.Error.Clusters = []string{}
 	_config.Delta.Diagnostic.Clusters = []_model.File_Diagnostic{}
 	cluster_chart := O.New[string, []string]()
@@ -129,7 +129,7 @@ func Library_Update() {
 	for index, files := range StackLibraryFiles_.Cluster {
 		Cssfile_Collection_ := _style.Cssfile_Collection(files)
 		_map.Copy(_config.Style.Library__Index, Cssfile_Collection_.SelectorMap)
-		_config.Manifest.Group.Cluster[_strconv.Itoa(index)] = Cssfile_Collection_.MetadataCollection
+		_config.Manifest.Group.Cluster[_strconv.Itoa(index)] = Cssfile_Collection_.SelectorMap
 		if count := len(Cssfile_Collection_.SelectorList); count > 0 {
 			cluster_counter += count
 			cluster_chart.Set(

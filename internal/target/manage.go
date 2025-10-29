@@ -61,7 +61,7 @@ func (This *Class) Savefile(filepath string, content string, hashindex int) {
 		} else {
 			var loc_index_map _model.Style_ClassIndexMap
 			var ref_index_map _model.Style_ClassIndexMap
-			var metadata_map _model.File_SymclassIndexMap
+			var metadata_map _model.Style_ClassIndexMap
 			switch tagdata.Scope {
 			case _model.Style_Type_Local:
 				metadata_map = file.LocalMap
@@ -76,7 +76,7 @@ func (This *Class) Savefile(filepath string, content string, hashindex int) {
 				ref_index_map = _config.Style.Public___Index
 			default:
 				loc_index_map = _model.Style_ClassIndexMap{}
-				metadata_map = _model.File_SymclassIndexMap{}
+				metadata_map = _model.Style_ClassIndexMap{}
 			}
 
 			response := _style.Rawtag_Upload(tagdata, file, loc_index_map, metadata_map)
@@ -90,7 +90,7 @@ func (This *Class) Savefile(filepath string, content string, hashindex int) {
 			file.Diagnostics = append(file.Diagnostics, response.Diagnostics...)
 		}
 	}
-	
+
 	maps.Copy(file.MixedMap, file.LocalMap)
 	maps.Copy(file.MixedMap, file.GlobalMap)
 	maps.Copy(file.MixedMap, file.PublicMap)

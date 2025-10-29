@@ -147,7 +147,7 @@ func Optimize(
 
 	// Parse the worker response
 	var workerResp t_ApiResponse
-	if res, err := _util.Code_JsonParse[t_ApiResponse](string(responseBody)); err == nil {
+	if res, err := _util.Code_JsoncParse[t_ApiResponse](string(responseBody)); err == nil {
 		workerResp = res
 	} else {
 		response.Message = "Failed to parse server response. Fallback: preview"
@@ -173,7 +173,7 @@ func Optimize(
 
 		// Parse the decrypted result
 		var sortedOutput R_Preview
-		if res, err := _util.Code_JsonParse[R_Preview](decryptedResult); err == nil {
+		if res, err := _util.Code_JsoncParse[R_Preview](decryptedResult); err == nil {
 			sortedOutput = res
 		} else {
 			response.Message = "Failed to parse decrypted result. Fallback: preview"

@@ -8,7 +8,7 @@ import (
 )
 
 func test_SaveFiles() {
-	_config.Static.Libraries_Saved = map[string]string{
+	_config.Saved.Libraries_Saved = map[string]string{
 		"0.test.css":    "",
 		"0.a0.css":      "",
 		"goo.1.go.css":  "",

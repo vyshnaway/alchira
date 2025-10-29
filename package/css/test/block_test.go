@@ -141,36 +141,36 @@ const content3 = `
 	`
 
 func Test(t *testing.T) {
-	bm1 := css.NewBlock()
+	bm1 := css.NewBlock(0, 0)
 	bm1.SetProp("color", "red")
-	nested := css.NewBlock()
+	nested := css.NewBlock(0, 0)
 	nested.SetProp("weight", "bold")
 	bm1.SetBlock("style", nested)
 
-	bm2 := css.NewBlock()
+	bm2 := css.NewBlock(0, 0)
 	bm2.SetProp("color", "blue")
-	nested2 := css.NewBlock()
+	nested2 := css.NewBlock(0, 0)
 	nested2.SetProp("weight", "normal")
 	bm2.SetBlock("style", nested2)
 
 	bm1.Merge(bm2)
-	ok, val := bm1.GetProp("color") // Returns "blue", true
-	fmt.Println(val, ok)            // Output: blue true
+	i, val := bm1.GetProp("color") // Returns "blue", true
+	fmt.Println(val, i)            // Output: blue true
 
 	// Fixed: Properly handle GetBlock return values
-	ok, block := bm1.GetBlock("style")
+	i, block := bm1.GetBlock("style")
 	var nestedVal string
-	if ok {
-		ok, nestedVal = block.GetProp("weight") // Returns "normal", true
+	if i > -1 {
+		i, nestedVal = block.GetProp("weight") // Returns "normal", true
 	} else {
-		nestedVal, ok = "", false // Handle missing block
+		nestedVal, i = "", -1 // Handle missing block
 	}
-	fmt.Println(nestedVal, ok) // Output: normal true
+	fmt.Println(nestedVal, i) // Output: normal true
 
 	bm3 := bm1.Clone()
 	bm3.Merge(bm2)
 	bm3.SetProp("color", "green")
-	if ok, block := bm3.GetBlock("style"); ok {
+	if i, block := bm3.GetBlock("style"); i > -1  {
 		block.SetProp("weight", "italic")
 		block.SetProp("--weight", "italic")
 	}
@@ -187,14 +187,14 @@ func Test(t *testing.T) {
 }
 
 func Test_Blocked(t *testing.T) {
-	block := css.NewBlock().Print()
+	block := css.NewBlock(5, 5).Print()
 	block.SetProp("a", "a")
 	block.Print()
-	block.SetProp("a", "a")
+	block.SetProp("s", "a")
 	block.SetBlock("f", block)
 	block.SetBlock("f", block)
 	block.SetBlock("f", block)
-	if ok, bl := block.GetBlock(""); ok {
+	if i, bl := block.GetBlock(""); i > -1 {
 		bl.SetProp("", "s")
 	}
 	block.Print()

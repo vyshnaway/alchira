@@ -1,7 +1,7 @@
 package models
 
 import (
-	css "main/package/css"
+	_css "main/package/css"
 )
 
 type Style_Type string
@@ -45,10 +45,10 @@ type Style_ClassData struct {
 	Attachments       map[string]bool
 	NativeStaple      string
 	ExportStaple      string
-	NativeRawStyle    *css.T_Block
-	ExportRawStyle    *css.T_Block
-	NativeAttachStyle *css.T_Block
-	ExportAttachStyle *css.T_Block
+	NativeRawStyle    *_css.T_Block
+	ExportRawStyle    *_css.T_Block
+	NativeAttachStyle *_css.T_Block
+	ExportAttachStyle *_css.T_Block
 }
 
 type Style_Dictionary map[string]map[int]string

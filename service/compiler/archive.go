@@ -15,7 +15,7 @@ import (
 func archive_Build() _models.Config_Archive {
 	archive := &_config.Archive
 	archive.Constants = map[string]string{}
-	_style.Parse_CssSnippet(_config.Static.RootCSS, "", "", false).Variables.Range(func(k, v string) {
+	_style.Parse_CssSnippet(_config.Saved.RootCSS, "", "", false).Variables.Range(func(k, v string) {
 		archive.Constants[k] = v
 	})
 	archive.ExportClasses = []string{}
@@ -28,7 +28,7 @@ func archive_Build() _models.Config_Archive {
 	var exportsheet _string.Builder
 	for _, data := range exportdata {
 		exportsheet.WriteString("\r\n")
-		
+
 		if _string.Contains(data.SymClass, "$$$") {
 			archive.ExportClasses = append(archive.ExportClasses, data.SymClass)
 		}
@@ -61,7 +61,7 @@ func archive_Build() _models.Config_Archive {
 
 		for key, val := range data.Stylesheet {
 			if key != "[]" && key[0] != ' ' {
-				if arr, err := _util.Code_JsonParse[[]string](key); err == nil {
+				if arr, err := _util.Code_JsoncParse[[]string](key); err == nil {
 					exportsheet.WriteString(" ")
 					exportsheet.WriteString("{")
 					exportsheet.WriteString(_string.Join(arr, "}&{"))
@@ -107,8 +107,8 @@ func archive_Files() map[string]string {
 	indexexport.ExportClasses = []string{}
 	indexexport.Versions = availableversions
 
-	indexjson := _util.Code_JsonBuild(indexexport, "")
-	artifactjson := _util.Code_JsonBuild(_config.Archive, "")
+	indexjson := _util.Code_JsoncBuild(indexexport, "")
+	artifactjson := _util.Code_JsoncBuild(_config.Archive, "")
 	artifact_files := map[string]string{
 		_fileman.Path_Join(_config.Path_Folder["arcversion"].Path, latestverfile):  string(artifactjson),
 		_fileman.Path_Join(_config.Path_Folder["arcversion"].Path, currentverfile): string(artifactjson),

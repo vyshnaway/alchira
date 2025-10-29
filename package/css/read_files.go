@@ -36,13 +36,13 @@ func getImportPath(str, rel string) string {
 	return _filepath.Join(_filepath.Dir(rel), _filepath.Clean(result.String()))
 }
 
-func read_File(currentpath string, ignorepaths map[string]bool) string {
+func read_File(currentpath string, ignorepaths map[string]bool, builder *_string.Builder) {
 	ignorepaths[currentpath] = true
 	content := ""
 	if r, e := _fileman.Read_File(currentpath, false); e == nil {
 		content = r
 	}
-	var builder _string.Builder
+
 	importsnippet := ""
 	cursor := _reader.New(_util.Code_Uncomment(content, false, true, false))
 	for ch, streaming := cursor.Active.Char, cursor.Streaming; streaming; ch, streaming = cursor.Increment() {
@@ -53,7 +53,7 @@ func read_File(currentpath string, ignorepaths map[string]bool) string {
 				if ch == ';' {
 					importingpath := getImportPath(importsnippet, currentpath)
 					if !ignorepaths[importingpath] {
-						builder.WriteString(read_File(importingpath, ignorepaths))
+						read_File(importingpath, ignorepaths, builder)
 					}
 					importsnippet = ""
 				}
@@ -71,12 +71,10 @@ func read_File(currentpath string, ignorepaths map[string]bool) string {
 			builder.WriteRune(ch)
 		}
 	}
-	result := builder.String()
-	return result
 }
 
 func Read_Files(filepath_array []string) string {
-	reading := []string{}
+	var reading _string.Builder
 
 	resolved_files := make(map[string]bool)
 	resolved_array := make([]string, len(filepath_array))
@@ -89,8 +87,9 @@ func Read_Files(filepath_array []string) string {
 	}
 
 	for _, filePath := range resolved_array {
-		reading = append(reading, read_File(filePath, resolved_files))
+		read_File(filePath, resolved_files, &reading)
+		reading.WriteString("\r\n")
 	}
 
-	return _string.Join(reading, "\r\n")
+	return reading.String()
 }

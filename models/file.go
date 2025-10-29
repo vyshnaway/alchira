@@ -16,8 +16,6 @@ type File_Diagnostic struct {
 	Sources []string `json:"sources"`
 }
 
-type File_SymclassIndexMap map[string]int
-
 type File_Source struct {
 	Title     string   `json:"title"`
 	Url       string   `json:"url"`
@@ -41,9 +39,10 @@ type File_StyleData struct {
 	UsedIn          []int
 	Attachments     map[string]bool
 	ClassTracks     [][]string
-	LocalClasses    Style_ClassIndexMap
-	GlobalClasses   Style_ClassIndexMap
-	PublicClasses   Style_ClassIndexMap
+	MixedMap        Style_ClassIndexMap
+	LocalMap        Style_ClassIndexMap
+	GlobalMap       Style_ClassIndexMap
+	PublicMap       Style_ClassIndexMap
 	TagReplacements []File_TagReplacement
 }
 
@@ -61,11 +60,7 @@ type File_Stash struct {
 	Label       string
 	DebugFront  string
 	StyleData   File_StyleData
-	MixedMap    File_SymclassIndexMap
-	LocalMap    File_SymclassIndexMap
-	GlobalMap   File_SymclassIndexMap
-	PublicMap   File_SymclassIndexMap
 	Lookup      File_Lookup
 	Errors      []string
-	Diagnostics []File_Diagnostic
+	Diagnostics []*File_Diagnostic
 }

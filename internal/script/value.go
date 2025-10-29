@@ -18,9 +18,8 @@ func value_EvaluateIndexTraces(
 	classList []string,
 	localClassMap _model.Style_ClassIndexMap,
 ) (ClassMap map[string]string) {
-	classMap := make(map[string]string)
-	indexArray := []int{}
-	classTrace := []_model.Style_ClassIndexTrace{}
+	indexArray := make([]int, 0, len(classList))
+	classTrace := make([]_model.Style_ClassIndexTrace, 0, len(classList))
 
 	for _, entry := range classList {
 		found := _action.Index_Find(entry, localClassMap)
@@ -29,6 +28,8 @@ func value_EvaluateIndexTraces(
 			indexArray = append(indexArray, found.Index)
 		}
 	}
+
+	classMap := make(map[string]string, len(classTrace))
 
 	indexSetback := _util.Array_Setback(indexArray)
 	if action == E_Action_BuildHash {
@@ -42,7 +43,7 @@ func value_EvaluateIndexTraces(
 			}
 		}
 	} else {
-		temp_map := []_model.Style_ClassIndexTrace{}
+		temp_map := make([]_model.Style_ClassIndexTrace, len(classTrace))
 
 		if action == E_Action_DebugHash {
 			for _, item := range classTrace {
@@ -85,17 +86,18 @@ func value_Parse(
 	fileData *_model.File_Stash,
 	FileCursor _reader.Type,
 ) value_Parse_retype {
-	classlist := []string{}
-	quotes := []rune{'\'', '`', '"'}
-	attachments := []string{}
-
-	var entry _string.Builder
-	scribed := value
-	activeQuote := ' '
-	inQuote := false
 
 	value += " "
+	activeQuote := ' '
+	scribed := value
+	inQuote := false
 	valuelen := len(value)
+	quotes := []rune{'\'', '`', '"'}
+
+	classlist := make([]string, 0, 12)
+	attachments := make([]string, 0, 8)
+	var entry _string.Builder
+
 	for marker := range valuelen {
 		ch := rune(value[marker])
 
@@ -138,7 +140,7 @@ func value_Parse(
 			)
 		}
 
-		classMap := value_EvaluateIndexTraces(action, metafront, classlist, fileData.StyleData.LocalClasses)
+		classMap := value_EvaluateIndexTraces(action, metafront, classlist, fileData.StyleData.LocalMap)
 
 		for marker := range valuelen {
 			ch := rune(value[marker])

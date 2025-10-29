@@ -33,19 +33,6 @@ type T_RawStyle struct {
 	Attributes map[string]string
 }
 
-var replacementTags = func() map[string]int {
-	res := map[string]int{}
-	for k, v := range _config.Root.CustomTags {
-		res["<!-- "+k+" -->"] = v
-		res["<!--"+k+"-->"] = v
-		res["<!--"+k+" -->"] = v
-		res["<!-- "+k+"-->"] = v
-		res["<"+k+" />"] = v
-		res["<"+k+"/>"] = v
-	}
-	return res
-}()
-
 type parse_return struct {
 	Scribed      string
 	ClassesList  [][]string
@@ -54,6 +41,7 @@ type parse_return struct {
 	Replacements []_model.File_TagReplacement
 }
 
+var replacementTags = _config.Static.ReplacementTags
 var regexp_aftertagopen = _regexp.MustCompile(`(?i)[\w\-\!/]`)
 
 func Rider(
@@ -62,20 +50,21 @@ func Rider(
 	action E_Action,
 ) parse_return {
 	fileData.StyleData.TagReplacements = []_model.File_TagReplacement{}
-	fileData.Scratch = ""
-	replacements := []_model.File_TagReplacement{}
-	tagTrack := []*T_RawStyle{}
-	classesList := [][]string{}
-	attachments := map[string]bool{}
-	stylesList := []*T_RawStyle{}
+	replacements := make([]_model.File_TagReplacement, 0, 8)
+	classesList := make([][]string, 0, 24)
+	tagTrack := make([]*T_RawStyle, 24)
+	stylesList := make([]*T_RawStyle, 24)
+	attachments := make(map[string]bool, 24)
 
 	var content string
 	var stream _string.Builder
 	if action == E_Action_Read {
 		content = fileData.Content
+		fileData.Midway = ""
 	} else {
 		content = fileData.Midway
 	}
+	fileData.Scratch = ""
 
 	cursor := _reader.New(content)
 

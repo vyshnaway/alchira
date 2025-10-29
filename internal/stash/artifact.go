@@ -36,7 +36,7 @@ type artifact_StackFiles_return struct {
 func artifact_CacheFiles() artifact_StackFiles_return {
 	artifact_Clear()
 	i := 0
-	for filepath, content := range _config.Static.Artifacts_Saved {
+	for filepath, content := range _config.Saved.Artifacts_Saved {
 		artifact_SaveFile(
 			filepath,
 			content,
@@ -94,7 +94,7 @@ func Artifact_Update() {
 		}
 	}
 
-	_config.Manifest.Group.Artifact = map[string]_model.File_SymclassIndexMap{}
+	_config.Manifest.Group.Artifact = map[string]_model.Style_ClassIndexMap{}
 	_config.Delta.Error.Artifacts = []string{}
 	_config.Delta.Diagnostic.Artifacts = []_model.File_Diagnostic{}
 	artifact_chart := O.New[string, []string]()
@@ -103,7 +103,7 @@ func Artifact_Update() {
 		Cache.Artifacts[file.FilePath] = file
 
 		symclasses := []string{}
-		metadatas := _model.File_SymclassIndexMap{}
+		metadatas := _model.Style_ClassIndexMap{}
 		for _, tagstyle := range _script.Rider(file, []string{}, _script.E_Action_Read).StylesList {
 
 			if len(tagstyle.SymClasses) == 0 {

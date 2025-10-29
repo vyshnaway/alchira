@@ -20,11 +20,10 @@ type R_Parse struct {
 
 func parse_AssignMerge(
 	classlist []string,
-	// export0_native1 bool,
 ) R_Parse {
-	attachments := map[string]bool{}
-	result := _css.NewBlock()
-	variables := O.New[string, string]()
+	attachments := make(map[string]bool, 8)
+	result := _css.NewBlock(8, 8)
+	variables := O.New[string, string](8)
 
 	for _, classname := range classlist {
 		found := _action.Index_Find(classname, _model.Style_ClassIndexMap{})
@@ -61,13 +60,13 @@ var assign_operator = string(_config.Root.CustomOps["assign"])
 var attach_operator = string(_config.Root.CustomOps["attach"])
 
 func Parse_Filter(content string) R_Parse_Filter {
-	ref := _css.ParsePartial(content)
+	ref := _css.ParsePartial(content, 8)
 	res := R_Parse_Filter{
-		Assign:     []string{},
-		Attach:     []string{},
-		Blocks:     O.New[string, string](),
-		Variables:  O.FromArray(ref.Variables),
-		Properties: O.New[string, string](),
+		Assign:     make([]string, 0, 8),
+		Attach:     make([]string, 0, 8),
+		Blocks:     O.New[string, string](8),
+		Variables:  O.FromOrderedArray(ref.Variables),
+		Properties: O.New[string, string](8),
 	}
 
 	for _, val := range ref.Directives {
@@ -135,7 +134,7 @@ func Parse_CssSnippet(
 		attachments[i] = true
 	}
 
-	propmap := _css.NewBlock()
+	propmap := _css.NewBlock(12, 12)
 	assigned.Variables.Range(func(k, v string) {
 		propmap.SetProp(k, v)
 		variables.Set(k, v)
@@ -150,14 +149,14 @@ func Parse_CssSnippet(
 		})
 	}
 
-	temp := _css.NewBlock()
+	temp := _css.NewBlock(12, 12)
 	temp.SetBlock("[]", propmap)
 	assigned.Result.Merge(temp)
 	output := assigned.Result
 	_, target := output.GetBlock("[]")
 
 	if flatten {
-		if ok, bm := output.GetBlock("[]"); ok {
+		if i, bm := output.GetBlock("[]"); i > -1 {
 			bm.PropRange(func(k, v string) {
 				output.SetProp(k, v)
 			})

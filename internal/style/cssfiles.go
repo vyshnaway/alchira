@@ -5,7 +5,7 @@ import (
 	_action "main/internal/action"
 	_css "main/package/css"
 	O "main/package/object"
-	"maps"
+	_map "maps"
 
 	_model "main/models"
 	_util "main/package/utils"
@@ -18,21 +18,21 @@ type R_Cssfile_Parse struct {
 }
 
 func Cssfile_String(content string, initial string) R_Cssfile_Parse {
-	scanned := _css.ParsePartial(_util.Code_Uncomment(content, false, true, false))
-	result := _css.NewBlockSeq()
+	scanned := _css.ParsePartial(_util.Code_Uncomment(content, false, true, false), 32)
+	result := _css.NewBlockSeq(8)
 	for _, d := range scanned.Directives {
 		result.AddDirective(d)
 	}
 
-	variables := O.New[string, string]()
-	attachments := map[string]bool{}
+	variables := O.New[string, string](36)
+	attachments := make(map[string]bool, 8)
 	for _, kv := range scanned.All_Blocks {
 		key := kv[0]
 		val := kv[1]
 		res := Parse_CssSnippet(val, initial, key, true)
 
 		variables.Copy(res.Variables)
-		maps.Copy(attachments, res.Attachments)
+		_map.Copy(attachments, res.Attachments)
 		result.AddNewBlock(key, res.Result)
 	}
 
@@ -44,18 +44,18 @@ func Cssfile_String(content string, initial string) R_Cssfile_Parse {
 }
 
 type cssfile_Collection_return struct {
-	MetadataCollection _model.File_SymclassIndexMap
-	SelectorList       []string
-	SelectorMap        map[string]int
+	SelectorMap  _model.Style_ClassIndexMap
+	SelectorList []string
 }
 
+var initialparse_allocation = 48
+
 func Cssfile_Collection(files []*_model.File_Stash) cssfile_Collection_return {
-	selectorList := []string{}
-	selectors := map[string]int{}
-	indexMetaCollection := _model.File_SymclassIndexMap{}
+	selectorList := make([]string, 0, len(files)*initialparse_allocation)
+	selectorMap := make(_model.Style_ClassIndexMap, cap(selectorList))
 
 	for _, file := range files {
-		for _, so := range _css.ParsePartial(_util.Code_Uncomment(file.Content, false, true, false)).All_Blocks {
+		for _, so := range _css.ParsePartial(_util.Code_Uncomment(file.Content, false, true, false), initialparse_allocation).All_Blocks {
 			selector := so[0]
 			value := so[1]
 
@@ -66,7 +66,7 @@ func Cssfile_Collection(files []*_model.File_Stash) cssfile_Collection_return {
 			if v, ok := _config.Style.Library__Index[classname]; ok {
 				index = v
 			}
-			if v, ok := selectors[classname]; ok {
+			if v, ok := selectorMap[classname]; ok {
 				index = v
 			}
 
@@ -83,12 +83,12 @@ func Cssfile_Collection(files []*_model.File_Stash) cssfile_Collection_return {
 				attachments := stylescanned.Attachments
 				object := stylescanned.Result
 				attach_style := func() *_css.T_Block {
-					if o, v := object.GetBlock("[]"); o {
-						temp := _css.NewBlock()
+					if i, v := object.GetBlock("[]"); i > -1 {
+						temp := _css.NewBlock(4, 2)
 						temp.SetBlock(selector, v)
 						return temp
 					} else {
-						return _css.NewBlock()
+						return _css.NewBlock(1, 1)
 					}
 				}()
 				artifact := _config.Archive.Name
@@ -124,16 +124,14 @@ func Cssfile_Collection(files []*_model.File_Stash) cssfile_Collection_return {
 					SrcData: classdata,
 				})
 				file.StyleData.UsedIn = append(file.StyleData.UsedIn, index)
-				selectors[classname] = index
-				indexMetaCollection[classname] = index
+				selectorMap[classname] = index
 				selectorList = append(selectorList, classname)
 			}
 		}
 	}
 
 	return cssfile_Collection_return{
-		MetadataCollection: indexMetaCollection,
-		SelectorList:       selectorList,
-		SelectorMap:        selectors,
+		SelectorMap:  selectorMap,
+		SelectorList: selectorList,
 	}
 }

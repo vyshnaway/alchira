@@ -62,7 +62,7 @@ func Delete_Folder(folderPath string, extensions, ignorePaths []string) (err err
 		return _fmt.Errorf("failed to list files in '%s': %w", folderPath, err)
 	}
 
-	errs := []error{}
+	errs := make([]error, 3*len(files))
 	for _, file := range files {
 		if _slice.Contains(ignorePaths, file) {
 			continue

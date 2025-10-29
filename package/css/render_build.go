@@ -40,7 +40,7 @@ func render_LoadVendors(collection *O.T[string, string], vendor string) []string
 }
 
 func render_Prefixer(stylemap *T_Block, vendors []string) *T_Block {
-	out := NewBlock()
+	out := NewBlock(len(vendor_Providers), 0)
 
 	stylemap.PropRange(func(key, val string) {
 		if key[0] == '@' {
@@ -50,7 +50,7 @@ func render_Prefixer(stylemap *T_Block, vendors []string) *T_Block {
 		} else {
 			for _, kv := range prefix_LoadProps(key, val, vendors) {
 				k, v := kv[0], kv[1]
-				if hasProp, _ := stylemap.GetProp(k); hasProp || k == key {
+				if i, _ := stylemap.GetProp(k); i > -1 || k == key {
 					out.SetProp(k+":"+_space+v+";", "")
 				}
 			}
@@ -159,9 +159,10 @@ func Render_Sequence(seq *T_BlockSeq, minify bool) string {
 
 func Render_Switched(refmap *T_Block, minify bool) string {
 	SetMinification(minify)
-	nonwrap := NewBlock()
-	rulewrap := NewBlock()
-	labelwrap := NewBlock()
+	p, b := refmap.PropLen(), refmap.BlockLen()
+	nonwrap := NewBlock(p, b)
+	rulewrap := NewBlock(p, b)
+	labelwrap := NewBlock(p, b)
 	refmap.PropRange(func(k, v string) {
 		nonwrap.SetProp(k, v)
 	})
@@ -170,7 +171,7 @@ func Render_Switched(refmap *T_Block, minify bool) string {
 		v0.BlockRange(func(k1 string, v1 *T_Block) {
 			if k1 == "[]" {
 				nonwrap.SetBlock(k0, v1)
-			} else if wrappers, err := _util.Code_JsonParse[[]string](k1); err == nil {
+			} else if wrappers, err := _util.Code_JsoncParse[[]string](k1); err == nil {
 				var target *T_Block
 				if k1[0] == ' ' {
 
@@ -184,6 +185,7 @@ func Render_Switched(refmap *T_Block, minify bool) string {
 				wrappers = append(wrappers, k0)
 				_slice.Reverse(wrappers)
 
+				p, b := v1.PropLen(), v1.BlockLen()
 				for index := 0; index < len(wrappers); index++ {
 					wrapper := wrappers[index]
 
@@ -194,7 +196,7 @@ func Render_Switched(refmap *T_Block, minify bool) string {
 					}
 
 					t := temp
-					temp = NewBlock()
+					temp = NewBlock(p, b)
 					temp.SetBlock(wrapper, t)
 				}
 				target.Merge(temp)

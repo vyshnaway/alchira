@@ -7,17 +7,17 @@ import (
 
 type T_Block struct {
 	Prop_keys  []string
-	prop_vals  map[string]string
+	Prop_vals  []string
 	Block_keys []string
-	block_vals map[string]*T_Block
+	Block_vals []*T_Block
 }
 
-func NewBlock() *T_Block {
+func NewBlock(prop_size, block_size int) *T_Block {
 	return &T_Block{
-		Prop_keys:  make([]string, 0),
-		prop_vals:  make(map[string]string),
-		Block_keys: make([]string, 0),
-		block_vals: make(map[string]*T_Block),
+		Prop_keys:  make([]string, 0, _util.Number_AbsInt(prop_size)+1),
+		Prop_vals:  make([]string, 0, _util.Number_AbsInt(prop_size)+1),
+		Block_keys: make([]string, 0, _util.Number_AbsInt(block_size)+1),
+		Block_vals: make([]*T_Block, 0, _util.Number_AbsInt(block_size)+1),
 	}
 }
 
@@ -27,90 +27,84 @@ func (This *T_Block) SetProp(key string, val string) {
 	if key == "" {
 		return
 	}
-	if This.prop_vals == nil {
-		This.prop_vals = make(map[string]string)
+
+	if len(This.Prop_keys) == cap(This.Prop_keys) {
+		newCap := cap(This.Prop_keys) * 2
+		newKeys := make([]string, len(This.Prop_keys), newCap)
+		newVals := make([]string, len(This.Prop_vals), newCap)
+		copy(newKeys, This.Prop_keys)
+		copy(newVals, This.Prop_vals)
+		This.Prop_keys = newKeys
+		This.Prop_vals = newVals
 	}
-	if ok, _ := This.GetProp(key); !ok {
+
+	if index, _ := This.GetProp(key); index > -1 {
+		This.Prop_vals[index] = val
+	} else {
+		This.Prop_vals = append(This.Prop_vals, val)
 		This.Prop_keys = append(This.Prop_keys, key)
 	}
-	This.prop_vals[key] = val
 }
 
 func (This *T_Block) SetBlock(key string, val *T_Block) {
 	if key == "" {
 		return
 	}
-	if This.block_vals == nil {
-		This.block_vals = make(map[string]*T_Block)
-	}
-	if ok, _ := This.GetBlock(key); !ok {
-		This.Block_keys = append(This.Block_keys, key)
-	}
-	This.block_vals[key] = val.Clone()
-}
 
-func (This *T_Block) MixinBlock(key string, val *T_Block) {
-	if key == "" {
-		return
+	if len(This.Block_keys) == cap(This.Block_keys) {
+		newCap := cap(This.Block_keys) * 2
+		newKeys := make([]string, len(This.Block_keys), newCap)
+		newVals := make([]*T_Block, len(This.Block_vals), newCap)
+		copy(newKeys, This.Block_keys)
+		copy(newVals, This.Block_vals)
+		This.Block_keys = newKeys
+		This.Block_vals = newVals
 	}
-	if This.block_vals == nil {
-		This.block_vals = make(map[string]*T_Block)
-	}
-	if ok, block := This.GetBlock(key); ok {
+
+	if index, block := This.GetBlock(key); index > -1 {
 		block.Merge(val)
 	} else {
+		This.Block_vals = append(This.Block_vals, val.Clone())
 		This.Block_keys = append(This.Block_keys, key)
-		This.block_vals[key] = val.Clone()
 	}
 }
 
 func (This *T_Block) Merge(source *T_Block) *T_Block {
-	if This.prop_vals == nil {
-		This.prop_vals = make(map[string]string)
+	if This.Prop_vals == nil || This.Prop_keys == nil {
+		This.Prop_vals = make([]string, 0, source.PropLen())
+		This.Prop_keys = make([]string, 0, source.PropLen())
 	}
-	if This.Prop_keys == nil {
-		This.Prop_keys = make([]string, 0)
-	}
-	if This.block_vals == nil {
-		This.block_vals = make(map[string]*T_Block)
-	}
-	if This.Block_keys == nil {
-		This.Block_keys = make([]string, 0)
+	if This.Block_vals == nil || This.Block_keys == nil {
+		This.Block_vals = make([]*T_Block, 0, source.BlockLen())
+		This.Block_keys = make([]string, 0, source.BlockLen())
 	}
 
 	source.PropRange(func(k, v string) {
 		This.SetProp(k, v)
 	})
-	This.Prop_keys = _util.Array_SetAppend(This.Prop_keys, source.Prop_keys...)
 
-	source.BlockRange(func(skey string, sval *T_Block) {
-		if isBlock, tval := This.GetBlock(skey); isBlock {
-			tval.Merge(sval)
-			This.SetBlock(skey, tval)
-		} else {
-			This.SetBlock(skey, sval)
-		}
+	source.BlockRange(func(k string, v *T_Block) {
+		This.SetBlock(k, v)
 	})
-	This.Block_keys = _util.Array_SetAppend(This.Block_keys, source.Block_keys...)
 
 	return This
 }
 
 func (This *T_Block) DelProp(key string) *T_Block {
-	if This.prop_vals != nil {
+	if This.Prop_vals != nil {
 		if i := _slice.Index(This.Prop_keys, key); i != -1 {
 			This.Prop_keys = _util.Array_RemoveAt(This.Prop_keys, i)
-			delete(This.prop_vals, key)
+			This.Prop_vals = _util.Array_RemoveAt(This.Prop_vals, i)
 		}
 	}
 	return This
 }
 
 func (This *T_Block) DelBlock(key string) *T_Block {
-	if This.block_vals != nil {
+	if This.Block_vals != nil {
 		if i := _slice.Index(This.Block_keys, key); i != -1 {
 			This.Block_keys = _util.Array_RemoveAt(This.Block_keys, i)
-			delete(This.block_vals, key)
+			This.Block_vals = _util.Array_RemoveAt(This.Block_vals, i)
 		}
 	}
 	return This
@@ -119,11 +113,11 @@ func (This *T_Block) DelBlock(key string) *T_Block {
 // Getters
 
 func (This *T_Block) PropLen() int {
-	return len(This.prop_vals)
+	return len(This.Prop_vals)
 }
 
 func (This *T_Block) BlockLen() int {
-	return len(This.block_vals)
+	return len(This.Block_vals)
 }
 
 func (This *T_Block) Len() int {
@@ -143,22 +137,24 @@ func (This *T_Block) BlockKeys() []string {
 }
 
 func (This *T_Block) Keys() []string {
-	keys := []string{}
+	keys := make([]string, len(This.Block_keys)+len(This.Prop_keys))
 	keys = append(keys, This.Block_keys...)
 	keys = append(keys, This.Prop_keys...)
 	return keys
 }
 
-func (This *T_Block) GetProp(key string) (ok bool, val string) {
-	if val, ok := This.prop_vals[key]; ok {
-		return true, val
+// index = -1 in case not present
+func (This *T_Block) GetProp(key string) (Index int, Val string) {
+	if index := _slice.Index(This.Prop_keys, key); index > -1 {
+		return index, This.Prop_vals[index]
 	}
-	return false, ""
+	return -1, ""
 }
 
-func (This *T_Block) GetBlock(key string) (ok bool, val *T_Block) {
-	if val, ok := This.block_vals[key]; ok {
-		return true, val
+// index = -1 in case not present
+func (This *T_Block) GetBlock(key string) (Index int, Val *T_Block) {
+	if index := _slice.Index(This.Block_keys, key); index > -1 {
+		return index, This.Block_vals[index]
 	}
-	return false, nil
+	return -1, nil
 }

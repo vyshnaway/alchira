@@ -57,7 +57,7 @@ func Read_Json(target string, online bool) (any, error) {
 		return nil, readErr
 	}
 
-	jsonData, err := _utils.Code_JsonParse[any](rawContent)
+	jsonData, err := _utils.Code_JsoncParse[any](rawContent)
 	if err != nil {
 		return nil, _fmt.Errorf("failed to parse JSON from '%s': %w", target, err)
 	}
@@ -66,7 +66,6 @@ func Read_Json(target string, online bool) (any, error) {
 
 // Bulk reads multiple files from a target directory based on extensions.
 func Read_Bulk(target string, extensions []string) (map[string]string, error) {
-	result := make(map[string]string)
 	var convertedExtensions []string
 	for _, ext := range extensions {
 		if !_strings.HasPrefix(ext, ".") {
@@ -81,7 +80,8 @@ func Read_Bulk(target string, extensions []string) (map[string]string, error) {
 		return nil, _fmt.Errorf("failed to list files in '%s': %w", target, err)
 	}
 
-	errs := []error{}
+	errs := make([]error, 0, len(files))
+	result := make(map[string]string, len(files))
 	for _, file := range files {
 		if len(convertedExtensions) == 0 || _slice.Contains(convertedExtensions, _filepath.Ext(file)) {
 			contentBytes, err := _os.ReadFile(file)
@@ -92,5 +92,6 @@ func Read_Bulk(target string, extensions []string) (map[string]string, error) {
 			result[file] = string(contentBytes)
 		}
 	}
+
 	return result, _error.Join(errs...)
 }

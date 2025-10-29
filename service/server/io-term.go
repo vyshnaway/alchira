@@ -31,7 +31,7 @@ func IO_Term(command string, arguments []string, userpc bool) (Response string) 
 	}
 
 	if userpc {
-		return utils.Code_JsonBuild(JsonRPCResponse{
+		return utils.Code_JsoncBuild(JsonRPCResponse{
 			JSONRPC: "2.0",
 			ID:      0,
 			Method:  command,
@@ -39,6 +39,6 @@ func IO_Term(command string, arguments []string, userpc bool) (Response string) 
 			Error:   nil,
 		}, "")
 	} else {
-		return utils.Code_JsonBuild(result, "  ")
+		return utils.Code_JsoncBuild(result, "  ")
 	}
 }

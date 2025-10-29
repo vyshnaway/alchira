@@ -32,7 +32,7 @@ func ClearUnwantedCache() (
 
 	for i := range _config.Style.PublishIndexMap {
 		if _, k := indexes[i]; !k {
-			delete(_config.Style.Index_to_Data, i)
+			delete(_config.Style.Index_Data, i)
 		}
 	}
 
@@ -40,7 +40,7 @@ func ClearUnwantedCache() (
 	newPubIn := [][]models.Style_ClassIndexTrace{}
 	for _, A := range _config.Style.PublishIndexMap {
 		for i := 0; i < len(A); i += pubInLt {
-			end := min(i + pubInLt, len(A))
+			end := min(i+pubInLt, len(A))
 			newPubIn = append(newPubIn, A[i:end])
 		}
 	}

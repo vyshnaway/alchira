@@ -3,62 +3,35 @@ package action
 import (
 	_config "main/configs"
 	_model "main/models"
-	_sync "sync"
 )
 
 // Simulated utils and enums
-var NOW = 0
-var BIN = make(map[int]struct{})
-var mu _sync.Mutex
 
 // Index_Declare: Assigns and registers a new index
 func Index_Declare(object *_model.Cache_SymclassData) int {
-	mu.Lock()
-	defer mu.Unlock()
 	var idx int
-	for i := range BIN {
+	for i := range _config.Style.Index_Bin {
 		idx = i
 		break
 	}
 	if idx == 0 {
-		NOW++
-		idx = NOW
+		_config.Style.Index_Now++
+		idx = _config.Style.Index_Now
 	}
 	object.SrcData.Index = idx
-	delete(BIN, idx)
-	_config.Style.Index_to_Data[idx] = object
+	delete(_config.Style.Index_Bin, idx)
+	_config.Style.Index_Data[idx] = object
 	return idx
 }
 
 // DISPOSE: Free indexes and remove associated data.
 func Index_Dispose(indexes ...int) {
-	mu.Lock()
-	defer mu.Unlock()
 	for _, idx := range indexes {
 		if idx > 0 {
-			BIN[idx] = struct{}{}
-			delete(_config.Style.Index_to_Data, idx)
+			_config.Style.Index_Bin[idx] = true
+			delete(_config.Style.Index_Data, idx)
 		}
 	}
-}
-
-// RESET: Remove all indexes above 'after'
-func Index_Reset(after int) int {
-	mu.Lock()
-	defer mu.Unlock()
-	if after < 0 {
-		after = 0
-	}
-	removed := 0
-	for idx := range _config.Style.Index_to_Data {
-		if idx > after {
-			delete(BIN, idx)
-			delete(_config.Style.Index_to_Data, idx)
-			removed++
-		}
-	}
-	NOW = after
-	return removed
 }
 
 type index_Find_retrun struct {
@@ -68,15 +41,11 @@ type index_Find_retrun struct {
 }
 
 func Index_Fetch(index int) *_model.Cache_SymclassData {
-	mu.Lock()
-	defer mu.Unlock()
-	data := _config.Style.Index_to_Data[index]
+	data := _config.Style.Index_Data[index]
 	return data
 }
 
 func Index_Find(classname string, localMap _model.Style_ClassIndexMap) index_Find_retrun {
-	mu.Lock()
-	defer mu.Unlock()
 	index := 0
 	group := _model.Style_Type_Null
 	if idx, found := localMap[classname]; found {
@@ -95,7 +64,7 @@ func Index_Find(classname string, localMap _model.Style_ClassIndexMap) index_Fin
 		index = idx
 		group = _model.Style_Type_Artifact
 	}
-	data := _config.Style.Index_to_Data[index]
+	data := _config.Style.Index_Data[index]
 
 	return index_Find_retrun{
 		Index: index,

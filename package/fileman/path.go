@@ -94,7 +94,7 @@ func Path_HasChildPath(parent, child string) bool {
 	child, _ = Path_Resolves(child)
 	parent = parent + string(_filepath.Separator)
 	// If rel starts with "..", it's outside the parent.
-	return _strings.HasPrefix(child,parent)
+	return _strings.HasPrefix(child, parent)
 }
 
 // Path_IsIndependent checks if two folders are independent (neither is inside the other).

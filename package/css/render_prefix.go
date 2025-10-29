@@ -10,7 +10,7 @@ import (
 
 func prefix_ForAttribute(content string, prefixes []string) *O.T[string, string] {
 	attrVals, attrStat := Vendor_Refer.Attributes[content]
-	result := O.New[string, string]()
+	result := O.New[string, string](len(attrVals))
 
 	if attrStat {
 		for vendor, values := range attrVals {
@@ -34,7 +34,7 @@ func prefix_ForValues(attribute string, value string, prefixes []string) *O.T[st
 		venVals, venStat = attrMap[cleanValue]
 	}
 
-	result := O.New[string, string]()
+	result := O.New[string, string](len(venVals))
 	if venStat {
 		for vendor, values := range venVals {
 			if _slice.Contains(prefixes, vendor) {
@@ -77,7 +77,7 @@ func prefix_ForAtRule(content string, prefixes []string) *O.T[string, string] {
 	rule := content[0:index]
 	data := content[index:]
 
-	result := O.New[string, string]()
+	result := O.New[string, string](len(prefixes))
 	for _, group := range prefixes {
 		if rval, rbool := Vendor_Refer.Atrules[rule]; rbool {
 			if gvalues, gbool := rval[group]; gbool {

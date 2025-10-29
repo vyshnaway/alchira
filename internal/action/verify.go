@@ -57,7 +57,7 @@ func Verify_Setup() (Report string, Status verify_Setup_Status_enum) {
 			status = Verify_Setup_Status_Initialized
 			report = S.MAKE(
 				S.Tag.H4("Error Paths", S.Preset.Failed, S.Style.AS_Bold),
-				X.List_Props(O.FromMap(errors), []string{}, []string{}),
+				X.List_Props(O.FromUnorderedMap(errors), []string{}, []string{}),
 				S.MakeList{TypeFunc: S.List.Bullets, Intent: 0, Preset: S.Preset.Failed, Styles: []string{}},
 			)
 		}
@@ -94,10 +94,10 @@ func Verify_Configs(remote_vendors bool) (Report string, Status bool) {
 	config_path := _config.Path_Json["configure"].Path
 	S.STEP("PATH : "+config_path, 1)
 
-	_config.Static.ProxyMap = []_model.Config_ProxyMap{}
+	_config.Saved.ProxyMap = []_model.Config_ProxyMap{}
 	if config_data, config_err := _fileman.Read_File(config_path, false); config_err == nil {
 
-		if config, err := _util.Code_JsonParse[_model.Config_Raw](config_data); err != nil {
+		if config, err := _util.Code_JsoncParse[_model.Config_Raw](config_data); err != nil {
 			errors = append(errors, config_path+" : Bad json/ Incomplete schema.")
 		} else {
 			S.TASK("Updating vendor-prefixes", 1)
@@ -119,17 +119,17 @@ func Verify_Configs(remote_vendors bool) (Report string, Status bool) {
 			}
 
 			if config.Artifacts == nil {
-				_config.Static.Artifacts_Sources = map[string]string{}
+				_config.Saved.Artifacts_Sources = map[string]string{}
 			} else {
-				_config.Static.Artifacts_Sources = config.Artifacts
+				_config.Saved.Artifacts_Sources = config.Artifacts
 			}
 
 			if config.ProxyMap != nil {
-				_config.Static.ProxyMap = config.ProxyMap
+				_config.Saved.ProxyMap = config.ProxyMap
 			}
 		}
 	} else {
-		errors = append(errors, "Bad Config file: "+ config_path)
+		errors = append(errors, "Bad Config file: "+config_path)
 	}
 
 	conflict_sync := Conflict_Sync_Test()

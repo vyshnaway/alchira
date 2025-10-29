@@ -13,7 +13,7 @@ var regex_at = _regexp.MustCompile(`@+`)
 
 // Replaces spaces and '@', then applies filters and replacements
 func String_Filter(s string, keepChars, skipChars, addBackSlashFor []rune) string {
-	final := _strings.Builder{}
+	var final _strings.Builder
 
 	s = regex_space.ReplaceAllString(s, "_")
 	s = regex_at.ReplaceAllString(s, "_")

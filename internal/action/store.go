@@ -107,6 +107,8 @@ func Store(
 		lookupId = targetPath
 	}
 
+	AZ := 24
+
 	result := _model.File_Stash{
 		LibLevel:   idn,
 		Label:      lodash_rune + label + lodash_rune,
@@ -117,30 +119,27 @@ func Store(
 		TargetPath: targetPath,
 		ClassFront: classFront,
 		DebugFront: debugClassfront,
+		Content:    content,
+		Midway:     "",
+		Scratch:    "",
 
 		Lookup: _model.File_Lookup{
 			Id:   lookupId,
 			Type: lookupType,
 		},
-		LocalMap:    _model.File_SymclassIndexMap{},
-		GlobalMap:   _model.File_SymclassIndexMap{},
-		PublicMap:   _model.File_SymclassIndexMap{},
-		MixedMap:    _model.File_SymclassIndexMap{},
-		Errors:      []string{},
-		Diagnostics: []_model.File_Diagnostic{},
-
 		StyleData: _model.File_StyleData{
 			UsedIn:          []int{},
 			Attachments:     map[string]bool{},
 			ClassTracks:     [][]string{},
-			LocalClasses:    _model.Style_ClassIndexMap{},
-			GlobalClasses:   _model.Style_ClassIndexMap{},
-			PublicClasses:   _model.Style_ClassIndexMap{},
+			LocalMap:        make(_model.Style_ClassIndexMap, AZ),
+			GlobalMap:       make(_model.Style_ClassIndexMap, AZ),
+			PublicMap:       make(_model.Style_ClassIndexMap, AZ),
+			MixedMap:        make(_model.Style_ClassIndexMap, AZ),
 			TagReplacements: []_model.File_TagReplacement{},
 		},
-		Content: content,
-		Midway:  "",
-		Scratch: "",
+
+		Diagnostics: make([]*_model.File_Diagnostic, AZ),
+		Errors:      make([]string, AZ),
 	}
 
 	return &result

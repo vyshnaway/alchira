@@ -81,6 +81,7 @@ func Execute(heading string) (Exitcode int) {
 			fallthrough
 
 		case Execute_Step_VerifySetupStruct:
+			_config.Reset()
 			if RebuildFlag.Load() {
 				showReport = false
 				RebuildFlag.Store(false)
@@ -239,10 +240,10 @@ func Execute(heading string) (Exitcode int) {
 									default:
 										if _fileman.Path_HasChildPath(_config.Path_Folder["libraries"].Path, filepath) &&
 											event.Extension == "css" {
-											_config.Static.Libraries_Saved[filepath] = event.FileContent
+											_config.Saved.Libraries_Saved[filepath] = event.FileContent
 										} else if _fileman.Path_HasChildPath(_config.Path_Folder["artifacts"].Path, filepath) &&
 											(event.Extension == _config.Root.Extension || event.Extension == "json") {
-											_config.Static.Artifacts_Saved[filepath] = event.FileContent
+											_config.Saved.Artifacts_Saved[filepath] = event.FileContent
 										}
 										steppings = append(steppings, Execute_Step_UpdateCache)
 									}
@@ -252,13 +253,13 @@ func Execute(heading string) (Exitcode int) {
 									breaknow = true
 								}
 							} else if event.Action == _watcher.E_Action_Update {
-								if target, ok := _config.Static.TargetDir_Saved[event.Folder]; ok && target.Stylesheet == event.FilePath {
+								if target, ok := _config.Saved.TargetDir_Saved[event.Folder]; ok && target.Stylesheet == event.FilePath {
 									target.StylesheetContent = event.FileContent
-									_config.Static.TargetDir_Saved[event.Folder] = target
+									_config.Saved.TargetDir_Saved[event.Folder] = target
 									steppings = append(steppings, Execute_Step_UpdateCache)
 								} else if _, ok := target.Extensions[event.Extension]; ok {
 									target.Filepath_to_Content[event.FilePath] = event.FileContent
-									_config.Static.TargetDir_Saved[event.Folder] = target
+									_config.Saved.TargetDir_Saved[event.Folder] = target
 									steppings = append(steppings, Execute_Step_UpdateCache)
 								} else {
 									outpath := _fileman.Path_Join(target.Source, event.FilePath)

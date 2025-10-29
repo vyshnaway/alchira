@@ -15,7 +15,6 @@ type tag_Parse_retype struct {
 	SelfClosed        bool
 	ClassSynced       bool
 	ClassesList       [][]string
-	Lodashes          []string
 	Attachments       []string
 	NativeAttributes  map[string]string
 	StyleDeclarations T_RawStyle
@@ -29,11 +28,10 @@ func Tag_Scanner(
 	action E_Action,
 	cursor *_reader.Type,
 ) tag_Parse_retype {
-	classesList := [][]string{}
-	attachments := []string{}
-	lodashes := []string{}
-	braceTrack := []rune{}
-	nativeAttributes := make(map[string]string)
+	classesList := make([][]string, 0, 1)
+	attachments := make([]string, 0, 4)
+	braceTrack := make([]rune, 0, 8)
+	nativeAttributes := make(map[string]string, 8)
 
 	deviance := 0
 	var attr _string.Builder
@@ -52,13 +50,13 @@ func Tag_Scanner(
 		Elvalue:    "",
 		Innertext:  "",
 		Scope:      _model.Style_Type_Null,
-		TagCount:   cursor.Active.Cycle + 1,
 		RowIndex:   cursor.Active.RowMarker,
 		ColIndex:   cursor.Active.ColMarker,
-		SymClasses: make([]string, 0),
-		Attributes: make(map[string]string),
-		Comments:   make([]string, 0),
-		Styles:     make(map[string]string),
+		TagCount:   cursor.Active.Cycle + 1,
+		SymClasses: make([]string, 0, 1),
+		Attributes: make(map[string]string, 12),
+		Comments:   make([]string, 0, 1),
+		Styles:     make(map[string]string, 3),
 	}
 
 	for cursor.Streaming {
@@ -192,7 +190,6 @@ func Tag_Scanner(
 		SelfClosed:        selfClosed,
 		ClassSynced:       classSynced,
 		ClassesList:       classesList,
-		Lodashes:          lodashes,
 		Attachments:       attachments,
 		NativeAttributes:  nativeAttributes,
 		StyleDeclarations: styleDeclarations,

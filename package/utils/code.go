@@ -2,11 +2,11 @@ package utils
 
 import (
 	_json "encoding/json"
-	_string "strings"
+	"strings"
 )
 
 func Code_Uncomment(content string, single, multi, html bool) string {
-	var result _string.Builder
+	var result strings.Builder
 
 	isInString := func(input string, index int) bool {
 		inSingleQuote, inDoubleQuote, inTemplateLiteral, escaped := false, false, false, false
@@ -72,8 +72,46 @@ func Code_Uncomment(content string, single, multi, html bool) string {
 	return result.String()
 }
 
+func Code_Minify(content string) string {
+	var builder strings.Builder
+	symbols := map[rune]struct{}{
+		'{': {}, '}': {}, ':': {}, ';': {}, ',': {},
+	}
+
+	var prevSpace bool
+
+	for _, r := range content {
+		_, isSym := symbols[r]
+
+		if isSym {
+			if builder.Len() > 0 && prevSpace {
+				// Remove the previous space before symbol
+				s := builder.String()
+				builder.Reset()
+				builder.WriteString(strings.TrimRight(s, " "))
+			}
+			builder.WriteRune(r)
+			prevSpace = false
+			continue
+		}
+
+		if r == ' ' {
+			if !prevSpace {
+				builder.WriteRune(' ')
+				prevSpace = true
+			}
+			// skip if previous was space (collapse spaces)
+		} else {
+			builder.WriteRune(r)
+			prevSpace = false
+		}
+	}
+
+	return builder.String()
+}
+
 func Code_StripWhitespace(s string) string {
-	var out []rune
+	var out strings.Builder
 	insideQuote := false
 	quoteChar := rune(0)
 	lastWasSpace := false
@@ -85,44 +123,21 @@ func Code_StripWhitespace(s string) string {
 				insideQuote = true
 				quoteChar = r
 			}
-			out = append(out, r)
+			out.WriteRune(r)
 			lastWasSpace = false
 			continue
 		}
 		if !insideQuote && (r == ' ' || r == '\t' || r == '\n' || r == '\r') {
 			if !lastWasSpace {
-				out = append(out, ' ')
+				out.WriteRune(' ')
 				lastWasSpace = true
 			}
 			continue
 		}
-		out = append(out, r)
+		out.WriteRune(r)
 		lastWasSpace = false
 	}
-	return string(out)
-}
-
-func Code_Minify(content string) string {
-	out := make([]rune, 0, len(content))
-	var prev rune
-	symbols := map[rune]struct{}{
-		'{': {}, '}': {}, ':': {}, ';': {}, ',': {},
-	}
-	for _, r := range content {
-		if _, isSym := symbols[r]; isSym {
-			if len(out) > 0 && out[len(out)-1] == ' ' {
-				out = out[:len(out)-1]
-			}
-			out = append(out, r)
-			prev = r
-			continue
-		}
-		if r != ' ' || prev != ' ' {
-			out = append(out, r)
-		}
-		prev = r
-	}
-	return _string.TrimSpace(string(out))
+	return out.String()
 }
 
 func Code_Strip(content string, single, multi, html, minify bool) string {
@@ -136,17 +151,17 @@ func Code_Strip(content string, single, multi, html, minify bool) string {
 	}
 }
 
-func Code_JsonBuild(obj any, gap string) string {
+func Code_JsoncBuild(obj any, gap string) (string, error) {
 	if gap == "" {
-		b, _ := _json.Marshal(obj)
-		return string(b)
+		s, e := _json.Marshal(obj)
+		return string(s), e
 	} else {
-		b, _ := _json.MarshalIndent(obj, "", "  ")
-		return string(b)
+		s, e := _json.MarshalIndent(obj, "", "  ")
+		return string(s), e
 	}
 }
 
-func Code_JsonParse[T any](str string) (T, error) {
+func Code_JsoncParse[T any](str string) (T, error) {
 	var out T
 	clean := Code_Uncomment(str, true, true, false)
 	err := _json.Unmarshal([]byte(clean), &out)

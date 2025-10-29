@@ -13,10 +13,10 @@ import (
 )
 
 func Hashrule_Upload() {
-	_config.Style.Hashrules = _config.Static.Hashrule
-	hashrule := _config.Static.Hashrule
+	_config.Style.Hashrules = _config.Saved.Hashrule
+	hashrule := _config.Saved.Hashrule
 	errors := []string{}
-	diagnostics := []_model.File_Diagnostic{}
+	diagnostics := []*_model.File_Diagnostic{}
 
 	for key := range hashrule {
 		var hash = "#{" + key + "}"
@@ -26,12 +26,12 @@ func Hashrule_Upload() {
 		} else {
 			delete(hashrule, key)
 			errors = append(errors, response.Errorstring)
-			diagnostics = append(diagnostics, response.Diagnostic)
+			diagnostics = append(diagnostics, &response.Diagnostic)
 		}
 	}
 
 	filtered := map[string]string{}
-	printmap := O.New[string, string]()
+	printmap := O.New[string, string](len(_config.Saved.Hashrule))
 	for k, v := range hashrule {
 		if len(k) > 0 && k[0] != '-' {
 			filtered[k] = v
@@ -62,7 +62,7 @@ var hashpattern = _regexp.MustCompile(`(?i)#\{[a-z0-9-]+\}`)
 func Hashrule_Import(str string, src string) hashrule_Import_return {
 	primitive := str
 	recursionSequence := make([]string, 0, len(_config.Style.Hashrules))
-	preview := O.New[string, string]()
+	preview := O.New[string, string](4)
 
 	var response = func(
 		result string,

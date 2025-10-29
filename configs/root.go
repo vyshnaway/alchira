@@ -2,6 +2,8 @@ package configs
 
 import (
 	_model "main/models"
+	_maps "maps"
+	_slices "slices"
 )
 
 const (
@@ -18,6 +20,8 @@ var Root = _model.Cache_Root{
 	RebuildInterval: 60000,
 	PollingInterval: 1000,
 	WaitingInterval: 100,
+	WebsocketPort:   0,
+
 	Url: _model.Cache_Url{
 		Site:      "https://www." + domain + "/",
 		Docs:      "https://docs." + domain + "/",
@@ -55,6 +59,33 @@ var Root = _model.Cache_Root{
 	},
 }
 
+var Static = _model.Cache_Static{
+	WATCH:          false,
+	DEBUG:          false,
+	MINIFY:         false,
+	SERVER:         false,
+	EXPORT:         false,
+	Command:        "",
+	Argument:       "",
+	RootPath:       "",
+	WorkPath:       "",
+	ProjectName:    "",
+	ProjectVersion: "",
+	CustomTags:     _slices.Collect(_maps.Keys(Root.CustomTags)),
+	ReplacementTags: func() map[string]int {
+		res := map[string]int{}
+		for k, v := range Root.CustomTags {
+			res["<!-- "+k+" -->"] = v
+			res["<!--"+k+"-->"] = v
+			res["<!--"+k+" -->"] = v
+			res["<!-- "+k+"-->"] = v
+			res["<"+k+" />"] = v
+			res["<"+k+"/>"] = v
+		}
+		return res
+	}(),
+}
+
 var Root_Scaffold = map[string]_model.File_Source{
 	"blueprint": {
 		Frags:     []string{"scaffold", "blueprint"},
@@ -64,6 +95,12 @@ var Root_Scaffold = map[string]_model.File_Source{
 	},
 	"libraries": {
 		Frags:     []string{"scaffold", "libraries"},
+		Path:      "",
+		Content:   "",
+		Essential: true,
+	},
+	"source": {
+		Frags:     []string{"source"},
 		Path:      "",
 		Content:   "",
 		Essential: true,

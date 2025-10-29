@@ -1,47 +1,57 @@
 package watchman
 
 import (
+	_fileman "main/package/fileman"
+	_os "os"
+	_filepath "path/filepath"
+	_time "time"
+
 	_fsnotify "github.com/fsnotify/fsnotify"
 	_watcher "github.com/radovskyb/watcher"
-	_fileman "main/package/fileman"
-	_filepath "path/filepath"
-	_sync "sync"
-	_time "time"
 )
 
-type E_Action int
+func (This *T_Watcher) Add_WatchingFolder(folders []string) {
+	This.mutex.Lock()
+	defer This.mutex.Unlock()
 
-const (
-	E_Action_Reload E_Action = iota
-	E_Action_Access
-	E_Action_Update
-	E_Action_Refactor
-)
+	for _, folder := range folders {
 
-type Event struct {
-	Action      E_Action
-	TimeStamp   string
-	Folder      string
-	FilePath    string
-	FileContent string
-	Extension   string
+		abs, err := _fileman.Path_Resolves(folder)
+		if _, exist := This.watchingFolders[abs]; !exist && err == nil && _fileman.Path_IfDir(folder) {
+
+			if This.notifyWatcher != nil {
+				This.notifyWatcher.Add(folder)
+				This.polledWatcher.Add(folder)
+				_filepath.Walk(folder, func(path string, info _os.FileInfo, err error) error {
+					if info.IsDir() {
+						This.polledWatcher.Add(folder)
+						This.notifyWatcher.Add(path)
+					}
+					return nil
+				})
+			}
+
+			This.watchingFolders[abs] = folder
+		}
+	}
 }
 
-type T_Watcher struct {
-	PolledWatcher   *_watcher.Watcher
-	NotifyWatcher   *_fsnotify.Watcher
-	mutex           *_sync.Mutex
-	queue           []Event
-	status          bool
-	Close           func()
-	folderMaps      map[string]string
-	resolvedFolders []string
-	resolvedIgnores []string
-	PollInterval    int
+func (This *T_Watcher) Add_IgnoredFolder(folders []string) {
+	This.mutex.Lock()
+	defer This.mutex.Unlock()
+	for _, folder := range folders {
+		abs, _ := _fileman.Path_Resolves(folder)
+		This.ignoredFolders[abs] = folder
+	}
 }
 
 // If content == "", file content is refetched from path as fallback
 func (This *T_Watcher) HandleEvent(action E_Action, filePath string, content string) {
+	for resFolder := range This.ignoredFolders {
+		if _fileman.Path_HasChildPath(resFolder, filePath) {
+			return
+		}
+	}
 
 	event := Event{}
 	now := _time.Now()
@@ -51,10 +61,10 @@ func (This *T_Watcher) HandleEvent(action E_Action, filePath string, content str
 		event.Extension = event.Extension[1:]
 	}
 
-	for _, parant := range This.resolvedFolders {
-		if _fileman.Path_HasChildPath(parant, filePath) {
-			event.Folder = This.folderMaps[parant]
-			event.FilePath = filePath[len(parant)+1:]
+	for resFolder, refFolder := range This.watchingFolders {
+		if _fileman.Path_HasChildPath(resFolder, filePath) {
+			event.Folder = refFolder
+			event.FilePath = filePath[len(resFolder)+1:]
 			event.TimeStamp = now.Format("15:04:05")
 			break
 		}
@@ -66,10 +76,10 @@ func (This *T_Watcher) HandleEvent(action E_Action, filePath string, content str
 		event.FileContent = string(data)
 	}
 
-	This.Add(event)
+	This.Add(&event)
 }
 
-func (This *T_Watcher) Add(event Event) {
+func (This *T_Watcher) Add(event *Event) {
 	This.mutex.Lock()
 	defer This.mutex.Unlock()
 	This.queue = append(This.queue, event)
@@ -83,24 +93,31 @@ func (This *T_Watcher) Pull() *Event {
 	}
 	evt := This.queue[0]
 	This.queue = This.queue[1:]
-	return &evt
+	return evt
 }
 
-func (This *T_Watcher) DeBuf() []Event {
+func (This *T_Watcher) DeBuf() []*Event {
 	This.mutex.Lock()
 	defer This.mutex.Unlock()
 	if len(This.queue) == 0 {
 		return nil
 	}
 	evts := This.queue
-	This.queue = []Event{}
+	This.queue = []*Event{}
 	return evts
 }
 
 func (This *T_Watcher) Reset() {
 	This.mutex.Lock()
 	defer This.mutex.Unlock()
-	This.queue = []Event{}
+	This.queue = []*Event{}
+	This.polledWatcher.Close()
+	This.polledWatcher = _watcher.New()
+	This.notifyWatcher.Close()
+	This.notifyWatcher = nil
+	if watcher, e := _fsnotify.NewWatcher(); e == nil {
+		This.notifyWatcher = watcher
+	}
 }
 
 func (This *T_Watcher) Length() int {

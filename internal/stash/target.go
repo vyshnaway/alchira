@@ -35,7 +35,7 @@ func Target_UpdateDirs() {
 	_config.Style.Global___Index = _model.Style_ClassIndexMap{}
 
 	i := 0
-	for key, files := range _config.Static.TargetDir_Saved {
+	for key, files := range _config.Saved.TargetDir_Saved {
 		Cache.Targetdir[key] = _target.New(files, _util.String_EnCounter(i))
 		i++
 	}

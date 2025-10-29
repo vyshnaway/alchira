@@ -44,12 +44,12 @@ func Setup_Environment(rootpath string, workpath string) {
 }
 
 func Setup_Tweaks(tweaks map[string]any) {
-	_config.Static.Tweaks = _config.Root.Tweaks
+	_config.Saved.Tweaks = _config.Root.Tweaks
 
 	if tweaks != nil {
 		for key, val := range _config.Root.Tweaks {
 			if _reflect.TypeOf(tweaks[key]) == _reflect.TypeOf(val) {
-				_config.Static.Tweaks[key] = tweaks[key]
+				_config.Saved.Tweaks[key] = tweaks[key]
 			}
 		}
 	}

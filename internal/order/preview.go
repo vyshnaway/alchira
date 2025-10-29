@@ -1,8 +1,8 @@
 package order
 
 import (
-	_json_ "encoding/json"
-	_utils_ "main/package/utils"
+	_json "encoding/json"
+	_utils "main/package/utils"
 )
 
 type R_Preview struct {
@@ -17,12 +17,6 @@ func Preview(classtrace [][]int, merge bool) *R_Preview {
 	maxLen := 0
 	counter := 0
 	refindex := 0
-	finalists := [][]int{}
-	final_hashtrace := [][][2]int{}
-	sorted_classtrace := [][]int{}
-	list_to_group := make(map[string]int)
-	group_to_table := make(map[int]map[int]int)
-	grouped_classtrace := make(map[string][][]int)
 
 	lengrouped_classtrace := make(map[int][][]int)
 	for _, arr := range classtrace {
@@ -33,29 +27,39 @@ func Preview(classtrace [][]int, merge bool) *R_Preview {
 		}
 	}
 
+	sorted_classtrace := make([][]int, 0, len(classtrace))
 	for currentLen := maxLen; currentLen > 0; currentLen-- {
 		if arrays, exists := lengrouped_classtrace[currentLen]; exists {
 			sorted_classtrace = append(sorted_classtrace, arrays...)
 		}
 	}
 
+	grouped_classtrace := make(map[string][][]int)
 	for _, arr := range sorted_classtrace {
 		var superParent []int
 		if merge {
-			superParent = _utils_.Array_FindSuperParent(arr, sorted_classtrace)
+			superParent = Array_FindSuperParent(arr, sorted_classtrace)
 		} else {
 			superParent = arr
 		}
-		superParentJSON, _ := _json_.Marshal(superParent)
+		superParentJSON, _ := _json.Marshal(superParent)
 		superParentString := string(superParentJSON)
-		grouped_classtrace[superParentString] = append(grouped_classtrace[superParentString], arr)
+		if grouped_classtrace[superParentString] == nil {
+			grouped_classtrace[superParentString] = [][]int{arr}
+		} else {
+			grouped_classtrace[superParentString] = append(grouped_classtrace[superParentString], arr)
+		}
 	}
 
+	list_to_group := make(map[string]int)
+	group_to_table := make(map[int]map[int]int)
+	finalists := make([][]int, 0, len(grouped_classtrace))
+	final_hashtrace := make([][][2]int, 0, len(grouped_classtrace))
 	for jsonref, classlists := range grouped_classtrace {
 		temptrace := [][2]int{}
 		reftable := make(map[int]int)
 
-		if seq, err := _utils_.Code_JsonParse[[]int](jsonref); err == nil {
+		if seq, err := _utils.Code_JsoncParse[[]int](jsonref); err == nil {
 			finalists = append(finalists, seq)
 			for _, item := range seq {
 				counter++
@@ -64,11 +68,11 @@ func Preview(classtrace [][]int, merge bool) *R_Preview {
 			}
 		}
 		for _, arr := range classlists {
-			arrJSON, _ := _json_.Marshal(arr)
+			arrJSON, _ := _json.Marshal(arr)
 			arrString := string(arrJSON)
 			list_to_group[arrString] = refindex
 		}
-		
+
 		final_hashtrace = append(final_hashtrace, temptrace)
 		group_to_table[refindex] = reftable
 		refindex++

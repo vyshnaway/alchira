@@ -26,7 +26,7 @@ func Update_Cache() {
 	_stash.Artifact_Update()
 	_stash.Library_Update()
 
-	index_scanned := _style.Cssfile_String(_util.Code_Uncomment(_config.Static.RootCSS, false, true, false), "INDEX | ")
+	index_scanned := _style.Cssfile_String(_util.Code_Uncomment(_config.Saved.RootCSS, false, true, false), "INDEX | ")
 	_config.Manifest.Constants = index_scanned.Variables.ToMap()
 	for attachment := range index_scanned.Attachments {
 		if res := _action.Index_Find(attachment, _model.Style_ClassIndexMap{}); res.Index > 0 {
@@ -44,8 +44,8 @@ func Accumulate() {
 	filemanifest, targetReport := _stash.Target_Accumulate()
 	_config.Delta.Report.TargetDir = targetReport
 
-	_config.Manifest.Group.Local = map[string]_model.File_SymclassIndexMap{}
-	_config.Manifest.Group.Global = map[string]_model.File_SymclassIndexMap{}
+	_config.Manifest.Group.Local = map[string]_model.Style_ClassIndexMap{}
+	_config.Manifest.Group.Global = map[string]_model.Style_ClassIndexMap{}
 
 	_config.Delta.Error.TargetDir = []string{}
 	_config.Delta.Lookup.TargetDir = map[string]_model.File_Lookup{}
@@ -57,7 +57,7 @@ func Accumulate() {
 		_config.Delta.Error.TargetDir = append(_config.Delta.Error.TargetDir, val.Errors...)
 		_config.Delta.Diagnostic.TargetDir = append(_config.Delta.Diagnostic.TargetDir, val.Diagnostics...)
 
-		mergedMap := make(_model.File_SymclassIndexMap)
+		mergedMap := make(_model.Style_ClassIndexMap)
 		_map.Copy(mergedMap, val.PublicMap)
 		_map.Copy(mergedMap, val.GlobalMap)
 		_config.Manifest.Group.Global[key] = mergedMap
@@ -70,7 +70,7 @@ func Accumulate() {
 
 	_config.Delta.Error.Multiples = []string{}
 	_config.Delta.Diagnostic.Multiples = []_model.File_Diagnostic{}
-	for _, val := range _config.Style.Index_to_Data {
+	for _, val := range _config.Style.Index_Data {
 		if len(val.SrcData.Metadata.Declarations) > 1 {
 			error_ := K.Error_Standard("Duplicate Declarations: "+val.SrcData.SymClass, val.SrcData.Metadata.Declarations)
 			_config.Delta.Error.Multiples = append(_config.Delta.Error.Multiples, error_.Errorstring)

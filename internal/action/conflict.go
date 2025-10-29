@@ -10,7 +10,7 @@ import (
 
 // ProxyMapDependency validates and processes proxy map dependencies
 func Conflict_Sync_Test() Verify_ProxyMapDependency_return {
-	proxymap := _config.Static.ProxyMap
+	proxymap := _config.Saved.ProxyMap
 	configdir := _config.Path_Folder["blueprint"].Path
 
 	result := Verify_ProxyMapDependency_return{
@@ -19,7 +19,7 @@ func Conflict_Sync_Test() Verify_ProxyMapDependency_return {
 	}
 
 	var wg _sync.WaitGroup
-	warning_channel := make(chan string, len(proxymap)*12)
+	warning_channel := make(chan string, len(proxymap)*9)
 	notification_channel := make(chan string, len(proxymap)*3)
 
 	for index, ip := range proxymap {
@@ -128,11 +128,11 @@ func Conflict_Sync_Test() Verify_ProxyMapDependency_return {
 		}(index, ip)
 	}
 
-	// go func() {
-	wg.Wait()
-	close(warning_channel)
-	close(notification_channel)
-	// }()
+	go func() {
+		wg.Wait()
+		close(warning_channel)
+		close(notification_channel)
+	}()
 
 	for w := range warning_channel {
 		result.Warnings = append(result.Warnings, w)

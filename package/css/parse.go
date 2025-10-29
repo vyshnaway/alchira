@@ -18,22 +18,22 @@ type R_Parse struct {
 	Variables     [][2]string
 }
 
-func ParsePartial(content string) R_Parse {
+func ParsePartial(content string, basic_allocation_size int) R_Parse {
 
 	result := R_Parse{
-		Directives:    []string{},
-		Operations:    []string{},
-		Properties:    [][2]string{},
-		Atrule_Blocks: [][2]string{},
-		Nested_Blocks: [][2]string{},
-		Select_Blocks: [][2]string{},
-		All_Blocks:    [][2]string{},
-		Variables:     [][2]string{},
+		Directives:    make([]string, 0, basic_allocation_size),
+		Operations:    make([]string, 0, basic_allocation_size),
+		Properties:    make([][2]string, 0, basic_allocation_size),
+		Atrule_Blocks: make([][2]string, 0, basic_allocation_size),
+		Nested_Blocks: make([][2]string, 0, basic_allocation_size),
+		Select_Blocks: make([][2]string, 0, basic_allocation_size),
+		All_Blocks:    make([][2]string, 0, basic_allocation_size),
+		Variables:     make([][2]string, 0, basic_allocation_size),
 	}
 
 	key := ""
 	var awaitBrace rune = 0
-	braceTrack := []rune{}
+	braceTrack := make([]rune, 0, 12)
 	keyStart := 0
 	valStart := 0
 	deviance := 0

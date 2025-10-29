@@ -9,7 +9,7 @@ import (
 )
 
 func Save_RootCss() {
-	_config.Static.RootCSS = _css.Read_Files([]string{
+	_config.Saved.RootCSS = _css.Read_Files([]string{
 		_config.Path_Css["atrules"].Path,
 		_config.Path_Css["constants"].Path,
 		_config.Path_Css["elements"].Path,
@@ -18,14 +18,14 @@ func Save_RootCss() {
 }
 
 func Save_Libraries() {
-	_config.Static.Libraries_Saved, _ = _fileman.Read_Bulk(
+	_config.Saved.Libraries_Saved, _ = _fileman.Read_Bulk(
 		_config.Path_Folder["libraries"].Path,
 		[]string{"css"},
 	)
 }
 
 func Save_Artifacts() {
-	_config.Static.Artifacts_Saved, _ = _fileman.Read_Bulk(
+	_config.Saved.Artifacts_Saved, _ = _fileman.Read_Bulk(
 		_config.Path_Folder["artifacts"].Path,
 		[]string{_config.Root.Extension, "json"},
 	)
@@ -33,7 +33,7 @@ func Save_Artifacts() {
 
 func Save_Targets() {
 	S.TASK("Saving Proxy-folders", 1)
-	_config.Static.TargetDir_Saved = Sync_ProxyMapDirs(_config.Static.ProxyMap)
+	_config.Saved.TargetDir_Saved = Sync_ProxyMapDirs(_config.Saved.ProxyMap)
 }
 
 func Save_Hashrule() (Report string, Status bool) {
@@ -41,12 +41,12 @@ func Save_Hashrule() (Report string, Status bool) {
 	S.TASK("Saving Hashrule", 1)
 
 	status := true
-	errors := []string{}
-	_config.Static.Hashrule = map[string]string{}
+	errors := make([]string, 0, 1)
+	_config.Saved.Hashrule = map[string]string{}
 	hashrule_path := _config.Path_Json["hashrule"].Path
 	if content, err := _fileman.Read_File(hashrule_path, false); err == nil {
-		if hashrules, e := _util.Code_JsonParse[map[string]string](content); e == nil {
-			_config.Static.Hashrule = hashrules
+		if hashrules, e := _util.Code_JsoncParse[map[string]string](content); e == nil {
+			_config.Saved.Hashrule = hashrules
 		} else {
 			status = false
 			errors = append(errors, "Bad "+hashrule_path+" file data.")

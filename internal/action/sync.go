@@ -64,7 +64,7 @@ func Sync_SaveVendors(vendor_source string, try_remote bool) {
 				return r
 			}
 		}
-		
+
 		if r, e := _fileman.Read_File(vendor_path, false); e == nil {
 			return r
 		}
@@ -72,7 +72,7 @@ func Sync_SaveVendors(vendor_source string, try_remote bool) {
 		return ""
 	}()
 
-	if vendor_table, err := _util.Code_JsonParse[_css.T_Vendor_Table](content); err == nil {
+	if vendor_table, err := _util.Code_JsoncParse[_css.T_Vendor_Table](content); err == nil {
 		_css.Vendor_Save(vendor_table)
 		if newdata {
 			_fileman.Write_File(vendor_path, content)
@@ -81,44 +81,44 @@ func Sync_SaveVendors(vendor_source string, try_remote bool) {
 }
 
 func Sync_ProxyMapDirs(proxyMaps []_model.Config_ProxyMap) map[string]_model.Config_ProxyStorage {
-	static_proxystorage := make(map[string]_model.Config_ProxyStorage)
-	for _, p := range proxyMaps {
-		static_proxystorage[p.Target] = _model.Config_ProxyStorage{
-			Source:              p.Source,
-			Target:              p.Target,
-			Stylesheet:          p.Stylesheet,
-			Extensions:          p.Extensions,
-			Filepath_to_Content: make(map[string]string),
-			StylesheetContent:   "",
-		}
-	}
 	var mut _sync.Mutex
-
 	var wg _sync.WaitGroup
-	for id, pm := range static_proxystorage {
+	static_proxystorage := make(map[string]_model.Config_ProxyStorage, len(proxyMaps))
+
+	for _, pm := range proxyMaps {
 		wg.Add(1)
-		go func(proxyid string, proxystorage _model.Config_ProxyStorage) {
-			proxystorage.Extensions[_config.Root.Extension] = []string{}
-			fileContents, err := _fileman.Sync_Bulk(
-				proxystorage.Target,
-				proxystorage.Source,
-				_slice.Collect(_map.Keys(proxystorage.Extensions)),
+
+		go func(proxyMap _model.Config_ProxyMap) {
+			defer wg.Done()
+
+			proxyMap.Extensions[_config.Root.Extension] = []string{}
+			fileContents, _ := _fileman.Sync_Bulk(
+				proxyMap.Target,
+				proxyMap.Source,
+				_slice.Collect(_map.Keys(proxyMap.Extensions)),
 				[]string{_config.Root.Extension},
-				[]string{proxystorage.Stylesheet},
+				[]string{proxyMap.Stylesheet},
 				!_config.Static.SERVER,
 			)
-			if err == nil && len(fileContents) > 0 {
-				proxystorage.Filepath_to_Content = fileContents
-				if content, err := _os.ReadFile(_fileman.Path_Join(proxystorage.Target, proxystorage.Stylesheet)); err == nil {
-					proxystorage.StylesheetContent = string(content)
-				}
 
+			stylesheetContent := ""
+			if len(fileContents) > 0 {
+				if content, err := _os.ReadFile(_fileman.Path_Join(proxyMap.Target, proxyMap.Stylesheet)); err == nil {
+					stylesheetContent = string(content)
+				}
 			}
+
 			mut.Lock()
 			defer mut.Unlock()
-			static_proxystorage[proxyid] = proxystorage
-			defer wg.Done()
-		}(id, pm)
+			static_proxystorage[pm.Target] = _model.Config_ProxyStorage{
+				Source:              _fileman.Path_Fix(pm.Source),
+				Target:              _fileman.Path_Fix(pm.Target),
+				Stylesheet:          _fileman.Path_Fix(pm.Stylesheet),
+				Extensions:          pm.Extensions,
+				Filepath_to_Content: fileContents,
+				StylesheetContent:   stylesheetContent,
+			}
+		}(pm)
 	}
 
 	wg.Wait()

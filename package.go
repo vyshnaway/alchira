@@ -2,6 +2,7 @@ package main
 
 import (
 	_fmt "fmt"
+	"log"
 	_config "main/configs"
 	_action "main/internal/action"
 	X "main/internal/console"
@@ -12,6 +13,8 @@ import (
 	_util "main/package/utils"
 	_compiler "main/service/compiler"
 	_server "main/service/server"
+	"net/http"
+	_ "net/http/pprof"
 	_os "os"
 	_filepath "path/filepath"
 	_slice "slices"
@@ -33,7 +36,9 @@ func Path_FromRoot(elem ...string) (string, error) {
 }
 
 func main() {
-	defaultPort := 0
+	go func() {
+		log.Println(http.ListenAndServe("localhost:6060", nil))
+	}()
 
 	exposedCommands := []string{}
 	for k := range _config.Root.Commands {
@@ -94,16 +99,9 @@ func main() {
 	_config.Static.EXPORT = _config.Static.SERVER || command == "publish"
 	_config.Static.WATCH = _config.Static.SERVER || ((command == "debug" || command == "preview") && argone == "-w")
 
-	S.Canvas.Initialize(!_config.Static.WATCH &&
-		_slice.Contains([]string{
-			"debug",
-			"preview",
-			"publish",
-			"init",
-			"install",
-		}, command),
-		true,
-		2,
+	S.Canvas.Initialize(
+		!_config.Static.WATCH && _slice.Contains([]string{"debug", "preview", "publish", "init", "install"}, command),
+		true, 2,
 	)
 
 	var flagmode string
@@ -117,6 +115,7 @@ func main() {
 	switch _config.Static.Command {
 	case "init":
 		{
+			_config.Reset()
 			var wg _sync.WaitGroup
 			wg.Add(2)
 			go func() { _action.Sync_RootDocs(); wg.Done() }()
@@ -152,16 +151,16 @@ func main() {
 			_action.Sync_RootDocs()
 			S.Post(_config.Sync_References["agent"].Content)
 			if val, err := _strconv.Atoi(argone); err == nil {
-				defaultPort = val
+				_config.Root.WebsocketPort = val
 			}
-			_server.Connect(defaultPort)
+			_server.Connect(_config.Root.WebsocketPort)
 		}
 	case "server":
 		{
 			if val, err := _strconv.Atoi(argone); err == nil {
-				defaultPort = val
+				_config.Root.WebsocketPort = val
 			}
-			_server.Connect(defaultPort)
+			_server.Connect(_config.Root.WebsocketPort)
 		}
 	case "install":
 		{
@@ -202,7 +201,7 @@ func main() {
 			))
 
 			S.Post(S.MAKE("", []string{
-				X.List_Record("Available Commands", O.FromMap(_config.Root.Commands)),
+				X.List_Record("Available Commands", O.FromUnorderedMap(_config.Root.Commands)),
 				X.List_Record("Agreements", func() *O.T[string, string] {
 					res := O.New[string, string]()
 					for _, data := range _config.Sync_Agreements {
