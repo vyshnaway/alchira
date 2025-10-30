@@ -1,13 +1,16 @@
 package fileman
 
 import (
+	"errors"
 	_fmt "fmt"
 	_os "os"
 	_filepath "path/filepath"
 	_slices "slices"
+	"sync"
 )
 
 func Clone_Hard(source, destination string, ignoreFiles []string) error {
+	var wg sync.WaitGroup
 	sourceInfo, err := _os.Stat(source)
 	if err != nil {
 		if _os.IsNotExist(err) {
@@ -27,25 +30,41 @@ func Clone_Hard(source, destination string, ignoreFiles []string) error {
 			return _fmt.Errorf("could not read source directory '%s': %w", source, err)
 		}
 
+		errCh := make(chan error, len(entries))
 		for _, entry := range entries {
-			srcPath := _filepath.Join(source, entry.Name())
-			destPath := _filepath.Join(destination, entry.Name())
+			wg.Add(1)
 
-			found := _slices.Contains(ignoreFiles, srcPath)
-			if found {
-				continue
-			}
+			go func(entry _os.DirEntry) {
+				defer wg.Done()
 
-			if entry.IsDir() {
-				if err := Clone_Hard(srcPath, destPath, ignoreFiles); err != nil {
-					return err
+				srcPath := _filepath.Join(source, entry.Name())
+				destPath := _filepath.Join(destination, entry.Name())
+
+				found := _slices.Contains(ignoreFiles, srcPath)
+				if found {
+					return
 				}
-			} else {
-				if err := helper_CopyFile(srcPath, destPath); err != nil {
-					return err
+
+				if entry.IsDir() {
+					if err := Clone_Hard(srcPath, destPath, ignoreFiles); err != nil {
+						errCh <- err
+					}
+				} else {
+					if err := helper_CopyFile(srcPath, destPath); err != nil {
+						errCh <- err
+					}
 				}
-			}
+			}(entry)
 		}
+		wg.Wait()
+		close(errCh)
+
+		errs := []error{}
+		for e := range errCh {
+			errs = append(errs, e)
+		}
+		return errors.Join(errs...)
+
 	} else {
 		if err := helper_CopyFile(source, destination); err != nil {
 			return err
