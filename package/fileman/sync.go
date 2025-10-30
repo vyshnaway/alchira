@@ -7,7 +7,7 @@ import (
 	_filepath "path/filepath"
 	_slice "slices"
 	_strings "strings"
-	// _sync "sync"
+	_sync "sync"
 )
 
 // File synchronizes a file from a URL or local path.
@@ -54,7 +54,7 @@ func Sync_Json(url, path string) (any, error) {
 
 // Bulk synchronizes two directories, handling inclusions, exclusions, and unsynced extensions.
 func Sync_Bulk(source, target string, extInclude, extnUnsync, fileExcludes []string, sync bool) (map[string]string, error) {
-	// var wg sync.WaitGroup
+	var wg _sync.WaitGroup
 	resultFileContents := make(map[string]string)
 
 	// Normalize extensions to include leading dot
@@ -126,52 +126,65 @@ func Sync_Bulk(source, target string, extInclude, extnUnsync, fileExcludes []str
 
 	// Delete files in target that are not in source or are marked as unsyncable
 	for _, relFile := range relativeTargetFiles {
-		targetFilePath := _filepath.Join(target, relFile)
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
 
-		// Check if file exists in source
-		sourceFileExists := _slice.Contains(relativeSourceFiles, relFile)
+			targetFilePath := _filepath.Join(target, relFile)
 
-		// Check if extension is in unsync list
-		isUnsyncable := _slice.Contains(extnUnsync, _filepath.Ext(relFile))
+			// Check if file exists in source
+			sourceFileExists := _slice.Contains(relativeSourceFiles, relFile)
 
-		if !sourceFileExists || isUnsyncable {
-			if err := _os.Remove(targetFilePath); err != nil && !_os.IsNotExist(err) {
-				errs = append(errs, nil, _fmt.Errorf("failed to delete target file '%s': %w", targetFilePath, err))
+			// Check if extension is in unsync list
+			isUnsyncable := _slice.Contains(extnUnsync, _filepath.Ext(relFile))
+
+			if !sourceFileExists || isUnsyncable {
+				if err := _os.Remove(targetFilePath); err != nil && !_os.IsNotExist(err) {
+					errs = append(errs, nil, _fmt.Errorf("failed to delete target file '%s': %w", targetFilePath, err))
+				}
 			}
-		}
+		}()
 	}
+	wg.Wait()
 	if len(errs) > 0 {
 		return nil, _error.Join(errs...)
 	}
 
 	// Copy files from source to target and read contents for included extensions
 	for _, relFile := range relativeSourceFiles {
-		sourceFilePath := _filepath.Join(source, relFile)
-		targetFilePath := _filepath.Join(target, relFile)
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
 
-		// Ensure parent directory exists in target
-		targetDir := _filepath.Dir(targetFilePath)
-		targetDirOk := true
-		if targetDirOk = Path_IfDir(targetDir); !targetDirOk {
-			if err := _os.MkdirAll(targetDir, 0755); err != nil {
-				targetDirOk = false
-				errs = append(errs, _fmt.Errorf("failed to create target directory '%s': %w", targetDir, err))
-			}
-		}
+			sourceFilePath := _filepath.Join(source, relFile)
+			targetFilePath := _filepath.Join(target, relFile)
 
-		if _slice.Contains(extInclude, _filepath.Ext(relFile)) {
-			contentBytes, err := _os.ReadFile(sourceFilePath)
-			if err != nil {
-				errs = append(errs, _fmt.Errorf("failed to read source file '%s' for inclusion: %w", sourceFilePath, err))
+			// Ensure parent directory exists in target
+			targetDir := _filepath.Dir(targetFilePath)
+			targetDirOk := true
+			if targetDirOk = Path_IfDir(targetDir); !targetDirOk {
+				if err := _os.MkdirAll(targetDir, 0755); err != nil {
+					targetDirOk = false
+					errs = append(errs, _fmt.Errorf("failed to create target directory '%s': %w", targetDir, err))
+				}
 			}
-			resultFileContents[relFile] = string(contentBytes)
-		} else if targetDirOk && sync {
-			// Copy file if not in extInclude (and not deleted in previous step)
-			if err := helper_CopyFile(sourceFilePath, targetFilePath); err != nil {
-				errs = append(errs, _fmt.Errorf("failed to copy file from '%s' to '%s': %w", sourceFilePath, targetFilePath, err))
+
+			if _slice.Contains(extInclude, _filepath.Ext(relFile)) {
+				contentBytes, err := _os.ReadFile(sourceFilePath)
+				if err != nil {
+					errs = append(errs, _fmt.Errorf("failed to read source file '%s' for inclusion: %w", sourceFilePath, err))
+				}
+				resultFileContents[relFile] = string(contentBytes)
+			} else if targetDirOk && sync {
+				// Copy file if not in extInclude (and not deleted in previous step)
+				if err := helper_CopyFile(sourceFilePath, targetFilePath); err != nil {
+					errs = append(errs, _fmt.Errorf("failed to copy file from '%s' to '%s': %w", sourceFilePath, targetFilePath, err))
+				}
 			}
-		}
+		}()
 	}
+	wg.Wait()
+
 	if len(errs) > 0 {
 		return resultFileContents, _error.Join(errs...)
 	}
@@ -188,27 +201,33 @@ func Sync_Bulk(source, target string, extInclude, extnUnsync, fileExcludes []str
 
 	if sync {
 		for _, targetFolder := range targetFolders {
-			relFolder, err := _filepath.Rel(target, targetFolder)
-			if err != nil {
-				errs = append(errs, _fmt.Errorf("failed to get relative path for target folder '%s': %w", targetFolder, err))
-				continue
-			}
-			sourceFolderPath := _filepath.Join(source, relFolder)
+			wg.Add(1)
+			go func() {
+				defer wg.Done()
 
-			// Check if the corresponding source folder exists
-			sourceFolderExists := _slice.Contains(sourceFolders, sourceFolderPath)
-
-			// If target folder is empty and no corresponding source folder, remove it
-			// (Note: This logic is simplified from Node.js version which checks if sourceFolderPath exists based on target path)
-			// A more robust solution would involve checking if the target folder became empty after file deletions.
-			// For simplicity, we'll remove if source equivalent doesn't exist AND target folder is empty.
-			isEmpty, _ := helper_IsDirEmpty(targetFolder) // Ignore error, assume not empty if error
-			if !sourceFolderExists && isEmpty {
-				if err := _os.RemoveAll(targetFolder); err != nil && !_os.IsNotExist(err) {
-					errs = append(errs, _fmt.Errorf("failed to remove empty target folder '%s': %w", targetFolder, err))
+				relFolder, err := _filepath.Rel(target, targetFolder)
+				if err != nil {
+					errs = append(errs, _fmt.Errorf("failed to get relative path for target folder '%s': %w", targetFolder, err))
+					return
 				}
-			}
+				sourceFolderPath := _filepath.Join(source, relFolder)
+
+				// Check if the corresponding source folder exists
+				sourceFolderExists := _slice.Contains(sourceFolders, sourceFolderPath)
+
+				// If target folder is empty and no corresponding source folder, remove it
+				// (Note: This logic is simplified from Node.js version which checks if sourceFolderPath exists based on target path)
+				// A more robust solution would involve checking if the target folder became empty after file deletions.
+				// For simplicity, we'll remove if source equivalent doesn't exist AND target folder is empty.
+				isEmpty, _ := helper_IsDirEmpty(targetFolder) // Ignore error, assume not empty if error
+				if !sourceFolderExists && isEmpty {
+					if err := _os.RemoveAll(targetFolder); err != nil && !_os.IsNotExist(err) {
+						errs = append(errs, _fmt.Errorf("failed to remove empty target folder '%s': %w", targetFolder, err))
+					}
+				}
+			}()
 		}
+		wg.Wait()
 	}
 
 	return resultFileContents, _error.Join(errs...)

@@ -160,7 +160,7 @@ func Execute(heading string) (Exitcode int) {
 				Accumulate()
 			}
 			fallthrough
-			
+
 		case Execute_Step_GenerateFiles:
 			S.STEP("Rebuilding Files", 1)
 			if !_config.Static.SERVER {
@@ -174,7 +174,7 @@ func Execute(heading string) (Exitcode int) {
 					}()
 				}
 			}
-			S.TASK("Compilation complete.", 1)
+			S.TASK("Compilation complete", 1)
 			fallthrough
 
 		case Execute_Step_LoopAround:
