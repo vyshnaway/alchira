@@ -154,13 +154,15 @@ func Execute(heading string) (Exitcode int) {
 			fallthrough
 
 		case Execute_Step_UpdateCache:
+			S.STEP("Extracting CSS", 1)
 			SetReferences()
 			if _config.Static.SERVER {
 				Accumulate()
 			}
 			fallthrough
-
+			
 		case Execute_Step_GenerateFiles:
+			S.STEP("Rebuilding Files", 1)
 			if !_config.Static.SERVER {
 				outfiles, report = Generate_Files()
 				if len(outfiles) > 0 {
@@ -172,6 +174,7 @@ func Execute(heading string) (Exitcode int) {
 					}()
 				}
 			}
+			S.TASK("Compilation complete.", 1)
 			fallthrough
 
 		case Execute_Step_LoopAround:

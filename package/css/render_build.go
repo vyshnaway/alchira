@@ -1,6 +1,7 @@
 package css
 
 import (
+	// "main/package/console"
 	O "main/package/object"
 	_util "main/package/utils"
 	_slice "slices"
@@ -12,7 +13,7 @@ var _break = ""
 var _space = ""
 var _minify = false
 
-func SetMinification(active bool) {
+func set_MinifyOptions(active bool) {
 	_minify = active
 	if active {
 		_tab = ""
@@ -39,17 +40,22 @@ func render_LoadVendors(collection *O.T[string, string], vendor string) []string
 	return result
 }
 
-func render_Prefixer(stylemap *T_Block, vendors []string) *T_Block {
+func render_Prefixes(stylemap *T_Block, vendors []string) *T_Block {
 	out := NewBlock(len(vendor_Providers), 0)
 
 	stylemap.PropRange(func(key, val string) {
 		if key[0] == '@' {
-			for _, r := range prefix_ForAtRule(key, vendors).Keys() {
-				out.SetProp(r+";", "")
-			}
+			prefix_ForAtRule(key, vendors).Range(func(k, v string) {
+				if len(v) > 0 {
+					out.SetProp(v+";", "")
+				}
+			})
 		} else {
 			for _, kv := range prefix_LoadProps(key, val, vendors) {
 				k, v := kv[0], kv[1]
+				if len(k) == 0 {
+					continue
+				}
 				if i, _ := stylemap.GetProp(k); i > -1 || k == key {
 					out.SetProp(k+":"+_space+v+";", "")
 				}
@@ -69,7 +75,7 @@ func render_Prefixer(stylemap *T_Block, vendors []string) *T_Block {
 func render_Partial(stylemap *T_Block, vendors []string, first bool) []string {
 	stylesheet := []string{}
 
-	prefixed := render_Prefixer(stylemap, vendors)
+	prefixed := render_Prefixes(stylemap, vendors)
 
 	if prefixed.PropLen() > 0 {
 		if !_minify && first {
@@ -78,7 +84,7 @@ func render_Partial(stylemap *T_Block, vendors []string, first bool) []string {
 		prefixed.PropRange(func(k, v string) {
 			if k[0] == '@' {
 				stylesheet = append(stylesheet, k)
-			} else {
+			} else if len(k) > 0 {
 				stylesheet = append(stylesheet, k+_space+v)
 			}
 		})
@@ -131,26 +137,27 @@ func render_Partial(stylemap *T_Block, vendors []string, first bool) []string {
 }
 
 func Render_Vendored(stylemap *T_Block, minify bool) string {
-	SetMinification(minify)
+	set_MinifyOptions(minify)
 	return _string.Join(render_Partial(stylemap.Flatten(), vendor_Providers, true), _break)
 }
 
 func Render_Sequence(seq *T_BlockSeq, minify bool) string {
-	SetMinification(minify)
+	set_MinifyOptions(minify)
 
 	lines := []string{}
 	for _, u := range seq.Units {
 		if u.CssBlock != nil {
-			lines = append(lines, _break+u.Selector+_space+"{")
-			for _, line := range render_Partial(u.CssBlock, vendor_Providers, false) {
-				lines = append(lines, _tab+line)
-			}
-			lines = append(lines, "}")
+			temp := NewBlock(0, 1)
+			temp.SetBlock(u.Selector, u.CssBlock)
+			lines = append(lines, _break)
+			lines = append(lines, render_Partial(temp, vendor_Providers, false)...)
 		} else {
 			if len(lines) == 0 {
 				lines = append(lines, "")
 			}
-			lines = append(lines, u.Selector+";")
+			if len(u.Selector) > 0 {
+				lines = append(lines, u.Selector+";")
+			}
 		}
 	}
 
@@ -158,7 +165,7 @@ func Render_Sequence(seq *T_BlockSeq, minify bool) string {
 }
 
 func Render_Switched(refmap *T_Block, minify bool) string {
-	SetMinification(minify)
+	set_MinifyOptions(minify)
 	p, b := refmap.PropLen(), refmap.BlockLen()
 	nonwrap := NewBlock(p, b)
 	rulewrap := NewBlock(p, b)

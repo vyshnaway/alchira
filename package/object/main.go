@@ -3,76 +3,76 @@ package object
 import "slices"
 
 type T[K comparable, V any] struct {
-	keys []K
-	vals []V
+	Keys []K
+	Vals []V
 }
 
 func New[K comparable, V any](initial_size int) *T[K, V] {
 	return &T[K, V]{
-		keys: make([]K, 0, initial_size),
-		vals: make([]V, 0, initial_size),
+		Keys: make([]K, 0, initial_size),
+		Vals: make([]V, 0, initial_size),
 	}
 }
 
-func (m *T[K, V]) Keys() []K {
-	return m.keys
+func (m *T[K, V]) GetKeys() []K {
+	return m.Keys
 }
 
-func (m *T[K, V]) Values() []V {
-	return m.vals
+func (m *T[K, V]) GetVals() []V {
+	return m.Vals
 }
 
 func (m *T[K, V]) Len() int {
-	return len(m.keys)
+	return len(m.Keys)
 }
 
 func (m *T[K, V]) Get(key K) (*V, bool) {
-	if index := slices.Index(m.keys, key); index > -1 {
-		return &m.vals[index], true
+	if index := slices.Index(m.Keys, key); index > -1 {
+		return &m.Vals[index], true
 	}
 	return nil, false
 }
 
 func (m *T[K, V]) Set(key K, value V) {
 
-	if len(m.keys) == cap(m.keys) {
-		newCap := cap(m.keys) * 2
-		newKeys := make([]K, len(m.keys), newCap)
-		newVals := make([]V, len(m.vals), newCap)
-		copy(newKeys, m.keys)
-		copy(newVals, m.vals)
-		m.keys = newKeys
-		m.vals = newVals
+	if len(m.Keys) == cap(m.Keys) {
+		newCap := cap(m.Keys) * 2
+		newKeys := make([]K, len(m.Keys), newCap)
+		newVals := make([]V, len(m.Vals), newCap)
+		copy(newKeys, m.Keys)
+		copy(newVals, m.Vals)
+		m.Keys = newKeys
+		m.Vals = newVals
 	}
 
-	if index := slices.Index(m.keys, key); index > -1 {
-		m.vals[index] = value
+	if index := slices.Index(m.Keys, key); index > -1 {
+		m.Vals[index] = value
 	} else {
-		m.keys = append(m.keys, key)
-		m.vals = append(m.vals, value)
+		m.Keys = append(m.Keys, key)
+		m.Vals = append(m.Vals, value)
 	}
 }
 
 func (m *T[K, V]) Delete(key K) {
-	for i, k := range m.keys {
+	for i, k := range m.Keys {
 		if k == key {
-			m.keys = append(m.keys[:i], m.keys[i+1:]...)
-			m.vals = append(m.vals[:i], m.vals[i+1:]...)
+			m.Keys = append(m.Keys[:i], m.Keys[i+1:]...)
+			m.Vals = append(m.Vals[:i], m.Vals[i+1:]...)
 			break
 		}
 	}
 }
 
 func (m *T[K, V]) Range(function func(k K, v V)) {
-	for index, key := range m.Keys() {
-		function(key, m.vals[index])
+	for index, key := range m.GetKeys() {
+		function(key, m.Vals[index])
 	}
 }
 
 func (m *T[K, V]) ToMap() map[K]V {
 	out := make(map[K]V, m.Len())
-	for index, key := range m.Keys() {
-		out[key] = m.vals[index]
+	for index, key := range m.GetKeys() {
+		out[key] = m.Vals[index]
 	}
 	return out
 }
@@ -102,11 +102,11 @@ func (m *T[K, V]) Copy(source *T[K, V]) {
 func (m *T[K, V]) Sort(function func([]K) []K) {
 	keymap := make(map[K]V, m.Len())
 	for i := range m.Len() {
-		keymap[m.keys[i]] = m.vals[i]
+		keymap[m.Keys[i]] = m.Vals[i]
 	}
-	m.keys = function(m.keys)
-	m.vals = make([]V, 0, len(m.keys))
-	for _, k := range m.keys {
-		m.vals = append(m.vals, keymap[k])
+	m.Keys = function(m.Keys)
+	m.Vals = make([]V, 0, len(m.Keys))
+	for _, k := range m.Keys {
+		m.Vals = append(m.Vals, keymap[k])
 	}
 }

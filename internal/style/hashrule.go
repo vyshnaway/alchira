@@ -39,9 +39,9 @@ func Hashrule_Upload() {
 		}
 	}
 	_config.Style.Hashrules = filtered
-	
+
 	printmap.Sort(func(s []string) []string {
-		temp := printmap.Keys()
+		temp := printmap.GetKeys()
 		_sort.Strings(temp)
 		return temp
 	})

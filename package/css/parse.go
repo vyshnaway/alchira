@@ -69,8 +69,11 @@ func ParsePartial(content string, basic_allocation_size int) R_Parse {
 		} else {
 			switch cursor.Active.Char {
 			case ':':
-				key = _util.String_Minify(content[keyStart:cursor.Active.Position])
-				valStart = cursor.Active.Position + 1
+				k := _util.String_Minify(content[keyStart:cursor.Active.Position])
+				if len(k) > 0 && k[0] != '@' {
+					key = k
+					valStart = cursor.Active.Position + 1
+				}
 			case '}':
 				fallthrough
 			case ';':

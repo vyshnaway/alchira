@@ -7,7 +7,6 @@ import (
 	X "main/internal/console"
 	_stash "main/internal/stash"
 	"main/models"
-	"main/package/console"
 	S "main/package/console"
 	_css "main/package/css"
 	O "main/package/object"
@@ -111,7 +110,6 @@ func Generate_Files() (Files map[string]string, Report string) {
 	report, errLen, finalMessage, index_frag := ClearUnwantedCache()
 	var class_builder _string.Builder
 
-	console.Render.Raw(_config.Style.PublishIndexMap)
 	for _, i := range _config.Style.PublishIndexMap {
 		class_builder.WriteString(_css.Render_Switched(func() *_css.T_Block {
 			result := _css.NewBlock(0, len(i))

@@ -1,6 +1,7 @@
 package style
 
 import (
+	"fmt"
 	_config "main/configs"
 	_action "main/internal/action"
 	_css "main/package/css"
@@ -144,9 +145,14 @@ func Parse_CssSnippet(
 		propmap.SetProp(k, v)
 		variables.Set(k, v)
 	})
+
 	if _config.Static.DEBUG {
 		scanned.Properties.Range(func(k, v string) {
-			propmap.SetProp(k, v+"/* "+initial+srcselector+" */")
+			if v == "" {
+				propmap.SetProp(fmt.Sprint(k, "/* ", initial, srcselector, " */"), "")
+			} else {
+				propmap.SetProp(k, fmt.Sprint(v, "/* ", initial, srcselector, " */"))
+			}
 		})
 	} else {
 		scanned.Properties.Range(func(k, v string) {

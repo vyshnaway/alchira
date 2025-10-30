@@ -7,6 +7,7 @@ import (
 	_filepath "path/filepath"
 	_slice "slices"
 	_strings "strings"
+	// _sync "sync"
 )
 
 // File synchronizes a file from a URL or local path.
@@ -53,6 +54,7 @@ func Sync_Json(url, path string) (any, error) {
 
 // Bulk synchronizes two directories, handling inclusions, exclusions, and unsynced extensions.
 func Sync_Bulk(source, target string, extInclude, extnUnsync, fileExcludes []string, sync bool) (map[string]string, error) {
+	// var wg sync.WaitGroup
 	resultFileContents := make(map[string]string)
 
 	// Normalize extensions to include leading dot
