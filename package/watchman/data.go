@@ -108,11 +108,12 @@ func (This *T_Watcher) DeBuf() []*Event {
 }
 
 func (This *T_Watcher) Reset() {
+	This.DeBuf()
 	This.mutex.Lock()
 	defer This.mutex.Unlock()
 	
+	This.close <- struct{}{}
 	This.Status = false
-	This.queue = []*Event{}
 
 	This.polledWatcher.Close()
 	This.polledWatcher = _watcher.New()

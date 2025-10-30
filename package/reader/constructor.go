@@ -4,7 +4,7 @@ type file_Position struct {
 	Last        rune `json:"last"`
 	Char        rune `json:"char"`
 	Next        rune `json:"next"`
-	Marker      int  `json:"marker"`
+	Position    int  `json:"marker"`
 	RowMarker   int  `json:"rowMarker"`
 	ColMarker   int  `json:"colMarker"`
 	Cycle       int  `json:"cycle"`
@@ -26,14 +26,14 @@ func New(content string) Type {
 
 func (This *Type) Reset() {
 	This.Active = file_Position{
-		Marker:      0,
+		Position:    0,
 		RowMarker:   0,
 		ColMarker:   0,
 		Cycle:       0,
 		ColFallback: 0,
 	}
 	This.Fallback = file_Position{
-		Marker:      0,
+		Position:    0,
 		RowMarker:   0,
 		ColMarker:   0,
 		Cycle:       0,

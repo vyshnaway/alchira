@@ -17,13 +17,19 @@ const (
 	E_Action_DebugHash
 )
 
+type T_Position struct {
+	Row int
+	Col int
+	Pos int
+}
+
 type T_RawStyle struct {
 	Elid       int
 	Element    string
 	Elvalue    string
 	TagCount   int
-	RowIndex   int
-	ColIndex   int
+	Start      T_Position
+	End        T_Position
 	EndMarker  int
 	SymClasses []string
 	Scope      _model.Style_Type
@@ -73,7 +79,7 @@ func Rider(
 
 		if cursor.Active.Last != '\\' && ch == '<' && regexp_aftertagopen.MatchString(string(cursor.Active.Next)) {
 			subScribed := ""
-			tagStart := cursor.Active.Marker
+			tagStart := cursor.Active.Position
 			result := Tag_Scanner(fileData, classProps, action, &cursor)
 			fragment := string(cursor.Runes[tagStart:result.StyleDeclarations.EndMarker])
 			hasDeclared := (len(result.StyleDeclarations.Styles) > 0 || len(result.StyleDeclarations.SymClasses) > 0)

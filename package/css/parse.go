@@ -62,19 +62,19 @@ func ParsePartial(content string, basic_allocation_size int) R_Parse {
 
 		if deviance == 1 && cursor.Active.Char == '{' {
 			isProp = false
-			key = _util.String_Minify(content[keyStart:cursor.Active.Marker])
-			valStart = cursor.Active.Marker + 1
+			key = _util.String_Minify(content[keyStart:cursor.Active.Position])
+			valStart = cursor.Active.Position + 1
 		} else if deviance != 0 {
 			continue
 		} else {
 			switch cursor.Active.Char {
 			case ':':
-				key = _util.String_Minify(content[keyStart:cursor.Active.Marker])
-				valStart = cursor.Active.Marker + 1
+				key = _util.String_Minify(content[keyStart:cursor.Active.Position])
+				valStart = cursor.Active.Position + 1
 			case '}':
 				fallthrough
 			case ';':
-				val := _util.String_Minify(content[valStart:cursor.Active.Marker])
+				val := _util.String_Minify(content[valStart:cursor.Active.Position])
 				{
 					if isProp {
 						if len(key) > 0 {
@@ -100,8 +100,8 @@ func ParsePartial(content string, basic_allocation_size int) R_Parse {
 						}
 						result.All_Blocks = append(result.All_Blocks, [2]string{key, val})
 					}
-					keyStart = cursor.Active.Marker + 1
-					valStart = cursor.Active.Marker + 1
+					keyStart = cursor.Active.Position + 1
+					valStart = cursor.Active.Position + 1
 					key = ""
 					val = ""
 					isProp = true

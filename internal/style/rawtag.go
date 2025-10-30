@@ -56,7 +56,7 @@ func Rawtag_Upload(
 	diagnostics := make([]*_model.File_Diagnostic, 0, 4)
 	attachments := make(map[string]bool, 12)
 	forArtifact := file.Lookup.Type == _model.File_Type_Artifact
-	declaration := file.TargetPath + ":" + _strconv.Itoa(raw.RowIndex) + ":" + _strconv.Itoa(raw.ColIndex)
+	declaration := file.TargetPath + ":" + _strconv.Itoa(raw.Start.Row) + ":" + _strconv.Itoa(raw.Start.Col)
 
 	symzero := ""
 	if len(raw.SymClasses) > 0 {
@@ -88,7 +88,7 @@ func Rawtag_Upload(
 		} else {
 			scope = raw.Scope
 		}
-		debugclass := _fmt.Sprint(scope, file.DebugFront, "\\:", raw.RowIndex, "\\:", raw.ColIndex, "_", normalized_symclass)
+		debugclass := _fmt.Sprint(scope, file.DebugFront, "\\:", raw.Start.Row, "\\:", raw.Start.Col, "_", normalized_symclass)
 
 		native_scanned, export_scanned := lodashstyle_process(raw.Styles[""], file, false,
 			_fmt.Sprint(raw.Scope, " : ", declaration, " | "), raw.SymClasses[0],
@@ -145,7 +145,7 @@ func Rawtag_Upload(
 		nativeAttachStyle := _css.NewBlock(8, 2)
 		if raw.Elid == _config.Root.CustomTags["style"] {
 			nativeAttachResult, exportAttachResult := lodashstyle_process(raw.Innertext, file, true,
-				_fmt.Sprint(raw.Scope, ":ATTACHMENT : ", file.FilePath, ":", raw.RowIndex, ":", raw.ColIndex, " | "),
+				_fmt.Sprint(raw.Scope, ":ATTACHMENT : ", file.FilePath, ":", raw.Start.Row, ":", raw.Start.Col , " | "),
 				raw.SymClasses[0],
 			)
 

@@ -8,63 +8,102 @@ import (
 func Code_Uncomment(content string, single, multi, html bool) string {
 	var result strings.Builder
 
-	isInString := func(input string, index int) bool {
-		inSingleQuote, inDoubleQuote, inTemplateLiteral, escaped := false, false, false, false
-
-		for i := 0; i < index && i < len(input); i++ {
-			char := input[i]
-
-			if escaped {
-				escaped = false
-				continue
-			}
-
-			if char == '\\' {
-				escaped = true
-				continue
-			}
-
-			if char == '\'' && !inDoubleQuote && !inTemplateLiteral {
-				inSingleQuote = !inSingleQuote
-			} else if char == '"' && !inSingleQuote && !inTemplateLiteral {
-				inDoubleQuote = !inDoubleQuote
-			} else if char == '`' && !inSingleQuote && !inDoubleQuote {
-				inTemplateLiteral = !inTemplateLiteral
-			}
-		}
-		return inSingleQuote || inDoubleQuote || inTemplateLiteral
-	}
+	inSingleQuote := false
+	inDoubleQuote := false
+	inTemplateLiteral := false
+	escaped := false
 
 	i := 0
-	for i < len(content) {
+	length := len(content)
+
+	for i < length {
 		char := content[i]
 
-		if single && char == '/' && i+1 < len(content) && content[i+1] == '/' && !isInString(content, i) {
+		// Handle escaping inside strings
+		if escaped {
+			result.WriteByte(char)
+			escaped = false
+			i++
+			continue
+		}
+
+		if char == '\\' && (inSingleQuote || inDoubleQuote || inTemplateLiteral) {
+			escaped = true
+			result.WriteByte(char)
+			i++
+			continue
+		}
+
+		// Update string state: enter/exit strings
+		if char == '\'' && !inDoubleQuote && !inTemplateLiteral {
+			inSingleQuote = !inSingleQuote
+			result.WriteByte(char)
+			i++
+			continue
+		}
+
+		if char == '"' && !inSingleQuote && !inTemplateLiteral {
+			inDoubleQuote = !inDoubleQuote
+			result.WriteByte(char)
+			i++
+			continue
+		}
+
+		if char == '`' && !inSingleQuote && !inDoubleQuote {
+			inTemplateLiteral = !inTemplateLiteral
+			result.WriteByte(char)
+			i++
+			continue
+		}
+
+		// If inside any string, just copy character
+		if inSingleQuote || inDoubleQuote || inTemplateLiteral {
+			result.WriteByte(char)
+			i++
+			continue
+		}
+
+		// Outside strings - handle comments
+
+		// Single line comment //
+		if single && char == '/' && i+1 < length && content[i+1] == '/' {
 			i += 2
-			for i < len(content) && content[i] != '\n' {
+			for i < length && content[i] != '\n' {
+				i++
+			}
+			// skip newline char too but keep newline in output to preserve lines
+			if i < length && content[i] == '\n' {
+				result.WriteByte('\n')
 				i++
 			}
 			continue
 		}
 
-		if multi && char == '/' && i+1 < len(content) && content[i+1] == '*' && !isInString(content, i) {
+		// Multi-line comment /* ... */
+		if multi && char == '/' && i+1 < length && content[i+1] == '*' {
 			i += 2
-			for i+1 < len(content) && (content[i] != '*' || content[i+1] != '/') {
+			for i+1 < length && !(content[i] == '*' && content[i+1] == '/') {
 				i++
 			}
-			i += 2
+			if i+1 < length {
+				i += 2 // Skip closing */
+			}
 			continue
 		}
 
-		if html && char == '<' && i+3 < len(content) && content[i:i+4] == "<!--" && !isInString(content, i) {
+		// HTML Comment <!-- ... -->
+		if html && char == '<' && i+3 < length && content[i:i+4] == "<!--" {
 			i += 4
-			for i+2 < len(content) && content[i:i+3] != "-->" {
+			for i+2 < length && content[i:i+3] != "-->" {
 				i++
 			}
-			i += 3
+			if i+2 < length {
+				i += 3 // Skip closing -->
+			}
 			continue
 		}
 
+		// Normal character outside comments and strings
 		result.WriteByte(char)
 		i++
 	}

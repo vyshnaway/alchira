@@ -47,14 +47,14 @@ func (This *Class) Savefile(filepath string, content string, hashindex int) {
 		if len(tagdata.SymClasses) == 0 {
 			E := X.Error_Standard(
 				"Symclass missing declaration scope.",
-				[]string{_fmt.Sprint(file.TargetPath, ":", tagdata.RowIndex, ":", tagdata.ColIndex)},
+				[]string{_fmt.Sprint(file.TargetPath, ":", tagdata.Start.Row, ":", tagdata.Start.Col)},
 			)
 			file.Errors = append(file.Errors, E.Errorstring)
 			file.Diagnostics = append(file.Diagnostics, &E.Diagnostic)
 		} else if len(tagdata.SymClasses) > 1 {
 			E := X.Error_Standard(
 				"Multiple SymClasses declaration scope.",
-				[]string{_fmt.Sprint(file.TargetPath, ":", tagdata.RowIndex, ":", tagdata.ColIndex)},
+				[]string{_fmt.Sprint(file.TargetPath, ":", tagdata.Start.Row, ":", tagdata.Start.Col)},
 			)
 			file.Errors = append(file.Errors, E.Errorstring)
 			file.Diagnostics = append(file.Diagnostics, &E.Diagnostic)

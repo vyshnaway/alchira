@@ -77,7 +77,7 @@ func Execute(heading string) (Exitcode int) {
 				<-sigs
 				watchman.Close()
 				S.Render.Write("\r\n", 2)
-				// save_action.Wait()
+				save_action.Wait()
 				_os.Exit(1)
 			}()
 		}
@@ -104,7 +104,6 @@ func Execute(heading string) (Exitcode int) {
 			}
 			res_report, res_status := _action.Verify_Setup()
 			if res_status == _action.Verify_Setup_Status_Verified {
-				watchman.Reset()
 				step = Execute_Step_LoopAround
 			} else {
 				if res_status == _action.Verify_Setup_Status_Initialized {
@@ -288,7 +287,5 @@ func Execute(heading string) (Exitcode int) {
 	}
 
 	save_action.Wait()
-	watchman.Close()
-
 	return exitcode
 }

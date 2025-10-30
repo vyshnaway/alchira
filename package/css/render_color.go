@@ -116,8 +116,8 @@ func Color_FallbackGen(
 			capture.Reset()
 		}
 
-		if _slices_.Contains(fallbackPalettes, capture.String()) && content[cursor.Active.Marker] == '(' {
-			frompos := cursor.Active.Marker
+		if _slices_.Contains(fallbackPalettes, capture.String()) && content[cursor.Active.Position] == '(' {
+			frompos := cursor.Active.Position
 			values := color_Investigate(&cursor, capture.String())
 			if len(values) > 2 {
 
@@ -159,7 +159,7 @@ func Color_FallbackGen(
 					rgb := _utils_.ColorRGB.From.Oklch(l, c, h, alpha)
 					r, g, b, alpha, converted = rgb.R, rgb.G, rgb.B, rgb.A, rgb.Converted
 				default:
-					converted = capture.String() + content[frompos:cursor.Active.Marker]
+					converted = capture.String() + content[frompos:cursor.Active.Position]
 				}
 
 				if fallback_RGB1_HEX0 {
@@ -169,7 +169,7 @@ func Color_FallbackGen(
 				}
 
 			} else {
-				result += capture.String() + content[frompos:cursor.Active.Marker]
+				result += capture.String() + content[frompos:cursor.Active.Position]
 			}
 			capture.Reset()
 		}

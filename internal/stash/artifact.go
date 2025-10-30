@@ -109,14 +109,14 @@ func Artifact_Update() {
 			if len(tagstyle.SymClasses) == 0 {
 				E := X.Error_Standard(
 					"Symclass missing declaration scope.",
-					[]string{_fmt.Sprint(file.FilePath, ":", tagstyle.RowIndex, ":", tagstyle.ColIndex)},
+					[]string{_fmt.Sprint(file.FilePath, ":", tagstyle.Start.Row, ":", tagstyle.Start.Col)},
 				)
 				file.Errors = append(file.Errors, E.Errorstring)
 				file.Diagnostics = append(file.Diagnostics, &E.Diagnostic)
 			} else if len(tagstyle.SymClasses) > 1 {
 				E := X.Error_Standard(
 					"Multiple SymClasses declaration scope.",
-					[]string{_fmt.Sprint(file.FilePath, ":", tagstyle.RowIndex, ":", tagstyle.ColIndex)},
+					[]string{_fmt.Sprint(file.FilePath, ":", tagstyle.Start.Row, ":", tagstyle.Start.Col)},
 				)
 				file.Errors = append(file.Errors, E.Errorstring)
 				file.Diagnostics = append(file.Diagnostics, &E.Diagnostic)

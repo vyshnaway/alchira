@@ -110,7 +110,7 @@ func (This *T_Watcher) Start() {
 		}()
 	}
 
-	if This.polledWatcher != nil {
+	if This.polledWatcher != nil && This.PollIntervalMs > 0 {
 
 		go func() {
 			for {
@@ -163,19 +163,12 @@ func (This *T_Watcher) Start() {
 				_fmt.Fprintf(_os.Stderr, "Watcher start error: %v\r\n", err)
 			}
 		}()
-
 	}
-
+	
 	This.Close = func() {
-		_fmt.Println("closed")
+		This.polledWatcher.Close()
+		This.notifyWatcher.Close()
 		This.close <- struct{}{}
 		This.Status = false
-		if This.polledWatcher != nil {
-			This.polledWatcher.Close()
-		}
-		if This.notifyWatcher != nil {
-			This.notifyWatcher.Close()
-		}
 	}
-
 }

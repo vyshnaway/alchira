@@ -44,14 +44,17 @@ func Tag_Scanner(
 	fallbackAquired := false
 
 	styleDeclarations := T_RawStyle{
-		Elid:       0,
-		EndMarker:  0,
-		Element:    "",
-		Elvalue:    "",
-		Innertext:  "",
-		Scope:      _model.Style_Type_Null,
-		RowIndex:   cursor.Active.RowMarker,
-		ColIndex:   cursor.Active.ColMarker,
+		Elid:      0,
+		EndMarker: 0,
+		Element:   "",
+		Elvalue:   "",
+		Innertext: "",
+		Scope:     _model.Style_Type_Null,
+		Start: T_Position{
+			Row: cursor.Active.RowMarker,
+			Col: cursor.Active.ColMarker,
+			Pos: cursor.Active.Position,
+		},
 		TagCount:   cursor.Active.Cycle + 1,
 		SymClasses: make([]string, 0, 1),
 		Attributes: make(map[string]string, 12),
@@ -173,7 +176,7 @@ func Tag_Scanner(
 		}
 	}
 
-	styleDeclarations.EndMarker = cursor.Active.Marker
+	styleDeclarations.EndMarker = cursor.Active.Position
 	if cursor.Active.Char == '>' {
 		styleDeclarations.EndMarker++
 	}
@@ -181,6 +184,11 @@ func Tag_Scanner(
 	if ok {
 		cursor.Active.Cycle++
 		selfClosed = cursor.Active.Last == '/'
+		styleDeclarations.End = T_Position{
+			Row: cursor.Active.RowMarker,
+			Col: cursor.Active.ColMarker,
+			Pos: cursor.Active.Position,
+		}
 	} else if fallbackAquired {
 		cursor.LoadFallback()
 	}

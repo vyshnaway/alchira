@@ -84,6 +84,7 @@ func Parse_Filter(content string) R_Parse_Filter {
 			breaks := _util.String_ZeroBreaks(val[spaceIndex:], []rune{' ', '\n', ','})
 			res.Assign = append(res.Assign, breaks...)
 		default:
+			res.Properties.Set(val, "")
 		}
 	}
 
@@ -95,7 +96,11 @@ func Parse_Filter(content string) R_Parse_Filter {
 				res.Attach = append(res.Attach, breaks[1:]...)
 			case assign_operator:
 				res.Assign = append(res.Assign, breaks[1:]...)
+			default:
+				res.Properties.Set(val, "")
 			}
+		} else {
+			res.Properties.Set(val, "")
 		}
 	}
 

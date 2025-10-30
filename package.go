@@ -110,9 +110,8 @@ func main() {
 
 	_config.Reset(false)
 	if _fileman.Path_IfDir(_config.Root_Scaffold["source"].Path) {
-		
 		go func() {
-			_log.Println(_http.ListenAndServe("localhost:6070", nil))
+			_log.Println(_http.ListenAndServe("localhost:7777", nil))
 		}()
 	}
 
