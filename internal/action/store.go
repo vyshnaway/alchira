@@ -138,8 +138,8 @@ func Store(
 			TagReplacements: []_model.File_TagReplacement{},
 		},
 
-		Diagnostics: make([]*_model.File_Diagnostic, AZ),
-		Errors:      make([]string, AZ),
+		Diagnostics: make([]*_model.File_Diagnostic, 0, AZ),
+		Errors:      make([]string, 0, AZ),
 	}
 
 	return &result

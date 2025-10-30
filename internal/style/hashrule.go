@@ -8,7 +8,7 @@ import (
 	_util "main/package/utils"
 	_regexp "regexp"
 	_slice "slices"
-	"sort"
+	_sort "sort"
 	_string "strings"
 )
 
@@ -38,15 +38,16 @@ func Hashrule_Upload() {
 			printmap.Set(k, v)
 		}
 	}
+	_config.Style.Hashrules = filtered
+	
 	printmap.Sort(func(s []string) []string {
 		temp := printmap.Keys()
-		sort.Strings(temp)
+		_sort.Strings(temp)
 		return temp
 	})
 
 	_config.Delta.Error.Hashrules = errors
 	_config.Delta.Diagnostic.Hashrules = diagnostics
-	_config.Style.Hashrules = filtered
 	_config.Delta.Report.Hashrule = X.List_Record("Active Hashrule", printmap)
 }
 

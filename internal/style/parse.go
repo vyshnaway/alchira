@@ -6,7 +6,7 @@ import (
 	_css "main/package/css"
 	O "main/package/object"
 	_util "main/package/utils"
-	"maps"
+	_map "maps"
 	_string "strings"
 
 	_model "main/models"
@@ -34,7 +34,7 @@ func parse_AssignMerge(
 					variables.Set(k, v)
 				}
 			})
-			maps.Copy(attachments, classdata.SrcData.Attachments)
+			_map.Copy(attachments, classdata.SrcData.Attachments)
 			result.Merge(classdata.SrcData.NativeRawStyle)
 		}
 	}
@@ -171,7 +171,7 @@ func Parse_CssSnippet(
 	scanned.Blocks.Range(func(key, val string) {
 		sub_result := Parse_CssSnippet(val, initial, srcselector+" / "+key, true)
 		variables.Copy(sub_result.Variables)
-		maps.Copy(attachments, sub_result.Attachments)
+		_map.Copy(attachments, sub_result.Attachments)
 		target.SetBlock(key, sub_result.Result)
 	})
 

@@ -22,8 +22,8 @@ var Root = models.Cache_Root{
 	Version:         "0.0.0",
 	Extension:       id,
 	RebuildInterval: 60000,
-	PollingInterval: 1000,
-	WaitingInterval: 100,
+	PollingInterval: 600,
+	WaitingInterval: 60,
 	WebsocketPort:   0,
 
 	Url: models.Cache_Url{
@@ -88,7 +88,7 @@ var Static = models.Cache_Static{
 		}
 		return res
 	}(),
-	Watchman:      &watchman.T_Watcher{},
+	Watchman:      watchman.New(),
 	ExecuteMutex:  sync.Mutex{},
 	RebuildFlag:   atomic.Bool{},
 	RebuildTicker: &time.Ticker{},

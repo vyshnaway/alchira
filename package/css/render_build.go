@@ -139,10 +139,10 @@ func Render_Sequence(seq *T_BlockSeq, minify bool) string {
 	SetMinification(minify)
 
 	lines := []string{}
-	for _, i := range seq.Units {
-		if i.CssBlock.Len() > 0 {
-			lines = append(lines, _break+i.Selector+_space+"{")
-			for _, line := range render_Partial(i.CssBlock, vendor_Providers, false) {
+	for _, u := range seq.Units {
+		if u.CssBlock != nil {
+			lines = append(lines, _break+u.Selector+_space+"{")
+			for _, line := range render_Partial(u.CssBlock, vendor_Providers, false) {
 				lines = append(lines, _tab+line)
 			}
 			lines = append(lines, "}")
@@ -150,7 +150,7 @@ func Render_Sequence(seq *T_BlockSeq, minify bool) string {
 			if len(lines) == 0 {
 				lines = append(lines, "")
 			}
-			lines = append(lines, i.Selector+";")
+			lines = append(lines, u.Selector+";")
 		}
 	}
 

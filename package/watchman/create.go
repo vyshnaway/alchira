@@ -62,10 +62,15 @@ func New() *T_Watcher {
 }
 
 func (This *T_Watcher) Start() {
+	This.Status = true
 
 	if This.notifyWatcher != nil {
 		go func() {
 			for {
+				if !This.Status {
+					return
+				}
+
 				select {
 				case event, ok := <-This.notifyWatcher.Events:
 					if !ok {
@@ -105,55 +110,65 @@ func (This *T_Watcher) Start() {
 		}()
 	}
 
-	go func() {
-		for {
-			select {
-			case event, ok := <-This.polledWatcher.Event:
-				if !ok {
-					continue
+	if This.polledWatcher != nil {
+
+		go func() {
+			for {
+				if !This.Status {
+					return
 				}
-				var act E_Action
 
-				switch event.Op {
+				select {
+				case event, ok := <-This.polledWatcher.Event:
+					if !ok {
+						continue
+					}
+					var act E_Action
 
-				case _watcher.Create:
-					info, err := _os.Stat(event.Path)
-					if err == nil && info.IsDir() {
+					switch event.Op {
+
+					case _watcher.Create:
+						info, err := _os.Stat(event.Path)
+						if err == nil && info.IsDir() {
+							This.Reset()
+							act = E_Action_Refactor
+						} else {
+							act = E_Action_Update
+						}
+
+					case _watcher.Write:
+						act = E_Action_Update
+
+					default:
 						This.Reset()
 						act = E_Action_Refactor
-					} else {
-						act = E_Action_Update
 					}
 
-				case _watcher.Write:
-					act = E_Action_Update
+					This.HandleEvent(act, event.Path, "")
 
-				default:
-					This.Reset()
-					act = E_Action_Refactor
+				case err, ok := <-This.polledWatcher.Error:
+					if ok {
+						_fmt.Fprintf(_os.Stderr, "Watcher error: %v\r\n", err)
+					}
+
+				case <-This.close:
+					return
 				}
-
-				This.HandleEvent(act, event.Path, "")
-
-			case err, ok := <-This.polledWatcher.Error:
-				if ok {
-					_fmt.Fprintf(_os.Stderr, "Watcher error: %v\r\n", err)
-				}
-
-			case <-This.close:
-				return
 			}
-		}
-	}()
+		}()
 
-	go func() {
-		err := This.polledWatcher.Start(_time.Millisecond * _time.Duration(This.PollIntervalMs))
-		if err != nil {
-			_fmt.Fprintf(_os.Stderr, "Watcher start error: %v\r\n", err)
-		}
-	}()
+		go func() {
+			err := This.polledWatcher.Start(_time.Millisecond * _time.Duration(This.PollIntervalMs))
+			if err != nil {
+				_fmt.Fprintf(_os.Stderr, "Watcher start error: %v\r\n", err)
+			}
+		}()
+
+	}
 
 	This.Close = func() {
+		_fmt.Println("closed")
+		This.close <- struct{}{}
 		This.Status = false
 		if This.polledWatcher != nil {
 			This.polledWatcher.Close()

@@ -1,7 +1,6 @@
 package compiler
 
 import (
-	"fmt"
 	_fmt "fmt"
 	_config "main/configs"
 	_action "main/internal/action"
@@ -144,7 +143,7 @@ func Generate_Files() (Files map[string]string, Report string) {
 		return _string.Join(frags, "")
 	}()
 
-	block_style := fmt.Sprint("<style>", style_sheet, "</style>")
+	block_style := _fmt.Sprint("<style>", style_sheet, "</style>")
 	block_on := block_style + block_style
 	for _, target := range _stash.Cache.Targetdir {
 		_map.Copy(files, target.SummonFiles(style_sheet, block_style, block_on, staple_sheet))
@@ -153,7 +152,7 @@ func Generate_Files() (Files map[string]string, Report string) {
 	if !_config.Static.WATCH {
 		report += func() string {
 
-			memchart := O.New[string, string](len(render_frags) + 1)
+			memchart := O.New[string, string](len(render_frags) + 2)
 			for _, i := range render_frags {
 				memchart.Set(
 					i.key,
@@ -162,7 +161,11 @@ func Generate_Files() (Files map[string]string, Report string) {
 			}
 
 			memchart.Set(
-				"",
+				_string.Repeat("=", 10),
+				_string.Repeat("=", 10),
+			)
+			memchart.Set(
+				"TOTAL",
 				_fmt.Sprintf("%9s", _fmt.Sprintf("%v Kb", _util.String_Memory(style_sheet))),
 			)
 

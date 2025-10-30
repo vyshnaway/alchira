@@ -124,6 +124,9 @@ func Reset(ReclaimMemory bool) {
 	Style_Reset()
 	Manifest_Reset()
 
+	Static.Watchman.Reset()
+	Static.RebuildFlag.Store(false)
+
 	if ReclaimMemory {
 		runtime.GC()
 	}

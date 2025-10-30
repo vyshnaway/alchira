@@ -11,7 +11,7 @@ type T_BlockSeq struct {
 
 func NewBlockSeq(size int) *T_BlockSeq {
 	return &T_BlockSeq{
-		Units: make([]*T_BlockUnit, size),
+		Units: make([]*T_BlockUnit, 0, size),
 	}
 }
 

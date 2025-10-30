@@ -58,15 +58,30 @@ func Execute(heading string) (Exitcode int) {
 	report := ""
 	outfiles := map[string]string{}
 	showReport := true
-	var save_action _sync.WaitGroup
-
-	var RebuildTickerReset func()
-	if _config.Static.WATCH && _config.Root.RebuildInterval > 0 {
-		RebuildTickerReset = startRebuildTicker(_config.Root.RebuildInterval)
-	}
-
 	watchman := _config.Static.Watchman
 	watchman.PollIntervalMs = _config.Root.PollingInterval
+
+	var save_action _sync.WaitGroup
+	var RebuildTickerReset func()
+
+	if _config.Static.WATCH {
+		if _config.Root.RebuildInterval > 0 {
+			RebuildTickerReset = startRebuildTicker(_config.Root.RebuildInterval)
+		}
+
+		if !_config.Static.SERVER {
+			sigs := make(chan _os.Signal, 1)
+			_signal.Notify(sigs, _syscall.SIGINT)
+
+			go func() {
+				<-sigs
+				watchman.Close()
+				S.Render.Write("\r\n", 2)
+				// save_action.Wait()
+				_os.Exit(1)
+			}()
+		}
+	}
 
 	for {
 		_config.Static.ExecuteMutex.Lock()
@@ -83,9 +98,8 @@ func Execute(heading string) (Exitcode int) {
 			if _config.Static.RebuildFlag.Load() {
 				_config.Reset(true)
 				showReport = false
-				_config.Static.RebuildFlag.Store(false)
 			}
-			if _config.Static.RebuildTicker != nil {
+			if _config.Static.WATCH && _config.Static.RebuildTicker != nil {
 				RebuildTickerReset()
 			}
 			res_report, res_status := _action.Verify_Setup()
@@ -141,7 +155,7 @@ func Execute(heading string) (Exitcode int) {
 			fallthrough
 
 		case Execute_Step_UpdateCache:
-			Update_Cache()
+			SetReferences()
 			if _config.Static.SERVER {
 				Accumulate()
 			}
@@ -174,20 +188,6 @@ func Execute(heading string) (Exitcode int) {
 					})
 
 					watchman.Start()
-
-					if !_config.Static.SERVER {
-						sigs := make(chan _os.Signal, 1)
-						_signal.Notify(sigs, _syscall.SIGINT)
-
-						go func() {
-							<-sigs
-							watchman.Close()
-							S.Render.Write("\r\n", 2)
-							save_action.Wait()
-							_os.Exit(1)
-						}()
-					}
-
 				}
 
 				step = Execute_Step_LoopAround

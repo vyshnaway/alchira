@@ -15,7 +15,7 @@ import (
 	_strconv "strconv"
 )
 
-func Update_Cache() {
+func SetReferences() {
 	_config.Delta_Reset()
 	_config.Style_Reset()
 	_config.Manifest_Reset()
@@ -23,6 +23,7 @@ func Update_Cache() {
 	_stash.Reset()
 	_stash.Artifact_Update()
 	_stash.Library_Update()
+	_style.Hashrule_Upload()
 
 	index_scanned := _style.Cssfile_String(_util.Code_Uncomment(_config.Saved.RootCSS, false, true, false), "INDEX | ")
 	_config.Manifest.Constants = index_scanned.Variables.ToMap()
@@ -31,8 +32,9 @@ func Update_Cache() {
 			_config.Delta.IndexAttach[res.Index] = true
 		}
 	}
+	
 	_config.Delta.IndexBuild = _css.Render_Sequence(index_scanned.Result, _config.Static.MINIFY)
-	_style.Hashrule_Upload()
+
 	_stash.SaveHandoffErrors()
 	_stash.Target_UpdateDirs()
 

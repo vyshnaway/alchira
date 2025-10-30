@@ -100,5 +100,13 @@ func (m *T[K, V]) Copy(source *T[K, V]) {
 }
 
 func (m *T[K, V]) Sort(function func([]K) []K) {
+	keymap := make(map[K]V, m.Len())
+	for i := range m.Len() {
+		keymap[m.keys[i]] = m.vals[i]
+	}
 	m.keys = function(m.keys)
+	m.vals = make([]V, 0, len(m.keys))
+	for _, k := range m.keys {
+		m.vals = append(m.vals, keymap[k])
+	}
 }

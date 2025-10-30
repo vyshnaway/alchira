@@ -52,8 +52,8 @@ func Rider(
 	fileData.StyleData.TagReplacements = []_model.File_TagReplacement{}
 	replacements := make([]_model.File_TagReplacement, 0, 8)
 	classesList := make([][]string, 0, 24)
-	tagTrack := make([]*T_RawStyle, 24)
-	stylesList := make([]*T_RawStyle, 24)
+	tagTrack := make([]*T_RawStyle, 0, 24)
+	stylesList := make([]*T_RawStyle, 0, 24)
 	attachments := make(map[string]bool, 24)
 
 	var content string
@@ -139,6 +139,7 @@ func Rider(
 					if len(tagTrack) != 0 {
 						track := tagTrack[len(tagTrack)-1]
 						tagTrack = tagTrack[:len(tagTrack)-1]
+
 						if track.Element == element {
 							track.Innertext = content[track.EndMarker:tagStart]
 							exitedNow = true

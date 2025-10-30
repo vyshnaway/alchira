@@ -2,7 +2,7 @@ package main
 
 import (
 	_fmt "fmt"
-	"log"
+	_log "log"
 	_config "main/configs"
 	_action "main/internal/action"
 	X "main/internal/console"
@@ -13,7 +13,7 @@ import (
 	_util "main/package/utils"
 	_compiler "main/service/compiler"
 	_server "main/service/server"
-	"net/http"
+	_http "net/http"
 	_ "net/http/pprof"
 	_os "os"
 	_filepath "path/filepath"
@@ -36,10 +36,6 @@ func Path_FromRoot(elem ...string) (string, error) {
 }
 
 func main() {
-	go func() {
-		log.Println(http.ListenAndServe("localhost:6060", nil))
-	}()
-
 	exposedCommands := []string{}
 	for k := range _config.Root.Commands {
 		exposedCommands = append(exposedCommands, k)
@@ -113,6 +109,13 @@ func main() {
 	}
 
 	_config.Reset(false)
+	if _fileman.Path_IfDir(_config.Root_Scaffold["source"].Path) {
+		
+		go func() {
+			_log.Println(_http.ListenAndServe("localhost:6070", nil))
+		}()
+	}
+
 
 	switch _config.Static.Command {
 	case "init":
