@@ -22,7 +22,7 @@ func value_EvaluateIndexTraces(
 	classTrace := make([]_model.Style_ClassIndexTrace, 0, len(classList))
 
 	for _, entry := range classList {
-		found := _action.Index_Find(entry, localClassMap)
+		found := _action.Index_Finder(entry, localClassMap)
 		if found.Index > 0 {
 			classTrace = append(classTrace, _model.Style_ClassIndexTrace{ClassName: entry, ClassIndex: found.Index})
 			indexArray = append(indexArray, found.Index)

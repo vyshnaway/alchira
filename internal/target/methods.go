@@ -42,7 +42,7 @@ func (This *Class) GetTracks() GetTracks_return {
 
 	scd := This.StylesheetContext.StyleData
 	for i := range scd.Attachments {
-		if found := _action.Index_Find(i, scd.LocalMap); found.Index > 0 {
+		if found := _action.Index_Finder(i, scd.LocalMap); found.Index > 0 {
 			attachments[found.Index] = true
 		}
 	}
@@ -54,7 +54,7 @@ func (This *Class) GetTracks() GetTracks_return {
 		for _, track := range file.StyleData.ClassTracks {
 			retraces := []int{}
 			for _, i := range track {
-				if found := _action.Index_Find(i, file.StyleData.LocalMap); found.Index > 0 {
+				if found := _action.Index_Finder(i, file.StyleData.LocalMap); found.Index > 0 {
 					retraces = append(retraces, found.Index)
 					attachments[found.Index] = true
 					_map.Copy(attachstrings, found.Data.SrcData.Attachments)
@@ -69,13 +69,13 @@ func (This *Class) GetTracks() GetTracks_return {
 		}
 
 		for i := range attachstrings {
-			if found := _action.Index_Find(i, file.StyleData.LocalMap); found.Index > 0 {
+			if found := _action.Index_Finder(i, file.StyleData.LocalMap); found.Index > 0 {
 				attachments[found.Index] = true
 			}
 		}
 
 		for i := range attachstrings {
-			if found := _action.Index_Find(i, file.StyleData.LocalMap); found.Index > 0 {
+			if found := _action.Index_Finder(i, file.StyleData.LocalMap); found.Index > 0 {
 				attachments[found.Index] = true
 			}
 		}

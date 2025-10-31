@@ -1,4 +1,4 @@
-package actions
+package handle
 
 import (
 	"main/configs"
@@ -11,25 +11,25 @@ import (
 )
 
 type T_Component_return struct {
-	Attributes map[string]string `json:"attributes"`
-	Summon     string            `json:"summon"`
-	Staple     string            `json:"staple"`
-	Symclass   string            `json:"symclass"`
-	Rootcss    string            `json:"rootcss"`
-	Compcss    string            `json:"compcss"`
+	Attributes map[string]string `json:Attributes`
+	Summon     string            `json:Summon`
+	Staple     string            `json:Staple`
+	Symclass   string            `json:Symclass`
+	Rootcss    string            `json:Rootcss`
+	Compcss    string            `json:Compcss`
 }
 
-func Component(symclass, filepath string) *T_Component_return {
+func Sandbox_View(symclass, filepath string) (response any, broadcast bool) {
 	var staplesheet, stylesheet strings.Builder
 
 	context := configs.Style.Filepath_to_Context[filepath]
 	if context == nil {
-		return nil
+		return nil, false
 	}
 
-	ref := action.Index_Find(symclass, context.StyleData.LocalMap)
+	ref := action.Index_Finder(symclass, context.StyleData.LocalMap)
 	if ref.Index == 0 {
-		return nil
+		return nil, false
 	}
 
 	summon := ref.Data.SrcData.SummonSnippet
@@ -47,14 +47,13 @@ func Component(symclass, filepath string) *T_Component_return {
 		data := action.Index_Fetch(i.ClassIndex).SrcData
 		attachments[i.ClassIndex] = data
 		for a := range data.Attachments {
-			if found := action.Index_Find(a, context.StyleData.LocalMap); found.Index > 0 {
+			if found := action.Index_Finder(a, context.StyleData.LocalMap); found.Index > 0 {
 				attachments[found.Index] = found.Data.SrcData
 			}
 		}
 		classBlocks.SetBlock(i.ClassName, data.NativeRawStyle)
 	}
 	stylesheet.WriteString(css.Render_Switched(classBlocks, false))
-	
 
 	stylesheet.WriteString(css.Render_Vendored(ref.Data.SrcData.NativeAttachStyle, true))
 	for _, data := range attachments {
@@ -69,5 +68,5 @@ func Component(symclass, filepath string) *T_Component_return {
 		Symclass:   symclass,
 		Rootcss:    configs.Delta.IndexBuild,
 		Compcss:    stylesheet.String(),
-	}
+	}, true
 }

@@ -75,7 +75,7 @@ func Rawtag_Upload(
 		normalized_symclass = _util.String_Filter(symclass, []rune{}, []rune{}, []rune{'$'})
 	}
 
-	found := _action.Index_Find(symclass, IndexMap)
+	found := _action.Index_Finder(symclass, IndexMap)
 	index := found.Index
 	if found.Group != _model.Style_Type_Null {
 		classdata := _action.Index_Fetch(found.Index)

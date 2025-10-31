@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"main/configs"
+	"main/service/server/handle"
 	"net"
 	"net/http"
 	"path/filepath"
@@ -14,10 +15,12 @@ import (
 )
 
 var (
-	mutex     sync.Mutex                       // Protects clients map
-	clients   = make(map[*websocket.Conn]bool) // Connected clients
-	broadcast = make(chan []byte)              // Broadcast channel
-	upgrader  = websocket.Upgrader{}
+	WS_Port int
+	WS_Url  string
+	WS_Mutex     sync.Mutex
+	WS_Clients   = make(map[*websocket.Conn]bool)
+	WS_Broadcast = make(chan []byte)
+	WS_Upgrader  = websocket.Upgrader{}
 )
 
 func RequestAvailablePort(tryPort int) (int, error) {
@@ -63,48 +66,44 @@ func Webview_Create(tryport int) (httpServer *http.Server, deducedPort int, err 
 	mux.HandleFunc(
 		"/ws",
 		func(w http.ResponseWriter, r *http.Request) {
-			upgrader.CheckOrigin = func(r *http.Request) bool { return true }
-			ws, err := upgrader.Upgrade(w, r, nil)
+			WS_Upgrader.CheckOrigin = func(r *http.Request) bool { return true }
+			ws, err := WS_Upgrader.Upgrade(w, r, nil)
 			if err != nil {
 				return
 			}
 
-			mutex.Lock()
-			clients[ws] = true
-			mutex.Unlock()
+			WS_Mutex.Lock()
+			WS_Clients[ws] = true
+			WS_Mutex.Unlock()
 
 			defer func() {
-				mutex.Lock()
-				delete(clients, ws)
-				mutex.Unlock()
+				WS_Mutex.Lock()
+				delete(WS_Clients, ws)
+				WS_Mutex.Unlock()
 				ws.Close()
 			}()
 
 			for {
-				_, message, err := ws.ReadMessage()
+				_, request, err := ws.ReadMessage()
 				if err != nil {
 					break
 				}
-				var req JsonRPCRequest
-				if err := json.Unmarshal(message, &req); err != nil {
-					continue
-				}
-				IO_Json(req)
+				w.Write(IO_Json(request))
 			}
 		},
 	)
 	go func() {
 		for {
-			msg := <-broadcast
-			mutex.Lock()
-			for client := range clients {
+			msg := <-WS_Broadcast
+			WS_Mutex.Lock()
+			for client := range WS_Clients {
 				err := client.WriteMessage(websocket.TextMessage, msg)
 				if err != nil {
 					client.Close()
-					delete(clients, client)
+					delete(WS_Clients, client)
 				}
 			}
-			mutex.Unlock()
+			WS_Mutex.Unlock()
 		}
 	}()
 
@@ -114,4 +113,30 @@ func Webview_Create(tryport int) (httpServer *http.Server, deducedPort int, err 
 	}
 
 	return server, foundPort, nil
+}
+
+func IO_Json(reqbyte []byte) []byte {
+	var req handle.JsonRPCRequest[any]
+	if err := json.Unmarshal(reqbyte, &req); err != nil {
+		return []byte{}
+	}
+
+	var broadcast_bool bool
+	var resp handle.JsonRPCResponse
+	resp.JSONRPC = "2.0"
+	resp.ID = req.ID
+
+	if method, exist := handle.Registery[req.Method]; exist {
+		resp.Result, broadcast_bool = method(reqbyte)
+	} else {
+		resp.Error = fmt.Errorf("invalid method")
+	}
+
+	if r, e := json.Marshal(resp); e == nil {
+		if broadcast_bool {
+			WS_Broadcast <- r
+		}
+		return r
+	}
+	return nil
 }

@@ -28,7 +28,7 @@ func SetReferences() {
 	index_scanned := _style.Cssfile_String(_util.Code_Uncomment(_config.Saved.RootCSS, false, true, false), "INDEX | ")
 	_config.Manifest.Constants = index_scanned.Variables.ToMap()
 	for attachment := range index_scanned.Attachments {
-		if res := _action.Index_Find(attachment, _model.Style_ClassIndexMap{}); res.Index > 0 {
+		if res := _action.Index_Finder(attachment, _model.Style_ClassIndexMap{}); res.Index > 0 {
 			_config.Delta.IndexAttach[res.Index] = true
 		}
 	}

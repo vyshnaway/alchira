@@ -27,7 +27,7 @@ func parse_AssignMerge(
 	variables := O.New[string, string](8)
 
 	for _, classname := range classlist {
-		found := _action.Index_Find(classname, _model.Style_ClassIndexMap{})
+		found := _action.Index_Finder(classname, _model.Style_ClassIndexMap{})
 		if found.Group == _model.Style_Type_Library {
 			classdata := _action.Index_Fetch(found.Index)
 			classdata.SrcData.NativeRawStyle.PropRange(func(k, v string) {

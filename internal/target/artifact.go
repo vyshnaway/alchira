@@ -63,7 +63,7 @@ func (This *Class) GetArtifacts() map[string]*_model.Style_ExportStyle {
 			exporting := Artifact(pubindex)
 
 			for a := range _action.Index_Fetch(pubindex).SrcData.Attachments {
-				if found := _action.Index_Find(a, file.StyleData.PublicMap); found.Index > 0 {
+				if found := _action.Index_Finder(a, file.StyleData.PublicMap); found.Index > 0 {
 					subexporting := Artifact(found.Index)
 					exporting.Attachments[subexporting.SymClass] = true
 					exports[subexporting.SymClass] = subexporting

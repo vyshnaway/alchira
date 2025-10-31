@@ -45,7 +45,7 @@ func Index_Fetch(index int) *_model.Cache_SymclassData {
 	return data
 }
 
-func Index_Find(classname string, localMap _model.Style_ClassIndexMap) index_Find_retrun {
+func Index_Finder(classname string, localMap _model.Style_ClassIndexMap) index_Find_retrun {
 	index := 0
 	group := _model.Style_Type_Null
 	if idx, found := localMap[classname]; found {

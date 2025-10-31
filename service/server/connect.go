@@ -3,10 +3,8 @@ package server
 import (
 	"bufio"
 	"context"
-	"encoding/json"
 	"fmt"
 	"main/configs"
-	"main/package/watchman"
 	"main/service/compiler"
 
 	"net/http"
@@ -17,25 +15,6 @@ import (
 	"time"
 )
 
-var Refer = struct {
-	LatestComponent  any
-	Port             int
-	Active           bool
-	Url              string
-	LiveCursor       bool
-	SymclassIndexMap map[string]int
-	WebviewState     map[string]any
-	watcher          *watchman.T_Watcher
-}{
-	Port:             0,
-	Url:              "",
-	Active:           false,
-	LiveCursor:       false,
-	SymclassIndexMap: map[string]int{},
-	WebviewState:     map[string]any{},
-	watcher:          nil,
-}
-
 func Connect(tryport int, concurrent bool) {
 	// Start server
 	server, port, err := Webview_Create(tryport)
@@ -43,8 +22,8 @@ func Connect(tryport int, concurrent bool) {
 		fmt.Println(0)
 		return
 	}
-	Refer.Port = port
-	Refer.Url = fmt.Sprintf("http://localhost:%d", port)
+	WS_Port = port
+	WS_Url = fmt.Sprintf("http://localhost:%d", port)
 	// Start HTTP server in background
 	serverDone := make(chan struct{})
 	go func() {
@@ -74,44 +53,36 @@ func Connect(tryport int, concurrent bool) {
 		go compiler.Execute("", concurrent)
 
 		for scanner.Scan() {
-			if configs.Static.Watchman.Status == false {
+			if !configs.Static.Watchman.Status {
 				continue
 			}
-			request := strings.TrimSpace(scanner.Text())
 
+			request := scanner.Text()
+			if strings.TrimSpace(request) == "exit" {
+				select {
+				case manualExit <- struct{}{}:
+				default:
+				}
+				break
+			}
+
+			var res = []byte{}
 			if strings.HasPrefix(request, "$ ") || strings.HasPrefix(request, "> ") {
 				split := strings.Fields(request[2:])
 				if len(split) < 1 {
 					continue
 				}
-				command := split[0]
-				arguments := split[1:]
-				res := IO_Term(command, arguments, request[0] == '>')
-
-				if res == "" {
-					continue
-				} else {
-					_, err := fmt.Fprintln(writer, res)
-					if err != nil {
-						fmt.Fprintln(os.Stderr, "Error writing response to stdout:", err)
-						break
-					}
-					if res == "0" {
-						select {
-						case manualExit <- struct{}{}:
-						default:
-						}
-						break
-					}
-				}
+				res = Interactive(split[0], split[1:], request[0] == '>')
 			} else {
-				var req JsonRPCRequest
-				if err := json.Unmarshal([]byte(request), &req); err != nil {
-					continue
-				}
-				_, err := fmt.Fprintln(writer, IO_Json(req))
+				res = IO_Json([]byte(request))
+			}
+
+			if len(res) == 0 {
+				continue
+			} else {
+				_, err := fmt.Fprintln(writer, string(res))
 				if err != nil {
-					fmt.Fprintln(os.Stderr, "Error writing JSON to stdout:", err)
+					fmt.Fprintln(os.Stderr, "Error writing response to stdout:", err)
 					break
 				}
 			}
