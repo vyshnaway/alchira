@@ -25,7 +25,7 @@ var symclass_regex = _regexp.MustCompile(`(?i)^[\w\-_]+\$+[\w\-]+$`)
 func Tag_Scanner(
 	fileData *_model.File_Stash,
 	action E_Action,
-	cursor *_reader.Type,
+	cursor *_reader.T_Reader,
 ) tag_Parse_retype {
 	classesList := make([][]string, 0, 1)
 	attachments := make([]string, 0, 4)
@@ -41,19 +41,15 @@ func Tag_Scanner(
 	selfClosed := false
 	classSynced := false
 	fallbackAquired := false
+	startpos := cursor.Active
 
 	styleDeclarations := _model.T_RawStyle{
-		Elid:      0,
-		EndMarker: 0,
-		Element:   "",
-		Elvalue:   "",
-		Innertext: "",
-		Scope:     _model.Style_Type_Null,
-		Start: _model.T_Position{
-			Row: cursor.Active.RowMarker,
-			Col: cursor.Active.ColMarker,
-			Pos: cursor.Active.Position,
-		},
+		Elid:       0,
+		EndMarker:  0,
+		Element:    "",
+		Elvalue:    "",
+		Innertext:  "",
+		Scope:      _model.Style_Type_Null,
 		TagCount:   cursor.Active.Cycle + 1,
 		SymClasses: make([]string, 0, 1),
 		Attributes: make(map[string]string, 12),
@@ -175,7 +171,7 @@ func Tag_Scanner(
 		}
 	}
 
-	styleDeclarations.EndMarker = cursor.Active.Position
+	styleDeclarations.EndMarker = cursor.Active.Idx
 	if cursor.Active.Char == '>' {
 		styleDeclarations.EndMarker++
 	}
@@ -183,10 +179,10 @@ func Tag_Scanner(
 	if ok {
 		cursor.Active.Cycle++
 		selfClosed = cursor.Active.Last == '/'
-		styleDeclarations.End = _model.T_Position{
-			Row: cursor.Active.RowMarker,
-			Col: cursor.Active.ColMarker,
-			Pos: cursor.Active.Position,
+		styleDeclarations.Range = _reader.T_Range{
+			Data:  []string{},
+			Start: startpos,
+			End:   cursor.Active,
 		}
 	} else if fallbackAquired {
 		cursor.LoadFallback()

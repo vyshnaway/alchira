@@ -84,7 +84,7 @@ func value_Parse(
 	value string,
 	action E_Action,
 	fileData *_model.File_Stash,
-	FileCursor _reader.Type,
+	FileCursor _reader.T_Reader,
 ) value_Parse_retype {
 
 	value += " "
@@ -135,8 +135,8 @@ func value_Parse(
 			metafront = _fmt.Sprintf(
 				"TAG%s\\:%d\\:%d__",
 				fileData.DebugFront,
-				FileCursor.Active.RowMarker,
-				FileCursor.Active.ColMarker,
+				FileCursor.Active.Row,
+				FileCursor.Active.Col,
 			)
 		}
 

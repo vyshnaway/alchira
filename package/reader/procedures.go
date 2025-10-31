@@ -1,25 +1,25 @@
 package reader
 
-func (This *Type) LoadFallback() {
+func (This *T_Reader) LoadFallback() {
 	This.Active = This.Fallback
 }
 
-func (This *Type) SaveFallback() {
+func (This *T_Reader) SaveFallback() {
 	This.Fallback = This.Active
 }
 
-func (This *Type) setCurrent() {
-	if This.Active.Position < len(This.Runes) {
-		This.Active.Char = This.Runes[This.Active.Position]
+func (This *T_Reader) setCurrent() {
+	if This.Active.Idx < len(This.Runes) {
+		This.Active.Char = This.Runes[This.Active.Idx]
 
-		if This.Active.Position+1 < len(This.Runes) {
-			This.Active.Next = This.Runes[This.Active.Position+1]
+		if This.Active.Idx+1 < len(This.Runes) {
+			This.Active.Next = This.Runes[This.Active.Idx+1]
 		} else {
 			This.Active.Next = 0
 		}
 
-		if This.Active.Position > 0 {
-			This.Active.Last = This.Runes[This.Active.Position-1]
+		if This.Active.Idx > 0 {
+			This.Active.Last = This.Runes[This.Active.Idx-1]
 		} else {
 			This.Active.Last = 0
 		}
@@ -30,19 +30,19 @@ func (This *Type) setCurrent() {
 	}
 }
 
-func (This *Type) updateIncPosition() {
+func (This *T_Reader) updateIncPosition() {
 	if This.Active.Char == '\n' {
-		This.Active.RowMarker++
-		This.Active.ColFallback = This.Active.ColMarker
-		This.Active.ColMarker = 0
+		This.Active.Row++
+		This.Active.ColFallback = This.Active.Col
+		This.Active.Col = 0
 	} else {
-		This.Active.ColMarker++
+		This.Active.Col++
 	}
 }
 
-func (This *Type) Increment() (Char rune, Streaming bool) {
+func (This *T_Reader) Increment() (Char rune, Streaming bool) {
 	This.Active.Last = This.Active.Char
-	This.Active.Position++
+	This.Active.Idx++
 	This.setCurrent()
 	This.updateIncPosition()
 
@@ -52,18 +52,18 @@ func (This *Type) Increment() (Char rune, Streaming bool) {
 	return 0, This.Streaming
 }
 
-func (This *Type) updateDecPosition() {
+func (This *T_Reader) updateDecPosition() {
 	if This.Active.Char == '\n' {
-		This.Active.RowMarker--
-		This.Active.ColMarker = This.Active.ColFallback
-	} else if This.Active.ColMarker > 0 {
-		This.Active.ColMarker--
+		This.Active.Row--
+		This.Active.Col = This.Active.ColFallback
+	} else if This.Active.Col > 0 {
+		This.Active.Col--
 	}
 }
 
-func (This *Type) Decrement() (Char rune, Streaming bool) {
-	if This.Active.Position > 0 {
-		This.Active.Position--
+func (This *T_Reader) Decrement() (Char rune, Streaming bool) {
+	if This.Active.Idx > 0 {
+		This.Active.Idx--
 	}
 	This.setCurrent()
 	This.updateDecPosition()
@@ -74,7 +74,7 @@ func (This *Type) Decrement() (Char rune, Streaming bool) {
 	return 0, This.Streaming
 }
 
-func (This *Type) Stream(autoincrement bool, function func()) {
+func (This *T_Reader) Stream(autoincrement bool, function func()) {
 	if autoincrement {
 		for This.Streaming {
 			function()

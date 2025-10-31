@@ -48,7 +48,7 @@ func Test_Tag(t *_testing.T) {
 	cursor := _reader.New(content)
 	res := _script.Tag_Scanner(data, _script.E_Action_Read, &cursor)
 	S.Render.Raw(res)
-	S.Post(content[:cursor.Active.Position])
+	S.Post(content[:cursor.Active.Idx])
 }
 
 func Test_Script(t *_testing.T) {
@@ -146,5 +146,5 @@ func Test_Script(t *_testing.T) {
 	cursor := _reader.New(content)
 	res := _script.Rider(data, _script.E_Action_Read)
 	S.Render.Raw(res)
-	S.Post(content[:cursor.Active.Position])
+	S.Post(content[:cursor.Active.Idx])
 }

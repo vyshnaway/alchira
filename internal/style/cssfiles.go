@@ -21,14 +21,14 @@ func Cssfile_String(content string, initial string) R_Cssfile_Parse {
 	scanned := _css.ParsePartial(_util.Code_Uncomment(content, false, true, false), 32)
 	result := _css.NewBlockSeq(8)
 	for _, d := range scanned.Directives {
-		result.AddDirective(d)
+		result.AddDirective(d.Data[0])
 	}
 
 	variables := O.New[string, string](36)
 	attachments := make(map[string]bool, 8)
-	for _, kv := range scanned.All_Blocks {
-		key := kv[0]
-		val := kv[1]
+	for _, r := range scanned.All_Blocks {
+		key := r.Data[0]
+		val := r.Data[1]
 		res := Parse_CssSnippet(val, initial, key, true)
 
 		variables.Copy(res.Variables)
@@ -55,9 +55,9 @@ func Cssfile_Collection(files []*_model.File_Stash) cssfile_Collection_return {
 	selectorMap := make(_model.Style_ClassIndexMap, cap(selectorList))
 
 	for _, file := range files {
-		for _, so := range _css.ParsePartial(_util.Code_Uncomment(file.Content, false, true, false), initialparse_allocation).All_Blocks {
-			selector := so[0]
-			value := so[1]
+		for _, r := range _css.ParsePartial(_util.Code_Uncomment(file.Content, false, true, false), initialparse_allocation).All_Blocks {
+			selector := r.Data[0]
+			value := r.Data[1]
 
 			declaration := file.SourcePath
 			classname := file.ClassFront + _util.String_Filter(selector, []rune{}, []rune{'\\', '.'}, []rune{})

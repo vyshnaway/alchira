@@ -1,41 +1,47 @@
 package reader
 
-type file_Position struct {
+type T_Position struct {
+	Idx         int  `json:"idx"`
+	Row         int  `json:"row"`
+	Col         int  `json:"col"`
 	Last        rune `json:"last"`
 	Char        rune `json:"char"`
 	Next        rune `json:"next"`
-	Position    int  `json:"marker"`
-	RowMarker   int  `json:"rowMarker"`
-	ColMarker   int  `json:"colMarker"`
 	Cycle       int  `json:"cycle"`
 	ColFallback int  `json:"colFallback"`
 }
 
-type Type struct {
+type T_Range struct {
+	Data  []string   `json:"data"`
+	Start T_Position `json:"start"`
+	End   T_Position `json:"end"`
+}
+
+type T_Reader struct {
 	Runes     []rune
-	Active    file_Position
-	Fallback  file_Position
+	Active    T_Position
+	Fallback  T_Position
 	Streaming bool
 }
 
-func New(content string) Type {
-	This := Type{Runes: []rune(content)}
+func New(content string) T_Reader {
+	This := T_Reader{Runes: []rune(content)}
 	This.Reset()
 	return This
 }
 
-func (This *Type) Reset() {
-	This.Active = file_Position{
-		Position:    0,
-		RowMarker:   0,
-		ColMarker:   0,
+func (This *T_Reader) Reset() {
+	This.Active = T_Position{
+		Idx:         0,
+		Row:         0,
+		Col:         0,
 		Cycle:       0,
 		ColFallback: 0,
 	}
-	This.Fallback = file_Position{
-		Position:    0,
-		RowMarker:   0,
-		ColMarker:   0,
+	This.Fallback = T_Position{
+		Idx:         0,
+		Row:         0,
+		Col:         0,
 		Cycle:       0,
 		ColFallback: 0,
 	}

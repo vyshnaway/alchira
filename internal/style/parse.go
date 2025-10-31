@@ -66,11 +66,15 @@ func Parse_Filter(content string) R_Parse_Filter {
 		Assign:     make([]string, 0, 8),
 		Attach:     make([]string, 0, 8),
 		Blocks:     O.New[string, string](8),
-		Variables:  O.FromOrderedArray(ref.Variables),
+		Variables:  O.New[string, string](8),
 		Properties: O.New[string, string](8),
 	}
+	for _, r := range ref.Variables {
+		res.Variables.Set(r.Data[0], r.Data[1])
+	}
 
-	for _, val := range ref.Directives {
+	for _, r := range ref.Directives {
+		val := r.Data[0]
 		spaceIndex := _string.Index(val, " ")
 		if spaceIndex < 0 {
 			spaceIndex = len(val)
@@ -89,7 +93,8 @@ func Parse_Filter(content string) R_Parse_Filter {
 		}
 	}
 
-	for _, val := range ref.Operations {
+	for _, r := range ref.Operations {
+		val := r.Data[0]
 		breaks := _util.String_ZeroBreaks(val, []rune{' ', '\n', ','})
 		if len(breaks) > 0 {
 			switch breaks[0] {
@@ -105,18 +110,18 @@ func Parse_Filter(content string) R_Parse_Filter {
 		}
 	}
 
-	for _, kv := range ref.Properties {
-		key, val := kv[0], kv[1]
+	for _, r := range ref.Properties {
+		key, val := r.Data[0], r.Data[1]
 		res.Properties.Set(key, val)
 	}
 
-	for _, kv := range ref.All_Blocks {
-		key, val := kv[0], kv[1]
+	for _, r := range ref.All_Blocks {
+		key, val := r.Data[0], r.Data[1]
 		res.Blocks.Set(key, val)
 	}
 
-	for _, kv := range ref.Variables {
-		key, val := kv[0], kv[1]
+	for _, r := range ref.Variables {
+		key, val := r.Data[0], r.Data[1]
 		res.Variables.Set(key, val)
 	}
 

@@ -10,7 +10,7 @@ import (
 	_strings_ "strings"
 )
 
-func color_Investigate(cursor *_Cursor_.Type, palette string) []float64 {
+func color_Investigate(cursor *_Cursor_.T_Reader, palette string) []float64 {
 	var value _strings_.Builder
 	values := []float64{}
 	braceTrack := []rune{}
@@ -116,8 +116,8 @@ func Color_FallbackGen(
 			capture.Reset()
 		}
 
-		if _slices_.Contains(fallbackPalettes, capture.String()) && content[cursor.Active.Position] == '(' {
-			frompos := cursor.Active.Position
+		if _slices_.Contains(fallbackPalettes, capture.String()) && content[cursor.Active.Idx] == '(' {
+			frompos := cursor.Active.Idx
 			values := color_Investigate(&cursor, capture.String())
 			if len(values) > 2 {
 
@@ -159,7 +159,7 @@ func Color_FallbackGen(
 					rgb := _utils_.ColorRGB.From.Oklch(l, c, h, alpha)
 					r, g, b, alpha, converted = rgb.R, rgb.G, rgb.B, rgb.A, rgb.Converted
 				default:
-					converted = capture.String() + content[frompos:cursor.Active.Position]
+					converted = capture.String() + content[frompos:cursor.Active.Idx]
 				}
 
 				if fallback_RGB1_HEX0 {
@@ -169,7 +169,7 @@ func Color_FallbackGen(
 				}
 
 			} else {
-				result += capture.String() + content[frompos:cursor.Active.Position]
+				result += capture.String() + content[frompos:cursor.Active.Idx]
 			}
 			capture.Reset()
 		}

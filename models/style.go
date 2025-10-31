@@ -2,6 +2,7 @@ package models
 
 import (
 	_css "main/package/css"
+	"main/package/reader"
 )
 
 type Style_Type string
@@ -36,6 +37,7 @@ type Style_Metadata struct {
 type Style_ClassData struct {
 	Attributes        map[string]string
 	Index             int
+	Range             *reader.T_Range
 	Metadata          *Style_Metadata
 	Artifact          string
 	Definent          string
@@ -60,8 +62,7 @@ type T_RawStyle struct {
 	Element    string
 	Elvalue    string
 	TagCount   int
-	Start      T_Position
-	End        T_Position
+	Range      reader.T_Range
 	EndMarker  int
 	SymClasses []string
 	Scope      Style_Type

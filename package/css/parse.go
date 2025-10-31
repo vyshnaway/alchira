@@ -8,37 +8,45 @@ import (
 )
 
 type R_Parse struct {
-	Directives    []string
-	Operations    []string
-	Properties    [][2]string
-	Atrule_Blocks [][2]string
-	Nested_Blocks [][2]string
-	Select_Blocks [][2]string
-	All_Blocks    [][2]string
-	Variables     [][2]string
+	Directives    []_reader.T_Range
+	Operations    []_reader.T_Range
+	Properties    []_reader.T_Range
+	Atrule_Blocks []_reader.T_Range
+	Nested_Blocks []_reader.T_Range
+	Select_Blocks []_reader.T_Range
+	All_Blocks    []_reader.T_Range
+	Variables     []_reader.T_Range
 }
 
 func ParsePartial(content string, basic_allocation_size int) R_Parse {
 
 	result := R_Parse{
-		Directives:    make([]string, 0, basic_allocation_size),
-		Operations:    make([]string, 0, basic_allocation_size),
-		Properties:    make([][2]string, 0, basic_allocation_size),
-		Atrule_Blocks: make([][2]string, 0, basic_allocation_size),
-		Nested_Blocks: make([][2]string, 0, basic_allocation_size),
-		Select_Blocks: make([][2]string, 0, basic_allocation_size),
-		All_Blocks:    make([][2]string, 0, basic_allocation_size),
-		Variables:     make([][2]string, 0, basic_allocation_size),
+		Directives:    make([]_reader.T_Range, 0, basic_allocation_size),
+		Operations:    make([]_reader.T_Range, 0, basic_allocation_size),
+		Properties:    make([]_reader.T_Range, 0, basic_allocation_size),
+		Atrule_Blocks: make([]_reader.T_Range, 0, basic_allocation_size),
+		Nested_Blocks: make([]_reader.T_Range, 0, basic_allocation_size),
+		Select_Blocks: make([]_reader.T_Range, 0, basic_allocation_size),
+		All_Blocks:    make([]_reader.T_Range, 0, basic_allocation_size),
+		Variables:     make([]_reader.T_Range, 0, basic_allocation_size),
 	}
 
 	key := ""
 	var awaitBrace rune = 0
 	braceTrack := make([]rune, 0, 12)
-	keyStart := 0
-	valStart := 0
 	deviance := 0
 	isProp := true
 	cursor := _reader.New(content + ";")
+	keyStart := cursor.Active
+	valueFrom := 0
+
+	createRange := func(data []string) _reader.T_Range {
+		return _reader.T_Range{
+			Data:  data,
+			Start: keyStart,
+			End:   cursor.Active,
+		}
+	}
 
 	for ch, streaming := cursor.Active.Char, cursor.Streaming; streaming; ch, streaming = cursor.Increment() {
 
@@ -62,49 +70,51 @@ func ParsePartial(content string, basic_allocation_size int) R_Parse {
 
 		if deviance == 1 && cursor.Active.Char == '{' {
 			isProp = false
-			key = _util.String_Minify(content[keyStart:cursor.Active.Position])
-			valStart = cursor.Active.Position + 1
+			key = _util.String_Minify(content[keyStart.Idx:cursor.Active.Idx])
+			valueFrom = cursor.Active.Idx + 1
 		} else if deviance != 0 {
 			continue
 		} else {
 			switch cursor.Active.Char {
 			case ':':
-				k := _util.String_Minify(content[keyStart:cursor.Active.Position])
+				k := _util.String_Minify(content[keyStart.Idx:cursor.Active.Idx])
 				if len(k) > 0 && k[0] != '@' {
 					key = k
-					valStart = cursor.Active.Position + 1
+					valueFrom = cursor.Active.Idx + 1
 				}
 			case '}':
 				fallthrough
 			case ';':
-				val := _util.String_Minify(content[valStart:cursor.Active.Position])
+				val := _util.String_Minify(content[valueFrom:cursor.Active.Idx])
 				{
 					if isProp {
 						if len(key) > 0 {
 							if _string.HasPrefix(key, "--") {
-								result.Variables = append(result.Variables, [2]string{key, val})
+								result.Variables = append(result.Variables, createRange([]string{key, val}))
 							}
-							result.Properties = append(result.Properties, [2]string{key, val})
+							result.Properties = append(result.Properties, createRange([]string{key, val}))
 						} else if len(val) > 0 {
 							if val[0] == '@' {
-								result.Directives = append(result.Directives, val)
+								result.Directives = append(result.Directives, createRange([]string{val}))
 							} else {
-								result.Operations = append(result.Operations, val)
+								result.Operations = append(result.Operations, createRange([]string{val}))
 							}
 						}
 					} else if len(key) > 0 {
 						switch rune(key[0]) {
 						case '@':
-							result.Atrule_Blocks = append(result.Atrule_Blocks, [2]string{key, val})
+							result.Atrule_Blocks = append(result.Atrule_Blocks, createRange([]string{key, val}))
 						case '&':
-							result.Nested_Blocks = append(result.Nested_Blocks, [2]string{key, val})
+							result.Nested_Blocks = append(result.Nested_Blocks, createRange([]string{key, val}))
 						default:
-							result.Select_Blocks = append(result.Select_Blocks, [2]string{key, val})
+							result.Select_Blocks = append(result.Select_Blocks, createRange([]string{key, val}))
 						}
-						result.All_Blocks = append(result.All_Blocks, [2]string{key, val})
+						result.All_Blocks = append(result.All_Blocks, createRange([]string{key, val}))
 					}
-					keyStart = cursor.Active.Position + 1
-					valStart = cursor.Active.Position + 1
+
+					cursor.Increment()
+					keyStart = cursor.Active
+					valueFrom = keyStart.Idx + 1
 					key = ""
 					val = ""
 					isProp = true

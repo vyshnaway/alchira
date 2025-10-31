@@ -61,7 +61,7 @@ func Rider(
 
 		if cursor.Active.Last != '\\' && ch == '<' && regexp_aftertagopen.MatchString(string(cursor.Active.Next)) {
 			subScribed := ""
-			tagStart := cursor.Active.Position
+			tagStart := cursor.Active.Idx
 			result := Tag_Scanner(fileData, action, &cursor)
 			fragment := string(cursor.Runes[tagStart:result.StyleDeclarations.EndMarker])
 			hasDeclared := (len(result.StyleDeclarations.Styles) > 0 || len(result.StyleDeclarations.SymClasses) > 0)

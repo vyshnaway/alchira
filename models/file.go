@@ -70,9 +70,3 @@ type Style_ClassIndexTrace struct {
 	ClassName  string
 	ClassIndex int
 }
-
-type T_Position struct {
-	Row int
-	Col int
-	Pos int
-}
