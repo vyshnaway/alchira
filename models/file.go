@@ -59,8 +59,20 @@ type File_Stash struct {
 	Scratch     string
 	Label       string
 	DebugFront  string
+	WatchAttrs  []string
 	StyleData   File_StyleData
 	Lookup      File_Lookup
 	Errors      []string
 	Diagnostics []*File_Diagnostic
+}
+
+type Style_ClassIndexTrace struct {
+	ClassName  string
+	ClassIndex int
+}
+
+type T_Position struct {
+	Row int
+	Col int
+	Pos int
 }

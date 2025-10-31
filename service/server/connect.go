@@ -36,7 +36,7 @@ var Refer = struct {
 	watcher:          nil,
 }
 
-func Connect(tryport int) {
+func Connect(tryport int, concurrent bool) {
 	// Start server
 	server, port, err := Webview_Create(tryport)
 	if err != nil {
@@ -71,7 +71,7 @@ func Connect(tryport int) {
 			}
 		}()
 
-		go compiler.Execute("")
+		go compiler.Execute("", concurrent)
 
 		for scanner.Scan() {
 			if configs.Static.Watchman.Status == false {

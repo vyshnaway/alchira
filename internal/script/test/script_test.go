@@ -26,7 +26,7 @@ func Test_File(t *_testing.T) {
 		"source",
 		"lbl",
 	)
-	res := _script.Rider(data, []string{"class"}, _script.E_Action_Read)
+	res := _script.Rider(data, _script.E_Action_Read)
 	S.Render.Raw(res)
 	S.Post(res.Scribed)
 }
@@ -46,7 +46,7 @@ func Test_Tag(t *_testing.T) {
 	)
 
 	cursor := _reader.New(content)
-	res := _script.Tag_Scanner(data, []string{"class"}, _script.E_Action_Read, &cursor)
+	res := _script.Tag_Scanner(data, _script.E_Action_Read, &cursor)
 	S.Render.Raw(res)
 	S.Post(content[:cursor.Active.Position])
 }
@@ -144,7 +144,7 @@ func Test_Script(t *_testing.T) {
 	)
 
 	cursor := _reader.New(content)
-	res := _script.Rider(data, []string{"class"}, _script.E_Action_Read)
+	res := _script.Rider(data, _script.E_Action_Read)
 	S.Render.Raw(res)
 	S.Post(content[:cursor.Active.Position])
 }

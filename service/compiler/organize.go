@@ -32,7 +32,7 @@ func SetReferences() {
 			_config.Delta.IndexAttach[res.Index] = true
 		}
 	}
-	
+
 	_config.Delta.IndexBuild = _css.Render_Sequence(index_scanned.Result, _config.Static.MINIFY)
 
 	_stash.SaveHandoffErrors()
@@ -70,7 +70,7 @@ func Accumulate() {
 
 	_config.Delta.Error.Multiples = []string{}
 	_config.Delta.Diagnostic.Multiples = []*_model.File_Diagnostic{}
-	for _, val := range _config.Style.Index_Data {
+	for _, val := range _config.Style.Index_to_Styledata {
 		if len(val.SrcData.Metadata.Declarations) > 1 {
 			error_ := K.Error_Standard("Duplicate Declarations: "+val.SrcData.SymClass, val.SrcData.Metadata.Declarations)
 			_config.Delta.Error.Multiples = append(_config.Delta.Error.Multiples, error_.Errorstring)

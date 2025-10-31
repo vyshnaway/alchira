@@ -23,7 +23,7 @@ func value_EvaluateIndexTraces(
 
 	for _, entry := range classList {
 		found := _action.Index_Find(entry, localClassMap)
-		if found.Group != _model.Style_Type_Null {
+		if found.Index > 0 {
 			classTrace = append(classTrace, _model.Style_ClassIndexTrace{ClassName: entry, ClassIndex: found.Index})
 			indexArray = append(indexArray, found.Index)
 		}
@@ -43,7 +43,7 @@ func value_EvaluateIndexTraces(
 			}
 		}
 	} else {
-		temp_map := make([]_model.Style_ClassIndexTrace, len(classTrace))
+		temp_map := make([]_model.Style_ClassIndexTrace, 0, len(classTrace))
 
 		if action == E_Action_DebugHash {
 			for _, item := range classTrace {

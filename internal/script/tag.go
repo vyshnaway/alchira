@@ -17,14 +17,13 @@ type tag_Parse_retype struct {
 	ClassesList       [][]string
 	Attachments       []string
 	NativeAttributes  map[string]string
-	StyleDeclarations T_RawStyle
+	StyleDeclarations _model.T_RawStyle
 }
 
 var symclass_regex = _regexp.MustCompile(`(?i)^[\w\-_]+\$+[\w\-]+$`)
 
 func Tag_Scanner(
 	fileData *_model.File_Stash,
-	classProps []string,
 	action E_Action,
 	cursor *_reader.Type,
 ) tag_Parse_retype {
@@ -43,14 +42,14 @@ func Tag_Scanner(
 	classSynced := false
 	fallbackAquired := false
 
-	styleDeclarations := T_RawStyle{
+	styleDeclarations := _model.T_RawStyle{
 		Elid:      0,
 		EndMarker: 0,
 		Element:   "",
 		Elvalue:   "",
 		Innertext: "",
 		Scope:     _model.Style_Type_Null,
-		Start: T_Position{
+		Start: _model.T_Position{
 			Row: cursor.Active.RowMarker,
 			Col: cursor.Active.ColMarker,
 			Pos: cursor.Active.Position,
@@ -132,7 +131,7 @@ func Tag_Scanner(
 						if len(tr_Value) > 0 {
 							styleDeclarations.Styles[tr_Attr] = tr_Value
 						}
-					} else if _slice.Contains(classProps, tr_Attr) {
+					} else if _slice.Contains(fileData.WatchAttrs, tr_Attr) {
 						classSynced = true
 						value_Parse_return := value_Parse(
 							tr_Value,
@@ -184,7 +183,7 @@ func Tag_Scanner(
 	if ok {
 		cursor.Active.Cycle++
 		selfClosed = cursor.Active.Last == '/'
-		styleDeclarations.End = T_Position{
+		styleDeclarations.End = _model.T_Position{
 			Row: cursor.Active.RowMarker,
 			Col: cursor.Active.ColMarker,
 			Pos: cursor.Active.Position,

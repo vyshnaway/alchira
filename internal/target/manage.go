@@ -33,7 +33,10 @@ func (This *Class) Savefile(filepath string, content string, hashindex int) {
 		_fmt.Sprint(This.Label, string(_config.Lodash_rune), _util.String_EnCounter(hashindex)),
 	)
 
-	parse_response := _script.Rider(file, This.ExtnsProps[file.Extension], _script.E_Action_Read)
+	if watchAttrs, ok := This.ExtnsProps[file.Extension]; ok && file.Extension != _config.Root.Extension {
+		file.WatchAttrs = watchAttrs
+	}
+	parse_response := _script.Rider(file, _script.E_Action_Read)
 	file.StyleData.ClassTracks = parse_response.ClassesList
 	file.StyleData.Attachments = parse_response.Attachments
 	file.Midway = parse_response.Scribed

@@ -18,6 +18,7 @@ func IO_Json(req JsonRPCRequest) string {
 	resp.JSONRPC = "2.0"
 	resp.ID = req.ID
 	switch req.Method {
+
 	case "fileManifest":
 		if params_, ok := req.Params.(map[string]any); ok {
 

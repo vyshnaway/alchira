@@ -52,7 +52,7 @@ func startRebuildTicker(intervalMs int) func() {
 	return RebuildTickerReset
 }
 
-func Execute(heading string) (Exitcode int) {
+func Execute(heading string, concurrent bool) (Exitcode int) {
 	exitcode := 0
 	step := Execute_Step_Initialize
 	report := ""
@@ -102,7 +102,7 @@ func Execute(heading string) (Exitcode int) {
 			if _config.Static.WATCH && _config.Static.RebuildTicker != nil {
 				RebuildTickerReset()
 			}
-			res_report, res_status := _action.Verify_Setup()
+			res_report, res_status := _action.Verify_Setup(concurrent)
 			if res_status == _action.Verify_Setup_Status_Verified {
 				step = Execute_Step_LoopAround
 			} else {
@@ -128,7 +128,7 @@ func Execute(heading string) (Exitcode int) {
 			fallthrough
 
 		case Execute_Step_VerifyConfigs:
-			if res_report, res_status := _action.Verify_Configs(false); !res_status {
+			if res_report, res_status := _action.Verify_Configs(false, concurrent); !res_status {
 				report = res_report
 				step = Execute_Step_LoopAround
 				exitcode = 1
@@ -141,7 +141,7 @@ func Execute(heading string) (Exitcode int) {
 			fallthrough
 
 		case Execute_Step_ReadTargets:
-			_action.Save_Targets()
+			_action.Save_Targets(concurrent)
 			fallthrough
 
 		case Execute_Step_ReadHashrule:
@@ -169,7 +169,7 @@ func Execute(heading string) (Exitcode int) {
 					save_action.Wait()
 					save_action.Add(1)
 					go func() {
-						_fileman.Write_Bulk(outfiles)
+						_fileman.Write_Bulk(outfiles, concurrent)
 						save_action.Done()
 					}()
 				}

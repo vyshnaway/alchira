@@ -13,36 +13,15 @@ type E_Action int
 
 const (
 	E_Action_Read E_Action = iota
+	E_Action_SandBox
 	E_Action_BuildHash
 	E_Action_DebugHash
 )
 
-type T_Position struct {
-	Row int
-	Col int
-	Pos int
-}
-
-type T_RawStyle struct {
-	Elid       int
-	Element    string
-	Elvalue    string
-	TagCount   int
-	Start      T_Position
-	End        T_Position
-	EndMarker  int
-	SymClasses []string
-	Scope      _model.Style_Type
-	Comments   []string
-	Innertext  string
-	Styles     map[string]string
-	Attributes map[string]string
-}
-
 type parse_return struct {
 	Scribed      string
 	ClassesList  [][]string
-	StylesList   []*T_RawStyle
+	StylesList   []*_model.T_RawStyle
 	Attachments  map[string]bool
 	Replacements []_model.File_TagReplacement
 }
@@ -52,14 +31,17 @@ var regexp_aftertagopen = _regexp.MustCompile(`(?i)[\w\-\!/]`)
 
 func Rider(
 	fileData *_model.File_Stash,
-	classProps []string,
 	action E_Action,
 ) parse_return {
+	if action == E_Action_SandBox {
+		_config.Style.PublishIndexMap = [][]_model.Style_ClassIndexTrace{}
+	}
+
 	fileData.StyleData.TagReplacements = []_model.File_TagReplacement{}
 	replacements := make([]_model.File_TagReplacement, 0, 8)
 	classesList := make([][]string, 0, 24)
-	tagTrack := make([]*T_RawStyle, 0, 24)
-	stylesList := make([]*T_RawStyle, 0, 24)
+	tagTrack := make([]*_model.T_RawStyle, 0, 24)
+	stylesList := make([]*_model.T_RawStyle, 0, 24)
 	attachments := make(map[string]bool, 24)
 
 	var content string
@@ -80,7 +62,7 @@ func Rider(
 		if cursor.Active.Last != '\\' && ch == '<' && regexp_aftertagopen.MatchString(string(cursor.Active.Next)) {
 			subScribed := ""
 			tagStart := cursor.Active.Position
-			result := Tag_Scanner(fileData, classProps, action, &cursor)
+			result := Tag_Scanner(fileData, action, &cursor)
 			fragment := string(cursor.Runes[tagStart:result.StyleDeclarations.EndMarker])
 			hasDeclared := (len(result.StyleDeclarations.Styles) > 0 || len(result.StyleDeclarations.SymClasses) > 0)
 

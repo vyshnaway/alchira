@@ -109,7 +109,7 @@ func Store(
 
 	AZ := 24
 
-	result := _model.File_Stash{
+	context := &_model.File_Stash{
 		LibLevel:   idn,
 		Label:      lodash_rune + label + lodash_rune,
 		Artifact:   norm_artifact,
@@ -122,6 +122,7 @@ func Store(
 		Content:    content,
 		Midway:     "",
 		Scratch:    "",
+		WatchAttrs: []string{},
 
 		Lookup: _model.File_Lookup{
 			Id:   lookupId,
@@ -142,5 +143,6 @@ func Store(
 		Errors:      make([]string, 0, AZ),
 	}
 
-	return &result
+	_config.Style.Filepath_to_Context[filePath] = context
+	return context
 }

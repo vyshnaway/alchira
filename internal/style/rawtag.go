@@ -4,7 +4,6 @@ import (
 	_fmt "fmt"
 	_config "main/configs"
 	_action "main/internal/action"
-	_script "main/internal/script"
 	_model "main/models"
 	_css "main/package/css"
 	_util "main/package/utils"
@@ -48,7 +47,7 @@ func lodashstyle_process(
 }
 
 func Rawtag_Upload(
-	raw *_script.T_RawStyle,
+	raw *_model.T_RawStyle,
 	file *_model.File_Stash,
 	IndexMap _model.Style_ClassIndexMap,
 ) R_Rawtag_Upload {
@@ -145,7 +144,7 @@ func Rawtag_Upload(
 		nativeAttachStyle := _css.NewBlock(8, 2)
 		if raw.Elid == _config.Root.CustomTags["style"] {
 			nativeAttachResult, exportAttachResult := lodashstyle_process(raw.Innertext, file, true,
-				_fmt.Sprint(raw.Scope, ":ATTACHMENT : ", file.FilePath, ":", raw.Start.Row, ":", raw.Start.Col , " | "),
+				_fmt.Sprint(raw.Scope, ":ATTACHMENT : ", file.FilePath, ":", raw.Start.Row, ":", raw.Start.Col, " | "),
 				raw.SymClasses[0],
 			)
 
@@ -186,11 +185,10 @@ func Rawtag_Upload(
 			vars = nil
 		}
 		metadata := &_model.Style_Metadata{
-			Info:          comments,
-			Skeleton:      nativeRawStyle.Skeleton(),
-			Declarations:  []string{declaration},
-			Variables:     vars,
-			SummonSnippet: summon,
+			Info:         comments,
+			Skeleton:     nativeRawStyle.Skeleton(),
+			Declarations: []string{declaration},
+			Variables:    vars,
 		}
 
 		index = _action.Index_Declare(&_model.Cache_SymclassData{
@@ -202,8 +200,9 @@ func Rawtag_Upload(
 				Definent:          raw.SymClasses[0],
 				SymClass:          symclass,
 				Metadata:          metadata,
-				Attachments:       attachments,
 				DebugClass:        debugclass,
+				Attachments:       attachments,
+				SummonSnippet:     summon,
 				ExportStaple:      exportStaple,
 				NativeStaple:      nativeStaple,
 				ExportRawStyle:    exportRawStyle,

@@ -98,15 +98,15 @@ func Cssfile_Collection(files []*_model.File_Stash) cssfile_Collection_return {
 					vars = nil
 				}
 				metadata := &_model.Style_Metadata{
-					Info:          nil,
-					Skeleton:      object.Skeleton(),
-					Declarations:  []string{declaration},
-					Variables:     vars,
-					SummonSnippet: "",
+					Info:         nil,
+					Skeleton:     object.Skeleton(),
+					Declarations: []string{declaration},
+					Variables:    vars,
 				}
 				classdata := &_model.Style_ClassData{
 					Attributes:        map[string]string{},
 					Index:             0,
+					SummonSnippet:     "",
 					Artifact:          artifact,
 					Definent:          selector,
 					SymClass:          classname,

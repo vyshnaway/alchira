@@ -118,16 +118,17 @@ type Cache_SymclassData struct {
 }
 
 type Cache_Style struct {
-	Index_Now       int
-	Index_Bin       map[int]bool
-	Index_Data      map[int]*Cache_SymclassData
-	Global___Index  Style_ClassIndexMap
-	Public___Index  Style_ClassIndexMap
-	Library__Index  Style_ClassIndexMap
-	Artifact_Index  Style_ClassIndexMap
-	ClassDictionary Style_Dictionary
-	PublishIndexMap [][]Style_ClassIndexTrace
-	Hashrules       map[string]string
+	Index_Now           int
+	Index_Bin           map[int]bool
+	Hashrules           map[string]string
+	Global___Index      Style_ClassIndexMap
+	Public___Index      Style_ClassIndexMap
+	Library__Index      Style_ClassIndexMap
+	Artifact_Index      Style_ClassIndexMap
+	ClassDictionary     Style_Dictionary
+	PublishIndexMap     [][]Style_ClassIndexTrace
+	Index_to_Styledata  map[int]*Cache_SymclassData
+	Filepath_to_Context map[string]*File_Stash
 }
 
 type Cache_Manifest_Groups struct {

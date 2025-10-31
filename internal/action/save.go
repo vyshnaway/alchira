@@ -31,9 +31,9 @@ func Save_Artifacts() {
 	)
 }
 
-func Save_Targets() {
+func Save_Targets(concurrent bool) {
 	S.TASK("Saving Proxy-folders", 1)
-	_config.Saved.TargetDir_Saved = Sync_ProxyMapDirs(_config.Saved.ProxyMap)
+	_config.Saved.TargetDir_Saved = Sync_ProxyMapDirs(_config.Saved.ProxyMap, concurrent)
 }
 
 func Save_Hashrule() (Report string, Status bool) {

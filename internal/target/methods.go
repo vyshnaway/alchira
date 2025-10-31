@@ -89,15 +89,7 @@ func (This *Class) GetTracks() GetTracks_return {
 
 func (This *Class) SyncClassnames(action _script.E_Action) {
 	for _, file := range This.FileCache {
-		watchprops := []string{}
-		if props, ok := This.ExtnsProps[file.Extension]; ok && file.Extension != _config.Root.Extension {
-			watchprops = props
-		}
-		res := _script.Rider(
-			file,
-			watchprops,
-			action,
-		)
+		res := _script.Rider(file, action)
 
 		file.Scratch = res.Scribed
 		file.StyleData.TagReplacements = res.Replacements

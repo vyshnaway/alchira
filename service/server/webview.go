@@ -20,35 +20,36 @@ var (
 	upgrader  = websocket.Upgrader{}
 )
 
+func RequestAvailablePort(tryPort int) (int, error) {
+	if tryPort > 0 {
+		ln, err := net.Listen("tcp", fmt.Sprintf(":%d", tryPort))
+		if err == nil {
+			port := ln.Addr().(*net.TCPAddr).Port
+			ln.Close()
+			return port, nil
+		}
+	}
+	ln, err := net.Listen("tcp", ":0")
+	if err != nil {
+		return 0, fmt.Errorf("no available port found: %w", err)
+	}
+	port := ln.Addr().(*net.TCPAddr).Port
+	ln.Close()
+	return port, nil
+}
+
 // Returns an http.Server ready to Start, the found port, and any error.
 // The server serves static files from 'view', always returns index.html for '/'.
 func Webview_Create(tryport int) (httpServer *http.Server, deducedPort int, err error) {
 	// Try requested port; fallback to OS-assigned port
-	foundPort, err := func(requestedPort int) (int, error) {
-		if requestedPort > 0 {
-			ln, err := net.Listen("tcp", fmt.Sprintf(":%d", requestedPort))
-			if err == nil {
-				port := ln.Addr().(*net.TCPAddr).Port
-				ln.Close()
-				return port, nil
-			}
-		}
-		ln, err := net.Listen("tcp", ":0")
-		if err != nil {
-			return 0, fmt.Errorf("no available port found: %w", err)
-		}
-		port := ln.Addr().(*net.TCPAddr).Port
-		ln.Close()
-		return port, nil
-	}(tryport)
+	foundPort, err := RequestAvailablePort(tryport)
 
 	if err != nil || foundPort == 0 {
 		return nil, 0, fmt.Errorf("unable to bind port: %v", err)
 	}
 
-	
 	mux := http.NewServeMux()
-	serveDir :=configs.Root_Scaffold["webview"].Path
+	serveDir := configs.Root_Scaffold["webview"].Path
 
 	// Serve index.html on /, and all files under serveDir
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
@@ -67,7 +68,7 @@ func Webview_Create(tryport int) (httpServer *http.Server, deducedPort int, err 
 			if err != nil {
 				return
 			}
-			
+
 			mutex.Lock()
 			clients[ws] = true
 			mutex.Unlock()

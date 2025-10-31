@@ -20,7 +20,7 @@ func Index_Declare(object *_model.Cache_SymclassData) int {
 	}
 	object.SrcData.Index = idx
 	delete(_config.Style.Index_Bin, idx)
-	_config.Style.Index_Data[idx] = object
+	_config.Style.Index_to_Styledata[idx] = object
 	return idx
 }
 
@@ -29,7 +29,7 @@ func Index_Dispose(indexes ...int) {
 	for _, idx := range indexes {
 		if idx > 0 {
 			_config.Style.Index_Bin[idx] = true
-			delete(_config.Style.Index_Data, idx)
+			delete(_config.Style.Index_to_Styledata, idx)
 		}
 	}
 }
@@ -41,7 +41,7 @@ type index_Find_retrun struct {
 }
 
 func Index_Fetch(index int) *_model.Cache_SymclassData {
-	data := _config.Style.Index_Data[index]
+	data := _config.Style.Index_to_Styledata[index]
 	return data
 }
 
@@ -64,7 +64,7 @@ func Index_Find(classname string, localMap _model.Style_ClassIndexMap) index_Fin
 		index = idx
 		group = _model.Style_Type_Artifact
 	}
-	data := _config.Style.Index_Data[index]
+	data := _config.Style.Index_to_Styledata[index]
 
 	return index_Find_retrun{
 		Index: index,

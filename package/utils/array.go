@@ -52,3 +52,11 @@ func Array_RemoveAt[T any](s []T, index int) []T {
 	}
 	return append(s[:index], s[index+1:]...)
 }
+
+func Array_FlattenOnce[T any](arrarr [][]T) []T {
+	arr := []T{}
+	for _, a := range arrarr {
+		arr = append(arr, a...)
+	}
+	return arr
+}
