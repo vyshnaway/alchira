@@ -102,10 +102,16 @@ func Execute(heading string, concurrent bool) (Exitcode int) {
 			if _config.Static.WATCH && _config.Static.RebuildTicker != nil {
 				RebuildTickerReset()
 			}
+
 			res_report, res_status := _action.Verify_Setup(concurrent)
-			if res_status == _action.Verify_Setup_Status_Verified {
+			switch res_status {
+			case _action.Verify_Setup_Status_Uninitialized:
+				report = res_report
+				showReport = true
+				_config.Static.WATCH = false
+			case _action.Verify_Setup_Status_Verified:
 				step = Execute_Step_LoopAround
-			} else {
+			default:
 				if res_status == _action.Verify_Setup_Status_Initialized {
 					exitcode = 1
 					report = res_report

@@ -164,10 +164,14 @@ func main() {
 		}
 	case "server":
 		{
-			if val, err := _strconv.Atoi(argone); err == nil {
-				_config.Root.WebsocketPort = val
+			if _, setup_status := _action.Verify_Setup(concurrent); setup_status == _action.Verify_Setup_Status_Uninitialized {
+				exitcode = 0;
+			} else {
+				if val, err := _strconv.Atoi(argone); err == nil {
+					_config.Root.WebsocketPort = val
+				}
+				_server.Connect(_config.Root.WebsocketPort, concurrent)
 			}
-			_server.Connect(_config.Root.WebsocketPort, concurrent)
 		}
 	case "install":
 		{
