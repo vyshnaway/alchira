@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"main/configs"
-	"main/service/server/handle"
 	"net"
 	"net/http"
 	"path/filepath"
@@ -116,18 +115,18 @@ func Webview_Create(tryport int) (httpServer *http.Server, deducedPort int, err 
 }
 
 func IO_Json(reqbyte []byte) []byte {
-	var req handle.JsonRPCRequest[any]
+	var req JsonRPCRequest[any]
 	if err := json.Unmarshal(reqbyte, &req); err != nil {
 		return []byte{}
 	}
 
 	var broadcast_bool bool
-	var resp handle.JsonRPCResponse
+	var resp JsonRPCResponse
 	resp.JSONRPC = "2.0"
 	resp.ID = req.ID
 
-	if method, exist := handle.Registery[req.Method]; exist {
-		resp.Result, broadcast_bool = method(reqbyte)
+	if entry, exist := Registery[req.Method]; exist {
+		resp.Result, broadcast_bool = entry.JsonStream(reqbyte)
 	} else {
 		resp.Error = fmt.Errorf("invalid method")
 	}

@@ -5,9 +5,6 @@ import (
 	"main/package/watchman"
 )
 
-type T_Manifest_Mixed_Rpc JsonRPCRequest[struct {
-}]
-
 type R_Manifest struct {
 	Global *R_ManifestGlobal           `json:"global"`
 	Locals map[string]*R_ManifestLocal `json:"locals"`

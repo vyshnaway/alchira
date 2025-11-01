@@ -4,10 +4,9 @@ import (
 	"encoding/json"
 	"main/configs"
 	"main/internal/action"
-	"main/service/server/handle"
 )
 
-var InteractiveRegistary = map[string]struct {
+var InteractiveRegistar = map[string]struct {
 	Info string
 	Func func([]string) any
 }{
@@ -24,28 +23,6 @@ var InteractiveRegistary = map[string]struct {
 			return nil
 		},
 		Info: `summon {relative-filepath} {symclass}`,
-	},
-	"manifest-locals": {
-		Func: func(args []string) any {
-			filemap := map[string]string{}
-			for _, f := range filemap {
-				filemap[f] = ""
-			}
-			return handle.Manifest_Locals(filemap)
-		},
-		Info: `manifest-locals {follow with maultiple filepaths to be refered}`,
-	},
-	"manifest-global": {
-		Func: func(args []string) any {
-			return handle.Manifest_Global()
-		},
-		Info: `returns global-manifest of working directory`,
-	},
-	"sandbox-state": {
-		Func: func(args []string) any {
-			return handle.Sandbox_State_Memory
-		},
-		Info: `returns component-sandbox option states`,
 	},
 	"sandbox-url": {
 		Func: func(args []string) any {
@@ -72,18 +49,18 @@ func Interactive(command string, arguments []string, broadcast bool) (Response [
 	var err string
 
 	if command == "help" {
-		m := map[string]string{}
-		for k, v := range InteractiveRegistary {
-			m[k] = v.Info
+		m := map[string]any{}
+		for k, v := range Registery {
+			m[k] = v.Instructions
 		}
 		result = m
-	} else if s, e := InteractiveRegistary[command]; e {
-		result = s.Func(arguments)
+	} else if s, e := Registery[command]; e {
+		result = s.Interactive(arguments)
 	}
 
 	var r []byte
 	if broadcast {
-		r, _ = json.Marshal(handle.JsonRPCResponse{
+		r, _ = json.Marshal(JsonRPCResponse{
 			JSONRPC: "2.0",
 			ID:      0,
 			Method:  command,
@@ -95,4 +72,52 @@ func Interactive(command string, arguments []string, broadcast bool) (Response [
 		r, _ = json.MarshalIndent(result, "", " ")
 	}
 	return r
+}
+
+// JSON-RPC message structures
+type JsonRPCRequest[T any] struct {
+	JSONRPC string `json:"jsonrpc"`
+	ID      any    `json:"id"`
+	Method  string `json:"method"`
+	Params  T      `json:"params"`
+}
+
+type JsonRPCResponse struct {
+	JSONRPC string `json:"jsonrpc"`
+	ID      any    `json:"id,omitempty"`
+	Method  string `json:"method"`
+	Result  any    `json:"result,omitempty"`
+	Error   any    `json:"error,omitempty"`
+}
+
+type T_RegisterEntry struct {
+	Instructions []string
+	Interactive  func(arguments []string) any
+	JsonStream   func(req []byte) (response any, broadcast bool)
+}
+
+func CreateMethod[T any](
+	minargs int,
+	Interactive func(arguments []string) any,
+	JsonStream func(params T) any,
+	Instructions []string,
+	broadcast bool,
+) T_RegisterEntry {
+	template, _ := json.Marshal(new(T))
+	return T_RegisterEntry{
+		JsonStream: func(reqbyte []byte) (response any, broadcast bool) {
+			var req JsonRPCRequest[T]
+			if err := json.Unmarshal(reqbyte, &req); err != nil {
+				return nil, false
+			}
+			return JsonStream(req.Params), broadcast
+		},
+		Interactive: func(arguments []string) any {
+			if len(arguments) < minargs {
+				return nil
+			}
+			return Interactive(arguments)
+		},
+		Instructions: append(Instructions, "Params: "+string(template)),
+	}
 }
