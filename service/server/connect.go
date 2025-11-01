@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"main/configs"
 	"main/service/compiler"
+	"slices"
 
 	"net/http"
 	"os"
@@ -44,7 +45,6 @@ func Connect(tryport int, concurrent bool) {
 		scanner := bufio.NewScanner(os.Stdin)
 		writer := bufio.NewWriter(os.Stdout)
 		defer func() {
-			// Always flush the writer on exit to ensure all output is written.
 			if err := writer.Flush(); err != nil {
 				fmt.Fprintln(os.Stderr, "Error flushing writer:", err)
 			}
@@ -53,17 +53,20 @@ func Connect(tryport int, concurrent bool) {
 		go compiler.Execute("", concurrent)
 
 		for scanner.Scan() {
-			if !configs.Static.Watchman.Status {
-				continue
+
+			request := strings.TrimSpace(scanner.Text())
+			if slices.Contains([]string{
+				"exit",
+				"> exit",
+				"$ exit",
+			}, strings.TrimSpace(request)) {
+				manualExit <- struct{}{}
+				break
 			}
 
-			request := scanner.Text()
-			if strings.TrimSpace(request) == "exit" {
-				select {
-				case manualExit <- struct{}{}:
-				default:
-				}
-				break
+			if !configs.Static.Watchman.Status {
+				time.Sleep(100 * time.Millisecond)
+				continue
 			}
 
 			var res = []byte{}
@@ -98,11 +101,7 @@ func Connect(tryport int, concurrent bool) {
 			fmt.Fprintln(os.Stderr, "Error reading from stdin:", err)
 		}
 
-		// Non-blocking channel signal to prevent deadlock if already closed or sent
-		select {
-		case manualExit <- struct{}{}:
-		default:
-		}
+		manualExit <- struct{}{}
 	}()
 
 	// Wait for exit signal, manual exit, or server exit

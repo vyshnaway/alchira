@@ -15,8 +15,8 @@ import (
 )
 
 var (
-	WS_Port int
-	WS_Url  string
+	WS_Port      int
+	WS_Url       string
 	WS_Mutex     sync.Mutex
 	WS_Clients   = make(map[*websocket.Conn]bool)
 	WS_Broadcast = make(chan []byte)

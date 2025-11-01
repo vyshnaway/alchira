@@ -90,10 +90,11 @@ func main() {
 	_config.Static.ProjectName = _util.String_Filter(projectname, []rune{}, []rune{}, []rune{})
 
 	_config.Static.DEBUG = command == "debug"
+	_config.Static.IAMAI = command == "iamai"
+	_config.Static.WATCH = command == "server" || ((command == "debug" || command == "preview") && argone == "-w")
+	_config.Static.SERVER = command == "server"
 	_config.Static.MINIFY = !_config.Static.DEBUG
-	_config.Static.SERVER = command == "server" || command == "iamai"
 	_config.Static.EXPORT = _config.Static.SERVER || command == "publish"
-	_config.Static.WATCH = _config.Static.SERVER || ((command == "debug" || command == "preview") && argone == "-w")
 
 	S.Canvas.Initialize(
 		!_config.Static.WATCH && _slice.Contains([]string{"debug", "preview", "publish", "init", "install"}, command),
@@ -153,20 +154,16 @@ func main() {
 		{
 			exitcode = _compiler.Execute(corecaps+" : "+"Publishing for Production", concurrent)
 		}
-	case "iamai":
-		{
-			_action.Sync_RootDocs()
-			S.Post(_config.Sync_References["agent"].Content)
-			if val, err := _strconv.Atoi(argone); err == nil {
-				_config.Root.WebsocketPort = val
-			}
-			_server.Connect(_config.Root.WebsocketPort, concurrent)
-		}
-	case "server":
+	case "iamai", "server":
 		{
 			if _, setup_status := _action.Verify_Setup(concurrent); setup_status == _action.Verify_Setup_Status_Uninitialized {
-				exitcode = 0;
+				exitcode = 0
 			} else {
+				if command == "iamai" {
+					_action.Sync_RootDocs()
+					S.Post(_config.Sync_References["agent"].Content)
+				}
+
 				if val, err := _strconv.Atoi(argone); err == nil {
 					_config.Root.WebsocketPort = val
 				}

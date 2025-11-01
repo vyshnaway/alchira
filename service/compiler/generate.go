@@ -23,16 +23,18 @@ func ClearUnwantedCache() (
 	IndexFrag string,
 ) {
 
-	indexes := make(map[int]bool, 64)
-	for _, i := range _config.Style.PublishIndexMap {
-		for _, j := range i {
-			indexes[j.ClassIndex] = true
+	if !_config.Static.IAMAI {
+		indexes := make(map[int]bool, 64)
+		for _, i := range _config.Style.PublishIndexMap {
+			for _, j := range i {
+				indexes[j.ClassIndex] = true
+			}
 		}
-	}
-
-	for i := range _config.Style.PublishIndexMap {
-		if _, k := indexes[i]; !k {
-			delete(_config.Style.Index_to_Styledata, i)
+	
+		for i := range _config.Style.PublishIndexMap {
+			if _, k := indexes[i]; !k {
+				delete(_config.Style.Index_to_Styledata, i)
+			}
 		}
 	}
 
@@ -73,9 +75,11 @@ func ClearUnwantedCache() (
 	index_frag := _config.Delta.IndexBuild
 	finalMessage := _config.Delta.FinalMessage
 
-	_config.Delta_Reset()
-	_config.Archive_Reset()
-	_config.Manifest_Reset()
+	if !_config.Static.IAMAI {
+		_config.Delta_Reset()
+		_config.Archive_Reset()
+		_config.Manifest_Reset()
+	}
 
 	return report, errLen, finalMessage, index_frag
 }

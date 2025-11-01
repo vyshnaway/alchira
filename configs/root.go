@@ -69,6 +69,7 @@ var Static = models.Cache_Static{
 	MINIFY:         false,
 	SERVER:         false,
 	EXPORT:         false,
+	IAMAI:          false,
 	Command:        "",
 	Argument:       "",
 	RootPath:       "",

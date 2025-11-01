@@ -65,7 +65,7 @@ func Execute(heading string, concurrent bool) (Exitcode int) {
 	var RebuildTickerReset func()
 
 	if _config.Static.WATCH {
-		if _config.Root.RebuildInterval > 0 {
+		if _config.Root.RebuildInterval > 0 && !_config.Static.IAMAI {
 			RebuildTickerReset = startRebuildTicker(_config.Root.RebuildInterval)
 		}
 

@@ -1,6 +1,7 @@
 package handle
 
 import (
+	"encoding/json"
 	"main/configs"
 	"main/internal/action"
 	"main/internal/script"
@@ -10,13 +11,26 @@ import (
 	"strings"
 )
 
+type Req_Sandbox_View JsonRPCRequest[struct {
+	Filepath string `json:"filepath"`
+	Symclass string `json:"symclass"`
+}]
+
+func Handle_Sandbox_View(reqbyte []byte) (response any, broadcast bool) {
+	var req Req_Sandbox_View
+	if err := json.Unmarshal(reqbyte, &req); err != nil {
+		return
+	}
+	return Sandbox_View(req.Params.Symclass, req.Params.Symclass)
+}
+
 type T_Component_return struct {
-	Attributes map[string]string `json:Attributes`
-	Summon     string            `json:Summon`
-	Staple     string            `json:Staple`
-	Symclass   string            `json:Symclass`
-	Rootcss    string            `json:Rootcss`
-	Compcss    string            `json:Compcss`
+	Attributes map[string]string `json:"attributes"`
+	Summon     string            `json:"summon"`
+	Staple     string            `json:"staple"`
+	Symclass   string            `json:"symclass"`
+	Rootcss    string            `json:"rootcss"`
+	Compcss    string            `json:"compcss"`
 }
 
 func Sandbox_View(symclass, filepath string) (response any, broadcast bool) {
