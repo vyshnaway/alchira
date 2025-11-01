@@ -92,7 +92,7 @@ func main() {
 	_config.Static.DEBUG = command == "debug"
 	_config.Static.IAMAI = command == "iamai"
 	_config.Static.WATCH = command == "server" || ((command == "debug" || command == "preview") && argone == "-w")
-	_config.Static.SERVER = command == "server"
+	_config.Static.SERVER = _config.Static.IAMAI || command == "server"
 	_config.Static.MINIFY = !_config.Static.DEBUG
 	_config.Static.EXPORT = _config.Static.SERVER || command == "publish"
 

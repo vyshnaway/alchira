@@ -28,10 +28,11 @@ type Style_ExportStyle struct {
 }
 
 type Style_Metadata struct {
-	Info         []string          `json:"info,omitempty"`
-	Skeleton     any               `json:"skeleton,omitempty"`
-	Declarations []string          `json:"declarations,omitempty"`
-	Variables    map[string]string `json:"variables,omitempty"`
+	Info          []string          `json:"info,omitempty"`
+	Skeleton      any               `json:"skeleton,omitempty"`
+	Declarations  []string          `json:"declarations,omitempty"`
+	Variables     map[string]string `json:"variables,omitempty"`
+	SummonSnippet string            `json:"summon,omitempty"`
 }
 
 type Style_ClassData struct {
@@ -46,7 +47,6 @@ type Style_ClassData struct {
 	Attachments       map[string]bool
 	NativeStaple      string
 	ExportStaple      string
-	SummonSnippet     string
 	NativeRawStyle    *_css.T_Block
 	ExportRawStyle    *_css.T_Block
 	NativeAttachStyle *_css.T_Block

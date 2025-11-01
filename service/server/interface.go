@@ -1,48 +1,6 @@
 package server
 
-import (
-	"encoding/json"
-	"main/configs"
-	"main/internal/action"
-)
-
-var InteractiveRegistar = map[string]struct {
-	Info string
-	Func func([]string) any
-}{
-	"summon": {
-		Func: func(args []string) any {
-			if len(args) == 2 {
-				filepath, symclass := args[0], args[1]
-				if context, ok := configs.Style.Filepath_to_Context[filepath]; ok {
-					if res := action.Index_Finder(symclass, context.StyleData.LocalMap); res.Index > 0 {
-						return res.Data.SrcData.SummonSnippet
-					}
-				}
-			}
-			return nil
-		},
-		Info: `summon {relative-filepath} {symclass}`,
-	},
-	"sandbox-url": {
-		Func: func(args []string) any {
-			return WS_Url
-		},
-		Info: `returns component-sandbox url`,
-	},
-	"websocket-url": {
-		Func: func(args []string) any {
-			return WS_Url + "/ws"
-		},
-		Info: `returns component-sandbox url`,
-	},
-	"diagnostics": {
-		Func: func(args []string) any {
-			return configs.Manifest.Diagnostics
-		},
-		Info: `returns list of current diagnostics`,
-	},
-}
+import "encoding/json"
 
 func Interactive(command string, arguments []string, broadcast bool) (Response []byte) {
 	var result any
@@ -96,7 +54,7 @@ type T_RegisterEntry struct {
 	JsonStream   func(req []byte) (response any, broadcast bool)
 }
 
-func CreateMethod[T any](
+func RegisterMethod[T any](
 	minargs int,
 	Interactive func(arguments []string) any,
 	JsonStream func(params T) any,

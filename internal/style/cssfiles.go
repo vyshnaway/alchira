@@ -6,6 +6,7 @@ import (
 	_css "main/package/css"
 	O "main/package/object"
 	_map "maps"
+	"strconv"
 
 	_model "main/models"
 	_util "main/package/utils"
@@ -55,12 +56,13 @@ func Cssfile_Collection(files []*_model.File_Stash) cssfile_Collection_return {
 	selectorMap := make(_model.Style_ClassIndexMap, cap(selectorList))
 
 	for _, file := range files {
-		for _, r := range _css.ParsePartial(_util.Code_Uncomment(file.Content, false, true, false), initialparse_allocation).All_Blocks {
-			selector := r.Data[0]
-			value := r.Data[1]
+		for _, raw := range _css.ParsePartial(_util.Code_Uncomment(file.Content, false, true, false), initialparse_allocation).All_Blocks {
+			selector := raw.Data[0]
+			value := raw.Data[1]
 
-			declaration := file.SourcePath
 			classname := file.ClassFront + _util.String_Filter(selector, []rune{}, []rune{'\\', '.'}, []rune{})
+			declaration := file.SourcePath + ":" + strconv.Itoa(raw.Start.Row) + ":" + strconv.Itoa(raw.Start.Col) +
+				"::" + strconv.Itoa(raw.End.Row) + ":" + strconv.Itoa(raw.End.Col)
 
 			index := 0
 			if v, ok := _config.Style.Library__Index[classname]; ok {
@@ -98,15 +100,15 @@ func Cssfile_Collection(files []*_model.File_Stash) cssfile_Collection_return {
 					vars = nil
 				}
 				metadata := &_model.Style_Metadata{
-					Info:         nil,
-					Skeleton:     object.Skeleton(),
-					Declarations: []string{declaration},
-					Variables:    vars,
+					Info:          nil,
+					Skeleton:      object.Skeleton(),
+					Declarations:  []string{declaration},
+					Variables:     vars,
+					SummonSnippet: "",
 				}
 				classdata := &_model.Style_ClassData{
 					Attributes:        map[string]string{},
 					Index:             0,
-					SummonSnippet:     "",
 					Artifact:          artifact,
 					Definent:          selector,
 					SymClass:          classname,

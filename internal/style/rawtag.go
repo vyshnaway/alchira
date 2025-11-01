@@ -55,7 +55,8 @@ func Rawtag_Upload(
 	diagnostics := make([]*_model.File_Diagnostic, 0, 4)
 	attachments := make(map[string]bool, 12)
 	forArtifact := file.Lookup.Type == _model.File_Type_Artifact
-	declaration := file.TargetPath + ":" + _strconv.Itoa(raw.Range.Start.Row) + ":" + _strconv.Itoa(raw.Range.Start.Col)
+	declaration := file.TargetPath + ":" + _strconv.Itoa(raw.Range.Start.Row) + ":" + _strconv.Itoa(raw.Range.Start.Col) +
+		"::" + _strconv.Itoa(raw.Range.End.Row) + ":" + _strconv.Itoa(raw.Range.End.Col)
 
 	symzero := ""
 	if len(raw.SymClasses) > 0 {
@@ -185,10 +186,11 @@ func Rawtag_Upload(
 			vars = nil
 		}
 		metadata := &_model.Style_Metadata{
-			Info:         comments,
-			Skeleton:     nativeRawStyle.Skeleton(),
-			Declarations: []string{declaration},
-			Variables:    vars,
+			Info:          comments,
+			Skeleton:      nativeRawStyle.Skeleton(),
+			Declarations:  []string{declaration},
+			Variables:     vars,
+			SummonSnippet: summon,
 		}
 
 		index = _action.Index_Declare(&_model.Cache_SymclassData{
@@ -202,7 +204,6 @@ func Rawtag_Upload(
 				Metadata:          metadata,
 				DebugClass:        debugclass,
 				Attachments:       attachments,
-				SummonSnippet:     summon,
 				ExportStaple:      exportStaple,
 				NativeStaple:      nativeStaple,
 				ExportRawStyle:    exportRawStyle,

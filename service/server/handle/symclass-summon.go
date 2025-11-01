@@ -17,7 +17,7 @@ func Symclass_Summon(symclass, filepath string) string {
 		return ""
 	}
 
-	return ref.Data.SrcData.SummonSnippet
+	return ref.Data.SrcData.Metadata.SummonSnippet
 }
 
 // switch req.Method {

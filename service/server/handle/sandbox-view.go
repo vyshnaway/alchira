@@ -32,7 +32,7 @@ func Sandbox_View(symclass, filepath string) (response any) {
 		return nil
 	}
 
-	summon := ref.Data.SrcData.SummonSnippet
+	summon := ref.Data.SrcData.Metadata.SummonSnippet
 	clontext := *context
 	clontext.Midway = summon
 	attachments := map[int]*models.Style_ClassData{}

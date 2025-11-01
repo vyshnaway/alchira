@@ -1,11 +1,12 @@
 package server
 
 import (
+	"main/configs"
 	"main/service/server/handle"
 )
 
 var Registery = map[string]T_RegisterEntry{
-	"manifest-global": CreateMethod(
+	"manifest-global": RegisterMethod(
 		0,
 		func(args []string) any {
 			return handle.Manifest_Global()
@@ -18,7 +19,7 @@ var Registery = map[string]T_RegisterEntry{
 		},
 		false,
 	),
-	"manifest-locals": CreateMethod(
+	"manifest-locals": RegisterMethod(
 		1,
 		func(args []string) any {
 			filemap := map[string]string{}
@@ -37,7 +38,7 @@ var Registery = map[string]T_RegisterEntry{
 		},
 		false,
 	),
-	"manifest-Mixed": CreateMethod(
+	"manifest-Mixed": RegisterMethod(
 		0,
 		func(args []string) any {
 			return ""
@@ -50,7 +51,7 @@ var Registery = map[string]T_RegisterEntry{
 		[]string{},
 		false,
 	),
-	"sandbox-state": CreateMethod(
+	"sandbox-state": RegisterMethod(
 		0,
 		func(args []string) any {
 			return handle.Sandbox_State_Memory
@@ -66,7 +67,7 @@ var Registery = map[string]T_RegisterEntry{
 		},
 		true,
 	),
-	"sandbox-view": CreateMethod(
+	"sandbox-view": RegisterMethod(
 		2,
 		func(args []string) any {
 			return ""
@@ -80,7 +81,7 @@ var Registery = map[string]T_RegisterEntry{
 		[]string{},
 		true,
 	),
-	"symclass-summon": CreateMethod(
+	"symclass-summon": RegisterMethod(
 		2,
 		func(args []string) any {
 			return handle.Symclass_Summon(args[0], args[1])
@@ -91,21 +92,48 @@ var Registery = map[string]T_RegisterEntry{
 		}) any {
 			return handle.Symclass_Summon(params.Symclass, params.Filepath)
 		},
-		[]string{},
+		[]string{
+			`summon {relative-filepath} {symclass}`,
+		},
 		false,
 	),
-	"sandbox-url": CreateMethod(
+	"sandbox-url": RegisterMethod(
 		0,
 		func(args []string) any {
-			return ""
+			return WS_Url
 		},
-		func(params struct {
-			Symclass string
-			Filepath string
-		}) any {
-			return handle.Symclass_Summon(params.Symclass, params.Filepath)
+		func(params any) any {
+			return WS_Url
 		},
-		[]string{},
+		[]string{
+			`returns component-sandbox url`,
+		},
+		false,
+	),
+	"websocket-url": RegisterMethod(
+		0,
+		func(args []string) any {
+			return WS_Url + "/ws"
+		},
+		func(params any) any {
+			return WS_Url + "/ws"
+		},
+		[]string{
+			`returns websocket url`,
+		},
+		false,
+	),
+	"diagnostics": RegisterMethod(
+		0,
+		func(args []string) any {
+			return configs.Manifest.Diagnostics
+		},
+		func(params any) any {
+			return configs.Manifest.Diagnostics
+		},
+		[]string{
+			`returns list of current diagnostics`,
+		},
 		false,
 	),
 }
