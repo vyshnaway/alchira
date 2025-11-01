@@ -21,7 +21,7 @@ type R_ManifestGlobal struct {
 	Diagnostics  []*models.File_Diagnostic         `json:"diagnostics"`
 }
 
-func ManifestGlobal() *R_ManifestGlobal {
+func Manifest_Global() *R_ManifestGlobal {
 	configs.Static.ExecuteMutex.Lock()
 	defer configs.Static.ExecuteMutex.Unlock()
 

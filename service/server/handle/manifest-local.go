@@ -4,6 +4,7 @@ import (
 	"main/configs"
 	"main/internal/action"
 	"main/models"
+	"main/package/watchman"
 	"maps"
 	"slices"
 	"strconv"
@@ -16,7 +17,20 @@ type R_ManifestLocal struct {
 	SymclassData map[string]*models.Style_Metadata `json:"symclassData"`
 }
 
-func ManifestLocal(filepath string) *R_ManifestLocal {
+func Manifest_Locals(filemap map[string]string) map[string]*R_ManifestLocal {
+	result := make(map[string]*R_ManifestLocal, len(filemap))
+	for filePath, fileContent := range filemap {
+		if fileContent != "" {
+			configs.Static.Watchman.HandleEvent(watchman.E_Action_Update, filePath, fileContent)
+		}
+	}
+	for filepath := range filemap {
+		result[filepath] = Manifest_Local(filepath)
+	}
+	return result
+}
+
+func Manifest_Local(filepath string) *R_ManifestLocal {
 	configs.Static.ExecuteMutex.Lock()
 	defer configs.Static.ExecuteMutex.Unlock()
 

@@ -1,27 +1,15 @@
 package handle
 
-import "encoding/json"
+var Sandbox_State_Memory = map[string]any{}
 
-type T_Sandbox_State JsonRPCRequest[struct {
-	Key string `json:"key"`
-	Val string `json:"value"`
-}]
+func Sandbox_State(keyRef, v string) (response any) {
 
-var D_Sandbox_State = map[string]any{}
-
-func Sandbox_State(reqbyte []byte) (response any, broadcast bool) {
-	var req T_Sandbox_State
-	if err := json.Unmarshal(reqbyte, &req); err != nil {
-		return
-	}
-
-	var key string
-	var value any
-	if val, exist := D_Sandbox_State[req.Params.Key]; exist {
-		value = val
+	var newVal any
+	if val, exist := Sandbox_State_Memory[keyRef]; exist {
+		newVal = val
 	} else {
-		D_Sandbox_State[key] = value
+		Sandbox_State_Memory[keyRef] = newVal
 	}
 
-	return map[string]any{"key": key, "value": value}, true
+	return map[string]any{"key": keyRef, "value": newVal}
 }

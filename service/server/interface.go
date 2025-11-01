@@ -11,7 +11,7 @@ var InteractiveRegistary = map[string]struct {
 	Info string
 	Func func([]string) any
 }{
-	"template": {
+	"summon": {
 		Func: func(args []string) any {
 			if len(args) == 2 {
 				filepath, symclass := args[0], args[1]
@@ -23,27 +23,27 @@ var InteractiveRegistary = map[string]struct {
 			}
 			return nil
 		},
-		Info: `template {relative-filepath} {symclass}`,
+		Info: `summon {relative-filepath} {symclass}`,
 	},
-	"manifest-local": {
+	"manifest-locals": {
 		Func: func(args []string) any {
 			filemap := map[string]string{}
 			for _, f := range filemap {
 				filemap[f] = ""
 			}
-			return handle.Manifest(filemap)
+			return handle.Manifest_Locals(filemap)
 		},
-		Info: `manifest-local {follow with maultiple filepaths to be refered}`,
+		Info: `manifest-locals {follow with maultiple filepaths to be refered}`,
 	},
 	"manifest-global": {
 		Func: func(args []string) any {
-			return handle.ManifestGlobal()
+			return handle.Manifest_Global()
 		},
 		Info: `returns global-manifest of working directory`,
 	},
 	"sandbox-state": {
 		Func: func(args []string) any {
-			return handle.D_Sandbox_State
+			return handle.Sandbox_State_Memory
 		},
 		Info: `returns component-sandbox option states`,
 	},

@@ -1,7 +1,6 @@
 package handle
 
 import (
-	"encoding/json"
 	"main/configs"
 	"main/internal/action"
 	"main/internal/script"
@@ -10,19 +9,6 @@ import (
 	"main/package/utils"
 	"strings"
 )
-
-type Req_Sandbox_View JsonRPCRequest[struct {
-	Filepath string `json:"filepath"`
-	Symclass string `json:"symclass"`
-}]
-
-func Handle_Sandbox_View(reqbyte []byte) (response any, broadcast bool) {
-	var req Req_Sandbox_View
-	if err := json.Unmarshal(reqbyte, &req); err != nil {
-		return
-	}
-	return Sandbox_View(req.Params.Symclass, req.Params.Symclass)
-}
 
 type T_Component_return struct {
 	Attributes map[string]string `json:"attributes"`
@@ -33,17 +19,17 @@ type T_Component_return struct {
 	Compcss    string            `json:"compcss"`
 }
 
-func Sandbox_View(symclass, filepath string) (response any, broadcast bool) {
+func Sandbox_View(symclass, filepath string) (response any) {
 	var staplesheet, stylesheet strings.Builder
 
 	context := configs.Style.Filepath_to_Context[filepath]
 	if context == nil {
-		return nil, false
+		return nil
 	}
 
 	ref := action.Index_Finder(symclass, context.StyleData.LocalMap)
 	if ref.Index == 0 {
-		return nil, false
+		return nil
 	}
 
 	summon := ref.Data.SrcData.SummonSnippet
@@ -82,5 +68,5 @@ func Sandbox_View(symclass, filepath string) (response any, broadcast bool) {
 		Symclass:   symclass,
 		Rootcss:    configs.Delta.IndexBuild,
 		Compcss:    stylesheet.String(),
-	}, true
+	}
 }
