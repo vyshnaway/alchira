@@ -5,12 +5,10 @@ import (
 	"main/internal/action"
 	"main/internal/stash"
 	"main/models"
-	"maps"
-	"slices"
 )
 
 type R_ManifestGlobal struct {
-	WatchFiles   []string                          `json:"watchfiles"`
+	FileAttrs   map[string][]string               `json:"fileAttrs"`
 	Environment  string                            `json:"environment"`
 	CustomTags   []string                          `json:"customtags"`
 	SwitchMap    map[string]string                 `json:"switchmap"`
@@ -44,8 +42,13 @@ func Manifest_Global() *R_ManifestGlobal {
 	AppendIndexMap(configs.Style.Library__Index)
 	AppendIndexMap(configs.Style.Artifact_Index)
 
+	file_attribs := make(map[string][]string, len(configs.Style.Filepath_to_Context))
+	for filepath, context := range configs.Style.Filepath_to_Context {
+		file_attribs[filepath] = context.WatchAttrs
+	}
+
 	return &R_ManifestGlobal{
-		WatchFiles:   slices.Collect(maps.Keys(configs.Style.Filepath_to_Context)),
+		FileAttrs:   file_attribs,
 		Environment:  configs.Archive.Environment,
 		CustomTags:   configs.Static.CustomTags,
 		SwitchMap:    switchmap,

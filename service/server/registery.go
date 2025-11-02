@@ -52,9 +52,28 @@ var Registery = map[string]T_RegisterEntry{
 		false,
 	),
 	"sandbox-state": RegisterMethod(
+		1,
+		func(args []string) any {
+			if len(args) > 1 {
+				return handle.Sandbox_State(args[0], args[1])
+			}
+			return handle.Sandbox_State_Mem[args[0]]
+		},
+		func(params struct {
+			Key string `json:"key"`
+			Val string `json:"value"`
+		}) any {
+			return handle.Sandbox_State(params.Key, params.Val)
+		},
+		[]string{
+			`returns component-sandbox option states`,
+		},
+		true,
+	),
+	"sandbox-states": RegisterMethod(
 		0,
 		func(args []string) any {
-			return handle.Sandbox_State_Memory
+			return handle.Sandbox_State_Mem
 		},
 		func(params struct {
 			Key string `json:"key"`

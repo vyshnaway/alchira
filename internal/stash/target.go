@@ -94,7 +94,7 @@ func Target_GetTracks() _target.GetTracks_return {
 func Target_SyncClassNames() {
 
 	var render_action script.E_Action
-	if _config.Static.Command == "debug" {
+	if _config.Static.DEBUG {
 		render_action = script.E_Action_DebugHash
 	} else {
 		render_action = script.E_Action_BuildHash
