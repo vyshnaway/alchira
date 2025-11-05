@@ -14,8 +14,8 @@ import (
 )
 
 var (
-	WS_Port      int
-	WS_Url       string
+	Session_Port int
+	Session_Url  string
 	WS_Mutex     sync.Mutex
 	WS_Clients   = make(map[*websocket.Conn]bool)
 	WS_Broadcast = make(chan []byte)
@@ -87,7 +87,10 @@ func Webview_Create(tryport int) (httpServer *http.Server, deducedPort int, err 
 				if err != nil {
 					break
 				}
-				w.Write(IO_Json(request))
+				// Send response back via WebSocket, NOT ResponseWriter
+				if err := ws.WriteMessage(websocket.TextMessage, IO_Json(request)); err != nil {
+					break
+				}
 			}
 		},
 	)
@@ -124,6 +127,7 @@ func IO_Json(reqbyte []byte) []byte {
 	var resp JsonRPCResponse
 	resp.JSONRPC = "2.0"
 	resp.ID = req.ID
+	resp.Method = req.Method
 
 	if entry, exist := Registery[req.Method]; exist {
 		resp.Result, broadcast_bool = entry.JsonStream(reqbyte)

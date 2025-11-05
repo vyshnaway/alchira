@@ -18,8 +18,8 @@ type Accumulator_return struct {
 
 func (This *Class) Accumulator() Accumulator_return {
 	accumulate := Accumulator_return{
-		GlobalClasses: _slice.Collect(_map.Keys(This.PublicMap)),
-		PublicClasses: _slice.Collect(_map.Keys(This.GlobalMap)),
+		GlobalClasses: _slice.Collect(_map.Keys(This.GlobalMap)),
+		PublicClasses: _slice.Collect(_map.Keys(This.PublicMap)),
 		ContextMap:    map[string]*_model.File_Stash{},
 	}
 

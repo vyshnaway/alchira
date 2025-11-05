@@ -1,18 +1,14 @@
 package server
 
-import "encoding/json"
+import (
+	"encoding/json"
+)
 
 func Interactive(command string, arguments []string, broadcast bool) (Response []byte) {
 	var result any
 	var err string
 
-	if command == "help" {
-		m := map[string]any{}
-		for k, v := range Registery {
-			m[k] = v.Instructions
-		}
-		result = m
-	} else if s, e := Registery[command]; e {
+	if s, e := Registery[command]; e {
 		result = s.Interactive(arguments)
 	}
 
@@ -42,10 +38,10 @@ type JsonRPCRequest[T any] struct {
 
 type JsonRPCResponse struct {
 	JSONRPC string `json:"jsonrpc"`
-	ID      any    `json:"id,omitempty"`
+	ID      any    `json:"id"`
 	Method  string `json:"method"`
-	Result  any    `json:"result,omitempty"`
-	Error   any    `json:"error,omitempty"`
+	Result  any    `json:"result"`
+	Error   any    `json:"error"`
 }
 
 type T_RegisterEntry struct {
@@ -68,7 +64,8 @@ func RegisterMethod[T any](
 			if err := json.Unmarshal(reqbyte, &req); err != nil {
 				return nil, false
 			}
-			return JsonStream(req.Params), broadcast
+			resp := JsonStream(req.Params)
+			return resp, broadcast
 		},
 		Interactive: func(arguments []string) any {
 			if len(arguments) < minargs {

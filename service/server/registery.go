@@ -51,19 +51,38 @@ var Registery = map[string]T_RegisterEntry{
 		[]string{},
 		false,
 	),
-	"sandbox-state": RegisterMethod(
+	"sandbox-state-set": RegisterMethod(
 		1,
 		func(args []string) any {
 			if len(args) > 1 {
-				return handle.Sandbox_State(args[0], args[1])
+				return handle.Sandbox_State_Set(args[0], args[1])
 			}
 			return handle.Sandbox_State_Mem[args[0]]
 		},
 		func(params struct {
 			Key string `json:"key"`
-			Val string `json:"value"`
+			Val any    `json:"value"`
 		}) any {
-			return handle.Sandbox_State(params.Key, params.Val)
+			return handle.Sandbox_State_Set(params.Key, params.Val)
+		},
+		[]string{
+			`returns component-sandbox option states`,
+		},
+		true,
+	),
+	"sandbox-state-init": RegisterMethod(
+		1,
+		func(args []string) any {
+			if len(args) > 1 {
+				return handle.Sandbox_State_Init(args[0], args[1])
+			}
+			return handle.Sandbox_State_Mem[args[0]]
+		},
+		func(params struct {
+			Key string `json:"key"`
+			Val any    `json:"value"`
+		}) any {
+			return handle.Sandbox_State_Init(params.Key, params.Val)
 		},
 		[]string{
 			`returns component-sandbox option states`,
@@ -75,29 +94,44 @@ var Registery = map[string]T_RegisterEntry{
 		func(args []string) any {
 			return handle.Sandbox_State_Mem
 		},
-		func(params struct {
-			Key string `json:"key"`
-			Val string `json:"value"`
-		}) any {
-			return handle.Sandbox_State(params.Key, params.Val)
+		func(params any) any {
+			return handle.Sandbox_State_Mem
 		},
 		[]string{
 			`returns component-sandbox option states`,
 		},
 		true,
 	),
+	"sandbox-show": RegisterMethod(
+		2,
+		func(args []string) any {
+			return handle.Sandbox_View(args[0], args[1])
+		},
+		func(params struct {
+			Filepath string `json:"filepath"`
+			Symclass string `json:"symclass"`
+		}) any {
+			return handle.Sandbox_View(params.Filepath, params.Symclass)
+		},
+		[]string{
+			`sandbox-view {relative-filepath} {symclass}`,
+		},
+		true,
+	),
 	"sandbox-view": RegisterMethod(
 		2,
 		func(args []string) any {
-			return ""
+			return handle.Sandbox_View(args[0], args[1])
 		},
 		func(params struct {
-			Symclass string `json:"symclass"`
 			Filepath string `json:"filepath"`
+			Symclass string `json:"symclass"`
 		}) any {
-			return handle.Sandbox_View(params.Symclass, params.Filepath)
+			return handle.Sandbox_View_Last
 		},
-		[]string{},
+		[]string{
+			`sandbox-view {relative-filepath} {symclass}`,
+		},
 		true,
 	),
 	"symclass-summon": RegisterMethod(
@@ -112,17 +146,17 @@ var Registery = map[string]T_RegisterEntry{
 			return handle.Symclass_Summon(params.Symclass, params.Filepath)
 		},
 		[]string{
-			`summon {relative-filepath} {symclass}`,
+			`symclass-summon {relative-filepath} {symclass}`,
 		},
 		false,
 	),
 	"sandbox-url": RegisterMethod(
 		0,
 		func(args []string) any {
-			return WS_Url
+			return "http://" + Session_Url
 		},
 		func(params any) any {
-			return WS_Url
+			return "http://" + Session_Url
 		},
 		[]string{
 			`returns component-sandbox url`,
@@ -132,13 +166,26 @@ var Registery = map[string]T_RegisterEntry{
 	"websocket-url": RegisterMethod(
 		0,
 		func(args []string) any {
-			return WS_Url + "/ws"
+			return "ws://" + Session_Url + "/ws"
 		},
 		func(params any) any {
-			return WS_Url + "/ws"
+			return "ws://" + Session_Url + "/ws"
 		},
 		[]string{
 			`returns websocket url`,
+		},
+		false,
+	),
+	"session-port": RegisterMethod(
+		0,
+		func(args []string) any {
+			return Session_Port
+		},
+		func(params any) any {
+			return Session_Port
+		},
+		[]string{
+			`returns session port`,
 		},
 		false,
 	),

@@ -3,6 +3,7 @@ package server
 import (
 	"bufio"
 	"context"
+	"encoding/json"
 	"fmt"
 	"main/configs"
 	"main/service/compiler"
@@ -23,8 +24,8 @@ func Connect(tryport int, concurrent bool) {
 		fmt.Println(0)
 		return
 	}
-	WS_Port = port
-	WS_Url = fmt.Sprintf("http://localhost:%d", port)
+	Session_Port = port
+	Session_Url = fmt.Sprintf("localhost:%d", port)
 	// Start HTTP server in background
 	serverDone := make(chan struct{})
 	go func() {
@@ -53,30 +54,31 @@ func Connect(tryport int, concurrent bool) {
 		go compiler.Execute("", concurrent)
 
 		for scanner.Scan() {
+			var res = []byte{}
 
 			request := strings.TrimSpace(scanner.Text())
-			if slices.Contains([]string{
-				"exit",
-				"> exit",
-				"$ exit",
-			}, strings.TrimSpace(request)) {
+			if slices.Contains([]string{"exit", "> exit", "$ exit"}, request) {
 				manualExit <- struct{}{}
 				break
-			}
+			} else if slices.Contains([]string{"help", "$ help", "> help"}, request) {
+				m := map[string]any{}
+				for k, v := range Registery {
+					m[k] = v.Instructions
+				}
+				res, _ = json.MarshalIndent(m, "", "  ")
 
-			if !configs.Static.Watchman.Status {
+			} else if !configs.Static.Watchman.Status {
 				time.Sleep(100 * time.Millisecond)
 				continue
-			}
-
-			var res = []byte{}
-			if strings.HasPrefix(request, "$ ") || strings.HasPrefix(request, "> ") {
+			} else if strings.HasPrefix(request, "$ ") || strings.HasPrefix(request, "> ") {
 				split := strings.Fields(request[2:])
 				if len(split) < 1 {
 					continue
 				}
 				res = Interactive(split[0], split[1:], request[0] == '>')
+
 			} else {
+
 				res = IO_Json([]byte(request))
 			}
 
@@ -100,7 +102,6 @@ func Connect(tryport int, concurrent bool) {
 		if err := scanner.Err(); err != nil {
 			fmt.Fprintln(os.Stderr, "Error reading from stdin:", err)
 		}
-
 		manualExit <- struct{}{}
 	}()
 

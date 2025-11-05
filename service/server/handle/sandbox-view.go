@@ -19,7 +19,9 @@ type T_Component_return struct {
 	Compcss    string            `json:"compcss"`
 }
 
-func Sandbox_View(symclass, filepath string) (response any) {
+var Sandbox_View_Last T_Component_return
+
+func Sandbox_View(filepath, symclass string) (response any) {
 	var staplesheet, stylesheet strings.Builder
 
 	context := configs.Style.Filepath_to_Context[filepath]
@@ -61,7 +63,7 @@ func Sandbox_View(symclass, filepath string) (response any) {
 		staplesheet.WriteString(data.NativeStaple)
 	}
 
-	return &T_Component_return{
+	Sandbox_View_Last = T_Component_return{
 		Attributes: attributes,
 		Summon:     summon,
 		Staple:     staplesheet.String(),
@@ -69,4 +71,6 @@ func Sandbox_View(symclass, filepath string) (response any) {
 		Rootcss:    configs.Delta.IndexBuild,
 		Compcss:    stylesheet.String(),
 	}
+
+	return &Sandbox_View_Last
 }
