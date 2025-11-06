@@ -12,7 +12,7 @@ var Registery = map[string]T_RegisterEntry{
 			return handle.Manifest_Global()
 		},
 		func(params any) any {
-			return handle.Manifest_Global
+			return handle.Manifest_Global()
 		},
 		[]string{
 			`returns global-manifest of working directory`,
@@ -22,31 +22,32 @@ var Registery = map[string]T_RegisterEntry{
 	"manifest-locals": RegisterMethod(
 		1,
 		func(args []string) any {
-			filemap := map[string]string{}
+			filemap := make([]handle.T_Manifest_Locals, len(args))
 			for _, f := range filemap {
-				filemap[f] = ""
+				filemap = append(filemap, handle.T_Manifest_Locals{
+					RelPath: f.RelPath,
+					AbsPath: f.AbsPath,
+				})
 			}
-			return handle.Manifest_Locals(filemap)
+			return handle.Manifest_Locals(filemap, "")
 		},
 		func(params struct {
-			FileMap map[string]string `json:"filemap"`
+			FileMap []handle.T_Manifest_Locals `json:"filemap"`
 		}) any {
-			return handle.Manifest_Locals(params.FileMap)
+			return handle.Manifest_Locals(params.FileMap, "")
 		},
 		[]string{
 			`manifest-locals {follow with maultiple filepaths to be refered}`,
 		},
 		false,
 	),
-	"manifest-Mixed": RegisterMethod(
+	"manifest-mixed": RegisterMethod(
 		0,
 		func(args []string) any {
 			return ""
 		},
-		func(params struct {
-			FileMap map[string]string `json:"filemap"`
-		}) any {
-			return handle.Manifest_Mixed(params.FileMap)
+		func(params handle.T_Manifest_Mixed) any {
+			return handle.Manifest_Mixed(params)
 		},
 		[]string{},
 		false,
@@ -89,7 +90,7 @@ var Registery = map[string]T_RegisterEntry{
 		},
 		true,
 	),
-	"sandbox-states": RegisterMethod(
+	"sandbox-state-list": RegisterMethod(
 		0,
 		func(args []string) any {
 			return handle.Sandbox_State_Mem
@@ -102,31 +103,28 @@ var Registery = map[string]T_RegisterEntry{
 		},
 		true,
 	),
-	"sandbox-show": RegisterMethod(
+	"sandbox-load": RegisterMethod(
 		2,
 		func(args []string) any {
-			return handle.Sandbox_View(args[0], args[1])
+			return handle.Sandbox_Load(args[0], args[1])
 		},
 		func(params struct {
 			Filepath string `json:"filepath"`
 			Symclass string `json:"symclass"`
 		}) any {
-			return handle.Sandbox_View(params.Filepath, params.Symclass)
+			return handle.Sandbox_Load(params.Filepath, params.Symclass)
 		},
 		[]string{
-			`sandbox-view {relative-filepath} {symclass}`,
+			`sandbox-load {relative-filepath} {symclass}`,
 		},
 		true,
 	),
 	"sandbox-view": RegisterMethod(
-		2,
+		0,
 		func(args []string) any {
-			return handle.Sandbox_View(args[0], args[1])
+			return handle.Sandbox_View_Last
 		},
-		func(params struct {
-			Filepath string `json:"filepath"`
-			Symclass string `json:"symclass"`
-		}) any {
+		func(params any) any {
 			return handle.Sandbox_View_Last
 		},
 		[]string{

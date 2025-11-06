@@ -21,43 +21,43 @@ type T_Component_return struct {
 
 var Sandbox_View_Last T_Component_return
 
-func Sandbox_View(filepath, symclass string) (response any) {
+func Sandbox_Load(filepath, symclass string) (response any) {
+	Manifest_Local(filepath, symclass)
+	return Sandbox_View_Last
+}
+
+func Sandbox_Index(index int) (response any) {
 	var staplesheet, stylesheet strings.Builder
-
-	context := configs.Style.Filepath_to_Context[filepath]
-	if context == nil {
+	data := action.Index_Fetch(index)
+	if data == nil {
 		return nil
 	}
 
-	ref := action.Index_Finder(symclass, context.StyleData.LocalMap)
-	if ref.Index == 0 {
-		return nil
-	}
-
-	summon := ref.Data.SrcData.Metadata.SummonSnippet
-	clontext := *context
+	summon := data.SrcData.Metadata.SummonSnippet
+	clontext := *data.Context
 	clontext.Midway = summon
 	attachments := map[int]*models.Style_ClassData{}
-	attributes := map[string]string{}
+	attributes := data.SrcData.Attributes
 	classBlocks := css.NewBlock(4, 4)
-	configs.Style.PublishIndexMap = [][]models.Style_ClassIndexTrace{}
+	configs.Style.PublishIndexMap = [][]models.Style_ClassIndexTrace{{
+		models.Style_ClassIndexTrace{ClassName: "._", ClassIndex: data.SrcData.Index},
+	}}
 
-	summon = script.Rider(&clontext, script.E_Action_SandBox).Scribed
+	summon = script.Rider(&clontext, script.E_Action_DebugHash).Scribed
 
-	classBlocks.SetBlock("._", ref.Data.SrcData.NativeRawStyle)
 	for _, i := range utils.Array_FlattenOnce(configs.Style.PublishIndexMap) {
 		data := action.Index_Fetch(i.ClassIndex).SrcData
 		attachments[i.ClassIndex] = data
 		for a := range data.Attachments {
-			if found := action.Index_Finder(a, context.StyleData.LocalMap); found.Index > 0 {
+			if found := action.Index_Finder(a, clontext.StyleData.LocalMap); found.Index > 0 {
 				attachments[found.Index] = found.Data.SrcData
 			}
 		}
 		classBlocks.SetBlock(i.ClassName, data.NativeRawStyle)
 	}
-	stylesheet.WriteString(css.Render_Switched(classBlocks, false))
+	stylesheet.WriteString(css.Render_Switched(classBlocks, true))
 
-	stylesheet.WriteString(css.Render_Vendored(ref.Data.SrcData.NativeAttachStyle, true))
+	stylesheet.WriteString(css.Render_Vendored(data.SrcData.NativeAttachStyle, true))
 	for _, data := range attachments {
 		stylesheet.WriteString(css.Render_Vendored(data.NativeAttachStyle, true))
 		staplesheet.WriteString(data.NativeStaple)
@@ -67,7 +67,7 @@ func Sandbox_View(filepath, symclass string) (response any) {
 		Attributes: attributes,
 		Summon:     summon,
 		Staple:     staplesheet.String(),
-		Symclass:   symclass,
+		Symclass:   data.SrcData.SymClass,
 		Rootcss:    configs.Delta.IndexBuild,
 		Compcss:    stylesheet.String(),
 	}

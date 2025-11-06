@@ -23,12 +23,16 @@ func (This *T_Watcher) Add_WatchingFolder(folders []string) {
 				This.notifyWatcher.Add(folder)
 				This.polledWatcher.Add(folder)
 				_filepath.Walk(folder, func(path string, info _os.FileInfo, err error) error {
+					if err != nil {
+						return err
+					}
 					if info.IsDir() {
-						This.polledWatcher.Add(folder)
+						This.polledWatcher.Add(path)
 						This.notifyWatcher.Add(path)
 					}
 					return nil
 				})
+
 			}
 
 			This.watchingFolders[abs] = folder
@@ -108,24 +112,29 @@ func (This *T_Watcher) DeBuf() []*Event {
 }
 
 func (This *T_Watcher) Reset() {
-	This.DeBuf()
-	This.mutex.Lock()
-	defer This.mutex.Unlock()
-	
-	This.close <- struct{}{}
-	This.Status = false
+    This.DeBuf()
+    This.mutex.Lock()
+    defer This.mutex.Unlock()
 
-	This.polledWatcher.Close()
-	This.polledWatcher = _watcher.New()
+    if This.Status {
+        close(This.close)  // close the signal channel
+    }
+    This.close = make(chan struct{})  // recreate for future use
+    This.Status = false
 
-	This.notifyWatcher.Close()
-	This.notifyWatcher = nil
-	if watcher, e := _fsnotify.NewWatcher(); e == nil {
-		This.notifyWatcher = watcher
-	}
+    This.polledWatcher.Close()
+    This.polledWatcher = _watcher.New()
 
-	This.ignoredFolders = map[string]string{}
-	This.watchingFolders = map[string]string{}
+    This.notifyWatcher.Close()
+    watcher, e := _fsnotify.NewWatcher()
+    if e == nil {
+        This.notifyWatcher = watcher
+    } else {
+        This.notifyWatcher = nil
+    }
+
+    This.ignoredFolders = map[string]string{}
+    This.watchingFolders = map[string]string{}
 }
 
 func (This *T_Watcher) Length() int {

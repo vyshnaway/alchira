@@ -143,6 +143,6 @@ func Store(
 		Errors:      make([]string, 0, AZ),
 	}
 
-	_config.Style.Filepath_to_Context[filePath] = context
+	_config.Style.Filepath_to_Context[targetPath] = context
 	return context
 }

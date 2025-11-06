@@ -28,6 +28,33 @@ func Interactive(command string, arguments []string, broadcast bool) (Response [
 	return r
 }
 
+func IO_Json(reqbyte []byte) []byte {
+	var req JsonRPCRequest[any]
+	if err := json.Unmarshal(reqbyte, &req); err != nil {
+		return []byte{}
+	}
+
+	var broadcast_bool bool
+	var resp JsonRPCResponse
+	resp.JSONRPC = "2.0"
+	resp.ID = req.ID
+	resp.Method = req.Method
+
+	if entry, exist := Registery[req.Method]; exist {
+		resp.Result, broadcast_bool = entry.JsonStream(reqbyte)
+	} else {
+		resp.Error = "invalid method"
+	}
+
+	if r, e := json.Marshal(resp); e == nil && len(r) > 0 {
+		if broadcast_bool {
+			WS_Broadcast <- r
+		}
+		return r
+	}
+	return []byte{}
+}
+
 // JSON-RPC message structures
 type JsonRPCRequest[T any] struct {
 	JSONRPC string `json:"jsonrpc"`
@@ -41,7 +68,7 @@ type JsonRPCResponse struct {
 	ID      any    `json:"id"`
 	Method  string `json:"method"`
 	Result  any    `json:"result"`
-	Error   any    `json:"error"`
+	Error   string `json:"error"`
 }
 
 type T_RegisterEntry struct {

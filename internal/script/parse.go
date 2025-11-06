@@ -13,7 +13,6 @@ type E_Action int
 
 const (
 	E_Action_Read E_Action = iota
-	E_Action_SandBox
 	E_Action_BuildHash
 	E_Action_DebugHash
 )
@@ -33,9 +32,6 @@ func Rider(
 	fileData *_model.File_Stash,
 	action E_Action,
 ) parse_return {
-	if action == E_Action_SandBox {
-		_config.Style.PublishIndexMap = [][]_model.Style_ClassIndexTrace{}
-	}
 
 	fileData.StyleData.TagReplacements = []_model.File_TagReplacement{}
 	replacements := make([]_model.File_TagReplacement, 0, 8)

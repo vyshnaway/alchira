@@ -82,15 +82,13 @@ func Connect(tryport int, concurrent bool) {
 				res = IO_Json([]byte(request))
 			}
 
-			if len(res) == 0 {
-				continue
-			} else {
+			if len(res) > 0 {
 				_, err := fmt.Fprintln(writer, string(res))
 				if err != nil {
 					fmt.Fprintln(os.Stderr, "Error writing response to stdout:", err)
 					break
 				}
-			}
+			} 
 
 			// Always check and handle flush error
 			if err := writer.Flush(); err != nil {

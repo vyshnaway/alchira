@@ -8,15 +8,14 @@ import (
 )
 
 type R_ManifestGlobal struct {
-	FileAttrs   map[string][]string               `json:"fileAttrs"`
-	Environment  string                            `json:"environment"`
-	CustomTags   []string                          `json:"customtags"`
-	SwitchMap    map[string]string                 `json:"switchmap"`
-	Hashrules    map[string]string                 `json:"hashrules"`
-	Constants    map[string]string                 `json:"constants"`
-	Symclasses   map[string]*models.Style_Metadata `json:"symclasses"`
-	AttrubuteMap map[string]map[string][]string    `json:"attributemap"`
-	Diagnostics  []*models.File_Diagnostic         `json:"diagnostics"`
+	FileAttributes map[string][]string               `json:"fileToAttributes"`
+	Environment    string                            `json:"environment"`
+	CustomTags     []string                          `json:"customtags"`
+	SwitchMap      map[string]string                 `json:"switchmap"`
+	Hashrules      map[string]string                 `json:"hashrules"`
+	Constants      map[string]string                 `json:"constants"`
+	Symclasses     map[string]*models.Style_Metadata `json:"symclasses"`
+	Diagnostics    []*models.File_Diagnostic         `json:"diagnostics"`
 }
 
 func Manifest_Global() *R_ManifestGlobal {
@@ -48,14 +47,13 @@ func Manifest_Global() *R_ManifestGlobal {
 	}
 
 	return &R_ManifestGlobal{
-		FileAttrs:   file_attribs,
-		Environment:  configs.Archive.Environment,
-		CustomTags:   configs.Static.CustomTags,
-		SwitchMap:    switchmap,
-		Hashrules:    configs.Style.Hashrules,
-		Constants:    configs.Manifest.Constants,
-		Symclasses:   symclassData,
-		AttrubuteMap: attributeMap,
-		Diagnostics:  configs.Manifest.Diagnostics,
+		FileAttributes: file_attribs,
+		Environment:    configs.Archive.Environment,
+		CustomTags:     configs.Static.CustomTags,
+		SwitchMap:      switchmap,
+		Hashrules:      configs.Style.Hashrules,
+		Constants:      configs.Manifest.Constants,
+		Symclasses:     symclassData,
+		Diagnostics:    configs.Manifest.Diagnostics,
 	}
 }

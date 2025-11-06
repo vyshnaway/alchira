@@ -1,6 +1,7 @@
 package watchman
 
 import (
+	"context"
 	_fmt "fmt"
 	_os "os"
 	_sync "sync"
@@ -39,9 +40,12 @@ type T_Watcher struct {
 	PollIntervalMs  int
 	ignoredFolders  map[string]string
 	watchingFolders map[string]string
+	ctx             context.Context
+	cancel          context.CancelFunc
 }
 
 func New() *T_Watcher {
+	ctx, cancel := context.WithCancel(context.Background())
 	var notifyWatcher *_fsnotify.Watcher = nil
 	if watcher, e := _fsnotify.NewWatcher(); e == nil {
 		notifyWatcher = watcher
@@ -58,6 +62,8 @@ func New() *T_Watcher {
 		PollIntervalMs:  0,
 		ignoredFolders:  map[string]string{},
 		watchingFolders: map[string]string{},
+		ctx:             ctx,
+		cancel:          cancel,
 	}
 }
 
@@ -72,9 +78,11 @@ func (This *T_Watcher) Start() {
 				}
 
 				select {
+				case <-This.ctx.Done():
+					return
 				case event, ok := <-This.notifyWatcher.Events:
 					if !ok {
-						continue
+						return
 					}
 					var act E_Action
 
@@ -99,9 +107,10 @@ func (This *T_Watcher) Start() {
 					This.HandleEvent(act, event.Name, "")
 
 				case err, ok := <-This.notifyWatcher.Errors:
-					if ok {
-						_fmt.Fprintf(_os.Stderr, "Watcher error: %v\r\n", err)
+					if !ok {
+						return
 					}
+					_fmt.Fprintf(_os.Stderr, "Watcher error: %v\r\n", err)
 
 				case <-This.close:
 					return
@@ -119,12 +128,13 @@ func (This *T_Watcher) Start() {
 				}
 
 				select {
+				case <-This.ctx.Done():
+					return
 				case event, ok := <-This.polledWatcher.Event:
 					if !ok {
-						continue
+						return
 					}
 					var act E_Action
-
 					switch event.Op {
 
 					case _watcher.Create:
@@ -147,9 +157,10 @@ func (This *T_Watcher) Start() {
 					This.HandleEvent(act, event.Path, "")
 
 				case err, ok := <-This.polledWatcher.Error:
-					if ok {
-						_fmt.Fprintf(_os.Stderr, "Watcher error: %v\r\n", err)
+					if !ok {
+						return
 					}
+					_fmt.Fprintf(_os.Stderr, "Watcher error: %v\r\n", err)
 
 				case <-This.close:
 					return
@@ -164,11 +175,18 @@ func (This *T_Watcher) Start() {
 			}
 		}()
 	}
-	
+
 	This.Close = func() {
-		This.polledWatcher.Close()
-		This.notifyWatcher.Close()
-		This.close <- struct{}{}
-		This.Status = false
+		This.mutex.Lock()
+		defer This.mutex.Unlock()
+		if This.Status {
+			This.Status = false
+			This.cancel()
+			This.polledWatcher.Close()
+			if This.notifyWatcher != nil {
+				This.notifyWatcher.Close()
+			}
+			close(This.close)
+		}
 	}
 }

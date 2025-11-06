@@ -137,8 +137,7 @@ func render_Partial(stylemap *T_Block, vendors []string, first bool) []string {
 }
 
 func Render_Vendored(stylemap *T_Block, minify bool) string {
-	set_MinifyOptions(minify)
-	return _string.Join(render_Partial(stylemap.Flatten(), vendor_Providers, true), _break)
+	return _string.Join(render_Partial(stylemap.Flatten(), vendor_Providers, minify), _break)
 }
 
 func Render_Sequence(seq *T_BlockSeq, minify bool) string {

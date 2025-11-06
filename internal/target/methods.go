@@ -40,9 +40,9 @@ func (This *Class) GetTracks() GetTracks_return {
 	classtracks := make([][]int, 24*len(This.FileCache))
 	attachments := make(map[int]bool, 8)
 
-	scd := This.StylesheetContext.StyleData
-	for i := range scd.Attachments {
-		if found := _action.Index_Finder(i, scd.LocalMap); found.Index > 0 {
+	sc := This.StylesheetContext.StyleData
+	for i := range sc.Attachments {
+		if found := _action.Index_Finder(i, sc.LocalMap); found.Index > 0 {
 			attachments[found.Index] = true
 		}
 	}
@@ -56,21 +56,15 @@ func (This *Class) GetTracks() GetTracks_return {
 			for _, i := range track {
 				if found := _action.Index_Finder(i, file.StyleData.LocalMap); found.Index > 0 {
 					retraces = append(retraces, found.Index)
-					attachments[found.Index] = true
 					_map.Copy(attachstrings, found.Data.SrcData.Attachments)
-					attachments[found.Index] = true
-					_map.Copy(attachstrings, found.Data.SrcData.Attachments)
+					if found.Group != _model.Style_Type_Library {
+						attachments[found.Index] = true
+					}
 				}
 			}
 
 			if len(retraces) > 0 {
 				classtracks = append(classtracks, retraces)
-			}
-		}
-
-		for i := range attachstrings {
-			if found := _action.Index_Finder(i, file.StyleData.LocalMap); found.Index > 0 {
-				attachments[found.Index] = true
 			}
 		}
 
