@@ -51,33 +51,36 @@ func (This *T_Watcher) Add_IgnoredFolder(folders []string) {
 
 // If content == "", file content is refetched from path as fallback
 func (This *T_Watcher) HandleEvent(action E_Action, filePath string, content string) {
-	for resFolder := range This.ignoredFolders {
-		if _fileman.Path_HasChildPath(resFolder, filePath) {
-			return
-		}
-	}
 
 	event := Event{}
-	now := _time.Now()
 	event.Action = action
-	event.Extension = _filepath.Ext(filePath)
-	if len(event.Extension) > 0 {
-		event.Extension = event.Extension[1:]
-	}
-
-	for resFolder, refFolder := range This.watchingFolders {
-		if ok, relpath := _fileman.Path_RelChildPath(resFolder, filePath); ok {
-			event.Folder = refFolder
-			event.FilePath = relpath
-			event.TimeStamp = now.Format("15:04:05")
-			break
+	if action != E_Action_Reload {
+		for resFolder := range This.ignoredFolders {
+			if _fileman.Path_HasChildPath(resFolder, filePath) {
+				return
+			}
 		}
-	}
 
-	if content != "" {
-		event.FileContent = content
-	} else if data, err := _fileman.Read_File(filePath, false); err == nil {
-		event.FileContent = string(data)
+		now := _time.Now()
+		event.Extension = _filepath.Ext(filePath)
+		if len(event.Extension) > 0 {
+			event.Extension = event.Extension[1:]
+		}
+
+		for resFolder, refFolder := range This.watchingFolders {
+			if ok, relpath := _fileman.Path_RelChildPath(resFolder, filePath); ok {
+				event.Folder = refFolder
+				event.FilePath = relpath
+				event.TimeStamp = now.Format("15:04:05")
+				break
+			}
+		}
+
+		if content != "" {
+			event.FileContent = content
+		} else if data, err := _fileman.Read_File(filePath, false); err == nil {
+			event.FileContent = string(data)
+		}
 	}
 
 	This.Add(&event)

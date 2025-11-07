@@ -15,9 +15,8 @@ type E_Action int
 
 const (
 	E_Action_Reload E_Action = iota
-	E_Action_Access
+	E_Action_Access 
 	E_Action_Update
-	E_Action_Refactor
 )
 
 type Event struct {
@@ -91,7 +90,7 @@ func (This *T_Watcher) Start() {
 						info, err := _os.Stat(event.Name)
 						if err == nil && info.IsDir() {
 							This.Reset()
-							act = E_Action_Refactor
+							act = E_Action_Reload
 						} else {
 							act = E_Action_Update
 						}
@@ -101,7 +100,7 @@ func (This *T_Watcher) Start() {
 
 					default:
 						This.Reset()
-						act = E_Action_Refactor
+						act = E_Action_Reload
 					}
 
 					This.HandleEvent(act, event.Name, "")
@@ -111,6 +110,7 @@ func (This *T_Watcher) Start() {
 						return
 					}
 					_fmt.Fprintf(_os.Stderr, "Watcher error: %v\r\n", err)
+					This.HandleEvent(E_Action_Reload, "", "")
 
 				case <-This.close:
 					return
@@ -141,7 +141,7 @@ func (This *T_Watcher) Start() {
 						info, err := _os.Stat(event.Path)
 						if err == nil && info.IsDir() {
 							This.Reset()
-							act = E_Action_Refactor
+							act = E_Action_Reload
 						} else {
 							act = E_Action_Update
 						}
@@ -151,7 +151,7 @@ func (This *T_Watcher) Start() {
 
 					default:
 						This.Reset()
-						act = E_Action_Refactor
+						act = E_Action_Reload
 					}
 
 					This.HandleEvent(act, event.Path, "")
@@ -161,6 +161,7 @@ func (This *T_Watcher) Start() {
 						return
 					}
 					_fmt.Fprintf(_os.Stderr, "Watcher error: %v\r\n", err)
+					This.HandleEvent(E_Action_Reload, "", "")
 
 				case <-This.close:
 					return

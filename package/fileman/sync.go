@@ -317,24 +317,21 @@ func Sync_BulkSerial(source, target string, extInclude, extnUnsync, fileExcludes
 		}
 	}
 
-	// Delete files in target that are not in source or are marked as unsyncable
-	for _, relFile := range relativeTargetFiles {
-		targetFilePath := _filepath.Join(target, relFile)
-
-		// Check if file exists in source
-		sourceFileExists := _slice.Contains(relativeSourceFiles, relFile)
-
-		// Check if extension is in unsync list
-		isUnsyncable := _slice.Contains(extnUnsync, _filepath.Ext(relFile))
-
-		if !sourceFileExists || isUnsyncable {
-			if err := _os.Remove(targetFilePath); err != nil && !_os.IsNotExist(err) {
-				errs = append(errs, nil, _fmt.Errorf("failed to delete target file '%s': %w", targetFilePath, err))
+	if sync {
+		// Delete files in target that are not in source or are marked as unsyncable
+		for _, relFile := range relativeTargetFiles {
+			sourceFileExists := _slice.Contains(relativeSourceFiles, relFile)
+			isUnsyncable := _slice.Contains(extnUnsync, _filepath.Ext(relFile))
+			if !sourceFileExists || isUnsyncable {
+				targetFilePath := _filepath.Join(target, relFile)
+				if err := _os.Remove(targetFilePath); err != nil && !_os.IsNotExist(err) {
+					errs = append(errs, nil, _fmt.Errorf("failed to delete target file '%s': %w", targetFilePath, err))
+				}
 			}
 		}
-	}
-	if len(errs) > 0 {
-		return nil, _error.Join(errs...)
+		if len(errs) > 0 {
+			return nil, _error.Join(errs...)
+		}
 	}
 
 	// Copy files from source to target and read contents for included extensions
@@ -387,8 +384,6 @@ func Sync_BulkSerial(source, target string, extInclude, extnUnsync, fileExcludes
 				continue
 			}
 			sourceFolderPath := _filepath.Join(source, relFolder)
-
-			// Check if the corresponding source folder exists
 			sourceFolderExists := _slice.Contains(sourceFolders, sourceFolderPath)
 
 			// If target folder is empty and no corresponding source folder, remove it
@@ -398,7 +393,7 @@ func Sync_BulkSerial(source, target string, extInclude, extnUnsync, fileExcludes
 			isEmpty, _ := helper_IsDirEmpty(targetFolder) // Ignore error, assume not empty if error
 			if !sourceFolderExists && isEmpty {
 				if err := _os.RemoveAll(targetFolder); err != nil && !_os.IsNotExist(err) {
-					errs = append(errs, _fmt.Errorf("failed to remove empty target folder '%s': %w", targetFolder, err))
+                    errs = append(errs, _fmt.Errorf("rm empty target folder '%s': %w", targetFolder, err))
 				}
 			}
 		}
