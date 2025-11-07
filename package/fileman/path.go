@@ -97,6 +97,19 @@ func Path_HasChildPath(parent, child string) bool {
 	return _strings.HasPrefix(child, parent)
 }
 
+// isSubpath returns true if child is a subdirectory of parent, not counting equality.
+func Path_RelChildPath(parent, child string) (ok bool, childRelPath string) {
+	parent, _ = Path_Resolves(parent)
+	child, _ = Path_Resolves(child)
+	parent = parent + string(_filepath.Separator)
+	if _strings.HasPrefix(child, parent) {
+		ok = true
+		childRelPath = child[len(parent):]
+	}
+	// If rel starts with "..", it's outside the parent.
+	return ok, childRelPath
+}
+
 // Path_IsIndependent checks if two folders are independent (neither is inside the other).
 func Path_IsIndependent(folder1, folder2 string) (bool, error) {
 	abs1, err := _filepath.Abs(folder1)

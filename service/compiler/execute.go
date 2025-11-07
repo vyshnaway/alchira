@@ -69,7 +69,7 @@ func Execute(heading string, concurrent bool) (Exitcode int) {
 			RebuildTickerReset = startRebuildTicker(_config.Root.RebuildInterval)
 		}
 
-		if !_config.Static.SERVER {
+		if !_config.Static.SERVER || !_config.Static.IAMAI {
 			sigs := make(chan _os.Signal, 1)
 			_signal.Notify(sigs, _syscall.SIGINT)
 
@@ -282,7 +282,7 @@ func Execute(heading string, concurrent bool) (Exitcode int) {
 
 		_config.Static.ExecuteMutex.Unlock()
 		if _config.Static.WATCH {
-			if !_config.Static.SERVER && len(report) > 0 && showReport {
+			if !_config.Static.SERVER && !_config.Static.IAMAI && len(report) > 0 && showReport {
 				S.Post(X.Report(heading, []string{}, report))
 			}
 			report = ""

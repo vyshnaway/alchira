@@ -92,21 +92,19 @@ func main() {
 	_config.Static.DEBUG = command == "debug"
 	_config.Static.IAMAI = command == "iamai"
 	_config.Static.WATCH = command == "server" || ((command == "debug" || command == "preview") && argone == "-w")
-	_config.Static.SERVER = _config.Static.IAMAI || command == "server"
+	_config.Static.SERVER = command == "server"
+	_config.Static.EXPORT = command == "server" || command == "publish" || command == "iamai"
 	_config.Static.MINIFY = !_config.Static.DEBUG
-	_config.Static.EXPORT = _config.Static.SERVER || command == "publish"
 
 	S.Canvas.Initialize(
 		!_config.Static.WATCH && _slice.Contains([]string{"debug", "preview", "publish", "init", "install"}, command),
 		true, 2,
 	)
 
-	var flagmode string
 	exitcode := 0
+	var flagmode = "Build"
 	if _config.Static.WATCH {
 		flagmode = "Watch"
-	} else {
-		flagmode = "Build"
 	}
 
 	_config.Reset(false)

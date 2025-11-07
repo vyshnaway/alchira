@@ -41,7 +41,10 @@ func IO_Json(reqbyte []byte) []byte {
 	resp.Method = req.Method
 
 	if entry, exist := Registery[req.Method]; exist {
-		resp.Result, broadcast_bool = entry.JsonStream(reqbyte)
+		if res := entry.JsonStream(reqbyte); res != nil {
+			resp.Result = res
+			broadcast_bool = entry.Broadcast
+		}
 	} else {
 		resp.Error = "invalid method"
 	}
@@ -74,7 +77,8 @@ type JsonRPCResponse struct {
 type T_RegisterEntry struct {
 	Instructions []string
 	Interactive  func(arguments []string) any
-	JsonStream   func(req []byte) (response any, broadcast bool)
+	JsonStream   func(req []byte) (response any)
+	Broadcast    bool
 }
 
 func RegisterMethod[T any](
@@ -86,14 +90,15 @@ func RegisterMethod[T any](
 ) T_RegisterEntry {
 	template, _ := json.Marshal(new(T))
 	return T_RegisterEntry{
-		JsonStream: func(reqbyte []byte) (response any, broadcast bool) {
+		JsonStream: func(reqbyte []byte) (response any) {
 			var req JsonRPCRequest[T]
 			if err := json.Unmarshal(reqbyte, &req); err != nil {
-				return nil, false
+				return nil
 			}
 			resp := JsonStream(req.Params)
-			return resp, broadcast
+			return resp
 		},
+		Broadcast: broadcast,
 		Interactive: func(arguments []string) any {
 			if len(arguments) < minargs {
 				return nil

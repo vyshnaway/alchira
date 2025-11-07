@@ -47,10 +47,38 @@ var Registery = map[string]T_RegisterEntry{
 			return ""
 		},
 		func(params handle.T_Manifest_Mixed) any {
-			return handle.Manifest_Mixed(params)
+			res :=  handle.Manifest_Mixed(params)
+			return res
 		},
 		[]string{},
 		false,
+	),
+	"sandbox-load": RegisterMethod(
+		2,
+		func(args []string) any {
+			return handle.Sandbox_Load(args[0], args[1])
+		},
+		func(params struct {
+			Filepath string `json:"filepath"`
+			Symclass string `json:"symclass"`
+		}) any {
+			return handle.Sandbox_Load(params.Filepath, params.Symclass)
+		},
+		[]string{
+			`sandbox-load {relative-filepath} {symclass}`,
+		},
+		true,
+	),
+	"sandbox-view": RegisterMethod(
+		0,
+		func(args []string) any {
+			return handle.Sandbox_View_Last
+		},
+		func(params any) any {
+			return handle.Sandbox_View_Last
+		},
+		[]string{},
+		true,
 	),
 	"sandbox-state-set": RegisterMethod(
 		1,
@@ -101,51 +129,6 @@ var Registery = map[string]T_RegisterEntry{
 		[]string{
 			`returns component-sandbox option states`,
 		},
-		true,
-	),
-	"sandbox-load": RegisterMethod(
-		2,
-		func(args []string) any {
-			return handle.Sandbox_Load(args[0], args[1])
-		},
-		func(params struct {
-			Filepath string `json:"filepath"`
-			Symclass string `json:"symclass"`
-		}) any {
-			return handle.Sandbox_Load(params.Filepath, params.Symclass)
-		},
-		[]string{
-			`sandbox-load {relative-filepath} {symclass}`,
-		},
-		true,
-	),
-	"sandbox-view": RegisterMethod(
-		0,
-		func(args []string) any {
-			return handle.Sandbox_View_Last
-		},
-		func(params any) any {
-			return handle.Sandbox_View_Last
-		},
-		[]string{
-			`sandbox-view {relative-filepath} {symclass}`,
-		},
-		true,
-	),
-	"symclass-summon": RegisterMethod(
-		2,
-		func(args []string) any {
-			return handle.Symclass_Summon(args[0], args[1])
-		},
-		func(params struct {
-			Symclass string
-			Filepath string
-		}) any {
-			return handle.Symclass_Summon(params.Symclass, params.Filepath)
-		},
-		[]string{
-			`symclass-summon {relative-filepath} {symclass}`,
-		},
 		false,
 	),
 	"sandbox-url": RegisterMethod(
@@ -194,6 +177,21 @@ var Registery = map[string]T_RegisterEntry{
 		},
 		func(params any) any {
 			return configs.Manifest.Diagnostics
+		},
+		[]string{
+			`returns list of current diagnostics`,
+		},
+		false,
+	),
+	"rebuild": RegisterMethod(
+		0,
+		func(args []string) any {
+			configs.Static.RebuildFlag.Store(true)
+			return nil
+		},
+		func(params any) any {
+			configs.Static.RebuildFlag.Store(true)
+			return nil
 		},
 		[]string{
 			`returns list of current diagnostics`,

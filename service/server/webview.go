@@ -61,58 +61,60 @@ func Webview_Create(tryport int) (httpServer *http.Server, deducedPort int, err 
 		}
 	})
 
-mux.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
-    WS_Upgrader.CheckOrigin = func(r *http.Request) bool { return true }
-    ws, err := WS_Upgrader.Upgrade(w, r, nil)
-    if err != nil {
-        // Optionally log the error here for debugging
-        return
-    }
+	mux.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
+		WS_Upgrader.CheckOrigin = func(r *http.Request) bool { return true }
+		ws, err := WS_Upgrader.Upgrade(w, r, nil)
+		if err != nil {
+			// Optionally log the error here for debugging
+			return
+		}
 
-    WS_Mutex.Lock()
-    WS_Clients[ws] = true
-    WS_Mutex.Unlock()
+		WS_Mutex.Lock()
+		WS_Clients[ws] = true
+		WS_Mutex.Unlock()
 
-    defer func() {
-        WS_Mutex.Lock()
-        delete(WS_Clients, ws)
-        WS_Mutex.Unlock()
-        ws.Close()
-    }()
+		defer func() {
+			WS_Mutex.Lock()
+			delete(WS_Clients, ws)
+			WS_Mutex.Unlock()
+			ws.Close()
+		}()
 
-    for {
-        _, request, err := ws.ReadMessage()
-        if err != nil {
-            // Connection closed or error reading message: clean exit
-            break
-        }
-        if res := IO_Json(request); len(res) > 0 {
-            if err := ws.WriteMessage(websocket.TextMessage, res); err != nil {
-                break
-            }
-        }
-    }
-})
+		for {
+			_, request, err := ws.ReadMessage()
+			if err != nil {
+				// Connection closed or error reading message: clean exit
+				break
+			}
+			if res := IO_Json(request); len(res) > 0 {
+				WS_Mutex.Lock()
+				err := ws.WriteMessage(websocket.TextMessage, res); 
+				WS_Mutex.Unlock()
+				if err != nil {
+					break
+				}
+			}
+		}
+	})
 
-go func() {
-    for {
-        msg, ok := <-WS_Broadcast
-        if !ok {
-            // Broadcast channel closed: exit goroutine cleanly
-            return
-        }
+	go func() {
+		for {
+			msg, ok := <-WS_Broadcast
+			if !ok {
+				// Broadcast channel closed: exit goroutine cleanly
+				return
+			}
 
-        WS_Mutex.Lock()
-        for client := range WS_Clients {
-            if err := client.WriteMessage(websocket.TextMessage, msg); err != nil {
-                client.Close()
-                delete(WS_Clients, client)
-            }
-        }
-        WS_Mutex.Unlock()
-    }
-}()
-
+			WS_Mutex.Lock()
+			for client := range WS_Clients {
+				if err := client.WriteMessage(websocket.TextMessage, msg); err != nil {
+					client.Close()
+					delete(WS_Clients, client)
+				}
+			}
+			WS_Mutex.Unlock()
+		}
+	}()
 
 	server := &http.Server{
 		Addr:    ":" + strconv.Itoa(foundPort),

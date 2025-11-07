@@ -66,9 +66,9 @@ func (This *T_Watcher) HandleEvent(action E_Action, filePath string, content str
 	}
 
 	for resFolder, refFolder := range This.watchingFolders {
-		if _fileman.Path_HasChildPath(resFolder, filePath) {
+		if ok, relpath := _fileman.Path_RelChildPath(resFolder, filePath); ok {
 			event.Folder = refFolder
-			event.FilePath = filePath[len(resFolder)+1:]
+			event.FilePath = relpath
 			event.TimeStamp = now.Format("15:04:05")
 			break
 		}
@@ -112,29 +112,29 @@ func (This *T_Watcher) DeBuf() []*Event {
 }
 
 func (This *T_Watcher) Reset() {
-    This.DeBuf()
-    This.mutex.Lock()
-    defer This.mutex.Unlock()
+	This.DeBuf()
+	This.mutex.Lock()
+	defer This.mutex.Unlock()
 
-    if This.Status {
-        close(This.close)  // close the signal channel
-    }
-    This.close = make(chan struct{})  // recreate for future use
-    This.Status = false
+	if This.Status {
+		close(This.close) // close the signal channel
+	}
+	This.close = make(chan struct{}) // recreate for future use
+	This.Status = false
 
-    This.polledWatcher.Close()
-    This.polledWatcher = _watcher.New()
+	This.polledWatcher.Close()
+	This.polledWatcher = _watcher.New()
 
-    This.notifyWatcher.Close()
-    watcher, e := _fsnotify.NewWatcher()
-    if e == nil {
-        This.notifyWatcher = watcher
-    } else {
-        This.notifyWatcher = nil
-    }
+	This.notifyWatcher.Close()
+	watcher, e := _fsnotify.NewWatcher()
+	if e == nil {
+		This.notifyWatcher = watcher
+	} else {
+		This.notifyWatcher = nil
+	}
 
-    This.ignoredFolders = map[string]string{}
-    This.watchingFolders = map[string]string{}
+	This.ignoredFolders = map[string]string{}
+	This.watchingFolders = map[string]string{}
 }
 
 func (This *T_Watcher) Length() int {

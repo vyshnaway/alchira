@@ -19,7 +19,7 @@ type T_Component_return struct {
 	Compcss    string            `json:"compcss"`
 }
 
-var Sandbox_View_Last T_Component_return
+var Sandbox_View_Last = new(T_Component_return)
 
 func Sandbox_Load(filepath, symclass string) (response any) {
 	Manifest_Local(filepath, symclass)
@@ -63,7 +63,7 @@ func Sandbox_Index(index int) (response any) {
 		staplesheet.WriteString(data.NativeStaple)
 	}
 
-	Sandbox_View_Last = T_Component_return{
+	Sandbox_View_Last = &T_Component_return{
 		Attributes: attributes,
 		Summon:     summon,
 		Staple:     staplesheet.String(),
@@ -72,5 +72,5 @@ func Sandbox_Index(index int) (response any) {
 		Compcss:    stylesheet.String(),
 	}
 
-	return &Sandbox_View_Last
+	return Sandbox_View_Last
 }
