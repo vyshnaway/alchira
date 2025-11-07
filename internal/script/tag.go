@@ -135,8 +135,8 @@ func Tag_Scanner(
 							fileData,
 							*cursor,
 						)
-						if len(value_Parse_return.Classlist) > 0 {
-							classesList = append(classesList, value_Parse_return.Classlist)
+						if len(value_Parse_return.Classlists) > 0 {
+							classesList = append(classesList, value_Parse_return.Classlists...)
 						}
 						if len(value_Parse_return.Attachments) > 0 {
 							attachments = append(attachments, value_Parse_return.Attachments...)

@@ -70,12 +70,13 @@ func value_EvaluateIndexTraces(
 	return classMap
 }
 
-var op_attach = _config.Root.CustomOps["attach"]
-var op_assign = _config.Root.CustomOps["assign"]
-var op_lodash = _config.Root.CustomOps["lodash"]
+var op_attach = byte(_config.Root.CustomOps["attach"])
+var op_assign = byte(_config.Root.CustomOps["assign"])
+var op_hyphen = byte(_config.Root.CustomOps["hyphen"])
+var op_lodash = byte(_config.Root.CustomOps["lodash"])
 
 type value_Parse_retype struct {
-	Classlist   []string
+	Classlists  [][]string
 	Attachments []string
 	Scribed     string
 }
@@ -94,6 +95,7 @@ func value_Parse(
 	valuelen := len(value)
 	quotes := []rune{'\'', '`', '"'}
 
+	classlists := make([][]string, 0, 12)
 	classlist := make([]string, 0, 12)
 	attachments := make([]string, 0, 8)
 	var entry _string.Builder
@@ -104,10 +106,13 @@ func value_Parse(
 		if inQuote {
 			if (ch == ' ' || ch == activeQuote) && entry.Len() > 0 {
 				entrystring := entry.String()
-				if rune(entrystring[0]) == op_attach {
+				switch entrystring[0] {
+				case op_attach:
 					attachments = append(attachments, entrystring[1:])
-				} else if rune(entrystring[0]) == op_assign {
+				case op_assign:
 					classlist = append(classlist, entrystring[1:])
+				case op_hyphen:
+					classlists = append(classlists, []string{entrystring[1:]})
 				}
 				entry.Reset()
 			} else {
@@ -148,10 +153,11 @@ func value_Parse(
 			if inQuote {
 				if ch == ' ' || ch == activeQuote {
 					entrystring := entry.String()
-					if entry.Len() > 0 && rune(entrystring[0]) != op_attach {
-						if rune(entrystring[0]) == op_lodash {
+					if entry.Len() > 0 && entrystring[0] != op_attach {
+						switch entrystring[0] {
+						case op_lodash:
 							scriber.WriteString(_fmt.Sprintf("%s%s", fileData.Label, entrystring[1:]))
-						} else if rune(entrystring[0]) == op_assign {
+						case op_assign:
 							entrystring := entrystring[1:]
 							found_Entry, found_Status := classMap[entrystring]
 							if found_Status {
@@ -159,7 +165,21 @@ func value_Parse(
 							} else {
 								scriber.WriteString(entrystring)
 							}
-						} else {
+						case op_hyphen:
+							entrystring := entrystring[1:]
+							hyphenMap := value_EvaluateIndexTraces(
+								action,
+								metafront,
+								[]string{entrystring},
+								fileData.StyleData.LocalMap,
+							)
+							found_Entry, found_Status := hyphenMap[entrystring]
+							if found_Status {
+								scriber.WriteString(found_Entry)
+							} else {
+								scriber.WriteString(entrystring)
+							}
+						default:
 							scriber.WriteString(entrystring)
 						}
 					}
@@ -184,8 +204,12 @@ func value_Parse(
 		scribed = scriber.String()
 	}
 
+	if len(classlist) > 0 {
+		classlists = append(classlists, classlist)
+	}
+
 	return value_Parse_retype{
-		Classlist:   classlist,
+		Classlists:  classlists,
 		Attachments: attachments,
 		Scribed:     scribed,
 	}

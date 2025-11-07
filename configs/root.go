@@ -55,6 +55,7 @@ var Root = models.Cache_Root{
 	CustomOps: map[string]rune{
 		"attach": '~',
 		"assign": '=',
+		"hyphen": '-',
 		"lodash": Lodash_rune,
 	},
 	CustomAtrules: map[string]string{

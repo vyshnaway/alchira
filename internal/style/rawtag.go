@@ -14,7 +14,7 @@ import (
 )
 
 var lodash_tag = "<!--" + lodash_rune + "-->"
-var lodash_rune = string(_config.Root.CustomOps["lodash"])
+var lodash_rune = string(_config.Lodash_rune)
 var lodash_regex = _regexp.MustCompile(`\.` + lodash_rune)
 var symzero_regex = _regexp.MustCompile(`^[-_]\$`)
 
