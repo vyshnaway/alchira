@@ -7,28 +7,28 @@ import (
 var Sync_References = map[string]_model.File_Source{
 	"readme": {
 		Title:   "Documentation",
-		Url:     "readme.md",
+		Url:     "pages/readme.md",
 		Path:    "",
 		Frags:   []string{"readme.md"},
 		Content: "",
 	},
 	"alerts": {
 		Title:   "Notifications",
-		Url:     "alerts.md",
+		Url:     "pages/alerts.md",
 		Path:    "",
 		Frags:   []string{"alerts.md"},
 		Content: "",
 	},
 	"changelog": {
 		Title:   "Changelog",
-		Url:     "changelog.md",
+		Url:     "pages/changelog.md",
 		Path:    "",
 		Frags:   []string{"changelog.md"},
 		Content: "",
 	},
 	"agent": {
 		Title:   "For AiAgents",
-		Url:     "agent.md",
+		Url:     "pages/agent.md",
 		Path:    "",
 		Frags:   []string{"agent.md"},
 		Content: "",
@@ -38,21 +38,21 @@ var Sync_References = map[string]_model.File_Source{
 var Sync_Agreements = map[string]_model.File_Source{
 	"license": {
 		Title:   "License",
-		Url:     "license.md",
+		Url:     "pages/license.md",
 		Path:    "",
 		Frags:   []string{"license.md"},
 		Content: "",
 	},
 	"terms": {
 		Title:   "Terms & Conditions",
-		Url:     "terms.md",
+		Url:     "pages/terms.md",
 		Path:    "",
 		Frags:   []string{"terms.md"},
 		Content: "",
 	},
 	"privacy": {
 		Title:   "Privacy Policy",
-		Url:     "privacy.md",
+		Url:     "pages/privacy.md",
 		Path:    "",
 		Frags:   []string{"privacy.md"},
 		Content: "",

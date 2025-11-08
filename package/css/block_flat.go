@@ -137,10 +137,11 @@ func (This *T_Block) flatten(parent string) (Res *T_Block) {
 	add(natives, atstd_list)
 
 	all := NewBlock(This.PropLen(), This.BlockLen())
+	all.SetBlock(parent, natives)
 	add(all, comps_list)
 	add(all, clven_list)
 	add(all, clstd_list)
-	all.SetBlock(parent, natives)
+	// all.SetBlock(parent, natives)
 	add(all, elven_list)
 	add(all, elstd_list)
 	add(all, child_list)

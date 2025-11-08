@@ -96,13 +96,22 @@ func Rider(
 							strbuild.WriteRune('=')
 							strbuild.WriteString(result.StyleDeclarations.Elvalue)
 						}
+						selfclose := false
 						for k, v := range result.NativeAttributes {
+							if k == "/" {
+								selfclose = true
+								continue
+							}
 							strbuild.WriteRune(' ')
 							strbuild.WriteString(k)
 							if len(v) > 0 {
 								strbuild.WriteRune('=')
 								strbuild.WriteString(v)
 							}
+						}
+						if selfclose {
+							strbuild.WriteRune(' ')
+							strbuild.WriteRune('/')
 						}
 						strbuild.WriteRune('>')
 						subScribed = strbuild.String()
