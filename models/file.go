@@ -60,7 +60,7 @@ type File_Stash struct {
 	Label       string
 	DebugFront  string
 	WatchAttrs  []string
-	StyleData   File_StyleData
+	Style       File_StyleData
 	Lookup      File_Lookup
 	Errors      []string
 	Diagnostics []*File_Diagnostic

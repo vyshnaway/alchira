@@ -44,6 +44,7 @@ type Style_ClassData struct {
 	Definent          string
 	SymClass          string
 	DebugClass        string
+	HasteClass        string
 	Attachments       map[string]bool
 	NativeStaple      string
 	ExportStaple      string

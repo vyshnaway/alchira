@@ -9,7 +9,6 @@ import (
 	_model "main/models"
 	O "main/package/object"
 	_util "main/package/utils"
-	"maps"
 	_map "maps"
 	_strconv "strconv"
 )
@@ -78,16 +77,19 @@ func Target_Accumulate() (
 func Target_GetTracks() _target.GetTracks_return {
 	classtracks := [][]int{}
 	attachments := map[int]bool{}
+	scattermap := map[int]bool{}
 
 	for _, target := range Cache.Targetdir {
-		tracks_ := target.GetTracks()
-		classtracks = append(classtracks, tracks_.ClassTracks...)
-		maps.Copy(attachments, tracks_.Attachments)
+		r := target.GetTracks()
+		classtracks = append(classtracks, r.ClassTracks...)
+		_map.Copy(attachments, r.Attachments)
+		_map.Copy(scattermap, r.ScatterMap)
 	}
 
 	return _target.GetTracks_return{
 		Attachments: attachments,
 		ClassTracks: classtracks,
+		ScatterMap:  scattermap,
 	}
 }
 

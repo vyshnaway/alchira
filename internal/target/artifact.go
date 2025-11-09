@@ -59,11 +59,11 @@ func (This *Class) GetArtifacts() map[string]*_model.Style_ExportStyle {
 	exports := map[string]*_model.Style_ExportStyle{}
 
 	for _, file := range This.FileCache {
-		for _, pubindex := range file.StyleData.PublicMap {
+		for _, pubindex := range file.Style.PublicMap {
 			exporting := Artifact(pubindex)
 
 			for a := range _action.Index_Fetch(pubindex).SrcData.Attachments {
-				if found := _action.Index_Finder(a, file.StyleData.PublicMap); found.Index > 0 {
+				if found := _action.Index_Finder(a, file.Style.PublicMap); found.Index > 0 {
 					subexporting := Artifact(found.Index)
 					exporting.Attachments[subexporting.SymClass] = true
 					exports[subexporting.SymClass] = subexporting

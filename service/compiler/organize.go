@@ -52,14 +52,14 @@ func Accumulate() {
 	_config.Delta.Diagnostic.TargetDir = []*_model.File_Diagnostic{}
 
 	for key, val := range filemanifest {
-		_config.Manifest.Group.Local[key] = val.StyleData.LocalMap
+		_config.Manifest.Group.Local[key] = val.Style.LocalMap
 		_config.Delta.Lookup.TargetDir[key] = &val.Lookup
 		_config.Delta.Error.TargetDir = append(_config.Delta.Error.TargetDir, val.Errors...)
 		_config.Delta.Diagnostic.TargetDir = append(_config.Delta.Diagnostic.TargetDir, val.Diagnostics...)
 
 		mergedMap := make(_model.Style_ClassIndexMap)
-		_map.Copy(mergedMap, val.StyleData.PublicMap)
-		_map.Copy(mergedMap, val.StyleData.GlobalMap)
+		_map.Copy(mergedMap, val.Style.PublicMap)
+		_map.Copy(mergedMap, val.Style.GlobalMap)
 		_config.Manifest.Group.Global[key] = mergedMap
 	}
 
@@ -112,7 +112,7 @@ func Accumulate() {
 var css_class_prefix = "." + string(_config.Root.CustomOps["lodash"])
 var tag_class_prefix = string(_config.Root.CustomOps["lodash"])
 
-func Organize() (AritfactFiles map[string]string, Attachments map[int]bool) {
+func Organize() (AritfactFiles map[string]string, Attachments map[int]bool, HasteMap map[int]bool) {
 
 	_config.Style.ClassDictionary = _model.Style_Dictionary{}
 	_config.Style.PublishIndexMap = [][]_model.Style_ClassIndexTrace{}
@@ -179,5 +179,5 @@ func Organize() (AritfactFiles map[string]string, Attachments map[int]bool) {
 	}
 
 	_map.Copy(tracks_.Attachments, _config.Delta.IndexAttach)
-	return artifact_files, tracks_.Attachments
+	return artifact_files, tracks_.Attachments, tracks_.ScatterMap
 }

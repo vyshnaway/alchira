@@ -14,7 +14,7 @@ import (
 
 func library_DeleteFile(filepath string) {
 	if file, ok := Cache.Libraries[filepath]; ok {
-		_action.Index_Dispose(file.StyleData.UsedIn...)
+		_action.Index_Dispose(file.Style.UsedIn...)
 		delete(Cache.Libraries, filepath)
 	}
 }

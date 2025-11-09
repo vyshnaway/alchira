@@ -193,28 +193,31 @@ func Rawtag_Upload(
 			SummonSnippet: summon,
 		}
 
+		scatterBuildClass := "__" + _util.String_EnCounter(index)
+		classdata := &_model.Style_ClassData{
+			Attributes:        attributes,
+			Index:             0,
+			Artifact:          artifact,
+			Definent:          raw.SymClasses[0],
+			SymClass:          symclass,
+			Metadata:          metadata,
+			DebugClass:        debugclass,
+			HasteClass:        scatterBuildClass,
+			Attachments:       attachments,
+			ExportStaple:      exportStaple,
+			NativeStaple:      nativeStaple,
+			ExportRawStyle:    exportRawStyle,
+			NativeRawStyle:    nativeRawStyle,
+			ExportAttachStyle: exportAttachStyle,
+			NativeAttachStyle: nativeAttachStyle,
+			Range:             &raw.Range,
+		}
 		index = _action.Index_Declare(&_model.Cache_SymclassData{
 			Context: file,
-			SrcData: &_model.Style_ClassData{
-				Attributes:        attributes,
-				Index:             0,
-				Artifact:          artifact,
-				Definent:          raw.SymClasses[0],
-				SymClass:          symclass,
-				Metadata:          metadata,
-				DebugClass:        debugclass,
-				Attachments:       attachments,
-				ExportStaple:      exportStaple,
-				NativeStaple:      nativeStaple,
-				ExportRawStyle:    exportRawStyle,
-				NativeRawStyle:    nativeRawStyle,
-				ExportAttachStyle: exportAttachStyle,
-				NativeAttachStyle: nativeAttachStyle,
-				Range:             &raw.Range,
-			},
+			SrcData: classdata,
 		})
 
-		file.StyleData.UsedIn = append(file.StyleData.UsedIn, index)
+		file.Style.UsedIn = append(file.Style.UsedIn, index)
 	}
 
 	return R_Rawtag_Upload{

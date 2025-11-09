@@ -49,7 +49,7 @@ func Sandbox_Index(index int) (response any) {
 		data := action.Index_Fetch(i.ClassIndex).SrcData
 		attachments[i.ClassIndex] = data
 		for a := range data.Attachments {
-			if found := action.Index_Finder(a, clontext.StyleData.LocalMap); found.Index > 0 {
+			if found := action.Index_Finder(a, clontext.Style.LocalMap); found.Index > 0 {
 				attachments[found.Index] = found.Data.SrcData
 			}
 		}

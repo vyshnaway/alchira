@@ -14,11 +14,11 @@ import (
 
 func (This *Class) Savefile(filepath string, content string, hashindex int) {
 	if file, ok := This.FileCache[filepath]; ok {
-		_action.Index_Dispose(file.StyleData.UsedIn...)
-		for key := range This.FileCache[filepath].StyleData.GlobalMap {
+		_action.Index_Dispose(file.Style.UsedIn...)
+		for key := range This.FileCache[filepath].Style.GlobalMap {
 			delete(_config.Style.Global___Index, key)
 		}
-		for key := range This.FileCache[filepath].StyleData.GlobalMap {
+		for key := range This.FileCache[filepath].Style.GlobalMap {
 			delete(_config.Style.Public___Index, key)
 		}
 		delete(This.FileCache, filepath)
@@ -37,8 +37,8 @@ func (This *Class) Savefile(filepath string, content string, hashindex int) {
 		file.WatchAttrs = watchAttrs
 	}
 	parse_response := _script.Rider(file, _script.E_Action_Read)
-	file.StyleData.ClassTracks = parse_response.ClassesList
-	file.StyleData.Attachments = parse_response.Attachments
+	file.Style.ClassTracks = parse_response.ClassesList
+	file.Style.Attachments = parse_response.Attachments
 	file.Midway = parse_response.Scribed
 
 	file.Lookup = _model.File_Lookup{
@@ -66,12 +66,12 @@ func (This *Class) Savefile(filepath string, content string, hashindex int) {
 			var ref_index_map _model.Style_ClassIndexMap
 			switch tagdata.Scope {
 			case _model.Style_Type_Local:
-				loc_index_map = file.StyleData.LocalMap
+				loc_index_map = file.Style.LocalMap
 			case _model.Style_Type_Global:
-				loc_index_map = file.StyleData.GlobalMap
+				loc_index_map = file.Style.GlobalMap
 				ref_index_map = _config.Style.Global___Index
 			case _model.Style_Type_Public:
-				loc_index_map = file.StyleData.PublicMap
+				loc_index_map = file.Style.PublicMap
 				ref_index_map = _config.Style.Public___Index
 			default:
 				loc_index_map = _model.Style_ClassIndexMap{}
@@ -89,14 +89,15 @@ func (This *Class) Savefile(filepath string, content string, hashindex int) {
 		}
 	}
 
-	maps.Copy(file.StyleData.MixedMap, file.StyleData.LocalMap)
-	maps.Copy(file.StyleData.MixedMap, file.StyleData.GlobalMap)
-	maps.Copy(file.StyleData.MixedMap, file.StyleData.PublicMap)
+	maps.Copy(file.Style.MixedMap, file.Style.LocalMap)
 
-	maps.Copy(This.GlobalMap, file.StyleData.GlobalMap)
-	maps.Copy(This.PublicMap, file.StyleData.PublicMap)
-	maps.Copy(This.MixedMap, file.StyleData.GlobalMap)
-	maps.Copy(This.MixedMap, file.StyleData.PublicMap)
+	maps.Copy(file.Style.MixedMap, file.Style.GlobalMap)
+	maps.Copy(This.GlobalMap, file.Style.GlobalMap)
+	maps.Copy(This.MixedMap, file.Style.GlobalMap)
+
+	maps.Copy(file.Style.MixedMap, file.Style.PublicMap)
+	maps.Copy(This.PublicMap, file.Style.PublicMap)
+	maps.Copy(This.MixedMap, file.Style.PublicMap)
 
 	This.FileCache[filepath] = file
 }
@@ -111,7 +112,7 @@ func (This *Class) UpdateCache() {
 
 func (This *Class) ClearFiles() {
 	for filepath, filedata := range This.FileCache {
-		_action.Index_Dispose(filedata.StyleData.UsedIn...)
+		_action.Index_Dispose(filedata.Style.UsedIn...)
 		delete(This.FileCache, filepath)
 	}
 }

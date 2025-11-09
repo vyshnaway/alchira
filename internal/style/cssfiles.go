@@ -106,6 +106,8 @@ func Cssfile_Collection(files []*_model.File_Stash) cssfile_Collection_return {
 					Variables:     vars,
 					SummonSnippet: "",
 				}
+
+				scatterBuildClass := "__" + _util.String_EnCounter(index)
 				classdata := &_model.Style_ClassData{
 					Attributes:        map[string]string{},
 					Index:             0,
@@ -117,6 +119,7 @@ func Cssfile_Collection(files []*_model.File_Stash) cssfile_Collection_return {
 					ExportRawStyle:    object,
 					Attachments:       attachments,
 					DebugClass:        file.DebugFront + "_" + _util.String_Filter(classname, []rune{}, []rune{}, []rune{'$', '/'}),
+					HasteClass:        scatterBuildClass,
 					NativeStaple:      "",
 					NativeAttachStyle: attach_style,
 					ExportAttachStyle: attach_style,
@@ -125,7 +128,8 @@ func Cssfile_Collection(files []*_model.File_Stash) cssfile_Collection_return {
 					Context: file,
 					SrcData: classdata,
 				})
-				file.StyleData.UsedIn = append(file.StyleData.UsedIn, index)
+
+				file.Style.UsedIn = append(file.Style.UsedIn, index)
 				selectorMap[classname] = index
 				selectorList = append(selectorList, classname)
 			}

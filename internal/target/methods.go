@@ -34,13 +34,15 @@ func (This *Class) Accumulator() Accumulator_return {
 type GetTracks_return struct {
 	ClassTracks [][]int
 	Attachments map[int]bool
+	ScatterMap  map[int]bool
 }
 
 func (This *Class) GetTracks() GetTracks_return {
 	classtracks := make([][]int, 24*len(This.FileCache))
 	attachments := make(map[int]bool, 8)
+	scatterIntMap := make(map[int]bool, 8)
 
-	sc := This.StylesheetContext.StyleData
+	sc := This.StylesheetContext.Style
 	for i := range sc.Attachments {
 		if found := _action.Index_Finder(i, sc.LocalMap); found.Index > 0 {
 			attachments[found.Index] = true
@@ -48,13 +50,17 @@ func (This *Class) GetTracks() GetTracks_return {
 	}
 
 	for _, file := range This.FileCache {
-		attachstrings := make(map[string]bool, len(file.StyleData.Attachments))
-		_map.Copy(attachstrings, file.StyleData.Attachments)
+		attachstrings := make(map[string]bool, 24)
+		for s := range file.Style.Attachments {
+			if r := _action.Index_Finder(s, file.Style.LocalMap); r.Index > 0 {
+				scatterIntMap[r.Index] = true
+			}
+		}
 
-		for _, track := range file.StyleData.ClassTracks {
+		for _, track := range file.Style.ClassTracks {
 			retraces := []int{}
 			for _, i := range track {
-				if found := _action.Index_Finder(i, file.StyleData.LocalMap); found.Index > 0 {
+				if found := _action.Index_Finder(i, file.Style.LocalMap); found.Index > 0 {
 					retraces = append(retraces, found.Index)
 					_map.Copy(attachstrings, found.Data.SrcData.Attachments)
 					if found.Group != _model.Style_Type_Library {
@@ -69,7 +75,7 @@ func (This *Class) GetTracks() GetTracks_return {
 		}
 
 		for i := range attachstrings {
-			if found := _action.Index_Finder(i, file.StyleData.LocalMap); found.Index > 0 {
+			if found := _action.Index_Finder(i, file.Style.LocalMap); found.Index > 0 {
 				attachments[found.Index] = true
 			}
 		}
@@ -78,6 +84,7 @@ func (This *Class) GetTracks() GetTracks_return {
 	return GetTracks_return{
 		ClassTracks: classtracks,
 		Attachments: attachments,
+		ScatterMap:  scatterIntMap,
 	}
 }
 
@@ -86,7 +93,7 @@ func (This *Class) SyncClassnames(action _script.E_Action) {
 		res := _script.Rider(file, action)
 
 		file.Scratch = res.Scribed
-		file.StyleData.TagReplacements = res.Replacements
+		file.Style.TagReplacements = res.Replacements
 	}
 }
 
@@ -103,7 +110,7 @@ func (This *Class) SummonFiles(
 		if file.Extension != _config.Root.Extension {
 			fromPos := 0
 			var out _string.Builder
-			for _, m := range file.StyleData.TagReplacements {
+			for _, m := range file.Style.TagReplacements {
 				switch m.Elid {
 				case _config.Root.CustomTags["staple"]:
 					out.WriteString(file.Scratch[fromPos:m.Loc] + stapleBlock)

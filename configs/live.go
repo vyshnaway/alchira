@@ -87,17 +87,17 @@ var Style *_model.Cache_Style
 
 func Style_Reset() {
 	Style = &_model.Cache_Style{
-		Index_Now:           0,
-		Index_Bin:           map[int]bool{},
-		Hashrules:           map[string]string{},
-		Global___Index:      _model.Style_ClassIndexMap{},
-		Public___Index:      _model.Style_ClassIndexMap{},
-		Library__Index:      _model.Style_ClassIndexMap{},
-		Artifact_Index:      _model.Style_ClassIndexMap{},
-		ClassDictionary:     _model.Style_Dictionary{},
-		PublishIndexMap:     [][]_model.Style_ClassIndexTrace{},
-		Index_to_Styledata:  map[int]*_model.Cache_SymclassData{},
-		Filepath_to_Context: map[string]*_model.File_Stash{},
+		Index_Now:            0,
+		Index_Bin:            map[int]bool{},
+		Hashrules:            map[string]string{},
+		Global___Index:       _model.Style_ClassIndexMap{},
+		Public___Index:       _model.Style_ClassIndexMap{},
+		Library__Index:       _model.Style_ClassIndexMap{},
+		Artifact_Index:       _model.Style_ClassIndexMap{},
+		ClassDictionary:      _model.Style_Dictionary{},
+		PublishIndexMap:      [][]_model.Style_ClassIndexTrace{},
+		Index_to_Styledata:   map[int]*_model.Cache_SymclassData{},
+		Filepath_to_Context:  map[string]*_model.File_Stash{},
 	}
 }
 

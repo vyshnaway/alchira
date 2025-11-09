@@ -16,7 +16,7 @@ import (
 
 func artifact_DeleteFile(filepath string) {
 	if file, ok := Cache.Artifacts[filepath]; ok {
-		_action.Index_Dispose(file.StyleData.UsedIn...)
+		_action.Index_Dispose(file.Style.UsedIn...)
 		delete(Cache.Artifacts, filepath)
 	}
 }

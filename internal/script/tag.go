@@ -5,6 +5,7 @@ import (
 	_model "main/models"
 	_reader "main/package/reader"
 	_util "main/package/utils"
+	"maps"
 	_regexp "regexp"
 	_slice "slices"
 	_string "strings"
@@ -14,8 +15,9 @@ type tag_Parse_retype struct {
 	Ok                bool
 	SelfClosed        bool
 	ClassSynced       bool
+	Fragment          string
 	ClassesList       [][]string
-	Attachments       []string
+	ScatterList       map[string]bool
 	NativeAttributes  map[string]string
 	StyleDeclarations _model.T_RawStyle
 }
@@ -28,20 +30,33 @@ func Tag_Scanner(
 	cursor *_reader.T_Reader,
 ) tag_Parse_retype {
 	classesList := make([][]string, 0, 1)
-	attachments := make([]string, 0, 4)
+	scatterList := make(map[string]bool, 4)
 	braceTrack := make([]rune, 0, 8)
 	nativeAttributes := make(map[string]string, 8)
 
 	deviance := 0
+	var awaitClosure rune = 0
 	var attr _string.Builder
 	var value _string.Builder
-	var awaitClosure rune = 0
 	ok := false
 	isVal := false
 	selfClosed := false
 	classSynced := false
 	fallbackAquired := false
 	startpos := cursor.Active
+
+	var fragment _string.Builder
+	fragment.WriteRune('<')
+	SaveToFrag := func(k, v string) {
+		if fragment.Len() > 1 {
+			fragment.WriteRune(' ')
+		}
+		fragment.WriteString(k)
+		if len(v) > 0 {
+			fragment.WriteRune('=')
+			fragment.WriteString(v)
+		}
+	}
 
 	styleDeclarations := _model.T_RawStyle{
 		Elid:       0,
@@ -95,6 +110,7 @@ func Tag_Scanner(
 					}
 					styleDeclarations.Element = tr_Attr
 					styleDeclarations.Elvalue = tr_Value
+					SaveToFrag(tr_Attr, tr_Value)
 				} else if styleDeclarations.Element[0] != '!' {
 					if tr_Attr == "&" {
 						if len(tr_Value) > 3 {
@@ -133,17 +149,19 @@ func Tag_Scanner(
 							tr_Value,
 							action,
 							fileData,
-							*cursor,
+							cursor,
 						)
-						if len(value_Parse_return.Classlists) > 0 {
-							classesList = append(classesList, value_Parse_return.Classlists...)
+						if len(value_Parse_return.OrderedClasses) > 0 {
+							classesList = append(classesList, value_Parse_return.OrderedClasses)
 						}
-						if len(value_Parse_return.Attachments) > 0 {
-							attachments = append(attachments, value_Parse_return.Attachments...)
+						if len(value_Parse_return.ScatterClasses) > 0 {
+							maps.Copy(scatterList, value_Parse_return.ScatterClasses)
 						}
 						nativeAttributes[tr_Attr] = value_Parse_return.Scribed
+						SaveToFrag(tr_Attr, value_Parse_return.Scribed)
 					} else {
 						nativeAttributes[tr_Attr] = tr_Value
+						SaveToFrag(tr_Attr, tr_Value)
 					}
 				}
 
@@ -177,6 +195,7 @@ func Tag_Scanner(
 	}
 
 	if ok {
+		fragment.WriteRune('>')
 		cursor.Active.Cycle++
 		selfClosed = cursor.Active.Last == '/'
 		styleDeclarations.Range = _reader.T_Range{
@@ -190,10 +209,11 @@ func Tag_Scanner(
 
 	return tag_Parse_retype{
 		Ok:                ok,
+		Fragment:          fragment.String(),
 		SelfClosed:        selfClosed,
 		ClassSynced:       classSynced,
 		ClassesList:       classesList,
-		Attachments:       attachments,
+		ScatterList:       scatterList,
 		NativeAttributes:  nativeAttributes,
 		StyleDeclarations: styleDeclarations,
 	}

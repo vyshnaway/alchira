@@ -86,7 +86,7 @@ func ClearUnwantedCache() (
 
 func Generate_Files() (Files map[string]string, Report string) {
 
-	files, attachments := Organize()
+	files, attachments, hasteMap := Organize()
 	_stash.Target_SyncClassNames()
 
 	appendix_frag := _css.Render_Sequence(func() *_css.T_BlockSeq {
@@ -111,9 +111,19 @@ func Generate_Files() (Files map[string]string, Report string) {
 		return attach_frag, staple_sheet
 	}()
 
+	haste_block := _css.NewBlock(0, len(hasteMap))
+	for i := range hasteMap {
+		d := _action.Index_Fetch(i)
+		if _config.Static.DEBUG {
+			haste_block.SetBlock(d.SrcData.DebugClass, d.SrcData.NativeRawStyle)
+		}else {
+			haste_block.SetBlock(d.SrcData.HasteClass, d.SrcData.NativeRawStyle)
+		}
+	}
+	quick_frag := _css.Render_Switched(haste_block, _config.Static.MINIFY)
+
 	report, errLen, finalMessage, index_frag := ClearUnwantedCache()
 	var class_builder _string.Builder
-
 	for _, i := range _config.Style.PublishIndexMap {
 		class_builder.WriteString(_css.Render_Switched(func() *_css.T_Block {
 			result := _css.NewBlock(0, len(i))
@@ -123,14 +133,15 @@ func Generate_Files() (Files map[string]string, Report string) {
 			return result
 		}(), _config.Static.MINIFY))
 	}
-	class_frag := class_builder.String()
+	strict_frag := class_builder.String()
 
 	render_frags := []struct {
 		key string
 		val string
 	}{
 		{key: "Root", val: index_frag},
-		{key: "Class", val: class_frag},
+		{key: "Quick", val: quick_frag},
+		{key: "Strict", val: strict_frag},
 		{key: "Attach", val: attach_frag},
 		{key: "Appendix", val: appendix_frag},
 	}

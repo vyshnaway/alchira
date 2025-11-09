@@ -4,6 +4,7 @@ import (
 	_config "main/configs"
 	_model "main/models"
 	_reader "main/package/reader"
+	_map "maps"
 	_regexp "regexp"
 	_slice "slices"
 	_string "strings"
@@ -33,12 +34,12 @@ func Rider(
 	action E_Action,
 ) parse_return {
 
-	fileData.StyleData.TagReplacements = []_model.File_TagReplacement{}
+	fileData.Style.TagReplacements = []_model.File_TagReplacement{}
 	replacements := make([]_model.File_TagReplacement, 0, 8)
-	classesList := make([][]string, 0, 24)
+	orderList := make([][]string, 0, 24)
 	tagTrack := make([]*_model.T_RawStyle, 0, 24)
 	stylesList := make([]*_model.T_RawStyle, 0, 24)
-	attachments := make(map[string]bool, 24)
+	scatterList := make(map[string]bool, 24)
 
 	var content string
 	var stream _string.Builder
@@ -63,10 +64,8 @@ func Rider(
 			hasDeclared := (len(result.StyleDeclarations.Styles) > 0 || len(result.StyleDeclarations.SymClasses) > 0)
 
 			if result.Ok {
-				classesList = append(classesList, result.ClassesList...)
-				for _, a := range result.Attachments {
-					attachments[a] = true
-				}
+				orderList = append(orderList, result.ClassesList...)
+				_map.Copy(scatterList, result.ScatterList)
 
 				if hasDeclared {
 					stylesList = append(stylesList, &result.StyleDeclarations)
@@ -86,36 +85,40 @@ func Rider(
 					}
 				}
 
-				if _, status := replacementTags[fragment]; (!status && result.ClassSynced) ||
-					(action == E_Action_Read && hasDeclared) {
+				if _, status := replacementTags[fragment]; (!status && result.ClassSynced) || (action == E_Action_Read && hasDeclared) {
+
 					if result.StyleDeclarations.Elid == 0 {
-						var strbuild _string.Builder
-						strbuild.WriteRune('<')
-						strbuild.WriteString(result.StyleDeclarations.Element)
-						if len(result.StyleDeclarations.Elvalue) > 0 {
-							strbuild.WriteRune('=')
-							strbuild.WriteString(result.StyleDeclarations.Elvalue)
-						}
-						selfclose := false
-						for k, v := range result.NativeAttributes {
-							if k == "/" {
-								selfclose = true
-								continue
-							}
-							strbuild.WriteRune(' ')
-							strbuild.WriteString(k)
-							if len(v) > 0 {
-								strbuild.WriteRune('=')
-								strbuild.WriteString(v)
-							}
-						}
-						if selfclose {
-							strbuild.WriteRune(' ')
-							strbuild.WriteRune('/')
-						}
-						strbuild.WriteRune('>')
-						subScribed = strbuild.String()
+						
+						// TODO: Intrim stage, Untested
+
+						// var strbuild _string.Builder
+						// strbuild.WriteRune('<')
+						// strbuild.WriteString(result.StyleDeclarations.Element)
+						// if len(result.StyleDeclarations.Elvalue) > 0 {
+						// 	strbuild.WriteRune('=')
+						// 	strbuild.WriteString(result.StyleDeclarations.Elvalue)
+						// }
+						// selfclose := false
+						// for k, v := range result.NativeAttributes {
+						// 	if k == "/" {
+						// 		selfclose = true
+						// 		continue
+						// 	}
+						// 	strbuild.WriteRune(' ')
+						// 	strbuild.WriteString(k)
+						// 	if len(v) > 0 {
+						// 		strbuild.WriteRune('=')
+						// 		strbuild.WriteString(v)
+						// 	}
+						// }
+						// if selfclose {
+						// 	strbuild.WriteRune(' ')
+						// 	strbuild.WriteRune('/')
+						// }
+						// strbuild.WriteRune('>')
+						subScribed = result.Fragment
 					}
+
 				} else {
 					subScribed = fragment
 				}
@@ -162,8 +165,8 @@ func Rider(
 	return parse_return{
 		Replacements: replacements,
 		Scribed:      stream.String(),
-		ClassesList:  classesList,
+		ClassesList:  orderList,
 		StylesList:   stylesList,
-		Attachments:  attachments,
+		Attachments:  scatterList,
 	}
 }
