@@ -42,7 +42,7 @@ func New(storage _model.Config_ProxyStorage, label string) *Class {
 		utils.String_EnCounter(0),
 	)
 	res := _style.Cssfile_String(storage.StylesheetContent, `APPENDIX : `+storage.Stylesheet+" | ")
-	stylesheetContext.Style.Attachments = res.Attachments
+	stylesheetContext.Style.RapidStyles = res.Attachments
 
 	var This = Class{
 		Source:             storage.Source,

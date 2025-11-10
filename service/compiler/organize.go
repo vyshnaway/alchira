@@ -112,10 +112,10 @@ func Accumulate() {
 var css_class_prefix = "." + string(_config.Root.CustomOps["lodash"])
 var tag_class_prefix = string(_config.Root.CustomOps["lodash"])
 
-func Organize() (AritfactFiles map[string]string, Attachments map[int]bool, HasteMap map[int]bool) {
+func Organize() (AritfactFiles map[string]string, Attachments map[int]bool, RapidquickMap map[int]bool) {
 
 	_config.Style.ClassDictionary = _model.Style_Dictionary{}
-	_config.Style.PublishIndexMap = [][]_model.Style_ClassIndexTrace{}
+	_config.Style.Publish_RigidTracks = [][]_model.Style_ClassIndexTrace{}
 
 	SaveClassRefs := func(stash _order_.R_Preview) {
 		for _, temp_trace := range stash.Final_Hashtrace {
@@ -130,7 +130,7 @@ func Organize() (AritfactFiles map[string]string, Attachments map[int]bool, Hast
 					ClassIndex: index,
 				})
 			}
-			_config.Style.PublishIndexMap = append(_config.Style.PublishIndexMap, tempPubMap)
+			_config.Style.Publish_RigidTracks = append(_config.Style.Publish_RigidTracks, tempPubMap)
 		}
 
 		for json_array, imap := range stash.List_to_GroupId {

@@ -25,13 +25,13 @@ func ClearUnwantedCache() (
 
 	if !_config.Static.IAMAI {
 		indexes := make(map[int]bool, 64)
-		for _, i := range _config.Style.PublishIndexMap {
+		for _, i := range _config.Style.Publish_RigidTracks {
 			for _, j := range i {
 				indexes[j.ClassIndex] = true
 			}
 		}
-	
-		for i := range _config.Style.PublishIndexMap {
+
+		for i := range _config.Style.Publish_RigidTracks {
 			if _, k := indexes[i]; !k {
 				delete(_config.Style.Index_to_Styledata, i)
 			}
@@ -39,14 +39,14 @@ func ClearUnwantedCache() (
 	}
 
 	pubInLt := 24
-	newPubIn := make([][]models.Style_ClassIndexTrace, 0, pubInLt*len(_config.Style.PublishIndexMap))
-	for _, A := range _config.Style.PublishIndexMap {
+	newPubIn := make([][]models.Style_ClassIndexTrace, 0, pubInLt*len(_config.Style.Publish_RigidTracks))
+	for _, A := range _config.Style.Publish_RigidTracks {
 		for i := 0; i < len(A); i += pubInLt {
 			end := min(i+pubInLt, len(A))
 			newPubIn = append(newPubIn, A[i:end])
 		}
 	}
-	_config.Style.PublishIndexMap = newPubIn
+	_config.Style.Publish_RigidTracks = newPubIn
 
 	_config.Delta.Report.Constants = X.List_Catalog(
 		"Root Constants",
@@ -86,7 +86,7 @@ func ClearUnwantedCache() (
 
 func Generate_Files() (Files map[string]string, Report string) {
 
-	files, attachments, hasteMap := Organize()
+	files, attachments, rapidMap := Organize()
 	_stash.Target_SyncClassNames()
 
 	appendix_frag := _css.Render_Sequence(func() *_css.T_BlockSeq {
@@ -111,20 +111,20 @@ func Generate_Files() (Files map[string]string, Report string) {
 		return attach_frag, staple_sheet
 	}()
 
-	haste_block := _css.NewBlock(0, len(hasteMap))
-	for i := range hasteMap {
+	rapid_block := _css.NewBlock(0, len(rapidMap))
+	for i := range rapidMap {
 		d := _action.Index_Fetch(i)
 		if _config.Static.DEBUG {
-			haste_block.SetBlock(d.SrcData.DebugClass, d.SrcData.NativeRawStyle)
-		}else {
-			haste_block.SetBlock(d.SrcData.HasteClass, d.SrcData.NativeRawStyle)
+			rapid_block.SetBlock("."+d.SrcData.DebugClass, d.SrcData.NativeRawStyle)
+		} else {
+			rapid_block.SetBlock("."+d.SrcData.RigidClass, d.SrcData.NativeRawStyle)
 		}
 	}
-	quick_frag := _css.Render_Switched(haste_block, _config.Static.MINIFY)
+	rapid_frag := _css.Render_Switched(rapid_block, _config.Static.MINIFY)
 
 	report, errLen, finalMessage, index_frag := ClearUnwantedCache()
 	var class_builder _string.Builder
-	for _, i := range _config.Style.PublishIndexMap {
+	for _, i := range _config.Style.Publish_RigidTracks {
 		class_builder.WriteString(_css.Render_Switched(func() *_css.T_Block {
 			result := _css.NewBlock(0, len(i))
 			for _, j := range i {
@@ -133,15 +133,15 @@ func Generate_Files() (Files map[string]string, Report string) {
 			return result
 		}(), _config.Static.MINIFY))
 	}
-	strict_frag := class_builder.String()
+	rigid_frag := class_builder.String()
 
 	render_frags := []struct {
 		key string
 		val string
 	}{
 		{key: "Root", val: index_frag},
-		{key: "Quick", val: quick_frag},
-		{key: "Strict", val: strict_frag},
+		{key: "Rapid", val: rapid_frag},
+		{key: "Rigid", val: rigid_frag},
 		{key: "Attach", val: attach_frag},
 		{key: "Appendix", val: appendix_frag},
 	}

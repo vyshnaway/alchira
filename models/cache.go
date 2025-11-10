@@ -127,9 +127,9 @@ type Cache_Style struct {
 	Library__Index      Style_ClassIndexMap
 	Artifact_Index      Style_ClassIndexMap
 	ClassDictionary     Style_Dictionary
-	PublishIndexMap     [][]Style_ClassIndexTrace
 	Index_to_Styledata  map[int]*Cache_SymclassData
 	Filepath_to_Context map[string]*File_Stash
+	Publish_RigidTracks [][]Style_ClassIndexTrace
 }
 
 type Cache_Manifest_Groups struct {

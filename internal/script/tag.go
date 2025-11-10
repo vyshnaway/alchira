@@ -5,7 +5,7 @@ import (
 	_model "main/models"
 	_reader "main/package/reader"
 	_util "main/package/utils"
-	"maps"
+	_map "maps"
 	_regexp "regexp"
 	_slice "slices"
 	_string "strings"
@@ -51,6 +51,8 @@ func Tag_Scanner(
 		if fragment.Len() > 1 {
 			fragment.WriteRune(' ')
 		}
+		// fmt.Print("[" , k, "|", v,"]")
+		// fmt.Println("")
 		fragment.WriteString(k)
 		if len(v) > 0 {
 			fragment.WriteRune('=')
@@ -155,7 +157,7 @@ func Tag_Scanner(
 							classesList = append(classesList, value_Parse_return.OrderedClasses)
 						}
 						if len(value_Parse_return.ScatterClasses) > 0 {
-							maps.Copy(scatterList, value_Parse_return.ScatterClasses)
+							_map.Copy(scatterList, value_Parse_return.ScatterClasses)
 						}
 						nativeAttributes[tr_Attr] = value_Parse_return.Scribed
 						SaveToFrag(tr_Attr, value_Parse_return.Scribed)
@@ -196,6 +198,8 @@ func Tag_Scanner(
 
 	if ok {
 		fragment.WriteRune('>')
+		// fmt.Println(fragment.String())
+		// fmt.Println("---")
 		cursor.Active.Cycle++
 		selfClosed = cursor.Active.Last == '/'
 		styleDeclarations.Range = _reader.T_Range{

@@ -39,13 +39,13 @@ func Sandbox_Index(index int) (response any) {
 	attachments := map[int]*models.Style_ClassData{}
 	attributes := data.SrcData.Attributes
 	classBlocks := css.NewBlock(4, 4)
-	configs.Style.PublishIndexMap = [][]models.Style_ClassIndexTrace{{
+	configs.Style.Publish_RigidTracks = [][]models.Style_ClassIndexTrace{{
 		models.Style_ClassIndexTrace{ClassName: "._", ClassIndex: data.SrcData.Index},
 	}}
 
 	summon = script.Rider(&clontext, script.E_Action_DebugHash).Scribed
 
-	for _, i := range utils.Array_FlattenOnce(configs.Style.PublishIndexMap) {
+	for _, i := range utils.Array_FlattenOnce(configs.Style.Publish_RigidTracks) {
 		data := action.Index_Fetch(i.ClassIndex).SrcData
 		attachments[i.ClassIndex] = data
 		for a := range data.Attachments {

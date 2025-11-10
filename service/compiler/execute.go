@@ -170,7 +170,14 @@ func Execute(heading string, concurrent bool) (Exitcode int) {
 		case Execute_Step_GenerateFiles:
 			S.STEP("Rebuilding Files", 1)
 			if !_config.Static.SERVER {
-				outfiles, report = Generate_Files()
+				new_outfiles, new_report := Generate_Files()
+				report = new_report
+				for filepath, new_content := range outfiles {
+					if old_content , exist :=outfiles[filepath]; exist && old_content == new_content {
+						delete(new_outfiles,filepath) 
+					}
+				}
+				outfiles = new_outfiles
 				if len(outfiles) > 0 {
 					save_action.Wait()
 					save_action.Add(1)

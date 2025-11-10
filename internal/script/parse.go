@@ -56,11 +56,12 @@ func Rider(
 	for cursor.Streaming {
 		ch := cursor.Active.Char
 
+		// TODO: Subscribed and Fragment can be optimized further
 		if cursor.Active.Last != '\\' && ch == '<' && regexp_aftertagopen.MatchString(string(cursor.Active.Next)) {
-			subScribed := ""
 			tagStart := cursor.Active.Idx
 			result := Tag_Scanner(fileData, action, &cursor)
 			fragment := string(cursor.Runes[tagStart:result.StyleDeclarations.EndMarker])
+			subScribed := fragment
 			hasDeclared := (len(result.StyleDeclarations.Styles) > 0 || len(result.StyleDeclarations.SymClasses) > 0)
 
 			if result.Ok {
@@ -85,47 +86,14 @@ func Rider(
 					}
 				}
 
-				if _, status := replacementTags[fragment]; (!status && result.ClassSynced) || (action == E_Action_Read && hasDeclared) {
-
-					if result.StyleDeclarations.Elid == 0 {
-						
-						// TODO: Intrim stage, Untested
-
-						// var strbuild _string.Builder
-						// strbuild.WriteRune('<')
-						// strbuild.WriteString(result.StyleDeclarations.Element)
-						// if len(result.StyleDeclarations.Elvalue) > 0 {
-						// 	strbuild.WriteRune('=')
-						// 	strbuild.WriteString(result.StyleDeclarations.Elvalue)
-						// }
-						// selfclose := false
-						// for k, v := range result.NativeAttributes {
-						// 	if k == "/" {
-						// 		selfclose = true
-						// 		continue
-						// 	}
-						// 	strbuild.WriteRune(' ')
-						// 	strbuild.WriteString(k)
-						// 	if len(v) > 0 {
-						// 		strbuild.WriteRune('=')
-						// 		strbuild.WriteString(v)
-						// 	}
-						// }
-						// if selfclose {
-						// 	strbuild.WriteRune(' ')
-						// 	strbuild.WriteRune('/')
-						// }
-						// strbuild.WriteRune('>')
-						subScribed = result.Fragment
-					}
-
+				_, status := replacementTags[fragment]
+				if (!status && result.ClassSynced) || (action == E_Action_Read && hasDeclared) && result.StyleDeclarations.Elid == 0 {
+					subScribed = result.Fragment
 				} else {
-					subScribed = fragment
+					subScribed = ""
 				}
 
 				cursor.Increment()
-			} else {
-				subScribed += fragment
 			}
 
 			exitedNow := false

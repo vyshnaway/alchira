@@ -63,7 +63,7 @@ func value_EvaluateIndexTraces(
 		}
 
 		if len(temp_map) > 0 {
-			_config.Style.PublishIndexMap = append(_config.Style.PublishIndexMap, temp_map)
+			_config.Style.Publish_RigidTracks = append(_config.Style.Publish_RigidTracks, temp_map)
 		}
 	}
 
@@ -87,7 +87,6 @@ func value_Parse(
 	FileCursor *_reader.T_Reader,
 ) value_Parse_retype {
 
-	value += " "
 	activeQuote := ' '
 	scribed := value
 	inQuote := false
@@ -172,7 +171,7 @@ func value_Parse(
 										[]rune{},
 									))
 								} else {
-									scriber.WriteString(res.Data.SrcData.HasteClass)
+									scriber.WriteString(res.Data.SrcData.RigidClass)
 								}
 							} else {
 								scriber.WriteString(entrystring)

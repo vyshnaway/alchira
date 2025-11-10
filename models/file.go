@@ -37,8 +37,8 @@ type File_TagReplacement struct {
 
 type File_StyleData struct {
 	UsedIn          []int
-	Attachments     map[string]bool
-	ClassTracks     [][]string
+	RapidStyles     map[string]bool
+	RigidTracks     [][]string
 	MixedMap        Style_ClassIndexMap
 	LocalMap        Style_ClassIndexMap
 	GlobalMap       Style_ClassIndexMap
