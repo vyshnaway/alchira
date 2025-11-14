@@ -90,6 +90,12 @@ func Verify_Configs(remote_vendors bool, concurrent bool) (Report string, Status
 
 	S.TASK("Verifying configs", 1)
 	errors := []string{}
+	diags := []*_model.File_Diagnostic{}
+	_config.Manifest.Diagnostics = diags
+	errAdd := func(path string, message string) {
+		errors = append(errors, path+" : "+message)
+		diags = append(diags, &_model.File_Diagnostic{Sources: []string{path}, Message: message})
+	}
 
 	config_path := _config.Path_Json["configure"].Path
 	S.STEP("PATH : "+config_path, 1)
@@ -98,7 +104,7 @@ func Verify_Configs(remote_vendors bool, concurrent bool) (Report string, Status
 	if config_data, config_err := _fileman.Read_File(config_path, false); config_err == nil {
 
 		if config, err := _util.Code_JsoncParse[_model.Config_Raw](config_data); err != nil {
-			errors = append(errors, config_path+" : Bad json/ Incomplete schema.")
+			errAdd(config_path, "Bad json/ Incomplete schema.")
 		} else {
 			S.TASK("Updating vendor-prefixes", 1)
 			Sync_SaveVendors(config.Vendors, remote_vendors)
@@ -129,11 +135,13 @@ func Verify_Configs(remote_vendors bool, concurrent bool) (Report string, Status
 			}
 		}
 	} else {
-		errors = append(errors, "Bad Config file: "+config_path)
+		errAdd(config_path, "Bad Config file.")
 	}
-
+	
 	conflict_sync := Conflict_Sync_Test(concurrent)
-	errors = append(errors, conflict_sync.Warnings...)
+	for _, m := range conflict_sync.Warnings {
+		errAdd(config_path, m)
+	}
 
 	Status = len(errors) == 0
 	if Status {
