@@ -172,8 +172,8 @@ func Execute(heading string, concurrent bool) (Exitcode int) {
 			if !_config.Static.SERVER {
 				new_outfiles, new_report := Generate_Files()
 				for filepath, new_content := range outfiles {
-					if old_content , exist :=outfiles[filepath]; exist && old_content == new_content {
-						delete(new_outfiles,filepath) 
+					if old_content, exist := outfiles[filepath]; exist && old_content == new_content {
+						delete(new_outfiles, filepath)
 					}
 				}
 				outfiles = new_outfiles
@@ -262,7 +262,7 @@ func Execute(heading string, concurrent bool) (Exitcode int) {
 									target.Filepath_to_Content[event.FilePath] = event.FileContent
 									_config.Saved.TargetDir_Saved[event.Folder] = target
 									steppings = append(steppings, Execute_Step_UpdateCache)
-								} else {
+								} else if !_config.Static.SERVER {
 									outpath := _fileman.Path_Join(target.Source, event.FilePath)
 									go _fileman.Write_File(outpath, event.FileContent)
 									steppings = append(steppings, Execute_Step_LoopAround)
