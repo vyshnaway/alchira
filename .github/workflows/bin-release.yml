@@ -73,7 +73,15 @@ jobs:
   npm-release:
     name: NPM Publish Trigger
     runs-on: ubuntu-latest
+    
     steps:
+      - name: Checkout xcss-core (read-only)
+        uses: actions/checkout@v5
+        with:
+          repository: yshell-dev/xcss-core
+          token: ${{ secrets.XCSS_REPO_CROSS }}
+          path: core_repo
+
       - name: Trigger publish workflow on Parent Repo
         uses: peter-evans/repository-dispatch@v2
         with:
