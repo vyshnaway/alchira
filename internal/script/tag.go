@@ -17,7 +17,7 @@ type tag_Parse_retype struct {
 	ClassSynced       bool
 	Fragment          string
 	ClassesList       [][]string
-	ScatterList       map[string]bool
+	RapidList         map[string]bool
 	NativeAttributes  map[string]string
 	StyleDeclarations _model.T_RawStyle
 }
@@ -51,8 +51,6 @@ func Tag_Scanner(
 		if fragment.Len() > 1 {
 			fragment.WriteRune(' ')
 		}
-		// fmt.Print("[" , k, "|", v,"]")
-		// fmt.Println("")
 		fragment.WriteString(k)
 		if len(v) > 0 {
 			fragment.WriteRune('=')
@@ -217,7 +215,7 @@ func Tag_Scanner(
 		SelfClosed:        selfClosed,
 		ClassSynced:       classSynced,
 		ClassesList:       classesList,
-		ScatterList:       scatterList,
+		RapidList:         scatterList,
 		NativeAttributes:  nativeAttributes,
 		StyleDeclarations: styleDeclarations,
 	}

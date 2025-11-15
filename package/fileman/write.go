@@ -13,11 +13,24 @@ import (
 func Write_File(filePath string, content string) error {
 	dir := _filepath.Dir(filePath)
 	if !Path_IfDir(dir) {
-		if err := _os.MkdirAll(dir, 0755); err != nil { // 0755 permissions
+		if err := _os.MkdirAll(dir, 0755); err != nil {
 			return _fmt.Errorf("failed to create directory '%s': %w", dir, err)
 		}
 	}
-	err := _os.WriteFile(filePath, []byte(content), 0644) // 0644 permissions
+
+	// Check if file exists and content is the same to avoid rewriting
+	existingContent, err := _os.ReadFile(filePath)
+	if err == nil {
+		if string(existingContent) == content {
+			// Contents are the same, no need to write
+			return nil
+		}
+	} else if !_os.IsNotExist(err) {
+		// An error other than file not existing occurred
+		return _fmt.Errorf("failed to read existing file '%s': %w", filePath, err)
+	}
+
+	err = _os.WriteFile(filePath, []byte(content), 0644)
 	if err != nil {
 		return _fmt.Errorf("error writing to file '%s': %w", filePath, err)
 	}
@@ -32,10 +45,21 @@ func Write_Json(pathString string, object any) error {
 			return _fmt.Errorf("failed to create directory '%s': %w", dir, err)
 		}
 	}
-	jsonData, err := _json.MarshalIndent(object, "", "  ") // Pretty print with 2 spaces
+	jsonData, err := _json.MarshalIndent(object, "", "  ")
 	if err != nil {
 		return _fmt.Errorf("failed to marshal JSON object: %w", err)
 	}
+
+	existingData, err := _os.ReadFile(pathString)
+	if err == nil {
+		if string(existingData) == string(jsonData) {
+			// JSON content unchanged, skip writing
+			return nil
+		}
+	} else if !_os.IsNotExist(err) {
+		return _fmt.Errorf("failed to read existing file '%s': %w", pathString, err)
+	}
+
 	err = _os.WriteFile(pathString, jsonData, 0644)
 	if err != nil {
 		return _fmt.Errorf("error writing JSON data to '%s': %w", pathString, err)
