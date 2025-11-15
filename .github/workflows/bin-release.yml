@@ -16,10 +16,10 @@ jobs:
 
     steps:
       - name: Checkout current repo
-        uses: actions/checkout@v5
+        uses: actions/checkout@v3
 
       - name: Checkout xcss-core (read-only)
-        uses: actions/checkout@v5
+        uses: actions/checkout@v3
         with:
           repository: yshell-dev/xcss-core
           token: ${{ secrets.XCSS_REPO_CROSS }}
@@ -76,7 +76,7 @@ jobs:
 
     steps:
       - name: Checkout xcss-core (read-only)
-        uses: actions/checkout@v5
+        uses: actions/checkout@v3
         with:
           repository: yshell-dev/xcss-core
           token: ${{ secrets.XCSS_REPO_CROSS }}
