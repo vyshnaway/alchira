@@ -23,12 +23,12 @@ jobs:
         with:
           repository: yshell-dev/xcss-core
           token: ${{ secrets.XCSS_REPO_CROSS }}
-          path: core_repo
+          path: core
 
       - name: Get version from xcss-core
         id: pacver
         run: |
-          cd core_repo
+          cd core
           echo "version=v$(jq -r .version package.json)" >> $GITHUB_OUTPUT
 
       - name: Run build script
@@ -48,7 +48,7 @@ jobs:
           token: ${{ secrets.XCSS_REPO_CROSS }}
           tag_name: ${{ steps.pacver.outputs.version }}
           name: Release ${{ steps.pacver.outputs.version }}
-          body_path: ./release.md
+          body_path: ./core/release.md
           files: artifacts/**
           overwrite_files: true
         env:
@@ -61,7 +61,7 @@ jobs:
           token: ${{ secrets.XCSS_REPO_CROSS }}
           tag_name: latest
           name: Release latest
-          body_path: ./release.md
+          body_path: ./core/release.md
           files: artifacts/**
           overwrite_files: true
         env:
