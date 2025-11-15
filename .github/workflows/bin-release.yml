@@ -31,9 +31,6 @@ jobs:
           cd core_repo
           echo "version=v$(jq -r .version package.json)" >> $GITHUB_OUTPUT
 
-      # - name: Switch back to current repository
-      #   run: cd "${GITHUB_WORKSPACE}"
-
       - name: Run build script
         run: |
           chmod +x ./scripts/build.sh
