@@ -27,8 +27,8 @@ var Root = models.Cache_Root{
 	WebsocketPort:   0,
 
 	Url: models.Cache_Url{
+		Cdn:       "https://cdn." + domain + "/",
 		Site:      "https://www." + domain + "/",
-		Docs:      "https://docs." + domain + "/",
 		Worker:    "https://worker." + domain + "/",
 		Console:   "https://console." + domain + "/",
 		Vendors:   "https://vendors." + domain + "/",

@@ -8,7 +8,7 @@ import (
 )
 
 type Cache_Url struct {
-	Docs      string
+	Cdn       string
 	Site      string
 	Worker    string
 	Console   string

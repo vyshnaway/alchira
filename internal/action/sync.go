@@ -15,7 +15,7 @@ import (
 func Sync_RootDocs() {
 	var wg _sync.WaitGroup
 	var mut _sync.Mutex
-
+	
 	for item_name, item := range _config.Sync_Agreements {
 		wg.Add(1)
 		func() {

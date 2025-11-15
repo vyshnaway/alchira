@@ -5,7 +5,6 @@ import (
 	_model "main/models"
 	_fileman "main/package/fileman"
 	_reflect "reflect"
-	_string "strings"
 )
 
 func Setup_Environment(rootpath string, workpath string) {
@@ -30,7 +29,7 @@ func Setup_Environment(rootpath string, workpath string) {
 		}
 	}
 
-	cdn := _config.Root.Url.Docs + "version/" + _string.Split(_config.Root.Version, ".")[0] + "/"
+	cdn := _config.Root.Url.Cdn
 	for id, source := range _config.Sync_Agreements {
 		source.Url = cdn + source.Url
 		source.Path = _fileman.Path_Join(append([]string{rootpath}, source.Frags...)...)
