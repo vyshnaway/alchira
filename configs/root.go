@@ -81,10 +81,10 @@ var Static = models.Cache_Static{
 	ReplacementTags: func() map[string]int {
 		res := map[string]int{}
 		for k, v := range Root.CustomTags {
-			res["<!-- "+k+" -->"] = v
 			res["<!--"+k+"-->"] = v
 			res["<!--"+k+" -->"] = v
 			res["<!-- "+k+"-->"] = v
+			res["<!-- "+k+" -->"] = v
 			res["<"+k+" />"] = v
 			res["<"+k+"/>"] = v
 		}
