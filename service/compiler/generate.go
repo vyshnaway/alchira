@@ -159,9 +159,9 @@ func Generate_Files() (Files map[string]string, Report string) {
 	}()
 
 	block_style := _fmt.Sprint("<style>", style_sheet, "</style>")
-	block_on := block_style + block_style
+	block_summon := block_style + _fmt.Sprint("<div>", staple_sheet, "</div>")
 	for _, target := range _stash.Cache.Targetdir {
-		_map.Copy(files, target.SummonFiles(style_sheet, block_style, block_on, staple_sheet))
+		_map.Copy(files, target.SummonFiles(style_sheet, block_style, block_summon, staple_sheet))
 	}
 
 	if !_config.Static.WATCH {
