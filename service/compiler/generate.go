@@ -158,10 +158,11 @@ func Generate_Files() (Files map[string]string, Report string) {
 		return _string.Join(frags, "")
 	}()
 
-	block_style := _fmt.Sprint("<style>", style_sheet, "</style>")
-	block_summon := block_style + _fmt.Sprint("<div>", staple_sheet, "</div>")
+	staple_block := _fmt.Sprint(_config.Saved.Tweaks["staple-prefix"], staple_sheet, _config.Saved.Tweaks["staple-prefix"])
+	style_block := _fmt.Sprint(_config.Saved.Tweaks["styles-prefix"], style_sheet, _config.Saved.Tweaks["styles-suffix"])
+	summon_block := style_block + staple_block
 	for _, target := range _stash.Cache.Targetdir {
-		_map.Copy(files, target.SummonFiles(style_sheet, block_style, block_summon, staple_sheet))
+		_map.Copy(files, target.SummonFiles(style_sheet, style_block, summon_block, staple_block))
 	}
 
 	if !_config.Static.WATCH {

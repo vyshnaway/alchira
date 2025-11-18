@@ -44,7 +44,16 @@ var Root = models.Cache_Root{
 		"install": "Install external artifacts.",
 	},
 	Tweaks: models.Config_Tweaks{
-		"CacheUsage": false,
+    // prefix for staple replacement tags 
+    "staple-prefix": "",
+    // suffix for staple replacement tags 
+    "staple-suffix": "",
+    // prefix for styles replacement tags 
+    "styles-prefix": "",
+    // suffix for styles replacement tags 
+    "styles-suffix": "",
+    // rebuild interval in seconds
+    "rebuild-interval": 0,
 	},
 	CustomTags: map[string]int{
 		"style":             1,

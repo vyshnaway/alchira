@@ -109,6 +109,7 @@ func Accumulate() {
 	}
 }
 
+var initial = 100
 var css_class_prefix = "." + string(_config.Root.CustomOps["lodash"])
 var tag_class_prefix = string(_config.Root.CustomOps["lodash"])
 
@@ -126,7 +127,7 @@ func Organize() (AritfactFiles map[string]string, Attachments map[int]bool, Rapi
 
 				classname := css_class_prefix + _util.String_EnCounter(classid)
 				if cascade_counter {
-					classname = classname + "-" + _strconv.Itoa(classid)
+					classname = classname + "-" + _strconv.Itoa(initial + classid)
 				}
 				tempPubMap = append(tempPubMap, _model.Style_ClassIndexTrace{
 					ClassName:  classname,
@@ -141,7 +142,7 @@ func Organize() (AritfactFiles map[string]string, Attachments map[int]bool, Rapi
 			for ref, classid := range stash.Group_to_Table[imap] {
 				classname := tag_class_prefix + _util.String_EnCounter(classid)
 				if cascade_counter {
-					classname = classname + "-" + _strconv.Itoa(classid)
+					classname = classname + "-" + _strconv.Itoa(initial + classid)
 				}
 				_config.Style.ClassDictionary[json_array][ref]= classname
 			}
