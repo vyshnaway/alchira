@@ -16,14 +16,14 @@ var Sync_References = map[string]_model.File_Source{
 		Title:   "Notifications",
 		Url:     "notifications.md",
 		Path:    "",
-		Frags:   []string{"alerts.md"},
+		Frags:   []string{"notifications.md"},
 		Content: "",
 	},
 	"agent": {
 		Title:   "For AiAgents",
 		Url:     "agent-prompt.md",
 		Path:    "",
-		Frags:   []string{"agent.md"},
+		Frags:   []string{"prompt.md"},
 		Content: "",
 	},
 }
