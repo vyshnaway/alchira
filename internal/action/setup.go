@@ -43,13 +43,36 @@ func Setup_Environment(rootpath string, workpath string) {
 }
 
 func Setup_Tweaks(tweaks map[string]any) {
-	_config.Saved.Tweaks = _config.Root.Tweaks
+	_config.Saved.Tweaks = make(map[string]any)
+	if tweaks == nil {
+		tweaks = map[string]any{}
+	}
 
-	if tweaks != nil {
-		for key, val := range _config.Root.Tweaks {
-			if _reflect.TypeOf(tweaks[key]) == _reflect.TypeOf(val) {
-				_config.Saved.Tweaks[key] = tweaks[key]
+	for key, val := range _config.Root.Tweaks {
+
+		ual, ok := tweaks[key]
+		if ok {
+			switch v := ual.(type) {
+			case float64:
+				// Convert float64 to int if val is int
+				if _, val_int_ok := val.(int); val_int_ok {
+					_config.Saved.Tweaks[key] = int(v)
+					continue
+				}
+			case int:
+				if _, val_int_ok := val.(int); val_int_ok {
+					_config.Saved.Tweaks[key] = v
+					continue
+				}
+			default:
+				// General type equality check
+				if _reflect.TypeOf(ual) == _reflect.TypeOf(val) {
+					_config.Saved.Tweaks[key] = ual
+					continue
+				}
 			}
 		}
+
+		_config.Saved.Tweaks[key] = val
 	}
 }

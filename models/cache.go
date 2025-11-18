@@ -21,7 +21,6 @@ type Cache_Root struct {
 	Version         string
 	Extension       string
 	WebsocketPort   int
-	RebuildInterval int
 	PollingInterval int
 	WaitingInterval int
 	Commands        map[string]string

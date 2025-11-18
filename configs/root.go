@@ -7,7 +7,6 @@ import (
 	"slices"
 	"sync"
 	"sync/atomic"
-	"time"
 )
 
 const (
@@ -21,10 +20,9 @@ var Root = models.Cache_Root{
 	Name:            id,
 	Version:         "0.0.0",
 	Extension:       id,
-	RebuildInterval: 60000,
 	PollingInterval: 600,
 	WaitingInterval: 60,
-	WebsocketPort:   0,
+	WebsocketPort:   1,
 
 	Url: models.Cache_Url{
 		Cdn:       "https://cdn." + domain + "/",
@@ -52,8 +50,8 @@ var Root = models.Cache_Root{
     "styles-prefix": "",
     // suffix for styles replacement tags 
     "styles-suffix": "",
-    // rebuild interval in seconds
-    "rebuild-interval": 0,
+    // rebuild interval in seconds (min 10)
+    "reload-period": 0,
 	},
 	CustomTags: map[string]int{
 		"style":             1,
@@ -102,7 +100,7 @@ var Static = models.Cache_Static{
 	Watchman:      watchman.New(),
 	ExecuteMutex:  sync.Mutex{},
 	RebuildFlag:   atomic.Bool{},
-	RebuildTicker: &time.Ticker{},
+	RebuildTicker: nil,
 }
 
 var Root_Scaffold = map[string]models.File_Source{

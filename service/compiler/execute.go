@@ -5,6 +5,7 @@ import (
 	_action "main/internal/action"
 	X "main/internal/console"
 	_stash "main/internal/stash"
+	"main/package/console"
 	S "main/package/console"
 	_fileman "main/package/fileman"
 	_watcher "main/package/watchman"
@@ -35,21 +36,29 @@ const (
 	Execute_Step_LoopAround
 )
 
-func startRebuildTicker(intervalMs int) func() {
-	var tickerDuration _time.Duration
-	RebuildTickerReset := func() { tickerDuration = _time.Duration(intervalMs) * _time.Millisecond }
-	RebuildTickerReset()
+func ResetRebuildTicker() {
+    intervalVal, _ := _config.Saved.Tweaks["reload-period"].(int)
+	if intervalVal < 0 {
+		intervalVal = -intervalVal
+	}
+    tickerDuration := _time.Duration(intervalVal + 1) * _time.Second
+	console.Render.Raw(intervalVal)
 
-	go func() {
-		_config.Static.RebuildTicker = _time.NewTicker(tickerDuration)
-		defer _config.Static.RebuildTicker.Stop()
+	if _config.Static.RebuildTicker == nil {
+        _config.Static.RebuildTicker = _time.NewTicker(tickerDuration)
+        go func(ticker *_time.Ticker) {
+            defer ticker.Stop()
+            for range ticker.C {
+                _config.Static.RebuildFlag.Store(true)
+            }
+        }(_config.Static.RebuildTicker)
+	}  
 
-		for range _config.Static.RebuildTicker.C {
-			_config.Static.RebuildFlag.Store(true)
-		}
-	}()
-
-	return RebuildTickerReset
+	if intervalVal < 10 {
+		_config.Static.RebuildTicker.Stop()
+	} else {
+		_config.Static.RebuildTicker.Reset(tickerDuration)
+	}
 }
 
 func Execute(heading string, concurrent bool) (Exitcode int) {
@@ -62,11 +71,10 @@ func Execute(heading string, concurrent bool) (Exitcode int) {
 	watchman.PollIntervalMs = _config.Root.PollingInterval
 
 	var save_action _sync.WaitGroup
-	var RebuildTickerReset func()
 
 	if _config.Static.WATCH {
-		if _config.Root.RebuildInterval > 0 && !_config.Static.IAMAI {
-			RebuildTickerReset = startRebuildTicker(_config.Root.RebuildInterval)
+		if !_config.Static.IAMAI {
+			ResetRebuildTicker()
 		}
 
 		if !_config.Static.SERVER || !_config.Static.IAMAI {
@@ -98,9 +106,6 @@ func Execute(heading string, concurrent bool) (Exitcode int) {
 			if _config.Static.RebuildFlag.Load() {
 				_config.Reset(true)
 				showReport = false
-			}
-			if _config.Static.WATCH && _config.Static.RebuildTicker != nil {
-				RebuildTickerReset()
 			}
 
 			res_report, res_status := _action.Verify_Setup(concurrent)
@@ -134,7 +139,9 @@ func Execute(heading string, concurrent bool) (Exitcode int) {
 			fallthrough
 
 		case Execute_Step_VerifyConfigs:
-			if res_report, res_status := _action.Verify_Configs(false, concurrent); !res_status {
+			res_report, res_status := _action.Verify_Configs(false, concurrent); 
+			ResetRebuildTicker()
+			if !res_status {
 				report = res_report
 				step = Execute_Step_LoopAround
 				exitcode = 1
