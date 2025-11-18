@@ -25,8 +25,8 @@ var Root = models.Cache_Root{
 	WebsocketPort:   1,
 
 	Url: models.Cache_Url{
-		Cdn:       "https://cdn." + domain + "/",
 		Site:      "https://www." + domain + "/",
+		Docs:      "https://www." + domain + "/cdn/",
 		Worker:    "https://worker." + domain + "/",
 		Console:   "https://console." + domain + "/",
 		Vendors:   "https://vendors." + domain + "/",
@@ -42,16 +42,18 @@ var Root = models.Cache_Root{
 		"install": "Install external artifacts.",
 	},
 	Tweaks: models.Config_Tweaks{
-    // prefix for staple replacement tags 
-    "staple-prefix": "",
-    // suffix for staple replacement tags 
-    "staple-suffix": "",
-    // prefix for styles replacement tags 
-    "styles-prefix": "",
-    // suffix for styles replacement tags 
-    "styles-suffix": "",
-    // rebuild interval in seconds (min 10)
-    "reload-period": 0,
+		"staple-prefix": "",
+		// prefix for staple replacement tags
+		"staple-suffix": "",
+		// suffix for staple replacement tags
+		"styles-prefix": "",
+		// prefix for styles replacement tags
+		"styles-suffix": "",
+		// suffix for styles replacement tags
+		
+		// EXPERIMENTAL
+		"reload-period": 0,
+		// rebuild interval in seconds (min 10)
 	},
 	CustomTags: map[string]int{
 		"style":             1,

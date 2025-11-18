@@ -29,7 +29,7 @@ func Setup_Environment(rootpath string, workpath string) {
 		}
 	}
 
-	cdn := _config.Root.Url.Cdn
+	cdn := _config.Root.Url.Docs
 	for id, source := range _config.Sync_Agreements {
 		source.Url = cdn + source.Url
 		source.Path = _fileman.Path_Join(append([]string{rootpath}, source.Frags...)...)
