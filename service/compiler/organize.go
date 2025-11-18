@@ -117,14 +117,19 @@ func Organize() (AritfactFiles map[string]string, Attachments map[int]bool, Rapi
 	_config.Style.ClassDictionary = _model.Style_Dictionary{}
 	_config.Style.Publish_RigidTracks = [][]_model.Style_ClassIndexTrace{}
 
-	SaveClassRefs := func(stash _order_.R_Preview) {
+	SaveClassRefs := func(stash _order_.R_Preview, cascade_counter bool) {
+		counter := 1000
 		for _, temp_trace := range stash.Final_Hashtrace {
 			tempPubMap := []_model.Style_ClassIndexTrace{}
 			for _, val := range temp_trace {
+				counter++
 				index := val[0]
 				classid := val[1]
 
 				classname := css_class_prefix + _util.String_EnCounter(classid)
+				if cascade_counter {
+					classname = classname + "-" + _strconv.Itoa(counter)
+				}
 				tempPubMap = append(tempPubMap, _model.Style_ClassIndexTrace{
 					ClassName:  classname,
 					ClassIndex: index,
@@ -149,7 +154,7 @@ func Organize() (AritfactFiles map[string]string, Attachments map[int]bool, Rapi
 	switch _config.Static.Command {
 	case "preview":
 		res, _ := _order_.Optimize(tracks_.ClassTracks, false, _config.Static.Argument, &_model.Config_Archive{})
-		SaveClassRefs(*res.Result)
+		SaveClassRefs(*res.Result, true)
 
 		if len(_config.Delta.Errors) > 0 {
 			_config.Delta.FinalMessage = _strconv.Itoa(len(_config.Delta.Errors)) + " Unresolved Errors. Rectify them to proceed with 'publish' command."
@@ -159,19 +164,20 @@ func Organize() (AritfactFiles map[string]string, Attachments map[int]bool, Rapi
 	case "publish":
 		if len(_config.Delta.Errors) > 0 {
 			res, _ := _order_.Optimize(tracks_.ClassTracks, false, _config.Static.Argument, archive_Build())
-			SaveClassRefs(*res.Result)
+			SaveClassRefs(*res.Result, true)
 
 			_config.Delta.FinalMessage = _strconv.Itoa(len(_config.Delta.Errors)) + " Errors. Falling back to 'preview' command."
 			_config.Static.Command = "preview"
 		} else {
 			archive := archive_Build()
 			res, _ := _order_.Optimize(tracks_.ClassTracks, true, _config.Static.Argument, archive)
-			SaveClassRefs(*res.Result)
-
+			
 			if res.Status {
+				SaveClassRefs(*res.Result, false)
 				artifact_files = archive_Files()
 				_config.Delta.FinalMessage = "Build Success."
 			} else {
+				SaveClassRefs(*res.Result, true)
 				_config.Delta.PublishError = res.Message
 				_config.Delta.FinalMessage = "Build Atttempt Failed. Fallback with Preview."
 			}
