@@ -7,7 +7,7 @@ permissions:
   contents: write
 
 env:
-  PARENT_REPO: yshell-dev/xcss-core
+  PARENT_REPO: yshell-dev/xcss-package
 
 jobs:
   bin-release:
@@ -18,14 +18,14 @@ jobs:
       - name: Checkout current repo
         uses: actions/checkout@v3
 
-      - name: Checkout xcss-core (read-only)
+      - name: Checkout xcss-package (read-only)
         uses: actions/checkout@v3
         with:
-          repository: yshell-dev/xcss-core
+          repository: yshell-dev/xcss-package
           token: ${{ secrets.XCSS_REPO_CROSS }}
           path: core
 
-      - name: Get version from xcss-core
+      - name: Get version from xcss-package
         id: pacver
         run: |
           cd core
@@ -56,7 +56,7 @@ jobs:
 
       - name: Publish release (latest tag)
         uses: softprops/action-gh-release@v2
-        with:         
+        with:
           repository: ${{ env.PARENT_REPO }}
           token: ${{ secrets.XCSS_REPO_CROSS }}
           tag_name: latest
@@ -72,10 +72,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout xcss-core (read-only)
+      - name: Checkout xcss-package (read-only)
         uses: actions/checkout@v3
         with:
-          repository: yshell-dev/xcss-core
+          repository: yshell-dev/xcss-package
           token: ${{ secrets.XCSS_REPO_CROSS }}
 
       - name: Trigger publish workflow on Parent Repo
