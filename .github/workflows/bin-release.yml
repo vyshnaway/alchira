@@ -9,7 +9,8 @@ permissions:
   contents: write
 
 env:
-  PARENT_REPO: yshell-dev/xcss-package
+  PACKAGE_REPO: yshell-dev/xcss-package
+  VSCODE_REPO: yshell-dev/xcss-vscode
 
 jobs:
   bin-release:
@@ -46,7 +47,7 @@ jobs:
       - name: Publish release (version tag)
         uses: softprops/action-gh-release@v2
         with:
-          repository: ${{ env.PARENT_REPO }}
+          repository: ${{ env.PACKAGE_REPO }}
           token: ${{ secrets.XCSS_REPO_CROSS }}
           tag_name: ${{ steps.pacver.outputs.version }}
           name: Release ${{ steps.pacver.outputs.version }}
@@ -59,7 +60,7 @@ jobs:
       - name: Publish release (latest tag)
         uses: softprops/action-gh-release@v2
         with:
-          repository: ${{ env.PARENT_REPO }}
+          repository: ${{ env.PACKAGE_REPO }}
           token: ${{ secrets.XCSS_REPO_CROSS }}
           tag_name: latest
           name: Release latest
@@ -68,3 +69,39 @@ jobs:
           overwrite_files: true
         env:
           GITHUB_TOKEN: ${{ secrets.XCSS_REPO_CROSS }}
+
+  publish-npm:
+    name: Npm Publish Trigger
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout ${{ env.PACKAGE_REPO }} (read-only)
+        uses: actions/checkout@v3
+        with:
+          repository: ${{ env.PACKAGE_REPO }}
+          token: ${{ secrets.XCSS_REPO_CROSS }}
+
+      - name: Trigger publish workflow on Parent Repo
+        uses: peter-evans/repository-dispatch@v2
+        with:
+          repository: ${{ env.PACKAGE_REPO }}
+          token: ${{ secrets.XCSS_REPO_CROSS }}
+          event-type: trigger-publish
+
+  publish-vsce:
+    name: VSCE Publish Trigger
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout ${{ env.VSCODE_REPO }} (read-only)
+        uses: actions/checkout@v3
+        with:
+          repository: ${{ env.VSCODE_REPO }}
+          token: ${{ secrets.XCSS_REPO_CROSS }}
+
+      - name: Trigger publish workflow on Parent Repo
+        uses: peter-evans/repository-dispatch@v2
+        with:
+          repository: ${{ env.VSCODE_REPO }}
+          token: ${{ secrets.XCSS_REPO_CROSS }}
+          event-type: trigger-publish
