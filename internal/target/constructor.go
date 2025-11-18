@@ -8,8 +8,10 @@ import (
 	"main/package/css"
 	_fileman "main/package/fileman"
 	"main/package/utils"
+	"maps"
 	_map "maps"
 	_slice "slices"
+	"sort"
 )
 
 type Class struct {
@@ -62,7 +64,9 @@ func New(storage _model.Config_ProxyStorage, label string) *Class {
 	}
 
 	i := 1
-	for filepath, filecontent := range storage.Filepath_to_Content {
+	paths := sort.StringSlice(_slice.Collect(maps.Keys(storage.Filepath_to_Content)))
+	for _, filepath := range paths {
+		filecontent := storage.Filepath_to_Content[filepath]  
 		This.Savefile(filepath, filecontent, i)
 		i++
 	}

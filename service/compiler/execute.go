@@ -5,7 +5,6 @@ import (
 	_action "main/internal/action"
 	X "main/internal/console"
 	_stash "main/internal/stash"
-	"main/package/console"
 	S "main/package/console"
 	_fileman "main/package/fileman"
 	_watcher "main/package/watchman"
@@ -42,7 +41,6 @@ func ResetRebuildTicker() {
 		intervalVal = -intervalVal
 	}
     tickerDuration := _time.Duration(intervalVal + 1) * _time.Second
-	console.Render.Raw(intervalVal)
 
 	if _config.Static.RebuildTicker == nil {
         _config.Static.RebuildTicker = _time.NewTicker(tickerDuration)
@@ -84,7 +82,7 @@ func Execute(heading string, concurrent bool) (Exitcode int) {
 			go func() {
 				<-sigs
 				watchman.Close()
-				S.Render.Write("\r\n", 2)
+				S.Render.Write("\n"+ S.Format(S.Divider(S.Canvas.DivRune.Top), S.Preset.Failed, S.Style.AS_Bold), 2)
 				save_action.Wait()
 				_os.Exit(1)
 			}()

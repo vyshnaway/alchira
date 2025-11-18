@@ -158,7 +158,7 @@ func Generate_Files() (Files map[string]string, Report string) {
 		return _string.Join(frags, "")
 	}()
 
-	staple_block := _fmt.Sprint(_config.Saved.Tweaks["staple-prefix"], staple_sheet, _config.Saved.Tweaks["staple-prefix"])
+	staple_block := _fmt.Sprint(_config.Saved.Tweaks["staple-prefix"], staple_sheet, _config.Saved.Tweaks["staple-suffix"])
 	style_block := _fmt.Sprint(_config.Saved.Tweaks["styles-prefix"], style_sheet, _config.Saved.Tweaks["styles-suffix"])
 	summon_block := style_block + staple_block
 	for _, target := range _stash.Cache.Targetdir {
@@ -186,7 +186,7 @@ func Generate_Files() (Files map[string]string, Report string) {
 			)
 
 			var heading string
-			if errLen > 0 {
+			if errLen > 0 || len(_config.Delta.PublishError) > 0{
 				heading = S.Tag.H2(finalMessage, S.Preset.Failed, S.Style.AS_Bold)
 			} else {
 				heading = S.Tag.H2(finalMessage, S.Preset.Success, S.Style.AS_Bold)

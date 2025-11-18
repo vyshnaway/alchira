@@ -179,10 +179,11 @@ func Organize() (AritfactFiles map[string]string, Attachments map[int]bool, Rapi
 				SaveClassRefs(*res.Result, false)
 				artifact_files = archive_Files()
 				_config.Delta.FinalMessage = "Build Success."
+				_config.Delta.PublishError = ""
 			} else {
 				SaveClassRefs(*res.Result, true)
 				_config.Delta.PublishError = res.Message
-				_config.Delta.FinalMessage = "Build Atttempt Failed. Fallback with Preview."
+				_config.Delta.FinalMessage = "Build Atttempt Failed. Falling back with Preview."
 			}
 		}
 	}

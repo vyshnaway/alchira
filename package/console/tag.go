@@ -81,14 +81,13 @@ func tag_Li(content string, preset []string, styles ...string) string {
 }
 
 func tag_Hr(content string, preset []string, styles ...string) string {
-	width := Canvas.Width()
-	n := int(_math.Ceil(float64(width) / float64(len(content))))
-	repeated := _strings.Repeat(content, n)
-	if len(repeated) > width {
-		repeated = repeated[:width]
+	rn := Canvas.DivRune.Mid
+	if len(content) > 0 {
+		rn = rune(content[0])
 	}
-	s := "\r\n" + repeated + "\r\n"
-	return Format(s, preset, styles...)
+
+    s := "\r\n" + Divider(rn) + "\r\n"
+    return Format(s, preset, styles...)
 }
 
 func tag_Br(repeat int, preset []string, styles ...string) string {
