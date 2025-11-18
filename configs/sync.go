@@ -16,7 +16,7 @@ var Sync_References = map[string]_model.File_Source{
 		Title:   "Notifications",
 		Url:     "notifications.md",
 		Path:    "",
-		Frags:   []string{"notifications.md"},
+		Frags:   []string{"alerts.md"},
 		Content: "",
 	},
 	"agent": {
