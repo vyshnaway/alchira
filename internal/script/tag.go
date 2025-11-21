@@ -2,6 +2,7 @@ package script
 
 import (
 	_config "main/configs"
+	_action "main/internal/action"
 	_model "main/models"
 	_reader "main/package/reader"
 	_util "main/package/utils"
@@ -17,7 +18,8 @@ type tag_Parse_retype struct {
 	ClassSynced       bool
 	Fragment          string
 	ClassesList       [][]string
-	RapidList         map[string]bool
+	SwiftList         map[string]bool
+	ForceList         map[string]bool
 	NativeAttributes  map[string]string
 	StyleDeclarations _model.T_RawStyle
 }
@@ -26,11 +28,12 @@ var symclass_regex = _regexp.MustCompile(`(?i)^[\w\-_]+\$+[\w\-]+$`)
 
 func Tag_Scanner(
 	fileData *_model.File_Stash,
-	action E_Action,
+	method E_Method,
 	cursor *_reader.T_Reader,
 ) tag_Parse_retype {
 	classesList := make([][]string, 0, 1)
-	scatterList := make(map[string]bool, 4)
+	swiftList := make(map[string]bool, 4)
+	forceList := make(map[string]bool, 4)
 	braceTrack := make([]rune, 0, 8)
 	nativeAttributes := make(map[string]string, 8)
 
@@ -44,19 +47,7 @@ func Tag_Scanner(
 	classSynced := false
 	fallbackAquired := false
 	startpos := cursor.Active
-
-	var fragment _string.Builder
-	fragment.WriteRune('<')
-	SaveToFrag := func(k, v string) {
-		if fragment.Len() > 1 {
-			fragment.WriteRune(' ')
-		}
-		fragment.WriteString(k)
-		if len(v) > 0 {
-			fragment.WriteRune('=')
-			fragment.WriteString(v)
-		}
-	}
+	tagStart := cursor.Active.Idx
 
 	styleDeclarations := _model.T_RawStyle{
 		Elid:       0,
@@ -70,6 +61,16 @@ func Tag_Scanner(
 		Attributes: make(map[string]string, 12),
 		Comments:   make([]string, 0, 1),
 		Styles:     make(map[string]string, 3),
+	}
+
+	var fragment, whitespace _string.Builder
+	fragment.WriteRune('<')
+	SaveToFrag := func(k, v string) {
+		fragment.WriteString(k)
+		if len(v) > 0 {
+			fragment.WriteRune('=')
+			fragment.WriteString(v)
+		}
 	}
 
 	for cursor.Streaming {
@@ -104,6 +105,7 @@ func Tag_Scanner(
 			if deviance == 0 && attr.Len() > 0 && _slice.Contains([]rune{' ', '\n', '\r', '>', '\t'}, ch) {
 				tr_Attr := _string.Trim(attr.String(), " \t\r\n")
 				tr_Value := _string.Trim(value.String(), " \t\r\n")
+
 				if len(styleDeclarations.Element) == 0 {
 					if elid, elok := _config.Root.CustomTags[tr_Attr]; elok {
 						styleDeclarations.Elid = elid
@@ -111,7 +113,15 @@ func Tag_Scanner(
 					styleDeclarations.Element = tr_Attr
 					styleDeclarations.Elvalue = tr_Value
 					SaveToFrag(tr_Attr, tr_Value)
+
 				} else if styleDeclarations.Element[0] != '!' {
+					if whitespace.Len() > 0 {
+						fragment.WriteString(whitespace.String())
+						whitespace.Reset()
+					} else {
+						fragment.WriteString(" ")
+          }
+
 					if tr_Attr == "&" {
 						if len(tr_Value) > 3 {
 							for _, line := range _string.Split(tr_Value[1:len(tr_Value)-2], "\r\n") {
@@ -143,25 +153,21 @@ func Tag_Scanner(
 						if len(tr_Value) > 0 {
 							styleDeclarations.Styles[tr_Attr] = tr_Value
 						}
-					} else if _slice.Contains(fileData.WatchAttrs, tr_Attr) {
+					} else {
 						classSynced = true
 						value_Parse_return := value_Parse(
 							tr_Value,
-							action,
+							method,
 							fileData,
 							cursor,
 						)
 						if len(value_Parse_return.OrderedClasses) > 0 {
 							classesList = append(classesList, value_Parse_return.OrderedClasses)
 						}
-						if len(value_Parse_return.ScatterClasses) > 0 {
-							_map.Copy(scatterList, value_Parse_return.ScatterClasses)
-						}
+						_map.Copy(swiftList, value_Parse_return.SwiftClasses)
+						_map.Copy(forceList, value_Parse_return.ForceClasses)
 						nativeAttributes[tr_Attr] = value_Parse_return.Scribed
 						SaveToFrag(tr_Attr, value_Parse_return.Scribed)
-					} else {
-						nativeAttributes[tr_Attr] = tr_Value
-						SaveToFrag(tr_Attr, tr_Value)
 					}
 				}
 
@@ -171,13 +177,17 @@ func Tag_Scanner(
 			}
 			if (deviance == 0 && (ch == '>' || ch == ';' || ch == ',' || ch == '<')) || deviance < 0 {
 				if ch == '>' {
+					fragment.WriteString(whitespace.String())
+					fragment.WriteRune('>')
 					ok = true
-
 				}
 				break
 			}
 		}
 
+		if deviance == 0 && _slice.Contains([]rune{' ', '\n', '\r', '\t'}, ch) {
+			whitespace.WriteRune(ch)
+		}
 		if deviance != 0 || (deviance == 0 && !_slice.Contains([]rune{' ', '=', '\n', '\r', '\t', '>'}, ch)) {
 			if isVal {
 				value.WriteRune(ch)
@@ -189,33 +199,67 @@ func Tag_Scanner(
 		}
 	}
 
+	var fragString = ""
 	styleDeclarations.EndMarker = cursor.Active.Idx
-	if cursor.Active.Char == '>' {
-		styleDeclarations.EndMarker++
-	}
 
 	if ok {
-		fragment.WriteRune('>')
-		// fmt.Println(fragment.String())
-		// fmt.Println("---")
-		cursor.Active.Cycle++
-		selfClosed = cursor.Active.Last == '/'
-		styleDeclarations.Range = _reader.T_Range{
-			Data:  []string{},
-			Start: startpos,
-			End:   cursor.Active,
+		if cursor.Active.Char == '>' {
+			styleDeclarations.EndMarker++
 		}
-	} else if fallbackAquired {
-		cursor.LoadFallback()
+
+		fragString = fragment.String()
+		if fragString[1] == '!' {
+			fragString = string(cursor.Runes[tagStart:styleDeclarations.EndMarker])
+			subfrag := _string.TrimSpace(fragString[3 : len(fragString)-1])
+
+			switch fragString[2] {
+			case op_lodash:
+				fragString = fileData.Label + subfrag
+
+			case op_attach:
+				if method == E_Method_Read {
+					swiftList[subfrag] = true
+				} else if i := _action.Index_Finder(subfrag, fileData.Style.LocalMap); i.Index > 0 {
+					if method == E_Method_DebugHash {
+						fragString = i.Data.SrcData.DebugSwiftClass
+					} else {
+						fragString = i.Data.SrcData.SwiftClass
+					}
+				}
+
+			case op_assign:
+				if method == E_Method_Read {
+					forceList[subfrag] = true
+				} else if i := _action.Index_Finder(subfrag, fileData.Style.LocalMap); i.Index > 0 {
+					if method == E_Method_DebugHash {
+						fragString = i.Data.SrcData.DebugForceClass
+					} else {
+						fragString = i.Data.SrcData.ForceClass
+					}
+				}
+			}
+
+		} else {
+			cursor.Active.Cycle++
+			selfClosed = cursor.Active.Last == '/'
+			styleDeclarations.Range = _reader.T_Range{Data: []string{}, Start: startpos, End: cursor.Active}
+		}
+
+	} else {
+		fragString = string(cursor.Runes[tagStart:styleDeclarations.EndMarker])
+		if fallbackAquired {
+			cursor.LoadFallback()
+		}
 	}
 
 	return tag_Parse_retype{
 		Ok:                ok,
-		Fragment:          fragment.String(),
+		ForceList:         forceList,
+		SwiftList:         swiftList,
+		Fragment:          fragString,
 		SelfClosed:        selfClosed,
 		ClassSynced:       classSynced,
 		ClassesList:       classesList,
-		RapidList:         scatterList,
 		NativeAttributes:  nativeAttributes,
 		StyleDeclarations: styleDeclarations,
 	}

@@ -20,7 +20,7 @@ func Manifest_Mixed(req T_Manifest_Mixed) R_Manifest_Mixed {
 	localManifest := map[string]*R_ManifestLocal{}
 	for _, f := range req.FileMap {
 		if f.Content != "" {
-			configs.Static.Watchman.HandleEvent(watchman.E_Action_Update, f.AbsPath, f.Content)
+			configs.Static.Watchman.HandleEvent(watchman.E_Method_Update, f.AbsPath, f.Content)
 		}
 	}
 	for _, f := range req.FileMap {

@@ -53,7 +53,7 @@ func archive_Build() *_models.Config_Archive {
 		v := data.Stylesheet["[]"]
 		attachments := _slice.Collect(_map.Keys(data.Attachments))
 		if len(data.Attachments) > 0 {
-			v = string(_config.Root.CustomOps["attach"]) + " " + _string.Join(attachments, " ") + ";" + v
+			v = string(_config.Root.CustomOp["attach"]) + " " + _string.Join(attachments, " ") + ";" + v
 		}
 		if len(v) > 0 {
 			exportsheet.WriteString("={" + v + "}")

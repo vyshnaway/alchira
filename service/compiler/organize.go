@@ -110,10 +110,10 @@ func Accumulate() {
 }
 
 var initial = 100
-var css_class_prefix = "." + string(_config.Root.CustomOps["lodash"])
-var tag_class_prefix = string(_config.Root.CustomOps["lodash"])
+var css_class_prefix = "._"
+var tag_class_prefix = "_"
 
-func Organize() (AritfactFiles map[string]string, Attachments map[int]bool, RapidquickMap map[int]bool) {
+func Organize() (AritfactFiles map[string]string, Attachments map[int]bool, SwiftMap map[int]bool, ForceMap map[int]bool) {
 
 	_config.Style.ClassDictionary = _model.Style_Dictionary{}
 	_config.Style.Publish_RigidTracks = [][]_model.Style_ClassIndexTrace{}
@@ -127,7 +127,7 @@ func Organize() (AritfactFiles map[string]string, Attachments map[int]bool, Rapi
 
 				classname := css_class_prefix + _util.String_EnCounter(classid)
 				if cascade_counter {
-					classname = classname + "-" + _strconv.Itoa(initial + classid)
+					classname = classname + "-" + _strconv.Itoa(initial+classid)
 				}
 				tempPubMap = append(tempPubMap, _model.Style_ClassIndexTrace{
 					ClassName:  classname,
@@ -142,9 +142,9 @@ func Organize() (AritfactFiles map[string]string, Attachments map[int]bool, Rapi
 			for ref, classid := range stash.Group_to_Table[imap] {
 				classname := tag_class_prefix + _util.String_EnCounter(classid)
 				if cascade_counter {
-					classname = classname + "-" + _strconv.Itoa(initial + classid)
+					classname = classname + "-" + _strconv.Itoa(initial+classid)
 				}
-				_config.Style.ClassDictionary[json_array][ref]= classname
+				_config.Style.ClassDictionary[json_array][ref] = classname
 			}
 		}
 	}
@@ -174,7 +174,7 @@ func Organize() (AritfactFiles map[string]string, Attachments map[int]bool, Rapi
 		} else {
 			archive := archive_Build()
 			res, _ := _order_.Optimize(tracks_.ClassTracks, true, _config.Static.Argument, archive)
-			
+
 			if res.Status {
 				SaveClassRefs(*res.Result, false)
 				artifact_files = archive_Files()
@@ -189,5 +189,5 @@ func Organize() (AritfactFiles map[string]string, Attachments map[int]bool, Rapi
 	}
 
 	_map.Copy(tracks_.Attachments, _config.Delta.IndexAttach)
-	return artifact_files, tracks_.Attachments, tracks_.ScatterMap
+	return artifact_files, tracks_.Attachments, tracks_.SwiftMap, tracks_.ForceMap
 }

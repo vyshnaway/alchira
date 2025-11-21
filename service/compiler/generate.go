@@ -86,7 +86,7 @@ func ClearUnwantedCache() (
 
 func Generate_Files() (Files map[string]string, Report string) {
 
-	files, attachments, rapidMap := Organize()
+	files, attachments, swiftMap, forceMap := Organize()
 	_stash.Target_SyncClassNames()
 
 	appendix_frag := _css.Render_Sequence(func() *_css.T_BlockSeq {
@@ -111,16 +111,27 @@ func Generate_Files() (Files map[string]string, Report string) {
 		return attach_frag, staple_sheet
 	}()
 
-	rapid_block := _css.NewBlock(0, len(rapidMap))
-	for i := range rapidMap {
+	swift_block := _css.NewBlock(0, len(swiftMap))
+	for i := range swiftMap {
 		d := _action.Index_Fetch(i)
 		if _config.Static.DEBUG {
-			rapid_block.SetBlock("."+d.SrcData.DebugClass, d.SrcData.NativeRawStyle)
+			swift_block.SetBlock("."+d.SrcData.DebugSwiftClass, d.SrcData.NativeRawStyle)
 		} else {
-			rapid_block.SetBlock("."+d.SrcData.RigidClass, d.SrcData.NativeRawStyle)
+			swift_block.SetBlock("."+d.SrcData.SwiftClass, d.SrcData.NativeRawStyle)
 		}
 	}
-	rapid_frag := _css.Render_Switched(rapid_block, _config.Static.MINIFY)
+	swift_frag := _css.Render_Switched(swift_block, _config.Static.MINIFY)
+
+	force_block := _css.NewBlock(0, len(forceMap))
+	for i := range forceMap {
+		d := _action.Index_Fetch(i)
+		if _config.Static.DEBUG {
+			force_block.SetBlock("."+d.SrcData.DebugForceClass, d.SrcData.NativeRawStyle)
+		} else {
+			force_block.SetBlock("."+d.SrcData.ForceClass, d.SrcData.NativeRawStyle)
+		}
+	}
+	force_frag := _css.Render_Switched(force_block, _config.Static.MINIFY)
 
 	report, errLen, finalMessage, index_frag := ClearUnwantedCache()
 	var class_builder _string.Builder
@@ -140,8 +151,9 @@ func Generate_Files() (Files map[string]string, Report string) {
 		val string
 	}{
 		{key: "Root", val: index_frag},
-		{key: "Rapid", val: rapid_frag},
+		{key: "Swift", val: swift_frag},
 		{key: "Rigid", val: rigid_frag},
+		{key: "Force", val: force_frag},
 		{key: "Attach", val: attach_frag},
 		{key: "Appendix", val: appendix_frag},
 	}
@@ -186,7 +198,7 @@ func Generate_Files() (Files map[string]string, Report string) {
 			)
 
 			var heading string
-			if errLen > 0 || len(_config.Delta.PublishError) > 0{
+			if errLen > 0 || len(_config.Delta.PublishError) > 0 {
 				heading = S.Tag.H2(finalMessage, S.Preset.Failed, S.Style.AS_Bold)
 			} else {
 				heading = S.Tag.H2(finalMessage, S.Preset.Success, S.Style.AS_Bold)

@@ -10,19 +10,20 @@ import (
 	_string "strings"
 )
 
-type E_Action int
+type E_Method int
 
 const (
-	E_Action_Read E_Action = iota
-	E_Action_BuildHash
-	E_Action_DebugHash
+	E_Method_Read E_Method = iota
+	E_Method_BuildHash
+	E_Method_DebugHash
 )
 
 type parse_return struct {
 	Scribed      string
-	ClassesList  [][]string
+	RigidTracks  [][]string
 	StylesList   []*_model.T_RawStyle
-	Attachments  map[string]bool
+	SwiftAssign  map[string]bool
+	ForceAssign  map[string]bool
 	Replacements []_model.File_TagReplacement
 }
 
@@ -31,7 +32,7 @@ var regexp_aftertagopen = _regexp.MustCompile(`(?i)[\w\-\!/]`)
 
 func Rider(
 	fileData *_model.File_Stash,
-	action E_Action,
+	action E_Method,
 ) parse_return {
 
 	fileData.Style.TagReplacements = []_model.File_TagReplacement{}
@@ -39,11 +40,12 @@ func Rider(
 	orderList := make([][]string, 0, 24)
 	tagTrack := make([]*_model.T_RawStyle, 0, 24)
 	stylesList := make([]*_model.T_RawStyle, 0, 24)
-	rapidList := make(map[string]bool, 24)
+	swiftList := make(map[string]bool, 24)
+	forceList := make(map[string]bool, 24)
 
 	var content string
 	var stream _string.Builder
-	if action == E_Action_Read {
+	if action == E_Method_Read {
 		content = fileData.Content
 		fileData.Midway = ""
 	} else {
@@ -55,15 +57,15 @@ func Rider(
 
 	for cursor.Streaming {
 
-		// TODO: Subscribed and Fragment can be optimized further
 		if cursor.Active.Last != '\\' && cursor.Active.Char == '<' && regexp_aftertagopen.MatchString(string(cursor.Active.Next)) {
 			tagStart := cursor.Active.Idx
 			result := Tag_Scanner(fileData, action, &cursor)
-			fragment := string(cursor.Runes[tagStart:result.StyleDeclarations.EndMarker])
+			fragment := result.Fragment
 			hasDeclared := (len(result.StyleDeclarations.Styles) > 0 || len(result.StyleDeclarations.SymClasses) > 0)
 
 			if result.Ok {
-				_map.Copy(rapidList, result.RapidList)
+				_map.Copy(swiftList, result.SwiftList)
+				_map.Copy(forceList, result.ForceList)
 				orderList = append(orderList, result.ClassesList...)
 				for k, v := range result.StyleDeclarations.Styles {
 					if len(v) > 2 {
@@ -73,20 +75,17 @@ func Rider(
 					}
 				}
 
-				if action == E_Action_Read {
+				if action == E_Method_Read {
 					if hasDeclared {
 						stylesList = append(stylesList, &result.StyleDeclarations)
-						fragment = result.Fragment
 					}
-					if len(tagTrack) > 0 || (hasDeclared && result.StyleDeclarations.Elid > 0) {
+					if len(tagTrack) > 0 || result.StyleDeclarations.Elid > 0 {
 						fragment = ""
 					}
 				} else if elid, status := replacementTags[fragment]; status {
 					replacements = append(replacements, _model.File_TagReplacement{Loc: stream.Len(), Elid: elid})
 					fragment = ""
-				} else if result.ClassSynced {
-					fragment = result.Fragment
-				}
+				} 
 
 				cursor.Increment()
 			}
@@ -129,8 +128,9 @@ func Rider(
 	return parse_return{
 		Replacements: replacements,
 		Scribed:      stream.String(),
-		ClassesList:  orderList,
+		RigidTracks:  orderList,
 		StylesList:   stylesList,
-		Attachments:  rapidList,
+		SwiftAssign:  swiftList,
+		ForceAssign:  forceList,
 	}
 }

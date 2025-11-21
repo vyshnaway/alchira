@@ -43,8 +43,10 @@ type Style_ClassData struct {
 	Artifact          string
 	Definent          string
 	SymClass          string
-	DebugClass        string
-	RigidClass        string
+	DebugSwiftClass   string
+	DebugForceClass   string
+	SwiftClass        string
+	ForceClass        string
 	Attachments       map[string]bool
 	NativeStaple      string
 	ExportStaple      string

@@ -43,7 +43,7 @@ func Sandbox_Index(index int) (response any) {
 		models.Style_ClassIndexTrace{ClassName: "._", ClassIndex: data.SrcData.Index},
 	}}
 
-	summon = script.Rider(&clontext, script.E_Action_DebugHash).Scribed
+	summon = script.Rider(&clontext, script.E_Method_DebugHash).Scribed
 
 	for _, i := range utils.Array_FlattenOnce(configs.Style.Publish_RigidTracks) {
 		data := action.Index_Fetch(i.ClassIndex).SrcData

@@ -13,9 +13,12 @@ import (
 	_string "strings"
 )
 
-var lodash_tag = "<!--" + lodash_rune + "-->"
-var lodash_rune = string(_config.Lodash_rune)
-var lodash_regex = _regexp.MustCompile(`\.` + lodash_rune)
+var Lodash_tag = "<!" + Lodash_char + ">"
+var Lodash_char = string(_config.Root.CustomOp["lodash"])
+var IdLodash_regex = _regexp.MustCompile(`\#` + Lodash_char)
+var ClassLodash_regex = _regexp.MustCompile(`\.` + Lodash_char)
+var CheckLodash_regex = _regexp.MustCompile(`[#.]` + Lodash_char)
+
 var symzero_regex = _regexp.MustCompile(`^[-_]\$`)
 
 func lodashstyle_process(
@@ -28,7 +31,7 @@ func lodashstyle_process(
 	NativeResult R_Parse,
 	AttachResult R_Parse,
 ) {
-	native := _string.ReplaceAll(content, lodash_tag, file.Label)
+	native := _string.ReplaceAll(content, Lodash_tag, file.Label)
 	nativeAttachResult := Parse_CssSnippet(
 		_util.Code_Uncomment(native, true, true, false),
 		selector, initial, flatten,
@@ -36,7 +39,7 @@ func lodashstyle_process(
 
 	exportAttachResult := nativeAttachResult
 	if _config.Static.EXPORT {
-		export := _string.ReplaceAll(content, lodash_tag, lodash_tag+file.Label)
+		export := _string.ReplaceAll(content, Lodash_tag, Lodash_tag+file.Label)
 		exportAttachResult = Parse_CssSnippet(
 			_util.Code_Uncomment(export, true, true, false),
 			selector, initial, flatten,
@@ -78,7 +81,7 @@ func Rawtag_Upload(
 
 	found := _action.Index_Finder(symclass, IndexMap)
 	index := found.Index
-	if found.Group != _model.Style_Type_Null {
+	if found.Index > 0 {
 		classdata := _action.Index_Fetch(found.Index)
 		classdata.SrcData.Metadata.Declarations = append(classdata.SrcData.Metadata.Declarations, declaration)
 	} else {
@@ -88,7 +91,7 @@ func Rawtag_Upload(
 		} else {
 			scope = raw.Scope
 		}
-		debugclass := _fmt.Sprint(scope, file.DebugFront, "\\:", raw.Range.Start.Row, "\\:", raw.Range.Start.Col, "_", normalized_symclass)
+		debugSwiftClass := _fmt.Sprint(scope, file.DebugFront, "\\:", raw.Range.Start.Row, "\\:", raw.Range.Start.Col, "_", normalized_symclass)
 
 		native_scanned, export_scanned := lodashstyle_process(raw.Styles[""], file, false,
 			_fmt.Sprint(raw.Scope, " : ", declaration, " | "), raw.SymClasses[0],
@@ -112,8 +115,9 @@ func Rawtag_Upload(
 
 					if native_scanned.Result.Len() > 0 {
 						if wrapperjson, err := _util.Code_JsoncBuild(query.Wrappers, ""); err == nil {
-							if !forArtifact && lodash_regex.MatchString(wrapperjson) {
-								wrapperjson = " " + lodash_regex.ReplaceAllString(wrapperjson, "."+file.Label)
+							if !forArtifact && CheckLodash_regex.MatchString(wrapperjson) {
+								wrapperjson = ClassLodash_regex.ReplaceAllString(wrapperjson, "."+file.Label)
+								wrapperjson = IdLodash_regex.ReplaceAllString(wrapperjson, "#"+file.Label)
 							} else {
 								exportRawStyle.SetBlock(wrapperjson, export_scanned.Result)
 							}
@@ -166,8 +170,8 @@ func Rawtag_Upload(
 		nativeStaple := ""
 		if raw.Elid == _config.Root.CustomTags["staple"] {
 			stripped := _util.Code_Strip(raw.Innertext, false, false, false, true)
-			exportStaple = _string.ReplaceAll(stripped, lodash_tag, lodash_tag+file.Label)
-			nativeStaple = _string.ReplaceAll(stripped, lodash_tag, file.Label)
+			exportStaple = _string.ReplaceAll(stripped, Lodash_tag, Lodash_tag+file.Label)
+			nativeStaple = _string.ReplaceAll(stripped, Lodash_tag, file.Label)
 		}
 
 		summon := ""
@@ -193,7 +197,6 @@ func Rawtag_Upload(
 			SummonSnippet: summon,
 		}
 
-		scatterBuildClass := "__" + _util.String_EnCounter(index)
 		classdata := &_model.Style_ClassData{
 			Attributes:        attributes,
 			Index:             0,
@@ -201,8 +204,8 @@ func Rawtag_Upload(
 			Definent:          raw.SymClasses[0],
 			SymClass:          symclass,
 			Metadata:          metadata,
-			DebugClass:        debugclass,
-			RigidClass:        scatterBuildClass,
+			DebugSwiftClass:   debugSwiftClass,
+			DebugForceClass:   debugSwiftClass + "_Important",
 			Attachments:       attachments,
 			ExportStaple:      exportStaple,
 			NativeStaple:      nativeStaple,
@@ -216,6 +219,9 @@ func Rawtag_Upload(
 			Context: file,
 			SrcData: classdata,
 		})
+		classhash := _util.String_EnCounter(index)
+		classdata.SwiftClass = "__" + classhash
+		classdata.ForceClass = "___" + classhash
 
 		file.Style.UsedIn = append(file.Style.UsedIn, index)
 	}

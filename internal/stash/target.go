@@ -77,29 +77,32 @@ func Target_Accumulate() (
 func Target_GetTracks() _target.GetTracks_return {
 	classtracks := [][]int{}
 	attachments := map[int]bool{}
-	scattermap := map[int]bool{}
+	swiftmap := map[int]bool{}
+	forcemap := map[int]bool{}
 
 	for _, target := range Cache.Targetdir {
 		r := target.GetTracks()
 		classtracks = append(classtracks, r.ClassTracks...)
 		_map.Copy(attachments, r.Attachments)
-		_map.Copy(scattermap, r.ScatterMap)
+		_map.Copy(swiftmap, r.SwiftMap)
+		_map.Copy(forcemap, r.ForceMap)
 	}
 
 	return _target.GetTracks_return{
 		Attachments: attachments,
 		ClassTracks: classtracks,
-		ScatterMap:  scattermap,
+		SwiftMap:    swiftmap,
+		ForceMap:    forcemap,
 	}
 }
 
 func Target_SyncClassNames() {
 
-	var render_action script.E_Action
+	var render_action script.E_Method
 	if _config.Static.DEBUG {
-		render_action = script.E_Action_DebugHash
+		render_action = script.E_Method_DebugHash
 	} else {
-		render_action = script.E_Action_BuildHash
+		render_action = script.E_Method_BuildHash
 	}
 
 	for _, target := range Cache.Targetdir {

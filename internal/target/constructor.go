@@ -44,7 +44,7 @@ func New(storage _model.Config_ProxyStorage, label string) *Class {
 		utils.String_EnCounter(0),
 	)
 	res := _style.Cssfile_String(storage.StylesheetContent, `APPENDIX : `+storage.Stylesheet+" | ")
-	stylesheetContext.Style.RapidStyles = res.Attachments
+	stylesheetContext.Style.SwiftStyles = res.Attachments
 
 	var This = Class{
 		Source:             storage.Source,
@@ -66,7 +66,7 @@ func New(storage _model.Config_ProxyStorage, label string) *Class {
 	i := 1
 	paths := sort.StringSlice(_slice.Collect(maps.Keys(storage.Filepath_to_Content)))
 	for _, filepath := range paths {
-		filecontent := storage.Filepath_to_Content[filepath]  
+		filecontent := storage.Filepath_to_Content[filepath]
 		This.Savefile(filepath, filecontent, i)
 		i++
 	}

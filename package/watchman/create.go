@@ -11,16 +11,16 @@ import (
 	_watcher "github.com/radovskyb/watcher"
 )
 
-type E_Action int
+type E_Method int
 
 const (
-	E_Action_Reload E_Action = iota
-	E_Action_Access 
-	E_Action_Update
+	E_Method_Reload E_Method = iota
+	E_Method_Access
+	E_Method_Update
 )
 
 type Event struct {
-	Action      E_Action
+	Action      E_Method
 	TimeStamp   string
 	Folder      string
 	FilePath    string
@@ -83,24 +83,24 @@ func (This *T_Watcher) Start() {
 					if !ok {
 						return
 					}
-					var act E_Action
+					var act E_Method
 
 					switch {
 					case event.Op&_fsnotify.Create == _fsnotify.Create:
 						info, err := _os.Stat(event.Name)
 						if err == nil && info.IsDir() {
 							This.Reset()
-							act = E_Action_Reload
+							act = E_Method_Reload
 						} else {
-							act = E_Action_Update
+							act = E_Method_Update
 						}
 
 					case event.Op&_fsnotify.Write == _fsnotify.Write:
-						act = E_Action_Update
+						act = E_Method_Update
 
 					default:
 						This.Reset()
-						act = E_Action_Reload
+						act = E_Method_Reload
 					}
 
 					This.HandleEvent(act, event.Name, "")
@@ -110,7 +110,7 @@ func (This *T_Watcher) Start() {
 						return
 					}
 					_fmt.Fprintf(_os.Stderr, "Watcher error: %v\r\n", err)
-					This.HandleEvent(E_Action_Reload, "", "")
+					This.HandleEvent(E_Method_Reload, "", "")
 
 				case <-This.close:
 					return
@@ -134,24 +134,24 @@ func (This *T_Watcher) Start() {
 					if !ok {
 						return
 					}
-					var act E_Action
+					var act E_Method
 					switch event.Op {
 
 					case _watcher.Create:
 						info, err := _os.Stat(event.Path)
 						if err == nil && info.IsDir() {
 							This.Reset()
-							act = E_Action_Reload
+							act = E_Method_Reload
 						} else {
-							act = E_Action_Update
+							act = E_Method_Update
 						}
 
 					case _watcher.Write:
-						act = E_Action_Update
+						act = E_Method_Update
 
 					default:
 						This.Reset()
-						act = E_Action_Reload
+						act = E_Method_Reload
 					}
 
 					This.HandleEvent(act, event.Path, "")
@@ -161,7 +161,7 @@ func (This *T_Watcher) Start() {
 						return
 					}
 					_fmt.Fprintf(_os.Stderr, "Watcher error: %v\r\n", err)
-					This.HandleEvent(E_Action_Reload, "", "")
+					This.HandleEvent(E_Method_Reload, "", "")
 
 				case <-This.close:
 					return

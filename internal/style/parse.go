@@ -55,10 +55,10 @@ type R_Parse_Filter struct {
 	Variables  *O.T[string, string]
 }
 
-var assign_directive = _config.Root.CustomAtrules["assign"]
-var attach_directive = _config.Root.CustomAtrules["attach"]
-var assign_operator = string(_config.Root.CustomOps["assign"])
-var attach_operator = string(_config.Root.CustomOps["attach"])
+var assign_directive = _config.Root.CustomDirective["assign"]
+var attach_directive = _config.Root.CustomDirective["attach"]
+var assign_operator = string(_config.Root.CustomOp["assign"])
+var attach_operator = string(_config.Root.CustomOp["attach"])
 
 func Parse_Filter(content string) R_Parse_Filter {
 	ref := _css.ParsePartial(content, 8)

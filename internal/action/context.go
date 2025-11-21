@@ -18,8 +18,6 @@ const (
 	Store_FileGroup_Target
 )
 
-var lodash_rune = string(_config.Root.CustomOps["lodash"])
-
 func Store(
 	fileGroup store_FileGroup_param,
 	filePath string,
@@ -111,7 +109,7 @@ func Store(
 
 	context := &_model.File_Stash{
 		LibLevel:   idn,
-		Label:      lodash_rune + label + lodash_rune,
+		Label:      "_" + label + "_",
 		Artifact:   norm_artifact,
 		FilePath:   filePath,
 		Extension:  extension,
@@ -130,7 +128,8 @@ func Store(
 		},
 		Style: _model.File_StyleData{
 			UsedIn:          []int{},
-			RapidStyles:     map[string]bool{},
+			SwiftStyles:     map[string]bool{},
+			ForceStyles:     map[string]bool{},
 			RigidTracks:     [][]string{},
 			LocalMap:        make(_model.Style_ClassIndexMap, AZ),
 			GlobalMap:       make(_model.Style_ClassIndexMap, AZ),

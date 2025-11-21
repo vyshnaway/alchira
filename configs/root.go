@@ -14,8 +14,6 @@ const (
 	domain = "xcss.io"
 )
 
-var Lodash_rune rune = '_'
-
 var Root = models.Cache_Root{
 	Name:            id,
 	Version:         "0.0.0",
@@ -50,24 +48,23 @@ var Root = models.Cache_Root{
 		// prefix for styles replacement tags
 		"styles-suffix": "",
 		// suffix for styles replacement tags
-		
+
 		// EXPERIMENTAL
 		"reload-period": 0,
 		// rebuild interval in seconds (min 10)
 	},
 	CustomTags: map[string]int{
-		"style":             1,
-		"staple":            2,
-		"summon":            3,
-		string(Lodash_rune): 4,
+		"style":  1,
+		"staple": 2,
+		"summon": 3,
 	},
-	CustomOps: map[string]rune{
-		"attach": '~',
-		"assign": '=',
-		"hyphen": '-',
-		"lodash": Lodash_rune,
+	CustomOp: map[string]rune{
+		"attach": '~', // Swift assign
+		"assign": '=', // Rigid assign
+		"import": '!', // Force assign
+		"lodash": '_', // Load file-hash
 	},
-	CustomAtrules: map[string]string{
+	CustomDirective: map[string]string{
 		"attach": "@--attach",
 		"assign": "@--assign",
 	},

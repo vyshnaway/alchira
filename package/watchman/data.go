@@ -50,11 +50,11 @@ func (This *T_Watcher) Add_IgnoredFolder(folders []string) {
 }
 
 // If content == "", file content is refetched from path as fallback
-func (This *T_Watcher) HandleEvent(action E_Action, filePath string, content string) {
+func (This *T_Watcher) HandleEvent(action E_Method, filePath string, content string) {
 
 	event := Event{}
 	event.Action = action
-	if action != E_Action_Reload {
+	if action != E_Method_Reload {
 		for resFolder := range This.ignoredFolders {
 			if _fileman.Path_HasChildPath(resFolder, filePath) {
 				return

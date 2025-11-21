@@ -40,7 +40,7 @@ func artifact_CacheFiles() artifact_StackFiles_return {
 		artifact_SaveFile(
 			filepath,
 			content,
-			string(_config.Lodash_rune)+utils.String_EnCounter(i),
+			"_"+utils.String_EnCounter(i),
 		)
 		i++
 	}
@@ -104,7 +104,7 @@ func Artifact_Update() {
 
 		symclasses := []string{}
 		metadatas := _model.Style_ClassIndexMap{}
-		for _, tagstyle := range _script.Rider(file, _script.E_Action_Read).StylesList {
+		for _, tagstyle := range _script.Rider(file, _script.E_Method_Read).StylesList {
 
 			if len(tagstyle.SymClasses) == 0 {
 				E := X.Error_Standard(

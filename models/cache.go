@@ -24,9 +24,9 @@ type Cache_Root struct {
 	PollingInterval int
 	WaitingInterval int
 	Commands        map[string]string
-	CustomAtrules   map[string]string
+	CustomDirective map[string]string
 	CustomTags      map[string]int
-	CustomOps       map[string]rune
+	CustomOp        map[string]rune
 	Url             Cache_Url
 	Tweaks          Config_Tweaks
 }

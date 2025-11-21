@@ -34,16 +34,18 @@ func (This *Class) Accumulator() Accumulator_return {
 type GetTracks_return struct {
 	ClassTracks [][]int
 	Attachments map[int]bool
-	ScatterMap  map[int]bool
+	SwiftMap    map[int]bool
+	ForceMap    map[int]bool
 }
 
 func (This *Class) GetTracks() GetTracks_return {
 	classtracks := make([][]int, 24*len(This.FileCache))
 	attachments := make(map[int]bool, 8)
-	scatterIntMap := make(map[int]bool, 8)
+	swiftIntMap := make(map[int]bool, 8)
+	forceIntMap := make(map[int]bool, 8)
 
 	sc := This.StylesheetContext.Style
-	for i := range sc.RapidStyles {
+	for i := range sc.SwiftStyles {
 		if found := _action.Index_Finder(i, sc.LocalMap); found.Index > 0 {
 			attachments[found.Index] = true
 		}
@@ -51,9 +53,19 @@ func (This *Class) GetTracks() GetTracks_return {
 
 	for _, file := range This.FileCache {
 		attachstrings := make(map[string]bool, 24)
-		for s := range file.Style.RapidStyles {
+		for s := range file.Style.SwiftStyles {
 			if found := _action.Index_Finder(s, file.Style.LocalMap); found.Index > 0 {
-				scatterIntMap[found.Index] = true
+				swiftIntMap[found.Index] = true
+				_map.Copy(attachstrings, found.Data.SrcData.Attachments)
+				if found.Group != _model.Style_Type_Library {
+					attachments[found.Index] = true
+				}
+			}
+		}
+
+		for s := range file.Style.ForceStyles {
+			if found := _action.Index_Finder(s, file.Style.LocalMap); found.Index > 0 {
+				forceIntMap[found.Index] = true
 				_map.Copy(attachstrings, found.Data.SrcData.Attachments)
 				if found.Group != _model.Style_Type_Library {
 					attachments[found.Index] = true
@@ -88,11 +100,12 @@ func (This *Class) GetTracks() GetTracks_return {
 	return GetTracks_return{
 		ClassTracks: classtracks,
 		Attachments: attachments,
-		ScatterMap:  scatterIntMap,
+		SwiftMap:    swiftIntMap,
+		ForceMap:    forceIntMap,
 	}
 }
 
-func (This *Class) SyncClassnames(action _script.E_Action) {
+func (This *Class) SyncClassnames(action _script.E_Method) {
 	for _, file := range This.FileCache {
 		res := _script.Rider(file, action)
 
@@ -122,8 +135,6 @@ func (This *Class) SummonFiles(
 					out.WriteString(file.Scratch[fromPos:m.Loc] + summonBlock)
 				case _config.Root.CustomTags["style"]:
 					out.WriteString(file.Scratch[fromPos:m.Loc] + styleBlock)
-				case _config.Root.CustomTags[string(_config.Lodash_rune)]:
-					out.WriteString(file.Scratch[fromPos:m.Loc] + file.Label)
 				default:
 					out.WriteString(file.Scratch[fromPos:])
 				}

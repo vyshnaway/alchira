@@ -26,7 +26,7 @@ func Manifest_Locals(filemap []T_Manifest_Locals, symclass string) map[string]*R
 	result := make(map[string]*R_ManifestLocal, len(filemap))
 	for _, file := range filemap {
 		if file.Content != "" {
-			configs.Static.Watchman.HandleEvent(watchman.E_Action_Update, file.AbsPath, file.Content)
+			configs.Static.Watchman.HandleEvent(watchman.E_Method_Update, file.AbsPath, file.Content)
 		}
 	}
 	for _, file := range filemap {

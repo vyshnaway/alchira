@@ -30,15 +30,16 @@ func (This *Class) Savefile(filepath string, content string, hashindex int) {
 		content,
 		This.Target,
 		This.Source,
-		_fmt.Sprint(This.Label, string(_config.Lodash_rune), _util.String_EnCounter(hashindex)),
+		_fmt.Sprint(This.Label, "_", _util.String_EnCounter(hashindex)),
 	)
 
 	if watchAttrs, ok := This.ExtnsProps[file.Extension]; ok && file.Extension != _config.Root.Extension {
 		file.WatchAttrs = watchAttrs
 	}
-	parse_response := _script.Rider(file, _script.E_Action_Read)
-	file.Style.RigidTracks = parse_response.ClassesList
-	file.Style.RapidStyles = parse_response.Attachments
+	parse_response := _script.Rider(file, _script.E_Method_Read)
+	file.Style.RigidTracks = parse_response.RigidTracks
+	file.Style.SwiftStyles = parse_response.SwiftAssign
+	file.Style.ForceStyles = parse_response.ForceAssign
 	file.Midway = parse_response.Scribed
 
 	file.Lookup = _model.File_Lookup{

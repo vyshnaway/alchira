@@ -36,21 +36,21 @@ const (
 )
 
 func ResetRebuildTicker() {
-    intervalVal, _ := _config.Saved.Tweaks["reload-period"].(int)
+	intervalVal, _ := _config.Saved.Tweaks["reload-period"].(int)
 	if intervalVal < 0 {
 		intervalVal = -intervalVal
 	}
-    tickerDuration := _time.Duration(intervalVal + 1) * _time.Second
+	tickerDuration := _time.Duration(intervalVal+1) * _time.Second
 
 	if _config.Static.RebuildTicker == nil {
-        _config.Static.RebuildTicker = _time.NewTicker(tickerDuration)
-        go func(ticker *_time.Ticker) {
-            defer ticker.Stop()
-            for range ticker.C {
-                _config.Static.RebuildFlag.Store(true)
-            }
-        }(_config.Static.RebuildTicker)
-	}  
+		_config.Static.RebuildTicker = _time.NewTicker(tickerDuration)
+		go func(ticker *_time.Ticker) {
+			defer ticker.Stop()
+			for range ticker.C {
+				_config.Static.RebuildFlag.Store(true)
+			}
+		}(_config.Static.RebuildTicker)
+	}
 
 	if intervalVal < 10 {
 		_config.Static.RebuildTicker.Stop()
@@ -82,7 +82,7 @@ func Execute(heading string, concurrent bool) (Exitcode int) {
 			go func() {
 				<-sigs
 				watchman.Close()
-				S.Render.Write("\n"+ S.Format(S.Divider(S.Canvas.DivRune.Top), S.Preset.Failed, S.Style.AS_Bold), 2)
+				S.Render.Write("\n"+S.Format(S.Divider(S.Canvas.DivRune.Top), S.Preset.Failed, S.Style.AS_Bold), 2)
 				save_action.Wait()
 				_os.Exit(1)
 			}()
@@ -137,7 +137,7 @@ func Execute(heading string, concurrent bool) (Exitcode int) {
 			fallthrough
 
 		case Execute_Step_VerifyConfigs:
-			res_report, res_status := _action.Verify_Configs(false, concurrent); 
+			res_report, res_status := _action.Verify_Configs(false, concurrent)
 			ResetRebuildTicker()
 			if !res_status {
 				report = res_report
@@ -222,7 +222,7 @@ func Execute(heading string, concurrent bool) (Exitcode int) {
 							breaknow := false
 
 							if event.Folder == _config.Path_Folder["blueprint"].Path {
-								if event.Action == _watcher.E_Action_Update {
+								if event.Action == _watcher.E_Method_Update {
 
 									switch filepath {
 									case _config.Path_Json["configure"].Path:
@@ -258,7 +258,7 @@ func Execute(heading string, concurrent bool) (Exitcode int) {
 									steppings = append(steppings, Execute_Step_VerifySetupStruct)
 									breaknow = true
 								}
-							} else if event.Action == _watcher.E_Action_Update {
+							} else if event.Action == _watcher.E_Method_Update {
 								if target, ok := _config.Saved.TargetDir_Saved[event.Folder]; ok && target.Stylesheet == event.FilePath {
 									target.StylesheetContent = event.FileContent
 									_config.Saved.TargetDir_Saved[event.Folder] = target
