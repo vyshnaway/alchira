@@ -121,8 +121,8 @@ var Root_Scaffold = map[string]models.File_Source{
 		Content:   "",
 		Essential: true,
 	},
-	"webview": {
-		Frags:     []string{"webview"},
+	"sandbox": {
+		Frags:     []string{"sandbox"},
 		Path:      "",
 		Content:   "",
 		Essential: true,
