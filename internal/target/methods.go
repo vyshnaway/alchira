@@ -63,16 +63,6 @@ func (This *Class) GetTracks() GetTracks_return {
 			}
 		}
 
-		for s := range file.Style.FinalStyles {
-			if found := _action.Index_Finder(s, file.Style.LocalMap); found.Index > 0 {
-				finalIntMap[found.Index] = true
-				_map.Copy(attachstrings, found.Data.SrcData.Attachments)
-				if found.Group != _model.Style_Type_Library {
-					attachments[found.Index] = true
-				}
-			}
-		}
-
 		for _, track := range file.Style.RigidTracks {
 			retraces := []int{}
 			for _, i := range track {
@@ -87,6 +77,16 @@ func (This *Class) GetTracks() GetTracks_return {
 
 			if len(retraces) > 0 {
 				classtracks = append(classtracks, retraces)
+			}
+		}
+
+		for s := range file.Style.FinalStyles {
+			if found := _action.Index_Finder(s, file.Style.LocalMap); found.Index > 0 {
+				finalIntMap[found.Index] = true
+				_map.Copy(attachstrings, found.Data.SrcData.Attachments)
+				if found.Group != _model.Style_Type_Library {
+					attachments[found.Index] = true
+				}
 			}
 		}
 

@@ -155,15 +155,11 @@ func Rawtag_Upload(
 
 			_map.Copy(attachments, nativeAttachResult.Attachments)
 			variables.Copy(nativeAttachResult.Variables)
-			if i, val := nativeAttachResult.Result.GetBlock("[]"); i > -1 {
-				nativeAttachStyle = val
-			}
+			nativeAttachStyle = nativeAttachResult.Result
 
 			_map.Copy(attachments, exportAttachResult.Attachments)
 			variables.Copy(exportAttachResult.Variables)
-			if i, val := exportAttachResult.Result.GetBlock("[]"); i > -1 {
-				exportAttachStyle = val
-			}
+			exportAttachStyle = exportAttachResult.Result
 		}
 
 		exportStaple := ""
