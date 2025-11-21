@@ -79,7 +79,7 @@ func Rider(
 					if hasDeclared {
 						stylesList = append(stylesList, &result.StyleDeclarations)
 					}
-					if len(tagTrack) > 0 || result.StyleDeclarations.Elid > 0 {
+					if len(tagTrack) > 0 || (result.StyleDeclarations.Elid > 0 && hasDeclared) {
 						fragment = ""
 					}
 				} else if elid, status := replacementTags[fragment]; status {
