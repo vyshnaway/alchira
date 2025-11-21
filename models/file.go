@@ -37,9 +37,9 @@ type File_TagReplacement struct {
 
 type File_StyleData struct {
 	UsedIn          []int
-	SwiftStyles     map[string]bool
+	RapidStyles     map[string]bool
 	RigidTracks     [][]string
-	ForceStyles     map[string]bool
+	FinalStyles     map[string]bool
 	MixedMap        Style_ClassIndexMap
 	LocalMap        Style_ClassIndexMap
 	GlobalMap       Style_ClassIndexMap

@@ -34,18 +34,18 @@ func (This *Class) Accumulator() Accumulator_return {
 type GetTracks_return struct {
 	ClassTracks [][]int
 	Attachments map[int]bool
-	SwiftMap    map[int]bool
-	ForceMap    map[int]bool
+	RapidMap    map[int]bool
+	FinalMap    map[int]bool
 }
 
 func (This *Class) GetTracks() GetTracks_return {
 	classtracks := make([][]int, 24*len(This.FileCache))
 	attachments := make(map[int]bool, 8)
-	swiftIntMap := make(map[int]bool, 8)
-	forceIntMap := make(map[int]bool, 8)
+	rapidIntMap := make(map[int]bool, 8)
+	finalIntMap := make(map[int]bool, 8)
 
 	sc := This.StylesheetContext.Style
-	for i := range sc.SwiftStyles {
+	for i := range sc.RapidStyles {
 		if found := _action.Index_Finder(i, sc.LocalMap); found.Index > 0 {
 			attachments[found.Index] = true
 		}
@@ -53,9 +53,9 @@ func (This *Class) GetTracks() GetTracks_return {
 
 	for _, file := range This.FileCache {
 		attachstrings := make(map[string]bool, 24)
-		for s := range file.Style.SwiftStyles {
+		for s := range file.Style.RapidStyles {
 			if found := _action.Index_Finder(s, file.Style.LocalMap); found.Index > 0 {
-				swiftIntMap[found.Index] = true
+				rapidIntMap[found.Index] = true
 				_map.Copy(attachstrings, found.Data.SrcData.Attachments)
 				if found.Group != _model.Style_Type_Library {
 					attachments[found.Index] = true
@@ -63,9 +63,9 @@ func (This *Class) GetTracks() GetTracks_return {
 			}
 		}
 
-		for s := range file.Style.ForceStyles {
+		for s := range file.Style.FinalStyles {
 			if found := _action.Index_Finder(s, file.Style.LocalMap); found.Index > 0 {
-				forceIntMap[found.Index] = true
+				finalIntMap[found.Index] = true
 				_map.Copy(attachstrings, found.Data.SrcData.Attachments)
 				if found.Group != _model.Style_Type_Library {
 					attachments[found.Index] = true
@@ -100,8 +100,8 @@ func (This *Class) GetTracks() GetTracks_return {
 	return GetTracks_return{
 		ClassTracks: classtracks,
 		Attachments: attachments,
-		SwiftMap:    swiftIntMap,
-		ForceMap:    forceIntMap,
+		RapidMap:    rapidIntMap,
+		FinalMap:    finalIntMap,
 	}
 }
 

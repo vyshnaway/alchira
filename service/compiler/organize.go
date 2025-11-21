@@ -113,7 +113,7 @@ var initial = 100
 var css_class_prefix = ".__"
 var tag_class_prefix = "__"
 
-func Organize() (AritfactFiles map[string]string, Attachments map[int]bool, SwiftMap map[int]bool, ForceMap map[int]bool) {
+func Organize() (AritfactFiles map[string]string, Attachments map[int]bool, RapidMap map[int]bool, FinalMap map[int]bool) {
 
 	_config.Style.ClassDictionary = _model.Style_Dictionary{}
 	_config.Style.Publish_RigidTracks = [][]_model.Style_ClassIndexTrace{}
@@ -189,5 +189,5 @@ func Organize() (AritfactFiles map[string]string, Attachments map[int]bool, Swif
 	}
 
 	_map.Copy(tracks_.Attachments, _config.Delta.IndexAttach)
-	return artifact_files, tracks_.Attachments, tracks_.SwiftMap, tracks_.ForceMap
+	return artifact_files, tracks_.Attachments, tracks_.RapidMap, tracks_.FinalMap
 }

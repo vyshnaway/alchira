@@ -59,9 +59,9 @@ var Root = models.Cache_Root{
 		"summon": 3,
 	},
 	CustomOp: map[string]rune{
-		"attach": '~', // Swift assign
+		"attach": '~', // Rapid assign
 		"assign": '=', // Rigid assign
-		"import": '!', // Force assign
+		"import": '!', // Final assign
 		"lodash": '#', // Load file-hash
 	},
 	CustomDirective: map[string]string{

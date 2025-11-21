@@ -128,8 +128,8 @@ func Store(
 		},
 		Style: _model.File_StyleData{
 			UsedIn:          []int{},
-			SwiftStyles:     map[string]bool{},
-			ForceStyles:     map[string]bool{},
+			RapidStyles:     map[string]bool{},
+			FinalStyles:     map[string]bool{},
 			RigidTracks:     [][]string{},
 			LocalMap:        make(_model.Style_ClassIndexMap, AZ),
 			GlobalMap:       make(_model.Style_ClassIndexMap, AZ),

@@ -107,7 +107,7 @@ func Cssfile_Collection(files []*_model.File_Stash) cssfile_Collection_return {
 					SummonSnippet: "",
 				}
 
-				debugSwiftClass := file.DebugFront + "_" + _util.String_Filter(classname, []rune{}, []rune{}, []rune{'$', '/'})
+				debugRapidClass := file.DebugFront + "_" + _util.String_Filter(classname, []rune{}, []rune{}, []rune{'$', '/'})
 				classdata := &_model.Style_ClassData{
 					Attributes:        map[string]string{},
 					Index:             0,
@@ -118,8 +118,8 @@ func Cssfile_Collection(files []*_model.File_Stash) cssfile_Collection_return {
 					NativeRawStyle:    object,
 					ExportRawStyle:    object,
 					Attachments:       attachments,
-					DebugSwiftClass:   debugSwiftClass,
-					DebugForceClass:   debugSwiftClass + "_Important",
+					DebugRapidClass:   debugRapidClass,
+					DebugFinalClass:   debugRapidClass + "_Important",
 					NativeStaple:      "",
 					NativeAttachStyle: attach_style,
 					ExportAttachStyle: attach_style,
@@ -129,8 +129,8 @@ func Cssfile_Collection(files []*_model.File_Stash) cssfile_Collection_return {
 					SrcData: classdata,
 				})
 				classhash := _util.String_EnCounter(index)
-				classdata.SwiftClass = SwiftClassPrefix + classhash
-				classdata.ForceClass = ForceClassPrefix + classhash
+				classdata.RapidClass = RapidClassPrefix + classhash
+				classdata.FinalClass = FinalClassPrefix + classhash
 
 				file.Style.UsedIn = append(file.Style.UsedIn, index)
 				selectorMap[classname] = index

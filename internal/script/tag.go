@@ -18,8 +18,8 @@ type tag_Parse_retype struct {
 	ClassSynced       bool
 	Fragment          string
 	ClassesList       [][]string
-	SwiftList         map[string]bool
-	ForceList         map[string]bool
+	RapidList         map[string]bool
+	FinalList         map[string]bool
 	NativeAttributes  map[string]string
 	StyleDeclarations _model.T_RawStyle
 }
@@ -32,8 +32,8 @@ func Tag_Scanner(
 	cursor *_reader.T_Reader,
 ) tag_Parse_retype {
 	classesList := make([][]string, 0, 1)
-	swiftList := make(map[string]bool, 4)
-	forceList := make(map[string]bool, 4)
+	rapidList := make(map[string]bool, 4)
+	finalList := make(map[string]bool, 4)
 	braceTrack := make([]rune, 0, 8)
 	nativeAttributes := make(map[string]string, 8)
 
@@ -120,7 +120,7 @@ func Tag_Scanner(
 						whitespace.Reset()
 					} else {
 						fragment.WriteString(" ")
-          }
+					}
 
 					if tr_Attr == "&" {
 						if len(tr_Value) > 3 {
@@ -164,8 +164,8 @@ func Tag_Scanner(
 						if len(value_Parse_return.OrderedClasses) > 0 {
 							classesList = append(classesList, value_Parse_return.OrderedClasses)
 						}
-						_map.Copy(swiftList, value_Parse_return.SwiftClasses)
-						_map.Copy(forceList, value_Parse_return.ForceClasses)
+						_map.Copy(rapidList, value_Parse_return.RapidClasses)
+						_map.Copy(finalList, value_Parse_return.FinalClasses)
 						nativeAttributes[tr_Attr] = value_Parse_return.Scribed
 						SaveToFrag(tr_Attr, value_Parse_return.Scribed)
 					}
@@ -218,23 +218,23 @@ func Tag_Scanner(
 
 			case op_attach:
 				if method == E_Method_Read {
-					swiftList[subfrag] = true
+					rapidList[subfrag] = true
 				} else if i := _action.Index_Finder(subfrag, fileData.Style.LocalMap); i.Index > 0 {
 					if method == E_Method_DebugHash {
-						fragString = i.Data.SrcData.DebugSwiftClass
+						fragString = i.Data.SrcData.DebugRapidClass
 					} else {
-						fragString = i.Data.SrcData.SwiftClass
+						fragString = i.Data.SrcData.RapidClass
 					}
 				}
 
 			case op_assign:
 				if method == E_Method_Read {
-					forceList[subfrag] = true
+					finalList[subfrag] = true
 				} else if i := _action.Index_Finder(subfrag, fileData.Style.LocalMap); i.Index > 0 {
 					if method == E_Method_DebugHash {
-						fragString = i.Data.SrcData.DebugForceClass
+						fragString = i.Data.SrcData.DebugFinalClass
 					} else {
-						fragString = i.Data.SrcData.ForceClass
+						fragString = i.Data.SrcData.FinalClass
 					}
 				}
 			}
@@ -254,8 +254,8 @@ func Tag_Scanner(
 
 	return tag_Parse_retype{
 		Ok:                ok,
-		ForceList:         forceList,
-		SwiftList:         swiftList,
+		FinalList:         finalList,
+		RapidList:         rapidList,
 		Fragment:          fragString,
 		SelfClosed:        selfClosed,
 		ClassSynced:       classSynced,

@@ -86,7 +86,7 @@ func ClearUnwantedCache() (
 
 func Generate_Files() (Files map[string]string, Report string) {
 
-	files, attachments, swiftMap, forceMap := Organize()
+	files, attachments, rapidMap, finalMap := Organize()
 	_stash.Target_SyncClassNames()
 
 	appendix_frag := _css.Render_Sequence(func() *_css.T_BlockSeq {
@@ -111,27 +111,27 @@ func Generate_Files() (Files map[string]string, Report string) {
 		return attach_frag, staple_sheet
 	}()
 
-	swift_block := _css.NewBlock(0, len(swiftMap))
-	for i := range swiftMap {
+	rapid_block := _css.NewBlock(0, len(rapidMap))
+	for i := range rapidMap {
 		d := _action.Index_Fetch(i)
 		if _config.Static.DEBUG {
-			swift_block.SetBlock("."+d.SrcData.DebugSwiftClass, d.SrcData.NativeRawStyle)
+			rapid_block.SetBlock("."+d.SrcData.DebugRapidClass, d.SrcData.NativeRawStyle)
 		} else {
-			swift_block.SetBlock("."+d.SrcData.SwiftClass, d.SrcData.NativeRawStyle)
+			rapid_block.SetBlock("."+d.SrcData.RapidClass, d.SrcData.NativeRawStyle)
 		}
 	}
-	swift_frag := _css.Render_Switched(swift_block, _config.Static.MINIFY)
+	rapid_frag := _css.Render_Switched(rapid_block, _config.Static.MINIFY)
 
-	force_block := _css.NewBlock(0, len(forceMap))
-	for i := range forceMap {
+	final_block := _css.NewBlock(0, len(finalMap))
+	for i := range finalMap {
 		d := _action.Index_Fetch(i)
 		if _config.Static.DEBUG {
-			force_block.SetBlock("."+d.SrcData.DebugForceClass, d.SrcData.NativeRawStyle)
+			final_block.SetBlock("."+d.SrcData.DebugFinalClass, d.SrcData.NativeRawStyle)
 		} else {
-			force_block.SetBlock("."+d.SrcData.ForceClass, d.SrcData.NativeRawStyle)
+			final_block.SetBlock("."+d.SrcData.FinalClass, d.SrcData.NativeRawStyle)
 		}
 	}
-	force_frag := _css.Render_Switched(force_block, _config.Static.MINIFY)
+	final_frag := _css.Render_Switched(final_block, _config.Static.MINIFY)
 
 	report, errLen, finalMessage, index_frag := ClearUnwantedCache()
 	var class_builder _string.Builder
@@ -151,9 +151,9 @@ func Generate_Files() (Files map[string]string, Report string) {
 		val string
 	}{
 		{key: "Root", val: index_frag},
-		{key: "Swift", val: swift_frag},
+		{key: "Rapid", val: rapid_frag},
 		{key: "Rigid", val: rigid_frag},
-		{key: "Force", val: force_frag},
+		{key: "Final", val: final_frag},
 		{key: "Attach", val: attach_frag},
 		{key: "Appendix", val: appendix_frag},
 	}

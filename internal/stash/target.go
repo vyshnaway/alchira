@@ -77,22 +77,22 @@ func Target_Accumulate() (
 func Target_GetTracks() _target.GetTracks_return {
 	classtracks := [][]int{}
 	attachments := map[int]bool{}
-	swiftmap := map[int]bool{}
-	forcemap := map[int]bool{}
+	rapidmap := map[int]bool{}
+	finalmap := map[int]bool{}
 
 	for _, target := range Cache.Targetdir {
 		r := target.GetTracks()
 		classtracks = append(classtracks, r.ClassTracks...)
 		_map.Copy(attachments, r.Attachments)
-		_map.Copy(swiftmap, r.SwiftMap)
-		_map.Copy(forcemap, r.ForceMap)
+		_map.Copy(rapidmap, r.RapidMap)
+		_map.Copy(finalmap, r.FinalMap)
 	}
 
 	return _target.GetTracks_return{
 		Attachments: attachments,
 		ClassTracks: classtracks,
-		SwiftMap:    swiftmap,
-		ForceMap:    forcemap,
+		RapidMap:    rapidmap,
+		FinalMap:    finalmap,
 	}
 }
 

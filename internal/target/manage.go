@@ -38,8 +38,8 @@ func (This *Class) Savefile(filepath string, content string, hashindex int) {
 	}
 	parse_response := _script.Rider(file, _script.E_Method_Read)
 	file.Style.RigidTracks = parse_response.RigidTracks
-	file.Style.SwiftStyles = parse_response.SwiftAssign
-	file.Style.ForceStyles = parse_response.ForceAssign
+	file.Style.RapidStyles = parse_response.RapidAssign
+	file.Style.FinalStyles = parse_response.FinalAssign
 	file.Midway = parse_response.Scribed
 
 	file.Lookup = _model.File_Lookup{

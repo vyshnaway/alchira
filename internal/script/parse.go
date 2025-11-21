@@ -22,8 +22,8 @@ type parse_return struct {
 	Scribed      string
 	RigidTracks  [][]string
 	StylesList   []*_model.T_RawStyle
-	SwiftAssign  map[string]bool
-	ForceAssign  map[string]bool
+	RapidAssign  map[string]bool
+	FinalAssign  map[string]bool
 	Replacements []_model.File_TagReplacement
 }
 
@@ -40,8 +40,8 @@ func Rider(
 	orderList := make([][]string, 0, 24)
 	tagTrack := make([]*_model.T_RawStyle, 0, 24)
 	stylesList := make([]*_model.T_RawStyle, 0, 24)
-	swiftList := make(map[string]bool, 24)
-	forceList := make(map[string]bool, 24)
+	rapidList := make(map[string]bool, 24)
+	finalList := make(map[string]bool, 24)
 
 	var content string
 	var stream _string.Builder
@@ -64,8 +64,8 @@ func Rider(
 			hasDeclared := (len(result.StyleDeclarations.Styles) > 0 || len(result.StyleDeclarations.SymClasses) > 0)
 
 			if result.Ok {
-				_map.Copy(swiftList, result.SwiftList)
-				_map.Copy(forceList, result.ForceList)
+				_map.Copy(rapidList, result.RapidList)
+				_map.Copy(finalList, result.FinalList)
 				orderList = append(orderList, result.ClassesList...)
 				for k, v := range result.StyleDeclarations.Styles {
 					if len(v) > 2 {
@@ -85,7 +85,7 @@ func Rider(
 				} else if elid, status := replacementTags[fragment]; status {
 					replacements = append(replacements, _model.File_TagReplacement{Loc: stream.Len(), Elid: elid})
 					fragment = ""
-				} 
+				}
 
 				cursor.Increment()
 			}
@@ -130,7 +130,7 @@ func Rider(
 		Scribed:      stream.String(),
 		RigidTracks:  orderList,
 		StylesList:   stylesList,
-		SwiftAssign:  swiftList,
-		ForceAssign:  forceList,
+		RapidAssign:  rapidList,
+		FinalAssign:  finalList,
 	}
 }

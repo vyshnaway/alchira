@@ -91,7 +91,7 @@ func Rawtag_Upload(
 		} else {
 			scope = raw.Scope
 		}
-		debugSwiftClass := _fmt.Sprint(scope, file.DebugFront, "\\:", raw.Range.Start.Row, "\\:", raw.Range.Start.Col, "_", normalized_symclass)
+		debugRapidClass := _fmt.Sprint(scope, file.DebugFront, "\\:", raw.Range.Start.Row, "\\:", raw.Range.Start.Col, "_", normalized_symclass)
 
 		native_scanned, export_scanned := lodashstyle_process(raw.Styles[""], file, false,
 			_fmt.Sprint(raw.Scope, " : ", declaration, " | "), raw.SymClasses[0],
@@ -204,8 +204,8 @@ func Rawtag_Upload(
 			Definent:          raw.SymClasses[0],
 			SymClass:          symclass,
 			Metadata:          metadata,
-			DebugSwiftClass:   debugSwiftClass,
-			DebugForceClass:   debugSwiftClass + "_Important",
+			DebugRapidClass:   debugRapidClass,
+			DebugFinalClass:   debugRapidClass + "_Important",
 			Attachments:       attachments,
 			ExportStaple:      exportStaple,
 			NativeStaple:      nativeStaple,
@@ -220,8 +220,8 @@ func Rawtag_Upload(
 			SrcData: classdata,
 		})
 		classhash := _util.String_EnCounter(index)
-		classdata.SwiftClass = SwiftClassPrefix + classhash
-		classdata.ForceClass = ForceClassPrefix + classhash
+		classdata.RapidClass = RapidClassPrefix + classhash
+		classdata.FinalClass = FinalClassPrefix + classhash
 
 		file.Style.UsedIn = append(file.Style.UsedIn, index)
 	}
@@ -243,5 +243,5 @@ type R_Rawtag_Upload struct {
 	Errors      []string
 }
 
-var SwiftClassPrefix = "_"
-var ForceClassPrefix = "___"
+var RapidClassPrefix = "_"
+var FinalClassPrefix = "___"
