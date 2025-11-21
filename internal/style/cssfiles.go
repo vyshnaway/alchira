@@ -6,7 +6,7 @@ import (
 	_css "main/package/css"
 	O "main/package/object"
 	_map "maps"
-	"strconv"
+	_strconv "strconv"
 
 	_model "main/models"
 	_util "main/package/utils"
@@ -61,8 +61,8 @@ func Cssfile_Collection(files []*_model.File_Stash) cssfile_Collection_return {
 			value := raw.Data[1]
 
 			classname := file.ClassFront + _util.String_Filter(selector, []rune{}, []rune{'\\', '.'}, []rune{})
-			declaration := file.SourcePath + ":" + strconv.Itoa(raw.Start.Row) + ":" + strconv.Itoa(raw.Start.Col) +
-				"::" + strconv.Itoa(raw.End.Row) + ":" + strconv.Itoa(raw.End.Col)
+			declaration := file.SourcePath + ":" + _strconv.Itoa(raw.Start.Row) + ":" + _strconv.Itoa(raw.Start.Col) +
+				"::" + _strconv.Itoa(raw.End.Row) + ":" + _strconv.Itoa(raw.End.Col)
 
 			index := 0
 			if v, ok := _config.Style.Library__Index[classname]; ok {
@@ -129,8 +129,8 @@ func Cssfile_Collection(files []*_model.File_Stash) cssfile_Collection_return {
 					SrcData: classdata,
 				})
 				classhash := _util.String_EnCounter(index)
-				classdata.SwiftClass = "__" + classhash
-				classdata.ForceClass = "___" + classhash
+				classdata.SwiftClass = SwiftClassPrefix + classhash
+				classdata.ForceClass = ForceClassPrefix + classhash
 
 				file.Style.UsedIn = append(file.Style.UsedIn, index)
 				selectorMap[classname] = index

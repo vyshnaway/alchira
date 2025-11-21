@@ -220,8 +220,8 @@ func Rawtag_Upload(
 			SrcData: classdata,
 		})
 		classhash := _util.String_EnCounter(index)
-		classdata.SwiftClass = "__" + classhash
-		classdata.ForceClass = "___" + classhash
+		classdata.SwiftClass = SwiftClassPrefix + classhash
+		classdata.ForceClass = ForceClassPrefix + classhash
 
 		file.Style.UsedIn = append(file.Style.UsedIn, index)
 	}
@@ -242,3 +242,6 @@ type R_Rawtag_Upload struct {
 	Diagnostics []*_model.File_Diagnostic
 	Errors      []string
 }
+
+var SwiftClassPrefix = "_"
+var ForceClassPrefix = "___"
