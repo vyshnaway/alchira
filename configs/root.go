@@ -62,7 +62,7 @@ var Root = models.Cache_Root{
 		"attach": '~', // Swift assign
 		"assign": '=', // Rigid assign
 		"import": '!', // Force assign
-		"lodash": '_', // Load file-hash
+		"lodash": '#', // Load file-hash
 	},
 	CustomDirective: map[string]string{
 		"attach": "@--attach",
