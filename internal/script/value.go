@@ -6,10 +6,8 @@ import (
 	_config "main/configs"
 	_action "main/internal/action"
 	_model "main/models"
-	"main/package/console"
 	_reader "main/package/reader"
 	_util "main/package/utils"
-	_slice "slices"
 	_string "strings"
 )
 
@@ -91,27 +89,23 @@ func value_Parse(
 	FileCursor *_reader.T_Reader,
 	needsEscape bool,
 ) value_Parse_retype {
-	checkEscape := func(char rune) bool {
+	checkEscape := func(char byte) bool {
 		if needsEscape {
 			return char == '\\'
 		}
 		return char != '\\'
 	}
 
-	activeQuote := ' '
-	scribed := value
-	inQuote := false
-	valuelen := len(value)
-	quotes := []rune{'\'', '`', '"'}
-
 	loadashes := make(map[string]bool, 12)
 	rapidClasses := make(map[string]bool, 12)
 	finalClasses := make(map[string]bool, 12)
 	orderedlist := make([]string, 0, 12)
 	var entry _string.Builder
-	awaitop := false
-	var waitop byte = 0
 
+	awaitop := false
+	streamed := value
+	valuelen := len(value)
+	var waitop byte = 0
 	var lastCh byte = 0
 	for marker := range valuelen {
 		ch := value[marker]
@@ -119,24 +113,25 @@ func value_Parse(
 			if ok := symclass_chars.Match([]byte{ch}); ok {
 				entry.WriteByte(ch)
 			} else {
-				fragString := entry.String()
+				entryString := entry.String()
 
 				switch waitop {
 				case op_order:
-					orderedlist = append(orderedlist, fragString)
+					orderedlist = append(orderedlist, entryString)
 				case op_scatter:
-					rapidClasses[fragString] = true
+					rapidClasses[entryString] = true
 				case op_finalize:
-					finalClasses[fragString] = true
+					finalClasses[entryString] = true
 				case op_lodash:
-					loadashes[fragString] = true
+					loadashes[entryString] = true
 				}
 
 				awaitop = false
 				waitop = 0
 				entry.Reset()
 			}
-		} else if checkEscape(rune(lastCh)) && (ch == op_scatter || ch == op_finalize || ch == op_lodash || (!needsEscape && op_order == ch)) {
+		} else if checkEscape(lastCh) && ((!needsEscape && op_order == ch) ||
+			ch == op_scatter || ch == op_finalize || ch == op_lodash) {
 			awaitop = true
 			waitop = ch
 		}
@@ -144,113 +139,96 @@ func value_Parse(
 	}
 
 	if action != E_Method_Read {
-		var scriber _string.Builder
-
+		var stream _string.Builder
 		entry.Reset()
-		activeQuote = ' '
-		inQuote = false
-
+		waitop = 0
+		lastCh = 0
+		awaitop = false
 		metafront := ""
+
 		if action == E_Method_DebugHash {
 			metafront = _fmt.Sprintf(
-				"TAG%s\\:%d\\:%d__",
-				fileData.DebugFront,
-				FileCursor.Active.Row,
-				FileCursor.Active.Col,
+				"TAG%s\\:%d\\:%d__", fileData.DebugFront,
+				FileCursor.Active.Row, FileCursor.Active.Col,
 			)
 		}
-
 		orderedMapping := value_EvaluateIndexTraces(action, metafront, orderedlist, fileData.Style.LocalMap)
 
-		var lastCh rune = 0
 		for marker := range valuelen {
-			ch := rune(value[marker])
+			ch := value[marker]
+			if awaitop {
+				if ok := symclass_chars.Match([]byte{ch}); ok {
+					entry.WriteByte(ch)
+				} else {
+					entrystring := entry.String()
 
-			if inQuote {
-				if lastCh != '\\' && (ch == ' ' || ch == activeQuote) {
-
-					if entry.Len() > 0 {
-						entrystring := entry.String()
-
-						switch entrystring[0] {
-
-						case op_lodash:
-							newentrystring := entrystring[1:]
-							if fileData.Style.Loadashes[newentrystring] {
-								console.Render.Raw(newentrystring)
-								scriber.WriteString(_fmt.Sprintf("%s%s", fileData.Label, newentrystring))
-							} else {
-								scriber.WriteString(entrystring)
+					switch waitop {
+					case op_lodash:
+						if fileData.Style.Loadashes[entrystring] {
+							stream.WriteString(_fmt.Sprintf("%s%s", fileData.Label, entrystring))
+							awaitop = false
+						}
+					case op_order:
+						if action != E_Method_OnlyHash {
+							if found_Entry, found_Status := orderedMapping[entrystring]; found_Status {
+								stream.WriteString(found_Entry)
+								awaitop = false
 							}
+						}
 
-						case op_order:
-							entrystring := entrystring[1:]
-							found_Entry, found_Status := orderedMapping[entrystring]
-							if found_Status {
-								scriber.WriteString(found_Entry)
-							} else {
-								scriber.WriteString(entrystring)
-							}
-
-						case op_scatter:
-							newentrystring := entrystring[1:]
-							if res := _action.Index_Finder(newentrystring, fileData.Style.LocalMap); res.Index > 0 {
+					case op_scatter:
+						if action != E_Method_OnlyHash {
+							if res := _action.Index_Finder(entrystring, fileData.Style.LocalMap); res.Index > 0 {
 								if action == E_Method_DebugHash {
-									scriber.WriteString(_util.String_Filter(
+									stream.WriteString(_util.String_Filter(
 										res.Data.SrcData.DebugRapidClass,
 										[]rune{'/', '.', ':', '|', '$'},
 										[]rune{'\\'},
 										[]rune{},
 									))
 								} else {
-									scriber.WriteString(res.Data.SrcData.RapidClass)
+									stream.WriteString(res.Data.SrcData.RapidClass)
 								}
-							} else {
-								scriber.WriteString(newentrystring)
+								awaitop = false
 							}
-
-						case op_finalize:
-							newentrystring := entrystring[1:]
-							if res := _action.Index_Finder(newentrystring, fileData.Style.LocalMap); res.Index > 0 {
+						}
+					case op_finalize:
+						if action != E_Method_OnlyHash {
+							if res := _action.Index_Finder(entrystring, fileData.Style.LocalMap); res.Index > 0 {
 								if action == E_Method_DebugHash {
-									scriber.WriteString(_util.String_Filter(
+									stream.WriteString(_util.String_Filter(
 										res.Data.SrcData.DebugFinalClass,
 										[]rune{'/', '.', ':', '|', '$'},
 										[]rune{'\\'},
 										[]rune{},
 									))
 								} else {
-									scriber.WriteString(res.Data.SrcData.FinalClass)
+									stream.WriteString(res.Data.SrcData.FinalClass)
 								}
-							} else {
-								scriber.WriteString(newentrystring)
+								awaitop = false
 							}
-
-						default:
-							scriber.WriteString(entrystring)
-
 						}
 					}
-					scriber.WriteRune(ch)
+
+					if awaitop {
+						stream.WriteByte(waitop)
+						stream.WriteString(entrystring)
+					}
+					stream.WriteByte(ch)
 					entry.Reset()
-				} else {
-					entry.WriteRune(ch)
+					waitop = 0
 				}
-				if ch == activeQuote {
-					inQuote = false
-					activeQuote = ' '
-				}
+			} else if checkEscape(lastCh) && ((!needsEscape && op_order == ch) ||
+				ch == op_scatter || ch == op_finalize || ch == op_lodash) {
+				awaitop = true
+				waitop = ch
 			} else {
-				scriber.WriteRune(ch)
-				if _slice.Contains(quotes, ch) {
-					inQuote = true
-					activeQuote = ch
-				}
+				stream.WriteByte(ch)
 			}
 			lastCh = ch
 		}
 
-		scribed = scriber.String()
+		streamed = stream.String()
 	}
 
 	return value_Parse_retype{
@@ -258,6 +236,6 @@ func value_Parse(
 		RapidClasses:   rapidClasses,
 		FinalClasses:   finalClasses,
 		Loadashes:      loadashes,
-		Scribed:        scribed,
+		Scribed:        streamed,
 	}
 }

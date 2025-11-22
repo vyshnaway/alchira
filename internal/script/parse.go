@@ -15,6 +15,7 @@ type E_Method int
 
 const (
 	E_Method_Read E_Method = iota
+	E_Method_OnlyHash
 	E_Method_BuildHash
 	E_Method_DebugHash
 )
@@ -56,7 +57,7 @@ func Rider(
 	fileData.Scratch = ""
 
 	cursor := _reader.New(content + " ")
-	var accum _string.Builder
+	var entry _string.Builder
 	awaitop := false
 	incFlag := true
 	var waitop byte = 0
@@ -127,55 +128,50 @@ func Rider(
 			awaitop = false
 		} else if awaitop {
 			if ok := symclass_chars.Match([]byte{by}); ok {
-				accum.WriteByte(by)
+				entry.WriteByte(by)
 			} else {
-				fragString := accum.String()
+				entrystring := entry.String()
 
 				switch waitop {
 				case op_lodash:
-					if method == E_Method_Read {
-						stream.WriteByte(waitop)
-					} else if fileData.Style.Loadashes[fragString] {
+					if method != E_Method_Read && fileData.Style.Loadashes[entrystring] {
 						stream.WriteString(fileData.Label)
-					} else {
-						stream.WriteByte(waitop)
+						awaitop = false
 					}
 
 				case op_scatter:
 					if method == E_Method_Read {
-						stream.WriteByte(waitop)
-						rapidList[fragString] = true
-					} else if i := _action.Index_Finder(fragString, fileData.Style.LocalMap); i.Index > 0 {
+						rapidList[entrystring] = true
+					} else if i := _action.Index_Finder(entrystring, fileData.Style.LocalMap); i.Index > 0 {
 						if method == E_Method_DebugHash {
-							fragString = i.Data.SrcData.DebugRapidClass
+							stream.WriteString(i.Data.SrcData.DebugRapidClass)
 						} else {
-							fragString = i.Data.SrcData.RapidClass
+							stream.WriteString(i.Data.SrcData.RapidClass)
 						}
-					} else {
-						stream.WriteByte(waitop)
+						awaitop = false
 					}
 
 				case op_finalize:
 					if method == E_Method_Read {
-						stream.WriteByte(waitop)
-						finalList[fragString] = true
-					} else if i := _action.Index_Finder(fragString, fileData.Style.LocalMap); i.Index > 0 {
+						finalList[entrystring] = true
+					} else if i := _action.Index_Finder(entrystring, fileData.Style.LocalMap); i.Index > 0 {
 						if method == E_Method_DebugHash {
-							fragString = i.Data.SrcData.DebugFinalClass
+							stream.WriteString(i.Data.SrcData.DebugFinalClass)
 						} else {
-							fragString = i.Data.SrcData.FinalClass
+							stream.WriteString(i.Data.SrcData.FinalClass)
 						}
-					} else {
-						stream.WriteByte(waitop)
+						awaitop = false
 					}
 				}
 
-				stream.WriteString(fragString)
+				if awaitop {
+					stream.WriteByte(waitop)
+					stream.WriteString(entrystring)
+				}
 				stream.WriteByte(by)
-
-				awaitop = false
+				entry.Reset()
 				waitop = 0
-				accum.Reset()
+				awaitop = false
 			}
 		} else if cursor.Active.Last == '\\' && (by == op_scatter || by == op_finalize || by == op_lodash) {
 			awaitop = true
