@@ -122,11 +122,9 @@ func Store(
 		Scratch:    "",
 		WatchAttrs: []string{},
 
-		Lookup: _model.File_Lookup{
-			Id:   lookupId,
-			Type: lookupType,
-		},
-		Style: _model.File_StyleData{
+		Cache: &_model.File_CacheData{
+			Id:              lookupId,
+			Type:            lookupType,
 			UsedIn:          []int{},
 			RapidStyles:     map[string]bool{},
 			FinalStyles:     map[string]bool{},

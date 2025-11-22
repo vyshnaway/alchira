@@ -58,9 +58,9 @@ func Delta_Reset() {
 			MemChart:  "",
 		},
 		Lookup: _model.Cache_Delta_Lookup{
-			Artifacts: map[string]*_model.File_Lookup{},
-			Libraries: map[string]*_model.File_Lookup{},
-			TargetDir: map[string]*_model.File_Lookup{},
+			Artifacts: map[string]*_model.File_CacheData{},
+			Libraries: map[string]*_model.File_CacheData{},
+			TargetDir: map[string]*_model.File_CacheData{},
 		},
 		Error: _model.Cache_Delta_Errors{
 			Artifacts: []string{},
@@ -107,7 +107,7 @@ func Manifest_Reset() {
 	Manifest = &_model.Cache_Manifest{
 		Constants:   map[string]string{},
 		Diagnostics: []*_model.File_Diagnostic{},
-		Lookup:      map[string]*_model.File_Lookup{},
+		Lookup:      map[string]*_model.File_CacheData{},
 		Group: _model.Cache_Manifest_Groups{
 			Axiom:    map[string]_model.Style_ClassIndexMap{},
 			Cluster:  map[string]_model.Style_ClassIndexMap{},

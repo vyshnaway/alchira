@@ -25,17 +25,14 @@ type File_Source struct {
 	Essential bool     `json:"essential"`
 }
 
-type File_Lookup struct {
-	Id   string    `json:"id"`
-	Type File_Type `json:"type"`
-}
-
 type File_TagReplacement struct {
 	Loc  int
 	Elid int
 }
 
-type File_StyleData struct {
+type File_CacheData struct {
+	Id              string
+	Type            File_Type
 	UsedIn          []int
 	RigidTracks     [][]string
 	RapidStyles     map[string]bool
@@ -62,9 +59,8 @@ type File_Stash struct {
 	Label       string
 	DebugFront  string
 	WatchAttrs  []string
-	Style       File_StyleData
-	Lookup      File_Lookup
 	Errors      []string
+	Cache       *File_CacheData
 	Diagnostics []*File_Diagnostic
 }
 

@@ -14,7 +14,7 @@ import (
 
 func library_DeleteFile(filepath string) {
 	if file, ok := Cache.Libraries[filepath]; ok {
-		_action.Index_Dispose(file.Style.UsedIn...)
+		_action.Index_Dispose(file.Cache.UsedIn...)
 		delete(Cache.Libraries, filepath)
 	}
 }
@@ -30,7 +30,7 @@ func library_SaveFile(filepath string, content string) {
 type library_StackFiles_return struct {
 	Cluster [][]*_model.File_Stash
 	Axiom   [][]*_model.File_Stash
-	Lookup  map[string]*_model.File_Lookup
+	Lookup  map[string]*_model.File_CacheData
 }
 
 func library_Clear() {
@@ -53,11 +53,11 @@ func Library_CacheFiles() library_StackFiles_return {
 	length := 0
 	axiom_map := map[int][]*_model.File_Stash{}
 	cluster_map := map[int][]*_model.File_Stash{}
-	lookup := map[string]*_model.File_Lookup{}
+	lookup := map[string]*_model.File_CacheData{}
 
 	for path, data := range Cache.Libraries {
 		var collection map[int][]*_model.File_Stash
-		switch data.Lookup.Type {
+		switch data.Cache.Type {
 		case _model.File_Type_Axiom:
 			collection = axiom_map
 		case _model.File_Type_Cluster:
@@ -65,8 +65,8 @@ func Library_CacheFiles() library_StackFiles_return {
 		default:
 			continue
 		}
-		lookup[path] = &data.Lookup
-		id, er := _strconv.Atoi(data.Lookup.Id)
+		lookup[path] = data.Cache
+		id, er := _strconv.Atoi(data.Cache.Id)
 
 		if er == nil {
 

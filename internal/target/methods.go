@@ -25,7 +25,7 @@ func (This *Class) Accumulator() Accumulator_return {
 
 	accumulate.ContextMap[This.TargetStylesheet] = This.StylesheetContext
 	for _, file := range This.FileCache {
-		accumulate.ContextMap[file.Lookup.Id] = file
+		accumulate.ContextMap[file.Cache.Id] = file
 	}
 
 	return accumulate
@@ -44,7 +44,7 @@ func (This *Class) GetTracks() GetTracks_return {
 	rapidIntMap := make(map[int]bool, 8)
 	finalIntMap := make(map[int]bool, 8)
 
-	sc := This.StylesheetContext.Style
+	sc := This.StylesheetContext.Cache
 	for i := range sc.RapidStyles {
 		if found := _action.Index_Finder(i, sc.LocalMap); found.Index > 0 {
 			attachments[found.Index] = true
@@ -53,8 +53,8 @@ func (This *Class) GetTracks() GetTracks_return {
 
 	for _, file := range This.FileCache {
 		attachstrings := make(map[string]bool, 24)
-		for s := range file.Style.RapidStyles {
-			if found := _action.Index_Finder(s, file.Style.LocalMap); found.Index > 0 {
+		for s := range file.Cache.RapidStyles {
+			if found := _action.Index_Finder(s, file.Cache.LocalMap); found.Index > 0 {
 				rapidIntMap[found.Index] = true
 				_map.Copy(attachstrings, found.Data.SrcData.Attachments)
 				if found.Group != _model.Style_Type_Library {
@@ -63,10 +63,10 @@ func (This *Class) GetTracks() GetTracks_return {
 			}
 		}
 
-		for _, track := range file.Style.RigidTracks {
+		for _, track := range file.Cache.RigidTracks {
 			retraces := []int{}
 			for _, i := range track {
-				if found := _action.Index_Finder(i, file.Style.LocalMap); found.Index > 0 {
+				if found := _action.Index_Finder(i, file.Cache.LocalMap); found.Index > 0 {
 					retraces = append(retraces, found.Index)
 					_map.Copy(attachstrings, found.Data.SrcData.Attachments)
 					if found.Group != _model.Style_Type_Library {
@@ -80,8 +80,8 @@ func (This *Class) GetTracks() GetTracks_return {
 			}
 		}
 
-		for s := range file.Style.FinalStyles {
-			if found := _action.Index_Finder(s, file.Style.LocalMap); found.Index > 0 {
+		for s := range file.Cache.FinalStyles {
+			if found := _action.Index_Finder(s, file.Cache.LocalMap); found.Index > 0 {
 				finalIntMap[found.Index] = true
 				_map.Copy(attachstrings, found.Data.SrcData.Attachments)
 				if found.Group != _model.Style_Type_Library {
@@ -91,7 +91,7 @@ func (This *Class) GetTracks() GetTracks_return {
 		}
 
 		for i := range attachstrings {
-			if found := _action.Index_Finder(i, file.Style.LocalMap); found.Index > 0 {
+			if found := _action.Index_Finder(i, file.Cache.LocalMap); found.Index > 0 {
 				attachments[found.Index] = true
 			}
 		}
@@ -110,7 +110,7 @@ func (This *Class) SyncClassnames(action _script.E_Method) {
 		res := _script.Rider(file, action)
 
 		file.Scratch = res.Scribed
-		file.Style.TagReplacements = res.Replacements
+		file.Cache.TagReplacements = res.Replacements
 	}
 }
 
@@ -127,7 +127,7 @@ func (This *Class) SummonFiles(
 		if file.Extension != _config.Root.Extension {
 			fromPos := 0
 			var out _string.Builder
-			for _, m := range file.Style.TagReplacements {
+			for _, m := range file.Cache.TagReplacements {
 				switch m.Elid {
 				case _config.Root.CustomTags["staple"]:
 					out.WriteString(file.Scratch[fromPos:m.Loc] + stapleBlock)

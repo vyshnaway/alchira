@@ -1,7 +1,7 @@
 package stash
 
 import (
-	"encoding/json"
+	_json "encoding/json"
 	_fmt "fmt"
 	_config "main/configs"
 	_action "main/internal/action"
@@ -10,13 +10,13 @@ import (
 	_style_ "main/internal/style"
 	_model "main/models"
 	O "main/package/object"
-	"main/package/utils"
+	_util "main/package/utils"
 	_strconv "strconv"
 )
 
 func artifact_DeleteFile(filepath string) {
 	if file, ok := Cache.Artifacts[filepath]; ok {
-		_action.Index_Dispose(file.Style.UsedIn...)
+		_action.Index_Dispose(file.Cache.UsedIn...)
 		delete(Cache.Artifacts, filepath)
 	}
 }
@@ -29,7 +29,7 @@ func artifact_SaveFile(filepath, content, label string) {
 
 type artifact_StackFiles_return struct {
 	Files   []*_model.File_Stash
-	Lookup  map[string]*_model.File_Lookup
+	Lookup  map[string]*_model.File_CacheData
 	Handoff []*_model.File_Stash
 }
 
@@ -40,19 +40,19 @@ func artifact_CacheFiles() artifact_StackFiles_return {
 		artifact_SaveFile(
 			filepath,
 			content,
-			"_"+utils.String_EnCounter(i),
+			"_"+_util.String_EnCounter(i),
 		)
 		i++
 	}
 
 	files := make([]*_model.File_Stash, len(Cache.Artifacts))
-	lookup := make(map[string]*_model.File_Lookup, len(Cache.Artifacts))
+	lookup := make(map[string]*_model.File_CacheData, len(Cache.Artifacts))
 	handoff := make([]*_model.File_Stash, len(Cache.Artifacts))
 
 	for path, data := range Cache.Artifacts {
 
-		if data.Lookup.Type == _model.File_Type_Artifact {
-			lookup[path] = &data.Lookup
+		if data.Cache.Type == _model.File_Type_Artifact {
+			lookup[path] = data.Cache
 			files = append(files, data)
 		} else {
 			handoff = append(handoff, data)
@@ -87,7 +87,7 @@ func Artifact_Update() {
 
 	for _, file := range SaveArtifactFile_.Handoff {
 		var archive _model.Config_Archive
-		if err := json.Unmarshal([]byte(file.Content), &archive); err == nil {
+		if err := _json.Unmarshal([]byte(file.Content), &archive); err == nil {
 			if archive.Constants != nil {
 				Cache.Handoffs[file.FilePath] = archive.Constants
 			}

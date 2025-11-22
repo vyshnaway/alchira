@@ -14,11 +14,11 @@ import (
 
 func (This *Class) Savefile(filepath string, content string, hashindex int) {
 	if file, ok := This.FileCache[filepath]; ok {
-		_action.Index_Dispose(file.Style.UsedIn...)
-		for key := range This.FileCache[filepath].Style.GlobalMap {
+		_action.Index_Dispose(file.Cache.UsedIn...)
+		for key := range This.FileCache[filepath].Cache.GlobalMap {
 			delete(_config.Style.Global___Index, key)
 		}
-		for key := range This.FileCache[filepath].Style.GlobalMap {
+		for key := range This.FileCache[filepath].Cache.GlobalMap {
 			delete(_config.Style.Public___Index, key)
 		}
 		delete(This.FileCache, filepath)
@@ -37,15 +37,13 @@ func (This *Class) Savefile(filepath string, content string, hashindex int) {
 		file.WatchAttrs = watchAttrs
 	}
 	parse_response := _script.Rider(file, _script.E_Method_Read)
-	file.Style.RigidTracks = parse_response.RigidTracks
-	file.Style.RapidStyles = parse_response.RapidAssign
-	file.Style.FinalStyles = parse_response.FinalAssign
+	file.Cache.RigidTracks = parse_response.RigidTracks
+	file.Cache.RapidStyles = parse_response.RapidAssign
+	file.Cache.FinalStyles = parse_response.FinalAssign
 	file.Midway = parse_response.Scribed
 
-	file.Lookup = _model.File_Lookup{
-		Id:   file.TargetPath,
-		Type: _model.File_Type_Target,
-	}
+	file.Cache.Id = file.TargetPath
+	file.Cache.Type = _model.File_Type_Target
 
 	for _, tagdata := range parse_response.StylesList {
 		if len(tagdata.SymClasses) == 0 {
@@ -67,12 +65,12 @@ func (This *Class) Savefile(filepath string, content string, hashindex int) {
 			var ref_index_map _model.Style_ClassIndexMap
 			switch tagdata.Scope {
 			case _model.Style_Type_Local:
-				loc_index_map = file.Style.LocalMap
+				loc_index_map = file.Cache.LocalMap
 			case _model.Style_Type_Global:
-				loc_index_map = file.Style.GlobalMap
+				loc_index_map = file.Cache.GlobalMap
 				ref_index_map = _config.Style.Global___Index
 			case _model.Style_Type_Public:
-				loc_index_map = file.Style.PublicMap
+				loc_index_map = file.Cache.PublicMap
 				ref_index_map = _config.Style.Public___Index
 			default:
 				loc_index_map = _model.Style_ClassIndexMap{}
@@ -90,15 +88,15 @@ func (This *Class) Savefile(filepath string, content string, hashindex int) {
 		}
 	}
 
-	maps.Copy(file.Style.MixedMap, file.Style.LocalMap)
+	maps.Copy(file.Cache.MixedMap, file.Cache.LocalMap)
 
-	maps.Copy(file.Style.MixedMap, file.Style.GlobalMap)
-	maps.Copy(This.GlobalMap, file.Style.GlobalMap)
-	maps.Copy(This.MixedMap, file.Style.GlobalMap)
+	maps.Copy(file.Cache.MixedMap, file.Cache.GlobalMap)
+	maps.Copy(This.GlobalMap, file.Cache.GlobalMap)
+	maps.Copy(This.MixedMap, file.Cache.GlobalMap)
 
-	maps.Copy(file.Style.MixedMap, file.Style.PublicMap)
-	maps.Copy(This.PublicMap, file.Style.PublicMap)
-	maps.Copy(This.MixedMap, file.Style.PublicMap)
+	maps.Copy(file.Cache.MixedMap, file.Cache.PublicMap)
+	maps.Copy(This.PublicMap, file.Cache.PublicMap)
+	maps.Copy(This.MixedMap, file.Cache.PublicMap)
 
 	This.FileCache[filepath] = file
 }
@@ -113,7 +111,7 @@ func (This *Class) UpdateCache() {
 
 func (This *Class) ClearFiles() {
 	for filepath, filedata := range This.FileCache {
-		_action.Index_Dispose(filedata.Style.UsedIn...)
+		_action.Index_Dispose(filedata.Cache.UsedIn...)
 		delete(This.FileCache, filepath)
 	}
 }

@@ -85,9 +85,9 @@ type Cache_Delta_Errors struct {
 }
 
 type Cache_Delta_Lookup struct {
-	Artifacts map[string]*File_Lookup
-	Libraries map[string]*File_Lookup
-	TargetDir map[string]*File_Lookup
+	Artifacts map[string]*File_CacheData
+	Libraries map[string]*File_CacheData
+	TargetDir map[string]*File_CacheData
 }
 
 type Cache_Delta_Diagnostics struct {
@@ -140,8 +140,8 @@ type Cache_Manifest_Groups struct {
 }
 
 type Cache_Manifest struct {
-	Constants   map[string]string       `json:"constants"`
-	Lookup      map[string]*File_Lookup `json:"lookup"`
-	Group       Cache_Manifest_Groups   `json:"group"`
-	Diagnostics []*File_Diagnostic      `json:"diagnostics"`
+	Constants   map[string]string          `json:"constants"`
+	Lookup      map[string]*File_CacheData `json:"lookup"`
+	Group       Cache_Manifest_Groups      `json:"group"`
+	Diagnostics []*File_Diagnostic         `json:"diagnostics"`
 }

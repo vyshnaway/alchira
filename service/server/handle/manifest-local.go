@@ -11,10 +11,10 @@ import (
 )
 
 type R_ManifestLocal struct {
+	Lodashes   []string                          `json:"hashes"`
 	Assignable []string                          `json:"assignable"`
 	Attachable []string                          `json:"attachable"`
 	Symclasses map[string]*models.Style_Metadata `json:"symclasses"`
-	lodashes   []string                          `json:"lodashes"`
 }
 
 type T_Manifest_Locals struct {
@@ -63,6 +63,9 @@ func Manifest_Local(filepath string, symclass string) *R_ManifestLocal {
 	lodashes := []string{}
 
 	if nav, ok := configs.Manifest.Lookup[filepath]; ok {
+		for h := range nav.Loadashes {
+			lodashes = append(lodashes, h)
+		}
 
 		if nav.Type == models.File_Type_Artifact {
 			if stash, er := manifest.Group.Artifact[nav.Id]; er {
@@ -134,7 +137,7 @@ Return:
 	return &R_ManifestLocal{
 		Assignable: assignable,
 		Attachable: attachable,
-		lodashes:   lodashes,
+		Lodashes:   lodashes,
 		Symclasses: symclassData,
 	}
 }

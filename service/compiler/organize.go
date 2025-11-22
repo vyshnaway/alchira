@@ -48,22 +48,22 @@ func Accumulate() {
 	_config.Manifest.Group.Global = map[string]_model.Style_ClassIndexMap{}
 
 	_config.Delta.Error.TargetDir = []string{}
-	_config.Delta.Lookup.TargetDir = map[string]*_model.File_Lookup{}
+	_config.Delta.Lookup.TargetDir = map[string]*_model.File_CacheData{}
 	_config.Delta.Diagnostic.TargetDir = []*_model.File_Diagnostic{}
 
 	for key, val := range filemanifest {
-		_config.Manifest.Group.Local[key] = val.Style.LocalMap
-		_config.Delta.Lookup.TargetDir[key] = &val.Lookup
+		_config.Manifest.Group.Local[key] = val.Cache.LocalMap
+		_config.Delta.Lookup.TargetDir[key] = val.Cache
 		_config.Delta.Error.TargetDir = append(_config.Delta.Error.TargetDir, val.Errors...)
 		_config.Delta.Diagnostic.TargetDir = append(_config.Delta.Diagnostic.TargetDir, val.Diagnostics...)
 
 		mergedMap := make(_model.Style_ClassIndexMap)
-		_map.Copy(mergedMap, val.Style.PublicMap)
-		_map.Copy(mergedMap, val.Style.GlobalMap)
+		_map.Copy(mergedMap, val.Cache.PublicMap)
+		_map.Copy(mergedMap, val.Cache.GlobalMap)
 		_config.Manifest.Group.Global[key] = mergedMap
 	}
 
-	_config.Manifest.Lookup = map[string]*_model.File_Lookup{}
+	_config.Manifest.Lookup = map[string]*_model.File_CacheData{}
 	_map.Copy(_config.Manifest.Lookup, _config.Delta.Lookup.Artifacts)
 	_map.Copy(_config.Manifest.Lookup, _config.Delta.Lookup.Libraries)
 	_map.Copy(_config.Manifest.Lookup, _config.Delta.Lookup.TargetDir)

@@ -37,7 +37,7 @@ func Rider(
 	method E_Method,
 ) parse_return {
 
-	fileData.Style.TagReplacements = []_model.File_TagReplacement{}
+	fileData.Cache.TagReplacements = []_model.File_TagReplacement{}
 	replacements := make([]_model.File_TagReplacement, 0, 8)
 	orderList := make([][]string, 0, 24)
 	tagTrack := make([]*_model.T_RawStyle, 0, 24)
@@ -134,7 +134,7 @@ func Rider(
 
 				switch waitop {
 				case op_lodash:
-					if method != E_Method_Read && fileData.Style.Loadashes[entrystring] {
+					if method != E_Method_Read && fileData.Cache.Loadashes[entrystring] {
 						stream.WriteString(fileData.Label)
 						stream.WriteString(entrystring)
 						awaitop = false
@@ -143,7 +143,7 @@ func Rider(
 				case op_scatter:
 					if method == E_Method_Read {
 						rapidList[entrystring] = true
-					} else if i := _action.Index_Finder(entrystring, fileData.Style.LocalMap); i.Index > 0 && method != E_Method_OnlyHash {
+					} else if i := _action.Index_Finder(entrystring, fileData.Cache.LocalMap); i.Index > 0 && method != E_Method_OnlyHash {
 						if method == E_Method_DebugHash {
 							stream.WriteString(i.Data.SrcData.DebugRapidClass)
 						} else {
@@ -155,7 +155,7 @@ func Rider(
 				case op_finalize:
 					if method == E_Method_Read {
 						finalList[entrystring] = true
-					} else if i := _action.Index_Finder(entrystring, fileData.Style.LocalMap); i.Index > 0 && method != E_Method_OnlyHash {
+					} else if i := _action.Index_Finder(entrystring, fileData.Cache.LocalMap); i.Index > 0 && method != E_Method_OnlyHash {
 						if method == E_Method_DebugHash {
 							stream.WriteString(i.Data.SrcData.DebugFinalClass)
 						} else {
@@ -192,7 +192,7 @@ func Rider(
 	replacements = append(replacements, _model.File_TagReplacement{Loc: 0, Elid: 0})
 
 	if method == E_Method_Read {
-		fileData.Style.Loadashes = loadashes
+		fileData.Cache.Loadashes = loadashes
 	}
 	return parse_return{
 		Replacements: replacements,

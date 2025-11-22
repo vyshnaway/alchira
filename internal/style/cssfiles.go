@@ -78,7 +78,7 @@ func Cssfile_Collection(files []*_model.File_Stash) cssfile_Collection_return {
 			} else {
 				stylescanned := Parse_CssSnippet(
 					value,
-					string(file.Lookup.Type)+" : "+file.FilePath+" | ",
+					string(file.Cache.Type)+" : "+file.FilePath+" | ",
 					selector,
 					false,
 				)
@@ -132,7 +132,7 @@ func Cssfile_Collection(files []*_model.File_Stash) cssfile_Collection_return {
 				classdata.RapidClass = RapidClassPrefix + classhash
 				classdata.FinalClass = FinalClassPrefix + classhash
 
-				file.Style.UsedIn = append(file.Style.UsedIn, index)
+				file.Cache.UsedIn = append(file.Cache.UsedIn, index)
 				selectorMap[classname] = index
 				selectorList = append(selectorList, classname)
 			}

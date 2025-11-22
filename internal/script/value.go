@@ -152,7 +152,7 @@ func Value_Parse(
 				FileCursor.Active.Row, FileCursor.Active.Col,
 			)
 		}
-		orderedMapping := value_EvaluateIndexTraces(action, metafront, orderedlist, fileData.Style.LocalMap)
+		orderedMapping := value_EvaluateIndexTraces(action, metafront, orderedlist, fileData.Cache.LocalMap)
 
 		for marker := range valuelen {
 			ch := value[marker]
@@ -164,7 +164,7 @@ func Value_Parse(
 
 					switch waitop {
 					case op_lodash:
-						if fileData.Style.Loadashes[entrystring] {
+						if fileData.Cache.Loadashes[entrystring] {
 							stream.WriteString(_fmt.Sprintf("%s%s", fileData.Label, entrystring))
 							awaitop = false
 						}
@@ -178,7 +178,7 @@ func Value_Parse(
 
 					case op_scatter:
 						if action != E_Method_OnlyHash {
-							if res := _action.Index_Finder(entrystring, fileData.Style.LocalMap); res.Index > 0 {
+							if res := _action.Index_Finder(entrystring, fileData.Cache.LocalMap); res.Index > 0 {
 								if action == E_Method_DebugHash {
 									stream.WriteString(_util.String_Filter(
 										res.Data.SrcData.DebugRapidClass,
@@ -194,7 +194,7 @@ func Value_Parse(
 						}
 					case op_finalize:
 						if action != E_Method_OnlyHash {
-							if res := _action.Index_Finder(entrystring, fileData.Style.LocalMap); res.Index > 0 {
+							if res := _action.Index_Finder(entrystring, fileData.Cache.LocalMap); res.Index > 0 {
 								if action == E_Method_DebugHash {
 									stream.WriteString(_util.String_Filter(
 										res.Data.SrcData.DebugFinalClass,

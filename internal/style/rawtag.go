@@ -25,7 +25,7 @@ func importLodash(ref *_model.File_Stash, str, lbl string) string {
 	file.Midway = str
 	file.Content = str
 	out := _script.Rider(&file, _script.E_Method_OnlyHash).Scribed
-	_fmt.Println("\n---\n"+out+"---\n")
+	_fmt.Println("\n---\n" + out + "---\n")
 	return out
 }
 
@@ -64,7 +64,7 @@ func Rawtag_Upload(
 	errors := make([]string, 0, 4)
 	diagnostics := make([]*_model.File_Diagnostic, 0, 4)
 	attachments := make(map[string]bool, 12)
-	forArtifact := file.Lookup.Type == _model.File_Type_Artifact
+	forArtifact := file.Cache.Type == _model.File_Type_Artifact
 	declaration := file.TargetPath + ":" + _strconv.Itoa(raw.Range.Start.Row) + ":" + _strconv.Itoa(raw.Range.Start.Col) +
 		"::" + _strconv.Itoa(raw.Range.End.Row) + ":" + _strconv.Itoa(raw.Range.End.Col)
 
@@ -225,7 +225,7 @@ func Rawtag_Upload(
 		classdata.RapidClass = RapidClassPrefix + classhash
 		classdata.FinalClass = FinalClassPrefix + classhash
 
-		file.Style.UsedIn = append(file.Style.UsedIn, index)
+		file.Cache.UsedIn = append(file.Cache.UsedIn, index)
 	}
 
 	return R_Rawtag_Upload{
