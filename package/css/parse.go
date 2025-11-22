@@ -36,7 +36,7 @@ func ParsePartial(content string, basic_allocation_size int) R_Parse {
 	braceTrack := make([]rune, 0, 12)
 	deviance := 0
 	isProp := true
-	cursor := _reader.New(content + ";")
+	cursor := _reader.New(content + "; ")
 	keyStart := cursor.Active
 	valueFrom := 0
 

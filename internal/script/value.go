@@ -82,7 +82,7 @@ type value_Parse_retype struct {
 	Scribed        string
 }
 
-func value_Parse(
+func Value_Parse(
 	value string,
 	action E_Method,
 	fileData *_model.File_Stash,

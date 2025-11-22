@@ -136,13 +136,14 @@ func Rider(
 				case op_lodash:
 					if method != E_Method_Read && fileData.Style.Loadashes[entrystring] {
 						stream.WriteString(fileData.Label)
+						stream.WriteString(entrystring)
 						awaitop = false
 					}
 
 				case op_scatter:
 					if method == E_Method_Read {
 						rapidList[entrystring] = true
-					} else if i := _action.Index_Finder(entrystring, fileData.Style.LocalMap); i.Index > 0 {
+					} else if i := _action.Index_Finder(entrystring, fileData.Style.LocalMap); i.Index > 0 && method != E_Method_OnlyHash {
 						if method == E_Method_DebugHash {
 							stream.WriteString(i.Data.SrcData.DebugRapidClass)
 						} else {
@@ -154,7 +155,7 @@ func Rider(
 				case op_finalize:
 					if method == E_Method_Read {
 						finalList[entrystring] = true
-					} else if i := _action.Index_Finder(entrystring, fileData.Style.LocalMap); i.Index > 0 {
+					} else if i := _action.Index_Finder(entrystring, fileData.Style.LocalMap); i.Index > 0 && method != E_Method_OnlyHash {
 						if method == E_Method_DebugHash {
 							stream.WriteString(i.Data.SrcData.DebugFinalClass)
 						} else {

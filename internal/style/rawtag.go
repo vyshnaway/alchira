@@ -4,6 +4,7 @@ import (
 	_fmt "fmt"
 	_config "main/configs"
 	_action "main/internal/action"
+	_script "main/internal/script"
 	_model "main/models"
 	_css "main/package/css"
 	_util "main/package/utils"
@@ -13,13 +14,20 @@ import (
 	_string "strings"
 )
 
-var Lodash_tag = "<!" + Lodash_char + ">"
-var Lodash_char = string(_config.Root.CustomOp["lodash"])
-var IdLodash_regex = _regexp.MustCompile(`\#` + Lodash_char)
-var ClassLodash_regex = _regexp.MustCompile(`\.` + Lodash_char)
-var CheckLodash_regex = _regexp.MustCompile(`[#.]` + Lodash_char)
-
 var symzero_regex = _regexp.MustCompile(`^[-_]\$`)
+
+var Lodash_char = string(_config.Root.CustomOp["lodash"])
+var Lodash_frag = "\\" + Lodash_char
+
+func importLodash(ref *_model.File_Stash, str, lbl string) string {
+	file := *ref
+	file.Label = lbl
+	file.Midway = str
+	file.Content = str
+	out := _script.Rider(&file, _script.E_Method_OnlyHash).Scribed
+	_fmt.Println("\n---\n"+out+"---\n")
+	return out
+}
 
 func lodashstyle_process(
 	content string,
@@ -31,15 +39,14 @@ func lodashstyle_process(
 	NativeResult R_Parse,
 	AttachResult R_Parse,
 ) {
-	native := _string.ReplaceAll(content, Lodash_tag, file.Label)
+	native := importLodash(file, content, file.Label)
 	nativeAttachResult := Parse_CssSnippet(
 		_util.Code_Uncomment(native, true, true, false),
 		selector, initial, flatten,
 	)
-
 	exportAttachResult := nativeAttachResult
 	if _config.Static.EXPORT {
-		export := _string.ReplaceAll(content, Lodash_tag, Lodash_tag+file.Label)
+		export := importLodash(file, content, Lodash_frag+file.Label)
 		exportAttachResult = Parse_CssSnippet(
 			_util.Code_Uncomment(export, true, true, false),
 			selector, initial, flatten,
@@ -115,9 +122,8 @@ func Rawtag_Upload(
 
 					if native_scanned.Result.Len() > 0 {
 						if wrapperjson, err := _util.Code_JsoncBuild(query.Wrappers, ""); err == nil {
-							if !forArtifact && CheckLodash_regex.MatchString(wrapperjson) {
-								wrapperjson = ClassLodash_regex.ReplaceAllString(wrapperjson, "."+file.Label)
-								wrapperjson = IdLodash_regex.ReplaceAllString(wrapperjson, "#"+file.Label)
+							if res := importLodash(file, wrapperjson, file.Label); !forArtifact {
+								wrapperjson = res
 							} else {
 								exportRawStyle.SetBlock(wrapperjson, export_scanned.Result)
 							}
@@ -166,8 +172,8 @@ func Rawtag_Upload(
 		nativeStaple := ""
 		if raw.Elid == _config.Root.CustomTags["staple"] {
 			stripped := _util.Code_Strip(raw.Innertext, false, false, false, true)
-			exportStaple = _string.ReplaceAll(stripped, Lodash_tag, Lodash_tag+file.Label)
-			nativeStaple = _string.ReplaceAll(stripped, Lodash_tag, file.Label)
+			exportStaple = importLodash(file, stripped, Lodash_frag+file.Label)
+			nativeStaple = importLodash(file, stripped, file.Label)
 		}
 
 		summon := ""

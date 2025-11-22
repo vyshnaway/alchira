@@ -158,7 +158,7 @@ func Tag_Scanner(
 					} else {
 						classSynced = true
 						isWatching := _slice.Contains(fileData.WatchAttrs, tr_Attr)
-						value_Parse_return := value_Parse(
+						value_Parse_return := Value_Parse(
 							tr_Value,
 							method,
 							fileData,
@@ -213,39 +213,9 @@ func Tag_Scanner(
 		if cursor.Active.Char == '>' {
 			styleDeclarations.EndMarker++
 		}
-
 		fragString = fragment.String()
 		if fragString[1] == '!' {
 			fragString = string(cursor.Runes[tagStart:styleDeclarations.EndMarker])
-			// subfrag := _string.TrimSpace(fragString[3 : len(fragString)-1])
-
-			// switch fragString[2] {
-			// case op_lodash:
-			// 	fragString = fileData.Label + subfrag
-
-			// case op_scatter:
-			// 	if method == E_Method_Read {
-			// 		rapidList[subfrag] = true
-			// 	} else if i := _action.Index_Finder(subfrag, fileData.Style.LocalMap); i.Index > 0 {
-			// 		if method == E_Method_DebugHash {
-			// 			fragString = i.Data.SrcData.DebugRapidClass
-			// 		} else {
-			// 			fragString = i.Data.SrcData.RapidClass
-			// 		}
-			// 	}
-
-			// case op_finalize:
-			// 	if method == E_Method_Read {
-			// 		finalList[subfrag] = true
-			// 	} else if i := _action.Index_Finder(subfrag, fileData.Style.LocalMap); i.Index > 0 {
-			// 		if method == E_Method_DebugHash {
-			// 			fragString = i.Data.SrcData.DebugFinalClass
-			// 		} else {
-			// 			fragString = i.Data.SrcData.FinalClass
-			// 		}
-			// 	}
-			// }
-
 		} else {
 			cursor.Active.Cycle++
 			selfClosed = cursor.Active.Last == '/'
