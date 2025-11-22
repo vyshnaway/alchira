@@ -24,14 +24,14 @@ func importLodash(ref *_model.File_Stash, str, lbl string) string {
 	file.Label = lbl
 	file.Midway = str
 	file.Content = str
-	out := _script.Rider(&file, _script.E_Method_OnlyHash).Scribed
+	out := _script.Rider(&file, _script.E_Method_LoadHash).Scribed
 	return out
 }
 func stripCustomTags(ref *_model.File_Stash, str string) string {
 	file := *ref
 	file.Midway = str
 	file.Content = str
-	out := _script.Rider(&file, _script.E_Method_Strip).Scribed
+	out := _script.Rider(&file, _script.E_Method_StripTag).Scribed
 	return out
 }
 

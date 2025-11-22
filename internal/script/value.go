@@ -138,7 +138,7 @@ func Value_Parse(
 		lastCh = ch
 	}
 
-	if action != E_Method_Read || action != E_Method_Strip {
+	if action != E_Method_Read && action != E_Method_StripTag {
 		var stream _string.Builder
 		entry.Reset()
 		waitop = 0
@@ -169,7 +169,7 @@ func Value_Parse(
 							awaitop = false
 						}
 					case op_order:
-						if action != E_Method_OnlyHash {
+						if action != E_Method_LoadHash {
 							if found_Entry, found_Status := orderedMapping[entrystring]; found_Status {
 								stream.WriteString(found_Entry)
 								awaitop = false
@@ -177,7 +177,7 @@ func Value_Parse(
 						}
 
 					case op_scatter:
-						if action != E_Method_OnlyHash {
+						if action != E_Method_LoadHash {
 							if res := _action.Index_Finder(entrystring, fileData.Cache.LocalMap); res.Index > 0 {
 								if action == E_Method_DebugHash {
 
@@ -196,7 +196,7 @@ func Value_Parse(
 							}
 						}
 					case op_finalize:
-						if action != E_Method_OnlyHash {
+						if action != E_Method_LoadHash {
 							if res := _action.Index_Finder(entrystring, fileData.Cache.LocalMap); res.Index > 0 {
 								if action == E_Method_DebugHash {
 									name := res.Data.SrcData.DebugFinalClass

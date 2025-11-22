@@ -15,8 +15,8 @@ type E_Method int
 
 const (
 	E_Method_Read E_Method = iota
-	E_Method_Strip
-	E_Method_OnlyHash
+	E_Method_LoadHash
+	E_Method_StripTag
 	E_Method_BuildHash
 	E_Method_DebugHash
 )
@@ -49,7 +49,7 @@ func Rider(
 
 	var content string
 	var stream _string.Builder
-	if method == E_Method_Read || method == E_Method_Strip {
+	if method == E_Method_Read || method == E_Method_StripTag {
 		content = fileData.Content
 		fileData.Midway = ""
 	} else {
@@ -128,7 +128,7 @@ func Rider(
 				stream.WriteString(fragment)
 			}
 			awaitop = false
-		} else if method != E_Method_Strip && awaitop {
+		} else if method != E_Method_StripTag && awaitop {
 			if ok := symclass_chars.Match([]byte{by}); ok {
 				entry.WriteByte(by)
 			} else {
@@ -145,7 +145,7 @@ func Rider(
 				case op_scatter:
 					if method == E_Method_Read {
 						rapidList[entrystring] = true
-					} else if i := _action.Index_Finder(entrystring, fileData.Cache.LocalMap); i.Index > 0 && method != E_Method_OnlyHash {
+					} else if i := _action.Index_Finder(entrystring, fileData.Cache.LocalMap); i.Index > 0 && method != E_Method_LoadHash {
 						if method == E_Method_DebugHash {
 							stream.WriteString(i.Data.SrcData.DebugScatterClass)
 						} else {
@@ -157,7 +157,7 @@ func Rider(
 				case op_finalize:
 					if method == E_Method_Read {
 						finalList[entrystring] = true
-					} else if i := _action.Index_Finder(entrystring, fileData.Cache.LocalMap); i.Index > 0 && method != E_Method_OnlyHash {
+					} else if i := _action.Index_Finder(entrystring, fileData.Cache.LocalMap); i.Index > 0 && method != E_Method_LoadHash {
 						if method == E_Method_DebugHash {
 							stream.WriteString(i.Data.SrcData.DebugFinalClass)
 						} else {
@@ -176,7 +176,7 @@ func Rider(
 				waitop = 0
 				awaitop = false
 			}
-		} else if method != E_Method_Strip &&
+		} else if method != E_Method_StripTag &&
 			cursor.Active.Last == '\\' &&
 			(by == op_scatter || by == op_finalize || by == op_lodash) {
 			awaitop = true
