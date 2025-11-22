@@ -217,6 +217,7 @@ func Value_Parse(
 					stream.WriteByte(ch)
 					entry.Reset()
 					waitop = 0
+					awaitop = false
 				}
 			} else if checkEscape(lastCh) && ((!needsEscape && op_order == ch) ||
 				ch == op_scatter || ch == op_finalize || ch == op_lodash) {

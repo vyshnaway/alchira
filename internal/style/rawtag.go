@@ -25,7 +25,6 @@ func importLodash(ref *_model.File_Stash, str, lbl string) string {
 	file.Midway = str
 	file.Content = str
 	out := _script.Rider(&file, _script.E_Method_OnlyHash).Scribed
-	_fmt.Println("\n---\n" + out + "---\n")
 	return out
 }
 
