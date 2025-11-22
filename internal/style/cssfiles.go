@@ -119,7 +119,7 @@ func Cssfile_Collection(files []*_model.File_Stash) cssfile_Collection_return {
 					ExportRawStyle:    object,
 					Attachments:       attachments,
 					DebugRapidClass:   debugRapidClass,
-					DebugFinalClass:   debugRapidClass + "_Important",
+					DebugFinalClass:   debugRapidClass + "_Final",
 					NativeStaple:      "",
 					NativeAttachStyle: attach_style,
 					ExportAttachStyle: attach_style,

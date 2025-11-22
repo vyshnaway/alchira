@@ -201,7 +201,7 @@ func Rawtag_Upload(
 			SymClass:          symclass,
 			Metadata:          metadata,
 			DebugRapidClass:   debugRapidClass,
-			DebugFinalClass:   debugRapidClass + "_Important",
+			DebugFinalClass:   debugRapidClass + "_Final",
 			Attachments:       attachments,
 			ExportStaple:      exportStaple,
 			NativeStaple:      nativeStaple,

@@ -2,7 +2,6 @@ package script
 
 import (
 	_config "main/configs"
-	_action "main/internal/action"
 	_model "main/models"
 	_reader "main/package/reader"
 	_util "main/package/utils"
@@ -18,6 +17,7 @@ type tag_Parse_retype struct {
 	ClassSynced       bool
 	Fragment          string
 	ClassesList       [][]string
+	Loadashes         map[string]bool
 	RapidList         map[string]bool
 	FinalList         map[string]bool
 	NativeAttributes  map[string]string
@@ -25,6 +25,7 @@ type tag_Parse_retype struct {
 }
 
 var symclass_regex = _regexp.MustCompile(`(?i)^[\w\-_]+\$+[\w\-]+$`)
+var symclass_chars = _regexp.MustCompile(`[A-Za-z0-9/_\$\-]`)
 
 func Tag_Scanner(
 	fileData *_model.File_Stash,
@@ -35,6 +36,7 @@ func Tag_Scanner(
 	rapidList := make(map[string]bool, 4)
 	finalList := make(map[string]bool, 4)
 	braceTrack := make([]rune, 0, 8)
+	loadashes := make(map[string]bool, 12)
 	nativeAttributes := make(map[string]string, 8)
 
 	deviance := 0
@@ -155,17 +157,22 @@ func Tag_Scanner(
 						}
 					} else {
 						classSynced = true
+						isWatching := _slice.Contains(fileData.WatchAttrs, tr_Attr)
 						value_Parse_return := value_Parse(
 							tr_Value,
 							method,
 							fileData,
 							cursor,
+							!isWatching,
 						)
-						if len(value_Parse_return.OrderedClasses) > 0 {
-							classesList = append(classesList, value_Parse_return.OrderedClasses)
-						}
 						_map.Copy(rapidList, value_Parse_return.RapidClasses)
 						_map.Copy(finalList, value_Parse_return.FinalClasses)
+						if isWatching {
+							if len(value_Parse_return.OrderedClasses) > 0 {
+								classesList = append(classesList, value_Parse_return.OrderedClasses)
+							}
+							_map.Copy(loadashes, value_Parse_return.Loadashes)
+						}
 						nativeAttributes[tr_Attr] = value_Parse_return.Scribed
 						SaveToFrag(tr_Attr, value_Parse_return.Scribed)
 					}
@@ -210,34 +217,34 @@ func Tag_Scanner(
 		fragString = fragment.String()
 		if fragString[1] == '!' {
 			fragString = string(cursor.Runes[tagStart:styleDeclarations.EndMarker])
-			subfrag := _string.TrimSpace(fragString[3 : len(fragString)-1])
+			// subfrag := _string.TrimSpace(fragString[3 : len(fragString)-1])
 
-			switch fragString[2] {
-			case op_lodash:
-				fragString = fileData.Label + subfrag
+			// switch fragString[2] {
+			// case op_lodash:
+			// 	fragString = fileData.Label + subfrag
 
-			case op_attach:
-				if method == E_Method_Read {
-					rapidList[subfrag] = true
-				} else if i := _action.Index_Finder(subfrag, fileData.Style.LocalMap); i.Index > 0 {
-					if method == E_Method_DebugHash {
-						fragString = i.Data.SrcData.DebugRapidClass
-					} else {
-						fragString = i.Data.SrcData.RapidClass
-					}
-				}
+			// case op_scatter:
+			// 	if method == E_Method_Read {
+			// 		rapidList[subfrag] = true
+			// 	} else if i := _action.Index_Finder(subfrag, fileData.Style.LocalMap); i.Index > 0 {
+			// 		if method == E_Method_DebugHash {
+			// 			fragString = i.Data.SrcData.DebugRapidClass
+			// 		} else {
+			// 			fragString = i.Data.SrcData.RapidClass
+			// 		}
+			// 	}
 
-			case op_assign:
-				if method == E_Method_Read {
-					finalList[subfrag] = true
-				} else if i := _action.Index_Finder(subfrag, fileData.Style.LocalMap); i.Index > 0 {
-					if method == E_Method_DebugHash {
-						fragString = i.Data.SrcData.DebugFinalClass
-					} else {
-						fragString = i.Data.SrcData.FinalClass
-					}
-				}
-			}
+			// case op_finalize:
+			// 	if method == E_Method_Read {
+			// 		finalList[subfrag] = true
+			// 	} else if i := _action.Index_Finder(subfrag, fileData.Style.LocalMap); i.Index > 0 {
+			// 		if method == E_Method_DebugHash {
+			// 			fragString = i.Data.SrcData.DebugFinalClass
+			// 		} else {
+			// 			fragString = i.Data.SrcData.FinalClass
+			// 		}
+			// 	}
+			// }
 
 		} else {
 			cursor.Active.Cycle++
@@ -254,6 +261,7 @@ func Tag_Scanner(
 
 	return tag_Parse_retype{
 		Ok:                ok,
+		Loadashes:         loadashes,
 		FinalList:         finalList,
 		RapidList:         rapidList,
 		Fragment:          fragString,

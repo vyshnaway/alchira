@@ -6,6 +6,7 @@ import (
 	_config "main/configs"
 	_action "main/internal/action"
 	_model "main/models"
+	"main/package/console"
 	_reader "main/package/reader"
 	_util "main/package/utils"
 	_slice "slices"
@@ -70,15 +71,16 @@ func value_EvaluateIndexTraces(
 	return classMap
 }
 
-var op_attach = byte(_config.Root.CustomOp["attach"])
-var op_assign = byte(_config.Root.CustomOp["assign"])
-var op_import = byte(_config.Root.CustomOp["import"])
+var op_order = byte(_config.Root.CustomOp["strict"])
+var op_scatter = byte(_config.Root.CustomOp["attach"])
+var op_finalize = byte(_config.Root.CustomOp["assign"])
 var op_lodash = byte(_config.Root.CustomOp["lodash"])
 
 type value_Parse_retype struct {
 	OrderedClasses []string
 	RapidClasses   map[string]bool
 	FinalClasses   map[string]bool
+	Loadashes      map[string]bool
 	Scribed        string
 }
 
@@ -87,7 +89,14 @@ func value_Parse(
 	action E_Method,
 	fileData *_model.File_Stash,
 	FileCursor *_reader.T_Reader,
+	needsEscape bool,
 ) value_Parse_retype {
+	checkEscape := func(char rune) bool {
+		if needsEscape {
+			return char == '\\'
+		}
+		return char != '\\'
+	}
 
 	activeQuote := ' '
 	scribed := value
@@ -95,39 +104,42 @@ func value_Parse(
 	valuelen := len(value)
 	quotes := []rune{'\'', '`', '"'}
 
+	loadashes := make(map[string]bool, 12)
 	rapidClasses := make(map[string]bool, 12)
 	finalClasses := make(map[string]bool, 12)
 	orderedlist := make([]string, 0, 12)
 	var entry _string.Builder
+	awaitop := false
+	var waitop byte = 0
 
-	var lastCh rune = 0
+	var lastCh byte = 0
 	for marker := range valuelen {
-		ch := rune(value[marker])
-
-		if inQuote {
-			if entry.Len() > 0 && lastCh != '\\' && (ch == ' ' || ch == activeQuote) {
-				entrystring := entry.String()
-				switch entrystring[0] {
-				case op_attach:
-					rapidClasses[entrystring[1:]] = true
-				case op_import:
-					finalClasses[entrystring[1:]] = true
-				case op_assign:
-					orderedlist = append(orderedlist, entrystring[1:])
-				}
-				entry.Reset()
+		ch := value[marker]
+		if awaitop {
+			if ok := symclass_chars.Match([]byte{ch}); ok {
+				entry.WriteByte(ch)
 			} else {
-				entry.WriteRune(ch)
-			}
-			if ch == activeQuote {
-				inQuote = false
-				activeQuote = ' '
-			}
-		} else if _slice.Contains(quotes, ch) {
-			inQuote = true
-			activeQuote = ch
-		}
+				fragString := entry.String()
 
+				switch waitop {
+				case op_order:
+					orderedlist = append(orderedlist, fragString)
+				case op_scatter:
+					rapidClasses[fragString] = true
+				case op_finalize:
+					finalClasses[fragString] = true
+				case op_lodash:
+					loadashes[fragString] = true
+				}
+
+				awaitop = false
+				waitop = 0
+				entry.Reset()
+			}
+		} else if checkEscape(rune(lastCh)) && (ch == op_scatter || ch == op_finalize || ch == op_lodash || (!needsEscape && op_order == ch)) {
+			awaitop = true
+			waitop = ch
+		}
 		lastCh = ch
 	}
 
@@ -163,9 +175,15 @@ func value_Parse(
 						switch entrystring[0] {
 
 						case op_lodash:
-							scriber.WriteString(_fmt.Sprintf("%s%s", fileData.Label, entrystring[1:]))
+							newentrystring := entrystring[1:]
+							if fileData.Style.Loadashes[newentrystring] {
+								console.Render.Raw(newentrystring)
+								scriber.WriteString(_fmt.Sprintf("%s%s", fileData.Label, newentrystring))
+							} else {
+								scriber.WriteString(entrystring)
+							}
 
-						case op_assign:
+						case op_order:
 							entrystring := entrystring[1:]
 							found_Entry, found_Status := orderedMapping[entrystring]
 							if found_Status {
@@ -174,9 +192,9 @@ func value_Parse(
 								scriber.WriteString(entrystring)
 							}
 
-						case op_attach:
-							entrystring := entrystring[1:]
-							if res := _action.Index_Finder(entrystring, fileData.Style.LocalMap); res.Index > 0 {
+						case op_scatter:
+							newentrystring := entrystring[1:]
+							if res := _action.Index_Finder(newentrystring, fileData.Style.LocalMap); res.Index > 0 {
 								if action == E_Method_DebugHash {
 									scriber.WriteString(_util.String_Filter(
 										res.Data.SrcData.DebugRapidClass,
@@ -188,12 +206,12 @@ func value_Parse(
 									scriber.WriteString(res.Data.SrcData.RapidClass)
 								}
 							} else {
-								scriber.WriteString(entrystring)
+								scriber.WriteString(newentrystring)
 							}
 
-						case op_import:
-							entrystring := entrystring[1:]
-							if res := _action.Index_Finder(entrystring, fileData.Style.LocalMap); res.Index > 0 {
+						case op_finalize:
+							newentrystring := entrystring[1:]
+							if res := _action.Index_Finder(newentrystring, fileData.Style.LocalMap); res.Index > 0 {
 								if action == E_Method_DebugHash {
 									scriber.WriteString(_util.String_Filter(
 										res.Data.SrcData.DebugFinalClass,
@@ -205,7 +223,7 @@ func value_Parse(
 									scriber.WriteString(res.Data.SrcData.FinalClass)
 								}
 							} else {
-								scriber.WriteString(entrystring)
+								scriber.WriteString(newentrystring)
 							}
 
 						default:
@@ -239,6 +257,7 @@ func value_Parse(
 		OrderedClasses: orderedlist,
 		RapidClasses:   rapidClasses,
 		FinalClasses:   finalClasses,
+		Loadashes:      loadashes,
 		Scribed:        scribed,
 	}
 }

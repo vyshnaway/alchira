@@ -14,6 +14,7 @@ type R_ManifestLocal struct {
 	Assignable []string                          `json:"assignable"`
 	Attachable []string                          `json:"attachable"`
 	Symclasses map[string]*models.Style_Metadata `json:"symclasses"`
+	lodashes   []string                          `json:"lodashes"`
 }
 
 type T_Manifest_Locals struct {
@@ -59,6 +60,7 @@ func Manifest_Local(filepath string, symclass string) *R_ManifestLocal {
 	attachable := []string{}
 	symclassData := map[string]*models.Style_Metadata{}
 	symclassIndex := map[string]int{}
+	lodashes := []string{}
 
 	if nav, ok := configs.Manifest.Lookup[filepath]; ok {
 
@@ -132,6 +134,7 @@ Return:
 	return &R_ManifestLocal{
 		Assignable: assignable,
 		Attachable: attachable,
+		lodashes:   lodashes,
 		Symclasses: symclassData,
 	}
 }
