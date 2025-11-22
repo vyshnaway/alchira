@@ -95,9 +95,11 @@ func Style_Reset() {
 		Library__Index:      _model.Style_ClassIndexMap{},
 		Artifact_Index:      _model.Style_ClassIndexMap{},
 		ClassDictionary:     _model.Style_Dictionary{},
-		Publish_RigidTracks: [][]_model.Style_ClassIndexTrace{},
 		Index_to_Styledata:  map[int]*_model.Cache_SymclassData{},
 		Filepath_to_Context: map[string]*_model.File_Stash{},
+		Publish_Ordered:     [][]_model.Style_ClassIndexTrace{},
+		Publish_Scattered:   _model.Style_ClassIndexMap{},
+		Publish_Final:       _model.Style_ClassIndexMap{},
 	}
 }
 

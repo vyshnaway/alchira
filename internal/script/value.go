@@ -47,7 +47,7 @@ func value_EvaluateIndexTraces(
 		if action == E_Method_DebugHash {
 			for _, item := range classTrace {
 				classdata := _action.Index_Fetch(item.ClassIndex)
-				classname := _fmt.Sprintf("%s%s", metaFront, classdata.SrcData.DebugRapidClass)
+				classname := _fmt.Sprintf("%s%s", metaFront, classdata.SrcData.DebugScatterClass)
 				temp_map = append(temp_map, _model.Style_ClassIndexTrace{
 					ClassName:  "." + classname,
 					ClassIndex: item.ClassIndex,
@@ -62,7 +62,7 @@ func value_EvaluateIndexTraces(
 		}
 
 		if len(temp_map) > 0 {
-			_config.Style.Publish_RigidTracks = append(_config.Style.Publish_RigidTracks, temp_map)
+			_config.Style.Publish_Ordered = append(_config.Style.Publish_Ordered, temp_map)
 		}
 	}
 
@@ -138,7 +138,7 @@ func Value_Parse(
 		lastCh = ch
 	}
 
-	if action != E_Method_Read {
+	if action != E_Method_Read || action != E_Method_Strip {
 		var stream _string.Builder
 		entry.Reset()
 		waitop = 0
@@ -180,14 +180,17 @@ func Value_Parse(
 						if action != E_Method_OnlyHash {
 							if res := _action.Index_Finder(entrystring, fileData.Cache.LocalMap); res.Index > 0 {
 								if action == E_Method_DebugHash {
+
+									name := res.Data.SrcData.DebugScatterClass
 									stream.WriteString(_util.String_Filter(
-										res.Data.SrcData.DebugRapidClass,
+										name,
 										[]rune{'/', '.', ':', '|', '$'},
 										[]rune{'\\'},
 										[]rune{},
 									))
+									_config.Style.Publish_Scattered["."+name] = res.Index
 								} else {
-									stream.WriteString(res.Data.SrcData.RapidClass)
+									stream.WriteString(res.Data.SrcData.ScatterClass)
 								}
 								awaitop = false
 							}
@@ -196,12 +199,14 @@ func Value_Parse(
 						if action != E_Method_OnlyHash {
 							if res := _action.Index_Finder(entrystring, fileData.Cache.LocalMap); res.Index > 0 {
 								if action == E_Method_DebugHash {
+									name := res.Data.SrcData.DebugFinalClass
 									stream.WriteString(_util.String_Filter(
-										res.Data.SrcData.DebugFinalClass,
+										name,
 										[]rune{'/', '.', ':', '|', '$'},
 										[]rune{'\\'},
 										[]rune{},
 									))
+									_config.Style.Publish_Final["."+name] = res.Index
 								} else {
 									stream.WriteString(res.Data.SrcData.FinalClass)
 								}

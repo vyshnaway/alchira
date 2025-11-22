@@ -15,6 +15,7 @@ type E_Method int
 
 const (
 	E_Method_Read E_Method = iota
+	E_Method_Strip
 	E_Method_OnlyHash
 	E_Method_BuildHash
 	E_Method_DebugHash
@@ -48,7 +49,7 @@ func Rider(
 
 	var content string
 	var stream _string.Builder
-	if method == E_Method_Read {
+	if method == E_Method_Read || method == E_Method_Strip {
 		content = fileData.Content
 		fileData.Midway = ""
 	} else {
@@ -72,6 +73,7 @@ func Rider(
 			fragment := result.Fragment
 			hasDeclared := (len(result.StyleDeclarations.Styles) > 0 || len(result.StyleDeclarations.SymClasses) > 0)
 
+			exitedNow := false
 			if result.Ok {
 				_map.Copy(rapidList, result.RapidList)
 				_map.Copy(finalList, result.FinalList)
@@ -95,38 +97,38 @@ func Rider(
 				} else if elid, status := replacementTags[fragment]; status {
 					replacements = append(replacements, _model.File_TagReplacement{Loc: stream.Len(), Elid: elid})
 					fragment = ""
+				} else if len(tagTrack) > 0 || (result.StyleDeclarations.Elid > 0 && hasDeclared) {
+					fragment = ""
 				}
 
+				if !result.SelfClosed {
+					if result.StyleDeclarations.Element[0] == '/' {
+						element := result.StyleDeclarations.Element[1:]
+						if len(tagTrack) != 0 {
+							track := tagTrack[len(tagTrack)-1]
+							tagTrack = tagTrack[:len(tagTrack)-1]
+
+							if track.Element == element {
+								track.Innertext = content[track.EndMarker:tagStart]
+								exitedNow = true
+							} else {
+								tagTrack = append(tagTrack, track)
+							}
+						}
+					} else if _slice.Contains(_config.Static.CustomTags, result.StyleDeclarations.Element) && hasDeclared {
+						result.StyleDeclarations.Attributes = result.NativeAttributes
+						tagTrack = append(tagTrack, &result.StyleDeclarations)
+					}
+				}
 			} else {
 				incFlag = false
-			}
-
-			exitedNow := false
-			if !result.SelfClosed && result.Ok {
-				if result.StyleDeclarations.Element[0] == '/' {
-					element := result.StyleDeclarations.Element[1:]
-					if len(tagTrack) != 0 {
-						track := tagTrack[len(tagTrack)-1]
-						tagTrack = tagTrack[:len(tagTrack)-1]
-
-						if track.Element == element {
-							track.Innertext = content[track.EndMarker:tagStart]
-							exitedNow = true
-						} else {
-							tagTrack = append(tagTrack, track)
-						}
-					}
-				} else if _slice.Contains(_config.Static.CustomTags, result.StyleDeclarations.Element) && hasDeclared {
-					result.StyleDeclarations.Attributes = result.NativeAttributes
-					tagTrack = append(tagTrack, &result.StyleDeclarations)
-				}
 			}
 
 			if len(tagTrack) == 0 && !exitedNow {
 				stream.WriteString(fragment)
 			}
 			awaitop = false
-		} else if awaitop {
+		} else if method != E_Method_Strip && awaitop {
 			if ok := symclass_chars.Match([]byte{by}); ok {
 				entry.WriteByte(by)
 			} else {
@@ -145,9 +147,9 @@ func Rider(
 						rapidList[entrystring] = true
 					} else if i := _action.Index_Finder(entrystring, fileData.Cache.LocalMap); i.Index > 0 && method != E_Method_OnlyHash {
 						if method == E_Method_DebugHash {
-							stream.WriteString(i.Data.SrcData.DebugRapidClass)
+							stream.WriteString(i.Data.SrcData.DebugScatterClass)
 						} else {
-							stream.WriteString(i.Data.SrcData.RapidClass)
+							stream.WriteString(i.Data.SrcData.ScatterClass)
 						}
 						awaitop = false
 					}
@@ -174,7 +176,9 @@ func Rider(
 				waitop = 0
 				awaitop = false
 			}
-		} else if cursor.Active.Last == '\\' && (by == op_scatter || by == op_finalize || by == op_lodash) {
+		} else if method != E_Method_Strip &&
+			cursor.Active.Last == '\\' &&
+			(by == op_scatter || by == op_finalize || by == op_lodash) {
 			awaitop = true
 			waitop = by
 		} else {

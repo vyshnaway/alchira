@@ -43,9 +43,9 @@ type Style_ClassData struct {
 	Artifact          string
 	Definent          string
 	SymClass          string
-	DebugRapidClass   string
+	DebugScatterClass string
 	DebugFinalClass   string
-	RapidClass        string
+	ScatterClass      string
 	FinalClass        string
 	Attachments       map[string]bool
 	NativeStaple      string

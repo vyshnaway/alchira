@@ -27,6 +27,13 @@ func importLodash(ref *_model.File_Stash, str, lbl string) string {
 	out := _script.Rider(&file, _script.E_Method_OnlyHash).Scribed
 	return out
 }
+func stripCustomTags(ref *_model.File_Stash, str string) string {
+	file := *ref
+	file.Midway = str
+	file.Content = str
+	out := _script.Rider(&file, _script.E_Method_Strip).Scribed
+	return out
+}
 
 func lodashstyle_process(
 	content string,
@@ -178,7 +185,8 @@ func Rawtag_Upload(
 		summon := ""
 		attributes := map[string]string{}
 		if raw.Elid == _config.Root.CustomTags["summon"] {
-			summon = _util.Code_Strip(raw.Innertext, false, false, true, true)
+			summon = stripCustomTags(file, raw.Innertext)
+			summon = _util.Code_Strip(summon, false, false, true, true)
 			attributes = raw.Attributes
 		}
 
@@ -205,7 +213,7 @@ func Rawtag_Upload(
 			Definent:          raw.SymClasses[0],
 			SymClass:          symclass,
 			Metadata:          metadata,
-			DebugRapidClass:   debugRapidClass,
+			DebugScatterClass: debugRapidClass,
 			DebugFinalClass:   debugRapidClass + "_Final",
 			Attachments:       attachments,
 			ExportStaple:      exportStaple,
@@ -221,7 +229,7 @@ func Rawtag_Upload(
 			SrcData: classdata,
 		})
 		classhash := _util.String_EnCounter(index)
-		classdata.RapidClass = RapidClassPrefix + classhash
+		classdata.ScatterClass = RapidClassPrefix + classhash
 		classdata.FinalClass = FinalClassPrefix + classhash
 
 		file.Cache.UsedIn = append(file.Cache.UsedIn, index)

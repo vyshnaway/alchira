@@ -118,7 +118,7 @@ func Cssfile_Collection(files []*_model.File_Stash) cssfile_Collection_return {
 					NativeRawStyle:    object,
 					ExportRawStyle:    object,
 					Attachments:       attachments,
-					DebugRapidClass:   debugRapidClass,
+					DebugScatterClass: debugRapidClass,
 					DebugFinalClass:   debugRapidClass + "_Final",
 					NativeStaple:      "",
 					NativeAttachStyle: attach_style,
@@ -129,7 +129,7 @@ func Cssfile_Collection(files []*_model.File_Stash) cssfile_Collection_return {
 					SrcData: classdata,
 				})
 				classhash := _util.String_EnCounter(index)
-				classdata.RapidClass = RapidClassPrefix + classhash
+				classdata.ScatterClass = RapidClassPrefix + classhash
 				classdata.FinalClass = FinalClassPrefix + classhash
 
 				file.Cache.UsedIn = append(file.Cache.UsedIn, index)

@@ -25,13 +25,13 @@ func ClearUnwantedCache() (
 
 	if !_config.Static.IAMAI {
 		indexes := make(map[int]bool, 64)
-		for _, i := range _config.Style.Publish_RigidTracks {
+		for _, i := range _config.Style.Publish_Ordered {
 			for _, j := range i {
 				indexes[j.ClassIndex] = true
 			}
 		}
 
-		for i := range _config.Style.Publish_RigidTracks {
+		for i := range _config.Style.Publish_Ordered {
 			if _, k := indexes[i]; !k {
 				delete(_config.Style.Index_to_Styledata, i)
 			}
@@ -39,14 +39,14 @@ func ClearUnwantedCache() (
 	}
 
 	pubInLt := 24
-	newPubIn := make([][]models.Style_ClassIndexTrace, 0, pubInLt*len(_config.Style.Publish_RigidTracks))
-	for _, A := range _config.Style.Publish_RigidTracks {
+	newPubIn := make([][]models.Style_ClassIndexTrace, 0, pubInLt*len(_config.Style.Publish_Ordered))
+	for _, A := range _config.Style.Publish_Ordered {
 		for i := 0; i < len(A); i += pubInLt {
 			end := min(i+pubInLt, len(A))
 			newPubIn = append(newPubIn, A[i:end])
 		}
 	}
-	_config.Style.Publish_RigidTracks = newPubIn
+	_config.Style.Publish_Ordered = newPubIn
 
 	_config.Delta.Report.Constants = X.List_Catalog(
 		"Root Constants",
@@ -86,7 +86,7 @@ func ClearUnwantedCache() (
 
 func Generate_Files() (Files map[string]string, Report string) {
 
-	files, attachments, rapidMap, finalMap := Organize()
+	files, attachments, scatteredMap, finalMap := Organize()
 	_stash.Target_SyncClassNames()
 
 	appendix_frag := _css.Render_Sequence(func() *_css.T_BlockSeq {
@@ -111,16 +111,16 @@ func Generate_Files() (Files map[string]string, Report string) {
 		return attach_frag, staple_sheet
 	}()
 
-	rapid_block := _css.NewBlock(0, len(rapidMap))
-	for i := range rapidMap {
+	scattered_block := _css.NewBlock(0, len(scatteredMap))
+	for i := range scatteredMap {
 		d := _action.Index_Fetch(i)
 		if _config.Static.DEBUG {
-			rapid_block.SetBlock("."+d.SrcData.DebugRapidClass, d.SrcData.NativeRawStyle)
+			scattered_block.SetBlock("."+d.SrcData.DebugScatterClass, d.SrcData.NativeRawStyle)
 		} else {
-			rapid_block.SetBlock("."+d.SrcData.RapidClass, d.SrcData.NativeRawStyle)
+			scattered_block.SetBlock("."+d.SrcData.ScatterClass, d.SrcData.NativeRawStyle)
 		}
 	}
-	rapid_frag := _css.Render_Switched(rapid_block, _config.Static.MINIFY)
+	scattered_frag := _css.Render_Switched(scattered_block, _config.Static.MINIFY)
 
 	final_block := _css.NewBlock(0, len(finalMap))
 	for i := range finalMap {
@@ -135,7 +135,7 @@ func Generate_Files() (Files map[string]string, Report string) {
 
 	report, errLen, finalMessage, index_frag := ClearUnwantedCache()
 	var class_builder _string.Builder
-	for _, i := range _config.Style.Publish_RigidTracks {
+	for _, i := range _config.Style.Publish_Ordered {
 		class_builder.WriteString(_css.Render_Switched(func() *_css.T_Block {
 			result := _css.NewBlock(0, len(i))
 			for _, j := range i {
@@ -144,15 +144,15 @@ func Generate_Files() (Files map[string]string, Report string) {
 			return result
 		}(), _config.Static.MINIFY))
 	}
-	rigid_frag := class_builder.String()
+	ordered_frag := class_builder.String()
 
 	render_frags := []struct {
 		key string
 		val string
 	}{
-		{key: "Root", val: index_frag},
-		{key: "Rapid", val: rapid_frag},
-		{key: "Rigid", val: rigid_frag},
+		{key: "Index", val: index_frag},
+		{key: "Scattered", val: scattered_frag},
+		{key: "Ordered", val: ordered_frag},
 		{key: "Final", val: final_frag},
 		{key: "Attach", val: attach_frag},
 		{key: "Appendix", val: appendix_frag},

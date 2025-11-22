@@ -6,7 +6,6 @@ import (
 	"main/internal/script"
 	"main/models"
 	"main/package/css"
-	"main/package/utils"
 	"strings"
 )
 
@@ -39,13 +38,23 @@ func Sandbox_Index(index int) (response any) {
 	attachments := map[int]*models.Style_ClassData{}
 	attributes := data.SrcData.Attributes
 	classBlocks := css.NewBlock(4, 4)
-	configs.Style.Publish_RigidTracks = [][]models.Style_ClassIndexTrace{{
-		models.Style_ClassIndexTrace{ClassName: "._", ClassIndex: data.SrcData.Index},
-	}}
 
 	summon = script.Rider(&clontext, script.E_Method_DebugHash).Scribed
 
-	for _, i := range utils.Array_FlattenOnce(configs.Style.Publish_RigidTracks) {
+	FinalClassMap := []models.Style_ClassIndexTrace{
+		{ClassName: "._", ClassIndex: data.SrcData.Index},
+	}
+	for c, i := range configs.Style.Publish_Scattered {
+		FinalClassMap = append(FinalClassMap, models.Style_ClassIndexTrace{ClassName: c, ClassIndex: i})
+	}
+	for _, i := range configs.Style.Publish_Ordered {
+		FinalClassMap = append(FinalClassMap, i...)
+	}
+	for c, i := range configs.Style.Publish_Final {
+		FinalClassMap = append(FinalClassMap, models.Style_ClassIndexTrace{ClassName: c, ClassIndex: i})
+	}
+
+	for _, i := range FinalClassMap {
 		data := action.Index_Fetch(i.ClassIndex).SrcData
 		attachments[i.ClassIndex] = data
 		for a := range data.Attachments {

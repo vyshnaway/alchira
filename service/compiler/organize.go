@@ -7,6 +7,7 @@ import (
 	_order_ "main/internal/order"
 	_stash "main/internal/stash"
 	_style "main/internal/style"
+	_target "main/internal/target"
 	_model "main/models"
 	C "main/package/console"
 	_css "main/package/css"
@@ -40,7 +41,7 @@ func SetReferences() {
 
 }
 
-func Accumulate() {
+func Accumulate() _target.GetTracks_return {
 	filemanifest, targetReport := _stash.Target_Accumulate()
 	_config.Delta.Report.TargetDir = targetReport
 
@@ -107,6 +108,7 @@ func Accumulate() {
 	} else {
 		_config.Delta.Report.Errors = ""
 	}
+	return _stash.Target_GetTracks()
 }
 
 var initial = 100
@@ -114,9 +116,6 @@ var css_class_prefix = ".__"
 var tag_class_prefix = "__"
 
 func Organize() (AritfactFiles map[string]string, Attachments map[int]bool, RapidMap map[int]bool, FinalMap map[int]bool) {
-
-	_config.Style.ClassDictionary = _model.Style_Dictionary{}
-	_config.Style.Publish_RigidTracks = [][]_model.Style_ClassIndexTrace{}
 
 	SaveClassRefs := func(stash _order_.R_Preview, cascade_counter bool) {
 		for _, temp_trace := range stash.Final_Hashtrace {
@@ -134,7 +133,7 @@ func Organize() (AritfactFiles map[string]string, Attachments map[int]bool, Rapi
 					ClassIndex: index,
 				})
 			}
-			_config.Style.Publish_RigidTracks = append(_config.Style.Publish_RigidTracks, tempPubMap)
+			_config.Style.Publish_Ordered = append(_config.Style.Publish_Ordered, tempPubMap)
 		}
 
 		for json_array, imap := range stash.List_to_GroupId {
@@ -149,14 +148,13 @@ func Organize() (AritfactFiles map[string]string, Attachments map[int]bool, Rapi
 		}
 	}
 
-	Accumulate()
+	tracks := Accumulate()
 	artifact_files := map[string]string{}
-	tracks_ := _stash.Target_GetTracks()
 	_config.Delta.FinalMessage = _strconv.Itoa(len(_config.Delta.Errors)) + " Errors."
 
 	switch _config.Static.Command {
 	case "preview":
-		res, _ := _order_.Optimize(tracks_.ClassTracks, false, _config.Static.Argument, &_model.Config_Archive{})
+		res, _ := _order_.Optimize(tracks.ClassTracks, false, _config.Static.Argument, &_model.Config_Archive{})
 		SaveClassRefs(*res.Result, true)
 
 		if len(_config.Delta.Errors) > 0 {
@@ -166,14 +164,14 @@ func Organize() (AritfactFiles map[string]string, Attachments map[int]bool, Rapi
 		}
 	case "publish":
 		if len(_config.Delta.Errors) > 0 {
-			res, _ := _order_.Optimize(tracks_.ClassTracks, false, _config.Static.Argument, archive_Build())
+			res, _ := _order_.Optimize(tracks.ClassTracks, false, _config.Static.Argument, archive_Build())
 			SaveClassRefs(*res.Result, true)
 
 			_config.Delta.FinalMessage = _strconv.Itoa(len(_config.Delta.Errors)) + " Errors. Falling back to 'preview' command."
 			_config.Static.Command = "preview"
 		} else {
 			archive := archive_Build()
-			res, _ := _order_.Optimize(tracks_.ClassTracks, true, _config.Static.Argument, archive)
+			res, _ := _order_.Optimize(tracks.ClassTracks, true, _config.Static.Argument, archive)
 
 			if res.Status {
 				SaveClassRefs(*res.Result, false)
@@ -188,6 +186,6 @@ func Organize() (AritfactFiles map[string]string, Attachments map[int]bool, Rapi
 		}
 	}
 
-	_map.Copy(tracks_.Attachments, _config.Delta.IndexAttach)
-	return artifact_files, tracks_.Attachments, tracks_.RapidMap, tracks_.FinalMap
+	_map.Copy(tracks.Attachments, _config.Delta.IndexAttach)
+	return artifact_files, tracks.Attachments, tracks.RapidMap, tracks.FinalMap
 }
