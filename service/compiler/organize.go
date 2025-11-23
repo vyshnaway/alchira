@@ -117,7 +117,7 @@ var tag_class_prefix = "__"
 
 func Organize() (AritfactFiles map[string]string, Attachments map[int]bool, RapidMap map[int]bool, FinalMap map[int]bool) {
 
-	SaveClassRefs := func(stash _order_.R_Preview, cascade_counter bool) {
+	SaveClassRefs := func(stash _order_.R_Preview) {
 		for _, temp_trace := range stash.Final_Hashtrace {
 			tempPubMap := []_model.Style_ClassIndexTrace{}
 			for _, val := range temp_trace {
@@ -125,7 +125,7 @@ func Organize() (AritfactFiles map[string]string, Attachments map[int]bool, Rapi
 				classid := val[1]
 
 				classname := css_class_prefix + _util.String_EnCounter(classid)
-				if cascade_counter {
+				if _config.Static.PREVIEW {
 					classname = classname + "-" + _strconv.Itoa(initial+classid)
 				}
 				tempPubMap = append(tempPubMap, _model.Style_ClassIndexTrace{
@@ -140,7 +140,7 @@ func Organize() (AritfactFiles map[string]string, Attachments map[int]bool, Rapi
 			_config.Style.ClassDictionary[json_array] = map[int]string{}
 			for ref, classid := range stash.Group_to_Table[imap] {
 				classname := tag_class_prefix + _util.String_EnCounter(classid)
-				if cascade_counter {
+				if _config.Static.PREVIEW {
 					classname = classname + "-" + _strconv.Itoa(initial+classid)
 				}
 				_config.Style.ClassDictionary[json_array][ref] = classname
@@ -155,7 +155,7 @@ func Organize() (AritfactFiles map[string]string, Attachments map[int]bool, Rapi
 	switch _config.Static.Command {
 	case "preview":
 		res, _ := _order_.Optimize(tracks.ClassTracks, false, _config.Static.Argument, &_model.Config_Archive{})
-		SaveClassRefs(*res.Result, true)
+		SaveClassRefs(*res.Result)
 
 		if len(_config.Delta.Errors) > 0 {
 			_config.Delta.FinalMessage = _strconv.Itoa(len(_config.Delta.Errors)) + " Unresolved Errors. Rectify them to proceed with 'publish' command."
@@ -165,7 +165,7 @@ func Organize() (AritfactFiles map[string]string, Attachments map[int]bool, Rapi
 	case "publish":
 		if len(_config.Delta.Errors) > 0 {
 			res, _ := _order_.Optimize(tracks.ClassTracks, false, _config.Static.Argument, archive_Build())
-			SaveClassRefs(*res.Result, true)
+			SaveClassRefs(*res.Result)
 
 			_config.Delta.FinalMessage = _strconv.Itoa(len(_config.Delta.Errors)) + " Errors. Falling back to 'preview' command."
 			_config.Static.Command = "preview"
@@ -174,12 +174,13 @@ func Organize() (AritfactFiles map[string]string, Attachments map[int]bool, Rapi
 			res, _ := _order_.Optimize(tracks.ClassTracks, true, _config.Static.Argument, archive)
 
 			if res.Status {
-				SaveClassRefs(*res.Result, false)
-				artifact_files = archive_Files()
+				SaveClassRefs(*res.Result)
+				// artifact_files = archive_Files()
 				_config.Delta.FinalMessage = "Build Success."
 				_config.Delta.PublishError = ""
 			} else {
-				SaveClassRefs(*res.Result, true)
+				_config.Static.PREVIEW = true
+				SaveClassRefs(*res.Result)
 				_config.Delta.PublishError = res.Message
 				_config.Delta.FinalMessage = "Build Atttempt Failed. Falling back with Preview."
 			}

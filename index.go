@@ -105,8 +105,8 @@ func main() {
 	_config.Static.IAMAI = command == "iamai"
 	_config.Static.WATCH = command == "server" || ((command == "debug" || command == "preview") && argone == "-w")
 	_config.Static.SERVER = command == "server"
-	_config.Static.EXPORT = command == "server" || command == "publish" || command == "iamai"
 	_config.Static.MINIFY = !_config.Static.DEBUG
+	_config.Static.PREVIEW = command == "preview"
 
 	S.Canvas.Initialize(
 		!_config.Static.WATCH && _slice.Contains([]string{"debug", "preview", "publish", "init", "install"}, command),

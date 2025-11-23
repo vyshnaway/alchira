@@ -16,7 +16,7 @@ type tag_Parse_retype struct {
 	SelfClosed        bool
 	ClassSynced       bool
 	Fragment          string
-	ClassesList       [][]string
+	ClassesList       []string
 	Loadashes         map[string]bool
 	RapidList         map[string]bool
 	FinalList         map[string]bool
@@ -32,7 +32,7 @@ func Tag_Scanner(
 	method E_Method,
 	cursor *_reader.T_Reader,
 ) tag_Parse_retype {
-	classesList := make([][]string, 0, 1)
+	classesList := make([]string, 0, 1)
 	scatterList := make(map[string]bool, 4)
 	finalList := make(map[string]bool, 4)
 	braceTrack := make([]rune, 0, 8)
@@ -165,14 +165,10 @@ func Tag_Scanner(
 							cursor,
 							!isWatching,
 						)
+						_map.Copy(loadashes, value_Parse_return.Loadashes)
 						_map.Copy(scatterList, value_Parse_return.ScatterList)
 						_map.Copy(finalList, value_Parse_return.FinalList)
-						if isWatching {
-							if len(value_Parse_return.OrderedClasses) > 0 {
-								classesList = append(classesList, value_Parse_return.OrderedClasses)
-							}
-							_map.Copy(loadashes, value_Parse_return.Loadashes)
-						}
+						classesList = append(classesList, value_Parse_return.OrderedClasses...)
 						nativeAttributes[tr_Attr] = value_Parse_return.Scribed
 						SaveToFrag(tr_Attr, value_Parse_return.Scribed)
 					}

@@ -34,10 +34,10 @@ type Cache_Root struct {
 type Cache_Static struct {
 	WATCH           bool
 	DEBUG           bool
+	IAMAI           bool
 	MINIFY          bool
 	SERVER          bool
-	IAMAI           bool
-	EXPORT          bool
+	PREVIEW         bool
 	Command         string
 	Argument        string
 	RootPath        string

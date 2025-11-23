@@ -73,10 +73,10 @@ var Root = models.Cache_Root{
 var Static = models.Cache_Static{
 	WATCH:          false,
 	DEBUG:          false,
+	IAMAI:          false,
 	MINIFY:         false,
 	SERVER:         false,
-	EXPORT:         false,
-	IAMAI:          false,
+	PREVIEW:        false,
 	Command:        "",
 	Argument:       "",
 	RootPath:       "",

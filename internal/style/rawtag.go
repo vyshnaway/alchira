@@ -64,7 +64,7 @@ func Rawtag_Upload(
 		}
 		debugClass := _fmt.Sprint(scope, file.DebugFront, "\\:", raw.Range.Start.Row, "\\:", raw.Range.Start.Col, "_", normalized_symclass)
 
-		native_scanned, export_scanned := lodashstyle_process(raw.Styles[""], file, false,
+		native_scanned, export_scanned := stylesnippet_process(raw.Styles[""], file, false,
 			_fmt.Sprint(raw.Scope, " : ", declaration, " | "), raw.SymClasses[0],
 		)
 		nativeRawStyle := native_scanned.Result
@@ -76,7 +76,7 @@ func Rawtag_Upload(
 			if key != "" {
 				query := Hashrule_Render(key, declaration)
 				if query.Status {
-					native_scanned, export_scanned := lodashstyle_process(val, file, true,
+					native_scanned, export_scanned := stylesnippet_process(val, file, true,
 						_fmt.Sprint(raw.Scope, " : ", declaration, " | "),
 						_fmt.Sprint(raw.SymClasses[0], " // ", key),
 					)
@@ -118,7 +118,7 @@ func Rawtag_Upload(
 		exportAttachStyle := _css.NewBlock(8, 2)
 		nativeAttachStyle := _css.NewBlock(8, 2)
 		if raw.Elid == _config.Root.CustomTags["style"] {
-			nativeAttachResult, exportAttachResult := lodashstyle_process(raw.Innertext, file, true,
+			nativeAttachResult, exportAttachResult := stylesnippet_process(raw.Innertext, file, true,
 				_fmt.Sprint(raw.Scope, ":ATTACHMENT : ", file.FilePath, ":", raw.Range.Start.Row, ":", raw.Range.Start.Col, " | "),
 				raw.SymClasses[0],
 			)
