@@ -24,7 +24,7 @@ func (This *Class) Savefile(filepath string, content string, hashindex int) {
 		delete(This.FileCache, filepath)
 	}
 
-	file := _action.Store(
+	file := _action.CreateContext(
 		_action.Store_FileGroup_Target,
 		filepath,
 		content,

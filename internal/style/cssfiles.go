@@ -110,7 +110,7 @@ func Cssfile_Collection(files []*_model.File_Stash) cssfile_Collection_return {
 
 				debugClass := _fmt.Sprint(
 					file.DebugFront, "_",
-					_util.String_Filter(classname, []rune{}, []rune{}, []rune{'$', '/'}),
+					_util.String_Filter(classname, []rune{'$', '/'}, []rune{}, []rune{}),
 				)
 				index := DeclareClass(file, &_model.Style_ClassData{
 					Attributes:        map[string]string{},

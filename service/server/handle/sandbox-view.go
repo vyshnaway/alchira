@@ -44,13 +44,13 @@ func Sandbox_Index(index int) (response any) {
 	FinalClassMap := []models.Style_ClassIndexTrace{
 		{ClassName: "._", ClassIndex: data.SrcData.Index},
 	}
-	for c, i := range configs.Style.Publish_Scattered {
+	for c, i := range configs.Style.Sandbox_Scattered {
 		FinalClassMap = append(FinalClassMap, models.Style_ClassIndexTrace{ClassName: c, ClassIndex: i})
 	}
 	for _, i := range configs.Style.Publish_Ordered {
 		FinalClassMap = append(FinalClassMap, i...)
 	}
-	for c, i := range configs.Style.Publish_Final {
+	for c, i := range configs.Style.Sandbox_Final {
 		FinalClassMap = append(FinalClassMap, models.Style_ClassIndexTrace{ClassName: c, ClassIndex: i})
 	}
 

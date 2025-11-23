@@ -34,7 +34,7 @@ type Class struct {
 func New(storage _model.Config_ProxyStorage, label string) *Class {
 	storage.Extensions[_config.Root.Extension] = []string{}
 
-	stylesheetContext := action.Store(
+	stylesheetContext := action.CreateContext(
 		action.Store_FileGroup_Target,
 		storage.Stylesheet,
 		storage.StylesheetContent,

@@ -21,7 +21,7 @@ func library_DeleteFile(filepath string) {
 
 func library_SaveFile(filepath string, content string) {
 	library_DeleteFile(filepath)
-	stored := _action.Store(_action.Store_FileGroup_Library, filepath, content, "", "", "")
+	stored := _action.CreateContext(_action.Store_FileGroup_Library, filepath, content, "", "", "")
 	if stored.LibLevel < 3 {
 		Cache.Libraries[filepath] = stored
 	}

@@ -6,83 +6,13 @@ import (
 	_action "main/internal/action"
 	X "main/internal/console"
 	_stash "main/internal/stash"
-	"main/models"
 	S "main/package/console"
 	_css "main/package/css"
 	O "main/package/object"
 	_util "main/package/utils"
 	_map "maps"
-	_slice "slices"
 	_string "strings"
 )
-
-func ClearUnwantedCache() (
-	Report string,
-	ErrLen int,
-	FinalMessage string,
-	IndexFrag string,
-) {
-
-	if !_config.Static.IAMAI {
-		indexes := make(map[int]bool, 64)
-		for _, i := range _config.Style.Publish_Ordered {
-			for _, j := range i {
-				indexes[j.ClassIndex] = true
-			}
-		}
-
-		for i := range _config.Style.Publish_Ordered {
-			if _, k := indexes[i]; !k {
-				delete(_config.Style.Index_to_Styledata, i)
-			}
-		}
-	}
-
-	pubInLt := 24
-	newPubIn := make([][]models.Style_ClassIndexTrace, 0, pubInLt*len(_config.Style.Publish_Ordered))
-	for _, A := range _config.Style.Publish_Ordered {
-		for i := 0; i < len(A); i += pubInLt {
-			end := min(i+pubInLt, len(A))
-			newPubIn = append(newPubIn, A[i:end])
-		}
-	}
-	_config.Style.Publish_Ordered = newPubIn
-
-	_config.Delta.Report.Constants = X.List_Catalog(
-		"Root Constants",
-		_slice.Collect(_map.Keys(_config.Manifest.Constants)),
-	)
-
-	var builder _string.Builder
-	for _, s := range []string{
-		_config.Delta.Report.Axioms,
-		_config.Delta.Report.Clusters,
-		_config.Delta.Report.Artifacts,
-		_config.Delta.Report.TargetDir,
-		_config.Delta.Report.Constants,
-		_config.Delta.Report.Hashrule,
-		_config.Delta.Report.Errors,
-		_config.Delta.Report.MemChart,
-	} {
-		if len(s) > 0 {
-			builder.WriteString(s)
-			builder.WriteRune('\r')
-			builder.WriteRune('\n')
-		}
-	}
-	report := builder.String()
-	errLen := len(_config.Delta.Errors)
-	index_frag := _config.Delta.IndexBuild
-	finalMessage := _config.Delta.FinalMessage
-
-	if !_config.Static.IAMAI {
-		_config.Delta_Reset()
-		_config.Archive_Reset()
-		_config.Manifest_Reset()
-	}
-
-	return report, errLen, finalMessage, index_frag
-}
 
 func Generate_Files() (Files map[string]string, Report string) {
 
@@ -115,7 +45,9 @@ func Generate_Files() (Files map[string]string, Report string) {
 	for i := range scatteredMap {
 		d := _action.Index_Fetch(i)
 		if _config.Static.DEBUG {
-			scattered_block.SetBlock("."+d.SrcData.DebugScatterClass, d.SrcData.NativeRawStyle)
+			scattered_block.SetBlock("."+FmtClassForCss(d.SrcData.DebugScatterClass), d.SrcData.NativeRawStyle)
+		} else if _config.Static.PREVIEW {
+			scattered_block.SetBlock("."+FmtClassForCss(d.SrcData.PreviewScatterClass), d.SrcData.NativeRawStyle)
 		} else {
 			scattered_block.SetBlock("."+d.SrcData.PublishScatterClass, d.SrcData.NativeRawStyle)
 		}
@@ -126,7 +58,9 @@ func Generate_Files() (Files map[string]string, Report string) {
 	for i := range finalMap {
 		d := _action.Index_Fetch(i)
 		if _config.Static.DEBUG {
-			final_block.SetBlock("."+d.SrcData.DebugFinalClass, d.SrcData.NativeRawStyle)
+			final_block.SetBlock("."+FmtClassForCss(d.SrcData.DebugFinalClass), d.SrcData.NativeRawStyle)
+		} else if _config.Static.PREVIEW {
+			final_block.SetBlock("."+FmtClassForCss(d.SrcData.PreviewFinalClass), d.SrcData.NativeRawStyle)
 		} else {
 			final_block.SetBlock("."+d.SrcData.PublishFinalClass, d.SrcData.NativeRawStyle)
 		}
@@ -139,7 +73,7 @@ func Generate_Files() (Files map[string]string, Report string) {
 		class_builder.WriteString(_css.Render_Switched(func() *_css.T_Block {
 			result := _css.NewBlock(0, len(i))
 			for _, j := range i {
-				result.SetBlock(j.ClassName, _action.Index_Fetch(j.ClassIndex).SrcData.NativeRawStyle)
+				result.SetBlock("."+FmtClassForCss(j.ClassName), _action.Index_Fetch(j.ClassIndex).SrcData.NativeRawStyle)
 			}
 			return result
 		}(), _config.Static.MINIFY))

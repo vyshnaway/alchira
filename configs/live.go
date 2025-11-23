@@ -98,8 +98,8 @@ func Style_Reset() {
 		Index_to_Styledata:  map[int]*_model.Cache_SymclassData{},
 		Filepath_to_Context: map[string]*_model.File_Stash{},
 		Publish_Ordered:     [][]_model.Style_ClassIndexTrace{},
-		Publish_Scattered:   _model.Style_ClassIndexMap{},
-		Publish_Final:       _model.Style_ClassIndexMap{},
+		Sandbox_Scattered:   _model.Style_ClassIndexMap{},
+		Sandbox_Final:       _model.Style_ClassIndexMap{},
 	}
 }
 

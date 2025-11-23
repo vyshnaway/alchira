@@ -52,12 +52,7 @@ func value_EvaluateIndexTraces(
 					ClassName:  "." + classname,
 					ClassIndex: item.ClassIndex,
 				})
-				classMap[item.ClassName] = _util.String_Filter(
-					classname,
-					[]rune{'/', '.', ':', '|', '$'},
-					[]rune{'\\'},
-					[]rune{},
-				)
+				classMap[item.ClassName] = classname
 			}
 		}
 
@@ -148,7 +143,7 @@ func Value_Parse(
 
 		if action == E_Method_DebugHash {
 			metafront = _fmt.Sprintf(
-				"TAG%s\\:%d\\:%d__", fileData.DebugFront,
+				"TAG%s:%d:%d__", fileData.DebugFront,
 				FileCursor.Active.Row, FileCursor.Active.Col,
 			)
 		}
@@ -180,15 +175,11 @@ func Value_Parse(
 						if action != E_Method_LoadHash {
 							if res := _action.Index_Finder(entrystring, fileData.Cache.LocalMap); res.Index > 0 {
 								if action == E_Method_DebugHash {
-
-									name := res.Data.SrcData.DebugScatterClass
-									stream.WriteString(_util.String_Filter(
-										name,
-										[]rune{'/', '.', ':', '|', '$'},
-										[]rune{'\\'},
-										[]rune{},
-									))
-									_config.Style.Publish_Scattered["."+name] = res.Index
+									classname := res.Data.SrcData.DebugScatterClass
+									stream.WriteString(classname)
+									_config.Style.Sandbox_Scattered["."+classname] = res.Index
+								} else if _config.Static.PREVIEW {
+									stream.WriteString(res.Data.SrcData.PreviewScatterClass)
 								} else {
 									stream.WriteString(res.Data.SrcData.PublishScatterClass)
 								}
@@ -199,14 +190,11 @@ func Value_Parse(
 						if action != E_Method_LoadHash {
 							if res := _action.Index_Finder(entrystring, fileData.Cache.LocalMap); res.Index > 0 {
 								if action == E_Method_DebugHash {
-									name := res.Data.SrcData.DebugFinalClass
-									stream.WriteString(_util.String_Filter(
-										name,
-										[]rune{'/', '.', ':', '|', '$'},
-										[]rune{'\\'},
-										[]rune{},
-									))
-									_config.Style.Publish_Final["."+name] = res.Index
+									classname := res.Data.SrcData.DebugFinalClass
+									stream.WriteString(classname)
+									_config.Style.Sandbox_Final["."+classname] = res.Index
+								} else if _config.Static.PREVIEW {
+									stream.WriteString(res.Data.SrcData.PreviewFinalClass)
 								} else {
 									stream.WriteString(res.Data.SrcData.PublishFinalClass)
 								}

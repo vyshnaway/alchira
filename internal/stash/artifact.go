@@ -23,7 +23,7 @@ func artifact_DeleteFile(filepath string) {
 
 func artifact_SaveFile(filepath, content, label string) {
 	artifact_DeleteFile(filepath)
-	stored := _action.Store(_action.Store_FileGroup_Artifact, filepath, content, "", "", label)
+	stored := _action.CreateContext(_action.Store_FileGroup_Artifact, filepath, content, "", "", label)
 	Cache.Artifacts[filepath] = stored
 }
 

@@ -41,8 +41,11 @@ type index_Find_retrun struct {
 }
 
 func Index_Fetch(index int) *_model.Cache_SymclassData {
-	data := _config.Style.Index_to_Styledata[index]
-	return data
+	data, ok := _config.Style.Index_to_Styledata[index]
+	if ok {
+		return data
+	}
+	return nil
 }
 
 func Index_Finder(classname string, localMap _model.Style_ClassIndexMap) index_Find_retrun {

@@ -44,10 +44,10 @@ func Rawtag_Upload(
 		} else {
 			symclass += _string.ReplaceAll(symzero, "$$$", "$")
 		}
-		normalized_symclass = _util.String_Filter(symclass, []rune{}, []rune{}, []rune{'$', '/'})
+		normalized_symclass = _util.String_Filter(symclass, []rune{'$', '/'}, []rune{}, []rune{})
 	} else {
 		symclass += string(symzero)
-		normalized_symclass = _util.String_Filter(symclass, []rune{}, []rune{}, []rune{'$'})
+		normalized_symclass = _util.String_Filter(symclass, []rune{'$'}, []rune{}, []rune{})
 	}
 
 	found := _action.Index_Finder(symclass, IndexMap)
@@ -62,7 +62,7 @@ func Rawtag_Upload(
 		} else {
 			scope = raw.Scope
 		}
-		debugClass := _fmt.Sprint(scope, file.DebugFront, "\\:", raw.Range.Start.Row, "\\:", raw.Range.Start.Col, "_", normalized_symclass)
+		debugClass := _fmt.Sprint(scope, file.DebugFront, ":", raw.Range.Start.Row, ":", raw.Range.Start.Col, "_", normalized_symclass)
 
 		native_scanned, export_scanned := stylesnippet_process(raw.Styles[""], file, false,
 			_fmt.Sprint(raw.Scope, " : ", declaration, " | "), raw.SymClasses[0],

@@ -111,23 +111,26 @@ func Accumulate() _target.GetTracks_return {
 	return _stash.Target_GetTracks()
 }
 
-var initial = 100
-var css_class_prefix = ".__"
-var tag_class_prefix = "__"
-
 func Organize() (AritfactFiles map[string]string, Attachments map[int]bool, RapidMap map[int]bool, FinalMap map[int]bool) {
 
 	SaveClassRefs := func(stash _order_.R_Preview) {
+		refmap := map[int]string{}
 		for _, temp_trace := range stash.Final_Hashtrace {
 			tempPubMap := []_model.Style_ClassIndexTrace{}
 			for _, val := range temp_trace {
 				index := val[0]
 				classid := val[1]
 
-				classname := css_class_prefix + _util.String_EnCounter(classid)
+				var classname string
 				if _config.Static.PREVIEW {
-					classname = classname + "-" + _strconv.Itoa(initial+classid)
+					if d := _action.Index_Fetch(index); d != nil {
+						classname = string(op_strict) + d.SrcData.SymClass + "-" + _strconv.Itoa(classid)
+					}
+				} else {
+					classname = "__" + _util.String_EnCounter(classid)
 				}
+				refmap[classid] = classname
+
 				tempPubMap = append(tempPubMap, _model.Style_ClassIndexTrace{
 					ClassName:  classname,
 					ClassIndex: index,
@@ -139,11 +142,7 @@ func Organize() (AritfactFiles map[string]string, Attachments map[int]bool, Rapi
 		for json_array, imap := range stash.List_to_GroupId {
 			_config.Style.ClassDictionary[json_array] = map[int]string{}
 			for ref, classid := range stash.Group_to_Table[imap] {
-				classname := tag_class_prefix + _util.String_EnCounter(classid)
-				if _config.Static.PREVIEW {
-					classname = classname + "-" + _strconv.Itoa(initial+classid)
-				}
-				_config.Style.ClassDictionary[json_array][ref] = classname
+				_config.Style.ClassDictionary[json_array][ref] = refmap[classid]
 			}
 		}
 	}

@@ -18,7 +18,7 @@ const (
 	Store_FileGroup_Target
 )
 
-func Store(
+func CreateContext(
 	fileGroup store_FileGroup_param,
 	filePath string,
 	content string,
@@ -91,7 +91,7 @@ func Store(
 		classFront += _string.Repeat("$", idn)
 	}
 
-	debugClassfront := "\\|" + _util.String_Filter(targetPath, []rune{}, []rune{}, []rune{'/', '.'})
+	debugClassfront := "|" + _util.String_Filter(targetPath, []rune{'/', '.'}, []rune{}, []rune{})
 	if fromBlueprint {
 		debugClassfront = string(lookupType) + debugClassfront
 	}

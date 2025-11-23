@@ -9,7 +9,7 @@ import (
 )
 
 func Test_File(t *_testing.T) {
-	data := _action.Store(_action.Store_FileGroup_Target, "file/path", `
+	data := _action.CreateContext(_action.Store_FileGroup_Target, "file/path", `
 # -webapps@1.0.1 : Available SymClasses
 
 > /test/glass$container
@@ -37,7 +37,7 @@ func Test_Tag(t *_testing.T) {
 
 <staple -$---hU> <svg xmlns="http://www.w3.org/2000/svg" style="display: none;"> <defs> <filter id="glass-distortion" x="0%" y="0%" width="100%" height="100%"> <feTurbulence type="fractalNoise" baseFrequency="0.008 0.008" numOctaves="2" seed="92" result="noise" /> <feGaussianBlur in="noise" stdDeviation="2" result="blurred" /> <feDisplacementMap in="SourceGraphic" in2="blurred" scale="77" xChannelSelector="R" yChannelSelector="G" /> </filter> </defs> </svg> </staple> 
 		`
-	data := _action.Store(_action.Store_FileGroup_Target,
+	data := _action.CreateContext(_action.Store_FileGroup_Target,
 		"file/path",
 		content,
 		"target",
@@ -135,7 +135,7 @@ func Test_Script(t *_testing.T) {
 </body>
 
 </html>`
-	data := _action.Store(_action.Store_FileGroup_Target,
+	data := _action.CreateContext(_action.Store_FileGroup_Target,
 		"file/path",
 		content,
 		"target",
