@@ -7,13 +7,13 @@ import (
 	_reflect "reflect"
 )
 
-func Setup_Environment(rootpath string, workpath string) {
+func Setup_Environment(rootdir, sourcedir, workdir string) {
 
-	_config.Static.RootPath = rootpath
-	_config.Static.WorkPath = workpath
+	_config.Static.RootPath = rootdir
+	_config.Static.WorkPath = workdir
 
 	for id, source := range _config.Root_Scaffold {
-		source.Path = _fileman.Path_Join(append([]string{rootpath}, source.Frags...)...)
+		source.Path = _fileman.Path_Join(append([]string{rootdir}, source.Frags...)...)
 		_config.Root_Scaffold[id] = source
 	}
 
@@ -24,7 +24,7 @@ func Setup_Environment(rootpath string, workpath string) {
 		_config.Path_Json,
 	} {
 		for id, source := range group {
-			source.Path = _fileman.Path_Join(append([]string{workpath}, source.Frags...)...)
+			source.Path = _fileman.Path_Join(append([]string{workdir}, source.Frags...)...)
 			group[id] = source
 		}
 	}
@@ -32,12 +32,12 @@ func Setup_Environment(rootpath string, workpath string) {
 	cdn := _config.Root.Url.Docs
 	for id, source := range _config.Sync_Agreements {
 		source.Url = cdn + source.Url
-		source.Path = _fileman.Path_Join(append([]string{rootpath}, source.Frags...)...)
+		source.Path = _fileman.Path_Join(append([]string{sourcedir}, source.Frags...)...)
 		_config.Sync_Agreements[id] = source
 	}
 	for id, source := range _config.Sync_References {
 		source.Url = cdn + source.Url
-		source.Path = _fileman.Path_Join(append([]string{rootpath}, source.Frags...)...)
+		source.Path = _fileman.Path_Join(append([]string{sourcedir}, source.Frags...)...)
 		_config.Sync_References[id] = source
 	}
 }

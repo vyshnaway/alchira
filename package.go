@@ -23,7 +23,7 @@ import (
 	_sync "sync"
 )
 
-func Path_FromRoot(elem ...string) (string, error) {
+func Path_FromPackage(elem ...string) (string, error) {
 	filename, err := _os.Executable()
 
 	if err != nil {
@@ -67,9 +67,10 @@ func main() {
 	}
 
 	workpath := "."
+	sourcedir, _ := Path_FromSource()
+	packagedir, _ := Path_FromPackage()
 	workPackagePath := "package.json"
-	rootpath, _ := Path_FromRoot(".")
-	rootPackagePath, _ := Path_FromRoot("package.json")
+	rootPackagePath, _ := Path_FromPackage("package.json")
 
 	rootPackageData, rootPackageErr := _fileman.Read_Json(rootPackagePath, false)
 	if rootPackageErr == nil {
@@ -92,7 +93,7 @@ func main() {
 		}
 	}
 
-	_action.Setup_Environment(rootpath, workpath)
+	_action.Setup_Environment(packagedir, sourcedir, workpath)
 	corecaps := _string.ToUpper(_config.Root.Name)
 
 	_config.Static.Command = command

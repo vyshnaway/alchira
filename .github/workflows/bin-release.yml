@@ -42,7 +42,7 @@ jobs:
       - name: Prepare artifacts
         run: |
           mkdir -p artifacts
-          cp -r ../bin/* artifacts/
+          cp -r ./bin/* artifacts/
 
       - name: Publish release (version tag)
         uses: softprops/action-gh-release@v2
@@ -51,7 +51,7 @@ jobs:
           token: ${{ secrets.XCSS_REPO_CROSS }}
           tag_name: ${{ steps.pacver.outputs.version }}
           name: Release ${{ steps.pacver.outputs.version }}
-          body_path: ./core/release.md
+          body_path: ./core/RELEASE.md
           files: artifacts/**
           overwrite_files: true
         env:
@@ -64,7 +64,7 @@ jobs:
           token: ${{ secrets.XCSS_REPO_CROSS }}
           tag_name: latest
           name: Release latest
-          body_path: ./core/release.md
+          body_path: ./core/RELEASE.md
           files: artifacts/**
           overwrite_files: true
         env:

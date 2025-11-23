@@ -43,8 +43,8 @@ EXEC_FILE="executable"   # Name of the output executable
 
 # Full absolute paths for source and output
 SRC_PATH="$ROOT_DIR/$SRC_DIR"
-EXEC_OUT_DIR="$ROOT_DIR/$EXEC_DIR"
-EXEC_PATH="$EXEC_OUT_DIR/$EXEC_FILE"
+EXEC_OUT_DIR="$SRC_PATH/$EXEC_DIR"
+BIN_PATH="$EXEC_OUT_DIR/$EXEC_FILE"
 
 # --- 2. Build Execution ---
 
@@ -60,8 +60,8 @@ cd "$SRC_PATH"
 
 # Execute the build command
 # -ldflags='-s -w' strips debugging info for smaller size.
-# The executable is placed at the absolute path $EXEC_PATH
-go build -gcflags='all=-l -N' -ldflags='-s -w' -o "$EXEC_PATH" 
+# The executable is placed at the absolute path $BIN_PATH
+go build -gcflags='all=-l -N' -ldflags='-s -w' -o "$BIN_PATH" 
 
 # Return to the original execution directory
 cd $PROJECT_DIR
@@ -69,4 +69,4 @@ cd $PROJECT_DIR
 # Continue command with latest binary
 # echo "Executing binary..."
 # echo
-"$EXEC_PATH" "$@"
+"$BIN_PATH" "$@"
