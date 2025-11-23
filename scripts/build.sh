@@ -2,7 +2,7 @@
 
 TIME_STAMP=$(date +%s)
 
-OUT_DIR=bin
+OUT_DIR=source/bin
 
 echo "Cleaning up existing binaries..."
 rm -rf ./$OUT_DIR/*
