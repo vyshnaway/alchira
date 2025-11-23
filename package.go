@@ -23,8 +23,19 @@ import (
 	_sync "sync"
 )
 
-// Path_FromRoot joins the given path elements to the calculated root directory.
 func Path_FromRoot(elem ...string) (string, error) {
+	filename, err := _os.Executable()
+
+	if err != nil {
+		return "", _fmt.Errorf("failed to get current file path for root calculation")
+	}
+	root := _filepath.Join(_filepath.Dir(filename), "..", "..")
+	joined := _filepath.Join(root, _filepath.Join(elem...))
+	return joined, nil
+}
+
+// Path_FromSource joins the given path elements to the calculated root directory.
+func Path_FromSource(elem ...string) (string, error) {
 	filename, err := _os.Executable()
 
 	if err != nil {
