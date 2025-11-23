@@ -1,4 +1,5 @@
 bin/
+fuse*
 package/
 source/
 node_modules/

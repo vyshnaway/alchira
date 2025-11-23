@@ -1,6 +1,7 @@
 package style
 
 import (
+	_fmt "fmt"
 	_config "main/configs"
 	_action "main/internal/action"
 	_css "main/package/css"
@@ -107,10 +108,12 @@ func Cssfile_Collection(files []*_model.File_Stash) cssfile_Collection_return {
 					SummonSnippet: "",
 				}
 
-				debugRapidClass := file.DebugFront + "_" + _util.String_Filter(classname, []rune{}, []rune{}, []rune{'$', '/'})
-				classdata := &_model.Style_ClassData{
+				debugClass := _fmt.Sprint(
+					file.DebugFront, "_",
+					_util.String_Filter(classname, []rune{}, []rune{}, []rune{'$', '/'}),
+				)
+				index := DeclareClass(file, &_model.Style_ClassData{
 					Attributes:        map[string]string{},
-					Index:             0,
 					Artifact:          artifact,
 					Definent:          selector,
 					SymClass:          classname,
@@ -118,19 +121,10 @@ func Cssfile_Collection(files []*_model.File_Stash) cssfile_Collection_return {
 					NativeRawStyle:    object,
 					ExportRawStyle:    object,
 					Attachments:       attachments,
-					DebugScatterClass: debugRapidClass,
-					DebugFinalClass:   debugRapidClass + "_Final",
 					NativeStaple:      "",
 					NativeAttachStyle: attach_style,
 					ExportAttachStyle: attach_style,
-				}
-				index := _action.Index_Declare(&_model.Cache_SymclassData{
-					Context: file,
-					SrcData: classdata,
-				})
-				classhash := _util.String_EnCounter(index)
-				classdata.ScatterClass = RapidClassPrefix + classhash
-				classdata.FinalClass = FinalClassPrefix + classhash
+				}, debugClass)
 
 				file.Cache.UsedIn = append(file.Cache.UsedIn, index)
 				selectorMap[classname] = index
@@ -144,3 +138,4 @@ func Cssfile_Collection(files []*_model.File_Stash) cssfile_Collection_return {
 		SelectorList: selectorList,
 	}
 }
+

@@ -22,12 +22,12 @@ const (
 )
 
 type parse_return struct {
-	Scribed      string
-	RigidTracks  [][]string
-	StylesList   []*_model.T_RawStyle
-	RapidAssign  map[string]bool
-	FinalAssign  map[string]bool
-	Replacements []_model.File_TagReplacement
+	Scribed         string
+	OrderedTracks   [][]string
+	StylesList      []*_model.T_RawStyle
+	ScatteredAssign map[string]bool
+	FinalAssign     map[string]bool
+	Replacements    []_model.File_TagReplacement
 }
 
 var replacementTags = _config.Static.ReplacementTags
@@ -43,7 +43,7 @@ func Rider(
 	orderList := make([][]string, 0, 24)
 	tagTrack := make([]*_model.T_RawStyle, 0, 24)
 	stylesList := make([]*_model.T_RawStyle, 0, 24)
-	rapidList := make(map[string]bool, 24)
+	scatteredList := make(map[string]bool, 24)
 	finalList := make(map[string]bool, 24)
 	loadashes := make(map[string]bool, 24)
 
@@ -75,7 +75,7 @@ func Rider(
 
 			exitedNow := false
 			if result.Ok {
-				_map.Copy(rapidList, result.RapidList)
+				_map.Copy(scatteredList, result.RapidList)
 				_map.Copy(finalList, result.FinalList)
 				_map.Copy(loadashes, result.Loadashes)
 				orderList = append(orderList, result.ClassesList...)
@@ -144,12 +144,12 @@ func Rider(
 
 				case op_scatter:
 					if method == E_Method_Read {
-						rapidList[entrystring] = true
+						scatteredList[entrystring] = true
 					} else if i := _action.Index_Finder(entrystring, fileData.Cache.LocalMap); i.Index > 0 && method != E_Method_LoadHash {
 						if method == E_Method_DebugHash {
 							stream.WriteString(i.Data.SrcData.DebugScatterClass)
 						} else {
-							stream.WriteString(i.Data.SrcData.ScatterClass)
+							stream.WriteString(i.Data.SrcData.PublishScatterClass)
 						}
 						awaitop = false
 					}
@@ -161,7 +161,7 @@ func Rider(
 						if method == E_Method_DebugHash {
 							stream.WriteString(i.Data.SrcData.DebugFinalClass)
 						} else {
-							stream.WriteString(i.Data.SrcData.FinalClass)
+							stream.WriteString(i.Data.SrcData.PublishFinalClass)
 						}
 						awaitop = false
 					}
@@ -199,11 +199,11 @@ func Rider(
 		fileData.Cache.Loadashes = loadashes
 	}
 	return parse_return{
-		Replacements: replacements,
-		Scribed:      stream.String(),
-		RigidTracks:  orderList,
-		StylesList:   stylesList,
-		RapidAssign:  rapidList,
-		FinalAssign:  finalList,
+		Scribed:         stream.String(),
+		StylesList:      stylesList,
+		FinalAssign:     finalList,
+		OrderedTracks:   orderList,
+		ScatteredAssign: scatteredList,
+		Replacements:    replacements,
 	}
 }

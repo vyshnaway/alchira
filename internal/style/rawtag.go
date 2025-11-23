@@ -4,62 +4,20 @@ import (
 	_fmt "fmt"
 	_config "main/configs"
 	_action "main/internal/action"
-	_script "main/internal/script"
 	_model "main/models"
 	_css "main/package/css"
 	_util "main/package/utils"
 	_map "maps"
-	_regexp "regexp"
 	_strconv "strconv"
 	_string "strings"
 )
 
-var symzero_regex = _regexp.MustCompile(`^[-_]\$`)
-
-var Lodash_char = string(_config.Root.CustomOp["lodash"])
-var Lodash_frag = "\\" + Lodash_char
-
-func importLodash(ref *_model.File_Stash, str, lbl string) string {
-	file := *ref
-	file.Label = lbl
-	file.Midway = str
-	file.Content = str
-	out := _script.Rider(&file, _script.E_Method_LoadHash).Scribed
-	return out
-}
-func stripCustomTags(ref *_model.File_Stash, str string) string {
-	file := *ref
-	file.Midway = str
-	file.Content = str
-	out := _script.Rider(&file, _script.E_Method_StripTag).Scribed
-	return out
-}
-
-func lodashstyle_process(
-	content string,
-	file *_model.File_Stash,
-	flatten bool,
-	initial string,
-	selector string,
-) (
-	NativeResult R_Parse,
-	AttachResult R_Parse,
-) {
-	native := importLodash(file, content, file.Label)
-	nativeAttachResult := Parse_CssSnippet(
-		_util.Code_Uncomment(native, true, true, false),
-		selector, initial, flatten,
-	)
-	exportAttachResult := nativeAttachResult
-	if _config.Static.EXPORT {
-		export := importLodash(file, content, Lodash_frag+file.Label)
-		exportAttachResult = Parse_CssSnippet(
-			_util.Code_Uncomment(export, true, true, false),
-			selector, initial, flatten,
-		)
-	}
-
-	return nativeAttachResult, exportAttachResult
+type R_Rawtag_Upload struct {
+	Symclass    string
+	Index       int
+	Attachments map[string]bool
+	Diagnostics []*_model.File_Diagnostic
+	Errors      []string
 }
 
 func Rawtag_Upload(
@@ -104,7 +62,7 @@ func Rawtag_Upload(
 		} else {
 			scope = raw.Scope
 		}
-		debugRapidClass := _fmt.Sprint(scope, file.DebugFront, "\\:", raw.Range.Start.Row, "\\:", raw.Range.Start.Col, "_", normalized_symclass)
+		debugClass := _fmt.Sprint(scope, file.DebugFront, "\\:", raw.Range.Start.Row, "\\:", raw.Range.Start.Col, "_", normalized_symclass)
 
 		native_scanned, export_scanned := lodashstyle_process(raw.Styles[""], file, false,
 			_fmt.Sprint(raw.Scope, " : ", declaration, " | "), raw.SymClasses[0],
@@ -206,15 +164,12 @@ func Rawtag_Upload(
 			SummonSnippet: summon,
 		}
 
-		classdata := &_model.Style_ClassData{
+		index = DeclareClass(file, &_model.Style_ClassData{
 			Attributes:        attributes,
-			Index:             0,
 			Artifact:          artifact,
 			Definent:          raw.SymClasses[0],
 			SymClass:          symclass,
 			Metadata:          metadata,
-			DebugScatterClass: debugRapidClass,
-			DebugFinalClass:   debugRapidClass + "_Final",
 			Attachments:       attachments,
 			ExportStaple:      exportStaple,
 			NativeStaple:      nativeStaple,
@@ -223,14 +178,7 @@ func Rawtag_Upload(
 			ExportAttachStyle: exportAttachStyle,
 			NativeAttachStyle: nativeAttachStyle,
 			Range:             &raw.Range,
-		}
-		index = _action.Index_Declare(&_model.Cache_SymclassData{
-			Context: file,
-			SrcData: classdata,
-		})
-		classhash := _util.String_EnCounter(index)
-		classdata.ScatterClass = RapidClassPrefix + classhash
-		classdata.FinalClass = FinalClassPrefix + classhash
+		}, debugClass)
 
 		file.Cache.UsedIn = append(file.Cache.UsedIn, index)
 	}
@@ -243,14 +191,3 @@ func Rawtag_Upload(
 		Errors:      errors,
 	}
 }
-
-type R_Rawtag_Upload struct {
-	Symclass    string
-	Index       int
-	Attachments map[string]bool
-	Diagnostics []*_model.File_Diagnostic
-	Errors      []string
-}
-
-var RapidClassPrefix = "_"
-var FinalClassPrefix = "___"

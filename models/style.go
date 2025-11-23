@@ -36,24 +36,26 @@ type Style_Metadata struct {
 }
 
 type Style_ClassData struct {
-	Attributes        map[string]string
-	Index             int
-	Range             *reader.T_Range
-	Metadata          *Style_Metadata
-	Artifact          string
-	Definent          string
-	SymClass          string
-	DebugScatterClass string
-	DebugFinalClass   string
-	ScatterClass      string
-	FinalClass        string
-	Attachments       map[string]bool
-	NativeStaple      string
-	ExportStaple      string
-	NativeRawStyle    *_css.T_Block
-	ExportRawStyle    *_css.T_Block
-	NativeAttachStyle *_css.T_Block
-	ExportAttachStyle *_css.T_Block
+	Attributes          map[string]string
+	Index               int
+	Range               *reader.T_Range
+	Metadata            *Style_Metadata
+	Artifact            string
+	Definent            string
+	SymClass            string
+	DebugScatterClass   string
+	DebugFinalClass     string
+	PreviewScatterClass string
+	PreviewFinalClass   string
+	PublishScatterClass string
+	PublishFinalClass   string
+	Attachments         map[string]bool
+	NativeStaple        string
+	ExportStaple        string
+	NativeRawStyle      *_css.T_Block
+	ExportRawStyle      *_css.T_Block
+	NativeAttachStyle   *_css.T_Block
+	ExportAttachStyle   *_css.T_Block
 }
 
 type Style_Dictionary map[string]map[int]string

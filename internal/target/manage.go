@@ -37,8 +37,8 @@ func (This *Class) Savefile(filepath string, content string, hashindex int) {
 		file.WatchAttrs = watchAttrs
 	}
 	parse_response := _script.Rider(file, _script.E_Method_Read)
-	file.Cache.RigidTracks = parse_response.RigidTracks
-	file.Cache.RapidStyles = parse_response.RapidAssign
+	file.Cache.RigidTracks = parse_response.OrderedTracks
+	file.Cache.RapidStyles = parse_response.ScatteredAssign
 	file.Cache.FinalStyles = parse_response.FinalAssign
 	file.Midway = parse_response.Scribed
 

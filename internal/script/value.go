@@ -76,8 +76,8 @@ var op_lodash = byte(_config.Root.CustomOp["lodash"])
 
 type value_Parse_retype struct {
 	OrderedClasses []string
-	RapidClasses   map[string]bool
-	FinalClasses   map[string]bool
+	ScatterList    map[string]bool
+	FinalList      map[string]bool
 	Loadashes      map[string]bool
 	Scribed        string
 }
@@ -97,8 +97,8 @@ func Value_Parse(
 	}
 
 	loadashes := make(map[string]bool, 12)
-	rapidClasses := make(map[string]bool, 12)
-	finalClasses := make(map[string]bool, 12)
+	scatterList := make(map[string]bool, 12)
+	finalList := make(map[string]bool, 12)
 	orderedlist := make([]string, 0, 12)
 	var entry _string.Builder
 
@@ -119,9 +119,9 @@ func Value_Parse(
 				case op_order:
 					orderedlist = append(orderedlist, entryString)
 				case op_scatter:
-					rapidClasses[entryString] = true
+					scatterList[entryString] = true
 				case op_finalize:
-					finalClasses[entryString] = true
+					finalList[entryString] = true
 				case op_lodash:
 					loadashes[entryString] = true
 				}
@@ -190,7 +190,7 @@ func Value_Parse(
 									))
 									_config.Style.Publish_Scattered["."+name] = res.Index
 								} else {
-									stream.WriteString(res.Data.SrcData.ScatterClass)
+									stream.WriteString(res.Data.SrcData.PublishScatterClass)
 								}
 								awaitop = false
 							}
@@ -208,7 +208,7 @@ func Value_Parse(
 									))
 									_config.Style.Publish_Final["."+name] = res.Index
 								} else {
-									stream.WriteString(res.Data.SrcData.FinalClass)
+									stream.WriteString(res.Data.SrcData.PublishFinalClass)
 								}
 								awaitop = false
 							}
@@ -239,8 +239,8 @@ func Value_Parse(
 
 	return value_Parse_retype{
 		OrderedClasses: orderedlist,
-		RapidClasses:   rapidClasses,
-		FinalClasses:   finalClasses,
+		ScatterList:    scatterList,
+		FinalList:      finalList,
 		Loadashes:      loadashes,
 		Scribed:        streamed,
 	}

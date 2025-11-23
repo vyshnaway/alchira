@@ -33,7 +33,7 @@ func Tag_Scanner(
 	cursor *_reader.T_Reader,
 ) tag_Parse_retype {
 	classesList := make([][]string, 0, 1)
-	rapidList := make(map[string]bool, 4)
+	scatterList := make(map[string]bool, 4)
 	finalList := make(map[string]bool, 4)
 	braceTrack := make([]rune, 0, 8)
 	loadashes := make(map[string]bool, 12)
@@ -165,8 +165,8 @@ func Tag_Scanner(
 							cursor,
 							!isWatching,
 						)
-						_map.Copy(rapidList, value_Parse_return.RapidClasses)
-						_map.Copy(finalList, value_Parse_return.FinalClasses)
+						_map.Copy(scatterList, value_Parse_return.ScatterList)
+						_map.Copy(finalList, value_Parse_return.FinalList)
 						if isWatching {
 							if len(value_Parse_return.OrderedClasses) > 0 {
 								classesList = append(classesList, value_Parse_return.OrderedClasses)
@@ -233,7 +233,7 @@ func Tag_Scanner(
 		Ok:                ok,
 		Loadashes:         loadashes,
 		FinalList:         finalList,
-		RapidList:         rapidList,
+		RapidList:         scatterList,
 		Fragment:          fragString,
 		SelfClosed:        selfClosed,
 		ClassSynced:       classSynced,

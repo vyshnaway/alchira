@@ -33,23 +33,15 @@ PROJECT_DIR="$(pwd -P)"
 SCRIPT_PATH="$(resolve_real_path "$0")"
 SCRIPT_DIR="$(dirname "$SCRIPT_PATH")"
 
-# Assuming the Go source is at the root of the project structure 
-# (../ relative to the script's directory).
-ROOT_DIR="$(cd "$SCRIPT_DIR/../../" && pwd -P)"
-
-SRC_DIR="source"        # Directory containing Go source code
-EXEC_DIR="bin"     # Output directory for the executable
-EXEC_FILE="executable"   # Name of the output executable
-
 # Full absolute paths for source and output
-SRC_PATH="$ROOT_DIR/$SRC_DIR"
-EXEC_OUT_DIR="$SRC_PATH/$EXEC_DIR"
-BIN_PATH="$EXEC_OUT_DIR/$EXEC_FILE"
+SRC_PATH="$(cd "$SCRIPT_DIR/../" && pwd -P)"
+OUT_DIR="$SRC_PATH/bin"
+BIN_PATH="$OUT_DIR/executable"
 
 # --- 2. Build Execution ---
 
 # Create the output directory if it doesn't exist
-mkdir -p "$EXEC_OUT_DIR"
+mkdir -p "$OUT_DIR"
 
 # echo "Building project..."
 

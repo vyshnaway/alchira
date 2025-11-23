@@ -117,7 +117,7 @@ func Generate_Files() (Files map[string]string, Report string) {
 		if _config.Static.DEBUG {
 			scattered_block.SetBlock("."+d.SrcData.DebugScatterClass, d.SrcData.NativeRawStyle)
 		} else {
-			scattered_block.SetBlock("."+d.SrcData.ScatterClass, d.SrcData.NativeRawStyle)
+			scattered_block.SetBlock("."+d.SrcData.PublishScatterClass, d.SrcData.NativeRawStyle)
 		}
 	}
 	scattered_frag := _css.Render_Switched(scattered_block, _config.Static.MINIFY)
@@ -128,7 +128,7 @@ func Generate_Files() (Files map[string]string, Report string) {
 		if _config.Static.DEBUG {
 			final_block.SetBlock("."+d.SrcData.DebugFinalClass, d.SrcData.NativeRawStyle)
 		} else {
-			final_block.SetBlock("."+d.SrcData.FinalClass, d.SrcData.NativeRawStyle)
+			final_block.SetBlock("."+d.SrcData.PublishFinalClass, d.SrcData.NativeRawStyle)
 		}
 	}
 	final_frag := _css.Render_Switched(final_block, _config.Static.MINIFY)
