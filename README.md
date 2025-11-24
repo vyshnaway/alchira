@@ -606,7 +606,7 @@ Class loaders has three varients each with different purpuses
 
 ### Ordered Class Loader (`!`)
 - Classes applied with this operator comes after scattered assigns and provide explicit control over cascading over. 
-- These imports can't be useed outside values of watch attributes.
+- These operator can only be used inside values of tag attributes.
 
 ### Final Class Loader (`=`)
 - Classes applied with this operator comes after Ordered assigns but does't provide explicit control over cascading.
@@ -623,9 +623,9 @@ Class loaders has three varients each with different purpuses
 	!order$class-1
 	=final$class-2 
 	!order$class-2
-" onload="loading?'\=final$class-1':'\=final-class-3'"> Content </div>
+" onload="this.classlist.add(loading?'\=final$class-1':'\=final-class-3')"> Content </div>
 <!-- 
-Prefer not using `Final classes` in watch attributes, 
+Prefer not to use `Final classes` in watch attributes, 
 unless for conditional adding to classname with inline script.
 -->
 
@@ -663,19 +663,38 @@ unless for conditional adding to classname with inline script.
 ```html
 <summon
 	custom$class="
-		= atomic$class-1 atomic$class-2 atomic$class-3 atomic$class-4;
-		~ attch$class-1 attch$class-2 attch$class-3 attch$class-4;
+		/* Assign Directive Operator */ 
+		= atomic$class-1 atomic$class-2;
+
+		/* Attach Directive Operator */
+		~ attach$class-1 attach$class-2;
+		
 		attribute-1: value-1;
 		attribute-2: value-2;
-		attribute-3: value-3;
+		
+		/* Merge Flatten*/
+		&[x-look=]& {
+			&[varient-1] { *** }
+			&[varient-2] { *** }
+		}
 	"
 >Template</summon>
 ```
 
+### Directive Operators
 - When composing sym-classes within tags, this syntax is a drop-in replacement for custom CSS directives.
   - `=` maps to `@--assign`
   - `~` maps to `@--attach`
 - Both operators produce the same final CSS output. They coexist mainly for developer convenience and clarity.
+
+### Merge-Flatten Operator
+
+This operator applies only when certain conditions are met:
+
+1. Nested child selectors must begin with the `&` character.
+2. The parent selector must end with one or more `&` characters (denoted as *n*, where *n*≥1).
+
+ When merging occurs, exactly `n` characters are removed from the end of the parent selector and the beginning of the child selector—excluding the special prefix `&` and suffix `&` characters—before concatenating them.
 # 6. Composition
 
 ## Symbolic-Class 
@@ -770,11 +789,25 @@ body[data-loading] .$class { ... }
 - Unoptimized cascading order, and respective classnames.
 - Classname is enumered hash followed by cascade position index.
 - **Scattered Classes:**
+  - Format: `~{classname}`
+  - Example: `~scatter-class` 
+- **Ordered Classes:**
+  - Format: `!{hash}_{cascade-counter}`
+  - Example: `!Ordered-class_23` 
+- **Final Classes:**
+  - Format: `={classname}`
+  - Example: `=final-class` 
+
+### `publish`
+
+- Unoptimized cascading order, and respective classnames.
+- Classname is enumered hash followed by cascade position index.
+- **Scattered Classes:**
   - Format: `_{hash}`
   - Example: `__k9`, `__8i` 
 - **Ordered Classes:**
   - Format: `__{hash}-{cascade-counter}`
-  - Example: `__H9-45`, `__8h-23` 
+  - Example: `__H9`, `__8h` 
 - **Final Classes:**
   - Format: `___{hash}`
   - Example: `___k9`, `___8i`

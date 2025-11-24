@@ -1,6 +1,6 @@
 # Flavourize
 
-## Fork / Clone repository
+### Fork / Clone repository
 
 - Fork this repository using your preferred Git service (e.g., GitHub, GitLab, Bitbucket), or clone the repository locally if you only want to keep a local copy without sharing or collaborating.
 - Forking creates a copy in your own account for collaborative development, while cloning copies the repository directly to your local machine.
@@ -14,6 +14,14 @@
 
 - The sandbox template provides a predefined example environment for testing and experimentation. 
 - You can personalize it by modifying configuration files, sample code, or dependencies so that it matches the needs of your development or testing scenarios.
+
+### Update Intro File
+
+- Modify the intro.md file within the scaffold to update the introduction section of the auto-generated **README.md** file.
+- When cloning this repository, ensure you keep the existing introduction unchanged. You can add any new content you want immediately after the original introduction, without modifying or removing it.
+- This method preserves the original context and key information while allowing you to enrich the documentation with additional details.
+- After making changes, run the **package.js** script to regenerate and update the **README.md** file with the revised content.
+
 
 ### Prepare Package Metadata
 
