@@ -16,7 +16,7 @@ type tag_Parse_retype struct {
 	SelfClosed        bool
 	ClassSynced       bool
 	Fragment          string
-	ClassesList       []string
+	ClassList         []string
 	Loadashes         map[string]bool
 	RapidList         map[string]bool
 	FinalList         map[string]bool
@@ -233,7 +233,7 @@ func Tag_Scanner(
 		Fragment:          fragString,
 		SelfClosed:        selfClosed,
 		ClassSynced:       classSynced,
-		ClassesList:       classesList,
+		ClassList:         classesList,
 		NativeAttributes:  nativeAttributes,
 		StyleDeclarations: styleDeclarations,
 	}

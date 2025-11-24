@@ -39,7 +39,7 @@ type GetTracks_return struct {
 }
 
 func (This *Class) GetTracks() GetTracks_return {
-	classtracks := make([][]int, 24*len(This.FileCache))
+	classtracks := make([][]int, 0, 24*len(This.FileCache))
 	attachments := make(map[int]bool, 8)
 	rapidIntMap := make(map[int]bool, 8)
 	finalIntMap := make(map[int]bool, 8)
@@ -96,7 +96,7 @@ func (This *Class) GetTracks() GetTracks_return {
 			}
 		}
 	}
-
+	
 	return GetTracks_return{
 		ClassTracks: classtracks,
 		Attachments: attachments,

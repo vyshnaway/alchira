@@ -78,7 +78,9 @@ func Rider(
 				_map.Copy(scatteredList, result.RapidList)
 				_map.Copy(finalList, result.FinalList)
 				_map.Copy(loadashes, result.Loadashes)
-				orderList = append(orderList, result.ClassesList)
+				if len(result.ClassList) > 0 {
+					orderList = append(orderList, result.ClassList)
+				}
 				for k, v := range result.StyleDeclarations.Styles {
 					if len(v) > 2 {
 						result.StyleDeclarations.Styles[k] = v[1 : len(v)-1]
