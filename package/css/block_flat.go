@@ -6,15 +6,15 @@ import (
 )
 
 func amparsandSuffixLen(str string) int {
-    count := 0
-    for i := len(str) - 1; i >= 0; i-- {
-        if str[i] == '&' || str[i] == '*' {
-            count++
-        } else {
-            break
-        }
-    }
-    return count
+	count := 0
+	for i := len(str) - 1; i >= 0; i-- {
+		if str[i] == '&' || str[i] == '*' {
+			count++
+		} else {
+			break
+		}
+	}
+	return count
 }
 
 func (This *T_Block) flatten(parent string) (Res *T_Block) {
@@ -134,10 +134,10 @@ func (This *T_Block) flatten(parent string) (Res *T_Block) {
 	add := func(target *T_Block, list []string) {
 		for _, k := range list {
 			if i, v := This.GetBlock(k); i > -1 {
-				temparent := parent
 				if _string.HasPrefix(k, "&") {
 					k = k[1:]
-					if trimlen :=amparsandSuffixLen(parent); trimlen>0{
+					temparent := parent
+					if trimlen := amparsandSuffixLen(parent); trimlen > 0 {
 						temparent = temparent[:len(temparent)-(trimlen+1)]
 						k = k[trimlen:]
 					}
