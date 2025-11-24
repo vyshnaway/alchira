@@ -42,7 +42,7 @@ func Sandbox_Index(index int) (response any) {
 
 	summon = script.Rider(&clontext, script.E_Method_DebugHash).Scribed
 
-	FinalClassMap := []models.Style_ClassIndexTrace{
+	FinalClassMap := []models.Style_ClassIndexTrace{ 
 		{ClassName: "_", ClassIndex: data.SrcData.Index},
 	}
 	for c, i := range configs.Style.Sandbox_Scattered {
