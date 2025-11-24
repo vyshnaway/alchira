@@ -85,7 +85,7 @@ func ClearUnwantedCache() (
 }
 
 func FmtClassForCss(classname string) string {
-	return utils.String_Filter(
+	return "."+utils.String_Filter(
 		classname,
 		[]rune{'_', '-'},
 		[]rune{},

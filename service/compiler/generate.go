@@ -45,11 +45,11 @@ func Generate_Files() (Files map[string]string, Report string) {
 	for i := range scatteredMap {
 		d := _action.Index_Fetch(i)
 		if _config.Static.DEBUG {
-			scattered_block.SetBlock("."+FmtClassForCss(d.SrcData.DebugScatterClass), d.SrcData.NativeRawStyle)
+			scattered_block.SetBlock(FmtClassForCss(d.SrcData.DebugScatterClass), d.SrcData.NativeRawStyle)
 		} else if _config.Static.PREVIEW {
-			scattered_block.SetBlock("."+FmtClassForCss(d.SrcData.PreviewScatterClass), d.SrcData.NativeRawStyle)
+			scattered_block.SetBlock(FmtClassForCss(d.SrcData.PreviewScatterClass), d.SrcData.NativeRawStyle)
 		} else {
-			scattered_block.SetBlock("."+d.SrcData.PublishScatterClass, d.SrcData.NativeRawStyle)
+			scattered_block.SetBlock(FmtClassForCss(d.SrcData.PublishScatterClass), d.SrcData.NativeRawStyle)
 		}
 	}
 	scattered_frag := _css.Render_Switched(scattered_block, _config.Static.MINIFY)
@@ -58,11 +58,11 @@ func Generate_Files() (Files map[string]string, Report string) {
 	for i := range finalMap {
 		d := _action.Index_Fetch(i)
 		if _config.Static.DEBUG {
-			final_block.SetBlock("."+FmtClassForCss(d.SrcData.DebugFinalClass), d.SrcData.NativeRawStyle)
+			final_block.SetBlock(FmtClassForCss(d.SrcData.DebugFinalClass), d.SrcData.NativeRawStyle)
 		} else if _config.Static.PREVIEW {
-			final_block.SetBlock("."+FmtClassForCss(d.SrcData.PreviewFinalClass), d.SrcData.NativeRawStyle)
+			final_block.SetBlock(FmtClassForCss(d.SrcData.PreviewFinalClass), d.SrcData.NativeRawStyle)
 		} else {
-			final_block.SetBlock("."+d.SrcData.PublishFinalClass, d.SrcData.NativeRawStyle)
+			final_block.SetBlock(FmtClassForCss(d.SrcData.PublishFinalClass), d.SrcData.NativeRawStyle)
 		}
 	}
 	final_frag := _css.Render_Switched(final_block, _config.Static.MINIFY)
@@ -73,7 +73,7 @@ func Generate_Files() (Files map[string]string, Report string) {
 		class_builder.WriteString(_css.Render_Switched(func() *_css.T_Block {
 			result := _css.NewBlock(0, len(i))
 			for _, j := range i {
-				result.SetBlock("."+FmtClassForCss(j.ClassName), _action.Index_Fetch(j.ClassIndex).SrcData.NativeRawStyle)
+				result.SetBlock(FmtClassForCss(j.ClassName), _action.Index_Fetch(j.ClassIndex).SrcData.NativeRawStyle)
 			}
 			return result
 		}(), _config.Static.MINIFY))

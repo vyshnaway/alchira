@@ -63,7 +63,7 @@ func Sandbox_Index(index int) (response any) {
 				attachments[found.Index] = found.Data.SrcData
 			}
 		}
-		classBlocks.SetBlock("."+compiler.FmtClassForCss(i.ClassName), data.NativeRawStyle)
+		classBlocks.SetBlock(compiler.FmtClassForCss(i.ClassName), data.NativeRawStyle)
 	}
 	stylesheet.WriteString(css.Render_Switched(classBlocks, true))
 
