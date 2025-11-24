@@ -163,7 +163,7 @@ func Tag_Scanner(
 							method,
 							fileData,
 							cursor,
-							!isWatching,
+							isWatching,
 						)
 						_map.Copy(loadashes, value_Parse_return.Loadashes)
 						_map.Copy(scatterList, value_Parse_return.ScatterList)

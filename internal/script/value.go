@@ -82,13 +82,13 @@ func Value_Parse(
 	action E_Method,
 	fileData *_model.File_Stash,
 	FileCursor *_reader.T_Reader,
-	needsEscape bool,
+	isWatching bool,
 ) value_Parse_retype {
 	checkEscape := func(char byte) bool {
-		if needsEscape {
-			return char == '\\'
+		if isWatching {
+			return char != '\\'
 		}
-		return char != '\\'
+		return char == '\\'
 	}
 
 	loadashes := make(map[string]bool, 12)
@@ -125,7 +125,7 @@ func Value_Parse(
 				waitop = 0
 				entry.Reset()
 			}
-		} else if checkEscape(lastCh) && ((!needsEscape && op_order == ch) ||
+		} else if checkEscape(lastCh) && ((!isWatching && op_order == ch) ||
 			ch == op_scatter || ch == op_finalize || ch == op_lodash) {
 			awaitop = true
 			waitop = ch
@@ -212,7 +212,7 @@ func Value_Parse(
 					waitop = 0
 					awaitop = false
 				}
-			} else if checkEscape(lastCh) && ((!needsEscape && op_order == ch) ||
+			} else if checkEscape(lastCh) && ((!isWatching && op_order == ch) ||
 				ch == op_scatter || ch == op_finalize || ch == op_lodash) {
 				awaitop = true
 				waitop = ch

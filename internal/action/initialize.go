@@ -57,19 +57,16 @@ func Initialize(concurrent bool) {
 
 	S.Post(X.List_Record("Available Commands", O.FromUnorderedMap(_config.Root.Commands)))
 
-	if len(_config.Root.Version) > 0 && _config.Root.Version[0] == '0' {
-		S.Post(
-			X.List_Steps("Publish command instructions.",
-				[]string{"This command is not released."},
-			))
-	} else {
-		S.Post(X.List_Steps("Publish command instructions.", []string{
-			"Create a new project and use its access key. For action visit " +
-				S.Format(_config.Root.Url.Console, S.Preset.Primary, S.Style.AS_Bold),
-			"If using in CI/CD workflow, it is suggested to use " +
-				S.Format("{bin} publish {key}", S.Preset.Primary, S.Style.AS_Bold),
-		}))
+	pubSteps := []string{
+		"Create a new project and use its access key. For action visit " +
+			S.Format(_config.Root.Url.Console, S.Preset.Primary, S.Style.AS_Bold),
+		"If using in CI/CD workflow, it is suggested to use " +
+			S.Format("{bin} publish {key}", S.Preset.Primary, S.Style.AS_Bold),
 	}
+	if len(_config.Root.Version) > 0 && _config.Root.Version[0] == '0' {
+		pubSteps = []string{"This command is not available in beta releases."}
+	}
+	S.Post(X.List_Steps("Publish command instructions.", pubSteps))
 
 	S.Post(S.Tag.H4("Initialized setup", S.Preset.Success, S.Style.AS_Bold))
 }
