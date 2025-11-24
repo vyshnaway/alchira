@@ -12,6 +12,13 @@ var Sync_References = map[string]_model.File_Source{
 		Frags:   []string{"README.md"},
 		Content: "",
 	},
+	"flavourize": {
+		Title:   "Flavourize",
+		Url:     "flavourize.md",
+		Path:    "",
+		Frags:   []string{"FLAVOUR.md"},
+		Content: "",
+	},
 	"alerts": {
 		Title:   "Notifications",
 		Url:     "notifications.md",
