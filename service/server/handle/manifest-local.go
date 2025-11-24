@@ -130,7 +130,7 @@ func Manifest_Local(filepath string, symclass string) *R_ManifestLocal {
 	}
 
 	if index, ok := symclassIndex[symclass]; ok {
-		Sandbox_Index(index)
+		Sandbox_Save(index)
 	}
 
 Return:

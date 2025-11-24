@@ -26,7 +26,7 @@ func Sandbox_Load(filepath, symclass string) (response any) {
 	return Sandbox_View_Last
 }
 
-func Sandbox_Index(index int) (response any) {
+func Sandbox_Save(index int) (response any) {
 	var staplesheet, stylesheet strings.Builder
 	data := action.Index_Fetch(index)
 	if data == nil {
