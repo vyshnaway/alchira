@@ -124,7 +124,7 @@ func Organize() (AritfactFiles map[string]string, Attachments map[int]bool, Rapi
 				var classname string
 				if _config.Static.PREVIEW {
 					if d := _action.Index_Fetch(index); d != nil {
-						classname = string(op_strict) + d.SrcData.SymClass + "-" + _strconv.Itoa(classid)
+						classname = string(op_strict) + d.SrcData.SymClass + "_" + _strconv.Itoa(classid)
 					}
 				} else {
 					classname = "__" + _util.String_EnCounter(classid)

@@ -49,7 +49,7 @@ func value_EvaluateIndexTraces(
 				classdata := _action.Index_Fetch(item.ClassIndex)
 				classname := _fmt.Sprintf("%s%s", metaFront, classdata.SrcData.DebugScatterClass)
 				temp_map = append(temp_map, _model.Style_ClassIndexTrace{
-					ClassName:  "." + classname,
+					ClassName:  classname,
 					ClassIndex: item.ClassIndex,
 				})
 				classMap[item.ClassName] = classname
@@ -177,7 +177,7 @@ func Value_Parse(
 								if action == E_Method_DebugHash {
 									classname := res.Data.SrcData.DebugScatterClass
 									stream.WriteString(classname)
-									_config.Style.Sandbox_Scattered["."+classname] = res.Index
+									_config.Style.Sandbox_Scattered[classname] = res.Index
 								} else if _config.Static.PREVIEW {
 									stream.WriteString(res.Data.SrcData.PreviewScatterClass)
 								} else {
@@ -192,7 +192,7 @@ func Value_Parse(
 								if action == E_Method_DebugHash {
 									classname := res.Data.SrcData.DebugFinalClass
 									stream.WriteString(classname)
-									_config.Style.Sandbox_Final["."+classname] = res.Index
+									_config.Style.Sandbox_Final[classname] = res.Index
 								} else if _config.Static.PREVIEW {
 									stream.WriteString(res.Data.SrcData.PreviewFinalClass)
 								} else {

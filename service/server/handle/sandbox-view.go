@@ -6,6 +6,7 @@ import (
 	"main/internal/script"
 	"main/models"
 	"main/package/css"
+	"main/service/compiler"
 	"strings"
 )
 
@@ -42,7 +43,7 @@ func Sandbox_Index(index int) (response any) {
 	summon = script.Rider(&clontext, script.E_Method_DebugHash).Scribed
 
 	FinalClassMap := []models.Style_ClassIndexTrace{
-		{ClassName: "._", ClassIndex: data.SrcData.Index},
+		{ClassName: "_", ClassIndex: data.SrcData.Index},
 	}
 	for c, i := range configs.Style.Sandbox_Scattered {
 		FinalClassMap = append(FinalClassMap, models.Style_ClassIndexTrace{ClassName: c, ClassIndex: i})
@@ -62,7 +63,7 @@ func Sandbox_Index(index int) (response any) {
 				attachments[found.Index] = found.Data.SrcData
 			}
 		}
-		classBlocks.SetBlock(i.ClassName, data.NativeRawStyle)
+		classBlocks.SetBlock("."+compiler.FmtClassForCss(i.ClassName), data.NativeRawStyle)
 	}
 	stylesheet.WriteString(css.Render_Switched(classBlocks, true))
 
