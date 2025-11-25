@@ -293,6 +293,9 @@ func Execute(heading string, concurrent bool) (Exitcode int) {
 		}
 
 		_config.Static.ExecuteMutex.Unlock()
+		if _config.Static.SERVER || _config.Static.IAMAI {
+			report = ""
+		}
 		if _config.Static.WATCH {
 			if !_config.Static.SERVER && !_config.Static.IAMAI && len(report) > 0 && showReport {
 				S.Post(X.Report(heading, []string{}, report))
