@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"sync"
+	"time"
 
 	"github.com/gorilla/websocket"
 )
@@ -120,6 +121,13 @@ func Webview_Create(tryport int) (httpServer *http.Server, deducedPort int, err 
 		Addr:    ":" + strconv.Itoa(foundPort),
 		Handler: mux,
 	}
+
+	go func() {
+		t := time.NewTicker(100 * time.Millisecond)
+		for range t.C {
+			Interactive("sandbox-view", []string{}, true)
+		} 
+	}()
 
 	return server, foundPort, nil
 }
