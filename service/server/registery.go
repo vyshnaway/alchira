@@ -47,7 +47,7 @@ var Registery = map[string]T_RegisterEntry{
 			return ""
 		},
 		func(params handle.T_Manifest_Mixed) any {
-			res :=  handle.Manifest_Mixed(params)
+			res := handle.Manifest_Mixed(params)
 			return res
 		},
 		[]string{},
@@ -80,7 +80,7 @@ var Registery = map[string]T_RegisterEntry{
 		[]string{},
 		true,
 	),
-	"sandbox-state-set": RegisterMethod(
+	"server-state-set": RegisterMethod(
 		1,
 		func(args []string) any {
 			if len(args) > 1 {
@@ -99,7 +99,7 @@ var Registery = map[string]T_RegisterEntry{
 		},
 		true,
 	),
-	"sandbox-state-init": RegisterMethod(
+	"server-state-init": RegisterMethod(
 		1,
 		func(args []string) any {
 			if len(args) > 1 {
@@ -118,7 +118,7 @@ var Registery = map[string]T_RegisterEntry{
 		},
 		true,
 	),
-	"sandbox-state-list": RegisterMethod(
+	"server-state-list": RegisterMethod(
 		0,
 		func(args []string) any {
 			return handle.Sandbox_State_Mem
