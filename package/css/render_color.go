@@ -118,7 +118,7 @@ func Color_FallbackGen(
 
 		if _slices_.Contains(fallbackPalettes, capture.String()) && content[cursor.Active.Idx] == '(' {
 			frompos := cursor.Active.Idx
-			values := color_Investigate(&cursor, capture.String())
+			values := color_Investigate(cursor, capture.String())
 			if len(values) > 2 {
 
 				r := 0.0

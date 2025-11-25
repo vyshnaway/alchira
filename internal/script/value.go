@@ -24,13 +24,6 @@ func Value_Parse(
 	FileCursor *_reader.T_Reader,
 	isWatching bool,
 ) value_Parse_retype {
-	checkOp := func(last, ch byte) bool {
-		opok := op_order == ch || ch == op_scatter || ch == op_finalize || ch == op_lodash
-		if isWatching {
-			return last != '\\' && opok
-		}
-		return last == '\\' && opok
-	}
 
 	loadashes := make(map[string]bool, 12)
 	scatterList := make(map[string]bool, 12)
@@ -66,14 +59,14 @@ func Value_Parse(
 				waitop = 0
 				entry.Reset()
 			}
-		} else if checkOp(lastCh, ch) {
+		} else if checkOpSlash(isWatching, lastCh, ch) {
 			awaitop = true
 			waitop = ch
 		}
 		lastCh = ch
 	}
 
-	if action != E_Method_Read && action != E_Method_StripTag {
+	if action != E_Method_Read && action != E_Method_Strip {
 		var stream _string.Builder
 		entry.Reset()
 		waitop = 0
@@ -152,7 +145,7 @@ func Value_Parse(
 					waitop = 0
 					awaitop = false
 				}
-			} else if checkOp(lastCh, ch) {
+			} else if checkOpSlash(isWatching, lastCh, ch) {
 				awaitop = true
 				waitop = ch
 			} else {

@@ -16,7 +16,7 @@ type E_Method int
 const (
 	E_Method_Read E_Method = iota
 	E_Method_LoadHash
-	E_Method_StripTag
+	E_Method_Strip
 	E_Method_BuildHash
 	E_Method_DebugHash
 )
@@ -49,7 +49,7 @@ func Rider(
 
 	var content string
 	var stream _string.Builder
-	if method == E_Method_Read || method == E_Method_StripTag {
+	if method == E_Method_Read || method == E_Method_Strip {
 		content = fileData.Content
 		fileData.Midway = ""
 	} else {
@@ -69,43 +69,47 @@ func Rider(
 
 		if cursor.Active.Last != '\\' && ch == '<' && regexp_aftertagopen.MatchString(string(cursor.Active.Next)) {
 			tagStart := cursor.Active.Idx
-			result := Tag_Scanner(fileData, method, &cursor)
-			fragment := result.Fragment
-			hasDeclared := (len(result.StyleDeclarations.Styles) > 0 || len(result.StyleDeclarations.SymClasses) > 0)
+			cursorx := *cursor
+			parsed := Tag_Scanner(fileData, method, cursor, []string{})
+			if method != E_Method_Read && method != E_Method_Strip {
+				parsed = Tag_Scanner(fileData, method, &cursorx, parsed.ClassList)
+			}
+			fragment := parsed.Fragment
+			hasDeclared := (len(parsed.StyleDeclarations.Styles) > 0 || len(parsed.StyleDeclarations.SymClasses) > 0)
 
 			exitedNow := false
-			if result.Ok {
-				_map.Copy(scatteredList, result.RapidList)
-				_map.Copy(finalList, result.FinalList)
-				_map.Copy(loadashes, result.Loadashes)
-				if len(result.ClassList) > 0 {
-					orderList = append(orderList, result.ClassList)
+			if parsed.Ok {
+				_map.Copy(scatteredList, parsed.RapidList)
+				_map.Copy(finalList, parsed.FinalList)
+				_map.Copy(loadashes, parsed.Loadashes)
+				if len(parsed.ClassList) > 0 {
+					orderList = append(orderList, parsed.ClassList)
 				}
-				for k, v := range result.StyleDeclarations.Styles {
+				for k, v := range parsed.StyleDeclarations.Styles {
 					if len(v) > 2 {
-						result.StyleDeclarations.Styles[k] = v[1 : len(v)-1]
+						parsed.StyleDeclarations.Styles[k] = v[1 : len(v)-1]
 					} else {
-						delete(result.StyleDeclarations.Styles, k)
+						delete(parsed.StyleDeclarations.Styles, k)
 					}
 				}
 
 				if method == E_Method_Read {
 					if hasDeclared {
-						stylesList = append(stylesList, &result.StyleDeclarations)
+						stylesList = append(stylesList, &parsed.StyleDeclarations)
 					}
-					if len(tagTrack) > 0 || (result.StyleDeclarations.Elid > 0 && hasDeclared) {
+					if len(tagTrack) > 0 || (parsed.StyleDeclarations.Elid > 0 && hasDeclared) {
 						fragment = ""
 					}
 				} else if elid, status := replacementTags[fragment]; status {
 					replacements = append(replacements, _model.File_TagReplacement{Loc: stream.Len(), Elid: elid})
 					fragment = ""
-				} else if len(tagTrack) > 0 || (result.StyleDeclarations.Elid > 0 && hasDeclared) {
+				} else if len(tagTrack) > 0 || (parsed.StyleDeclarations.Elid > 0 && hasDeclared) {
 					fragment = ""
 				}
 
-				if !result.SelfClosed {
-					if result.StyleDeclarations.Element[0] == '/' {
-						element := result.StyleDeclarations.Element[1:]
+				if !parsed.SelfClosed {
+					if parsed.StyleDeclarations.Element[0] == '/' {
+						element := parsed.StyleDeclarations.Element[1:]
 						if len(tagTrack) != 0 {
 							track := tagTrack[len(tagTrack)-1]
 							tagTrack = tagTrack[:len(tagTrack)-1]
@@ -117,9 +121,9 @@ func Rider(
 								tagTrack = append(tagTrack, track)
 							}
 						}
-					} else if _slice.Contains(_config.Static.CustomTags, result.StyleDeclarations.Element) && hasDeclared {
-						result.StyleDeclarations.Attributes = result.NativeAttributes
-						tagTrack = append(tagTrack, &result.StyleDeclarations)
+					} else if _slice.Contains(_config.Static.CustomTags, parsed.StyleDeclarations.Element) && hasDeclared {
+						parsed.StyleDeclarations.Attributes = parsed.NativeAttributes
+						tagTrack = append(tagTrack, &parsed.StyleDeclarations)
 					}
 				}
 			} else {
@@ -130,7 +134,7 @@ func Rider(
 				stream.WriteString(fragment)
 			}
 			awaitop = false
-		} else if method != E_Method_StripTag && awaitop {
+		} else if method != E_Method_Strip && awaitop {
 			if ok := symclass_chars.Match([]byte{by}); ok {
 				entry.WriteByte(by)
 			} else {
@@ -178,7 +182,7 @@ func Rider(
 				waitop = 0
 				awaitop = false
 			}
-		} else if method != E_Method_StripTag &&
+		} else if method != E_Method_Strip &&
 			cursor.Active.Last == '\\' &&
 			(by == op_scatter || by == op_finalize || by == op_lodash) {
 			awaitop = true

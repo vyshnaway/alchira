@@ -80,6 +80,6 @@ func stripCustomTags(ref *_model.File_Stash, str string) string {
 	file := *ref
 	file.Midway = str
 	file.Content = str
-	out := _script.Rider(&file, _script.E_Method_StripTag).Scribed
+	out := _script.Rider(&file, _script.E_Method_Strip).Scribed
 	return out
 }

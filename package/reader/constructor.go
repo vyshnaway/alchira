@@ -24,10 +24,10 @@ type T_Reader struct {
 	Streaming bool
 }
 
-func New(content string) T_Reader {
+func New(content string) *T_Reader {
 	This := T_Reader{Runes: []rune(content)}
 	This.Reset()
-	return This
+	return &This
 }
 
 func (This *T_Reader) Reset() {

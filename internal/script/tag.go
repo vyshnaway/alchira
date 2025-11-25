@@ -31,6 +31,7 @@ func Tag_Scanner(
 	fileData *_model.File_Stash,
 	method E_Method,
 	cursor *_reader.T_Reader,
+	orederedlist []string,
 ) tag_Parse_retype {
 	classesList := make([]string, 0, 1)
 	scatterList := make(map[string]bool, 4)
@@ -158,19 +159,25 @@ func Tag_Scanner(
 					} else {
 						classSynced = true
 						isWatching := _slice.Contains(fileData.WatchAttrs, tr_Attr)
-						value_Parse_return := Value_Parse(
-							tr_Value,
-							method,
-							fileData,
-							cursor,
-							isWatching,
-						)
-						_map.Copy(loadashes, value_Parse_return.Loadashes)
-						_map.Copy(scatterList, value_Parse_return.ScatterList)
-						_map.Copy(finalList, value_Parse_return.FinalList)
-						classesList = append(classesList, value_Parse_return.OrderedClasses...)
-						nativeAttributes[tr_Attr] = value_Parse_return.Scribed
-						SaveToFrag(tr_Attr, value_Parse_return.Scribed)
+						scribed := tr_Value
+						if method == E_Method_Strip || method == E_Method_Read {
+							value_Parse_return := Value_ClassFilter(tr_Value, isWatching)
+							_map.Copy(loadashes, value_Parse_return.Loadashes)
+							_map.Copy(scatterList, value_Parse_return.ScatterList)
+							_map.Copy(finalList, value_Parse_return.FinalList)
+							classesList = append(classesList, value_Parse_return.OrderedClasses...)
+						} else {
+							scribed = Value_Builder(
+								tr_Value,
+								method,
+								fileData,
+								cursor,
+								isWatching,
+								orederedlist,
+							)
+						}
+						nativeAttributes[tr_Attr] = scribed
+						SaveToFrag(tr_Attr, scribed)
 					}
 				}
 
