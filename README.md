@@ -66,27 +66,27 @@ npm run xcss {command}
 # 1. Command Line
 
 - `init`
-	- Sets up the project by importing the configuration folder, and makes necessary changes to `configure.jsonc`.
-	- If run inside an already initialized directory, it will create the necessary sub-folders as defined.
+  - Sets up the project by importing the configuration folder, and makes necessary changes to `configure.jsonc`.
+  - If run inside an already initialized directory, it will create the necessary sub-folders as defined.
 
 - `debug` : Compiles with full verbosity and traceability
-	- Verbose output
-	- Traceable class-names and properties.
-	- Larger output size
-	- Use `debug -w` for live compilation with identical output.
+  - Verbose output
+  - Traceable class-names and properties.
+  - Larger output size
+  - Use `debug -w` for live compilation with identical output.
 
 - `preview` : Optimized compilation for lightweight builds:
-	- Hashed class-names (≥ 3 characters)
-	- Minified CSS.
-	- Partial dependency resolution
-	- Optimized for minimal class footprint
-	- Use `preview -w` for live compilation.
+  - Hashed class-names (≥ 3 characters)
+  - Minified CSS.
+  - Partial dependency resolution
+  - Optimized for minimal class footprint
+  - Use `preview -w` for live compilation.
 
 - `publish {key}` : 
-	- Requires a valid key and active internet connection
-	- Executes only if no compilation errors are present
-	- Falls back to the `preview` build if conditions aren't met
-	- **Recommended for production-grade enterprise deployments**
+  - Requires a valid key and active internet connection
+  - Executes only if no compilation errors are present
+  - Falls back to the `preview` build if conditions aren't met
+  - **Recommended for production-grade enterprise deployments**
 # 2. Example Demo
 
 ## Input
@@ -98,9 +98,9 @@ npm run xcss {command}
 <html lang="en">
 
 <head>
-	<meta charset="utf-8" />
-	<meta name="viewport" content="width=device-width, initial-scale=1" />
-	<!-- style -->
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- style -->
 </head>
 ```
 - `<!-- style -->`, a reserved comment tag, which will be replaced by compiled stylesheet.
@@ -111,13 +111,13 @@ npm run xcss {command}
 data-sveltekit-preload-data="hover" 
 class="=bg$pattern-checkerboard =$custom-pattern" 
 _$custom-pattern="
-	--pattern-checker-bg1: #456734;
-	--pattern-checker-bg2: #2bb43d;
-	--pattern-checker-size: var(---delta-block-lg);
+  --pattern-checker-bg1: #456734;
+  --pattern-checker-bg2: #2bb43d;
+  --pattern-checker-size: var(---delta-block-lg);
 "
 {@media (min-width:512px)}&="
-	--pattern-checker-bg1: var(---primary-100);
-	--pattern-checker-bg2: var(---secondary-900);
+  --pattern-checker-bg1: var(---primary-100);
+  --pattern-checker-bg2: var(---secondary-900);
 ">
 ```
 
@@ -127,33 +127,32 @@ _$custom-pattern="
 - To use a symbolic class use `={sym-class}` with in attributes. 
 
 ```html
-	<staple amorphous$--container>
-		<svg xmlns="http://www.w3.org/2000/svg">
-			<defs>
-				<filter id="#glass-distortion" x="0%" y="0%" width="100%" height="100%">
-					<feTurbulence type="fractalNoise" baseFrequency="0.008 0.008" numOctaves="2" seed="92"
-						result="noise" />
-					<feGaussianBlur in="noise" stdDeviation="2" result="blurred" />
-					<feDisplacementMap in="SourceGraphic" in2="blurred" scale="77" xChannelSelector="R"
-						yChannelSelector="G" />
-				</filter>
-			</defs>
-		</svg>
-	</staple>
+  <staple amorphous$--container>
+    <svg xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <filter id="#glass-distortion" x="0%" y="0%" width="100%" height="100%">
+          <feTurbulence type="fractalNoise" baseFrequency="0.008 0.008" numOctaves="2" seed="92"
+            result="noise" />
+          <feGaussianBlur in="noise" stdDeviation="2" result="blurred" />
+          <feDisplacementMap in="SourceGraphic" in2="blurred" scale="77" xChannelSelector="R"
+            yChannelSelector="G" />
+        </filter>
+      </defs>
+    </svg>
+  </staple>
 ```
 
 -  `<staple ... > ... </staple>` a special tag used to create a **dependency to text-block with a symclass**. The content with-in the tag will be only deployed if the corresponding symclass is used compiled CSS.
 
 ```html
-	<summon style="
-		background-size: 18px 18px;
-		background-image: linear-gradient(#ffffff 0.9px, transparent 0.9px), 
-			linear-gradient(to right, oklab(100% 0 -0.00011) 0.9px, #cacaca 1px);
-	" data-amorphous-type="liquid" amorphous$$$container="
-		~ amorphous$--container;
-		= p-24 m-0 border-0 d-flex align-center justify-center position-fixed
-			= tx$decoration-none border-dotted cursor-pointer tx$size-h1;
-		= isolate an$transition-all an$animation-delay-500;
+  <summon style="
+    background-size: 18px 18px;
+    background-image: linear-gradient(#ffffff 0.9px, transparent 0.9px), 
+      linear-gradient(to right, oklab(100% 0 -0.00011) 0.9px, #cacaca 1px);
+  " data-amorphous-type="liquid" amorphous$$$container="
+		~ amorphous$--container ;
+		= p-12 m-0 border-0 d-flex align-center justify-center position-fixed;
+		= tx$decoration-none isolate an$transition-all an$animation-delay-500;
 		animation: .5s fade-in forwards;
 		&:hover {
 			= tf$scale-105;
@@ -166,29 +165,30 @@ _$custom-pattern="
 			= position-absolute inset-0 layer-neg-1 radius-16 tx$content-clear;
 			box-shadow: inset 0 0 15px -5px #ffffffec;
 		}
-		&[data-amorphous-type='frosted'] {
-			&::after { backdrop-filter: blur(1px); }
-			&::before { background-color: lab(93.8 1 -5.7 / 0.713); }
+		&[data-glass-type=]& {
+			&['liquid'] {
+				&::after { backdrop-filter: blur(.5px); }
+				&::before { background-color: #e7fffa73; }
+			}
+			&['frosted'] {
+				&::after { backdrop-filter: blur(1px); }
+				&::before { background-color: lab(93.8 1 -5.7 / 0.713); }
+			}
 		}
-		&[data-amorphous-type='liquid'] {
-			&::after { backdrop-filter: blur(.5px); }
-			&::before { background-color: #e7fffa73; }
-		}
-	">
-		Template
-	</summon>
+  ">
+    Template
+  </summon>
 ```
-
 - `<summon ... > ... </summon>`, a special tag which lets you create portable template for component level **symclasses**, which can be used for preview in a live sand-boxed environment while using language server. 
 - `@--attach` / `~` can be used to add a dependency attachment of a symbolic class. These will be used for dependency tracking.
 
 ```html
-	<div data-amorphous-type='liquid' class="~amorphous$$$container"> Content </div>
+  <div data-amorphous-type='liquid' class="~amorphous$$$container"> Content </div>
 ```
 - Symbolic classes can  defined anywhere and used where-ever within the provided scope.
 
 ```html
-	<!-- staple -->
+  <!-- staple -->
 </body>
 </html>
 ```
@@ -201,115 +201,115 @@ _$custom-pattern="
 <html lang="en">
 
 <head>
-	<meta charset="utf-8" />
-	<meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-	<style>
-		
-		._8h {
-			--pattern-checker-bg1: var(---tertiary-300, #e0e0e0);
-			--pattern-checker-bg2: transparent;
-			--pattern-checker-size: 40px;
-			background: linear-gradient(45deg, var(--pattern-checker-bg1) 25%, var(--pattern-checker-bg2) 25%, var(--pattern-checker-bg2) 75%, var(--pattern-checker-bg1) 75%, var(--pattern-checker-bg1)), linear-gradient(45deg, var(--pattern-checker-bg1) 25%, var(--pattern-checker-bg2) 25%, var(--pattern-checker-bg2) 75%, var(--pattern-checker-bg1) 75%, var(--pattern-checker-bg1));
-			background-size: var(--pattern-checker-size) var(--pattern-checker-size);
-			background-position: 0 0, calc(var(--pattern-checker-size) / 2) calc(var(--pattern-checker-size) / 2);
-			display: flex;
-			justify-content: center;
-			align-items: center;
-			min-width: 100vw;
-			min-height: 100vh;
-		}
+  <style>
+    
+    ._8h {
+      --pattern-checker-bg1: var(---tertiary-300, #e0e0e0);
+      --pattern-checker-bg2: transparent;
+      --pattern-checker-size: 40px;
+      background: linear-gradient(45deg, var(--pattern-checker-bg1) 25%, var(--pattern-checker-bg2) 25%, var(--pattern-checker-bg2) 75%, var(--pattern-checker-bg1) 75%, var(--pattern-checker-bg1)), linear-gradient(45deg, var(--pattern-checker-bg1) 25%, var(--pattern-checker-bg2) 25%, var(--pattern-checker-bg2) 75%, var(--pattern-checker-bg1) 75%, var(--pattern-checker-bg1));
+      background-size: var(--pattern-checker-size) var(--pattern-checker-size);
+      background-position: 0 0, calc(var(--pattern-checker-size) / 2) calc(var(--pattern-checker-size) / 2);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-width: 100vw;
+      min-height: 100vh;
+    }
 
-		._8i {
-			padding: 6rem;
-			margin: 0;
-			border-width: 0;
-			border-radius: 4rem;
-			display: flex;
-			align-items: center;
-			justify-content: center;
-			position: fixed;
-			text-decoration: none;
-			cursor: pointer;
-			background: none;
-			font-size: var(---font-size-h1);
-			isolation: isolate;
-			transition: all 300ms ease;
-			box-shadow: 0px 6px 12px -6px #77777777;
-		}
+    ._8i {
+      padding: 6rem;
+      margin: 0;
+      border-width: 0;
+      border-radius: 4rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: fixed;
+      text-decoration: none;
+      cursor: pointer;
+      background: none;
+      font-size: var(---font-size-h1);
+      isolation: isolate;
+      transition: all 300ms ease;
+      box-shadow: 0px 6px 12px -6px #77777777;
+    }
 
-		._8i.glass-type[data-amorphous-type='frosted']::after {
-			backdrop-filter: blur(1px);
-		}
+    ._8i.glass-type[data-amorphous-type='frosted']::after {
+      backdrop-filter: blur(1px);
+    }
 
-		._8i.glass-type[data-amorphous-type='frosted']::before {
-			background-color: rgba(255, 255, 255, 0.6);
-		}
+    ._8i.glass-type[data-amorphous-type='frosted']::before {
+      background-color: rgba(255, 255, 255, 0.6);
+    }
 
-		._8i.glass-type[data-amorphous-type='liquid']::after {
-			backdrop-filter: blur(.5px);
-		}
+    ._8i.glass-type[data-amorphous-type='liquid']::after {
+      backdrop-filter: blur(.5px);
+    }
 
-		._8i.glass-type[data-amorphous-type='liquid']::before {
-			background-color: rgba(255, 255, 255, 0.25);
-		}
+    ._8i.glass-type[data-amorphous-type='liquid']::before {
+      background-color: rgba(255, 255, 255, 0.25);
+    }
 
-		._8i:hover {
-			transform: scale(1.25);
-		}
+    ._8i:hover {
+      transform: scale(1.25);
+    }
 
-		._8i::after {
-			position: absolute;
-			top: 0;
-			right: 0;
-			bottom: 0;
-			left: 0;
-			z-index: -2;
-			border-radius: 4rem;
-			content: "";
-			filter: url(#glass-distortion);
-		}
+    ._8i::after {
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      z-index: -2;
+      border-radius: 4rem;
+      content: "";
+      filter: url(#glass-distortion);
+    }
 
-		._8i::before {
-			position: absolute;
-			top: 0;
-			right: 0;
-			bottom: 0;
-			left: 0;
-			z-index: -1;
-			border-radius: 4rem;
-			content: "";
-			box-shadow: inset 0 0 15px -5px #00000044;
-		}
+    ._8i::before {
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      z-index: -1;
+      border-radius: 4rem;
+      content: "";
+      box-shadow: inset 0 0 15px -5px #00000044;
+    }
 
-		@media (min-width:512px) {
-			._8h {
-				--pattern-checker-bg1: var(---primary-100);
-				--pattern-checker-bg2: var(---secondary-900);
-			}
-		}
-	</style>
+    @media (min-width:512px) {
+      ._8h {
+        --pattern-checker-bg1: var(---primary-100);
+        --pattern-checker-bg2: var(---secondary-900);
+      }
+    }
+  </style>
 </head>
 
 <body data-sveltekit-preload-data="hover" class="_8h">
 
-	<div class="_8i" data-amorphous-type='liquid'>
-		Content
-	</div>
+  <div class="_8i" data-amorphous-type='liquid'>
+    Content
+  </div>
 
-	<div>
-		<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
-			<defs>
-				<filter id="glass-distortion" x="0%" y="0%" width="100%" height="100%">
-					<feTurbulence type="fractalNoise" baseFrequency="0.008 0.008" numOctaves="2" seed="92"
-						result="noise" />
-					<feGaussianBlur in="noise" stdDeviation="2" result="blurred" />
-					<feDisplacementMap in="SourceGraphic" in2="blurred" scale="77" xChannelSelector="R"
-						yChannelSelector="G" />
-				</filter>
-			</defs>
-		</svg>
-	</div>
+  <div>
+    <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+      <defs>
+        <filter id="glass-distortion" x="0%" y="0%" width="100%" height="100%">
+          <feTurbulence type="fractalNoise" baseFrequency="0.008 0.008" numOctaves="2" seed="92"
+            result="noise" />
+          <feGaussianBlur in="noise" stdDeviation="2" result="blurred" />
+          <feDisplacementMap in="SourceGraphic" in2="blurred" scale="77" xChannelSelector="R"
+            yChannelSelector="G" />
+        </filter>
+      </defs>
+    </svg>
+  </div>
 </body>
 
 </html>
@@ -552,7 +552,7 @@ All the first order blocks of each file will have a corresponding symbolic class
 For the files of given extention, **watch attributes** for those files, provide additional featues for declaration.
 ```json
 "extensions": {
-	"html": [ "class", "id" ]
+  "html": [ "class", "id" ]
 } // Watch tag attribute
 ```
 
@@ -568,13 +568,13 @@ For the files of given extention, **watch attributes** for those files, provide 
 <!-- Hash followers = ["class-1", "id-1"] -->
 
 <style -$symclass {#\#id-1}&="prop: val;">
-	.\#class-1 {...}
-	#\#id {...}
+  .\#class-1 {...}
+  #\#id {...}
 </style>
 <!-- style -->
 <script>
-	const id = "\#id-1"
-	const id = "\#id-2"
+  const id = "\#id-1"
+  const id = "\#id-2"
 </script>
 ```
 
@@ -584,13 +584,13 @@ For the files of given extention, **watch attributes** for those files, provide 
 <!-- Hash followers = ["class-1", "id-1"] -->
 
 <style>
-	#_8r-23_id-1 .-$symclass { prop: val; }
-	._8r-23_class { ... }
-	#_8r-23_id { ... }
+  #_8r-23_id-1 .-$symclass { prop: val; }
+  ._8r-23_class { ... }
+  #_8r-23_id { ... }
 </style>
 <script>
-	const id = "_8r-23_id-1"
-	const id = "\#id-2"
+  const id = "_8r-23_id-1"
+  const id = "\#id-2"
 </script>
 ```
 
@@ -616,13 +616,13 @@ Class loaders has three varients each with different purpuses
 
 ```html
 <div class="
-	~atomic$class-1 
-	!order$class-3
-	~atomic$class-2
-	~atomic$class-3
-	!order$class-1
-	=final$class-2 
-	!order$class-2
+  ~atomic$class-1 
+  !order$class-3
+  ~atomic$class-2
+  ~atomic$class-3
+  !order$class-1
+  =final$class-2 
+  !order$class-2
 " onload="this.classlist.add(loading?'\=final$class-1':'\=final-class-3')"> Content </div>
 <!-- 
 Prefer not to use `Final classes` in watch attributes, 
@@ -630,31 +630,31 @@ unless for conditional adding to classname with inline script.
 -->
 
 <style>
-	/* Scattered classes have unpredictable cascading order. */
-	.atomic\$class-2 { ... }
-	.atomic\$class-1 { ... }
-	.atomic\$class-3 { ... }
+  /* Scattered classes have unpredictable cascading order. */
+  .atomic\$class-2 { ... }
+  .atomic\$class-1 { ... }
+  .atomic\$class-3 { ... }
 
-	/* Ordered classes strictly follow cascade order. */
-	.order\$class-3 { ... }
-	.order\$class-1 { ... }
-	.order\$class-2 { ... }
+  /* Ordered classes strictly follow cascade order. */
+  .order\$class-3 { ... }
+  .order\$class-1 { ... }
+  .order\$class-2 { ... }
 
-	/* Final classes have unpredictable cascading order. */
-	.final\$class-1 { ... }
-	.final\$class-3 { ... }
-	.final\$class-2 { ... }
+  /* Final classes have unpredictable cascading order. */
+  .final\$class-1 { ... }
+  .final\$class-3 { ... }
+  .final\$class-2 { ... }
 </style>
 
 <script>
-	const selectorArray = [
-		"\~atomic$class-3", // returns result
-		"~atomic$class-3", // stays the same
-		"\!order$class-1",  // stays the same
-		"!order$class-1",  // stays the same
-		"\=final$class-2",  // returns result
-		"=final$class-2",  // stays the same
-	]
+  const selectorArray = [
+    "\~atomic$class-3", // returns result
+    "~atomic$class-3", // stays the same
+    "\!order$class-1",  // stays the same
+    "!order$class-1",  // stays the same
+    "\=final$class-2",  // returns result
+    "=final$class-2",  // stays the same
+  ]
 <script>
 ```
 
@@ -662,22 +662,22 @@ unless for conditional adding to classname with inline script.
 
 ```html
 <summon
-	custom$class="
-		/* Assign Directive Operator */ 
-		= atomic$class-1 atomic$class-2;
+  custom$class="
+    /* Assign Directive Operator */ 
+    = atomic$class-1 atomic$class-2;
 
-		/* Attach Directive Operator */
-		~ attach$class-1 attach$class-2;
-		
-		attribute-1: value-1;
-		attribute-2: value-2;
-		
-		/* Merge Flatten*/
-		&[x-look=]& {
-			&[varient-1] { *** }
-			&[varient-2] { *** }
-		}
-	"
+    /* Attach Directive Operator */
+    ~ attach$class-1 attach$class-2;
+    
+    attribute-1: value-1;
+    attribute-2: value-2;
+    
+    /* Merge Flatten*/
+    &[x-look=]& {
+      &[varient-1] { *** }
+      &[varient-2] { *** }
+    }
+  "
 >Template</summon>
 ```
 
@@ -704,13 +704,13 @@ This operator applies only when certain conditions are met:
 ```
 
 - **`cluster`**: Collection of classes, or use '-' to delegate to open cluster. 
-	- Available characters: `A-Z`, `a-z`, `0-9`, and `-`.
-	- `-` or `_`  is only for delegating open cluster at declaration. It will be hidden in other cases.
+  - Available characters: `A-Z`, `a-z`, `0-9`, and `-`.
+  - `-` or `_`  is only for delegating open cluster at declaration. It will be hidden in other cases.
 - **`scope`**: Scope of access of declared styles
-	- `$` | **Local:** with in the declared file.
-	- `$$` | **Global:** across all valid files in target folders.
+  - `$` | **Local:** with in the declared file.
+  - `$$` | **Global:** across all valid files in target folders.
 - **`identifier`**: Specific identifier within the cluster.
-	- Available characters: `A-Z` `a-z` `0-9` and `-`.
+  - Available characters: `A-Z` `a-z` `0-9` and `-`.
 
 - While composing styles, you can use any of the following for external grouping:
   - **\` ... \`**
@@ -739,20 +739,20 @@ This operator applies only when certain conditions are met:
 - `hashrules` (`#{rule}`) are valid within these attributes.
 - use `{...}` brackets for raw string formatting for not breaking at spaces.
 - Within `identifier@{ ... }`, shorthand expressions map to style constraints:
-	- `width>=` : `min-width:`
-	- `width<=` : `max-width:`
-	- `height>=` : `min-height:`
-	- `height<=` : `max-height:` 
-	
+  - `width>=` : `min-width:`
+  - `width<=` : `max-width:`
+  - `height>=` : `min-height:`
+  - `height<=` : `max-height:` 
+  
 ### Example
 ```html
 <!-- Assume Hashrule `#{Load}` == "body[data-loading]" from hashrules.jsonc  -->
 <div
-	_$class="..."
-	#{Load}&="..." 
-	{@supports not (backdrop-filter: blur(1px))}&="..."
-	container@{(max-width: 320px)}&="...">			
-	{Placeholder}
+  _$class="..."
+  #{Load}&="..." 
+  {@supports not (backdrop-filter: blur(1px))}&="..."
+  container@{(max-width: 320px)}&="...">
+  {Placeholder}
 </div>
 ```
 Gets structurally gets transformed into:
@@ -760,10 +760,10 @@ Gets structurally gets transformed into:
 .$class { ... }
 body[data-loading] .$class { ... }
 @supports not (backdrop-filter: blur(1px)) { 
-	.$class { ... } 
+  .$class { ... } 
 }
 @container (max-width: 320px) { 
-	.$class { ... } 
+  .$class { ... } 
 }
 ```
 
@@ -820,24 +820,24 @@ body[data-loading] .$class { ... }
 
 ```html 
 <style local$-class>
-    ...
+  ...
 </style>
 <staple local$--class>
-    ...
+  ...
 </staple>
 <summon
-    attribute-1="attr-value-1"
-    attribute-2="attr-value-2"
-    attribute-3="attr-value-3"
-    local$class="
-        ~ local$-class local$--class;
-        = $class-1 $$class-2 $class-3;
-        property-1: value-1;
-        property-2: value-2;
-        property-3: value-3;
-    "
+  attribute-1="attr-value-1"
+  attribute-2="attr-value-2"
+  attribute-3="attr-value-3"
+  local$class="
+    ~ local$-class local$--class;
+    = $class-1 $$class-2 $class-3;
+    property-1: value-1;
+    property-2: value-2;
+    property-3: value-3;
+  "
 >
-    Template
+  Template
 </summon>
 ```
 
