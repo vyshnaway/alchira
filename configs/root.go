@@ -36,8 +36,8 @@ var Root = models.Cache_Root{
 		"debug":   "Live build for developer environment",
 		"server":  "LSP Communication Brige.",
 		"preview": "Test build. Pass test for \"publish\" command.",
-		"publish": "Optimized build, uses web-api.",
-		"install": "Install external artifacts.",
+		// "publish": "Optimized build, uses web-api.",
+		// "install": "Install external artifacts.",
 	},
 	Tweaks: models.Config_Tweaks{
 		"staple-prefix": "",

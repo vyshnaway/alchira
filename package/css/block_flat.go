@@ -138,7 +138,7 @@ func (This *T_Block) flatten(parent string) (Res *T_Block) {
 					k = k[1:]
 					temparent := parent
 					if trimlen := amparsandSuffixLen(parent); trimlen > 0 {
-						temparent = temparent[:len(temparent)-(trimlen+1)]
+						temparent = temparent[:len(temparent)-(trimlen*2)]
 						k = k[trimlen:]
 					}
 					k = temparent + k
