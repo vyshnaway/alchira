@@ -138,8 +138,18 @@ func (This *T_Block) flatten(parent string) (Res *T_Block) {
 					k = k[1:]
 					temparent := parent
 					if trimlen := amparsandSuffixLen(parent); trimlen > 0 {
-						temparent = temparent[:len(temparent)-(trimlen*2)]
-						k = k[trimlen:]
+						trimBytes := trimlen * 2
+						if len(temparent) >= trimBytes {
+							temparent = temparent[:len(temparent)-trimBytes]
+						} else {
+							temparent = "" // or handle underflow case appropriately
+						}
+
+						if len(k) >= trimlen {
+							k = k[trimlen:]
+						} else {
+							k = "" // or handle overflow case appropriately
+						}
 					}
 					k = temparent + k
 				}
