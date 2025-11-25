@@ -120,7 +120,6 @@ func Webview_Create(tryport int) (httpServer *http.Server, deducedPort int, err 
 		Addr:    ":" + strconv.Itoa(foundPort),
 		Handler: mux,
 	}
-	// SandboxAutoUpdate()
 
 	return server, foundPort, nil
 }
