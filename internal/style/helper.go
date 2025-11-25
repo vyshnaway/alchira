@@ -27,6 +27,7 @@ func DeclareClass(
 	})
 
 	classhash := _util.String_EnCounter(index)
+	classdata.Classhash = classhash
 	classdata.DebugScatterClass = debugClass
 	classdata.DebugFinalClass = debugClass + "_Final"
 	classdata.PreviewScatterClass = PreviewScatterPrefix + classdata.SymClass + "_" + classhash

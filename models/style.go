@@ -43,6 +43,7 @@ type Style_ClassData struct {
 	Artifact            string
 	Definent            string
 	SymClass            string
+	Classhash           string
 	DebugScatterClass   string
 	DebugFinalClass     string
 	PreviewScatterClass string
