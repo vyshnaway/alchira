@@ -29,8 +29,8 @@ func DeclareClass(
 	classhash := _util.String_EnCounter(index)
 	classdata.DebugScatterClass = debugClass
 	classdata.DebugFinalClass = debugClass + "_Final"
-	classdata.PreviewScatterClass = PreviewScatterPrefix + classdata.SymClass
-	classdata.PreviewFinalClass = PreviewFinalPrefix + classdata.SymClass
+	classdata.PreviewScatterClass = PreviewScatterPrefix + classdata.SymClass + "_" + classhash
+	classdata.PreviewFinalClass = PreviewFinalPrefix + classdata.SymClass + "_" + classhash
 	classdata.PublishScatterClass = PublishScatterPrefix + classhash
 	classdata.PublishFinalClass = PublishFinalPrefix + classhash
 
@@ -56,11 +56,11 @@ func stylesnippet_process(
 		selector, initial, flatten,
 	)
 	exportAttachResult := nativeAttachResult
-		export := importLodash(file, content, Lodash_frag+file.Label)
-		exportAttachResult = Parse_CssSnippet(
-			_util.Code_Uncomment(export, true, true, false),
-			selector, initial, flatten,
-		)
+	export := importLodash(file, content, Lodash_frag+file.Label)
+	exportAttachResult = Parse_CssSnippet(
+		_util.Code_Uncomment(export, true, true, false),
+		selector, initial, flatten,
+	)
 	// }
 
 	return nativeAttachResult, exportAttachResult
