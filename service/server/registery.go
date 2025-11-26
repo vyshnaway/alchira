@@ -5,7 +5,7 @@ import (
 	"main/service/server/handle"
 )
 
-var Registery = map[string]T_RegisterEntry{
+var Registery = map[string]*T_RegisterEntry{
 	"manifest-global": RegisterMethod(
 		0,
 		func(args []string) any {

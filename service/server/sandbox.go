@@ -129,11 +129,11 @@ func Webview_Create(tryport int) (httpServer *http.Server, deducedPort int, err 
 		for range t.C {
 			if handle.SandboxDataDiffered() {
 				cycle = 5
+			} else if cycle == 0 {
+				continue
 			}
-			if cycle > 0 {
-				cycle--
-				Interactive("sandbox-view", []string{}, true)
-			}
+			cycle--
+			Interactive("sandbox-view", []string{}, true)
 		}
 	}()
 

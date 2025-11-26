@@ -2,6 +2,8 @@ package server
 
 import (
 	"encoding/json"
+	"main/service/compiler"
+	"time"
 )
 
 func Interactive(command string, arguments []string, broadcast bool) (Response []byte) {
@@ -41,8 +43,9 @@ func IO_Json(reqbyte []byte) []byte {
 	resp.Method = req.Method
 
 	if entry, exist := Registery[req.Method]; exist {
-		if res := entry.JsonStream(reqbyte); res != nil {
+		if res, duration := entry.JsonStream(reqbyte); res != nil {
 			resp.Result = res
+			resp.Duration = duration
 			broadcast_bool = entry.Broadcast
 		}
 	} else {
@@ -67,18 +70,20 @@ type JsonRPCRequest[T any] struct {
 }
 
 type JsonRPCResponse struct {
-	JSONRPC string `json:"jsonrpc"`
-	ID      any    `json:"id"`
-	Method  string `json:"method"`
-	Result  any    `json:"result"`
-	Error   string `json:"error"`
+	JSONRPC  string `json:"jsonrpc"`
+	ID       any    `json:"id"`
+	Method   string `json:"method"`
+	Result   any    `json:"result"`
+	Error    string `json:"error"`
+	Duration int    `json:"duration"`
 }
 
 type T_RegisterEntry struct {
 	Instructions []string
 	Interactive  func(arguments []string) any
-	JsonStream   func(req []byte) (response any)
+	JsonStream   func(req []byte) (response any, duration int)
 	Broadcast    bool
+	Duration     int64
 }
 
 func RegisterMethod[T any](
@@ -87,24 +92,31 @@ func RegisterMethod[T any](
 	JsonStream func(params T) any,
 	Instructions []string,
 	broadcast bool,
-) T_RegisterEntry {
+) *T_RegisterEntry {
 	template, _ := json.Marshal(new(T))
-	return T_RegisterEntry{
-		JsonStream: func(reqbyte []byte) (response any) {
-			var req JsonRPCRequest[T]
-			if err := json.Unmarshal(reqbyte, &req); err != nil {
-				return nil
-			}
-			resp := JsonStream(req.Params)
-			return resp
-		},
-		Broadcast: broadcast,
-		Interactive: func(arguments []string) any {
-			if len(arguments) < minargs {
-				return nil
-			}
-			return Interactive(arguments)
-		},
+	e := &T_RegisterEntry{
+		Broadcast:    broadcast,
 		Instructions: append(Instructions, "Params: "+string(template)),
 	}
+
+	e.Interactive = func(arguments []string) any {
+		if len(arguments) < minargs {
+			return nil
+		}
+		res := Interactive(arguments)
+		return res
+	}
+
+	e.JsonStream = func(reqbyte []byte) (response any, dutation int) {
+		var req JsonRPCRequest[T]
+		if err := json.Unmarshal(reqbyte, &req); err != nil {
+			return nil, 0
+		}
+		start := time.Now()
+		res := JsonStream(req.Params)
+		e.Duration = compiler.CycleStamp + time.Since(start).Milliseconds()
+		return res, int(e.Duration)
+	}
+
+	return e
 }

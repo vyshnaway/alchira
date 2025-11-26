@@ -10,6 +10,7 @@ import (
 	"main/service/compiler"
 	"maps"
 	"strings"
+	"time"
 )
 
 type T_Component_return struct {
@@ -19,6 +20,7 @@ type T_Component_return struct {
 	Symclass   string            `json:"symclass"`
 	Rootcss    string            `json:"rootcss"`
 	Compcss    string            `json:"compcss"`
+	Timestamp  int64             `json:"timestamp"`
 }
 
 var Sandbox_View_Component = new(T_Component_return)
@@ -81,6 +83,7 @@ func Sandbox_Save(index int) (response any) {
 		Symclass:   data.SrcData.SymClass,
 		Rootcss:    configs.Delta.IndexBuild,
 		Compcss:    stylesheet.String(),
+		Timestamp:  time.Now().UnixNano(),
 	}
 
 	return Sandbox_View_Component
@@ -89,7 +92,13 @@ func Sandbox_Save(index int) (response any) {
 func SandboxDataDiffered() bool {
 	now := Sandbox_View_Component
 	last := sandbox_View_ComponentLast
+	sandbox_View_ComponentLast = Sandbox_View_Component
 	differed := false
+
+	if now.Timestamp == last.Timestamp {
+		return false
+	}
+
 	if now.Symclass != last.Symclass {
 		return true
 	}
@@ -105,15 +114,15 @@ func SandboxDataDiffered() bool {
 	if now.Rootcss != last.Rootcss {
 		return true
 	}
-    if last.Attributes != nil && now.Attributes != nil && len(now.Attributes) == len(last.Attributes) {
-        for k, vc := range now.Attributes {
-            if vl, ok := last.Attributes[k]; !ok || vl != vc {
-                return true
-            }
-        }
-    } else {
-        return true
-    }
-	sandbox_View_ComponentLast = Sandbox_View_Component
+	if last.Attributes != nil && now.Attributes != nil && len(now.Attributes) == len(last.Attributes) {
+		for k, vc := range now.Attributes {
+			if vl, ok := last.Attributes[k]; !ok || vl != vc {
+				return true
+			}
+		}
+	} else {
+		return true
+	}
+
 	return differed
 }

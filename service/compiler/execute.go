@@ -35,6 +35,9 @@ const (
 	Execute_Step_LoopAround
 )
 
+var startStamp int64
+var CycleStamp int64
+
 func ResetRebuildTicker() {
 	intervalVal, _ := _config.Saved.Tweaks["reload-period"].(int)
 	if intervalVal < 0 {
@@ -48,11 +51,12 @@ func ResetRebuildTicker() {
 			defer ticker.Stop()
 			for range ticker.C {
 				_config.Static.RebuildFlag.Store(true)
+				S.Post("ohyeah")
 			}
 		}(_config.Static.RebuildTicker)
 	}
 
-	if intervalVal < 10 {
+	if intervalVal < 1 {
 		_config.Static.RebuildTicker.Stop()
 	} else {
 		_config.Static.RebuildTicker.Reset(tickerDuration)
@@ -90,6 +94,10 @@ func Execute(heading string, concurrent bool) (Exitcode int) {
 	}
 
 	for {
+		now := _time.Now().UnixMilli()
+		CycleStamp = now - startStamp
+		startStamp = now
+
 		_config.Static.ExecuteMutex.Lock()
 
 		switch step {
