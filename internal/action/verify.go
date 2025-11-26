@@ -133,11 +133,18 @@ func Verify_Configs(remote_vendors bool, concurrent bool) (Report string, Status
 			if config.ProxyMap != nil {
 				_config.Saved.ProxyMap = config.ProxyMap
 			}
+			for _, p := range _config.Saved.ProxyMap {
+				if p.Extensions == nil {
+					p.Extensions = map[string][]string{_config.Root.Extension: {}}
+				} else if p.Extensions[_config.Root.Extension] == nil {
+					p.Extensions[_config.Root.Extension] = []string{}
+				}
+			}
 		}
 	} else {
 		errAdd(config_path, "Bad Config file.")
 	}
-	
+
 	conflict_sync := Conflict_Sync_Test(concurrent)
 	for _, m := range conflict_sync.Warnings {
 		errAdd(config_path, m)

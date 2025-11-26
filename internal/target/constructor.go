@@ -1,7 +1,6 @@
 package target
 
 import (
-	_config "main/configs"
 	"main/internal/action"
 	_style "main/internal/style"
 	_model "main/models"
@@ -32,7 +31,6 @@ type Class struct {
 }
 
 func New(storage _model.Config_ProxyStorage, label string) *Class {
-	storage.Extensions[_config.Root.Extension] = []string{}
 
 	stylesheetContext := action.CreateContext(
 		action.Store_FileGroup_Target,

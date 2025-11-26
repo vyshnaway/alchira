@@ -1,13 +1,11 @@
 package target
 
 import (
-	"fmt"
 	_config "main/configs"
 	_action "main/internal/action"
 	_script "main/internal/script"
 	"main/internal/style"
 	_model "main/models"
-	"main/package/console"
 	_map "maps"
 	_slice "slices"
 	_string "strings"
@@ -91,10 +89,6 @@ func (This *Class) GetTracks() GetTracks_return {
 				}
 			}
 		}
-	}
-	console.Render.Raw(attachInts)
-	for k := range attachInts {
-		fmt.Println(_action.Index_Fetch(k).SrcData.SymClass)
 	}
 	return GetTracks_return{
 		ClassTracks: classtracks,

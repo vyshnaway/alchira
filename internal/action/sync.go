@@ -15,7 +15,7 @@ import (
 func Sync_RootDocs() {
 	var wg _sync.WaitGroup
 	var mut _sync.Mutex
-	
+
 	for item_name, item := range _config.Sync_Agreements {
 		wg.Add(1)
 		func() {
@@ -91,7 +91,6 @@ func Sync_ProxyMapDirs(proxyMaps []_model.Config_ProxyMap, concurrent bool) map[
 		go func(proxyMap _model.Config_ProxyMap) {
 			defer wg.Done()
 
-			proxyMap.Extensions[_config.Root.Extension] = []string{}
 			fileContents, _ := _fileman.Sync_Bulk(
 				proxyMap.Target,
 				proxyMap.Source,
