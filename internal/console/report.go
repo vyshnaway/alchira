@@ -18,9 +18,6 @@ func Report(heading string, targets []string, report string) string {
 	}
 	return S.MAKE(
 		heading,
-		[]string{
-			report,
-			
-		},
+		[]string{ report,},
 	) + S.Tag.H5("Press Ctrl+C to stop watching.", S.Preset.Failed, S.Style.AS_Bold)
 }

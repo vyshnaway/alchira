@@ -51,7 +51,6 @@ func ResetRebuildTicker() {
 			defer ticker.Stop()
 			for range ticker.C {
 				_config.Static.RebuildFlag.Store(true)
-				S.Post("ohyeah")
 			}
 		}(_config.Static.RebuildTicker)
 	}
@@ -86,7 +85,7 @@ func Execute(heading string, concurrent bool) (Exitcode int) {
 			go func() {
 				<-sigs
 				watchman.Close()
-				S.Render.Write("\n"+S.Format(S.Divider(S.Canvas.DivRune.Top), S.Preset.Failed, S.Style.AS_Bold), 2)
+				S.Render.Write("\n"+S.Tag.H5("Ok, I will stop watching!!!", S.Preset.Failed, S.Style.AS_Bold), 3)
 				save_action.Wait()
 				_os.Exit(1)
 			}()
