@@ -21,11 +21,12 @@ type T_Component_return struct {
 	Compcss    string            `json:"compcss"`
 }
 
-var Sandbox_View_Last = new(T_Component_return)
+var Sandbox_View_Component = new(T_Component_return)
+var sandbox_View_ComponentLast = new(T_Component_return)
 
 func Sandbox_Load(filepath, symclass string) (response any) {
 	Manifest_Local(filepath, symclass)
-	return Sandbox_View_Last
+	return Sandbox_View_Component
 }
 
 func Sandbox_Save(index int) (response any) {
@@ -61,7 +62,7 @@ func Sandbox_Save(index int) (response any) {
 		data := action.Index_Fetch(i.ClassIndex)
 		attachIndex[i.ClassIndex] = true
 		maps.Copy(attachIndex, style.ResolveDependints(data))
-		
+
 		classBlocks.SetBlock(compiler.FmtClassForCss(i.ClassName), data.SrcData.NativeRawStyle)
 	}
 	stylesheet.WriteString(css.Render_Switched(classBlocks, true))
@@ -73,7 +74,7 @@ func Sandbox_Save(index int) (response any) {
 		staplesheet.WriteString(ref.SrcData.NativeStaple)
 	}
 
-	Sandbox_View_Last = &T_Component_return{
+	Sandbox_View_Component = &T_Component_return{
 		Attributes: attributes,
 		Summon:     summon,
 		Staple:     staplesheet.String(),
@@ -82,5 +83,37 @@ func Sandbox_Save(index int) (response any) {
 		Compcss:    stylesheet.String(),
 	}
 
-	return Sandbox_View_Last
+	return Sandbox_View_Component
+}
+
+func SandboxDataDiffered() bool {
+	now := Sandbox_View_Component
+	last := sandbox_View_ComponentLast
+	differed := false
+	if now.Symclass != last.Symclass {
+		return true
+	}
+	if now.Summon != last.Summon {
+		return true
+	}
+	if now.Staple != last.Staple {
+		return true
+	}
+	if now.Compcss != last.Compcss {
+		return true
+	}
+	if now.Rootcss != last.Rootcss {
+		return true
+	}
+    if last.Attributes != nil && now.Attributes != nil && len(now.Attributes) == len(last.Attributes) {
+        for k, vc := range now.Attributes {
+            if vl, ok := last.Attributes[k]; !ok || vl != vc {
+                return true
+            }
+        }
+    } else {
+        return true
+    }
+	sandbox_View_ComponentLast = Sandbox_View_Component
+	return differed
 }

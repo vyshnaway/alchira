@@ -72,10 +72,10 @@ var Registery = map[string]T_RegisterEntry{
 	"sandbox-view": RegisterMethod(
 		0,
 		func(args []string) any {
-			return handle.Sandbox_View_Last
+			return handle.Sandbox_View_Component
 		},
 		func(params any) any {
-			return handle.Sandbox_View_Last
+			return handle.Sandbox_View_Component
 		},
 		[]string{},
 		true,

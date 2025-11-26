@@ -3,6 +3,7 @@ package server
 import (
 	"fmt"
 	"main/configs"
+	"main/service/server/handle"
 	"net"
 	"net/http"
 	"path/filepath"
@@ -124,9 +125,16 @@ func Webview_Create(tryport int) (httpServer *http.Server, deducedPort int, err 
 
 	go func() {
 		t := time.NewTicker(100 * time.Millisecond)
+		cycle := 0
 		for range t.C {
-			Interactive("sandbox-view", []string{}, true)
-		} 
+			if handle.SandboxDataDiffered() {
+				cycle = 5
+			}
+			if cycle > 0 {
+				cycle--
+				Interactive("sandbox-view", []string{}, true)
+			}
+		}
 	}()
 
 	return server, foundPort, nil
