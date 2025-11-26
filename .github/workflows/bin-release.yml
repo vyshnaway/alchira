@@ -9,8 +9,8 @@ permissions:
   contents: write
 
 env:
-  PACKAGE_REPO: yshell-dev/xcss-package
-  VSCODE_REPO: yshell-dev/xcss-vscode
+  PACKAGE_REPO: yshelldev/xcss-package
+  VSCODE_REPO: yshelldev/xcss-vscode
 
 jobs:
   bin-release:
@@ -24,7 +24,7 @@ jobs:
       - name: Checkout xcss-package (read-only)
         uses: actions/checkout@v3
         with:
-          repository: yshell-dev/xcss-package
+          repository: yshelldev/xcss-package
           token: ${{ secrets.XCSS_REPO_CROSS }}
           path: core
 
