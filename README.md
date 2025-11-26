@@ -9,7 +9,7 @@ For details, please read the full EULA document provided in this repository.
 
 ## What is XCSS?
 
-![Preview](https://github.com/yshell-dev/xcss-vscode/raw/HEAD/preview.png)
+![Preview](https://github.com/yshelldev/xcss-vscode/raw/HEAD/preview.png)
 
 XCSS is a constraint-driven CSS build-time kernel designed to be the foundational engine for building custom CSS frameworks. Rather than being a traditional CSS framework loaded with predefined classes, XCSS provides a powerful structural abstraction that preserves the full flexibility of vanilla CSS while adding native dependency management and modular composition. It works seamlessly across any text-based environment, is framework agnostic, and integrates effortlessly with existing design systems and token libraries.
 
@@ -810,13 +810,13 @@ body[data-loading] .$class { ... }
 - Unoptimized cascading order, and respective classnames.
 - Classname is enumered hash followed by cascade position index.
 - **Scattered Classes:**
-  - Format: `~{classname}`
+  - Format: `~{classname}_{hash}`
   - Example: `~scatter-class` 
 - **Ordered Classes:**
-  - Format: `!{hash}_{cascade-counter}`
-  - Example: `!Ordered-class_23` 
+  - Format: `!{classname}_{hash}-{cascade-counter}`
+  - Example: `!ordered-class_g3-134` 
 - **Final Classes:**
-  - Format: `={classname}`
+  - Format: `={classname}_{hash}`
   - Example: `=final-class` 
 
 ### `publish`

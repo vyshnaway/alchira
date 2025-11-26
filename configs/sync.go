@@ -57,11 +57,4 @@ var Sync_Agreements = map[string]_model.File_Source{
 		Frags:   []string{"PRIVACY.md"},
 		Content: "",
 	},
-	"eula": {
-		Title:   "End User License Agreement",
-		Url:     "agreements/eula.md",
-		Path:    "",
-		Frags:   []string{"EULA.md"},
-		Content: "",
-	},
 }
