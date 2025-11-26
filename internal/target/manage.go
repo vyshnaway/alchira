@@ -33,7 +33,7 @@ func (This *Class) Savefile(filepath string, content string, hashindex int) {
 		_fmt.Sprint(This.Label, "_", _util.String_EnCounter(hashindex)),
 	)
 
-	if watchAttrs, ok := This.ExtnsProps[file.Extension]; ok && file.Extension != _config.Root.Extension {
+	if watchAttrs, ok := This.ExtnsProps[file.Extension]; ok {
 		file.WatchAttrs = watchAttrs
 	}
 	parse_response := _script.Rider(file, _script.E_Method_Read)

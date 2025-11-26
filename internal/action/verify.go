@@ -140,6 +140,7 @@ func Verify_Configs(remote_vendors bool, concurrent bool) (Report string, Status
 					p.Extensions[_config.Root.Extension] = []string{}
 				}
 			}
+			// S.Render.Raw(_config.Saved.ProxyMap)
 		}
 	} else {
 		errAdd(config_path, "Bad Config file.")
