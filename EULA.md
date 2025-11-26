@@ -5,7 +5,7 @@
 ### 1. Definitions
 
 - "XCSS": The software tool, including its binary, documentation, and associated materials.
-- "We": Vyshnav Prasad, git@github.com:yshelldev, the licensor.
+- "We": Vyshnav Prasad, git@github.com:yshell-dev, the licensor.
 - "You": The individual or entity using XCSS.
 
 ### 2. Grant of License
@@ -29,10 +29,10 @@ You may not:
 ### 5. Community and Contributions
 
 During the preview period, you are encouraged to:
-- Share your feedback, ideas, and sample projects by opening [issues](https://github.com/yshelldev/xcss-package/issues) or [discussions](https://github.com/yshelldev/xcss-package/discussions) at [github.com/yshelldev/xcss-package](https://github.com/yshelldev/xcss-package).
+- Share your feedback, ideas, and sample projects by opening [issues](https://github.com/yshell-dev/xcss-package/issues) or [discussions](https://github.com/yshell-dev/xcss-package/discussions) at [github.com/yshell-dev/xcss-package](https://github.com/yshell-dev/xcss-package).
 - Experiment with integrating XCSS into your own projects and showcase your results.
 - Direct source contributions to xcss-core are not expected at this stage.
-- If you wish, you can fork the xcss-core repository to create your own variants or flavors from [github.com/yshelldev/xcss-package](https://github.com/yshelldev/xcss-package).
+- If you wish, you can fork the xcss-core repository to create your own variants or flavors from [github.com/yshell-dev/xcss-package](https://github.com/yshell-dev/xcss-package).
 
 ### 6. Tools Powered by XCSS
 

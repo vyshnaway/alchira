@@ -40,6 +40,9 @@ var CycleStamp int64
 
 func ResetRebuildTicker() {
 	intervalVal, _ := _config.Saved.Tweaks["reload-period"].(int)
+	if _config.Static.SERVER {
+		intervalVal = 10
+	}
 	if intervalVal < 0 {
 		intervalVal = -intervalVal
 	}
