@@ -84,14 +84,14 @@ func Target_GetTracks() _target.GetTracks_return {
 		r := target.GetTracks()
 		classtracks = append(classtracks, r.ClassTracks...)
 		_map.Copy(attachments, r.Attachments)
-		_map.Copy(rapidmap, r.RapidMap)
+		_map.Copy(rapidmap, r.ScatterMap)
 		_map.Copy(finalmap, r.FinalMap)
 	}
 
 	return _target.GetTracks_return{
 		Attachments: attachments,
 		ClassTracks: classtracks,
-		RapidMap:    rapidmap,
+		ScatterMap:  rapidmap,
 		FinalMap:    finalmap,
 	}
 }

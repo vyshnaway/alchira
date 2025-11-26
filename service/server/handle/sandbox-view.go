@@ -4,9 +4,11 @@ import (
 	"main/configs"
 	"main/internal/action"
 	"main/internal/script"
+	"main/internal/style"
 	"main/models"
 	"main/package/css"
 	"main/service/compiler"
+	"maps"
 	"strings"
 )
 
@@ -36,7 +38,7 @@ func Sandbox_Save(index int) (response any) {
 	summon := data.SrcData.Metadata.SummonSnippet
 	clontext := *data.Context
 	clontext.Midway = summon
-	attachments := map[int]*models.Style_ClassData{}
+	attachIndex := map[int]bool{}
 	attributes := data.SrcData.Attributes
 	classBlocks := css.NewBlock(4, 4)
 
@@ -56,21 +58,19 @@ func Sandbox_Save(index int) (response any) {
 	}
 
 	for _, i := range FinalClassMap {
-		data := action.Index_Fetch(i.ClassIndex).SrcData
-		attachments[i.ClassIndex] = data
-		for a := range data.Attachments {
-			if found := action.Index_Finder(a, clontext.Cache.LocalMap); found.Index > 0 {
-				attachments[found.Index] = found.Data.SrcData
-			}
-		}
-		classBlocks.SetBlock(compiler.FmtClassForCss(i.ClassName), data.NativeRawStyle)
+		data := action.Index_Fetch(i.ClassIndex)
+		attachIndex[i.ClassIndex] = true
+		maps.Copy(attachIndex, style.ResolveDependints(data))
+		
+		classBlocks.SetBlock(compiler.FmtClassForCss(i.ClassName), data.SrcData.NativeRawStyle)
 	}
 	stylesheet.WriteString(css.Render_Switched(classBlocks, true))
 
 	stylesheet.WriteString(css.Render_Vendored(data.SrcData.NativeAttachStyle, true))
-	for _, data := range attachments {
-		stylesheet.WriteString(css.Render_Vendored(data.NativeAttachStyle, true))
-		staplesheet.WriteString(data.NativeStaple)
+	for i := range attachIndex {
+		ref := action.Index_Fetch(i)
+		stylesheet.WriteString(css.Render_Vendored(ref.SrcData.NativeAttachStyle, true))
+		staplesheet.WriteString(ref.SrcData.NativeStaple)
 	}
 
 	Sandbox_View_Last = &T_Component_return{

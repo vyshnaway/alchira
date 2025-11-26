@@ -22,7 +22,7 @@ type R_Parse struct {
 func parse_AssignMerge(
 	classlist []string,
 ) R_Parse {
-	attachments := make(map[string]bool, 8)
+	attachments := map[string]bool{}
 	result := _css.NewBlock(8, 8)
 	variables := O.New[string, string](8)
 
@@ -35,7 +35,6 @@ func parse_AssignMerge(
 					variables.Set(k, v)
 				}
 			})
-			_map.Copy(attachments, classdata.SrcData.Attachments)
 			result.Merge(classdata.SrcData.NativeRawStyle)
 		}
 	}
@@ -140,7 +139,7 @@ func Parse_CssSnippet(
 	variables := assigned.Variables
 	variables.Copy(scanned.Variables)
 
-	attachments := assigned.Attachments
+	attachments := map[string]bool{}
 	for _, i := range scanned.Attach {
 		attachments[i] = true
 	}

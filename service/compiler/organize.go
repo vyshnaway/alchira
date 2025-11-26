@@ -187,5 +187,5 @@ func Organize() (AritfactFiles map[string]string, Attachments map[int]bool, Rapi
 	}
 
 	_map.Copy(tracks.Attachments, _config.Delta.IndexAttach)
-	return artifact_files, tracks.Attachments, tracks.RapidMap, tracks.FinalMap
+	return artifact_files, tracks.Attachments, tracks.ScatterMap, tracks.FinalMap
 }

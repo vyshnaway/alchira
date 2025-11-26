@@ -113,8 +113,9 @@ type Cache_Delta struct {
 }
 
 type Cache_SymclassData struct {
-	Context *File_Stash
-	SrcData *Style_ClassData
+	Context   *File_Stash
+	SrcData   *Style_ClassData
+	Dependint map[int]bool
 }
 
 type Cache_Style struct {
