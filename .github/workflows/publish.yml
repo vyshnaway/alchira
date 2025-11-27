@@ -73,6 +73,7 @@ jobs:
   # publish-npm:
   #   name: Npm Publish Trigger
   #   runs-on: ubuntu-latest
+  #   needs: bin-release
 
   #   steps:
   #     - name: Checkout ${{ env.PACKAGE_REPO }} (read-only)
