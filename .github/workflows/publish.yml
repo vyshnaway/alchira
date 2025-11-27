@@ -92,6 +92,7 @@ jobs:
   publish-vsce:
     name: VSCE Publish Trigger
     runs-on: ubuntu-latest
+    needs: bin-release
 
     steps:
       - name: Checkout ${{ env.VSCODE_REPO }} (read-only)
