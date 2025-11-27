@@ -178,7 +178,7 @@ func Organize() (AritfactFiles map[string]string, Attachments map[int]bool, Rapi
 				_config.Delta.FinalMessage = "Build Success."
 				_config.Delta.PublishError = ""
 			} else {
-				_config.Static.PREVIEW = true
+				_config.Static.PREVIEW = !res.Status
 				SaveClassRefs(*res.Result)
 				_config.Delta.PublishError = res.Message
 				_config.Delta.FinalMessage = "Build Atttempt Failed. Falling back with Preview."
