@@ -1,5 +1,7 @@
 # Flavourize
 
+> Template Repo: [XCSS Package](https://github.com/yshelldev/xcss-package)
+
 ### Fork / Clone repository
 
 - Fork this repository using your preferred Git service (e.g., GitHub, GitLab, Bitbucket), or clone the repository locally if you only want to keep a local copy without sharing or collaborating.
@@ -21,7 +23,6 @@
 - When cloning this repository, ensure you keep the existing introduction unchanged. You can add any new content you want immediately after the original introduction, without modifying or removing it.
 - This method preserves the original context and key information while allowing you to enrich the documentation with additional details.
 - After making changes, run the **package.js** script to regenerate and update the **README.md** file with the revised content.
-
 
 ### Prepare Package Metadata
 
