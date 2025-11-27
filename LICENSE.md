@@ -32,7 +32,7 @@ You may not, without explicit prior written consent from Us:
 ### 5. Community and Contributions
 
 During the preview period, You are encouraged to:
- 
+
 - Provide feedback, ideas, and sample projects via [GitHub issues](https://github.com/yshelldev/xcss-package/issues) or [discussions](https://github.com/yshelldev/xcss-package/discussions).
 - Experiment with integrating XCSS in your projects and share your experiences.
 - Contributions to the source repository are not expected at this stage; you may fork the repository to create derivative works.

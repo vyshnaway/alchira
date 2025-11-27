@@ -47,10 +47,10 @@ For using XCSS in non-JavaScript based codebases, install XCSS globally. After t
 
 ### Global Installation
 
-Install XCSS Package globally with:
+Install XCSS Core globally with:
 
 ```bash
-npm install -g xcss-package
+npm install -g xcss-core
 ```
 
 Run XCSS commands directly:
@@ -61,10 +61,10 @@ xcss {command}
 
 ### Local Installation
 
-Install XCSS Package as a development dependency locally:
+Install XCSS Core as a development dependency locally:
 
 ```bash
-npm install --save-dev xcss-package
+npm install --save-dev xcss-core
 ```
 
 Run XCSS commands locally using npm scripts:
