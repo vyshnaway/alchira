@@ -2,7 +2,7 @@
 
 ## End-User License Agreement (EULA)
 
-By using this software, you agree to the terms and conditions outlined in the [End-User License Agreement](./EULA.md).
+By using this software, you agree to the terms and conditions outlined in the [End-User License Agreement](https://www.xcss.io/agreements/license).
 For details, please read the full EULA document provided in this repository.
 
 ---

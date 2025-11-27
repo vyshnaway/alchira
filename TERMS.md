@@ -15,7 +15,7 @@
 - Data Collection: No data is collected unless you explicitly share it with us.
 
 5. ## Changes to Terms
-- Updates: These Terms & Conditions may be updated periodically. Any changes will be posted on xcss.xpktr.com.
+- Updates: These Terms & Conditions may be updated periodically. Any changes will be posted on [www.xcss.io/notifications](www.xcss.io/notifications)
 - Acceptance: Continued use of XCSS after updates indicates your acceptance of the revised terms. Please check periodically for any major changes.
 
 ### Contact Information
