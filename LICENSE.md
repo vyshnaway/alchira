@@ -30,7 +30,7 @@ You may not, without explicit prior written consent from Us:
 - Remove or alter any copyright, trademark, or proprietary notices.
 
 ### 5. Community and Contributions
- 
+
 During the preview period, You are encouraged to:
 
 - Provide feedback, ideas, and sample projects via [GitHub issues](https://github.com/yshelldev/xcss-package/issues) or [discussions](https://github.com/yshelldev/xcss-package/discussions).

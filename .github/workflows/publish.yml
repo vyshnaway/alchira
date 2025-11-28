@@ -32,7 +32,7 @@ jobs:
         id: pacver
         run: |
           cd core 
-          echo "version=v$(jq -r .compiler-version package.json)" >> $GITHUB_OUTPUT
+          echo "version=v$(jq -r .compiler package.json)" >> $GITHUB_OUTPUT
 
       - name: Run build script
         run: |
