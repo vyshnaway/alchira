@@ -1,13 +1,13 @@
 package compiler
 
 import (
-	"main/package/utils"
-	"sort"
 	_config "main/configs"
 	X "main/internal/console"
 	_model "main/models"
+	"main/package/utils"
 	_map "maps"
 	_slice "slices"
+	"sort"
 	_string "strings"
 )
 
@@ -49,17 +49,26 @@ func ClearUnwantedCache() (
 		consts,
 	)
 
+	var reportBlocks []string
+	if _config.Static.WATCH {
+		reportBlocks = []string{
+			_config.Delta.Report.Axioms,
+			_config.Delta.Report.Clusters,
+			_config.Delta.Report.Artifacts,
+			_config.Delta.Report.TargetDir,
+			_config.Delta.Report.Constants,
+			_config.Delta.Report.Hashrule,
+			_config.Delta.Report.Errors,
+		}
+	} else {
+		reportBlocks = []string{
+			_config.Delta.Report.Errors,
+			_config.Delta.Report.MemChart,
+		}
+	}
+
 	var builder _string.Builder
-	for _, s := range []string{
-		_config.Delta.Report.Axioms,
-		_config.Delta.Report.Clusters,
-		_config.Delta.Report.Artifacts,
-		_config.Delta.Report.TargetDir,
-		_config.Delta.Report.Constants,
-		_config.Delta.Report.Hashrule,
-		_config.Delta.Report.Errors,
-		_config.Delta.Report.MemChart,
-	} {
+	for _, s := range reportBlocks {
 		if len(s) > 0 {
 			builder.WriteString(s)
 			builder.WriteRune('\r')

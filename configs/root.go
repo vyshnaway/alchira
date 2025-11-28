@@ -21,7 +21,13 @@ var Root = models.Cache_Root{
 	PollingInterval: 200,
 	WaitingInterval: 20,
 	WebsocketPort:   1,
-
+	Flavour: models.Package_Flavour{
+		Name:      "",
+		Version:   "",
+		Sandbox:   "",
+		Blueprint: "",
+		Libraries: "",
+	},
 	Url: models.Cache_Url{
 		Site:      "https://www." + domain + "/",
 		Docs:      "https://www." + domain + "/cdn/",
@@ -31,6 +37,7 @@ var Root = models.Cache_Root{
 		Artifacts: "https://artifact." + domain + "/",
 	},
 	Commands: map[string]string{
+		"void":    "Void run, no execution.",
 		"init":    "Initiate or Update & Verify setup.",
 		"iamai":   "Let ai agents start here.",
 		"debug":   "Live build for developer environment",

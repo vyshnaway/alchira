@@ -77,9 +77,14 @@ func main() {
 	var rootData models.Package_Json
 	if str, err := _fileman.Read_File(rootPackagePath, false); err == nil {
 		if json.Unmarshal([]byte(str), &rootData) == nil {
-			_config.Root.Name = _util.String_Fallback(rootData.Name, _config.Root.Name)
-			_config.Root.Version = _util.String_Fallback(rootData.Version, _config.Root.Version)
+			_config.Root.Name = _string.TrimSpace(_util.String_Fallback(rootData.Name, _config.Root.Name))
+			_config.Root.Version = _string.TrimSpace(_util.String_Fallback(rootData.Version, _config.Root.Version))
 		}
+	}
+
+	if _action.Setup_Environment(packagedir, sourcedir, workpath, rootData.Flavour) {
+		_config.Root.Flavour.Name = _string.TrimSpace(_util.String_Fallback(rootData.Flavour.Name))
+		_config.Root.Flavour.Version = _string.TrimSpace(_util.String_Fallback(rootData.Flavour.Version))
 	}
 
 	var workData models.Package_Json
@@ -92,8 +97,8 @@ func main() {
 		}
 	}
 
-	_action.Setup_Environment(packagedir, sourcedir, workpath, rootData.Configs)
-	corecaps := _string.ToUpper(_config.Root.Name)
+	packagecaps := _string.ToUpper(_config.Root.Name)
+	flavourcaps := _string.ToUpper(_config.Root.Flavour.Name)
 
 	_config.Static.Command = command
 	_config.Static.Argument = argone
@@ -134,7 +139,7 @@ func main() {
 			var wg _sync.WaitGroup
 			wg.Add(2)
 			go func() { _action.Sync_RootDocs(); wg.Done() }()
-			go func() { Sp.Title(corecaps+" : Initialize", 1000, 1); wg.Done() }()
+			go func() { Sp.Title(packagecaps+" : Initialize", 1000, 1); wg.Done() }()
 			wg.Wait()
 			setup_report, setup_status := _action.Verify_Setup(concurrent)
 			switch setup_status {
@@ -151,15 +156,15 @@ func main() {
 		}
 	case "debug":
 		{
-			exitcode = _compiler.Execute(corecaps+" : Debug "+flagmode, concurrent)
+			exitcode = _compiler.Execute(packagecaps+" : Debug "+flagmode, concurrent)
 		}
 	case "preview":
 		{
-			exitcode = _compiler.Execute(corecaps+" : Preview "+flagmode, concurrent)
+			exitcode = _compiler.Execute(packagecaps+" : Preview "+flagmode, concurrent)
 		}
 	case "publish":
 		{
-			exitcode = _compiler.Execute(corecaps+" : "+"Publishing for Production", concurrent)
+			exitcode = _compiler.Execute(packagecaps+" : "+"Publishing for Production", concurrent)
 		}
 	case "iamai", "server":
 		{
@@ -206,12 +211,19 @@ func main() {
 				}
 			}
 		}
+	case "void":
 	default:
 		{
 			_action.Sync_RootDocs()
-
+			title := packagecaps + " @ v" + _config.Root.Version
+			if len(flavourcaps) > 0 {
+				title += " | " + flavourcaps
+			}
+			if len(rootData.Flavour.Version) > 0 {
+				title += " @ " + rootData.Flavour.Version
+			}
 			S.Post(S.MAKE(
-				S.Tag.H1(corecaps+" @ v"+_config.Root.Version, S.Preset.Title, S.Style.AS_Bold),
+				S.Tag.H1(title, S.Preset.Title, S.Style.AS_Bold),
 				[]string{_string.Trim(_config.Sync_References["alerts"].Content, "\t\r\n ")},
 			))
 

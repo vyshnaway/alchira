@@ -104,11 +104,13 @@ func String_Memory(s string) float64 {
 }
 
 // Fallback if type check as string fails
-func String_Fallback(val any, fallback string) string {
-	if s, ok := val.(string); ok && s != "" {
-		return s
+func String_Fallback(values ...any) string {
+	for _, val := range values {
+		if s, ok := val.(string); ok && s != "" {
+			return s
+		}
 	}
-	return fallback
+	return ""
 }
 
 // Add space padding to both sides of string till limit

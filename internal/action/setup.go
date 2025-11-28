@@ -7,7 +7,7 @@ import (
 	_reflect "reflect"
 )
 
-func Setup_Environment(rootdir, sourcedir, workdir string, rootConfig _model.Package_Configs) {
+func Setup_Environment(rootdir, sourcedir, workdir string, rootConfig _model.Package_Flavour) (flavourable bool) {
 
 	_config.Static.RootPath = rootdir
 	_config.Static.WorkPath = workdir
@@ -17,13 +17,16 @@ func Setup_Environment(rootdir, sourcedir, workdir string, rootConfig _model.Pac
 		_config.Root_Navigate[id] = source
 	}
 
-	if blueprint := rootConfig.Redirect.Blueprint; len(blueprint) > 0 && _fileman.Path_IfDir(blueprint) {
+	if blueprint := rootConfig.Blueprint; len(blueprint) > 0 && _fileman.Path_IfDir(blueprint) {
+		flavourable = true
 		_config.Root_Navigate["blueprint"].Path = blueprint
 	}
-	if libraries := rootConfig.Redirect.Libraries; len(libraries) > 0 && _fileman.Path_IfDir(libraries) {
+	if libraries := rootConfig.Libraries; len(libraries) > 0 && _fileman.Path_IfDir(libraries) {
+		flavourable = true
 		_config.Root_Navigate["libraries"].Path = libraries
 	}
-	if sandbox := rootConfig.Redirect.Sandbox; len(sandbox) > 0 && _fileman.Path_IfDir(sandbox) {
+	if sandbox := rootConfig.Sandbox; len(sandbox) > 0 && _fileman.Path_IfDir(sandbox) {
+		flavourable = true
 		_config.Root_Navigate["sandbox"].Path = sandbox
 	}
 
@@ -50,6 +53,8 @@ func Setup_Environment(rootdir, sourcedir, workdir string, rootConfig _model.Pac
 		source.Path = _fileman.Path_Join(append([]string{sourcedir}, source.Frags...)...)
 		_config.Sync_References[id] = source
 	}
+
+	return flavourable
 }
 
 func Setup_Tweaks(tweaks map[string]any) {
