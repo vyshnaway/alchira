@@ -31,8 +31,8 @@ jobs:
       - name: Get version from xcss-package
         id: pacver
         run: |
-          cd core
-          echo "version=v$(jq -r .version package.json)" >> $GITHUB_OUTPUT
+          cd core 
+          echo "version=v$(jq -r .compiler-version package.json)" >> $GITHUB_OUTPUT
 
       - name: Run build script
         run: |
