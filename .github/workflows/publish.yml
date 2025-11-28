@@ -61,7 +61,7 @@ jobs:
           token: ${{ secrets.XCSS_REPO_CROSS }}
           tag_name: ${{ steps.pacver.outputs.patchTag }}
           name: Release ${{ steps.pacver.outputs.patchTag }}
-          body_path: ./compiler/RELEASE.md
+          body_path: ./RELEASE.md
           files: artifacts/**
           overwrite_files: true
         env:
@@ -74,7 +74,7 @@ jobs:
           token: ${{ secrets.XCSS_REPO_CROSS }}
           tag_name: ${{ steps.pacver.outputs.minorTag }}
           name: Release ${{ steps.pacver.outputs.minorTag }}
-          body_path: ./compiler/RELEASE.md
+          body_path: ./RELEASE.md
           files: artifacts/**
           overwrite_files: true
         env:
@@ -87,7 +87,7 @@ jobs:
           token: ${{ secrets.XCSS_REPO_CROSS }}
           tag_name: ${{ steps.pacver.outputs.majorTag }}
           name: Release ${{ steps.pacver.outputs.majorTag }}
-          body_path: ./compiler/RELEASE.md
+          body_path: ./RELEASE.md
           files: artifacts/**
           overwrite_files: true
         env:
@@ -100,7 +100,7 @@ jobs:
           token: ${{ secrets.XCSS_REPO_CROSS }}
           tag_name: latest
           name: Release latest
-          body_path: ./compiler/RELEASE.md
+          body_path: ./RELEASE.md
           files: artifacts/**
           overwrite_files: true
         env:
