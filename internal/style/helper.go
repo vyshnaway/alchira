@@ -7,6 +7,7 @@ import (
 	_model "main/models"
 	_util "main/package/utils"
 	_regexp "regexp"
+	"strings"
 )
 
 var symzero_regex = _regexp.MustCompile(`^[-_]\$`)
@@ -30,8 +31,12 @@ func DeclareClass(
 	classdata.Classhash = classhash
 	classdata.DebugScatterClass = debugClass
 	classdata.DebugFinalClass = debugClass + "_Final"
-	classdata.PreviewScatterClass = PreviewScatterPrefix + classdata.SymClass + "_" + classhash
-	classdata.PreviewFinalClass = PreviewFinalPrefix + classdata.SymClass + "_" + classhash
+	classdata.PreviewScatterClass = PreviewScatterPrefix + classdata.SymClass
+	classdata.PreviewFinalClass = PreviewFinalPrefix + classdata.SymClass
+	if !strings.Contains(classdata.SymClass, "$$") {
+		classdata.PreviewScatterClass = classdata.PreviewScatterClass + "_" + classhash
+		classdata.PreviewFinalClass = classdata.PreviewFinalClass + "_" + classhash
+	}
 	classdata.PublishScatterClass = PublishScatterPrefix + classhash
 	classdata.PublishFinalClass = PublishFinalPrefix + classhash
 
@@ -62,7 +67,6 @@ func stylesnippet_process(
 		_util.Code_Uncomment(export, true, true, false),
 		selector, initial, flatten,
 	)
-	// }
 
 	return nativeAttachResult, exportAttachResult
 }
