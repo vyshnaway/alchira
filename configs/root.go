@@ -18,8 +18,8 @@ var Root = models.Cache_Root{
 	Name:            id,
 	Version:         "0.0.0",
 	Extension:       id,
-	PollingInterval: 600,
-	WaitingInterval: 60,
+	PollingInterval: 200,
+	WaitingInterval: 20,
 	WebsocketPort:   1,
 
 	Url: models.Cache_Url{

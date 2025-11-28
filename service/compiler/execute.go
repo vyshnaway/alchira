@@ -309,6 +309,7 @@ func Execute(heading string, concurrent bool) (Exitcode int) {
 		if _config.Static.WATCH {
 			if !_config.Static.SERVER && !_config.Static.IAMAI && len(report) > 0 && showReport {
 				S.Post(X.Report(heading, []string{}, report))
+				S.Render.Write(X.Report(heading, []string{}, report), 2)
 			}
 			report = ""
 			heading = ""

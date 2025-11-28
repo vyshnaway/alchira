@@ -2,17 +2,12 @@ package compiler
 
 import (
 	"main/package/utils"
-
+	"sort"
 	_config "main/configs"
-
 	X "main/internal/console"
-
 	_model "main/models"
-
 	_map "maps"
-
 	_slice "slices"
-
 	_string "strings"
 )
 
@@ -47,10 +42,11 @@ func ClearUnwantedCache() (
 		}
 	}
 	_config.Style.Publish_Ordered = newPubIn
-
+	consts := _slice.Collect(_map.Keys(_config.Manifest.Constants))
+	sort.Strings(consts)
 	_config.Delta.Report.Constants = X.List_Catalog(
 		"Root Constants",
-		_slice.Collect(_map.Keys(_config.Manifest.Constants)),
+		consts,
 	)
 
 	var builder _string.Builder
@@ -85,7 +81,7 @@ func ClearUnwantedCache() (
 }
 
 func FmtClassForCss(classname string) string {
-	return "."+utils.String_Filter(
+	return "." + utils.String_Filter(
 		classname,
 		[]rune{'_', '-'},
 		[]rune{},
