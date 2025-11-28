@@ -222,29 +222,28 @@ func main() {
 			if len(rootData.Flavour.Version) > 0 {
 				title += " @ " + rootData.Flavour.Version
 			}
-			S.Post(S.MAKE(
-				S.Tag.H1(title, S.Preset.Title, S.Style.AS_Bold),
-				[]string{_string.Trim(_config.Sync_References["alerts"].Content, "\t\r\n ")},
-			))
 
-			S.Post(S.MAKE("", []string{
-				X.List_Record("Available Commands", O.FromUnorderedMap(_config.Root.Commands)),
-				X.List_Record("Agreements", func() *O.T[string, string] {
-					res := O.New[string, string](len(_config.Sync_Agreements))
-					for _, data := range _config.Sync_Agreements {
-						res.Set(data.Title, data.Path)
-					}
-					return res
-				}()),
-				X.List_Record("References", func() *O.T[string, string] {
-					res := O.New[string, string](len(_config.Sync_References))
-					for _, data := range _config.Sync_References {
-						res.Set(data.Title, data.Path)
-					}
-					return res
-				}()),
-				S.Tag.H4("For more information visit : "+_config.Root.Url.Site, S.Preset.Tertiary, S.Style.AS_Bold),
-			}))
+			S.Post(S.MAKE(S.Tag.H2(title, S.Preset.Title, S.Style.AS_Bold),
+				[]string{
+					_string.Trim(_config.Sync_References["notices"].Content, "\t\r\n ") +"\n",
+					X.List_Record("Available Commands", O.FromUnorderedMap(_config.Root.Commands)),
+					X.List_Record("Agreements", func() *O.T[string, string] {
+						res := O.New[string, string](len(_config.Sync_Agreements))
+						for _, data := range _config.Sync_Agreements {
+							res.Set(data.Title, data.Path)
+						}
+						return res
+					}()),
+					X.List_Record("References", func() *O.T[string, string] {
+						res := O.New[string, string](len(_config.Sync_References))
+						for _, data := range _config.Sync_References {
+							res.Set(data.Title, data.Path)
+						}
+						return res
+					}()),
+					S.Tag.H4("For more information visit : "+_config.Root.Url.Site, S.Preset.Tertiary, S.Style.AS_Bold),
+				},
+			))
 		}
 	}
 
