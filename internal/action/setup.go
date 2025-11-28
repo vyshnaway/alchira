@@ -7,14 +7,24 @@ import (
 	_reflect "reflect"
 )
 
-func Setup_Environment(rootdir, sourcedir, workdir string) {
+func Setup_Environment(rootdir, sourcedir, workdir string, rootConfig _model.Package_Configs) {
 
 	_config.Static.RootPath = rootdir
 	_config.Static.WorkPath = workdir
 
-	for id, source := range _config.Root_Scaffold {
+	for id, source := range _config.Root_Navigate {
 		source.Path = _fileman.Path_Join(append([]string{rootdir}, source.Frags...)...)
-		_config.Root_Scaffold[id] = source
+		_config.Root_Navigate[id] = source
+	}
+
+	if blueprint := rootConfig.Redirect.Blueprint; len(blueprint) > 0 && _fileman.Path_IfDir(blueprint) {
+		_config.Root_Navigate["blueprint"].Path = blueprint
+	}
+	if libraries := rootConfig.Redirect.Libraries; len(libraries) > 0 && _fileman.Path_IfDir(libraries) {
+		_config.Root_Navigate["libraries"].Path = libraries
+	}
+	if sandbox := rootConfig.Redirect.Sandbox; len(sandbox) > 0 && _fileman.Path_IfDir(sandbox) {
+		_config.Root_Navigate["sandbox"].Path = sandbox
 	}
 
 	for _, group := range []map[string]_model.File_Source{

@@ -1,11 +1,13 @@
 package main
 
 import (
+	"encoding/json"
 	_fmt "fmt"
 	_log "log"
 	_config "main/configs"
 	_action "main/internal/action"
 	X "main/internal/console"
+	"main/models"
 	S "main/package/console"
 	Sp "main/package/console/play"
 	_fileman "main/package/fileman"
@@ -72,34 +74,29 @@ func main() {
 	workPackagePath := "package.json"
 	rootPackagePath, _ := Path_FromPackage("package.json")
 
-	rootPackageData, rootPackageErr := _fileman.Read_Json(rootPackagePath, false)
-	if rootPackageErr == nil {
-		rootPackageData_ := rootPackageData.(map[string]any)
-		_config.Root.Name = _util.String_Fallback(rootPackageData_["name"], _config.Root.Name)
-		_config.Root.Version = _util.String_Fallback(rootPackageData_["version"], _config.Root.Version)
-	} else {
-		_fmt.Println("Error Json: " + rootPackagePath)
-	}
-
-	projectname := "-"
-	projectversion := "0.0.0"
-	if workPackageData, workPackageErr := _fileman.Read_Json(workPackagePath, false); workPackageErr == nil {
-		workPackageData_ := workPackageData.(map[string]any)
-		if val, ok := workPackageData_["name"].(string); ok && val != "" {
-			projectname = val
-		}
-		if val, ok := workPackageData_["version"].(string); ok && val != "" {
-			projectversion = val
+	var rootData models.Package_Json
+	if str, err := _fileman.Read_File(rootPackagePath, false); err == nil {
+		if json.Unmarshal([]byte(str), &rootData) == nil {
+			_config.Root.Name = _util.String_Fallback(rootData.Name, _config.Root.Name)
+			_config.Root.Version = _util.String_Fallback(rootData.Version, _config.Root.Version)
 		}
 	}
 
-	_action.Setup_Environment(packagedir, sourcedir, workpath)
+	var workData models.Package_Json
+	if str, err := _fileman.Read_File(workPackagePath, false); err == nil {
+		if json.Unmarshal([]byte(str), &workData) == nil {
+			projectname := _util.String_Fallback(workData.Name, _config.Static.ProjectVersion)
+			projectversion := _util.String_Fallback(workData.Version, _config.Static.ProjectName)
+			_config.Static.ProjectVersion = projectversion
+			_config.Static.ProjectName = _util.String_Filter(projectname, []rune{}, []rune{}, []rune{})
+		}
+	}
+
+	_action.Setup_Environment(packagedir, sourcedir, workpath, rootData.Configs)
 	corecaps := _string.ToUpper(_config.Root.Name)
 
 	_config.Static.Command = command
 	_config.Static.Argument = argone
-	_config.Static.ProjectVersion = projectversion
-	_config.Static.ProjectName = _util.String_Filter(projectname, []rune{}, []rune{}, []rune{})
 
 	_config.Static.DEBUG = command == "debug"
 	_config.Static.IAMAI = command == "iamai"
@@ -120,7 +117,7 @@ func main() {
 	}
 
 	_config.Reset(false)
-	if _fileman.Path_IfDir(_config.Root_Scaffold["source"].Path) {
+	if _fileman.Path_IfFile(_config.Root_Navigate["index"].Path) {
 		pprof, e := _server.RequestAvailablePort(0)
 		if e == nil {
 			go func() {

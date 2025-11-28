@@ -12,8 +12,8 @@ func Initialize(concurrent bool) {
 	S.STEP("Cloning blueprint to Project", 1)
 	S.TASK("Initialized setup.", 1)
 
-	err1 := _fileman.Clone_Safe(_config.Root_Scaffold["blueprint"].Path, _config.Path_Folder["blueprint"].Path, []string{}, concurrent)
-	err2 := _fileman.Clone_Safe(_config.Root_Scaffold["libraries"].Path, _config.Path_Folder["libraries"].Path, []string{}, concurrent)
+	err1 := _fileman.Clone_Safe(_config.Root_Navigate["blueprint"].Path, _config.Path_Folder["blueprint"].Path, []string{}, concurrent)
+	err2 := _fileman.Clone_Safe(_config.Root_Navigate["libraries"].Path, _config.Path_Folder["libraries"].Path, []string{}, concurrent)
 
 	if err1 != nil {
 		S.Post(S.MAKE(

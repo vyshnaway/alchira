@@ -81,8 +81,8 @@ var Static = models.Cache_Static{
 	Argument:       "",
 	RootPath:       "",
 	WorkPath:       "",
-	ProjectName:    "",
-	ProjectVersion: "",
+	ProjectName:    "-",
+	ProjectVersion: "0.0",
 	CustomTags:     slices.Collect(maps.Keys(Root.CustomTags)),
 	ReplacementTags: func() map[string]int {
 		res := map[string]int{}
@@ -102,29 +102,25 @@ var Static = models.Cache_Static{
 	RebuildTicker: nil,
 }
 
-var Root_Scaffold = map[string]models.File_Source{
+var Root_Navigate = map[string]*models.File_Source{
 	"blueprint": {
 		Frags:     []string{"scaffold", "blueprint"},
 		Path:      "",
-		Content:   "",
 		Essential: true,
 	},
 	"libraries": {
 		Frags:     []string{"scaffold", "libraries"},
 		Path:      "",
-		Content:   "",
-		Essential: true,
-	},
-	"source": {
-		Frags:     []string{"source"},
-		Path:      "",
-		Content:   "",
 		Essential: true,
 	},
 	"sandbox": {
-		Frags:     []string{"sandbox"},
+		Frags:     []string{"scaffold", "sandbox"},
 		Path:      "",
-		Content:   "",
+		Essential: true,
+	},
+	"index": {
+		Frags:     []string{"compiler", "index.go"},
+		Path:      "",
 		Essential: true,
 	},
 }

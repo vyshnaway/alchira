@@ -52,7 +52,7 @@ func Webview_Create(tryport int) (httpServer *http.Server, deducedPort int, err 
 	}
 
 	mux := http.NewServeMux()
-	serveDir := configs.Root_Scaffold["sandbox"].Path
+	serveDir := configs.Root_Navigate["sandbox"].Path
 
 	// Serve index.html on /, and all files under serveDir
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
