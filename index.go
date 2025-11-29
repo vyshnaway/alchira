@@ -99,7 +99,7 @@ func main() {
 
 	packagecaps := _string.ToUpper(_config.Root.Name)
 	flavourcaps := _string.ToUpper(_config.Root.Flavour.Name)
-
+	
 	_config.Static.Command = command
 	_config.Static.Argument = argone
 
@@ -134,6 +134,8 @@ func main() {
 	concurrent := false
 
 	switch _config.Static.Command {
+	case "void":
+
 	case "init":
 		{
 			var wg _sync.WaitGroup
@@ -211,21 +213,20 @@ func main() {
 				}
 			}
 		}
-	case "void":
 	default:
 		{
 			_action.Sync_RootDocs()
 			title := packagecaps + " @ v" + _config.Root.Version
 			if len(flavourcaps) > 0 {
 				title += " | " + flavourcaps
-			}
-			if len(rootData.Flavour.Version) > 0 {
-				title += " @ " + rootData.Flavour.Version
+				if len(rootData.Flavour.Version) > 0 {
+					title += " @ " + rootData.Flavour.Version
+				}
 			}
 
 			S.Post(S.MAKE(S.Tag.H2(title, S.Preset.Title, S.Style.AS_Bold),
 				[]string{
-					_string.Trim(_config.Sync_References["notices"].Content, "\t\r\n ") +"\n",
+					_string.Trim(_config.Sync_References["notices"].Content, "\t\r\n ") + "\n",
 					X.List_Record("Available Commands", O.FromUnorderedMap(_config.Root.Commands)),
 					X.List_Record("Agreements", func() *O.T[string, string] {
 						res := O.New[string, string](len(_config.Sync_Agreements))

@@ -1,15 +1,15 @@
 package models
 
 type Package_Flavour struct {
-	Name      string `json:"name,omitempty"`
-	Version   string `json:"version,omitempty"`
-	Sandbox   string `json:"sandbox,omitempty"`
-	Blueprint string `json:"blueprint,omitempty"`
-	Libraries string `json:"libraries,omitempty"`
+	Name      string `json:"name"`
+	Version   string `json:"version"`
+	Sandbox   string `json:"sandbox"`
+	Blueprint string `json:"blueprint"`
+	Libraries string `json:"libraries"`
 }
 
 type Package_Json struct {
-	Name    string          `json:"name,omitempty"`
-	Version string          `json:"version,omitempty"`
+	Name    string          `json:"name"`
+	Version string          `json:"version"`
 	Flavour Package_Flavour `json:"flavour"`
 }
