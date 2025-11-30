@@ -3,41 +3,53 @@
 # Save the original working directory
 WORKDIR=$(pwd)
 
-# Get version from the first argument
-VERSION="$1"
 
-# If version not provided, read it from package.json
-if [ -z "$VERSION" ]; then
+# Initialize variables
+VERSION=""
+COMMIT_MSG=""
+
+# Parse arguments
+if [[ "$1" == "-p" ]]; then
+  VERSION="$2"
+  if [ -z "$VERSION" ]; then
+    echo "Usage: $0 -p <version>"
+    exit 1
+  fi
+  COMMIT_MSG="#Release v$VERSION"
+elif [[ "$1" == "-m" ]]; then
+  shift
+  # Use rest of the arguments as custom commit message
+  COMMIT_MSG="$*"
+else
+  # No flag, fallback to version from package.json
   if command -v jq >/dev/null 2>&1; then
     VERSION=$(jq -r '.version' package.json)
   else
-    # Fallback using grep and sed (less robust)
     VERSION=$(grep '"version"' package.json | sed -E 's/.*"version": *"([^"]+)".*/\1/')
   fi
 
-  # If still empty, exit with error
   if [ -z "$VERSION" ]; then
     echo "Version not specified and unable to read from package.json"
     exit 1
   fi
 
-  echo "No version argument provided, using version from package.json: $VERSION"
+  COMMIT_MSG="#Release v$VERSION"
 fi
 
-# Update version in package.json using jq
-if command -v jq >/dev/null 2>&1; then
-  jq --arg v "$VERSION" '.version = $v' package.json > package.tmp.json && mv package.tmp.json package.json
-  echo "Updated package.json version to $VERSION"
-else
-  # Fallback: use sed (less safe, assumes simple JSON)
-  sed -i.bak -E "s/\"version\": \"[^\"]+\"/\"version\": \"$VERSION\"/" package.json
-  echo "Updated package.json version to $VERSION (using sed fallback)"
+echo "Using commit message: $COMMIT_MSG"
+
+# If version is set (only if -p or fallback), update package.json version
+if [ -n "$VERSION" ]; then
+  if command -v jq >/dev/null 2>&1; then
+    jq --arg v "$VERSION" '.version = $v' package.json > package.tmp.json && mv package.tmp.json package.json
+    echo "Updated package.json version to $VERSION"
+  else
+    sed -i.bak -E "s/\"version\": \"[^\"]+\"/\"version\": \"$VERSION\"/" package.json
+    echo "Updated package.json version to $VERSION (using sed fallback)"
+  fi
 fi
 
 node ./execute void
-
-# Prepare commit message
-COMMIT_MSG="#Release v$VERSION"
 
 # List of relative paths to repositories to commit and push
 REPOS=(
