@@ -41,9 +41,9 @@ COMMIT_MSG="#Release v$VERSION"
 
 # List of relative paths to repositories to commit and push
 REPOS=(
-  "."            # root repository
-  "./scaffold"   # example submodule path; add more if needed
+  "./scaffold"
   "./compiler"
+  "."
 )
 
 # # Loop through each path, commit, and push
