@@ -116,10 +116,11 @@ jobs:
 
     steps:
       - name: Checkout ${{ env.PACKAGE_REPO }} (read-only)
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: ${{ env.PACKAGE_REPO }}
           token: ${{ secrets.XCSS_REPO_CROSS }}
+          lfs: false
 
       - name: Sync and push submodule updates for scaffold
         run: |
@@ -130,8 +131,9 @@ jobs:
           git fetch origin
           if [[ $(git status --porcelain) ]]; then
             git add .
-            git commit -m "Your commit message here"
-            git push origin HEAD
+            git commit -m "Version Update"
+            git pull --rebase origin main
+            git push origin main
           else
             echo "Repository is already up-to-date."
           fi
@@ -140,8 +142,9 @@ jobs:
           git fetch origin
           if [[ $(git status --porcelain) ]]; then
             git add .
-            git commit -m "Your commit message here"
-            git push origin HEAD
+            git commit -m "Version Update"
+            git pull --rebase origin main
+            git push origin main
           else
             echo "Repository is already up-to-date."
           fi
