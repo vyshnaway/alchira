@@ -1,8 +1,12 @@
 name: Release Binary
 
 on:
-  repository_dispatch:
-    types: [trigger-publish]
+  push:
+    tags: v*
+    branches: [main]
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -16,6 +20,8 @@ jobs:
   bin-release:
     name: Bin Update Trigger
     runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' &&
+      contains(github.event.head_commit.message, '#Release')
 
     steps:
       - name: Checkout current repo
