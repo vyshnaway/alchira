@@ -7,7 +7,7 @@ VERSION=""
 COMMIT_MSG=""
 
 # Parse arguments
-if [[ "$1" == "-p" ]]; then
+if [[ "$1" == "V" ]]; then
   VERSION="$2"
   if [ -z "$VERSION" ]; then
     # No version flag value, fallback to version from package.json
@@ -22,7 +22,7 @@ if [[ "$1" == "-p" ]]; then
     fi
   fi
   COMMIT_MSG="#Release v$VERSION"
-elif [[ "$1" == "m" ]]; then
+elif [[ "$1" == "M" ]]; then
   shift
   # Use rest of the arguments as custom commit message
   COMMIT_MSG="$*"
