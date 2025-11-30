@@ -7,7 +7,7 @@ WORKDIR=$(pwd)
 # Initialize variables
 VERSION=""
 COMMIT_MSG=""
-echo $
+echo $1
 # Parse arguments
 if [[ "$1" == "-p" ]]; then
   VERSION="$2"
@@ -37,8 +37,6 @@ elif [[ "$1" == "-m" ]]; then
 else
   COMMIT_MSG="Periodic Commit"
 fi
-
-echo "Using commit message: $COMMIT_MSG"
 
 # If version is set (only if -p or fallback), update package.json version
 if [ -n "$VERSION" ]; then
