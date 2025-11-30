@@ -14,6 +14,20 @@ if [[ "$1" == "-p" ]]; then
   if [ -z "$VERSION" ]; then
     echo "Usage: $0 -p <version>"
     exit 1
+  else
+    # No flag, fallback to version from package.json
+    if command -v jq >/dev/null 2>&1; then
+      VERSION=$(jq -r '.version' package.json)
+    else
+      VERSION=$(grep '"version"' package.json | sed -E 's/.*"version": *"([^"]+)".*/\1/')
+    fi
+
+    if [ -z "$VERSION" ]; then
+      echo "Version not specified and unable to read from package.json"
+      exit 1
+    fi
+
+    COMMIT_MSG="#Release v$VERSION"
   fi
   COMMIT_MSG="#Release v$VERSION"
 elif [[ "$1" == "-m" ]]; then
@@ -21,19 +35,7 @@ elif [[ "$1" == "-m" ]]; then
   # Use rest of the arguments as custom commit message
   COMMIT_MSG="$*"
 else
-  # No flag, fallback to version from package.json
-  if command -v jq >/dev/null 2>&1; then
-    VERSION=$(jq -r '.version' package.json)
-  else
-    VERSION=$(grep '"version"' package.json | sed -E 's/.*"version": *"([^"]+)".*/\1/')
-  fi
-
-  if [ -z "$VERSION" ]; then
-    echo "Version not specified and unable to read from package.json"
-    exit 1
-  fi
-
-  COMMIT_MSG="#Release v$VERSION"
+  COMMIT_MSG="Periodic Commit"
 fi
 
 echo "Using commit message: $COMMIT_MSG"
