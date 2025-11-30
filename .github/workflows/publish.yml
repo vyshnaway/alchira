@@ -127,6 +127,10 @@ jobs:
           git submodule update --init ./scaffold
           node execute
 
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git remote set-url origin https://x-access-token:${{ secrets.XCSS_REPO_CROSS }}@github.com/OWNER/REPOSITORY.git
+
           cd scaffold
           git fetch origin
           if [[ $(git status --porcelain) ]]; then
@@ -148,13 +152,6 @@ jobs:
           else
             echo "Repository is already up-to-date."
           fi
-
-        env:
-          GIT_AUTHOR_NAME: github-actions
-          GIT_AUTHOR_EMAIL: github-actions@github.com
-          GIT_COMMITTER_NAME: github-actions
-          GIT_COMMITTER_EMAIL: github-actions@github.com
-          GITHUB_TOKEN: ${{ secrets.XCSS_REPO_CROSS }}
 
       - name: Trigger publish workflow on Parent Repo
         uses: peter-evans/repository-dispatch@v2
