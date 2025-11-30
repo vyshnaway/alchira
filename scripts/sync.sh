@@ -60,8 +60,8 @@ REPOS=(
   "."
 )
 
-echo "VERSION:$VERSION"
-echo "VERSION:$COMMIT_MSG"
+echo "VERSION: $VERSION"
+echo "MESSAGE: $COMMIT_MSG"
 echo "==============================="
 # # Loop through each path, commit, and push
 for repo in "${REPOS[@]}"; do
