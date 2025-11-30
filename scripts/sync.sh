@@ -62,7 +62,6 @@ REPOS=(
 
 # # Loop through each path, commit, and push
 for repo in "${REPOS[@]}"; do
-  echo "==============================="
   echo "Processing repository at: $repo"
 
   # Change to repository path
@@ -80,6 +79,7 @@ for repo in "${REPOS[@]}"; do
   else
     echo "No changes to commit in $repo"
   fi
+  echo "==============================="
 done
 
 # Return to original working directory
