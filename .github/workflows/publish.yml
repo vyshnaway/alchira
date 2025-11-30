@@ -132,8 +132,7 @@ jobs:
           git config user.email "github-actions@github.com"
           git remote set-url origin https://x-access-token:${{ secrets.XCSS_REPO_CROSS }}@github.com/yshelldev/xcss-scaffold.git
           git fetch origin main
-          git pull --rebase origin main
-          
+
           if [[ $(git status --porcelain) ]]; then
             git add .
             git commit -m "Version Update"
@@ -148,8 +147,7 @@ jobs:
           git config user.email "github-actions@github.com"
           git remote set-url origin https://x-access-token:${{ secrets.XCSS_REPO_CROSS }}@github.com/yshelldev/xcss-package.git
           git fetch origin main
-          git pull --rebase origin main
-
+          
           if [[ $(git status --porcelain) ]]; then
             git add .
             git commit -m "Version Update"
