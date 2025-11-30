@@ -2,11 +2,9 @@ name: Release Binary
 
 on:
   push:
-    tags: v*
     branches: [main]
-  pull_request:
-    types: [opened, synchronize, reopened, closed]
-    branches: [main]
+  repository_dispatch:
+    types: [trigger-publish]
   workflow_dispatch:
 
 permissions:
@@ -20,8 +18,10 @@ jobs:
   bin-release:
     name: Bin Update Trigger
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' &&
-      contains(github.event.head_commit.message, '#Release')
+    if:
+      (github.event_name == 'push' && github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, '#Release')) ||
+      (github.event_name == 'repository_dispatch' && github.event.action == 'trigger-publish') ||
+      (github.event_name == 'workflow_dispatch')
 
     steps:
       - name: Checkout current repo
@@ -128,24 +128,5 @@ jobs:
         uses: peter-evans/repository-dispatch@v2
         with:
           repository: ${{ env.PACKAGE_REPO }}
-          token: ${{ secrets.XCSS_REPO_CROSS }}
-          event-type: trigger-publish
-
-  publish-vsce:
-    name: VSCE Publish Trigger
-    runs-on: ubuntu-latest
-    needs: bin-release
-
-    steps:
-      - name: Checkout ${{ env.VSCODE_REPO }} (read-only)
-        uses: actions/checkout@v3
-        with:
-          repository: ${{ env.VSCODE_REPO }}
-          token: ${{ secrets.XCSS_REPO_CROSS }}
-
-      - name: Trigger publish workflow on Parent Repo
-        uses: peter-evans/repository-dispatch@v2
-        with:
-          repository: ${{ env.VSCODE_REPO }}
           token: ${{ secrets.XCSS_REPO_CROSS }}
           event-type: trigger-publish
