@@ -109,66 +109,17 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.XCSS_REPO_CROSS }}
 
-  version-sync:
-    name: Trigger Package Release
-    runs-on: ubuntu-latest
-    needs: bin-release
-
-    steps:
-      - name: Checkout ${{ env.PACKAGE_REPO }} (read-only)
-        uses: actions/checkout@v4
-        with:
-          repository: ${{ env.PACKAGE_REPO }}
-          token: ${{ secrets.XCSS_REPO_CROSS }}
-          lfs: false
-
-      - name: Sync and push submodule updates for scaffold
-        run: |
-          git submodule update --init ./scaffold
-          
-          git config user.name "github-actions"
-          git config user.email "github-actions@github.com"
-          git remote set-url origin https://x-access-token:${{ secrets.XCSS_REPO_CROSS }}@github.com/yshelldev/xcss-package.git
-          git fetch origin main
-          git pull --rebase origin main
-
-          cd scaffold
-          git config user.name "github-actions"
-          git config user.email "github-actions@github.com"
-          git remote set-url origin https://x-access-token:${{ secrets.XCSS_REPO_CROSS }}@github.com/yshelldev/xcss-scaffold.git
-          git fetch origin main
-          git pull --rebase origin main
-          
-          node ../execute
-          if [[ $(git status --porcelain) ]]; then
-            git add .
-            git commit -m "Version Update"
-            git push origin main || { echo 'Failed to push root repository'; exit 1; }
-          else
-            echo "Root repository is already up-to-date."
-          fi
-          cd ..
-
-          if [[ $(git status --porcelain) ]]; then
-            git add .
-            git commit -m "Version Update"
-            git push origin main || { echo 'Failed to push scaffold submodule'; exit 1; }
-          else
-            echo "Scaffold submodule repository is already up-to-date."
-          fi
-
   publish-package:
     name: Trigger Package Release
     runs-on: ubuntu-latest
-    needs: version-sync
-
+    needs: bin-release
     steps:
       - name: Checkout ${{ env.PACKAGE_REPO }} (read-only)
         uses: actions/checkout@v4
         with:
           repository: ${{ env.PACKAGE_REPO }}
           token: ${{ secrets.XCSS_REPO_CROSS }}
-          
+
       - name: Trigger publish workflow on Parent Repo
         uses: peter-evans/repository-dispatch@v2
         with:
@@ -179,8 +130,7 @@ jobs:
   publish-scaffold:
     name: Trigger Scaffold Release
     runs-on: ubuntu-latest
-    needs: version-sync
-
+    needs: bin-release
     steps:
       - name: Checkout ${{ env.SCAFFOLD_REPO }} (read-only)
         uses: actions/checkout@v3
