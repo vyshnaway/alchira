@@ -48,6 +48,7 @@ REPOS=(
 
 # # Loop through each path, commit, and push
 for repo in "${REPOS[@]}"; do
+  echo "==============================="
   echo "Processing repository at: $repo"
 
   # Change to repository path
