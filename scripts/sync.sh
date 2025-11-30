@@ -60,6 +60,9 @@ REPOS=(
   "."
 )
 
+echo $VERSION
+echo $COMMIT_MSG
+echo "==============================="
 # # Loop through each path, commit, and push
 for repo in "${REPOS[@]}"; do
   echo "Processing repository at: $repo"
