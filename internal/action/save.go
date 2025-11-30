@@ -25,10 +25,10 @@ func Save_Libraries() {
 }
 
 func Save_Artifacts() {
-	_config.Saved.Artifacts_Saved, _ = _fileman.Read_Bulk(
-		_config.Path_Folder["artifacts"].Path,
-		[]string{_config.Root.Extension, "json"},
-	)
+	// _config.Saved.Artifacts_Saved, _ = _fileman.Read_Bulk(
+	// 	_config.Path_Folder["artifacts"].Path,
+	// 	[]string{_config.Root.Extension, "json"},
+	// )
 }
 
 func Save_Targets(concurrent bool) {

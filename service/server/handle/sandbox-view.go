@@ -89,40 +89,40 @@ func Sandbox_Save(index int) (response any) {
 	return Sandbox_View_Component
 }
 
-func SandboxDataDiffered() bool {
-	now := Sandbox_View_Component
-	last := sandbox_View_ComponentLast
-	sandbox_View_ComponentLast = Sandbox_View_Component
-	differed := false
+// func SandboxDataDiffered() bool {
+// 	now := Sandbox_View_Component
+// 	last := sandbox_View_ComponentLast
+// 	sandbox_View_ComponentLast = Sandbox_View_Component
+// 	differed := false
 
-	if now.Timestamp == last.Timestamp {
-		return false
-	}
+// 	if now.Timestamp == last.Timestamp {
+// 		return false
+// 	}
 
-	if now.Symclass != last.Symclass {
-		return true
-	}
-	if now.Summon != last.Summon {
-		return true
-	}
-	if now.Staple != last.Staple {
-		return true
-	}
-	if now.Compcss != last.Compcss {
-		return true
-	}
-	if now.Rootcss != last.Rootcss {
-		return true
-	}
-	if last.Attributes != nil && now.Attributes != nil && len(now.Attributes) == len(last.Attributes) {
-		for k, vc := range now.Attributes {
-			if vl, ok := last.Attributes[k]; !ok || vl != vc {
-				return true
-			}
-		}
-	} else {
-		return true
-	}
+// 	if now.Symclass != last.Symclass {
+// 		return true
+// 	}
+// 	if now.Summon != last.Summon {
+// 		return true
+// 	}
+// 	if now.Staple != last.Staple {
+// 		return true
+// 	}
+// 	if now.Compcss != last.Compcss {
+// 		return true
+// 	}
+// 	if now.Rootcss != last.Rootcss {
+// 		return true
+// 	}
+// 	if last.Attributes != nil && now.Attributes != nil && len(now.Attributes) == len(last.Attributes) {
+// 		for k, vc := range now.Attributes {
+// 			if vl, ok := last.Attributes[k]; !ok || vl != vc {
+// 				return true
+// 			}
+// 		}
+// 	} else {
+// 		return true
+// 	}
 
-	return differed
-}
+// 	return differed
+// }

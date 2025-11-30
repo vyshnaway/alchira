@@ -3,13 +3,13 @@ package server
 import (
 	"fmt"
 	"main/configs"
-	"main/service/server/handle"
+	// "main/service/server/handle"
 	"net"
 	"net/http"
 	"path/filepath"
 	"strconv"
 	"sync"
-	"time"
+	// "time"
 
 	"github.com/gorilla/websocket"
 )
@@ -123,19 +123,19 @@ func Webview_Create(tryport int) (httpServer *http.Server, deducedPort int, err 
 		Handler: mux,
 	}
 
-	go func() {
-		t := time.NewTicker(100 * time.Millisecond)
-		cycle := 0
-		for range t.C {
-			if handle.SandboxDataDiffered() {
-				cycle = 5
-			} else if cycle == 0 {
-				continue
-			}
-			cycle--
-			Interactive("sandbox-view", []string{}, true)
-		}
-	}()
+	// go func() {
+	// 	t := time.NewTicker(100 * time.Millisecond)
+	// 	cycle := 0
+	// 	for range t.C {
+	// 		if handle.SandboxDataDiffered() {
+	// 			cycle = 5
+	// 		} else if cycle == 0 {
+	// 			continue
+	// 		}
+	// 		cycle--
+	// 		Interactive("sandbox-view", []string{}, true)
+	// 	}
+	// }()
 
 	return server, foundPort, nil
 }
