@@ -57,26 +57,13 @@ jobs:
           mkdir -p artifacts
           cp -r ./bin/* artifacts/
 
-      - name: Publish release (Patch Tag)
+      - name: Publish release (latest tag)
         uses: softprops/action-gh-release@v2
         with:
           repository: ${{ env.PACKAGE_REPO }}
           token: ${{ secrets.XCSS_REPO_CROSS }}
-          tag_name: ${{ steps.pacver.outputs.patchTag }}
-          name: Release ${{ steps.pacver.outputs.patchTag }}
-          body_path: ./RELEASE.md
-          files: artifacts/**
-          overwrite_files: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.XCSS_REPO_CROSS }}
-
-      - name: Publish release (Minor Tag)
-        uses: softprops/action-gh-release@v2
-        with:
-          repository: ${{ env.PACKAGE_REPO }}
-          token: ${{ secrets.XCSS_REPO_CROSS }}
-          tag_name: ${{ steps.pacver.outputs.minorTag }}
-          name: Release ${{ steps.pacver.outputs.minorTag }}
+          tag_name: latest
+          name: Release latest
           body_path: ./RELEASE.md
           files: artifacts/**
           overwrite_files: true
@@ -96,13 +83,26 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.XCSS_REPO_CROSS }}
 
-      - name: Publish release (latest tag)
+      - name: Publish release (Minor Tag)
         uses: softprops/action-gh-release@v2
         with:
           repository: ${{ env.PACKAGE_REPO }}
           token: ${{ secrets.XCSS_REPO_CROSS }}
-          tag_name: latest
-          name: Release latest
+          tag_name: ${{ steps.pacver.outputs.minorTag }}
+          name: Release ${{ steps.pacver.outputs.minorTag }}
+          body_path: ./RELEASE.md
+          files: artifacts/**
+          overwrite_files: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.XCSS_REPO_CROSS }}
+          
+      - name: Publish release (Patch Tag)
+        uses: softprops/action-gh-release@v2
+        with:
+          repository: ${{ env.PACKAGE_REPO }}
+          token: ${{ secrets.XCSS_REPO_CROSS }}
+          tag_name: ${{ steps.pacver.outputs.patchTag }}
+          name: Release ${{ steps.pacver.outputs.patchTag }}
           body_path: ./RELEASE.md
           files: artifacts/**
           overwrite_files: true
