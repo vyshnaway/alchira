@@ -3,34 +3,23 @@
 # Save the original working directory
 WORKDIR=$(pwd)
 
-
-# Initialize variables
 VERSION=""
 COMMIT_MSG=""
 
-echo $0
-echo $1
-echo $2
 # Parse arguments
 if [[ "$1" == "-p" ]]; then
   VERSION="$2"
   if [ -z "$VERSION" ]; then
-    echo "Usage: $0 -p <version>"
-    exit 1
-  else
-    # No flag, fallback to version from package.json
+    # No version flag value, fallback to version from package.json
     if command -v jq >/dev/null 2>&1; then
       VERSION=$(jq -r '.version' package.json)
     else
       VERSION=$(grep '"version"' package.json | sed -E 's/.*"version": *"([^"]+)".*/\1/')
     fi
-
     if [ -z "$VERSION" ]; then
       echo "Version not specified and unable to read from package.json"
       exit 1
     fi
-
-    COMMIT_MSG="#Release v$VERSION"
   fi
   COMMIT_MSG="#Release v$VERSION"
 elif [[ "$1" == "-m" ]]; then
@@ -40,6 +29,7 @@ elif [[ "$1" == "-m" ]]; then
 else
   COMMIT_MSG="Periodic Commit"
 fi
+
 
 # If version is set (only if -p or fallback), update package.json version
 if [ -n "$VERSION" ]; then
