@@ -87,16 +87,17 @@ func Sync_BulkParallel(source, target string, extInclude, extnUnsync, fileExclud
 
 	// Initial synchronization to ensure both directories exist and have basic content
 	if !sourceExists && !targetExists {
-		return nil, _fmt.Errorf("neither source '%s' nor target '%s' directories exist", source, target)
+		return resultFileContents, _fmt.Errorf("neither source '%s' nor target '%s' directories exist", source, target)
 	}
-	if !targetExists && sourceExists {
+	if !targetExists && sourceExists && sync {
 		if err := Clone_Safe(source, target, []string{}, concurrent); err != nil {
-			return nil, _fmt.Errorf("failed to safely clone source to target when target did not exist: %w", err)
+			return resultFileContents, _fmt.Errorf("failed to safely clone source to target when target did not exist: %w", err)
 		}
 	}
-	if !sourceExists && targetExists {
+
+	if !sourceExists && targetExists && sync {
 		if err := Clone_Safe(target, source, []string{}, concurrent); err != nil { // Note: original code clones target to source here
-			return nil, _fmt.Errorf("failed to safely clone target to source when source did not exist: %w", err)
+			return resultFileContents, _fmt.Errorf("failed to safely clone target to source when source did not exist: %w", err)
 		}
 	}
 
@@ -105,7 +106,7 @@ func Sync_BulkParallel(source, target string, extInclude, extnUnsync, fileExclud
 	// List files and filter by exclusions
 	targetFiles, err := Path_ListFiles(target, []string{})
 	if err != nil {
-		return nil, _fmt.Errorf("failed to list target files: %w", err)
+		return resultFileContents, _fmt.Errorf("failed to list target files: %w", err)
 	}
 	relativeTargetFiles := make([]string, 0, len(targetFiles))
 	for _, file := range targetFiles {
@@ -117,12 +118,12 @@ func Sync_BulkParallel(source, target string, extInclude, extnUnsync, fileExclud
 		}
 	}
 	if len(errs) > 0 {
-		return nil, _error.Join(errs...)
+		return resultFileContents, _error.Join(errs...)
 	}
 
 	sourceFiles, err := Path_ListFiles(source, []string{})
 	if err != nil {
-		return nil, _fmt.Errorf("failed to list source files: %w", err)
+		return resultFileContents, _fmt.Errorf("failed to list source files: %w", err)
 	}
 	relativeSourceFiles := make([]string, 0, len(sourceFiles))
 	for _, file := range sourceFiles {
@@ -157,7 +158,7 @@ func Sync_BulkParallel(source, target string, extInclude, extnUnsync, fileExclud
 	}
 	wg.Wait()
 	if len(errs) > 0 {
-		return nil, _error.Join(errs...)
+		return resultFileContents, _error.Join(errs...)
 	}
 
 	// Copy files from source to target and read contents for included extensions
@@ -172,7 +173,7 @@ func Sync_BulkParallel(source, target string, extInclude, extnUnsync, fileExclud
 			// Ensure parent directory exists in target
 			targetDir := _filepath.Dir(targetFilePath)
 			targetDirOk := true
-			if targetDirOk = Path_IfDir(targetDir); !targetDirOk {
+			if targetDirOk = Path_IfDir(targetDir); !targetDirOk && sync {
 				if err := _os.MkdirAll(targetDir, 0755); err != nil {
 					targetDirOk = false
 					errs = append(errs, _fmt.Errorf("failed to create target directory '%s': %w", targetDir, err))
@@ -270,16 +271,18 @@ func Sync_BulkSerial(source, target string, extInclude, extnUnsync, fileExcludes
 
 	// Initial synchronization to ensure both directories exist and have basic content
 	if !sourceExists && !targetExists {
-		return nil, _fmt.Errorf("neither source '%s' nor target '%s' directories exist", source, target)
+		return resultFileContents, _fmt.Errorf("neither source '%s' nor target '%s' directories exist", source, target)
 	}
-	if !targetExists && sourceExists {
+
+	if !targetExists && sourceExists && sync {
 		if err := Clone_Safe(source, target, []string{}, concurrent); err != nil {
-			return nil, _fmt.Errorf("failed to safely clone source to target when target did not exist: %w", err)
+			return resultFileContents, _fmt.Errorf("failed to safely clone source to target when target did not exist: %w", err)
 		}
 	}
-	if !sourceExists && targetExists {
+
+	if !sourceExists && targetExists && sync {
 		if err := Clone_Safe(target, source, []string{}, concurrent); err != nil { // Note: original code clones target to source here
-			return nil, _fmt.Errorf("failed to safely clone target to source when source did not exist: %w", err)
+			return resultFileContents, _fmt.Errorf("failed to safely clone target to source when source did not exist: %w", err)
 		}
 	}
 
@@ -288,7 +291,7 @@ func Sync_BulkSerial(source, target string, extInclude, extnUnsync, fileExcludes
 	// List files and filter by exclusions
 	targetFiles, err := Path_ListFiles(target, []string{})
 	if err != nil {
-		return nil, _fmt.Errorf("failed to list target files: %w", err)
+		return resultFileContents, _fmt.Errorf("failed to list target files: %w", err)
 	}
 	relativeTargetFiles := make([]string, 0, len(targetFiles))
 	for _, file := range targetFiles {
@@ -300,12 +303,12 @@ func Sync_BulkSerial(source, target string, extInclude, extnUnsync, fileExcludes
 		}
 	}
 	if len(errs) > 0 {
-		return nil, _error.Join(errs...)
+		return resultFileContents, _error.Join(errs...)
 	}
 
 	sourceFiles, err := Path_ListFiles(source, []string{})
 	if err != nil {
-		return nil, _fmt.Errorf("failed to list source files: %w", err)
+		return resultFileContents, _fmt.Errorf("failed to list source files: %w", err)
 	}
 	relativeSourceFiles := make([]string, 0, len(sourceFiles))
 	for _, file := range sourceFiles {
@@ -330,7 +333,7 @@ func Sync_BulkSerial(source, target string, extInclude, extnUnsync, fileExcludes
 			}
 		}
 		if len(errs) > 0 {
-			return nil, _error.Join(errs...)
+			return resultFileContents, _error.Join(errs...)
 		}
 	}
 
@@ -342,7 +345,7 @@ func Sync_BulkSerial(source, target string, extInclude, extnUnsync, fileExcludes
 		// Ensure parent directory exists in target
 		targetDir := _filepath.Dir(targetFilePath)
 		targetDirOk := true
-		if targetDirOk = Path_IfDir(targetDir); !targetDirOk {
+		if targetDirOk = Path_IfDir(targetDir); !targetDirOk && sync {
 			if err := _os.MkdirAll(targetDir, 0755); err != nil {
 				targetDirOk = false
 				errs = append(errs, _fmt.Errorf("failed to create target directory '%s': %w", targetDir, err))
@@ -393,7 +396,7 @@ func Sync_BulkSerial(source, target string, extInclude, extnUnsync, fileExcludes
 			isEmpty, _ := helper_IsDirEmpty(targetFolder) // Ignore error, assume not empty if error
 			if !sourceFolderExists && isEmpty {
 				if err := _os.RemoveAll(targetFolder); err != nil && !_os.IsNotExist(err) {
-                    errs = append(errs, _fmt.Errorf("rm empty target folder '%s': %w", targetFolder, err))
+					errs = append(errs, _fmt.Errorf("rm empty target folder '%s': %w", targetFolder, err))
 				}
 			}
 		}
