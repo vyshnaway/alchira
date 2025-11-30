@@ -121,6 +121,31 @@ jobs:
           repository: ${{ env.PACKAGE_REPO }}
           token: ${{ secrets.XCSS_REPO_CROSS }}
 
+      - name: Sync and push submodule updates for scaffold
+        run: |
+          git submodule update --init ./scaffold
+          node execute
+          cd scaffold
+          git fetch origin
+          LATEST_REMOTE=$(git rev-parse origin/main)
+          CURRENT_HEAD=$(git rev-parse HEAD)
+          if [ "$LATEST_REMOTE" != "$CURRENT_HEAD" ]; then
+            git checkout $LATEST_REMOTE
+            cd ../..
+            git add xrc/content
+            git commit -m "Update submodule xrc/content to latest"
+            git pull --rebase origin main
+            git push origin main
+          else
+            echo "Submodule xrc/content is already up-to-date."
+          fi
+        env:
+          GIT_AUTHOR_NAME: github-actions
+          GIT_AUTHOR_EMAIL: github-actions@github.com
+          GIT_COMMITTER_NAME: github-actions
+          GIT_COMMITTER_EMAIL: github-actions@github.com
+          GITHUB_TOKEN: ${{ secrets.XCSS_REPO_CROSS }}
+
       - name: Trigger publish workflow on Parent Repo
         uses: peter-evans/repository-dispatch@v2
         with:
@@ -131,7 +156,7 @@ jobs:
   publish-scaffold:
     name: Trigger Scaffold Release
     runs-on: ubuntu-latest
-    needs: bin-release
+    needs: publish-package
 
     steps:
       - name: Checkout ${{ env.SCAFFOLD_REPO }} (read-only)
