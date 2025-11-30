@@ -7,7 +7,10 @@ WORKDIR=$(pwd)
 # Initialize variables
 VERSION=""
 COMMIT_MSG=""
+
 echo $0
+echo $1
+echo $2
 # Parse arguments
 if [[ "$1" == "-p" ]]; then
   VERSION="$2"
