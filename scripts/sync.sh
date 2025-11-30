@@ -22,7 +22,7 @@ if [[ "$1" == "-p" ]]; then
     fi
   fi
   COMMIT_MSG="#Release v$VERSION"
-elif [[ "$1" == "-m" ]]; then
+elif [[ "$1" == "m" ]]; then
   shift
   # Use rest of the arguments as custom commit message
   COMMIT_MSG="$*"
