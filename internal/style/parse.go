@@ -30,10 +30,12 @@ func parse_AssignMerge(
 		found := _action.Index_Finder(classname, _model.Style_ClassIndexMap{})
 		if found.Group == _model.Style_Type_Library {
 			classdata := _action.Index_Fetch(found.Index)
-			classdata.SrcData.NativeRawStyle.PropRange(func(k, v string) {
-				if _string.HasPrefix(k, "--") {
-					variables.Set(k, v)
-				}
+			classdata.SrcData.NativeRawStyle.BlockRange(func(k string, v *_css.T_Block) {
+				v.PropRange(func(K, V string) {
+					if _string.HasPrefix(K, "--") {
+						variables.Set(K, V)
+					}
+				})
 			})
 			result.Merge(classdata.SrcData.NativeRawStyle)
 		}
