@@ -12,21 +12,15 @@ func Initialize(concurrent bool) {
 	S.STEP("Cloning blueprint to Project", 1)
 	S.TASK("Initialized setup.", 1)
 
-	err1 := _fileman.Clone_Safe(_config.Root_Navigate["blueprint"].Path, _config.Path_Folder["blueprint"].Path, []string{}, concurrent)
-	err2 := _fileman.Clone_Hard(_config.Root_Navigate["libraries"].Path, _config.Path_Folder["libstatic"].Path, []string{}, concurrent)
-
-	if err1 != nil {
+	if err := _fileman.Clone_Safe(
+		_config.Root_Navigate["blueprint"].Path,
+		_config.Path_Folder["blueprint"].Path,
+		[]string{},
+		concurrent,
+	); err != nil {
 		S.Post(S.MAKE(
 			S.Tag.H4("Initialization failed.", S.Preset.Failed, S.Style.AS_Bold),
-			[]string{err1.Error()},
-			S.MakeList{TypeFunc: S.List.Bullets, Intent: 0, Preset: S.Preset.Failed},
-		))
-		return
-	}
-	if err2 != nil {
-		S.Post(S.MAKE(
-			S.Tag.H4("Initialization failed.", S.Preset.Failed, S.Style.AS_Bold),
-			[]string{err2.Error()},
+			[]string{err.Error()},
 			S.MakeList{TypeFunc: S.List.Bullets, Intent: 0, Preset: S.Preset.Failed},
 		))
 		return

@@ -341,7 +341,9 @@ _$custom-pattern="
 ```
     xtyles/
     ├── libraries
-    |   └── *
+    |   ├── _static_
+    |   |    └── *.css
+    |   └── *.css
     ├── #at-rules.css
     ├── #constants.css
     ├── #elements.css
@@ -462,9 +464,13 @@ _$custom-pattern="
 
 ### ./libraries
 
-- This is your boilerplate setup for new projects.
-- Group classes into clusters and enable inheritance up to 6 levels, deriving from existing classes.
-- Library management features are detailed in the next section.
+- Organize classes into groups with up to 6 levels of inheritance based on existing classes.
+- Details on managing libraries are covered in the next section.
+
+### ./libraries/_static
+
+- This folder contains the immutable part of your library supplied by the configured flavour.
+- It includes static class sources used for symclass generation.
 # 4. Libraries
 
 Composing libraries is essentially like managing a set of CSS files—sensibly grouping classes and naming them according to established standards. This approach ensures clarity, maintainability, and consistency across your stylesheets.
