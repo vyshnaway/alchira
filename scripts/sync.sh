@@ -1,61 +1,60 @@
-#!/bin/bash
+#!/usr/bin/env bash
+set -euo pipefail
 
-# Save the original working directory
 WORKDIR=$(pwd)
 
 VERSION=""
 COMMIT_MSG=""
 
-# Parse arguments
-if [[ "$1" == "V" ]]; then
-  VERSION="$2"
-  if [ -z "$VERSION" ]; then
-    # No version flag value, fallback to version from package.json
-    if command -v jq >/dev/null 2>&1; then
-      VERSION=$(jq -r '.version' package.json)
-    else
-      VERSION=$(grep '"version"' package.json | sed -E 's/.*"version": *"([^"]+)".*/\1/')
-    fi
-    if [ -z "$VERSION" ]; then
-      echo "Version not specified and unable to read from package.json"
-      exit 1
-    fi
+case "${1-}" in
+  V)
+    VERSION="${2-}"
+    ;;
+  M)
+    shift
+    COMMIT_MSG="${*:-}"
+    ;;
+esac
+
+# If VERSION not passed, read from package.json
+if [[ "${1-}" == "V" && -z "$VERSION" ]]; then
+  if command -v jq >/dev/null 2>&1; then
+    VERSION=$(jq -r '.version' package.json)
+  else
+    VERSION=$(grep '"version"' package.json | sed -E 's/.*"version": *"([^"]+)".*/\1/')
   fi
-  COMMIT_MSG="#Release v$VERSION"
-elif [[ "$1" == "M" ]]; then
-  shift
-  # Use rest of the arguments as custom commit message
-  COMMIT_MSG="$*"
-else
-  COMMIT_MSG="Periodic Commit"
+  if [ -z "$VERSION" ]; then
+    echo "Version not specified and unable to read from package.json"
+    exit 1
+  fi
 fi
 
-
-# If version is set (only if -p or fallback), update package.json version
 if [ -n "$VERSION" ]; then
-  if command -v jq >/dev/null 2>&1; then
-    jq --arg v "$VERSION" '.version = $v' package.json > package.tmp.json && mv package.tmp.json package.json
-    echo "Updated package.json version to $VERSION"
-  else
-    sed -i.bak -E "s/\"version\": \"[^\"]+\"/\"version\": \"$VERSION\"/" package.json
-    echo "Updated package.json version to $VERSION (using sed fallback)"
-  fi
+  COMMIT_MSG="${COMMIT_MSG:-#Release v$VERSION}"
+else
+  COMMIT_MSG="${COMMIT_MSG:-Periodic Commit}"
 fi
 
 if command -v jq >/dev/null 2>&1; then
-  jq '
-    .flavour = {
-      name: "",
-      version: "",
-      sandbox: "",
-      blueprint: "",
-      libraries: ""
-    }
+  jq --arg v "$VERSION" '
+    if $v != "" then .version = $v else . end
+    | .flavour = {
+        name: "",
+        version: "",
+        sandbox: "",
+        blueprint: "",
+        libraries: ""
+      }
   ' package.json > package.tmp.json && mv package.tmp.json package.json
-  echo "Updated package.json version to $VERSION and cleared flavour"
+  [ -n "$VERSION" ] && echo "Updated package.json version to $VERSION"
+  echo "Cleared flavour in package.json"
 else
+  if [ -n "$VERSION" ]; then
+    sed -i.bak -E 's/"version": *"[^"]+"/"version": "'"$VERSION"'"/' package.json
+    echo "Updated package.json version to $VERSION (using sed fallback)"
+  fi
   sed -i.bak -E \
-  's/"flavour": *\{[^}]*\}/"flavour": {"name": "", "version": "", "sandbox": "", "blueprint": "", "libraries": ""}/' \
+    's/"flavour": *\{[^}]*\}/"flavour": {"name": "", "version": "", "sandbox": "", "blueprint": "", "libraries": ""}/' \
     package.json
   echo "Cleared flavour block in package.json (using sed fallback)"
 fi
@@ -69,24 +68,24 @@ REPOS=(
   "."
 )
 
-echo "VERSION: $VERSION"
+echo "VERSION: ${VERSION:-<none>}"
 echo "MESSAGE: $COMMIT_MSG"
 echo "==============================="
-# # Loop through each path, commit, and push
+
 for repo in "${REPOS[@]}"; do
   echo "Processing repository at: $repo"
 
-  # Change to repository path
   cd "$WORKDIR/$repo" || { echo "Failed to cd into $repo"; exit 1; }
 
-  # Fetch latest changes and rebase to avoid conflicts
+  # Ensure we are on main
+  git rev-parse --verify main >/dev/null 2>&1 && git checkout main
+
   git fetch origin main
 
-  # Check if there are any changes to commit
-  if [[ $(git status --porcelain) ]]; then
+  if [[ -n "$(git status --porcelain)" ]]; then
     git add .
     git commit -m "$COMMIT_MSG"
-    git push origin main || { echo "Failed to push $repo"; exit 1; }
+    git push origin main
     echo "Successfully pushed changes in $repo"
   else
     echo "No changes to commit in $repo"
@@ -94,5 +93,4 @@ for repo in "${REPOS[@]}"; do
   echo "==============================="
 done
 
-# Return to original working directory
 cd "$WORKDIR"
