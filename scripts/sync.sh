@@ -34,11 +34,22 @@ fi
 # If version is set (only if -p or fallback), update package.json version
 if [ -n "$VERSION" ]; then
   if command -v jq >/dev/null 2>&1; then
-    jq --arg v "$VERSION" '.version = $v' package.json > package.tmp.json && mv package.tmp.json package.json
-    echo "Updated package.json version to $VERSION"
+    jq '
+      .version = "'"$VERSION"'" |
+      .flavour = {
+        name: "",
+        version: "",
+        sandbox: "",
+        blueprint: "",
+        libraries: ""
+      }
+    ' package.json > package.tmp.json && mv package.tmp.json package.json
+    echo "Updated package.json version to $VERSION and cleared flavour"
   else
-    sed -i.bak -E "s/\"version\": \"[^\"]+\"/\"version\": \"$VERSION\"/" package.json
-    echo "Updated package.json version to $VERSION (using sed fallback)"
+    sed -i.bak -E \
+    's/"flavour": *\{[^}]*\}/"flavour": {"name": "", "version": "", "sandbox": "", "blueprint": "", "libraries": ""}/' \
+      package.json
+    echo "Cleared flavour block in package.json (using sed fallback)"
   fi
 fi
 
