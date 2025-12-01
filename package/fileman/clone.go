@@ -1,13 +1,12 @@
 package fileman
 
 import (
-	"errors"
 	_errors "errors"
 	_fmt "fmt"
 	_os "os"
 	_filepath "path/filepath"
 	_slices "slices"
-	"sync"
+	_sync "sync"
 )
 
 // Safe performs a safe copy, only copying files that don't exist in the destination.
@@ -94,7 +93,7 @@ func Clone_HardSerial(source, destination string, ignoreFiles []string) error {
 }
 
 func Clone_HardParallel(source, destination string, ignoreFiles []string) error {
-	var wg sync.WaitGroup
+	var wg _sync.WaitGroup
 	sourceInfo, err := _os.Stat(source)
 	if err != nil {
 		if _os.IsNotExist(err) {
@@ -147,7 +146,7 @@ func Clone_HardParallel(source, destination string, ignoreFiles []string) error 
 		for e := range errCh {
 			errs = append(errs, e)
 		}
-		return errors.Join(errs...)
+		return _errors.Join(errs...)
 
 	} else {
 		if err := helper_CopyFile(source, destination); err != nil {
