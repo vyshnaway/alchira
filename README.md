@@ -811,13 +811,13 @@ body[data-loading] .$class { ... }
 - Classname is enumered hash followed by cascade position index.
 - **Scattered Classes:**
   - Format: `~{classname}_{hash}`
-  - Example: `~scatter-class` 
+  - Example: `~scatter-class_g3` 
 - **Ordered Classes:**
   - Format: `!{classname}_{hash}-{cascade-counter}`
   - Example: `!ordered-class_g3-134` 
 - **Final Classes:**
   - Format: `={classname}_{hash}`
-  - Example: `=final-class` 
+  - Example: `=final-class_g3` 
 
 ### `publish`
 

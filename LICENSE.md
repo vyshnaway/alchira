@@ -1,6 +1,6 @@
 # License
 
-## End User License Agreement (EULA) for XCSS
+## End User License Agreement (EULA) for XCSS Compiler
 
 ### 1. Definitions
 
@@ -39,21 +39,17 @@ During the preview period, You are encouraged to:
 
 ### 6. Tools Powered by XCSS
 
-If You plan to create public or commercial tools or applications powered by XCSS, You must enter into a written agreement with XPKTR Labs before development or distribution. Contact us at [xcss@yshell.dev](mailto:xcss@yshell.dev) for contract discussions.
+If You plan to create public or commercial tools or applications powered by XCSS, You must enter into a written agreement with Us before development or distribution. Contact us at [xcss@yshell.dev](mailto:xcss@yshell.dev) for contract discussions.
 
 ### 7. Confidentiality
 
-You agree to keep confidential all non-public information of XCSS, including source code, algorithms, methodologies, and implementation details.
+You agree to keep confidential all non-public information of XCSS Compiler, including source code, algorithms, methodologies, and implementation details.
 
 ### 8. No Warranty
 
 XCSS is provided “AS IS” without warranties, express or implied. Real-time features are experimental and may change post-preview.
 
-### 9. Package Usage Terms
-
-XCSS may be installed via common package managers like npm or yarn under this Agreement.
-
-### 10. Updates and Support
+### 9. Updates and Support
 
 Updates during the preview period are at Our discretion. Support is provided through community channels such as GitHub.
 
@@ -61,8 +57,8 @@ Updates during the preview period are at Our discretion. Support is provided thr
 
 ### Contact Information
 
-- Website: [www.xcss.io](https://www.xcss.io)  
-- E-Mail: [xcss@yshell.dev](mailto:xcss@yshell.dev)
+- **Website:** [www.xcss.io](https://www.xcss.io)  
+- **E-Mail:** [xcss@yshell.dev](mailto:xcss@yshell.dev)
 
 ---
 

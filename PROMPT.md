@@ -5,7 +5,7 @@
 Welcome to the XCSS style context exploration interface. To begin, start the live interactive XCSS terminal by running:
 
 ```
-npm run xcss iamai
+npx xcss iamai
 ```
 
 This launches a real-time interactive session similar to a REPL, enabling you to explore your project’s styling system dynamically.
