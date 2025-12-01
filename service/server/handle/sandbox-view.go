@@ -24,7 +24,7 @@ type T_Component_return struct {
 }
 
 var Sandbox_View_Component = new(T_Component_return)
-var sandbox_View_ComponentLast = new(T_Component_return)
+// var sandbox_View_ComponentLast = new(T_Component_return)
 
 func Sandbox_Load(filepath, symclass string) (response any) {
 	Manifest_Local(filepath, symclass)
