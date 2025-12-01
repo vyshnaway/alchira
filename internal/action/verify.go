@@ -24,6 +24,7 @@ func Verify_Setup(concurrent bool) (Report string, Status verify_Setup_Status_en
 
 	if _fileman.Path_IfDir(_config.Path_Folder["blueprint"].Path) {
 		_fileman.Clone_Safe(_config.Root_Navigate["blueprint"].Path, _config.Path_Folder["blueprint"].Path, []string{}, concurrent)
+		_fileman.Clone_Hard(_config.Root_Navigate["libraries"].Path, _config.Path_Folder["libstatic"].Path, []string{}, concurrent)
 
 		errors := map[string]string{}
 		S.TASK("Verifying directory status", 1)

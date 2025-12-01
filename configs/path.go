@@ -35,6 +35,11 @@ var Path_Folder = map[string]_model.File_Source{
 		Content:   "",
 		Essential: false,
 	},
+	"libstatic": {
+		Frags:     []string{id, "libraries", "_static_"},
+		Path:      "",
+		Essential: true,
+	},
 }
 
 var Path_Css = map[string]_model.File_Source{

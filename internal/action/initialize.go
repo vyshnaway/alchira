@@ -13,7 +13,7 @@ func Initialize(concurrent bool) {
 	S.TASK("Initialized setup.", 1)
 
 	err1 := _fileman.Clone_Safe(_config.Root_Navigate["blueprint"].Path, _config.Path_Folder["blueprint"].Path, []string{}, concurrent)
-	err2 := _fileman.Clone_Safe(_config.Root_Navigate["libraries"].Path, _config.Path_Folder["libraries"].Path, []string{}, concurrent)
+	err2 := _fileman.Clone_Hard(_config.Root_Navigate["libraries"].Path, _config.Path_Folder["libstatic"].Path, []string{}, concurrent)
 
 	if err1 != nil {
 		S.Post(S.MAKE(
