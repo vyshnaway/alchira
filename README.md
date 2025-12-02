@@ -50,7 +50,7 @@ For using XCSS in non-JavaScript based codebases, install XCSS globally. After t
 Install XCSS Package globally with:
 
 ```bash
-npm install -g xcss-central
+npm install -g xcss-package
 ```
 
 Run XCSS commands directly:
@@ -64,7 +64,7 @@ xcss {command}
 Install XCSS Package as a development dependency locally:
 
 ```bash
-npm install --save-dev xcss-central
+npm install --save-dev xcss-package
 ```
 
 Run XCSS commands locally using npm scripts:
