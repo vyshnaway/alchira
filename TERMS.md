@@ -20,6 +20,6 @@
 - **Updates:** These Terms & Conditions may be updated periodically. Changes posted at [www.xcss.io/notifications](https://www.xcss.io/notifications).
 - **Acceptance:** Continued use after updates indicates acceptance of revised terms. Check periodically for major changes.
 
-#### Contact Information
+#### Contact Informa
 - **Support:** [xcss@yshell.dev](mailto:xcss@yshell.dev)
 - **Website:** [https://www.xcss.io](https://www.xcss.io)
