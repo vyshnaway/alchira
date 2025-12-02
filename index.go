@@ -99,7 +99,7 @@ func main() {
 
 	packagecaps := _string.ToUpper(_config.Root.Name)
 	flavourcaps := _string.ToUpper(_config.Root.Flavour.Name)
-	
+
 	_config.Static.Command = command
 	_config.Static.Argument = argone
 
@@ -135,6 +135,9 @@ func main() {
 
 	switch _config.Static.Command {
 	case "void":
+		if argone == "sync" {
+			_action.Sync_RootDocs()
+		}
 
 	case "init":
 		{
