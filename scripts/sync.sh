@@ -59,8 +59,6 @@ else
   echo "Cleared flavour block in package.json (using sed fallback)"
 fi
 
-# node ./execute void sync
-# xdev void sync
 ./compiler/scripts/live.sh void sync
 
 # List of relative paths to repositories to commit and push
