@@ -60,6 +60,7 @@ else
 fi
 
 node ./execute void sync
+xdev void sync
 
 # List of relative paths to repositories to commit and push
 REPOS=(
