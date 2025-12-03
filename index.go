@@ -97,7 +97,6 @@ func main() {
 		}
 	}
 
-
 	_config.Static.Command = command
 	_config.Static.Argument = argone
 
@@ -120,7 +119,7 @@ func main() {
 	}
 
 	_config.Reset(false)
-	if _fileman.Path_IfFile(_config.Root_Navigate["index"].Path) {
+	if _config.Static.Command != "void" && _fileman.Path_IfFile(_config.Root_Navigate["index"].Path) {
 		pprof, e := _server.RequestAvailablePort(0)
 		if e == nil {
 			go func() {
@@ -134,7 +133,7 @@ func main() {
 	title := _string.ToUpper(_config.Root.Name)
 	vtitle := title + " @ v" + _config.Root.Version
 	flavourcaps := _string.ToUpper(_config.Root.Flavour.Name)
-	
+
 	if len(flavourcaps) > 0 {
 		vtitle += " | " + flavourcaps
 		if len(rootData.Flavour.Version) > 0 {
