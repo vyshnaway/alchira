@@ -341,7 +341,7 @@ _$custom-pattern="
 ```
     xtyles/
     ├── libraries
-    |   ├── _static_
+    |   ├── _scaffold_
     |   |    └── *.css
     |   └── *.css
     ├── #at-rules.css
@@ -353,11 +353,11 @@ _$custom-pattern="
     └── vendors.jsonc
 ```
 
-### ./#at-rules.css
+### `./#at-rules.css`
 - Defines preface directives for exported stylesheets.
 - Declares preface-level directives for exported stylesheets, such as `@import`, `@layer`, `@charset`, `@font-face` etc.
 
-### ./#constants.css
+### `./#constants.css`
 - Defines the core design tokens—colors, spacing, typography, and themes.
 - Constants are context-aware and surfaced via LSP suggestions in valid scopes, enabling consistent styling.
 
@@ -365,16 +365,16 @@ _$custom-pattern="
 > To prevent naming collisions and maintain clarity, all constants should follow the standard prefix format:  **`---{...}`**. This naming convention ensures safe resolution across files and avoids unintended conflicts in symbolic or dynamic contexts
 ---
 
-### ./#elements.css
+### `./#elements.css`
 - Encourages semantic usage of tags by styling native tags directly.
 - Offers classless CSS that dynamically adapts to the design system defined in `constants.css`, promoting minimal markup and clean semantics.
 
-### ./#extends.css
+### `./#extends.css`
 - Augments the base CSS with additional declarations and overrides.
 - Ideal for post-compilation definitions, utility extensions, and scoped enhancements that build on the compiled source stylesheet.
 
 ---
-### ./configure.jsonc
+### `./configure.jsonc`
 
 ```json
 {
@@ -417,7 +417,7 @@ _$custom-pattern="
 	    Maps file types to attributes where symbolic classes will be injected.  
 	    Example: `"html": ["class"]` targets HTML files and assist merge tooltip via extention for given attributes.
 
-### ./hashrules.jsonc
+### `./hashrules.jsonc`
 
 ```json
 {
@@ -457,19 +457,19 @@ _$custom-pattern="
 
 > For clarity and conflict avoidance, any `hashrule` used as a variable should begin with a **`-` prefix**.
 
-### ./vendors.jsonc
+### `./vendors.jsonc`
 
 - If `configure.jsonc | vendors: none` : Paste custom vendor data in this file
 - If `configure.jsonc | vendors: {url}` has a valid URL source file will by automatically updated occasionally for vendor provider data.
 
-### ./libraries
+### `./libraries`
 
 - Organize classes into groups with up to 6 levels of inheritance based on existing classes.
 - Details on managing libraries are covered in the next section.
 
-### ./libraries/_static
+### `./libraries/_scaffold_`
 
-- This folder contains the immutable part of your library supplied by the configured flavour.
+- This folder contains the immutable part of your library supplied by the initalized flavour.
 - It includes static class sources used for symclass generation.
 # 4. Libraries
 

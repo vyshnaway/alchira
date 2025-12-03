@@ -97,8 +97,6 @@ func main() {
 		}
 	}
 
-	packagecaps := _string.ToUpper(_config.Root.Name)
-	flavourcaps := _string.ToUpper(_config.Root.Flavour.Name)
 
 	_config.Static.Command = command
 	_config.Static.Argument = argone
@@ -133,6 +131,20 @@ func main() {
 	}
 	concurrent := false
 
+	title := _string.ToUpper(_config.Root.Name)
+	vtitle := title + " @ v" + _config.Root.Version
+	flavourcaps := _string.ToUpper(_config.Root.Flavour.Name)
+	
+	if len(flavourcaps) > 0 {
+		vtitle += " | " + flavourcaps
+		if len(rootData.Flavour.Version) > 0 {
+			vtitle += " @ " + rootData.Flavour.Version
+		}
+	}
+	if len(flavourcaps) > 0 {
+		title += " | " + flavourcaps
+	}
+
 	switch _config.Static.Command {
 	case "void":
 		if argone == "sync" {
@@ -144,7 +156,7 @@ func main() {
 			var wg _sync.WaitGroup
 			wg.Add(2)
 			go func() { _action.Sync_RootDocs(); wg.Done() }()
-			go func() { Sp.Title(packagecaps+" : Initialize", 1000, 1); wg.Done() }()
+			go func() { Sp.Title(title+" : Initialize", 1000, 1); wg.Done() }()
 			wg.Wait()
 			setup_report, setup_status := _action.Verify_Setup(concurrent)
 			switch setup_status {
@@ -161,15 +173,15 @@ func main() {
 		}
 	case "debug":
 		{
-			exitcode = _compiler.Execute(packagecaps+" : Debug "+flagmode, concurrent)
+			exitcode = _compiler.Execute(title+" : Debug "+flagmode, concurrent)
 		}
 	case "preview":
 		{
-			exitcode = _compiler.Execute(packagecaps+" : Preview "+flagmode, concurrent)
+			exitcode = _compiler.Execute(title+" : Preview "+flagmode, concurrent)
 		}
 	case "publish":
 		{
-			exitcode = _compiler.Execute(packagecaps+" : "+"Publishing for Production", concurrent)
+			exitcode = _compiler.Execute(title+" : "+"Publishing for Production", concurrent)
 		}
 	case "iamai", "server":
 		{
@@ -219,15 +231,8 @@ func main() {
 	default:
 		{
 			_action.Sync_RootDocs()
-			title := packagecaps + " @ v" + _config.Root.Version
-			if len(flavourcaps) > 0 {
-				title += " | " + flavourcaps
-				if len(rootData.Flavour.Version) > 0 {
-					title += " @ " + rootData.Flavour.Version
-				}
-			}
 
-			S.Post(S.MAKE(S.Tag.H2(title, S.Preset.Title, S.Style.AS_Bold),
+			S.Post(S.MAKE(S.Tag.H2(vtitle, S.Preset.Title, S.Style.AS_Bold),
 				[]string{
 					_string.Trim(_config.Sync_References["notices"].Content, "\t\r\n ") + "\n",
 					X.List_Record("Available Commands", O.FromUnorderedMap(_config.Root.Commands)),

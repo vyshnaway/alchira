@@ -50,7 +50,7 @@ func ClearUnwantedCache() (
 	)
 
 	var reportBlocks []string
-	if _config.Static.WATCH {
+	if _config.Static.WATCH || _config.Static.DEBUG {
 		reportBlocks = []string{
 			_config.Delta.Report.Axioms,
 			_config.Delta.Report.Clusters,
