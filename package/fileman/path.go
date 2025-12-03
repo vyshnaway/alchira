@@ -14,7 +14,7 @@ func Path_BaseName(pathString string) string {
 }
 
 // Returns basename from a pathString
-func Path_FileExtention(pathString string) string {
+func Path_FileExtension(pathString string) string {
 	e := _filepath.Ext(pathString)
 	if len(e) > 0 {
 		e = e[1:]

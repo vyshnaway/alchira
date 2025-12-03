@@ -17,6 +17,7 @@ func Saved_Reset() {
 		Libraries_Saved:   map[string]string{},
 		TargetDir_Saved:   map[string]_model.Config_ProxyStorage{},
 		Artifacts_Sources: map[string]string{},
+		Sandbox:           map[string]any{},
 	}
 }
 

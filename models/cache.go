@@ -62,6 +62,7 @@ type Cache_Saved struct {
 	TargetDir_Saved   map[string]Config_ProxyStorage
 	ProxyMap          []Config_ProxyMap
 	Tweaks            Config_Tweaks
+	Sandbox           map[string]any
 }
 
 type Cache_Delta_Report struct {

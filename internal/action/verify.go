@@ -24,17 +24,21 @@ func Verify_Setup(concurrent bool) (Report string, Status verify_Setup_Status_en
 
 	if _fileman.Path_IfDir(_config.Path_Folder["blueprint"].Path) {
 		if !_config.Static.SERVER {
-			_fileman.Clone_Safe(
-				_config.Root_Navigate["blueprint"].Path,
-				_config.Path_Folder["blueprint"].Path,
-				[]string{}, concurrent)
+			if _fileman.Path_IfDir(_config.Root_Navigate["blueprint"].Path) {
+				_fileman.Clone_Safe(
+					_config.Root_Navigate["blueprint"].Path,
+					_config.Path_Folder["blueprint"].Path,
+					[]string{}, concurrent)
+			}
 
-			_fileman.Sync_Bulk(
-				_config.Root_Navigate["libraries"].Path,
-				_config.Path_Folder["libstatic"].Path,
-				[]string{}, []string{}, []string{},
-				true, concurrent,
-			)
+			if _fileman.Path_IfDir(_config.Root_Navigate["libraries"].Path) {
+				_fileman.Sync_Bulk(
+					_config.Root_Navigate["libraries"].Path,
+					_config.Path_Folder["libstatic"].Path,
+					[]string{}, []string{}, []string{},
+					true, concurrent,
+				)
+			}
 		}
 
 		errors := map[string]string{}
@@ -123,6 +127,7 @@ func Verify_Configs(remote_vendors bool, concurrent bool) (Report string, Status
 
 			_config.Archive.Environment = config.Environment
 			Setup_Tweaks(config.Tweaks)
+			Setup_Sandbox(config.Sandbox)
 
 			if len(config.Name) > 0 {
 				_config.Archive.Name = config.Name
@@ -153,6 +158,7 @@ func Verify_Configs(remote_vendors bool, concurrent bool) (Report string, Status
 				}
 			}
 			// S.Render.Raw(_config.Saved.ProxyMap)
+
 		}
 	} else {
 		errAdd(config_path, "Bad Config file.")

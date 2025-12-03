@@ -415,7 +415,7 @@ _$custom-pattern="
 	    Stylesheet appended to the final compiled output. Located within the target directory.
 	- **`extensions`**  
 	    Maps file types to attributes where symbolic classes will be injected.  
-	    Example: `"html": ["class"]` targets HTML files and assist merge tooltip via extention for given attributes.
+	    Example: `"html": ["class"]` targets HTML files and assist merge tooltip via extension for given attributes.
 
 ### `./hashrules.jsonc`
 
@@ -576,7 +576,7 @@ All the first order blocks of each file will have a corresponding symbolic class
 
 ### Watch attributes
 
-For the files of given extention, **watch attributes** for those files, provide additional featues for declaration.
+For the files of given extension, **watch attributes** for those files, provide additional featues for declaration.
 ```json
 "extensions": {
   "html": [ "class", "id" ]
