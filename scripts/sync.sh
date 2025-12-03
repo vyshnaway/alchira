@@ -61,6 +61,7 @@ fi
 
 node ./execute void
 ./compiler/scripts/live.sh void sync
+echo $VERSION > ./compiler/VERSION 
 
 # List of relative paths to repositories to commit and push
 REPOS=(
