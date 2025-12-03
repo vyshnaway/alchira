@@ -378,8 +378,6 @@ _$custom-pattern="
 
 ```json
 {
-  "name": "",
-  "version": "",
   "vendors": "none",
   "proxymap": [
     {
@@ -392,16 +390,11 @@ _$custom-pattern="
         ]
       }
     }
-  ] 
+  ],
+  "environment": "browser",
 }
 ```
 
-- **`name`**  
-    Artifact name used during composition.  
-    If omitted, defaults to `../package.json::name`.
-- **`version`**  
-    Current version of the artifact.  
-    If omitted, defaults to `../package.json::version`.
 - **`vendors`**  
     Specifies vendor prefixing behavior.  
     Accepts `"none"` or a list of vendor targets (e.g., `"webkit"`, `"moz"`).
@@ -416,6 +409,9 @@ _$custom-pattern="
 	- **`extensions`**  
 	    Maps file types to attributes where symbolic classes will be injected.  
 	    Example: `"html": ["class"]` targets HTML files and assist merge tooltip via extension for given attributes.
+- **`environment`**  
+    Used by Editor extention for standerd css completion in compilation blocks.  
+    Refer Extention walkthorugh to see in action at [../tutorial/0.extention.md](../tutorial/0.extention.md).
 
 ### `./hashrules.jsonc`
 
@@ -721,7 +717,25 @@ This operator applies only when certain conditions are met:
 1. Nested child selectors must begin with the `&` character.
 2. The parent selector must end with one or more `&` characters (denoted as *n*, where *n*≥1).
 
- When merging occurs, exactly `n` characters are removed from the end of the parent selector and the beginning of the child selector—excluding the special prefix `&` and suffix `&` characters—before concatenating them.
+When merging occurs, exactly `n` characters are removed from the end of the parent selector and the beginning of the child selector—excluding the special prefix `&` and suffix `&` characters—before concatenating them.
+
+**Limitation Notice:** This operator has a side effect preventing comma-separated multiple nested selectors. Use cautiously for complex cases.
+
+```css 
+/* Input */
+[a-]& { 
+  &[b], &[c] { ... } 
+}
+
+/* Expected output */
+[a-b] { ... }
+[a-c] { ... }
+
+/* Actual result */
+[a-b], &[c] { ... }  /* Second selector fails */
+```
+
+The `&` (parent reference) doesn't expand correctly in comma-separated nested rules, breaking multi-selector support.
 # 6. Composition
 
 ## Symbolic-Class 
