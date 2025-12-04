@@ -154,9 +154,12 @@ func Rider(
 					} else if i := _action.Index_Finder(entrystring, fileData.Cache.LocalMap); i.Index > 0 && method != E_Method_LoadHash {
 						if method == E_Method_DebugHash {
 							stream.WriteString(i.Data.SrcData.DebugScatterClass)
+						} else if _config.Static.PREVIEW {
+							stream.WriteString(i.Data.SrcData.PreviewScatterClass)
 						} else {
 							stream.WriteString(i.Data.SrcData.PublishScatterClass)
 						}
+
 						awaitop = false
 					}
 
@@ -166,6 +169,8 @@ func Rider(
 					} else if i := _action.Index_Finder(entrystring, fileData.Cache.LocalMap); i.Index > 0 && method != E_Method_LoadHash {
 						if method == E_Method_DebugHash {
 							stream.WriteString(i.Data.SrcData.DebugFinalClass)
+						} else if _config.Static.PREVIEW {
+							stream.WriteString(i.Data.SrcData.PreviewFinalClass)
 						} else {
 							stream.WriteString(i.Data.SrcData.PublishFinalClass)
 						}
