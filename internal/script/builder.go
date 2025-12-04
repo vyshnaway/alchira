@@ -5,6 +5,7 @@ import (
 	_config "main/configs"
 	_action "main/internal/action"
 	_model "main/models"
+	// "main/package/console"
 	_reader "main/package/reader"
 	_string "strings"
 )
@@ -13,9 +14,9 @@ func Value_Builder(
 	value string,
 	action E_Method,
 	fileData *_model.File_Stash,
-	FileCursor *_reader.T_Reader,
+	fileCursor *_reader.T_Reader,
 	isWatching bool,
-	orderedlist []string,
+	orderedMapping map[string]string,
 ) string {
 
 	awaitop := false
@@ -30,16 +31,7 @@ func Value_Builder(
 	waitop = 0
 	lastCh = 0
 	awaitop = false
-	metafront := ""
-
-	if action == E_Method_DebugHash {
-		metafront = _fmt.Sprintf(
-			"TAG%s:%d:%d__", fileData.DebugFront,
-			FileCursor.Active.Row, FileCursor.Active.Col,
-		)
-	}
-	orderedMapping := value_EvaluateIndexTraces(action, metafront, orderedlist, fileData.Cache.LocalMap)
-
+	
 	for marker := range valuelen {
 		ch := value[marker]
 		if awaitop {

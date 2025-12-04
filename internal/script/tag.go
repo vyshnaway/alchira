@@ -1,6 +1,7 @@
 package script
 
 import (
+	_fmt "fmt"
 	_config "main/configs"
 	_model "main/models"
 	_reader "main/package/reader"
@@ -30,10 +31,9 @@ var symclass_chars = _regexp.MustCompile(`[A-Za-z0-9/_\$\-]`)
 func Tag_Scanner(
 	fileData *_model.File_Stash,
 	method E_Method,
-	cursor *_reader.T_Reader,
-	orederedlist []string,
+	fileCursor *_reader.T_Reader,
+	orderedlist []string,
 ) tag_Parse_retype {
-	classesList := make([]string, 0, 1)
 	scatterList := make(map[string]bool, 4)
 	finalList := make(map[string]bool, 4)
 	braceTrack := make([]rune, 0, 8)
@@ -49,8 +49,8 @@ func Tag_Scanner(
 	selfClosed := false
 	classSynced := false
 	fallbackAquired := false
-	startpos := cursor.Active
-	tagStart := cursor.Active.Idx
+	startpos := fileCursor.Active
+	tagStart := fileCursor.Active.Idx
 
 	styleDeclarations := _model.T_RawStyle{
 		Elid:       0,
@@ -59,7 +59,7 @@ func Tag_Scanner(
 		Elvalue:    "",
 		Innertext:  "",
 		Scope:      _model.Style_Type_Null,
-		TagCount:   cursor.Active.Cycle + 1,
+		TagCount:   fileCursor.Active.Cycle + 1,
 		SymClasses: make([]string, 0, 1),
 		Attributes: make(map[string]string, 12),
 		Comments:   make([]string, 0, 1),
@@ -76,13 +76,13 @@ func Tag_Scanner(
 		}
 	}
 
-	for cursor.Streaming {
-		ch, _ := cursor.Increment()
+	for fileCursor.Streaming {
+		ch, _ := fileCursor.Increment()
 
-		if cursor.Active.Last != '\\' {
-			if !fallbackAquired && cursor.Active.Next == '<' {
+		if fileCursor.Active.Last != '\\' {
+			if !fallbackAquired && fileCursor.Active.Next == '<' {
 				fallbackAquired = true
-				cursor.SaveFallback()
+				fileCursor.SaveFallback()
 			}
 
 			if awaitClosure != 0 && awaitClosure == ch {
@@ -100,7 +100,7 @@ func Tag_Scanner(
 					braceTrack = append(braceTrack, awaitClosure)
 					deviance = len(braceTrack)
 				} else if awaitClosure != ch && _slice.Contains(_util.Refer.CloseBraces, ch) {
-					cursor.Increment()
+					fileCursor.Increment()
 					break
 				}
 			}
@@ -165,15 +165,25 @@ func Tag_Scanner(
 							_map.Copy(loadashes, value_Parse_return.Loadashes)
 							_map.Copy(scatterList, value_Parse_return.ScatterList)
 							_map.Copy(finalList, value_Parse_return.FinalList)
-							classesList = append(classesList, value_Parse_return.OrderedClasses...)
+							orderedlist = append(orderedlist, value_Parse_return.OrderedClasses...)
 						} else {
+
+							metafront := ""
+							if method == E_Method_DebugHash {
+								metafront = _fmt.Sprintf(
+									"TAG%s:%d:%d__", fileData.DebugFront,
+									fileCursor.Active.Row, fileCursor.Active.Col,
+								)
+							}
+							orderedMapping := value_EvaluateIndexTraces(method, metafront, orderedlist, fileData.Cache.LocalMap)
+							
 							scribed = Value_Builder(
 								tr_Value,
 								method,
 								fileData,
-								cursor,
+								fileCursor,
 								isWatching,
-								orederedlist,
+								orderedMapping,
 							)
 						}
 						nativeAttributes[tr_Attr] = scribed
@@ -210,28 +220,28 @@ func Tag_Scanner(
 	}
 
 	var fragString = ""
-	styleDeclarations.EndMarker = cursor.Active.Idx
+	styleDeclarations.EndMarker = fileCursor.Active.Idx
 
 	if ok {
-		if cursor.Active.Char == '>' {
+		if fileCursor.Active.Char == '>' {
 			styleDeclarations.EndMarker++
 		}
 		fragString = fragment.String()
 		if fragString[1] == '!' {
-			fragString = string(cursor.Runes[tagStart:styleDeclarations.EndMarker])
+			fragString = string(fileCursor.Runes[tagStart:styleDeclarations.EndMarker])
 		} else {
-			cursor.Active.Cycle++
-			selfClosed = cursor.Active.Last == '/'
-			styleDeclarations.Range = _reader.T_Range{Data: []string{}, Start: startpos, End: cursor.Active}
+			fileCursor.Active.Cycle++
+			selfClosed = fileCursor.Active.Last == '/'
+			styleDeclarations.Range = _reader.T_Range{Data: []string{}, Start: startpos, End: fileCursor.Active}
 		}
 
 	} else {
-		fragString = string(cursor.Runes[tagStart:styleDeclarations.EndMarker])
+		fragString = string(fileCursor.Runes[tagStart:styleDeclarations.EndMarker])
 		if fallbackAquired {
-			cursor.LoadFallback()
+			fileCursor.LoadFallback()
 		}
 	}
-
+	
 	return tag_Parse_retype{
 		Ok:                ok,
 		Loadashes:         loadashes,
@@ -240,7 +250,7 @@ func Tag_Scanner(
 		Fragment:          fragString,
 		SelfClosed:        selfClosed,
 		ClassSynced:       classSynced,
-		ClassList:         classesList,
+		ClassList:         orderedlist,
 		NativeAttributes:  nativeAttributes,
 		StyleDeclarations: styleDeclarations,
 	}

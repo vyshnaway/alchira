@@ -70,7 +70,11 @@ func Rider(
 		if cursor.Active.Last != '\\' && ch == '<' && regexp_aftertagopen.MatchString(string(cursor.Active.Next)) {
 			tagStart := cursor.Active.Idx
 			cursorx := *cursor
-			parsed := Tag_Scanner(fileData, method, cursor, []string{})
+			methodx := E_Method_Read
+			if method == E_Method_Strip {
+				methodx = E_Method_Strip
+			}
+			parsed := Tag_Scanner(fileData, methodx, cursor, []string{})
 			if method != E_Method_Read && method != E_Method_Strip {
 				parsed = Tag_Scanner(fileData, method, &cursorx, parsed.ClassList)
 			}
