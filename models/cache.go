@@ -132,6 +132,7 @@ type Cache_Style struct {
 	Index_to_Styledata  map[int]*Cache_SymclassData
 	Filepath_to_Context map[string]*File_Stash
 	Sandbox_Scattered   Style_ClassIndexMap
+	Sandbox_Append      Style_ClassIndexMap
 	Publish_Ordered     [][]Style_ClassIndexTrace
 	Sandbox_Final       Style_ClassIndexMap
 }

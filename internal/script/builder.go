@@ -72,7 +72,11 @@ func Value_Builder(
 							if method == E_Method_DebugHash {
 								classname := res.Data.SrcData.DebugScatterClass
 								stream.WriteString(classname)
-								_config.Style.Sandbox_Scattered[classname] = res.Index
+								if waitop == op_scatter {
+									_config.Style.Sandbox_Scattered[classname] = res.Index
+								} else {
+									_config.Style.Sandbox_Append[classname] = res.Index
+								}
 							} else if method == E_Method_PreviewHash || _config.Static.PREVIEW {
 								stream.WriteString(res.Data.SrcData.PreviewScatterClass)
 							} else {

@@ -100,6 +100,7 @@ func Style_Reset() {
 		Filepath_to_Context: map[string]*_model.File_Stash{},
 		Publish_Ordered:     [][]_model.Style_ClassIndexTrace{},
 		Sandbox_Scattered:   _model.Style_ClassIndexMap{},
+		Sandbox_Append:   _model.Style_ClassIndexMap{},
 		Sandbox_Final:       _model.Style_ClassIndexMap{},
 	}
 }

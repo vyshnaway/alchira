@@ -1,6 +1,7 @@
 package handle
 
 import (
+	"fmt"
 	"main/configs"
 	"main/internal/action"
 	"main/internal/script"
@@ -26,8 +27,6 @@ type T_Component_return struct {
 
 var Sandbox_View_Component = new(T_Component_return)
 
-// var sandbox_View_ComponentLast = new(T_Component_return)
-
 func Sandbox_Load(filepath, symclass string) (response any) {
 	Manifest_Local(filepath, symclass)
 	return Sandbox_View_Component
@@ -52,6 +51,11 @@ func Sandbox_Save(index int) (response any) {
 	FinalClassMap := []models.Style_ClassIndexTrace{
 		{ClassName: "_", ClassIndex: data.SrcData.Index},
 	}
+	appendmap := map[int]bool{}
+	for c, i := range configs.Style.Sandbox_Append {
+		appendmap[i] = true
+		FinalClassMap = append(FinalClassMap, models.Style_ClassIndexTrace{ClassName: c, ClassIndex: i})
+	}
 	for c, i := range configs.Style.Sandbox_Scattered {
 		FinalClassMap = append(FinalClassMap, models.Style_ClassIndexTrace{ClassName: c, ClassIndex: i})
 	}
@@ -63,8 +67,10 @@ func Sandbox_Save(index int) (response any) {
 	}
 
 	for _, i := range FinalClassMap {
+		if !appendmap[i.ClassIndex] {
+			attachIndex[i.ClassIndex] = true
+		}
 		data := action.Index_Fetch(i.ClassIndex)
-		attachIndex[i.ClassIndex] = true
 		maps.Copy(attachIndex, style.ResolveDependints(data))
 
 		classBlocks.SetBlock(compiler.FmtClassForCss(i.ClassName), data.SrcData.NativeRawStyle)
@@ -81,7 +87,7 @@ func Sandbox_Save(index int) (response any) {
 	Sandbox_View_Component = &T_Component_return{
 		Attributes: attributes,
 		Summon:     summon,
-		Staple:     staplesheet.String(),
+		Staple:     fmt.Sprint(configs.Saved.Tweaks["staple-prefix"], staplesheet.String(), configs.Saved.Tweaks["staple-suffix"]),
 		Symclass:   data.SrcData.SymClass,
 		Rootcss:    configs.Delta.IndexBuild,
 		Compcss:    stylesheet.String(),
@@ -91,6 +97,8 @@ func Sandbox_Save(index int) (response any) {
 
 	return Sandbox_View_Component
 }
+
+// var sandbox_View_ComponentLast = new(T_Component_return)
 
 // func SandboxDataDiffered() bool {
 // 	now := Sandbox_View_Component
