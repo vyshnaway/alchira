@@ -22,12 +22,10 @@ func Manifest_Global() *R_ManifestGlobal {
 	configs.Static.ExecuteMutex.Lock()
 	defer configs.Static.ExecuteMutex.Unlock()
 
-	attributeMap := map[string]map[string][]string{}
 	switchmap := map[string]string{}
 	for _, tv := range stash.Cache.Targetdir {
 		switchmap[tv.Source] = tv.Target
 		switchmap[tv.Target] = tv.Source
-		attributeMap[tv.Target] = tv.ExtnsProps
 	}
 
 	symclassData := map[string]*models.Style_Metadata{}

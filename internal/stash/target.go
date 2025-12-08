@@ -101,8 +101,10 @@ func Target_SyncClassNames() {
 	var render_action script.E_Method
 	if _config.Static.DEBUG {
 		render_action = script.E_Method_DebugHash
+	} else if _config.Static.PREVIEW {
+		render_action = script.E_Method_PreviewHash
 	} else {
-		render_action = script.E_Method_BuildHash
+		render_action = script.E_Method_PublishHash
 	}
 
 	for _, target := range Cache.Targetdir {

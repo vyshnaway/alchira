@@ -5,6 +5,7 @@ import (
 	_config "main/configs"
 	_action "main/internal/action"
 	_model "main/models"
+
 	// "main/package/console"
 	_reader "main/package/reader"
 	_string "strings"
@@ -12,18 +13,20 @@ import (
 
 func Value_Builder(
 	value string,
-	action E_Method,
+	method E_Method,
 	fileData *_model.File_Stash,
 	fileCursor *_reader.T_Reader,
 	isWatching bool,
 	orderedMapping map[string]string,
-) string {
+) (string, []string) {
 
+	runes := []rune(value)
+	appends := []string{}
 	awaitop := false
 	scribed := value
 	valuelen := len(value)
-	var waitop byte = 0
-	var lastCh byte = 0
+	var waitop rune = 0
+	var lastCh rune = 0
 	var entry _string.Builder
 
 	var stream _string.Builder
@@ -31,12 +34,12 @@ func Value_Builder(
 	waitop = 0
 	lastCh = 0
 	awaitop = false
-	
+
 	for marker := range valuelen {
-		ch := value[marker]
+		ch := runes[marker]
 		if awaitop {
-			if ok := symclass_chars.Match([]byte{ch}); ok {
-				entry.WriteByte(ch)
+			if ok := symclass_chars.Match([]byte{byte(ch)}); ok {
+				entry.WriteRune(ch)
 			} else {
 				entrystring := entry.String()
 
@@ -46,22 +49,31 @@ func Value_Builder(
 						stream.WriteString(_fmt.Sprintf("%s%s", fileData.Label, entrystring))
 						awaitop = false
 					}
+
 				case op_order:
-					if action != E_Method_LoadHash {
+					if method != E_Method_LoadHash {
 						if found_Entry, found_Status := orderedMapping[entrystring]; found_Status {
 							stream.WriteString(found_Entry)
 							awaitop = false
 						}
 					}
 
-				case op_scatter:
-					if action != E_Method_LoadHash {
+				case op_append:
+					if method != E_Method_LoadHash {
 						if res := _action.Index_Finder(entrystring, fileData.Cache.LocalMap); res.Index > 0 {
-							if action == E_Method_DebugHash {
+							appends = append(appends, res.Data.SrcData.NativeStaple)
+							awaitop = false
+						}
+					}
+					fallthrough
+				case op_scatter:
+					if method != E_Method_LoadHash {
+						if res := _action.Index_Finder(entrystring, fileData.Cache.LocalMap); res.Index > 0 {
+							if method == E_Method_DebugHash {
 								classname := res.Data.SrcData.DebugScatterClass
 								stream.WriteString(classname)
 								_config.Style.Sandbox_Scattered[classname] = res.Index
-							} else if _config.Static.PREVIEW {
+							} else if method == E_Method_PreviewHash || _config.Static.PREVIEW {
 								stream.WriteString(res.Data.SrcData.PreviewScatterClass)
 							} else {
 								stream.WriteString(res.Data.SrcData.PublishScatterClass)
@@ -70,13 +82,13 @@ func Value_Builder(
 						}
 					}
 				case op_finalize:
-					if action != E_Method_LoadHash {
+					if method != E_Method_LoadHash {
 						if res := _action.Index_Finder(entrystring, fileData.Cache.LocalMap); res.Index > 0 {
-							if action == E_Method_DebugHash {
+							if method == E_Method_DebugHash {
 								classname := res.Data.SrcData.DebugFinalClass
 								stream.WriteString(classname)
 								_config.Style.Sandbox_Final[classname] = res.Index
-							} else if _config.Static.PREVIEW {
+							} else if method == E_Method_PreviewHash || _config.Static.PREVIEW {
 								stream.WriteString(res.Data.SrcData.PreviewFinalClass)
 							} else {
 								stream.WriteString(res.Data.SrcData.PublishFinalClass)
@@ -87,10 +99,13 @@ func Value_Builder(
 				}
 
 				if awaitop {
-					stream.WriteByte(waitop)
+					if !isWatching {
+						stream.WriteRune('\\')
+					}
+					stream.WriteRune(waitop)
 					stream.WriteString(entrystring)
 				}
-				stream.WriteByte(ch)
+				stream.WriteRune(ch)
 				entry.Reset()
 				waitop = 0
 				awaitop = false
@@ -99,12 +114,17 @@ func Value_Builder(
 			awaitop = true
 			waitop = ch
 		} else {
-			stream.WriteByte(ch)
+			if lastCh == '\\' {
+				stream.WriteRune('\\')
+			}
+			if ch != '\\' {
+				stream.WriteRune(ch)
+			}
 		}
 		lastCh = ch
 	}
 
 	scribed = stream.String()
 
-	return scribed
+	return scribed, appends
 }

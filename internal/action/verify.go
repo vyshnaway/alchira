@@ -152,9 +152,14 @@ func Verify_Configs(remote_vendors bool, concurrent bool) (Report string, Status
 			}
 			for _, p := range _config.Saved.ProxyMap {
 				if p.Extensions == nil {
-					p.Extensions = map[string][]string{_config.Root.Extension: {}}
-				} else if p.Extensions[_config.Root.Extension] == nil {
-					p.Extensions[_config.Root.Extension] = []string{}
+					p.Extensions = map[string]_model.Config_Extension{_config.Root.Extension: {}}
+				} else if p.Extensions[_config.Root.Extension].Watch == nil {
+					p.Extensions[_config.Root.Extension] = _model.Config_Extension{}
+				}
+				for _, ex := range p.Extensions {
+					if (ex.Watch) == nil {
+						ex.Watch = []string{}
+					}
 				}
 			}
 			// S.Render.Raw(_config.Saved.ProxyMap)

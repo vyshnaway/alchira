@@ -17,8 +17,9 @@ const (
 	E_Method_Read E_Method = iota
 	E_Method_LoadHash
 	E_Method_Strip
-	E_Method_BuildHash
 	E_Method_DebugHash
+	E_Method_PreviewHash
+	E_Method_PublishHash
 )
 
 type parse_return struct {
@@ -26,6 +27,7 @@ type parse_return struct {
 	OrderedTracks   [][]string
 	StylesList      []*_model.T_RawStyle
 	ScatteredAssign map[string]bool
+	AppendsList     map[string]bool
 	FinalAssign     map[string]bool
 	Replacements    []_model.File_TagReplacement
 }
@@ -45,6 +47,7 @@ func Rider(
 	stylesList := make([]*_model.T_RawStyle, 0, 24)
 	scatteredList := make(map[string]bool, 24)
 	finalList := make(map[string]bool, 24)
+	appendsList := make(map[string]bool, 24)
 	loadashes := make(map[string]bool, 24)
 
 	var content string
@@ -61,11 +64,10 @@ func Rider(
 	var entry _string.Builder
 	awaitop := false
 	incFlag := true
-	var waitop byte = 0
+	var waitop rune = 0
 
 	for cursor.Streaming {
 		ch := cursor.Active.Char
-		by := byte(ch)
 
 		if cursor.Active.Last != '\\' && ch == '<' && regexp_aftertagopen.MatchString(string(cursor.Active.Next)) {
 			tagStart := cursor.Active.Idx
@@ -83,7 +85,8 @@ func Rider(
 
 			exitedNow := false
 			if parsed.Ok {
-				_map.Copy(scatteredList, parsed.RapidList)
+				_map.Copy(scatteredList, parsed.ScatteredList)
+				_map.Copy(appendsList, parsed.AppendsList)
 				_map.Copy(finalList, parsed.FinalList)
 				_map.Copy(loadashes, parsed.Loadashes)
 				if len(parsed.ClassList) > 0 {
@@ -139,8 +142,8 @@ func Rider(
 			}
 			awaitop = false
 		} else if method != E_Method_Strip && awaitop {
-			if ok := symclass_chars.Match([]byte{by}); ok {
-				entry.WriteByte(by)
+			if ok := symclass_chars.Match([]byte{byte(ch)}); ok {
+				entry.WriteRune(ch)
 			} else {
 				entrystring := entry.String()
 
@@ -158,7 +161,7 @@ func Rider(
 					} else if i := _action.Index_Finder(entrystring, fileData.Cache.LocalMap); i.Index > 0 && method != E_Method_LoadHash {
 						if method == E_Method_DebugHash {
 							stream.WriteString(i.Data.SrcData.DebugScatterClass)
-						} else if _config.Static.PREVIEW {
+						} else if E_Method_PreviewHash == method || _config.Static.PREVIEW {
 							stream.WriteString(i.Data.SrcData.PreviewScatterClass)
 						} else {
 							stream.WriteString(i.Data.SrcData.PublishScatterClass)
@@ -173,7 +176,7 @@ func Rider(
 					} else if i := _action.Index_Finder(entrystring, fileData.Cache.LocalMap); i.Index > 0 && method != E_Method_LoadHash {
 						if method == E_Method_DebugHash {
 							stream.WriteString(i.Data.SrcData.DebugFinalClass)
-						} else if _config.Static.PREVIEW {
+						} else if E_Method_PreviewHash == method || _config.Static.PREVIEW {
 							stream.WriteString(i.Data.SrcData.PreviewFinalClass)
 						} else {
 							stream.WriteString(i.Data.SrcData.PublishFinalClass)
@@ -183,21 +186,25 @@ func Rider(
 				}
 
 				if awaitop {
-					stream.WriteByte(waitop)
+					stream.WriteRune('\\')
+					stream.WriteRune(waitop)
 					stream.WriteString(entrystring)
 				}
-				stream.WriteByte(by)
+				stream.WriteRune(ch)
 				entry.Reset()
 				waitop = 0
 				awaitop = false
 			}
 		} else if method != E_Method_Strip &&
 			cursor.Active.Last == '\\' &&
-			(by == op_scatter || by == op_finalize || by == op_lodash) {
+			(ch == op_scatter || ch == op_finalize || ch == op_lodash) {
 			awaitop = true
-			waitop = by
-		} else {
-			if len(tagTrack) == 0 {
+			waitop = ch
+		} else if len(tagTrack) == 0 {
+			if cursor.Active.Last == '\\' {
+				stream.WriteRune('\\')
+			}
+			if cursor.Active.Char != '\\' {
 				stream.WriteRune(cursor.Active.Char)
 			}
 		}
@@ -218,6 +225,7 @@ func Rider(
 		StylesList:      stylesList,
 		FinalAssign:     finalList,
 		OrderedTracks:   orderList,
+		AppendsList:     appendsList,
 		ScatteredAssign: scatteredList,
 		Replacements:    replacements,
 	}

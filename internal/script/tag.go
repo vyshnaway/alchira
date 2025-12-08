@@ -19,8 +19,9 @@ type tag_Parse_retype struct {
 	Fragment          string
 	ClassList         []string
 	Loadashes         map[string]bool
-	RapidList         map[string]bool
+	ScatteredList     map[string]bool
 	FinalList         map[string]bool
+	AppendsList       map[string]bool
 	NativeAttributes  map[string]string
 	StyleDeclarations _model.T_RawStyle
 }
@@ -34,6 +35,8 @@ func Tag_Scanner(
 	fileCursor *_reader.T_Reader,
 	orderedlist []string,
 ) tag_Parse_retype {
+	appends := []string{}
+	appendsList := make(map[string]bool, 4)
 	scatterList := make(map[string]bool, 4)
 	finalList := make(map[string]bool, 4)
 	braceTrack := make([]rune, 0, 8)
@@ -76,6 +79,8 @@ func Tag_Scanner(
 		}
 	}
 
+	tracking := fileCursor.Active.Next != '!'
+
 	for fileCursor.Streaming {
 		ch, _ := fileCursor.Increment()
 
@@ -85,23 +90,25 @@ func Tag_Scanner(
 				fileCursor.SaveFallback()
 			}
 
-			if awaitClosure != 0 && awaitClosure == ch {
-				deviance = len(braceTrack) - 1
-				braceTrack = braceTrack[:deviance]
-				if deviance > 0 {
-					awaitClosure = braceTrack[deviance-1]
-				} else {
-					awaitClosure = 0
-				}
-			} else if !_slice.Contains(_util.Refer.WatchQuotes, awaitClosure) {
-				if _slice.Contains(_util.Refer.OpenBraces, ch) ||
-					_slice.Contains(_util.Refer.WatchQuotes, ch) {
-					awaitClosure = _util.Refer.BracePair[ch]
-					braceTrack = append(braceTrack, awaitClosure)
-					deviance = len(braceTrack)
-				} else if awaitClosure != ch && _slice.Contains(_util.Refer.CloseBraces, ch) {
-					fileCursor.Increment()
-					break
+			if tracking {
+				if awaitClosure != 0 && awaitClosure == ch {
+					deviance = len(braceTrack) - 1
+					braceTrack = braceTrack[:deviance]
+					if deviance > 0 {
+						awaitClosure = braceTrack[deviance-1]
+					} else {
+						awaitClosure = 0
+					}
+				} else if !_slice.Contains(_util.Refer.WatchQuotes, awaitClosure) {
+					if _slice.Contains(_util.Refer.OpenBraces, ch) ||
+						_slice.Contains(_util.Refer.WatchQuotes, ch) {
+						awaitClosure = _util.Refer.BracePair[ch]
+						braceTrack = append(braceTrack, awaitClosure)
+						deviance = len(braceTrack)
+					} else if awaitClosure != ch && _slice.Contains(_util.Refer.CloseBraces, ch) {
+						fileCursor.Increment()
+						break
+					}
 				}
 			}
 
@@ -164,20 +171,22 @@ func Tag_Scanner(
 							value_Parse_return := Value_ClassFilter(tr_Value, isWatching)
 							_map.Copy(loadashes, value_Parse_return.Loadashes)
 							_map.Copy(scatterList, value_Parse_return.ScatterList)
+							_map.Copy(appendsList, value_Parse_return.AppendsList)
 							_map.Copy(finalList, value_Parse_return.FinalList)
 							orderedlist = append(orderedlist, value_Parse_return.OrderedClasses...)
 						} else {
 
 							metafront := ""
-							if method == E_Method_DebugHash {
-								metafront = _fmt.Sprintf(
-									"TAG%s:%d:%d__", fileData.DebugFront,
-									fileCursor.Active.Row, fileCursor.Active.Col,
-								)
+							switch method {
+							case E_Method_DebugHash:
+								metafront = _fmt.Sprintf("TAG%s:%d:%d__", fileData.DebugFront, fileCursor.Active.Row, fileCursor.Active.Col)
+							case E_Method_PreviewHash:
+								metafront = _fmt.Sprintf("%s%d-%d_", fileData.Label, fileCursor.Active.Row, fileCursor.Active.Col)
 							}
+
 							orderedMapping := value_EvaluateIndexTraces(method, metafront, orderedlist, fileData.Cache.LocalMap)
-							
-							scribed = Value_Builder(
+
+							scribed_, append_ := Value_Builder(
 								tr_Value,
 								method,
 								fileData,
@@ -185,6 +194,8 @@ func Tag_Scanner(
 								isWatching,
 								orderedMapping,
 							)
+							scribed = scribed_
+							appends = append(appends, append_...)
 						}
 						nativeAttributes[tr_Attr] = scribed
 						SaveToFrag(tr_Attr, scribed)
@@ -230,6 +241,10 @@ func Tag_Scanner(
 		if fragString[1] == '!' {
 			fragString = string(fileCursor.Runes[tagStart:styleDeclarations.EndMarker])
 		} else {
+			for _, a := range appends {
+				fragment.WriteString(a)
+			}
+			fragString = fragment.String()
 			fileCursor.Active.Cycle++
 			selfClosed = fileCursor.Active.Last == '/'
 			styleDeclarations.Range = _reader.T_Range{Data: []string{}, Start: startpos, End: fileCursor.Active}
@@ -241,12 +256,13 @@ func Tag_Scanner(
 			fileCursor.LoadFallback()
 		}
 	}
-	
+
 	return tag_Parse_retype{
 		Ok:                ok,
+		AppendsList:       appendsList,
 		Loadashes:         loadashes,
 		FinalList:         finalList,
-		RapidList:         scatterList,
+		ScatteredList:     scatterList,
 		Fragment:          fragString,
 		SelfClosed:        selfClosed,
 		ClassSynced:       classSynced,

@@ -21,7 +21,7 @@ type Class struct {
 
 	Label              string
 	Extensions         []string
-	ExtnsProps         map[string][]string
+	ExtnsProps         map[string]_model.Config_Extension
 	StylesheetContext  *_model.File_Stash
 	StylesheetBlockSeq *css.T_BlockSeq
 	MixedMap           _model.Style_ClassIndexMap
@@ -41,7 +41,7 @@ func New(storage _model.Config_ProxyStorage, label string) *Class {
 		utils.String_EnCounter(0),
 	)
 	res := _style.Cssfile_String(storage.StylesheetContent, `APPENDIX : `+storage.Stylesheet+" | ")
-	stylesheetContext.Cache.RapidStyles = res.Attachments
+	stylesheetContext.Cache.ScatteredStyles = res.Attachments
 
 	var This = Class{
 		Source:             storage.Source,

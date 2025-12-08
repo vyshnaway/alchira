@@ -94,7 +94,7 @@ func Setup_Tweaks(tweaks map[string]any) {
 
 func Setup_Sandbox(configs map[string]any) {
 	if configs == nil {
-		configs = map[string]any{}
+		_config.Saved.Sandbox  = map[string]any{}
 	} else {
 		_config.Saved.Sandbox = configs
 	}

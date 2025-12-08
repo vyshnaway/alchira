@@ -3,17 +3,21 @@ package models
 type Config_Tweaks map[string]any
 
 type Config_ProxyMap struct {
-	Source     string              `json:"source"`
-	Target     string              `json:"target"`
-	Stylesheet string              `json:"stylesheet"`
-	Extensions map[string][]string `json:"extensions"`
+	Source     string                      `json:"source"`
+	Target     string                      `json:"target"`
+	Stylesheet string                      `json:"stylesheet"`
+	Extensions map[string]Config_Extension `json:"extensions"`
+}
+
+type Config_Extension struct {
+	Watch []string `json:"watch"`
 }
 
 type Config_ProxyStorage struct {
 	Source              string
 	Target              string
 	Stylesheet          string
-	Extensions          map[string][]string
+	Extensions          map[string]Config_Extension
 	StylesheetContent   string
 	Filepath_to_Content map[string]string
 }

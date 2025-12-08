@@ -29,7 +29,7 @@ func value_EvaluateIndexTraces(
 	classMap := make(map[string]string, len(classTrace))
 
 	indexSetback := _util.Array_Setback(indexArray)
-	if action == E_Method_BuildHash {
+	if action == E_Method_PublishHash {
 		json_Return, json_Error := _json_.Marshal(indexSetback)
 		if json_Error == nil {
 			dict_Return, dict_Status := _config.Style.ClassDictionary[string(json_Return)]
@@ -42,10 +42,21 @@ func value_EvaluateIndexTraces(
 	} else {
 		temp_map := make([]_model.Style_ClassIndexTrace, 0, len(classTrace))
 
-		if action == E_Method_DebugHash {
+		switch action {
+		case E_Method_DebugHash:
 			for _, item := range classTrace {
 				classdata := _action.Index_Fetch(item.ClassIndex)
 				classname := _fmt.Sprintf("%s%s", metaFront, classdata.SrcData.DebugScatterClass)
+				temp_map = append(temp_map, _model.Style_ClassIndexTrace{
+					ClassName:  classname,
+					ClassIndex: item.ClassIndex,
+				})
+				classMap[item.ClassName] = classname
+			}
+		case E_Method_PreviewHash:
+			for _, item := range classTrace {
+				classdata := _action.Index_Fetch(item.ClassIndex)
+				classname := _fmt.Sprintf("%s%s", metaFront, classdata.SrcData.PreviewScatterClass)
 				temp_map = append(temp_map, _model.Style_ClassIndexTrace{
 					ClassName:  classname,
 					ClassIndex: item.ClassIndex,
@@ -62,7 +73,8 @@ func value_EvaluateIndexTraces(
 	return classMap
 }
 
-var op_order = byte(_config.Root.CustomOp["strict"])
-var op_scatter = byte(_config.Root.CustomOp["attach"])
-var op_finalize = byte(_config.Root.CustomOp["assign"])
-var op_lodash = byte(_config.Root.CustomOp["lodash"])
+var op_order = _config.Root.CustomOp["strict"]
+var op_append = _config.Root.CustomOp["append"]
+var op_scatter = _config.Root.CustomOp["attach"]
+var op_finalize = _config.Root.CustomOp["assign"]
+var op_lodash = _config.Root.CustomOp["lodash"]

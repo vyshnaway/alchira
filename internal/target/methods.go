@@ -41,24 +41,31 @@ type GetTracks_return struct {
 
 func (This *Class) GetTracks() GetTracks_return {
 	classtracks := make([][]int, 0, 24*len(This.FileCache))
-	attachInts := make(map[int]bool, 8)
-	scatterIntMap := make(map[int]bool, 8)
 	finalIntMap := make(map[int]bool, 8)
+	attachIntMap := make(map[int]bool, 8)
+	scatterIntMap := make(map[int]bool, 8)
 
 	sc := This.StylesheetContext.Cache
-	for i := range sc.RapidStyles {
+	for i := range sc.ScatteredStyles {
 		if found := _action.Index_Finder(i, sc.LocalMap); found.Index > 0 {
-			attachInts[found.Index] = true
+			attachIntMap[found.Index] = true
 		}
 	}
 
 	for _, file := range This.FileCache {
-		for s := range file.Cache.RapidStyles {
+		for s := range file.Cache.AppendsStyles {
 			if found := _action.Index_Finder(s, file.Cache.LocalMap); found.Index > 0 {
 				scatterIntMap[found.Index] = true
-				_map.Copy(attachInts, style.ResolveDependints(found.Data))
+				_map.Copy(attachIntMap, style.ResolveDependints(found.Data))
+			}
+		}
+
+		for s := range file.Cache.ScatteredStyles {
+			if found := _action.Index_Finder(s, file.Cache.LocalMap); found.Index > 0 {
+				scatterIntMap[found.Index] = true
+				_map.Copy(attachIntMap, style.ResolveDependints(found.Data))
 				if found.Group != _model.Style_Type_Library {
-					attachInts[found.Index] = true
+					attachIntMap[found.Index] = true
 				}
 			}
 		}
@@ -68,9 +75,9 @@ func (This *Class) GetTracks() GetTracks_return {
 			for _, i := range track {
 				if found := _action.Index_Finder(i, file.Cache.LocalMap); found.Index > 0 {
 					retraces = append(retraces, found.Index)
-					_map.Copy(attachInts, style.ResolveDependints(found.Data))
+					_map.Copy(attachIntMap, style.ResolveDependints(found.Data))
 					if found.Group != _model.Style_Type_Library {
-						attachInts[found.Index] = true
+						attachIntMap[found.Index] = true
 					}
 				}
 			}
@@ -83,16 +90,16 @@ func (This *Class) GetTracks() GetTracks_return {
 		for s := range file.Cache.FinalStyles {
 			if found := _action.Index_Finder(s, file.Cache.LocalMap); found.Index > 0 {
 				finalIntMap[found.Index] = true
-				_map.Copy(attachInts, style.ResolveDependints(found.Data))
+				_map.Copy(attachIntMap, style.ResolveDependints(found.Data))
 				if found.Group != _model.Style_Type_Library {
-					attachInts[found.Index] = true
+					attachIntMap[found.Index] = true
 				}
 			}
 		}
 	}
 	return GetTracks_return{
 		ClassTracks: classtracks,
-		Attachments: attachInts,
+		Attachments: attachIntMap,
 		ScatterMap:  scatterIntMap,
 		FinalMap:    finalIntMap,
 	}

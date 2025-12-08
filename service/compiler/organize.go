@@ -114,37 +114,37 @@ func Accumulate() _target.GetTracks_return {
 func Organize() (AritfactFiles map[string]string, Attachments map[int]bool, RapidMap map[int]bool, FinalMap map[int]bool) {
 
 	SaveClassRefs := func(stash _order_.R_Preview) {
-		refmap := map[int]string{}
-		for _, temp_trace := range stash.Final_Hashtrace {
-			tempPubMap := []_model.Style_ClassIndexTrace{}
-			for _, val := range temp_trace {
-				index := val[0]
-				classid := val[1]
+		// refmap := map[int]string{}
+		// for _, temp_trace := range stash.Final_Hashtrace {
+		// 	tempPubMap := []_model.Style_ClassIndexTrace{}
+		// 	for _, val := range temp_trace {
+		// 		index := val[0]
+		// 		classid := val[1]
 
-				var classname string
-				if _config.Static.PREVIEW {
-					if d := _action.Index_Fetch(index); d != nil {
-						classname = string(op_strict) + d.SrcData.SymClass + "_" + d.SrcData.Classhash + "-" + _strconv.Itoa(classid)
-					}
-				} else {
-					classname = "__" + _util.String_EnCounter(classid)
-				}
-				refmap[classid] = classname
+		// 		var classname string
+		// 		if _config.Static.PREVIEW {
+		// 			if d := _action.Index_Fetch(index); d != nil {
+		// 				classname = string(op_strict) + d.SrcData.SymClass + "_" + d.SrcData.Classhash + "-" + _strconv.Itoa(classid)
+		// 			}
+		// 		} else {
+		// 			classname = "__" + _util.String_EnCounter(classid)
+		// 		}
+		// 		refmap[classid] = classname
 
-				tempPubMap = append(tempPubMap, _model.Style_ClassIndexTrace{
-					ClassName:  classname,
-					ClassIndex: index,
-				})
-			}
-			_config.Style.Publish_Ordered = append(_config.Style.Publish_Ordered, tempPubMap)
-		}
+		// 		tempPubMap = append(tempPubMap, _model.Style_ClassIndexTrace{
+		// 			ClassName:  classname,
+		// 			ClassIndex: index,
+		// 		})
+		// 	}
+		// 	_config.Style.Publish_Ordered = append(_config.Style.Publish_Ordered, tempPubMap)
+		// }
 
-		for json_array, imap := range stash.List_to_GroupId {
-			_config.Style.ClassDictionary[json_array] = map[int]string{}
-			for ref, classid := range stash.Group_to_Table[imap] {
-				_config.Style.ClassDictionary[json_array][ref] = refmap[classid]
-			}
-		}
+		// for json_array, imap := range stash.List_to_GroupId {
+		// 	_config.Style.ClassDictionary[json_array] = map[int]string{}
+		// 	for ref, classid := range stash.Group_to_Table[imap] {
+		// 		_config.Style.ClassDictionary[json_array][ref] = refmap[classid]
+		// 	}
+		// }
 	}
 
 	tracks := Accumulate()

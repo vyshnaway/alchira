@@ -99,8 +99,10 @@ func Test_Main(t *_testing.T) {
 		Target:            "Target",
 		Stylesheet:        "Stylesheet",
 		StylesheetContent: "StylesheetContent",
-		Extensions: map[string][]string{
-			"html": {"class"},
+		Extensions: map[string]_model.Config_Extension{
+			"html": _model.Config_Extension{
+				Watch: []string{"class"},
+			},
 		},
 		Filepath_to_Content: map[string]string{
 			"index.html": content1,
