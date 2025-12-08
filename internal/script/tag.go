@@ -239,7 +239,7 @@ func Tag_Scanner(
 		}
 		fragString = fragment.String()
 		if fragString[1] == '!' {
-			fragString = string(fileCursor.Runes[tagStart:styleDeclarations.EndMarker])
+			fragString = string(fileCursor.Slice(tagStart, styleDeclarations.EndMarker))
 		} else {
 			for _, a := range appends {
 				fragment.WriteString(a)
@@ -251,7 +251,7 @@ func Tag_Scanner(
 		}
 
 	} else {
-		fragString = string(fileCursor.Runes[tagStart:styleDeclarations.EndMarker])
+		fragString = string(fileCursor.Slice(tagStart, styleDeclarations.EndMarker))
 		if fallbackAquired {
 			fileCursor.LoadFallback()
 		}

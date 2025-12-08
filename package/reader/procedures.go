@@ -86,3 +86,16 @@ func (This *T_Reader) Stream(autoincrement bool, function func()) {
 		}
 	}
 }
+
+func (This *T_Reader) Slice(start, end int) []rune {
+    if start < 0 {
+        start = 0
+    }
+    if end > len(This.Runes) {
+        end = len(This.Runes)
+    }
+    if start > end {
+        start = end
+    }
+    return This.Runes[start:end]
+}

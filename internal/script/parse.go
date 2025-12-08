@@ -122,7 +122,7 @@ func Rider(
 							tagTrack = tagTrack[:len(tagTrack)-1]
 
 							if track.Element == element {
-								track.Innertext = content[track.EndMarker:tagStart]
+								track.Innertext = string(cursor.Slice(track.EndMarker, tagStart))
 								exitedNow = true
 							} else {
 								tagTrack = append(tagTrack, track)
