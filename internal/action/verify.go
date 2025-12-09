@@ -24,16 +24,16 @@ func Verify_Setup(concurrent bool) (Report string, Status verify_Setup_Status_en
 
 	if _fileman.Path_IfDir(_config.Path_Folder["blueprint"].Path) {
 		if !_config.Static.SERVER {
-			if _fileman.Path_IfDir(_config.Root_Navigate["blueprint"].Path) {
+			if _fileman.Path_IfDir(_config.Root_Flavor["blueprint"].Path) {
 				_fileman.Clone_Safe(
-					_config.Root_Navigate["blueprint"].Path,
+					_config.Root_Flavor["blueprint"].Path,
 					_config.Path_Folder["blueprint"].Path,
 					[]string{}, concurrent)
 			}
 
-			if _fileman.Path_IfDir(_config.Root_Navigate["libraries"].Path) {
+			if _fileman.Path_IfDir(_config.Root_Flavor["libraries"].Path) {
 				_fileman.Sync_Bulk(
-					_config.Root_Navigate["libraries"].Path,
+					_config.Root_Flavor["libraries"].Path,
 					_config.Path_Folder["libstatic"].Path,
 					[]string{}, []string{}, []string{},
 					true, concurrent,
@@ -120,7 +120,7 @@ func Verify_Configs(remote_vendors bool, concurrent bool) (Report string, Status
 	if config_data, config_err := _fileman.Read_File(config_path, false); config_err == nil {
 
 		if config, err := _util.Code_JsoncParse[_model.Config_Raw](config_data); err != nil {
-			errAdd(config_path, "Bad json/ Incomplete schema.")
+			errAdd(config_path, "Bad json / Incomplete schema.")
 		} else {
 			S.TASK("Updating vendor-prefixes", 1)
 			Sync_SaveVendors(config.Vendors, remote_vendors)

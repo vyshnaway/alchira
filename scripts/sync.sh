@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-set -euo pipefail
 
-WORKDIR=$(pwd)
+set -euo pipefail
 
 VERSION=""
 COMMIT_MSG=""
+WORKDIR=$(pwd)
 
 case "${1-}" in
   V)
@@ -59,6 +59,14 @@ else
   echo "Cleared flavour block in package.json (using sed fallback)"
 fi
 
+
+
+SRCMETA="$WORKDIR/compiler/configs/meta.go"
+printf 'package configs\n\n' > "$SRCMETA"
+printf 'var VERSION = "%s"\n' "$VERSION" >> "$SRCMETA"
+
+# Update docs.
+
 node ./execute void
 ./compiler/scripts/live.sh void sync
 echo $VERSION > ./compiler/VERSION 
@@ -70,29 +78,30 @@ REPOS=(
   "."
 )
 
+
 echo "VERSION: ${VERSION:-<none>}"
 echo "MESSAGE: $COMMIT_MSG"
 echo "==============================="
 
-for repo in "${REPOS[@]}"; do
-  echo "Processing repository at: $repo"
+# for repo in "${REPOS[@]}"; do
+#   echo "Processing repository at: $repo"
 
-  cd "$WORKDIR/$repo" || { echo "Failed to cd into $repo"; exit 1; }
+#   cd "$WORKDIR/$repo" || { echo "Failed to cd into $repo"; exit 1; }
 
-  # Ensure we are on main
-  git rev-parse --verify main >/dev/null 2>&1 && git checkout main
+#   # Ensure we are on main
+#   git rev-parse --verify main >/dev/null 2>&1 && git checkout main
 
-  git fetch origin main
+#   git fetch origin main
 
-  if [[ -n "$(git status --porcelain)" ]]; then
-    git add .
-    git commit -m "$COMMIT_MSG"
-    git push origin main
-    echo "Successfully pushed changes in $repo"
-  else
-    echo "No changes to commit in $repo"
-  fi
-  echo "==============================="
-done
+#   if [[ -n "$(git status --porcelain)" ]]; then
+#     git add .
+#     git commit -m "$COMMIT_MSG"
+#     git push origin main
+#     echo "Successfully pushed changes in $repo"
+#   else
+#     echo "No changes to commit in $repo"
+#   fi
+#   echo "==============================="
+# done
 
-cd "$WORKDIR"
+# cd "$WORKDIR"

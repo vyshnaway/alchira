@@ -28,7 +28,7 @@ type Cache_Root struct {
 	CustomTags      map[string]int
 	CustomOp        map[string]rune
 	Url             Cache_Url
-	Flavour         Package_Flavour
+	Flavor          Compiler_Flavor
 	Tweaks          Config_Tweaks
 }
 

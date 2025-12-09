@@ -6,80 +6,80 @@ import (
 
 var Path_Folder = map[string]_model.File_Source{
 	"blueprint": {
-		Frags:     []string{id},
+		Frags:     []string{ID},
 		Essential: true,
 	},
 	"artifacts": {
-		Frags:     []string{id, "artifacts"},
+		Frags:     []string{ID, "artifacts"},
 		Essential: false,
 	},
 	"archive": {
-		Frags:     []string{id, "archive"},
+		Frags:     []string{ID, "archive"},
 		Essential: false,
 	},
 	"arcversion": {
-		Frags:     []string{id, "archive", "version"},
+		Frags:     []string{ID, "archive", "version"},
 		Essential: false,
 	},
 	"libraries": {
-		Frags:     []string{id, "libraries"},
+		Frags:     []string{ID, "libraries"},
 		Essential: false,
 	},
 	"libstatic": {
-		Frags:     []string{id, "libraries", "_scaffold_"},
+		Frags:     []string{ID, "libraries", "_scaffold_"},
 		Essential: false,
 	},
 }
 
 var Path_Css = map[string]_model.File_Source{
 	"atrules": {
-		Frags:     []string{id, "#at-rules.css"},
+		Frags:     []string{ID, "#at-rules.css"},
 		Essential: true,
 	},
 	"constants": {
-		Frags:     []string{id, "#constants.css"},
+		Frags:     []string{ID, "#constants.css"},
 		Essential: true,
 	},
 	"elements": {
-		Frags:     []string{id, "#elements.css"},
+		Frags:     []string{ID, "#elements.css"},
 		Essential: true,
 	},
 	"extends": {
-		Frags:     []string{id, "#extends.css"},
+		Frags:     []string{ID, "#extends.css"},
 		Essential: true,
 	},
 }
 
 var Path_Json = map[string]_model.File_Source{
 	"configure": {
-		Frags:     []string{id, "configure.jsonc"},
+		Frags:     []string{ID, "configure.jsonc"},
 		Essential: true,
 	},
 	"hashrule": {
-		Frags:     []string{id, "hashrules.jsonc"},
+		Frags:     []string{ID, "hashrules.jsonc"},
 		Essential: true,
 	},
 	"vendors": {
-		Frags:     []string{id, "vendors.jsonc"},
+		Frags:     []string{ID, "vendors.jsonc"},
 		Essential: true,
 	},
 	"archive": {
-		Frags:     []string{id, "archive", "index.json"},
+		Frags:     []string{ID, "archive", "index.json"},
 		Essential: false,
 	},
 }
 
 var Path_Files = map[string]_model.File_Source{
 	"readme": {
-		Frags:     []string{id, "readme.md"},
+		Frags:     []string{ID, "readme.md"},
 		Essential: false,
 	},
 	"licence": {
-		Frags:     []string{id, "licence.md"},
+		Frags:     []string{ID, "licence.md"},
 		Essential: false,
 	},
 	"changelog": {
-		Frags:     []string{id, "changelog.md"},
+		Frags:     []string{ID, "changelog.md"},
 		Essential: false,
 	},
 }

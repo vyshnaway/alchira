@@ -10,18 +10,18 @@ import (
 )
 
 const (
-	id     = "xcss"
-	domain = "xcss.io"
+	ID     = "xcss"
+	DOMAIN = "xcss.io"
 )
 
 var Root = models.Cache_Root{
-	Name:            id,
-	Version:         "0.0.0",
-	Extension:       id,
+	Name:            ID,
+	Version:         VERSION,
+	Extension:       ID,
 	PollingInterval: 1000,
 	WaitingInterval: 100,
 	WebsocketPort:   1,
-	Flavour: models.Package_Flavour{
+	Flavor: models.Compiler_Flavor{
 		Name:      "",
 		Version:   "",
 		Sandbox:   "",
@@ -29,12 +29,12 @@ var Root = models.Cache_Root{
 		Libraries: "",
 	},
 	Url: models.Cache_Url{
-		Site:      "https://www." + domain + "/",
-		Docs:      "https://www." + domain + "/cdn/",
-		Worker:    "https://worker." + domain + "/",
-		Console:   "https://console." + domain + "/",
-		Vendors:   "https://vendors." + domain + "/",
-		Artifacts: "https://artifact." + domain + "/",
+		Site:      "https://www." + DOMAIN + "/",
+		Docs:      "https://www." + DOMAIN + "/cdn/",
+		Worker:    "https://worker." + DOMAIN + "/",
+		Console:   "https://console." + DOMAIN + "/",
+		Vendors:   "https://vendors." + DOMAIN + "/",
+		Artifacts: "https://artifact." + DOMAIN + "/",
 	},
 	Commands: map[string]string{
 		"void":    "Void run, no execution.",
@@ -110,7 +110,7 @@ var Static = models.Cache_Static{
 	RebuildTicker: nil,
 }
 
-var Root_Navigate = map[string]*models.File_Source{
+var Root_Flavor = map[string]*models.File_Source{
 	"blueprint": {
 		Frags:     []string{"scaffold", "blueprint"},
 		Path:      "",
@@ -123,11 +123,6 @@ var Root_Navigate = map[string]*models.File_Source{
 	},
 	"sandbox": {
 		Frags:     []string{"scaffold", "sandbox"},
-		Path:      "",
-		Essential: true,
-	},
-	"index": {
-		Frags:     []string{"compiler", "index.go"},
 		Path:      "",
 		Essential: true,
 	},

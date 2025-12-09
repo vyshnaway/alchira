@@ -3,12 +3,14 @@ package server
 import (
 	"fmt"
 	"main/configs"
+
 	// "main/service/server/handle"
 	"net"
 	"net/http"
 	"path/filepath"
 	"strconv"
 	"sync"
+
 	// "time"
 
 	"github.com/gorilla/websocket"
@@ -52,7 +54,7 @@ func Webview_Create(tryport int) (httpServer *http.Server, deducedPort int, err 
 	}
 
 	mux := http.NewServeMux()
-	serveDir := configs.Root_Navigate["sandbox"].Path
+	serveDir := configs.Root_Flavor["sandbox"].Path
 
 	// Serve index.html on /, and all files under serveDir
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {

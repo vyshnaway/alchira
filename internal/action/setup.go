@@ -7,27 +7,42 @@ import (
 	_reflect "reflect"
 )
 
-func Setup_Environment(rootdir, sourcedir, workdir string, rootConfig _model.Package_Flavour) (flavourable bool) {
+func Setup_Environment(compilerdir, relWorkpath, absWorkpath string, config _model.Compiler_Config) (flavourable bool) {
 
-	_config.Static.RootPath = rootdir
-	_config.Static.WorkPath = workdir
+	_config.Static.RootPath = compilerdir
+	_config.Static.WorkPath = relWorkpath
 
-	for id, source := range _config.Root_Navigate {
-		source.Path = _fileman.Path_Join(append([]string{rootdir}, source.Frags...)...)
-		_config.Root_Navigate[id] = source
+	var FlavRef _model.Compiler_Flavor
+	if res, ok := config.Flavour.Workspace[absWorkpath]; ok {
+		FlavRef = res
 	}
 
-	if blueprint := rootConfig.Blueprint; len(blueprint) > 0 && _fileman.Path_IfDir(blueprint) {
+	if blueprint := FlavRef.Blueprint; len(blueprint) > 0 && _fileman.Path_IfDir(blueprint) {
 		flavourable = true
-		_config.Root_Navigate["blueprint"].Path = blueprint
+		_config.Root_Flavor["blueprint"].Path = blueprint
+	} else {
+		_config.Root_Flavor["blueprint"].Path = config.Flavour.Default.Blueprint
 	}
-	if libraries := rootConfig.Libraries; len(libraries) > 0 && _fileman.Path_IfDir(libraries) {
+
+	if libraries := FlavRef.Libraries; len(libraries) > 0 && _fileman.Path_IfDir(libraries) {
 		flavourable = true
-		_config.Root_Navigate["libraries"].Path = libraries
+		_config.Root_Flavor["libraries"].Path = libraries
+	} else {
+		_config.Root_Flavor["libraries"].Path = config.Flavour.Default.Libraries
 	}
-	if sandbox := rootConfig.Sandbox; len(sandbox) > 0 && _fileman.Path_IfDir(sandbox) {
+
+	if sandbox := FlavRef.Sandbox; len(sandbox) > 0 && _fileman.Path_IfDir(sandbox) {
 		flavourable = true
-		_config.Root_Navigate["sandbox"].Path = sandbox
+		_config.Root_Flavor["sandbox"].Path = sandbox
+	} else {
+		_config.Root_Flavor["sandbox"].Path = config.Flavour.Default.Sandbox
+
+	}
+
+	if flavourable {
+		_config.Root.Flavor = FlavRef
+	} else {
+		_config.Root.Flavor = config.Flavour.Default
 	}
 
 	for _, group := range []map[string]_model.File_Source{
@@ -37,7 +52,7 @@ func Setup_Environment(rootdir, sourcedir, workdir string, rootConfig _model.Pac
 		_config.Path_Json,
 	} {
 		for id, source := range group {
-			source.Path = _fileman.Path_Join(append([]string{workdir}, source.Frags...)...)
+			source.Path = _fileman.Path_Join(append([]string{relWorkpath}, source.Frags...)...)
 			group[id] = source
 		}
 	}
@@ -45,12 +60,12 @@ func Setup_Environment(rootdir, sourcedir, workdir string, rootConfig _model.Pac
 	cdn := _config.Root.Url.Docs
 	for id, source := range _config.Sync_Agreements {
 		source.Url = cdn + source.Url
-		source.Path = _fileman.Path_Join(append([]string{sourcedir}, source.Frags...)...)
+		source.Path = _fileman.Path_Join(append([]string{compilerdir}, source.Frags...)...)
 		_config.Sync_Agreements[id] = source
 	}
 	for id, source := range _config.Sync_References {
 		source.Url = cdn + source.Url
-		source.Path = _fileman.Path_Join(append([]string{sourcedir}, source.Frags...)...)
+		source.Path = _fileman.Path_Join(append([]string{compilerdir}, source.Frags...)...)
 		_config.Sync_References[id] = source
 	}
 
@@ -94,7 +109,7 @@ func Setup_Tweaks(tweaks map[string]any) {
 
 func Setup_Sandbox(configs map[string]any) {
 	if configs == nil {
-		_config.Saved.Sandbox  = map[string]any{}
+		_config.Saved.Sandbox = map[string]any{}
 	} else {
 		_config.Saved.Sandbox = configs
 	}

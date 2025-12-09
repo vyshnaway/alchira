@@ -21,9 +21,9 @@ var Sync_References = map[string]_model.File_Source{
 	},
 	"agent": {
 		Title:   "For AiAgents",
-		Url:     "agent-prompt.md",
+		Url:     "agent.md",
 		Path:    "",
-		Frags:   []string{"PROMPT.md"},
+		Frags:   []string{"AGENT.md"},
 		Content: "",
 	},
 }

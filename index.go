@@ -25,19 +25,8 @@ import (
 	_sync "sync"
 )
 
-func Path_FromPackage(elem ...string) (string, error) {
-	filename, err := _os.Executable()
-
-	if err != nil {
-		return "", _fmt.Errorf("failed to get current file path for root calculation")
-	}
-	root := _filepath.Join(_filepath.Dir(filename), "..", "..")
-	joined := _filepath.Join(root, _filepath.Join(elem...))
-	return joined, nil
-}
-
-// Path_FromSource joins the given path elements to the calculated root directory.
-func Path_FromSource(elem ...string) (string, error) {
+// Path_FromCompiler joins the given path elements to the calculated root directory.
+func Path_FromCompiler(elem ...string) (string, error) {
 	filename, err := _os.Executable()
 
 	if err != nil {
@@ -68,32 +57,26 @@ func main() {
 		command = ""
 	}
 
-	workpath := "."
-	sourcedir, _ := Path_FromSource()
-	packagedir, _ := Path_FromPackage()
-	workPackagePath := "package.json"
-	rootPackagePath, _ := Path_FromPackage("package.json")
-
-	var rootData models.Package_Json
-	if str, err := _fileman.Read_File(rootPackagePath, false); err == nil {
-		if json.Unmarshal([]byte(str), &rootData) == nil {
-			_config.Root.Name = _string.TrimSpace(_util.String_Fallback(rootData.Name, _config.Root.Name))
-			_config.Root.Version = _string.TrimSpace(_util.String_Fallback(rootData.Version, _config.Root.Version))
-		}
-	}
-
-	if _action.Setup_Environment(packagedir, sourcedir, workpath, rootData.Flavour) {
-		_config.Root.Flavour.Name = _string.TrimSpace(_util.String_Fallback(rootData.Flavour.Name))
-		_config.Root.Flavour.Version = _string.TrimSpace(_util.String_Fallback(rootData.Flavour.Version))
-	}
-
-	var workData models.Package_Json
+	relWorkpath := "."
+	absWorkpath, _ := _fileman.Path_Resolves(relWorkpath)
+	workPackagePath, _ := _fileman.Path_Resolves("package.json")
+	var workData models.Compiler_Config
 	if str, err := _fileman.Read_File(workPackagePath, false); err == nil {
 		if json.Unmarshal([]byte(str), &workData) == nil {
 			projectname := _util.String_Fallback(workData.Name, _config.Static.ProjectVersion)
 			projectversion := _util.String_Fallback(workData.Version, _config.Static.ProjectName)
 			_config.Static.ProjectVersion = projectversion
 			_config.Static.ProjectName = _util.String_Filter(projectname, []rune{}, []rune{}, []rune{})
+		}
+	}
+
+	compilerDir, _ := Path_FromCompiler()
+	compilerConfigPath, _ := Path_FromCompiler("bin", "configs.json")
+
+	if str, err := _fileman.Read_File(compilerConfigPath, false); err == nil {
+		var compilerConfig models.Compiler_Config
+		if json.Unmarshal([]byte(str), &compilerConfig) == nil {
+			_action.Setup_Environment(compilerDir, relWorkpath, absWorkpath, compilerConfig)
 		}
 	}
 
@@ -119,7 +102,7 @@ func main() {
 	}
 
 	_config.Reset(false)
-	if _config.Static.Command != "void" && _fileman.Path_IfFile(_config.Root_Navigate["index"].Path) {
+	if _config.Static.Command != "void" && _fileman.Path_IfFile(_fileman.Path_Join(compilerDir, ".gitignore")) {
 		pprof, e := _server.RequestAvailablePort(0)
 		if e == nil {
 			go func() {
@@ -132,12 +115,12 @@ func main() {
 
 	title := _string.ToUpper(_config.Root.Name)
 	vtitle := title + " @ v" + _config.Root.Version
-	flavourcaps := _string.ToUpper(_config.Root.Flavour.Name)
+	flavourcaps := _string.ToUpper(_config.Root.Flavor.Name)
 
 	if len(flavourcaps) > 0 {
 		vtitle += " | " + flavourcaps
-		if len(rootData.Flavour.Version) > 0 {
-			vtitle += " @ " + rootData.Flavour.Version
+		if len(_config.Root.Flavor.Version) > 0 {
+			vtitle += " @ " + _config.Root.Flavor.Version
 		}
 	}
 	if len(flavourcaps) > 0 {
