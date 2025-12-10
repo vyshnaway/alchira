@@ -36,7 +36,7 @@ func (This *Class) Savefile(filepath string, content string, hashindex int) {
 	if watchAttrs, ok := This.ExtnsProps[file.Extension]; ok {
 		file.WatchAttrs = watchAttrs.Watch
 	}
-	parse_response := _script.Rider(file, _script.E_Method_Read)
+	parse_response := _script.Rider(file, _script.E_Method_Read, map[int]bool{})
 	file.Cache.RigidTracks = parse_response.OrderedTracks
 	file.Cache.ScatteredStyles = parse_response.ScatteredAssign
 	file.Cache.AppendsStyles = parse_response.AppendsList

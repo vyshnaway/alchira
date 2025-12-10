@@ -18,6 +18,7 @@ func Value_Builder(
 	fileCursor *_reader.T_Reader,
 	isWatching bool,
 	orderedMapping map[string]string,
+	appendstack map[int]bool,
 ) (string, []string) {
 
 	runes := []rune(value)
@@ -61,7 +62,19 @@ func Value_Builder(
 				case op_append:
 					if method != E_Method_LoadHash {
 						if res := _action.Index_Finder(entrystring, fileData.Cache.LocalMap); res.Index > 0 {
-							appends = append(appends, res.Data.SrcData.NativeStaple)
+							if !appendstack[res.Index] {
+								appendstack[res.Index] = true
+								if len(res.Data.SrcData.NativeStaple) > 0 {
+									appends = append(appends, res.Data.SrcData.NativeStaple)
+								} else if len(res.Data.SrcData.Metadata.SummonSnippet) > 0 {
+									_fmt.Println(res.Data.SrcData.Metadata.SummonSnippet)
+									context := *res.Data.Context
+									context.Content = res.Data.SrcData.Metadata.SummonSnippet
+									context.Midway = Rider(&context, E_Method_Read, map[int]bool{}).Scribed
+									newappend := Rider(&context, method, appendstack).Scribed
+									appends = append(appends, newappend)
+								}
+							}
 							awaitop = false
 						}
 					}

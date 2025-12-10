@@ -104,7 +104,7 @@ func Artifact_Update() {
 
 		symclasses := []string{}
 		metadatas := _model.Style_ClassIndexMap{}
-		for _, tagstyle := range _script.Rider(file, _script.E_Method_Read).StylesList {
+		for _, tagstyle := range _script.Rider(file, _script.E_Method_Read, map[int]bool{}).StylesList {
 
 			if len(tagstyle.SymClasses) == 0 {
 				E := X.Error_Standard(

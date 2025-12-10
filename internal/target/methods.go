@@ -107,7 +107,7 @@ func (This *Class) GetTracks() GetTracks_return {
 
 func (This *Class) SyncClassnames(action _script.E_Method) {
 	for _, file := range This.FileCache {
-		res := _script.Rider(file, action)
+		res := _script.Rider(file, action, map[int]bool{})
 
 		file.Scratch = res.Scribed
 		file.Cache.TagReplacements = res.Replacements

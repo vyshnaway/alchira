@@ -46,7 +46,7 @@ func Sandbox_Save(index int) (response any) {
 	attributes := data.SrcData.Attributes
 	classBlocks := css.NewBlock(4, 4)
 
-	summon = strings.TrimSpace(script.Rider(&clontext, script.E_Method_DebugHash).Scribed)
+	summon = strings.TrimSpace(script.Rider(&clontext, script.E_Method_DebugHash, map[int]bool{}).Scribed)
 
 	FinalClassMap := []models.Style_ClassIndexTrace{
 		{ClassName: "_", ClassIndex: data.SrcData.Index},

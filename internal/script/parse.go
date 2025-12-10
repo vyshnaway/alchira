@@ -38,6 +38,7 @@ var regexp_aftertagopen = _regexp.MustCompile(`(?i)[\w\-\!/]`)
 func Rider(
 	fileData *_model.File_Stash,
 	method E_Method,
+	appendstack map[int]bool,
 ) parse_return {
 
 	fileData.Cache.TagReplacements = []_model.File_TagReplacement{}
@@ -76,9 +77,9 @@ func Rider(
 			if method == E_Method_Strip {
 				methodx = E_Method_Strip
 			}
-			parsed := Tag_Scanner(fileData, methodx, cursor, []string{})
+			parsed := Tag_Scanner(fileData, methodx, cursor, []string{}, appendstack)
 			if method != E_Method_Read && method != E_Method_Strip {
-				parsed = Tag_Scanner(fileData, method, &cursorx, parsed.ClassList)
+				parsed = Tag_Scanner(fileData, method, &cursorx, parsed.ClassList, appendstack)
 			}
 			fragment := parsed.Fragment
 			hasDeclared := (len(parsed.StyleDeclarations.Styles) > 0 || len(parsed.StyleDeclarations.SymClasses) > 0)

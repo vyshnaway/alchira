@@ -34,6 +34,7 @@ func Tag_Scanner(
 	method E_Method,
 	fileCursor *_reader.T_Reader,
 	orderedlist []string,
+	appendstack  map[int]bool,
 ) tag_Parse_retype {
 	appends := []string{}
 	appendsList := make(map[string]bool, 4)
@@ -193,6 +194,7 @@ func Tag_Scanner(
 								fileCursor,
 								isWatching,
 								orderedMapping,
+								appendstack,
 							)
 							scribed = scribed_
 							appends = append(appends, append_...)

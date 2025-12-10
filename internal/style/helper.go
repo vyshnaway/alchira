@@ -71,19 +71,19 @@ func stylesnippet_process(
 	return nativeAttachResult, exportAttachResult
 }
 
-func importLodash(ref *_model.File_Stash, str, lbl string) string {
-	file := *ref
+func importLodash(context *_model.File_Stash, str, lbl string) string {
+	file := *context
 	file.Label = lbl
 	file.Midway = str
 	file.Content = str
-	out := _script.Rider(&file, _script.E_Method_LoadHash).Scribed
+	out := _script.Rider(&file, _script.E_Method_LoadHash, map[int]bool{}).Scribed
 	return out
 }
 
-func stripCustomTags(ref *_model.File_Stash, str string) string {
-	file := *ref
+func stripCustomTags(context *_model.File_Stash, str string) string {
+	file := *context
 	file.Midway = str
 	file.Content = str
-	out := _script.Rider(&file, _script.E_Method_Strip).Scribed
+	out := _script.Rider(&file, _script.E_Method_Strip, map[int]bool{}).Scribed
 	return out
 }
