@@ -46,7 +46,7 @@ func Test_Tag(t *_testing.T) {
 	)
 
 	cursor := _reader.New(content)
-	res := _script.Tag_Scanner(data, _script.E_Method_Read, cursor, []string{}, map[int]bool{})
+	res := _script.Tag_Scanner(data, _script.E_Method_Read, cursor, map[int]bool{}, map[string]string{})
 	S.Render.Raw(res)
 	S.Post(content[:cursor.Active.Idx])
 }

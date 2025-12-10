@@ -9,7 +9,7 @@ import (
 	_util "main/package/utils"
 )
 
-func value_EvaluateIndexTraces(
+func Value_EvaluateIndexTraces(
 	action E_Method,
 	metaFront string,
 	classList []string,

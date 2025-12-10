@@ -1,6 +1,7 @@
 package script
 
 import (
+	_fmt "fmt"
 	_config "main/configs"
 	_action "main/internal/action"
 	_model "main/models"
@@ -77,9 +78,19 @@ func Rider(
 			if method == E_Method_Strip {
 				methodx = E_Method_Strip
 			}
-			parsed := Tag_Scanner(fileData, methodx, cursor, []string{}, appendstack)
+			parsed := Tag_Scanner(fileData, methodx, cursor, appendstack, map[string]string{})
 			if method != E_Method_Read && method != E_Method_Strip {
-				parsed = Tag_Scanner(fileData, method, &cursorx, parsed.ClassList, appendstack)
+
+				metafront := ""
+				switch method {
+				case E_Method_DebugHash:
+					metafront = _fmt.Sprintf("TAG%s:%d:%d__", fileData.DebugFront, cursorx.Active.Row, cursorx.Active.Col)
+				case E_Method_PreviewHash:
+					metafront = _fmt.Sprintf("%s%d-%d_", fileData.Label, cursorx.Active.Row, cursorx.Active.Col)
+				}
+				orderedMapping := Value_EvaluateIndexTraces(method, metafront, parsed.OrderedList, fileData.Cache.LocalMap)
+
+				parsed = Tag_Scanner(fileData, method, &cursorx, appendstack, orderedMapping)
 			}
 			fragment := parsed.Fragment
 			hasDeclared := (len(parsed.StyleDeclarations.Styles) > 0 || len(parsed.StyleDeclarations.SymClasses) > 0)
@@ -90,8 +101,8 @@ func Rider(
 				_map.Copy(appendsList, parsed.AppendsList)
 				_map.Copy(finalList, parsed.FinalList)
 				_map.Copy(loadashes, parsed.Loadashes)
-				if len(parsed.ClassList) > 0 {
-					orderList = append(orderList, parsed.ClassList)
+				if len(parsed.OrderedList) > 0 {
+					orderList = append(orderList, parsed.OrderedList)
 				}
 				for k, v := range parsed.StyleDeclarations.Styles {
 					if len(v) > 2 {

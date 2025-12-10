@@ -8,8 +8,11 @@ import (
 	"main/internal/style"
 	"main/models"
 	"main/package/css"
+	"main/package/reader"
+	"main/package/utils"
 	"main/service/compiler"
 	"maps"
+	"slices"
 	"strings"
 	"time"
 )
@@ -43,10 +46,35 @@ func Sandbox_Save(index int) (response any) {
 	clontext := *data.Context
 	clontext.Midway = summon
 	attachIndex := map[int]bool{}
-	attributes := data.SrcData.Attributes
 	classBlocks := css.NewBlock(4, 4)
 
-	summon = strings.TrimSpace(script.Rider(&clontext, script.E_Method_DebugHash, map[int]bool{}).Scribed)
+	orderedlist := []string{}
+	var Builder strings.Builder
+	attributes := map[string]string{}
+	for k, v := range data.SrcData.Attributes {
+		value_Parse_return := script.Value_ClassFilter(v, slices.Contains(clontext.WatchAttrs, k))
+		orderedlist = append(orderedlist, value_Parse_return.OrderedClasses...)
+	}
+	orderedlist = utils.Array_Setback(orderedlist);
+	orderedMapping := script.Value_EvaluateIndexTraces(script.E_Method_DebugHash, "", orderedlist, clontext.Cache.LocalMap)
+	
+	for k, v := range data.SrcData.Attributes {
+		scribes, appends := script.Value_Builder(
+			v, script.E_Method_DebugHash,
+			&clontext, reader.New(v),
+			slices.Contains(clontext.WatchAttrs, k),
+			orderedMapping, map[int]bool{},
+		)
+
+		attributes[k] = scribes
+		for _, vv := range appends {
+			Builder.WriteString(vv)
+			Builder.WriteRune('\n')
+		}
+	}
+
+	Builder.WriteString(strings.TrimSpace(script.Rider(&clontext, script.E_Method_DebugHash, map[int]bool{}).Scribed))
+	summon = Builder.String()
 
 	FinalClassMap := []models.Style_ClassIndexTrace{
 		{ClassName: "_", ClassIndex: data.SrcData.Index},

@@ -1,7 +1,6 @@
 package script
 
 import (
-	_fmt "fmt"
 	_config "main/configs"
 	_model "main/models"
 	_reader "main/package/reader"
@@ -17,7 +16,7 @@ type tag_Parse_retype struct {
 	SelfClosed        bool
 	ClassSynced       bool
 	Fragment          string
-	ClassList         []string
+	OrderedList       []string
 	Loadashes         map[string]bool
 	ScatteredList     map[string]bool
 	FinalList         map[string]bool
@@ -33,9 +32,10 @@ func Tag_Scanner(
 	fileData *_model.File_Stash,
 	method E_Method,
 	fileCursor *_reader.T_Reader,
-	orderedlist []string,
-	appendstack  map[int]bool,
+	appendstack map[int]bool,
+	orderedMapping map[string]string,
 ) tag_Parse_retype {
+	orderedlist := []string{}
 	appends := []string{}
 	appendsList := make(map[string]bool, 4)
 	scatterList := make(map[string]bool, 4)
@@ -177,16 +177,6 @@ func Tag_Scanner(
 							orderedlist = append(orderedlist, value_Parse_return.OrderedClasses...)
 						} else {
 
-							metafront := ""
-							switch method {
-							case E_Method_DebugHash:
-								metafront = _fmt.Sprintf("TAG%s:%d:%d__", fileData.DebugFront, fileCursor.Active.Row, fileCursor.Active.Col)
-							case E_Method_PreviewHash:
-								metafront = _fmt.Sprintf("%s%d-%d_", fileData.Label, fileCursor.Active.Row, fileCursor.Active.Col)
-							}
-
-							orderedMapping := value_EvaluateIndexTraces(method, metafront, orderedlist, fileData.Cache.LocalMap)
-
 							scribed_, append_ := Value_Builder(
 								tr_Value,
 								method,
@@ -268,7 +258,7 @@ func Tag_Scanner(
 		Fragment:          fragString,
 		SelfClosed:        selfClosed,
 		ClassSynced:       classSynced,
-		ClassList:         orderedlist,
+		OrderedList:       orderedlist,
 		NativeAttributes:  nativeAttributes,
 		StyleDeclarations: styleDeclarations,
 	}
