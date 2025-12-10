@@ -78,7 +78,7 @@ func ParsePartial(content string, basic_allocation_size int) R_Parse {
 			switch cursor.Active.Char {
 			case ':':
 				k := _util.String_Minify(content[keyStart.Idx:cursor.Active.Idx])
-				if len(k) > 0 && k[0] != '@' {
+				if len(k) > 0 && k[0] != '@' && k[0] != '&' {
 					key = k
 					valueFrom = cursor.Active.Idx + 1
 				}

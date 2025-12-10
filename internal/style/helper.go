@@ -58,13 +58,13 @@ func stylesnippet_process(
 ) {
 	native := importLodash(file, content, file.Label)
 	nativeAttachResult := Parse_CssSnippet(
-		_util.Code_Uncomment(native, true, true, false),
+		_util.Code_Uncomment(native, true, true, true),
 		selector, initial, flatten,
 	)
 	exportAttachResult := nativeAttachResult
 	export := importLodash(file, content, Lodash_frag+file.Label)
 	exportAttachResult = Parse_CssSnippet(
-		_util.Code_Uncomment(export, true, true, false),
+		_util.Code_Uncomment(export, true, true, true),
 		selector, initial, flatten,
 	)
 

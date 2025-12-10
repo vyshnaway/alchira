@@ -5,6 +5,7 @@ import (
 	_config "main/configs"
 	_action "main/internal/action"
 	_model "main/models"
+	"maps"
 
 	// "main/package/console"
 	_reader "main/package/reader"
@@ -63,15 +64,16 @@ func Value_Builder(
 					if method != E_Method_LoadHash {
 						if res := _action.Index_Finder(entrystring, fileData.Cache.LocalMap); res.Index > 0 {
 							if !appendstack[res.Index] {
-								appendstack[res.Index] = true
+								subappendstack := make(map[int]bool, len(appendstack)+1)
+								maps.Copy(subappendstack, appendstack)
+								subappendstack[res.Index] = true
 								if len(res.Data.SrcData.NativeStaple) > 0 {
 									appends = append(appends, res.Data.SrcData.NativeStaple)
 								} else if len(res.Data.SrcData.Metadata.SummonSnippet) > 0 {
-									_fmt.Println(res.Data.SrcData.Metadata.SummonSnippet)
 									context := *res.Data.Context
 									context.Content = res.Data.SrcData.Metadata.SummonSnippet
-									context.Midway = Rider(&context, E_Method_Read, map[int]bool{}).Scribed
-									newappend := Rider(&context, method, appendstack).Scribed
+									context.Midway = res.Data.SrcData.Metadata.SummonSnippet
+									newappend := Rider(&context, method, subappendstack).Scribed
 									appends = append(appends, newappend)
 								}
 							}

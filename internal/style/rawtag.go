@@ -135,7 +135,7 @@ func Rawtag_Upload(
 		exportStaple := ""
 		nativeStaple := ""
 		if raw.Elid == _config.Root.CustomTags["staple"] {
-			stripped := _util.Code_Strip(raw.Innertext, false, false, false, true)
+			stripped := _util.Code_Strip(raw.Innertext, false, false, false, false)
 			exportStaple = importLodash(file, stripped, Lodash_frag+file.Label)
 			nativeStaple = importLodash(file, stripped, file.Label)
 		}
@@ -144,7 +144,7 @@ func Rawtag_Upload(
 		attributes := map[string]string{}
 		if raw.Elid == _config.Root.CustomTags["summon"] {
 			summon = stripCustomTags(file, raw.Innertext)
-			summon = _util.Code_Strip(summon, false, false, true, true)
+			summon = _util.Code_Strip(summon, false, false, false, false)
 			attributes = raw.Attributes
 		}
 
