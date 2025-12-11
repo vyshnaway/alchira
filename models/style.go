@@ -33,6 +33,7 @@ type Style_Metadata struct {
 	Declarations  []string          `json:"declarations,omitempty"`
 	Variables     map[string]string `json:"variables,omitempty"`
 	SummonSnippet string            `json:"summon,omitempty"`
+	Appendable    bool              `json:"appendable,omitempty"`
 }
 
 type Style_ClassData struct {

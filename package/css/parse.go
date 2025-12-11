@@ -36,22 +36,22 @@ func ParsePartial(content string, basic_allocation_size int) R_Parse {
 	braceTrack := make([]rune, 0, 12)
 	deviance := 0
 	isProp := true
-	cursor := _reader.New(content + "; ")
-	keyStart := cursor.Active
+	reader := _reader.New(content + "; ")
+	keyStart := reader.Active
 	valueFrom := 0
 
 	createRange := func(data []string) _reader.T_Range {
 		return _reader.T_Range{
 			Data:  data,
 			Start: keyStart,
-			End:   cursor.Active,
+			End:   reader.Active,
 		}
 	}
 
-	for ch, streaming := cursor.Active.Char, cursor.Streaming; streaming; ch, streaming = cursor.Increment() {
+	for ch, streaming := reader.Active.Char, reader.Streaming; streaming; ch, streaming = reader.Increment() {
 
 		if ch == '\\' {
-			cursor.Increment()
+			reader.Increment()
 			continue
 		} else if awaitBrace != 0 && awaitBrace == ch {
 			deviance = len(braceTrack) - 1
@@ -68,24 +68,24 @@ func ParsePartial(content string, basic_allocation_size int) R_Parse {
 			deviance = len(braceTrack)
 		}
 
-		if deviance == 1 && cursor.Active.Char == '{' {
+		if deviance == 1 && reader.Active.Char == '{' {
 			isProp = false
-			key = _util.String_Minify(content[keyStart.Idx:cursor.Active.Idx])
-			valueFrom = cursor.Active.Idx + 1
+			key = _util.String_Minify(string(reader.Slice(keyStart.Idx, reader.Active.Idx)))
+			valueFrom = reader.Active.Idx + 1
 		} else if deviance != 0 {
 			continue
 		} else {
-			switch cursor.Active.Char {
+			switch reader.Active.Char {
 			case ':':
-				k := _util.String_Minify(content[keyStart.Idx:cursor.Active.Idx])
+				k := _util.String_Minify(string(reader.Slice(keyStart.Idx, reader.Active.Idx)))
 				if len(k) > 0 && k[0] != '@' && k[0] != '&' {
 					key = k
-					valueFrom = cursor.Active.Idx + 1
+					valueFrom = reader.Active.Idx + 1
 				}
 			case '}':
 				fallthrough
 			case ';':
-				val := _util.String_Minify(content[valueFrom:cursor.Active.Idx])
+				val := _util.String_Minify(string(reader.Slice(valueFrom, reader.Active.Idx)))
 				{
 					if isProp {
 						if len(key) > 0 {
@@ -112,8 +112,8 @@ func ParsePartial(content string, basic_allocation_size int) R_Parse {
 						result.All_Blocks = append(result.All_Blocks, createRange([]string{key, val}))
 					}
 
-					cursor.Increment()
-					keyStart = cursor.Active
+					reader.Increment()
+					keyStart = reader.Active
 					valueFrom = keyStart.Idx + 1
 					key = ""
 					val = ""

@@ -39,10 +39,10 @@ var Root = models.Cache_Root{
 	Commands: map[string]string{
 		"void":    "Void run, no execution.",
 		"init":    "Initiate or Update & Verify setup.",
-		"iamai":   "Let ai agents start here.",
 		"debug":   "Live build for developer environment",
 		"server":  "LSP Communication Brige.",
 		"preview": "Test build. Pass test for \"publish\" command.",
+		// "iamai":   "Let ai agents start here.",
 		// "publish": "Optimized build, uses web-api.",
 		// "install": "Install external artifacts.",
 	},

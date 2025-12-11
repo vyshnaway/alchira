@@ -148,6 +148,10 @@ func Rawtag_Upload(
 			attributes = raw.Attributes
 		}
 
+		appendable := false
+		if len(nativeStaple) > 0 || len(summon) > 0 {
+			appendable = true
+		}
 		comments := raw.Comments
 		if len(comments) == 0 {
 			comments = nil
@@ -162,6 +166,7 @@ func Rawtag_Upload(
 			Declarations:  []string{declaration},
 			Variables:     vars,
 			SummonSnippet: summon,
+			Appendable:        appendable,
 		}
 
 		index = DeclareClass(file, &_model.Style_ClassData{
