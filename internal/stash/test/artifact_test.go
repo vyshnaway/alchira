@@ -8,7 +8,7 @@ import (
 
 func test_SaveArtifacts() {
 	_config.Saved.Libraries_Saved = map[string]string{
-		"lib.xcss":      `
+		"lib." + _config.ID: `
 # -webapps@1.0.1 : Available SymClasses
 
 > /test/glass$container

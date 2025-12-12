@@ -152,6 +152,8 @@ func Organize() (AritfactFiles map[string]string, Attachments map[int]bool, Rapi
 	_config.Delta.FinalMessage = _strconv.Itoa(len(_config.Delta.Errors)) + " Errors."
 
 	switch _config.Static.Command {
+	case "watch":
+		fallthrough
 	case "preview":
 		res, _ := _order_.Optimize(tracks.ClassTracks, false, _config.Static.Argument, &_model.Config_Archive{})
 		SaveClassRefs(*res.Result)

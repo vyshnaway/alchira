@@ -85,21 +85,17 @@ func main() {
 
 	_config.Static.DEBUG = command == "debug"
 	_config.Static.IAMAI = command == "iamai"
-	_config.Static.WATCH = command == "server" || ((command == "debug" || command == "preview") && argone == "-w")
+	_config.Static.WATCH = command == "server" || command == "watch"
 	_config.Static.SERVER = command == "server"
-	_config.Static.MINIFY = !_config.Static.DEBUG
-	_config.Static.PREVIEW = command == "preview"
+	_config.Static.MINIFY = !_config.Static.DEBUG || !_config.Static.SERVER
+	_config.Static.PREVIEW = command == "preview" || command == "watch"
 
 	S.Canvas.Initialize(
-		!_config.Static.WATCH && _slice.Contains([]string{"debug", "preview", "publish", "init", "install"}, command),
+		!_config.Static.WATCH && _slice.Contains([]string{"debug", "watch", "preview", "publish", "init", "install"}, command),
 		true, 2,
 	)
 
 	exitcode := 0
-	var flagmode = "Build"
-	if _config.Static.WATCH {
-		flagmode = "Watch"
-	}
 
 	_config.Reset(false)
 	if _config.Static.Command != "void" && _fileman.Path_IfFile(_fileman.Path_Join(compilerDir, ".gitignore")) {
@@ -128,6 +124,7 @@ func main() {
 	}
 
 	switch _config.Static.Command {
+
 	case "void":
 		if argone == "sync" {
 			_action.Sync_RootDocs()
@@ -155,11 +152,15 @@ func main() {
 		}
 	case "debug":
 		{
-			exitcode = _compiler.Execute(title+" : Debug "+flagmode, concurrent)
+			exitcode = _compiler.Execute(title+" : Debug", concurrent)
+		}
+	case "watch":
+		{
+			exitcode = _compiler.Execute(title+" : Watch", concurrent)
 		}
 	case "preview":
 		{
-			exitcode = _compiler.Execute(title+" : Preview "+flagmode, concurrent)
+			exitcode = _compiler.Execute(title+" : Preview", concurrent)
 		}
 	case "publish":
 		{

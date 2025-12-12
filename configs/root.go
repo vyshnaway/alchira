@@ -11,7 +11,8 @@ import (
 
 const (
 	ID     = "xcss"
-	DOMAIN = "xcss.io"
+	TLD    = "io"
+	DOMAIN = ID + "." + TLD
 )
 
 var Root = models.Cache_Root{
@@ -112,17 +113,17 @@ var Static = models.Cache_Static{
 
 var Root_Flavor = map[string]*models.File_Source{
 	"blueprint": {
-		Frags:     []string{"scaffold", "blueprint"},
+		Frags:     []string{},
 		Path:      "",
 		Essential: true,
 	},
 	"libraries": {
-		Frags:     []string{"scaffold", "libraries"},
+		Frags:     []string{},
 		Path:      "",
 		Essential: true,
 	},
 	"sandbox": {
-		Frags:     []string{"scaffold", "sandbox"},
+		Frags:     []string{},
 		Path:      "",
 		Essential: true,
 	},

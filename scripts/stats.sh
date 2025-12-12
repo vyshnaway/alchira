@@ -24,22 +24,23 @@ total_files=0
 printf "%-60s %-10s %-15s %-20s\n" "File" "Lines" "Size (Bytes)" "Last Modified"
 printf "%s\n" "------------------------------------------------------------"
 
-# Find all files and collect stats
+# Find only *.go files and collect stats
 while IFS= read -r file; do
     if [ -f "$file" ] && [ -r "$file" ]; then
         # Get line count
         lines=$(wc -l < "$file" 2>/dev/null || echo "0")
-        
+
         # Get file size (in bytes)
-        # Use ls for portability across platforms
         size=$(ls -l "$file" 2>/dev/null | awk '{print $5}' || echo "0")
-        
-        # Get last modified timestamp (platform-agnostic with date parsing)
-        modified=$(date -r "$file" "+%Y-%m-%d %H:%M:%S" 2>/dev/null || stat -c %y "$file" 2>/dev/null | cut -d. -f1 || echo "Unknown")
-        
-        # Print file stats, truncate file path if too long
+
+        # Get last modified timestamp
+        modified=$(date -r "$file" "+%Y-%m-%d %H:%M:%S" 2>/dev/null \
+            || stat -c %y "$file" 2>/dev/null | cut -d. -f1 \
+            || echo "Unknown")
+
+        # Print file stats
         printf "%-60.60s %-10d %-15d %-20s\n" "$file" "$lines" "$size" "$modified"
-        
+
         # Update totals
         total_lines=$((total_lines + lines))
         total_size=$((total_size + size))
@@ -47,10 +48,10 @@ while IFS= read -r file; do
     else
         echo "Skipping '$file': not a readable file" >&2
     fi
-done < <(find "$DIR" -type f 2>/dev/null)
+done < <(find "$DIR" -type f -name '*.go' 2>/dev/null)
 
 # Print summary
 printf "%s\n" "------------------------------------------------------------"
-echo "Total files: $total_files"
+echo "Total .go files: $total_files"
 echo "Total lines: $total_lines"
 echo "Total size: $total_size bytes"
