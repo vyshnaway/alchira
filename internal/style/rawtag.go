@@ -166,7 +166,7 @@ func Rawtag_Upload(
 			Declarations:  []string{declaration},
 			Variables:     vars,
 			SummonSnippet: summon,
-			Appendable:        appendable,
+			Appendable:    appendable,
 		}
 
 		index = DeclareClass(file, &_model.Style_ClassData{

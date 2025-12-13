@@ -34,7 +34,7 @@ func Value_Builder(
 	awaitop = false
 
 	for nr.Streaming {
-		ch, _ := nr.Increment()
+		ch := nr.Active.Char
 
 		if awaitop {
 			if ok := symclass_chars.Match([]byte{byte(ch)}); ok {
@@ -137,7 +137,7 @@ func Value_Builder(
 				stream.WriteRune(ch)
 			}
 		}
-		nr.Active.Last = ch
+		nr.Increment()
 	}
 
 	scribed = stream.String()

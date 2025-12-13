@@ -38,7 +38,7 @@ func Value_ClassFilter(
 	var waitop rune = 0
 
 	for nr.Streaming {
-		ch, _ := nr.Increment()
+		ch := nr.Active.Char 
 
 		if awaitop {
 			if ok := symclass_chars.Match([]byte{byte(ch)}); ok {
@@ -67,6 +67,7 @@ func Value_ClassFilter(
 			awaitop = true
 			waitop = ch
 		}
+		nr.Increment()
 	}
 
 	return value_ClassFilter_return{
