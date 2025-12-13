@@ -57,7 +57,7 @@ func Setup_Environment(compilerdir, relWorkpath, absWorkpath string, config _mod
 		}
 	}
 
-	cdn := _config.Root.Url.Docs
+	cdn := _config.Root.Url.Cdn
 	for id, source := range _config.Sync_Agreements {
 		source.Url = cdn + source.Url
 		source.Path = _fileman.Path_Join(append([]string{compilerdir}, source.Frags...)...)

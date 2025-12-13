@@ -7,7 +7,6 @@ import (
 	_model "main/models"
 	"maps"
 
-	// "main/package/console"
 	_reader "main/package/reader"
 	_string "strings"
 )
@@ -22,23 +21,21 @@ func Value_Builder(
 	appendstack map[int]bool,
 ) (string, []string) {
 
-	runes := []rune(value)
 	appends := []string{}
 	awaitop := false
 	scribed := value
-	valuelen := len(value)
+	nr := _reader.New(value)
 	var waitop rune = 0
-	var lastCh rune = 0
 	var entry _string.Builder
 
 	var stream _string.Builder
 	entry.Reset()
 	waitop = 0
-	lastCh = 0
 	awaitop = false
 
-	for marker := range valuelen {
-		ch := runes[marker]
+	for nr.Streaming {
+		ch, _ := nr.Increment()
+
 		if awaitop {
 			if ok := symclass_chars.Match([]byte{byte(ch)}); ok {
 				entry.WriteRune(ch)
@@ -129,18 +126,18 @@ func Value_Builder(
 				waitop = 0
 				awaitop = false
 			}
-		} else if checkOpSlash(isWatching, lastCh, ch) {
+		} else if checkOpSlash(isWatching, nr.Active.Last, ch) {
 			awaitop = true
 			waitop = ch
 		} else {
-			if lastCh == '\\' {
+			if nr.Active.Last == '\\' {
 				stream.WriteRune('\\')
 			}
 			if ch != '\\' {
 				stream.WriteRune(ch)
 			}
 		}
-		lastCh = ch
+		nr.Active.Last = ch
 	}
 
 	scribed = stream.String()

@@ -30,7 +30,7 @@ func Verify_Setup(concurrent bool) (Report string, Status verify_Setup_Status_en
 					_config.Path_Folder["blueprint"].Path,
 					[]string{}, concurrent)
 			}
-
+			
 			if _fileman.Path_IfDir(_config.Root_Flavor["libraries"].Path) {
 				_fileman.Sync_Bulk(
 					_config.Root_Flavor["libraries"].Path,

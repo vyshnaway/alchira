@@ -10,15 +10,16 @@ import (
 )
 
 const (
-	ID     = "xcss"
+	ID     = "xtatix"
 	TLD    = "io"
+	EXT    = "xtx"
 	DOMAIN = ID + "." + TLD
 )
 
 var Root = models.Cache_Root{
 	Name:            ID,
 	Version:         VERSION,
-	Extension:       ID,
+	Extension:       EXT,
 	PollingInterval: 1000,
 	WaitingInterval: 100,
 	WebsocketPort:   1,
@@ -30,8 +31,8 @@ var Root = models.Cache_Root{
 		Libraries: "",
 	},
 	Url: models.Cache_Url{
+		Cdn:       "https://cdn." + DOMAIN + "/",
 		Site:      "https://www." + DOMAIN + "/",
-		Docs:      "https://www." + DOMAIN + "/cdn/",
 		Worker:    "https://worker." + DOMAIN + "/",
 		Console:   "https://console." + DOMAIN + "/",
 		Vendors:   "https://vendors." + DOMAIN + "/",
@@ -40,7 +41,8 @@ var Root = models.Cache_Root{
 	Commands: map[string]string{
 		"void":    "Void run, no execution.",
 		"init":    "Initiate or Update & Verify setup.",
-		"debug":   "Live build for developer environment",
+		"debug":   "Verbose output compilation.",
+		"watch":   "Preview command in live watch mode.",
 		"server":  "LSP Communication Brige.",
 		"preview": "Test build. Pass test for \"publish\" command.",
 		// "iamai":   "Let ai agents start here.",

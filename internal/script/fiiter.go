@@ -1,6 +1,7 @@
 package script
 
 import (
+	"main/package/reader"
 	_string "strings"
 )
 
@@ -33,12 +34,12 @@ func Value_ClassFilter(
 	var entry _string.Builder
 
 	awaitop := false
-	runes := []rune(value)
-	valuelen := len(value)
+	nr := reader.New(value)
 	var waitop rune = 0
-	var lastCh rune = 0
-	for marker := range valuelen {
-		ch := runes[marker]
+
+	for nr.Streaming {
+		ch, _ := nr.Increment()
+
 		if awaitop {
 			if ok := symclass_chars.Match([]byte{byte(ch)}); ok {
 				entry.WriteRune(ch)
@@ -62,11 +63,10 @@ func Value_ClassFilter(
 				waitop = 0
 				entry.Reset()
 			}
-		} else if checkOpSlash(isWatching, lastCh, ch) {
+		} else if checkOpSlash(isWatching, nr.Active.Last, ch) {
 			awaitop = true
 			waitop = ch
 		}
-		lastCh = ch
 	}
 
 	return value_ClassFilter_return{
