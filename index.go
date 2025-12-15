@@ -79,10 +79,6 @@ func main() {
 			_action.Setup_Environment(compilerDir, relWorkpath, absWorkpath, compilerConfig)
 		}
 	}
-	
-	_fmt.Println(compilerDir)
-	_fmt.Println(relWorkpath)
-	_fmt.Println(absWorkpath)
 
 	_config.Static.Command = command
 	_config.Static.Argument = argone
