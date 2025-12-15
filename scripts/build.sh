@@ -38,7 +38,7 @@ CGO_ENABLED=0 GOOS=windows GOARCH=386 go build -buildvcs=false -trimpath -ldflag
 echo "Building for macOS (AMD64)..."
 CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -buildvcs=false -trimpath -ldflags="-s -w -extldflags '-static'" -o ./$OUT_DIR/darwin-amd64
 
-echo "Building for macOS (ARM64 - Apple Silicon)..."
+echo "Building for macOS (ARM64)..."
 CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build -buildvcs=false -trimpath -ldflags="-s -w -extldflags '-static'" -o ./$OUT_DIR/darwin-arm64
 
 echo
