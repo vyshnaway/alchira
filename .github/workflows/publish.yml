@@ -1,0 +1,146 @@
+name: Release Binary
+
+on:
+  push:
+    branches: [main]
+  repository_dispatch:
+    types: [trigger-publish]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  PACKAGE_REPO: yshelldev/xcss-central
+  SCAFFOLD_REPO: yshelldev/xcss-scaffold
+
+jobs:
+  bin-release:
+    name: Bin Update Trigger
+    runs-on: ubuntu-latest
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, '#Release')) || (github.event_name != 'push')
+
+    steps:
+      - name: Checkout current repo
+        uses: actions/checkout@v3
+
+      - name: Checkout xcss-central (read-only)
+        uses: actions/checkout@v3
+        with:
+          repository: yshelldev/xcss-central
+          token: ${{ secrets.XCSS_REPO_CROSS }}
+          path: compiler
+
+      - name: Get version from xcss-central
+        id: pacver
+        run: |
+          cd compiler 
+          version="v$(jq -r .compiler package.json)"
+          echo "version=$version" >> $GITHUB_OUTPUT
+
+          patchTag=$version
+          echo "patchTag=$patchTag" >> $GITHUB_OUTPUT
+
+          minorTag=$(echo "$version" | cut -d '.' -f1-2)
+          echo "minorTag=$minorTag" >> $GITHUB_OUTPUT
+
+          majorTag=$(echo "$version" | cut -d '.' -f1)
+          echo "majorTag=$majorTag" >> $GITHUB_OUTPUT
+
+      - name: Run build script
+        run: |
+          chmod +x ./scripts/build.sh
+          ./scripts/build.sh
+
+      - name: Prepare artifacts
+        run: |
+          mkdir -p artifacts
+          cp -r ./bin/* artifacts/
+
+      - name: Publish release (latest tag)
+        uses: softprops/action-gh-release@v2
+        with:
+          repository: ${{ env.PACKAGE_REPO }}
+          token: ${{ secrets.XCSS_REPO_CROSS }}
+          tag_name: latest
+          name: Release latest
+          body_path: ./RELEASE.md
+          files: artifacts/**
+          overwrite_files: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.XCSS_REPO_CROSS }}
+
+      # - name: Publish release (Major Tag)
+      #   uses: softprops/action-gh-release@v2
+      #   with:
+      #     repository: ${{ env.PACKAGE_REPO }}
+      #     token: ${{ secrets.XCSS_REPO_CROSS }}
+      #     tag_name: ${{ steps.pacver.outputs.majorTag }}
+      #     name: Release ${{ steps.pacver.outputs.majorTag }}
+      #     body_path: ./RELEASE.md
+      #     files: artifacts/**
+      #     overwrite_files: true
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.XCSS_REPO_CROSS }}
+
+      # - name: Publish release (Minor Tag)
+      #   uses: softprops/action-gh-release@v2
+      #   with:
+      #     repository: ${{ env.PACKAGE_REPO }}
+      #     token: ${{ secrets.XCSS_REPO_CROSS }}
+      #     tag_name: ${{ steps.pacver.outputs.minorTag }}
+      #     name: Release ${{ steps.pacver.outputs.minorTag }}
+      #     body_path: ./RELEASE.md
+      #     files: artifacts/**
+      #     overwrite_files: true
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.XCSS_REPO_CROSS }}
+
+      # - name: Publish release (Patch Tag)
+      #   uses: softprops/action-gh-release@v2
+      #   with:
+      #     repository: ${{ env.PACKAGE_REPO }}
+      #     token: ${{ secrets.XCSS_REPO_CROSS }}
+      #     tag_name: ${{ steps.pacver.outputs.patchTag }}
+      #     name: Release ${{ steps.pacver.outputs.patchTag }}
+      #     body_path: ./RELEASE.md
+      #     files: artifacts/**
+      #     overwrite_files: true
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.XCSS_REPO_CROSS }}
+
+  publish-package:
+    name: Trigger Package Release
+    runs-on: ubuntu-latest
+    needs: bin-release
+    steps:
+      - name: Checkout ${{ env.PACKAGE_REPO }} (read-only)
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.PACKAGE_REPO }}
+          token: ${{ secrets.XCSS_REPO_CROSS }}
+
+      - name: Trigger publish workflow on Parent Repo
+        uses: peter-evans/repository-dispatch@v2
+        with:
+          repository: ${{ env.PACKAGE_REPO }}
+          token: ${{ secrets.XCSS_REPO_CROSS }}
+          event-type: trigger-publish
+
+  publish-scaffold:
+    name: Trigger Scaffold Release
+    runs-on: ubuntu-latest
+    needs: bin-release
+    steps:
+      - name: Checkout ${{ env.SCAFFOLD_REPO }} (read-only)
+        uses: actions/checkout@v3
+        with:
+          repository: ${{ env.SCAFFOLD_REPO }}
+          token: ${{ secrets.XCSS_REPO_CROSS }}
+
+      - name: Trigger publish workflow on Parent Repo
+        uses: peter-evans/repository-dispatch@v2
+        with:
+          repository: ${{ env.SCAFFOLD_REPO }}
+          token: ${{ secrets.XCSS_REPO_CROSS }}
+          event-type: trigger-publish
