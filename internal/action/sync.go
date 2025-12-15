@@ -80,7 +80,7 @@ func Sync_SaveVendors(vendor_source string, try_remote bool) {
 	}
 }
 
-func Sync_ProxyMapDirs(proxyMaps []_model.Config_ProxyMap, concurrent bool) map[string]_model.Config_ProxyStorage {
+func Sync_ProxyMapDirs(proxyMaps []_model.Config_ProxyMap) map[string]_model.Config_ProxyStorage {
 	var mut _sync.Mutex
 	var wg _sync.WaitGroup
 	static_proxystorage := make(map[string]_model.Config_ProxyStorage, len(proxyMaps))
@@ -98,7 +98,6 @@ func Sync_ProxyMapDirs(proxyMaps []_model.Config_ProxyMap, concurrent bool) map[
 				[]string{_config.Root.Extension},
 				[]string{proxyMap.Stylesheet},
 				!_config.Static.SERVER,
-				concurrent,
 			)
 
 			stylesheetContent := ""

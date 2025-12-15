@@ -25,7 +25,7 @@ const content = `
 	--pattern-checker-bg2: var(---secondary-900);
 ">
 
-	<staple glass$$--container="= d-flex" &#{Cl1}&#{Cl2}&#{Load}&="= d-flex">Test
+	<stitch glass$$--container="= d-flex" &#{Cl1}&#{Cl2}&#{Load}&="= d-flex">Test
 		<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
 			<defs>
 				<filter id="glass-distortion" x="0%" y="0%" width="100%" height="100%">
@@ -37,9 +37,9 @@ const content = `
 				</filter>
 			</defs>
 		</svg>
-	</staple>
+	</stitch>
 
-	<summon style="
+	<sketch style="
 		background-image: linear-gradient(#ffffff 0.9px, transparent 0.9px), linear-gradient(to right, #ffffff 0.9px, #cacaca 1px);  
 		background-size: 18px 18px;
 	" data-glass-type="frosted" class="glass-type" glass$$$container="
@@ -77,13 +77,13 @@ const content = `
 			}
 		}
 	" &="Use activation class glass-type for [data-glass-type='liquid'|'frosted']attribute">Test
-	</summon>
+	</sketch>
 
 	<div data-glass-type='liquid' class="=glass$$$container ~glass-type =glass$$--container -lodash">
 		Liquid Glass
 	</div>
 
-	<staple />
+	<stitch />
 </body>
 
 </html>

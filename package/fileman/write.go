@@ -6,7 +6,6 @@ import (
 	_fmt "fmt"
 	_os "os"
 	_filepath "path/filepath"
-	_sync "sync"
 )
 
 // File writes content to a file, creating directories if needed.
@@ -68,26 +67,12 @@ func Write_Json(pathString string, object any) error {
 }
 
 // Bulk writes multiple files from a map of file paths to content.
-func Write_Bulk(fileContentMap map[string]string, concurrent bool) error {
+func Write_Bulk(fileContentMap map[string]string) error {
 	var errs = make([]error, 0, len(fileContentMap))
 
-	if concurrent {
-		var wg _sync.WaitGroup
-		wg.Add(len(fileContentMap))
-		for filePath, content := range fileContentMap {
-			go func() {
-				if e := Write_File(filePath, content); e != nil {
-					errs = append(errs, e)
-				}
-				wg.Done()
-			}()
-		}
-		wg.Wait()
-	} else {
-		for filePath, content := range fileContentMap {
-			if e := Write_File(filePath, content); e != nil {
-				errs = append(errs, e)
-			}
+	for filePath, content := range fileContentMap {
+		if e := Write_File(filePath, content); e != nil {
+			errs = append(errs, e)
 		}
 	}
 

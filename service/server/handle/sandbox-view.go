@@ -19,8 +19,8 @@ import (
 
 type T_Component_return struct {
 	Attributes map[string]string `json:"attributes"`
-	Summon     string            `json:"summon"`
-	Staple     string            `json:"staple"`
+	Sketch     string            `json:"sketch"`
+	Stitch     string            `json:"stitch"`
 	Symclass   string            `json:"symclass"`
 	Rootcss    string            `json:"rootcss"`
 	Compcss    string            `json:"compcss"`
@@ -36,15 +36,15 @@ func Sandbox_Load(filepath, symclass string) (response any) {
 }
 
 func Sandbox_Save(index int) (response any) {
-	var staplesheet, stylesheet strings.Builder
+	var stitchsheet, stylesheet strings.Builder
 	data := action.Index_Fetch(index)
 	if data == nil {
 		return nil
 	}
 
-	summon := data.SrcData.Metadata.SummonSnippet
+	sketch := data.SrcData.Metadata.SketchSnippet
 	clontext := *data.Context
-	clontext.Midway = summon
+	clontext.Midway = sketch
 	attachIndex := map[int]bool{}
 	classBlocks := css.NewBlock(4, 4)
 
@@ -55,9 +55,9 @@ func Sandbox_Save(index int) (response any) {
 		value_Parse_return := script.Value_ClassFilter(v, slices.Contains(clontext.WatchAttrs, k))
 		orderedlist = append(orderedlist, value_Parse_return.OrderedClasses...)
 	}
-	orderedlist = utils.Array_Setback(orderedlist);
+	orderedlist = utils.Array_Setback(orderedlist)
 	orderedMapping := script.Value_EvaluateIndexTraces(script.E_Method_DebugHash, "", orderedlist, clontext.Cache.LocalMap)
-	
+
 	for k, v := range data.SrcData.Attributes {
 		scribes, appends := script.Value_Builder(
 			v, script.E_Method_DebugHash,
@@ -74,7 +74,7 @@ func Sandbox_Save(index int) (response any) {
 	}
 
 	Builder.WriteString(strings.TrimSpace(script.Rider(&clontext, script.E_Method_DebugHash, map[int]bool{}).Scribed))
-	summon = Builder.String()
+	sketch = Builder.String()
 
 	FinalClassMap := []models.Style_ClassIndexTrace{
 		{ClassName: "_", ClassIndex: data.SrcData.Index},
@@ -109,13 +109,13 @@ func Sandbox_Save(index int) (response any) {
 	for i := range attachIndex {
 		ref := action.Index_Fetch(i)
 		stylesheet.WriteString(css.Render_Vendored(ref.SrcData.NativeAttachStyle, true))
-		staplesheet.WriteString(ref.SrcData.NativeStaple)
+		stitchsheet.WriteString(ref.SrcData.NativeStitch)
 	}
 
 	Sandbox_View_Component = &T_Component_return{
 		Attributes: attributes,
-		Summon:     summon,
-		Staple:     fmt.Sprint(configs.Saved.Tweaks["staple-prefix"], staplesheet.String(), configs.Saved.Tweaks["staple-suffix"]),
+		Sketch:     sketch,
+		Stitch:     fmt.Sprint(configs.Saved.Tweaks["stitch-prefix"], stitchsheet.String(), configs.Saved.Tweaks["stitch-suffix"]),
 		Symclass:   data.SrcData.SymClass,
 		Rootcss:    configs.Delta.IndexBuild,
 		Compcss:    stylesheet.String(),
@@ -141,10 +141,10 @@ func Sandbox_Save(index int) (response any) {
 // 	if now.Symclass != last.Symclass {
 // 		return true
 // 	}
-// 	if now.Summon != last.Summon {
+// 	if now.Sketch != last.Sketch {
 // 		return true
 // 	}
-// 	if now.Staple != last.Staple {
+// 	if now.Stitch != last.Stitch {
 // 		return true
 // 	}
 // 	if now.Compcss != last.Compcss {

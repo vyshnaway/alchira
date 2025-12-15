@@ -8,6 +8,7 @@ import (
 
 // copyFile is a helper function to copy a single file.
 func helper_CopyFile(src, dst string) error {
+	_fmt.Println(src)
 	sourceFile, err := _os.Open(src)
 	if err != nil {
 		return _fmt.Errorf("could not open source file '%s': %w", src, err)

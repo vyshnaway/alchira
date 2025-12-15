@@ -32,7 +32,7 @@ type Style_Metadata struct {
 	Skeleton      any               `json:"skeleton,omitempty"`
 	Declarations  []string          `json:"declarations,omitempty"`
 	Variables     map[string]string `json:"variables,omitempty"`
-	SummonSnippet string            `json:"summon,omitempty"`
+	SketchSnippet string            `json:"sketch,omitempty"`
 	Appendable    bool              `json:"appendable,omitempty"`
 }
 
@@ -52,8 +52,8 @@ type Style_ClassData struct {
 	PublishScatterClass string
 	PublishFinalClass   string
 	Attachments         map[string]bool
-	NativeStaple        string
-	ExportStaple        string
+	NativeStitch        string
+	ExportStitch        string
 	NativeRawStyle      *_css.T_Block
 	ExportRawStyle      *_css.T_Block
 	NativeAttachStyle   *_css.T_Block

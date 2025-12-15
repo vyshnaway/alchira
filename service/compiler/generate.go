@@ -27,18 +27,18 @@ func Generate_Files() (Files map[string]string, Report string) {
 		return result
 	}(), _config.Static.MINIFY)
 
-	attach_frag, staple_sheet := func() (string, string) {
+	attach_frag, stitch_sheet := func() (string, string) {
 		attach_styles := _css.NewBlock(len(attachments), len(attachments))
-		var attach_staples _string.Builder
+		var attach_stitchs _string.Builder
 		for a := range attachments {
 			if data := _action.Index_Fetch(a); data != nil {
 				attach_styles.Merge(data.SrcData.NativeAttachStyle)
-				attach_staples.WriteString(data.SrcData.NativeStaple)
+				attach_stitchs.WriteString(data.SrcData.NativeStitch)
 			}
 		}
 		attach_frag := _css.Render_Vendored(attach_styles, _config.Static.MINIFY)
-		staple_sheet := attach_staples.String()
-		return attach_frag, staple_sheet
+		stitch_sheet := attach_stitchs.String()
+		return attach_frag, stitch_sheet
 	}()
 
 	scattered_block := _css.NewBlock(0, len(scatteredMap))
@@ -104,11 +104,11 @@ func Generate_Files() (Files map[string]string, Report string) {
 		return _string.Join(frags, "")
 	}()
 
-	staple_block := _fmt.Sprint(_config.Saved.Tweaks["staple-prefix"], staple_sheet, _config.Saved.Tweaks["staple-suffix"])
+	stitch_block := _fmt.Sprint(_config.Saved.Tweaks["stitch-prefix"], stitch_sheet, _config.Saved.Tweaks["stitch-suffix"])
 	style_block := _fmt.Sprint(_config.Saved.Tweaks["styles-prefix"], style_sheet, _config.Saved.Tweaks["styles-suffix"])
-	summon_block := style_block + staple_block
+	sketch_block := style_block + stitch_block
 	for _, target := range _stash.Cache.Targetdir {
-		_map.Copy(files, target.SummonFiles(style_sheet, style_block, summon_block, staple_block))
+		_map.Copy(files, target.SketchFiles(style_sheet, style_block, sketch_block, stitch_block))
 	}
 
 	if !_config.Static.WATCH {

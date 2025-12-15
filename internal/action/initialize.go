@@ -8,7 +8,7 @@ import (
 	O "main/package/object"
 )
 
-func Initialize(concurrent bool) {
+func Initialize() {
 	S.STEP("Cloning blueprint to Project", 1)
 	S.TASK("Initialized setup.", 1)
 
@@ -16,7 +16,6 @@ func Initialize(concurrent bool) {
 		_config.Root_Flavor["blueprint"].Path,
 		_config.Path_Folder["blueprint"].Path,
 		[]string{},
-		concurrent,
 	); err != nil {
 		S.Post(S.MAKE(
 			S.Tag.H4("Initialization failed.", S.Preset.Failed, S.Style.AS_Bold),

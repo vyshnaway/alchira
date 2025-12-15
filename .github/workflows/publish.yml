@@ -35,7 +35,7 @@ jobs:
         id: pacver
         run: |
           cd compiler 
-          version="v$(jq -r .compilerVersion package.json)"
+          version="v$(jq -r .compiler package.json)"
           echo "version=$version" >> $GITHUB_OUTPUT
 
           patchTag=$version

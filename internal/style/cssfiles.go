@@ -105,7 +105,7 @@ func Cssfile_Collection(files []*_model.File_Stash) cssfile_Collection_return {
 					Skeleton:      object.Skeleton(),
 					Declarations:  []string{declaration},
 					Variables:     vars,
-					SummonSnippet: "",
+					SketchSnippet: "",
 				}
 
 				debugClass := _fmt.Sprint(
@@ -121,7 +121,7 @@ func Cssfile_Collection(files []*_model.File_Stash) cssfile_Collection_return {
 					NativeRawStyle:    object,
 					ExportRawStyle:    object,
 					Attachments:       attachments,
-					NativeStaple:      "",
+					NativeStitch:      "",
 					NativeAttachStyle: attach_style,
 					ExportAttachStyle: attach_style,
 				}, debugClass)
@@ -138,4 +138,3 @@ func Cssfile_Collection(files []*_model.File_Stash) cssfile_Collection_return {
 		SelectorList: selectorList,
 	}
 }
-

@@ -107,7 +107,6 @@ func main() {
 			S.Post(S.Tag.H2(_fmt.Sprint("[DEV] | Pprof Port: ", pprof), S.Preset.Tertiary))
 		}
 	}
-	concurrent := false
 
 	title := _string.ToUpper(_config.Root.Name)
 	vtitle := title + " @ v" + _config.Root.Version
@@ -137,38 +136,38 @@ func main() {
 			go func() { _action.Sync_RootDocs(); wg.Done() }()
 			go func() { Sp.Title(title+" : Initialize", 1000, 1); wg.Done() }()
 			wg.Wait()
-			setup_report, setup_status := _action.Verify_Setup(concurrent)
+			setup_report, setup_status := _action.Verify_Setup()
 			switch setup_status {
 			case _action.Verify_Setup_Status_Uninitialized:
-				_action.Initialize(concurrent)
+				_action.Initialize()
 				exitcode = 1
 			case _action.Verify_Setup_Status_Initialized:
 				S.Post(setup_report)
 				exitcode = 1
 			case _action.Verify_Setup_Status_Verified:
-				report, _ := _action.Verify_Configs(true, concurrent)
+				report, _ := _action.Verify_Configs(true)
 				S.Post(report)
 			}
 		}
 	case "debug":
 		{
-			exitcode = _compiler.Execute(title+" : Debug", concurrent)
+			exitcode = _compiler.Execute(title+" : Debug")
 		}
 	case "watch":
 		{
-			exitcode = _compiler.Execute(title+" : Watch", concurrent)
+			exitcode = _compiler.Execute(title+" : Watch")
 		}
 	case "preview":
 		{
-			exitcode = _compiler.Execute(title+" : Preview", concurrent)
+			exitcode = _compiler.Execute(title+" : Preview")
 		}
 	case "publish":
 		{
-			exitcode = _compiler.Execute(title+" : "+"Publishing for Production", concurrent)
+			exitcode = _compiler.Execute(title+" : "+"Publishing for Production")
 		}
 	case "iamai", "server":
 		{
-			if _, setup_status := _action.Verify_Setup(concurrent); setup_status == _action.Verify_Setup_Status_Uninitialized {
+			if _, setup_status := _action.Verify_Setup(); setup_status == _action.Verify_Setup_Status_Uninitialized {
 				exitcode = 0
 			} else {
 				if command == "iamai" {
@@ -179,14 +178,14 @@ func main() {
 				if val, err := _strconv.Atoi(argone); err == nil {
 					_config.Root.WebsocketPort = val
 				}
-				_server.Connect(_config.Root.WebsocketPort, concurrent)
+				_server.Connect(_config.Root.WebsocketPort)
 			}
 		}
 	case "install":
 		{
 			S.Post(S.Tag.H3("Installing Artifacts", S.Preset.Primary, S.Style.AS_Bold))
 			S.Post("\n")
-			setup_report, setup_status := _action.Verify_Setup(concurrent)
+			setup_report, setup_status := _action.Verify_Setup()
 
 			switch setup_status {
 			case _action.Verify_Setup_Status_Uninitialized:
@@ -195,10 +194,10 @@ func main() {
 				exitcode = 1
 				fallthrough
 			case _action.Verify_Setup_Status_Verified:
-				if config_message, config_ok := _action.Verify_Configs(true, concurrent); config_ok {
+				if config_message, config_ok := _action.Verify_Configs(true); config_ok {
 					update_ok, update_message, update_files := _compiler.Artifact_Install()
 					if update_ok {
-						_fileman.Write_Bulk(update_files, concurrent)
+						_fileman.Write_Bulk(update_files)
 						S.Post(S.Tag.H4("Artifacts Updated", S.Preset.Success, S.Style.AS_Bold))
 					} else {
 						S.Post(S.Tag.H4("Artifacts not updated due to pending errors on dryrun.", S.Preset.Failed, S.Style.AS_Bold))

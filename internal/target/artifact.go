@@ -17,12 +17,12 @@ func Artifact(index int) *_model.Style_ExportStyle {
 	stylesheet := make(map[string]string, style.SrcData.ExportRawStyle.BlockLen())
 	attributes := make(map[string]string, len(style.SrcData.Attributes))
 
-	if len(style.SrcData.ExportStaple) > 0 {
-		element = "staple"
-		innertext = style.SrcData.ExportStaple
-	} else if len(style.SrcData.Metadata.SummonSnippet) > 0 {
-		element = "summon"
-		innertext = style.SrcData.Metadata.SummonSnippet
+	if len(style.SrcData.ExportStitch) > 0 {
+		element = "stitch"
+		innertext = style.SrcData.ExportStitch
+	} else if len(style.SrcData.Metadata.SketchSnippet) > 0 {
+		element = "sketch"
+		innertext = style.SrcData.Metadata.SketchSnippet
 	} else {
 		element = "style"
 		innertext = style.SrcData.ExportAttachStyle.Format(true)

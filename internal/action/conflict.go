@@ -9,7 +9,7 @@ import (
 )
 
 // ProxyMapDependency validates and processes proxy map dependencies
-func Conflict_Sync_Test(concurrent bool) Verify_ProxyMapDependency_return {
+func Conflict_Sync_Test() Verify_ProxyMapDependency_return {
 	proxymap := _config.Saved.ProxyMap
 	configdir := _config.Path_Folder["blueprint"].Path
 
@@ -57,8 +57,8 @@ func Conflict_Sync_Test(concurrent bool) Verify_ProxyMapDependency_return {
 				if !(source_type == _fileman.Path_Check_Type_Nil || source_type == _fileman.Path_Check_Type_Dir) {
 					warning_channel <- _fmt.Sprintf("Invalid index of [%d]:\"%s\"", i, m.Source)
 					return
-				} else if !_config.Static.SERVER {
-					if err := _fileman.Clone_Safe(m.Target, m.Source, []string{}, concurrent); err == nil {
+				} else if !_config.Static.SERVER && source_type == _fileman.Path_Check_Type_Nil {
+					if err := _fileman.Clone_Safe(m.Target, m.Source, []string{}); err == nil {
 						notification_channel <- _fmt.Sprintf("[%d]:\"%s\" cloned from [%d]:\"%s\"", i, m.Source, i, m.Target)
 					} else {
 						warning_channel <- _fmt.Sprintf("[%d]:\"%s\" clone from [%d] failed:\"%s\"", i, m.Source, i, m.Target)
@@ -69,8 +69,8 @@ func Conflict_Sync_Test(concurrent bool) Verify_ProxyMapDependency_return {
 				if target_type != _fileman.Path_Check_Type_Nil {
 					warning_channel <- _fmt.Sprintf("Invalid index of [%d]:\"%s\"", i, m.Target)
 					return
-				} else if !_config.Static.SERVER {
-					if err := _fileman.Clone_Safe(m.Source, m.Target, []string{}, concurrent); err == nil {
+				} else if !_config.Static.SERVER && target_type == _fileman.Path_Check_Type_Nil{
+					if err := _fileman.Clone_Safe(m.Source, m.Target, []string{}); err == nil {
 						notification_channel <- _fmt.Sprintf("[%d]:\"%s\" cloned from [%d]:\"%s\"", i, m.Target, i, m.Source)
 					} else {
 						warning_channel <- _fmt.Sprintf("[%d]:\"%s\" clone from [%d] failed:\"%s\"", i, m.Target, i, m.Source)

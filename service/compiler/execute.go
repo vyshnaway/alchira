@@ -65,7 +65,7 @@ func ResetRebuildTicker() {
 	}
 }
 
-func Execute(heading string, concurrent bool) (Exitcode int) {
+func Execute(heading string) (Exitcode int) {
 	exitcode := 0
 	step := Execute_Step_Initialize
 	report := ""
@@ -116,7 +116,7 @@ func Execute(heading string, concurrent bool) (Exitcode int) {
 				showReport = false
 			}
 
-			res_report, res_status := _action.Verify_Setup(concurrent)
+			res_report, res_status := _action.Verify_Setup()
 			switch res_status {
 			case _action.Verify_Setup_Status_Uninitialized:
 				report = res_report
@@ -147,7 +147,7 @@ func Execute(heading string, concurrent bool) (Exitcode int) {
 			fallthrough
 
 		case Execute_Step_VerifyConfigs:
-			res_report, res_status := _action.Verify_Configs(false, concurrent)
+			res_report, res_status := _action.Verify_Configs(false)
 			ResetRebuildTicker()
 			if !res_status {
 				report = res_report
@@ -162,7 +162,7 @@ func Execute(heading string, concurrent bool) (Exitcode int) {
 			fallthrough
 
 		case Execute_Step_ReadTargets:
-			_action.Save_Targets(concurrent)
+			_action.Save_Targets()
 			fallthrough
 
 		case Execute_Step_ReadHashrule:
@@ -197,7 +197,7 @@ func Execute(heading string, concurrent bool) (Exitcode int) {
 					save_action.Wait()
 					save_action.Add(1)
 					go func() {
-						_fileman.Write_Bulk(outfiles, concurrent)
+						_fileman.Write_Bulk(outfiles)
 						save_action.Done()
 					}()
 				}
@@ -320,7 +320,6 @@ func Execute(heading string, concurrent bool) (Exitcode int) {
 			break
 		}
 	}
-
 	save_action.Wait()
 	return exitcode
 }

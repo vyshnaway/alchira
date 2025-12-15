@@ -132,24 +132,24 @@ func Rawtag_Upload(
 			exportAttachStyle = exportAttachResult.Result
 		}
 
-		exportStaple := ""
-		nativeStaple := ""
-		if raw.Elid == _config.Root.CustomTags["staple"] {
+		exportStitch := ""
+		nativeStitch := ""
+		if raw.Elid == _config.Root.CustomTags["stitch"] {
 			stripped := _util.Code_Strip(raw.Innertext, false, false, false, false)
-			exportStaple = importLodash(file, stripped, Lodash_frag+file.Label)
-			nativeStaple = importLodash(file, stripped, file.Label)
+			exportStitch = importLodash(file, stripped, Lodash_frag+file.Label)
+			nativeStitch = importLodash(file, stripped, file.Label)
 		}
 
-		summon := ""
+		sketch := ""
 		attributes := map[string]string{}
-		if raw.Elid == _config.Root.CustomTags["summon"] {
-			summon = stripCustomTags(file, raw.Innertext)
-			summon = _util.Code_Strip(summon, false, false, false, false)
+		if raw.Elid == _config.Root.CustomTags["sketch"] {
+			sketch = stripCustomTags(file, raw.Innertext)
+			sketch = _util.Code_Strip(sketch, false, false, false, false)
 			attributes = raw.Attributes
 		}
 
 		appendable := false
-		if len(nativeStaple) > 0 || len(summon) > 0 {
+		if len(nativeStitch) > 0 || len(sketch) > 0 {
 			appendable = true
 		}
 		comments := raw.Comments
@@ -165,10 +165,10 @@ func Rawtag_Upload(
 			Skeleton:      nativeRawStyle.Skeleton(),
 			Declarations:  []string{declaration},
 			Variables:     vars,
-			SummonSnippet: summon,
+			SketchSnippet: sketch,
 			Appendable:    appendable,
 		}
-
+		
 		index = DeclareClass(file, &_model.Style_ClassData{
 			Attributes:        attributes,
 			Artifact:          artifact,
@@ -176,8 +176,8 @@ func Rawtag_Upload(
 			SymClass:          symclass,
 			Metadata:          metadata,
 			Attachments:       attachments,
-			ExportStaple:      exportStaple,
-			NativeStaple:      nativeStaple,
+			ExportStitch:      exportStitch,
+			NativeStitch:      nativeStitch,
 			ExportRawStyle:    exportRawStyle,
 			NativeRawStyle:    nativeRawStyle,
 			ExportAttachStyle: exportAttachStyle,

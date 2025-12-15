@@ -148,7 +148,7 @@ _$custom-pattern="
 - To use a symbolic class use `={sym-class}` with in attributes. 
 
 ```html
-  <staple amorphous$--container>
+  <stitch amorphous$--container>
     <svg xmlns="http://www.w3.org/2000/svg">
       <defs>
         <filter id="#glass-distortion" x="0%" y="0%" width="100%" height="100%">
@@ -160,13 +160,13 @@ _$custom-pattern="
         </filter>
       </defs>
     </svg>
-  </staple>
+  </stitch>
 ```
 
--  `<staple ... > ... </staple>` a special tag used to create a **dependency to text-block with a symclass**. The content with-in the tag will be only deployed if the corresponding symclass is used compiled CSS.
+-  `<stitch ... > ... </stitch>` a special tag used to create a **dependency to text-block with a symclass**. The content with-in the tag will be only deployed if the corresponding symclass is used compiled CSS.
 
 ```html
-  <summon style="
+  <sketch style="
     background-size: 18px 18px;
     background-image: linear-gradient(#ffffff 0.9px, transparent 0.9px), 
       linear-gradient(to right, oklab(100% 0 -0.00011) 0.9px, #cacaca 1px);
@@ -198,9 +198,9 @@ _$custom-pattern="
     }
   ">
     Template
-  </summon>
+  </sketch>
 ```
-- `<summon ... > ... </summon>`, a special tag which lets you create portable template for component level **symclasses**, which can be used for preview in a live sand-boxed environment while using language server. 
+- `<sketch ... > ... </sketch>`, a special tag which lets you create portable template for component level **symclasses**, which can be used for preview in a live sand-boxed environment while using language server. 
 - `@--attach` / `~` can be used to add a dependency attachment of a symbolic class. These will be used for dependency tracking.
 
 ```html
@@ -209,11 +209,11 @@ _$custom-pattern="
 - Symbolic classes can  defined anywhere and used where-ever within the provided scope.
 
 ```html
-  <!-- staple -->
+  <!-- stitch -->
 </body>
 </html>
 ```
-- `<!-- staple -->` a reserved tag which will be replaced with staple content of tracked dependencies.
+- `<!-- stitch -->` a reserved tag which will be replaced with stitch content of tracked dependencies.
 
 ## Output
 
@@ -684,7 +684,7 @@ unless for conditional adding to classname with inline script.
 ## Compose Operators (For composing sym-classes)
 
 ```html
-<summon
+<sketch
   custom$class="
     /* Assign Directive Operator */ 
     = atomic$class-1 atomic$class-2;
@@ -701,7 +701,7 @@ unless for conditional adding to classname with inline script.
       &[varient-2] { *** }
     }
   "
->Template</summon>
+>Template</sketch>
 ```
 
 ### Directive Operators
@@ -863,10 +863,10 @@ body[data-loading] .$class { ... }
 <style local$-class>
   ...
 </style>
-<staple local$--class>
+<stitch local$--class>
   ...
-</staple>
-<summon
+</stitch>
+<sketch
   attribute-1="attr-value-1"
   attribute-2="attr-value-2"
   attribute-3="attr-value-3"
@@ -879,7 +879,7 @@ body[data-loading] .$class { ... }
   "
 >
   Template
-</summon>
+</sketch>
 ```
 
 ### `<style> ... </style>` 
@@ -887,12 +887,12 @@ body[data-loading] .$class { ... }
 - If a sym-class is found in the opening tag, the content between tags is considered a dependent snippet of that corresponding sym-class.
 - Declared using a sym-class where - immediately follows the final $ (e.g., style$-class-name).
 
-### `<staple> ... </staple>`
+### `<stitch> ... </stitch>`
 - Snippets are imported in a minified form but remain unprocessed.
 - Useful for direct association without transformation or validation.
-- Declared using a sym-class where -- immediately follows the final $ (e.g., staple$--class-name).
+- Declared using a sym-class where -- immediately follows the final $ (e.g., stitch$--class-name).
 
-### `<summon> ... </summon>`
+### `<sketch> ... </sketch>`
 - Used to declare component-level styles and generate corresponding style templates.
 - The snippet inside these tags is used for live preview of the given classes.
 - Style attributes are passed to the sandbox body, while other attributes are passed directly to the preview sandbox.
@@ -922,14 +922,14 @@ body[data-loading] .$class { ... }
   "
 >
 
-  <staple amorphous$--container>
+  <stitch amorphous$--container>
     <svg xmlns="http://www.w3.org/2000/svg">
       <defs> ... </defs>
     </svg>
-  </staple>
+  </stitch>
 
 
-  <summon 
+  <sketch 
     data-glass-type="liquid" 
     amorphous$$$container="
       ~ amorphous$--container;
@@ -939,31 +939,31 @@ body[data-loading] .$class { ... }
     "
   >
     Template
-  </summon>
+  </sketch>
 
   <div 
     id="#scoped-id" 
     data-glass-type='liquid' 
     class="~amorphous$$$container"
   > Content </div>
-  <!-- staple -->
+  <!-- stitch -->
 </body>
 
 </html>
 ```
 
-### `<summon />` /  `<!-- summon -->` 
+### `<sketch />` /  `<!-- sketch -->` 
 
-- Used as a placeholder for deploying `stylesheet` and `staple-snippets` together in the compiled output.
+- Used as a placeholder for deploying `stylesheet` and `stitch-snippets` together in the compiled output.
 - Intended for rapid prototyping, not recommended for production use.
 
 ### `<style />` /  `<!-- style -->`
 
 - Embed stylesheet using these tags with in any targeted files. 
 
-### `<staple />` / `<!-- staple -->`
+### `<stitch />` / `<!-- stitch -->`
 
-- Acts as a placeholder for injecting attached `staple-snippets` into the compiled output.
+- Acts as a placeholder for injecting attached `stitch-snippets` into the compiled output.
 # 8. Appendix
 
 ## Errors & diagnostics
@@ -985,7 +985,7 @@ body[data-loading] .$class { ... }
 ## Dependency resolution
 
 - Dependency resolution is automated. The compiler traverses the attachment tree for symbolic-class `@--attach`/`~` links and deploys all interconnected dependencies together after symbolic classes are composed.
-- `staple` snippets are replaced with the `<staple />` placeholder at compile time; ensure your attached staple snippets are present where expected to avoid missing assets.
+- `stitch` snippets are replaced with the `<stitch />` placeholder at compile time; ensure your attached stitch snippets are present where expected to avoid missing assets.
 
 ## Hashing Methodology
 

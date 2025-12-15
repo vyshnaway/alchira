@@ -24,7 +24,7 @@ func Value_Builder(
 	appends := []string{}
 	awaitop := false
 	scribed := value
-	nr := _reader.New(value)
+	nr := _reader.New(value + " ")
 	var waitop rune = 0
 	var entry _string.Builder
 
@@ -64,12 +64,12 @@ func Value_Builder(
 								subappendstack := make(map[int]bool, len(appendstack)+1)
 								maps.Copy(subappendstack, appendstack)
 								subappendstack[res.Index] = true
-								if len(res.Data.SrcData.NativeStaple) > 0 {
-									appends = append(appends, res.Data.SrcData.NativeStaple)
-								} else if len(res.Data.SrcData.Metadata.SummonSnippet) > 0 {
+								if len(res.Data.SrcData.NativeStitch) > 0 {
+									appends = append(appends, res.Data.SrcData.NativeStitch)
+								} else if len(res.Data.SrcData.Metadata.SketchSnippet) > 0 {
 									context := *res.Data.Context
-									context.Content = res.Data.SrcData.Metadata.SummonSnippet
-									context.Midway = res.Data.SrcData.Metadata.SummonSnippet
+									context.Content = res.Data.SrcData.Metadata.SketchSnippet
+									context.Midway = res.Data.SrcData.Metadata.SketchSnippet
 									newappend := Rider(&context, method, subappendstack).Scribed
 									appends = append(appends, newappend)
 								}
@@ -142,5 +142,5 @@ func Value_Builder(
 
 	scribed = stream.String()
 
-	return scribed, appends
+	return _string.TrimSpace(scribed), appends
 }

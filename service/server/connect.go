@@ -17,7 +17,7 @@ import (
 	"time"
 )
 
-func Connect(tryport int, concurrent bool) {
+func Connect(tryport int) {
 	// Start server
 	server, port, err := Webview_Create(tryport)
 	if err != nil {
@@ -51,7 +51,7 @@ func Connect(tryport int, concurrent bool) {
 			}
 		}()
 
-		go compiler.Execute("", concurrent)
+		go compiler.Execute("")
 
 		for scanner.Scan() {
 			var res = []byte{}

@@ -8,6 +8,7 @@ import (
 	_fileman "main/package/fileman"
 	O "main/package/object"
 	_util "main/package/utils"
+	"time"
 )
 
 type verify_Setup_Status_enum int
@@ -18,25 +19,25 @@ const (
 	Verify_Setup_Status_Verified      verify_Setup_Status_enum = 2
 )
 
-func Verify_Setup(concurrent bool) (Report string, Status verify_Setup_Status_enum) {
+func Verify_Setup() (Report string, Status verify_Setup_Status_enum) {
 	status := Verify_Setup_Status_Uninitialized
 	report := ""
 
 	if _fileman.Path_IfDir(_config.Path_Folder["blueprint"].Path) {
+		time.Sleep(2 * time.Second)
 		if !_config.Static.SERVER {
 			if _fileman.Path_IfDir(_config.Root_Flavor["blueprint"].Path) {
 				_fileman.Clone_Safe(
 					_config.Root_Flavor["blueprint"].Path,
 					_config.Path_Folder["blueprint"].Path,
-					[]string{}, concurrent)
+					[]string{})
 			}
-			
+
 			if _fileman.Path_IfDir(_config.Root_Flavor["libraries"].Path) {
-				_fileman.Sync_Bulk(
+				_fileman.Clone_Hard(
 					_config.Root_Flavor["libraries"].Path,
 					_config.Path_Folder["libstatic"].Path,
-					[]string{}, []string{}, []string{},
-					true, concurrent,
+					[]string{},
 				)
 			}
 		}
@@ -93,7 +94,7 @@ type Verify_ProxyMapDependency_return struct {
 	Messages []string
 }
 
-func Verify_Configs(remote_vendors bool, concurrent bool) (Report string, Status bool) {
+func Verify_Configs(remote_vendors bool) (Report string, Status bool) {
 	if data, err := _fileman.Read_File(_config.Path_Files["readme"].Path, false); err == nil {
 		_config.Archive.Readme = data
 	}
@@ -120,7 +121,7 @@ func Verify_Configs(remote_vendors bool, concurrent bool) (Report string, Status
 	if config_data, config_err := _fileman.Read_File(config_path, false); config_err == nil {
 
 		if config, err := _util.Code_JsoncParse[_model.Config_Raw](config_data); err != nil {
-			errAdd(config_path, "Bad json / Incomplete schema.")
+			errAdd(config_path, "Bad json / Incomplete sketch.")
 		} else {
 			S.TASK("Updating vendor-prefixes", 1)
 			Sync_SaveVendors(config.Vendors, remote_vendors)
@@ -162,14 +163,12 @@ func Verify_Configs(remote_vendors bool, concurrent bool) (Report string, Status
 					}
 				}
 			}
-			// S.Render.Raw(_config.Saved.ProxyMap)
-
 		}
 	} else {
 		errAdd(config_path, "Bad Config file.")
 	}
 
-	conflict_sync := Conflict_Sync_Test(concurrent)
+	conflict_sync := Conflict_Sync_Test()
 	for _, m := range conflict_sync.Warnings {
 		errAdd(config_path, m)
 	}
