@@ -11,8 +11,7 @@ permissions:
   contents: write
 
 env:
-  PACKAGE_REPO: yshelldev/xcss-central
-  SCAFFOLD_REPO: yshelldev/xcss-scaffold
+  PACKAGE_REPO: xtatixone/xtatix
 
 jobs:
   bin-release:
@@ -29,12 +28,10 @@ jobs:
         with:
           repository: yshelldev/xcss-central
           token: ${{ secrets.XCSS_REPO_CROSS }}
-          path: compiler
 
       - name: Get version from xcss-central
         id: pacver
         run: |
-          cd compiler 
           version="v$(jq -r .compiler package.json)"
           echo "version=$version" >> $GITHUB_OUTPUT
 
@@ -124,23 +121,5 @@ jobs:
         uses: peter-evans/repository-dispatch@v2
         with:
           repository: ${{ env.PACKAGE_REPO }}
-          token: ${{ secrets.XCSS_REPO_CROSS }}
-          event-type: trigger-publish
-
-  publish-scaffold:
-    name: Trigger Scaffold Release
-    runs-on: ubuntu-latest
-    needs: bin-release
-    steps:
-      - name: Checkout ${{ env.SCAFFOLD_REPO }} (read-only)
-        uses: actions/checkout@v3
-        with:
-          repository: ${{ env.SCAFFOLD_REPO }}
-          token: ${{ secrets.XCSS_REPO_CROSS }}
-
-      - name: Trigger publish workflow on Parent Repo
-        uses: peter-evans/repository-dispatch@v2
-        with:
-          repository: ${{ env.SCAFFOLD_REPO }}
           token: ${{ secrets.XCSS_REPO_CROSS }}
           event-type: trigger-publish

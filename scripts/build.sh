@@ -2,7 +2,10 @@
 
 TIME_STAMP=$(date +%s)
 
-OUT_DIR=binary
+OUT_DIR=./binary
+TMP_EXE="$OUT_DIR/executable"
+go build -gcflags='all=-l -N' -ldflags='-s -w' -o "$TMP_EXE"
+$TMP_EXE
 
 echo "Cleaning up existing binaries..."
 rm -rf ./$OUT_DIR/*
@@ -30,3 +33,5 @@ CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -buildvcs=false -trimpath -ldfla
 
 echo "Building for macOS (ARM64 - Apple Silicon)..."
 CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build -buildvcs=false -trimpath -ldflags="-s -w -extldflags '-static'" -o ./$OUT_DIR/darwin-arm64
+
+echo

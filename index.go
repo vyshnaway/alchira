@@ -25,14 +25,14 @@ import (
 	_sync "sync"
 )
 
-// Path_FromCompiler joins the given path elements to the calculated root directory.
-func Path_FromCompiler(elem ...string) (string, error) {
+// Path_FromBinFolder joins the given path elements to the calculated root directory.
+func Path_FromBinFolder(elem ...string) (string, error) {
 	filename, err := _os.Executable()
 
 	if err != nil {
 		return "", _fmt.Errorf("failed to get current file path for root calculation")
 	}
-	root := _filepath.Join(_filepath.Dir(filename), "..")
+	root := _filepath.Dir(filename)
 	joined := _filepath.Join(root, _filepath.Join(elem...))
 	return joined, nil
 }
@@ -70,8 +70,8 @@ func main() {
 		}
 	}
 
-	compilerDir, _ := Path_FromCompiler()
-	compilerConfigPath, _ := Path_FromCompiler("bin", "configs.json")
+	compilerDir, _ := Path_FromBinFolder("..")
+	compilerConfigPath, _ := Path_FromBinFolder("configs.json")
 
 	if str, err := _fileman.Read_File(compilerConfigPath, false); err == nil {
 		var compilerConfig models.Compiler_Config
@@ -79,6 +79,10 @@ func main() {
 			_action.Setup_Environment(compilerDir, relWorkpath, absWorkpath, compilerConfig)
 		}
 	}
+	
+	_fmt.Println(compilerDir)
+	_fmt.Println(relWorkpath)
+	_fmt.Println(absWorkpath)
 
 	_config.Static.Command = command
 	_config.Static.Argument = argone
@@ -151,19 +155,19 @@ func main() {
 		}
 	case "debug":
 		{
-			exitcode = _compiler.Execute(title+" : Debug")
+			exitcode = _compiler.Execute(title + " : Debug")
 		}
 	case "watch":
 		{
-			exitcode = _compiler.Execute(title+" : Watch")
+			exitcode = _compiler.Execute(title + " : Watch")
 		}
 	case "preview":
 		{
-			exitcode = _compiler.Execute(title+" : Preview")
+			exitcode = _compiler.Execute(title + " : Preview")
 		}
 	case "publish":
 		{
-			exitcode = _compiler.Execute(title+" : "+"Publishing for Production")
+			exitcode = _compiler.Execute(title + " : " + "Publishing for Production")
 		}
 	case "iamai", "server":
 		{
