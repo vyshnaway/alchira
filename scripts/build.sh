@@ -2,13 +2,10 @@
 
 TIME_STAMP=$(date +%s)
 
-OUT_DIR=bin
+OUT_DIR=binary
 
 echo "Cleaning up existing binaries..."
 rm -rf ./$OUT_DIR/*
-
-echo "Changing to gosource directory..."
-pwd
 
 echo "Building for Linux (AMD64)..."
 CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -buildvcs=false -trimpath -ldflags="-s -w -extldflags '-static'" -o ./$OUT_DIR/linux-amd64
