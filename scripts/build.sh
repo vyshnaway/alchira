@@ -1,14 +1,21 @@
 #!/bin/sh
 
-TIME_STAMP=$(date +%s)
+VERSION=$(< VERSION)
+SRCMETA="./configs/meta.go"
+{
+  printf 'package configs\n\n'
+  printf 'var VERSION = "%s"\n' "$VERSION"
+} > "$SRCMETA"
 
 OUT_DIR=./binary
+
 TMP_EXE="$OUT_DIR/executable"
 go build -gcflags='all=-l -N' -ldflags='-s -w' -o "$TMP_EXE"
-$TMP_EXE
+$TMP_EXE void
 
-echo "Cleaning up existing binaries..."
-rm -rf ./$OUT_DIR/*
+# echo "Cleaning up existing binaries..."
+rm -rf ./$OUT_DIR
+mkdir $OUT_DIR
 
 echo "Building for Linux (AMD64)..."
 CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -buildvcs=false -trimpath -ldflags="-s -w -extldflags '-static'" -o ./$OUT_DIR/linux-amd64

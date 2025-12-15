@@ -23,16 +23,10 @@ jobs:
       - name: Checkout current repo
         uses: actions/checkout@v3
 
-      - name: Checkout xcss-central (read-only)
-        uses: actions/checkout@v3
-        with:
-          repository: yshelldev/xcss-central
-          token: ${{ secrets.XCSS_REPO_CROSS }}
-
       - name: Get version from xcss-central
         id: pacver
         run: |
-          version="v$(jq -r .compiler package.json)"
+          version=${< VERSION}
           echo "version=$version" >> $GITHUB_OUTPUT
 
           patchTag=$version
@@ -53,6 +47,15 @@ jobs:
         run: |
           mkdir -p artifacts
           cp -r ./bin/* artifacts/
+
+      - name: Checkout Public Repo (read-only)
+        uses: actions/checkout@v3
+        with:
+          repository: ${{ env.PACKAGE_REPO }}
+          token: ${{ secrets.XCSS_REPO_CROSS }}
+          path: pubrepo
+
+      - run: cd pubrepo
 
       - name: Publish release (latest tag)
         uses: softprops/action-gh-release@v2

@@ -2,22 +2,22 @@
 
 ## End-User License Agreement (EULA)
 
-By using this software, you agree to the terms and conditions outlined in the [End-User License Agreement](https://www.xcss.io/agreements/license).
+By using this software, you agree to the terms and conditions outlined in the [End-User License Agreement](https://www.xtatix.io/agreements/license).
 For details, please read the full EULA document provided in this repository.
 
 ---
 
-## What is XCSS?
+## What is Xtatix?
 
-![Preview](https://github.com/yshelldev/xcss-vscode/raw/HEAD/preview.png)
+![Preview](https://github.com/yshelldev/xtatix-vscode/raw/HEAD/preview.png)
 
-XCSS is a constraint-driven CSS build-time kernel designed to be the foundational engine for building custom CSS frameworks. Rather than being a traditional CSS framework loaded with predefined classes, XCSS provides a powerful structural abstraction that preserves the full flexibility of vanilla CSS while adding native dependency management and modular composition. It works seamlessly across any text-based environment, is framework agnostic, and integrates effortlessly with existing design systems and token libraries.
+Xtatix is a constraint-driven CSS build-time kernel designed to be the foundational engine for building custom CSS frameworks. Rather than being a traditional CSS framework loaded with predefined classes, Xtatix provides a powerful structural abstraction that preserves the full flexibility of vanilla CSS while adding native dependency management and modular composition. It works seamlessly across any text-based environment, is framework agnostic, and integrates effortlessly with existing design systems and token libraries.
 
-By focusing on modular style blocks, logical constraint-based syntax, and automatic cascading and dependency resolution, XCSS empowers teams to build maintainable, predictable, and optimized stylesheets tailored precisely to their project needs.
+By focusing on modular style blocks, logical constraint-based syntax, and automatic cascading and dependency resolution, Xtatix empowers teams to build maintainable, predictable, and optimized stylesheets tailored precisely to their project needs.
 
-## Why Use XCSS?
+## Why Use Xtatix?
 
-XCSS strikes a careful balance between raw flexibility and developer experience without sacrificing either. It:
+Xtatix strikes a careful balance between raw flexibility and developer experience without sacrificing either. It:
 
 - Enables fully customizable framework creation with minimal initial setup, reducing context switching between CSS and HTML.
 - Resolves style dependencies and cascading order natively at build time, minimizing manual overrides and conflicts.
@@ -25,52 +25,40 @@ XCSS strikes a careful balance between raw flexibility and developer experience 
 - Delivers production-ready optimized builds with debloated, dependency-aware styles for faster and cleaner deployment.
 - Acts as a robust kernel platform, giving you complete control and transparency while providing structural best practices and optimization out of the box.
 
-In short, XCSS is the essential, extensible core upon which efficient, scalable, and maintainable CSS frameworks can be built—offering the power and performance that modern design systems and large-scale projects demand.
-
-## Sections
-
-0. [Installation](http://www.xcss.io/documentation/0-installation)
-1. [Command Line](http://www.xcss.io/documentation/1-command)
-2. [Example Preview](http://www.xcss.io/documentation/2-example)
-3. [Directory](http://www.xcss.io/documentation/3-directory)
-4. [Composing Libraries](http://www.xcss.io/documentation/4-libraries)
-5. [Operators](http://www.xcss.io/documentation/5-operators)
-6. [Inline Composition](http://www.xcss.io/documentation/6-composing)
-7. [Custom HTML Tags](http://www.xcss.io/documentation/7-custom-tags)
-8. [Appendix](http://www.xcss.io/documentation/8-appendix)
+In short, Xtatix is the essential, extensible core upon which efficient, scalable, and maintainable CSS frameworks can be built—offering the power and performance that modern design systems and large-scale projects demand.
 
 # 0. Installation
 
-For using XCSS in non-JavaScript based codebases, install XCSS globally. After that, the usage remains the same as in other environments.
+For using Xtatix in non-JavaScript based codebases, install Xtatix globally. After that, the usage remains the same as in other environments.
 
 ## Using NPM
 
 ### Global Installation
 
-Install XCSS Central globally with:
+Install Xtatix Central globally with:
 
 ```bash
-npm install -g xcss-central
+npm install -g xtatix-central
 ```
 
-Run XCSS commands directly:
+Run Xtatix commands directly:
 
 ```bash
-xcss {command}
+xtatix {command}
 ```
 
 ### Local Installation
 
-Install XCSS Central as a development dependency locally:
+Install Xtatix Central as a development dependency locally:
 
 ```bash
-npm install --save-dev xcss-central
+npm install --save-dev xtatix-central
 ```
 
-Run XCSS commands locally using npm scripts:
+Run Xtatix commands locally using npm scripts:
 
 ```bash
-npx xcss {command}
+npx xtatix {command}
 ```
 # 1. Command Line
 
@@ -568,174 +556,188 @@ All the first order blocks of each file will have a corresponding symbolic class
 - In a file of **Order `n`**, symbolic classes may be referenced from other files using two distinct directives, with in the scope of whole `axiom` and `cluster` were permitted sources are:
 	-  `@--assign`: Files of **Order ≤ n−1**
 	-  `@--attach`: Files of **Order ≤ n**
-# 5. Operators
+# 5. Hash Loader
 
-### Watch attributes
+# Hash Loaders
 
-For the files of given extension, **watch attributes** for those files, provide additional featues for declaration.
+The Hash Loader operator dynamically imports unique hashes for files, enabling their seamless use as identifiers in HTML attributes, CSS styles, and JavaScript code for efficient tracking and updates.
+
+## Watch Attributes Configuration
+
+Define which HTML attributes should watch for hashes based on file extensions. For example, to watch class and id attributes in HTML files, use this configuration:
+
 ```json
-"extensions": {
-  "html": [ "class", "id" ]
-} // Watch tag attribute
+"extensions": { "html": [ "class", "id" ] }
 ```
+This setup allows the Hash Loader to recognize and link hashes within those attributes automatically.
 
-## Hash Loader
+## Using Hashes in Watch Attributes
 
-- This operator can be usef for importing Unique hash of files.
-- When used in values of watch attributes, snippet that follows the operater gets registered as valid **hash follower** with in the file.
-- To use import hashes other that values of watch attributes, along with compose attributes, prefix valid hash follower with `\#`.
+Place hashes directly as values in watched attributes by prefixing them with `#`:
 
-#### Input
+```xml
+<section id="#reg-id" class="#reg-class">
+```
+This links the hash dynamically to the HTML elements for tracking or live updates, enabling reactive styling or scripting tied to these unique identifiers.
+
+### Using Hashes Outside Watch Attributes
+
+When using hashes in other places like JavaScript, CSS, or non-watched attributes, prefix the hash follower with a backslash `\` to escape it, ensuring valid usage without conflicts:
+
 ```html
-<div class="#class-1" id="#id-1" data-test="#test"> 
-<!-- Hash followers = ["class-1", "id-1"] -->
+<div onload="func('\#reg-id')">
 
-<style -$symclass {#\#id-1}&="prop: val;">
-  .\#class-1 {...}
-  #\#id {...}
+<style>
+  .\#reg-class { ... }  
 </style>
-<!-- style -->
+
 <script>
-  const id = "\#id-1"
-  const id = "\#id-2"
+  const id = "\#reg-id";
+  const className = "\#reg-class";
+
+  const className = ".\#unreg-class";
+  // Note: Unregistered hashes like ".\#unreg-class" will not appear in the rendered output.
+
+  function func(str) {
+    // Your function implementation
+  }
 </script>
 ```
 
-#### Output
-```html
-<div class="_8r-23_class-1" id="_8r-23_id-1" data-test="#test">
-<!-- Hash followers = ["class-1", "id-1"] -->
+Using this escaping keeps hashes valid across different contexts whether in HTML, styles, or scripts.
 
-<style>
-  #_8r-23_id-1 .-$symclass { prop: val; }
-  ._8r-23_class { ... }
-  #_8r-23_id { ... }
-</style>
+### Additional Tips
+
+- Always escape hashes with `\#` outside watch attribute values.
+
+> This method ensures consistency and correctness when importing and using unique identifiers across your project files.
+# 6. Class Loader
+
+Class Loaders are special operators in Xtatix that signal the use of symbolic classes (sym-classes) within watch attributes. They distinguish sym-classes from conventional CSS classes, enabling their simultaneous use without conflicts or style collisions in complex projects.
+
+Unlike traditional CSS cascading, which applies styles globally, Class Loaders implement localized cascade control rules at the element level. This allows developers to precisely layer and control how sym-classes interact with each other and with existing styles, eliminating global cascade conflicts.
+
+### Core Concept
+
+Class Loaders create scoped cascade layers within an individual HTML element, applied in a strict sequence during compilation:
+
+> Scattered (~) → Ordered (+) → Final (=)
+
+Each variant represents a distinct cascade layer:
+
+- **Scattered (~):** Utility and atomic classes applied first, in a non-deterministic order.
+- **Ordered (+):** Classes applied after scattered, with explicit order-based control.
+- **Final (=):** Classes applied last, typically for dynamic or externally controlled styles.
+
+### Practical Cascade Flow
+
+```html
+<p class="~atomic +component =dynamic-prop">
+  <!-- 
+    1. `~` classes load first (atomic utilities, no strict cascade)
+    2. `+` classes override next based on declared order (component-level styles)
+    3. `=` classes apply last and have final precedence (dynamic props or conditional styles)
+  -->
+</p>
+```
+
+### Real-World Use Cases
+
+- `~`: For atomic utilities such as padding and margins where no precise cascade ordering is needed.
+- `+`: For component styles that require explicit override control.
+- `=`: For state or property-driven styles in frameworks that need last-layer authority.
+
+> Enable project theme option in the sandbox toolbar enables global design tokens from your current design system, so turn it on to see live changes.
+
+## Scattered Class Loader (`~`)
+
+The Scattered Class Loader (`~`) applies utility and atomic classes in a non-deterministic way. It avoids reliable style cascading, especially in complex or deeply nested components, providing low-specificity control without predictable inheritance.
+
+### Key Limitations
+- Does not cascade styles reliably in nested components, making inheritance unpredictable.
+- Styles may change continuously due to this unpredictable loading behavior.
+
+### Syntax and Usage
+- Prefix sym-classes with a backslash when used outside watch attribute values: `\~`.
+
+```html
+<sketch class-loader$scattered>
+    <p class="~tx$size-h1 ~tx$size-h2" onload="func('\~align-center')">Paragraph</p>
+</sketch>
+<p class="~tx$size-h1 ~tx$size-h2" onload="func('\~align-center')">Paragraph</p>
 <script>
-  const id = "_8r-23_id-1"
-  const id = "\#id-2"
+    const classname = `\~tx$size-h1`;
+</script>
+```
+Escape the tilde in JavaScript template literals or event handlers to maintain functionality.
+
+### When to Use
+
+- Best suited for utilities and atomic classes that do not overlap.
+- Avoid using it when stable or nested style propagation is required.
+
+
+## Ordered Class Loader (`+`)
+
+The Ordered Class Loader (+) applies classes after scattered classes, allowing explicit control over cascading order within a single element.
+
+### Usage Restrictions
+
+- This operator can only be used inside the values of HTML tag attributes.
+- It cannot be used outside tag attributes (e.g., in JavaScript or styles).
+
+### Example
+
+```html
+<sketch class-loader$ordered>
+    <p class="~tx$size-h1 ~tx$size-h2 +tx$size-h3 +tx$size-h2" onload="func('\+align-center')">Paragraph</p>
+</sketch>
+<p class="~tx$size-h1 ~tx$size-h2 +tx$size-h2 +tx$size-h3" onload="func('\+align-center')">Paragraph</p>
+<script>
+    const classname = `\=tx$size-h1`; // Operator not allowed outside tag attributes
 </script>
 ```
 
-## Class Loaders
+### Cascading Behavior
 
-These operators signal the use of symbolic classes (sym-classes) in class attributes. They distinguish sym-classes from regular classes used by other styling systems, allowing simultaneous use without conflicts.
-  
-Class loaders has three varients each with different purpuses
+- The cascade follows the exact order of classes within the attribute's value.
+- Classes with `+` are applied after scattered ~ classes, overriding them if necessary.
+- In the example, `tx$size-h2` applied with `+` comes last and thus takes precedence.
 
-### Scattered Class Loader (`~`)
-- May not cascade styles reliably, especially in complex or deeply nested components, so you dont get precise control.
-- To use operator other that values of watch attributes, prefix valid symclass with `\~`.
+### When to Use
 
-### Ordered Class Loader (`!`)
-- Classes applied with this operator comes after scattered assigns and provide explicit control over cascading over. 
-- These operator can only be used inside values of tag attributes.
+- Use to control precisely which styles override others within the same element.
+- Handy when combining conflicting utility classes or higher order component classes, to make style application predictable.
 
-### Final Class Loader (`=`)
-- Classes applied with this operator comes after Ordered assigns but does't provide explicit control over cascading.
-- To use operator other that values of watch attributes, prefix valid symclass with `\=`.
+## Final Class Loader (`=`)
 
-#### Example
+The Final Class Loader operator `=` applies classes after both scattered `~` and ordered `+` classes, but it does not provide explicit control over the cascading order.
 
-```html
-<div class="
-  ~atomic$class-1 
-  !order$class-3
-  ~atomic$class-2
-  ~atomic$class-3
-  !order$class-1
-  =final$class-2 
-  !order$class-2
-" onload="this.classlist.add(loading?'\=final$class-1':'\=final-class-3')"> Content </div>
-<!-- 
-Prefer not to use `Final classes` in watch attributes, 
-unless for conditional adding to classname with inline script.
--->
+### Usage and Syntax
 
-<style>
-  /* Scattered classes have unpredictable cascading order. */
-  .atomic\$class-2 { ... }
-  .atomic\$class-1 { ... }
-  .atomic\$class-3 { ... }
-
-  /* Ordered classes strictly follow cascade order. */
-  .order\$class-3 { ... }
-  .order\$class-1 { ... }
-  .order\$class-2 { ... }
-
-  /* Final classes have unpredictable cascading order. */
-  .final\$class-1 { ... }
-  .final\$class-3 { ... }
-  .final\$class-2 { ... }
-</style>
-
-<script>
-  const selectorArray = [
-    "\~atomic$class-3", // returns result
-    "~atomic$class-3", // stays the same
-    "\!order$class-1",  // stays the same
-    "!order$class-1",  // stays the same
-    "\=final$class-2",  // returns result
-    "=final$class-2",  // stays the same
-  ]
-<script>
-```
-
-## Compose Operators (For composing sym-classes)
+- It is used inside tag attribute values.
+- Outside watch attribute values (e.g. JavaScript), escape with a backslash: `\=`.
 
 ```html
-<sketch
-  custom$class="
-    /* Assign Directive Operator */ 
-    = atomic$class-1 atomic$class-2;
-
-    /* Attach Directive Operator */
-    ~ attach$class-1 attach$class-2;
-    
-    attribute-1: value-1;
-    attribute-2: value-2;
-    
-    /* Merge Flatten*/
-    &[x-look=]& {
-      &[varient-1] { *** }
-      &[varient-2] { *** }
-    }
-  "
->Template</sketch>
+<sketch class-loader$final>
+     <p class="~tx$size-h1 ~tx$size-h2 +tx$size-h3 =tx$size-h4 =tx$size-h5"> paragraph </p>
+</sketch>
+<p class="~tx$size-h1 ~tx$size-h2 +tx$size-h3 =tx$size-h4 =tx$size-h5"> paragraph </p>
+<script>
+    const classname = `\=tx$size-h1`;
+</script>
 ```
 
-### Directive Operators
-- When composing sym-classes within tags, this syntax is a drop-in replacement for custom CSS directives.
-  - `=` maps to `@--assign`
-  - `~` maps to `@--attach`
-- Both operators produce the same final CSS output. They coexist mainly for developer convenience and clarity.
+### Behavior
 
-### Merge-Flatten Operator
+- The final classes are applied last and may cause continuous style changes due to their unpredictable cascading.
+- The cascade order is less explicit compared to the Ordered Class Loader.
 
-This operator applies only when certain conditions are met:
+### When to Use
 
-1. Nested child selectors must begin with the `&` character.
-2. The parent selector must end with one or more `&` characters (denoted as *n*, where *n*≥1).
-
-When merging occurs, exactly `n` characters are removed from the end of the parent selector and the beginning of the child selector—excluding the special prefix `&` and suffix `&` characters—before concatenating them.
-
-**Limitation Notice:** This operator has a side effect preventing comma-separated multiple nested selectors. Use cautiously for complex cases.
-
-```css 
-/* Input */
-[a-]& { 
-  &[b], &[c] { ... } 
-}
-
-/* Expected output */
-[a-b] { ... }
-[a-c] { ... }
-
-/* Actual result */
-[a-b], &[c] { ... }  /* Second selector fails */
-```
-
-The `&` (parent reference) doesn't expand correctly in comma-separated nested rules, breaking multi-selector support.
+- Ideal for external actions that come from outside the element's usual style scope, such as prop passing in JavaScript frameworks.
+- Useful for conditional logic where styles are applied dynamically and may change frequently.
+- This loader helps handle dynamic styling situations where final overrides are necessary but strict cascading order control is not required.
 # 6. Composition
 
 ## Symbolic-Class 

@@ -72,13 +72,12 @@ func main() {
 
 	compilerDir, _ := Path_FromBinFolder("..")
 	compilerConfigPath, _ := Path_FromBinFolder("configs.json")
-
+	
+	var compilerConfig models.Compiler_Config
 	if str, err := _fileman.Read_File(compilerConfigPath, false); err == nil {
-		var compilerConfig models.Compiler_Config
-		if json.Unmarshal([]byte(str), &compilerConfig) == nil {
-			_action.Setup_Environment(compilerDir, relWorkpath, absWorkpath, compilerConfig)
-		}
+		json.Unmarshal([]byte(str), &compilerConfig)
 	}
+	_action.Setup_Environment(compilerDir, relWorkpath, absWorkpath, compilerConfig)
 
 	_config.Static.Command = command
 	_config.Static.Argument = argone
