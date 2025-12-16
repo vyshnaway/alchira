@@ -370,7 +370,7 @@ _$custom-pattern="
   "proxymap": [
     {
       "source": "src",
-      "target": "xrc",
+       "xrc",
       "stylesheet": "styles.css",
       "extensions": {
         "html": [

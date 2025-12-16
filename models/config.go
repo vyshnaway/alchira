@@ -3,8 +3,8 @@ package models
 type Config_Tweaks map[string]any
 
 type Config_ProxyMap struct {
-	Source     string                      `json:"source"`
 	Target     string                      `json:"target"`
+	Source     string                      `json:"source"`
 	Stylesheet string                      `json:"stylesheet"`
 	Extensions map[string]Config_Extension `json:"extensions"`
 }

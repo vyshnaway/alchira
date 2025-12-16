@@ -92,8 +92,8 @@ func Sync_ProxyMapDirs(proxyMaps []_model.Config_ProxyMap) map[string]_model.Con
 			defer wg.Done()
 
 			fileContents, _ := _fileman.Sync_Bulk(
-				proxyMap.Target,
 				proxyMap.Source,
+				proxyMap.Target,
 				_slice.Collect(_map.Keys(proxyMap.Extensions)),
 				[]string{_config.Root.Extension},
 				[]string{proxyMap.Stylesheet},
@@ -102,16 +102,16 @@ func Sync_ProxyMapDirs(proxyMaps []_model.Config_ProxyMap) map[string]_model.Con
 
 			stylesheetContent := ""
 			if len(fileContents) > 0 {
-				if content, err := _os.ReadFile(_fileman.Path_Join(proxyMap.Target, proxyMap.Stylesheet)); err == nil {
+				if content, err := _os.ReadFile(_fileman.Path_Join(proxyMap.Source, proxyMap.Stylesheet)); err == nil {
 					stylesheetContent = string(content)
 				}
 			}
 
 			mut.Lock()
 			defer mut.Unlock()
-			static_proxystorage[pm.Target] = _model.Config_ProxyStorage{
-				Source:              _fileman.Path_Fix(pm.Source),
-				Target:              _fileman.Path_Fix(pm.Target),
+			static_proxystorage[pm.Source] = _model.Config_ProxyStorage{
+				Source:              _fileman.Path_Fix(pm.Target),
+				Target:              _fileman.Path_Fix(pm.Source),
 				Stylesheet:          _fileman.Path_Fix(pm.Stylesheet),
 				Extensions:          pm.Extensions,
 				Filepath_to_Content: fileContents,
