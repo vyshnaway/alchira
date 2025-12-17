@@ -14,7 +14,7 @@ var Sync_References = map[string]_model.File_Source{
 	},
 	"notices": {
 		Title:   "Notifications",
-		Url:     "notifications.md",
+		Url:     "notice.md",
 		Path:    "",
 		Frags:   []string{"NOTICES.md"},
 		Content: "",
