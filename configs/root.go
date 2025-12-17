@@ -31,8 +31,7 @@ var Root = models.Cache_Root{
 		Libraries: "",
 	},
 	Url: models.Cache_Url{
-		// Cdn:       "https://cdn." + DOMAIN + "/",
-		Cdn:       "https://xtatixone.github.io/.github/",
+		Cdn:       "https://cdn." + DOMAIN + "/",
 		Site:      "https://www." + DOMAIN + "/",
 		Worker:    "https://worker." + DOMAIN + "/",
 		Console:   "https://console." + DOMAIN + "/",
