@@ -536,9 +536,9 @@ The Ordered Class Loader (+) applies classes after scattered classes, allowing e
 
 ```html
 <sketch class-loader$ordered>
-    <p class="~tx$size-h1 ~tx$size-h2 +tx$size-h3 +tx$size-h2" onload="func('\!align-center')">Paragraph</p>
+    <p class="~tx$size-h1 ~tx$size-h2 +tx$size-h3 +tx$size-h2" onload="func('\+align-center')">Paragraph</p>
 </sketch>
-<p class="~tx$size-h1 ~tx$size-h2 +tx$size-h2 +tx$size-h3" onload="func('\!align-center')">Paragraph</p>
+<p class="~tx$size-h1 ~tx$size-h2 +tx$size-h2 +tx$size-h3" onload="func('\+align-center')">Paragraph</p>
 <script>
     const classname = `\=tx$size-h1`; // Operator not allowed outside tag attributes
 </script>
@@ -712,7 +712,7 @@ demo$varient-preview="= d-flex gap-8 ;"
 			}
 		}
 	" 
-	x-preset-1
+	x-preset-2
 	> </sketch>
 	<button class="&demo$$button ~demo$button-varients-2" x-preset-2> </button>
 	<!-- While composing symclass in this manner, all variables are detected, and autosuggests them. -->
