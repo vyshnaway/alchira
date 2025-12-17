@@ -11,7 +11,7 @@ import (
 
 const (
 	ID     = "xtatix"
-	TLD    = "io"
+	TLD    = "one"
 	EXT    = "xtx"
 	DOMAIN = ID + "." + TLD
 )

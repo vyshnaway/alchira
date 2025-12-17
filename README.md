@@ -1,65 +1,120 @@
-# Documentation
+# 0.0 Xtatix Client
 
-## End-User License Agreement (EULA)
+The extension connects to language servers in this fallback order:
 
-By using this software, you agree to the terms and conditions outlined in the [End-User License Agreement](https://www.xtatix.io/agreements/license).
-For details, please read the full EULA document provided in this repository.
+- Locally installed in the workspace directory
+- Globally installed on the system
+- Built-in language instance bundled with the extension
 
----
+In `./xtatix/configure.jsonc` | `environment`, determines the css completion provider in composition blocks.
+	
+## Status bar Widget
 
-## What is Xtatix?
+- Hover to find Sandbox-Url.
+- Click on widget to see essential links and and Cli commands.
+- Displays if focused editor file is being watched and error count.
 
-![Preview](https://github.com/yshelldev/xtatix-vscode/raw/HEAD/preview.png)
+> Run `Preview` or `Debug`, command from widget palttte before proceeding further.
 
-Xtatix is a constraint-driven CSS build-time kernel designed to be the foundational engine for building custom CSS frameworks. Rather than being a traditional CSS framework loaded with predefined classes, Xtatix provides a powerful structural abstraction that preserves the full flexibility of vanilla CSS while adding native dependency management and modular composition. It works seamlessly across any text-based environment, is framework agnostic, and integrates effortlessly with existing design systems and token libraries.
+## Practice Element
 
-By focusing on modular style blocks, logical constraint-based syntax, and automatic cascading and dependency resolution, Xtatix empowers teams to build maintainable, predictable, and optimized stylesheets tailored precisely to their project needs.
+Use this code block as your workspace to try out features.
 
-## Why Use Xtatix?
+```html
+<sketch 
+demo$button="
+	= tx$weight-600 border-none cursor-pointer;
+	--button_radius: 0.75em;
+	--button_color: #e8e8e8;
+	--button_outline_color: #000000;
+	font-size: 17px;
+	border-radius: var(--button_radius);
+	background: var(--button_outline_color);
+	& > span {
+		= tfx$duration-100 d-flex px-6 py-4 mod$-translate-y-6;
+		box-sizing: border-box;
+		border: 2px solid var(--button_outline_color);
+		border-radius: var(--button_radius);
+		background: var(--button_color);
+		color: var(--button_outline_color);
+	}
+	&:hover > span {
+		= mod$-translate-y-8;
+	}
+	&:active > span {
+		= mod$translate-y-0;
+	}
+	&[x-preset-]& {
+		&[1] {
+			--button_color: #ffe17d;
+			--button_outline_color: #491505;
+		}
+		&[2] {
+			--button_color: #b3fff9;
+			--button_outline_color: #495f7a;
+		}
+	}
+"
+x-preset-1
+> 
+    <span> Click Me </span>
+</sketch>
 
-Xtatix strikes a careful balance between raw flexibility and developer experience without sacrificing either. It:
+<button class="=demo$button">
+</button>
 
-- Enables fully customizable framework creation with minimal initial setup, reducing context switching between CSS and HTML.
-- Resolves style dependencies and cascading order natively at build time, minimizing manual overrides and conflicts.
-- Supports reusable modular blocks that grow with your application, eliminating brittle selectors and tangled overrides.
-- Delivers production-ready optimized builds with debloated, dependency-aware styles for faster and cleaner deployment.
-- Acts as a robust kernel platform, giving you complete control and transparency while providing structural best practices and optimization out of the box.
-
-In short, Xtatix is the essential, extensible core upon which efficient, scalable, and maintainable CSS frameworks can be built—offering the power and performance that modern design systems and large-scale projects demand.
-
-# 0. Installation
-
-For using Xtatix in non-JavaScript based codebases, install Xtatix globally. After that, the usage remains the same as in other environments.
-
-## Using NPM
-
-### Global Installation
-
-Install Xtatix Central globally with:
-
-```bash
-npm install -g xtatix-central
 ```
+Inspiration: https://uiverse.io/Voxybuns/lucky-fireant-71
 
-Run Xtatix commands directly:
+## Shortcuts
 
-```bash
-xtatix {command}
-```
+### SandBox: `[ ctrl + alt + x ]`
 
-### Local Installation
+- Put cursor on a symclass here `demo$buttom` instance and trigger event.
+- Change attribute `x-preset-1` to `x-preset-2`, to observe live udpates.
+- In the sandbox webview panal few tools are available try out those.
 
-Install Xtatix Central as a development dependency locally:
+### Formating: `[ alt + shift + x ]`
 
-```bash
-npm install --save-dev xtatix-central
-```
+- The extension formats Xtatix-Composition Blocks in the focused file on first trigger.
+- Subsequent triggers toggle the nearest folding range across the entire file, not just composition blocks.
 
-Run Xtatix commands locally using npm scripts:
+### Source/Target Switch: `[ ctrl + alt + shift + x ]`
 
-```bash
-npx xtatix {command}
-```
+- Toggle between files in the source and target directories with a one-to-one mapping.
+- This feature will not work for `*.xtatix` files, given the fact compilation doesnot produce source files.
+
+### Template Import: `[ alt + x ]`
+
+- Import available templates for the symclass at the active cursor position, appending them to the current HTML tag.
+- In practice: Change `class=""` to `class="=demo$button"`, hover over preferred symclass and trigger the event, the template snippet imports after the current tag scope.
+- This is especially useful for complex, highly structured compound components, allowing you to build and iterate from there
+
+### Goto Source: `[ F12 ]` / `[ ctrl + (left-click over symclass) ]`
+
+- Redirects to location of declaration.
+
+## Language support
+
+- Files of extensions `.xtatix` is treated as markdown.
+- Support for `@--attach` and `@--assign` directives css files.
+- Tooltips with information, on watching attributes, symbolic classes and hashrules.
+- Block recognitions, folding range detection, color pallete and syntax highliting for Xtatix Composition blocks.
+- Color picker palettes: `rgb`, `rgba`, `hsl`, `hsla`, `lch`, `oklch`, `lab`, `oklab`, `hex`
+
+### Developer Assistance
+
+## Real-time diagnostics.
+
+- Declararion collition of symclasses as errors.
+- Invalid use of hashrules as warnings.
+
+## Intellisense and autocomplete.
+
+- Symbolc classes: Across file on valid trigger.
+- Hashrules: on `&` or `#`(have a chance to not get triggered in case of collition with other extensions), for tag attributes.
+- Variables: Resolved from complete active tag-scope.
+- Attributes: Varient attributes derived from tag-scope.
 # 1. Command Line
 
 ### `init` : Initialize and Healthcheck
@@ -96,233 +151,6 @@ npx xtatix {command}
 
 - Helps in context aware styling by AI Agnets.
 - This command is a combination of `preview` and `server` commands.
-# 2. Example Demo
-
-## Input
-
-- The following is fragmented preview of input to output compilation.
-
-```html
-<!doctype html>
-<html lang="en">
-
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <!-- style -->
-</head>
-```
-- `<!-- style -->`, a reserved comment tag, which will be replaced by compiled stylesheet.
-
-```html
-
-<body 
-data-sveltekit-preload-data="hover" 
-class="=bg$pattern-checkerboard =$custom-pattern" 
-_$custom-pattern="
-  --pattern-checker-bg1: #456734;
-  --pattern-checker-bg2: #2bb43d;
-  --pattern-checker-size: var(---delta-block-lg);
-"
-{@media (min-width:512px)}&="
-  --pattern-checker-bg1: var(---primary-100);
-  --pattern-checker-bg2: var(---secondary-900);
-">
-```
-
-- You can compose classes with in html tags with attribute representing **symbolic classes (symclasses)** `bg$pattern`, and attribute which ends with `&` is considered **wrappers** for the symbolic class.
-- `@--assign` / `=` can be used for initial compose of a symbolic class using **symclasses from libraries**. These will be hoisted to block scope and any explicit properties will easily override them. 
-- Use `&` attribute to write comment, which can be used multiple times in the same tag. 
-- To use a symbolic class use `={sym-class}` with in attributes. 
-
-```html
-  <stitch amorphous$--container>
-    <svg xmlns="http://www.w3.org/2000/svg">
-      <defs>
-        <filter id="#glass-distortion" x="0%" y="0%" width="100%" height="100%">
-          <feTurbulence type="fractalNoise" baseFrequency="0.008 0.008" numOctaves="2" seed="92"
-            result="noise" />
-          <feGaussianBlur in="noise" stdDeviation="2" result="blurred" />
-          <feDisplacementMap in="SourceGraphic" in2="blurred" scale="77" xChannelSelector="R"
-            yChannelSelector="G" />
-        </filter>
-      </defs>
-    </svg>
-  </stitch>
-```
-
--  `<stitch ... > ... </stitch>` a special tag used to create a **dependency to text-block with a symclass**. The content with-in the tag will be only deployed if the corresponding symclass is used compiled CSS.
-
-```html
-  <sketch style="
-    background-size: 18px 18px;
-    background-image: linear-gradient(#ffffff 0.9px, transparent 0.9px), 
-      linear-gradient(to right, oklab(100% 0 -0.00011) 0.9px, #cacaca 1px);
-  " data-amorphous-type="liquid" amorphous$$$container="
-    ~ amorphous$--container ;
-    = p-12 m-0 border-0 d-flex align-center justify-center position-fixed;
-    = tx$decoration-none isolate an$transition-all an$animation-delay-500;
-    animation: .5s fade-in forwards;
-    &:hover {
-      = tf$scale-105;
-    }
-    &::after {
-      = position-absolute inset-0 layer-neg-2 radius-16 tx$content-clear;
-      filter: url(#\#glass-distortion);
-    }
-    &::before {
-      = position-absolute inset-0 layer-neg-1 radius-16 tx$content-clear;
-      box-shadow: inset 0 0 15px -5px #ffffffec;
-    }
-    &[data-glass-type=]& {
-      &['liquid'] {
-        &::after { backdrop-filter: blur(.5px); }
-        &::before { background-color: #e7fffa73; }
-      }
-      &['frosted'] {
-        &::after { backdrop-filter: blur(1px); }
-        &::before { background-color: lab(93.8 1 -5.7 / 0.713); }
-      }
-    }
-  ">
-    Template
-  </sketch>
-```
-- `<sketch ... > ... </sketch>`, a special tag which lets you create portable template for component level **symclasses**, which can be used for preview in a live sand-boxed environment while using language server. 
-- `@--attach` / `~` can be used to add a dependency attachment of a symbolic class. These will be used for dependency tracking.
-
-```html
-  <div data-amorphous-type='liquid' class="~amorphous$$$container"> Content </div>
-```
-- Symbolic classes can  defined anywhere and used where-ever within the provided scope.
-
-```html
-  <!-- stitch -->
-</body>
-</html>
-```
-- `<!-- stitch -->` a reserved tag which will be replaced with stitch content of tracked dependencies.
-
-## Output
-
-```html
-<!doctype html>
-<html lang="en">
-
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-
-  <style>
-    
-    ._8h {
-      --pattern-checker-bg1: var(---tertiary-300, #e0e0e0);
-      --pattern-checker-bg2: transparent;
-      --pattern-checker-size: 40px;
-      background: linear-gradient(45deg, var(--pattern-checker-bg1) 25%, var(--pattern-checker-bg2) 25%, var(--pattern-checker-bg2) 75%, var(--pattern-checker-bg1) 75%, var(--pattern-checker-bg1)), linear-gradient(45deg, var(--pattern-checker-bg1) 25%, var(--pattern-checker-bg2) 25%, var(--pattern-checker-bg2) 75%, var(--pattern-checker-bg1) 75%, var(--pattern-checker-bg1));
-      background-size: var(--pattern-checker-size) var(--pattern-checker-size);
-      background-position: 0 0, calc(var(--pattern-checker-size) / 2) calc(var(--pattern-checker-size) / 2);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-width: 100vw;
-      min-height: 100vh;
-    }
-
-    ._8i {
-      padding: 6rem;
-      margin: 0;
-      border-width: 0;
-      border-radius: 4rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: fixed;
-      text-decoration: none;
-      cursor: pointer;
-      background: none;
-      font-size: var(---font-size-h1);
-      isolation: isolate;
-      transition: all 300ms ease;
-      box-shadow: 0px 6px 12px -6px #77777777;
-    }
-
-    ._8i.glass-type[data-amorphous-type='frosted']::after {
-      backdrop-filter: blur(1px);
-    }
-
-    ._8i.glass-type[data-amorphous-type='frosted']::before {
-      background-color: rgba(255, 255, 255, 0.6);
-    }
-
-    ._8i.glass-type[data-amorphous-type='liquid']::after {
-      backdrop-filter: blur(.5px);
-    }
-
-    ._8i.glass-type[data-amorphous-type='liquid']::before {
-      background-color: rgba(255, 255, 255, 0.25);
-    }
-
-    ._8i:hover {
-      transform: scale(1.25);
-    }
-
-    ._8i::after {
-      position: absolute;
-      top: 0;
-      right: 0;
-      bottom: 0;
-      left: 0;
-      z-index: -2;
-      border-radius: 4rem;
-      content: "";
-      filter: url(#glass-distortion);
-    }
-
-    ._8i::before {
-      position: absolute;
-      top: 0;
-      right: 0;
-      bottom: 0;
-      left: 0;
-      z-index: -1;
-      border-radius: 4rem;
-      content: "";
-      box-shadow: inset 0 0 15px -5px #00000044;
-    }
-
-    @media (min-width:512px) {
-      ._8h {
-        --pattern-checker-bg1: var(---primary-100);
-        --pattern-checker-bg2: var(---secondary-900);
-      }
-    }
-  </style>
-</head>
-
-<body data-sveltekit-preload-data="hover" class="_8h">
-
-  <div class="_8i" data-amorphous-type='liquid'>
-    Content
-  </div>
-
-  <div>
-    <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
-      <defs>
-        <filter id="glass-distortion" x="0%" y="0%" width="100%" height="100%">
-          <feTurbulence type="fractalNoise" baseFrequency="0.008 0.008" numOctaves="2" seed="92"
-            result="noise" />
-          <feGaussianBlur in="noise" stdDeviation="2" result="blurred" />
-          <feDisplacementMap in="SourceGraphic" in2="blurred" scale="77" xChannelSelector="R"
-            yChannelSelector="G" />
-        </filter>
-      </defs>
-    </svg>
-  </div>
-</body>
-
-</html>
-```
 # 3. Directory
 
 ## Setup folder
@@ -556,9 +384,13 @@ All the first order blocks of each file will have a corresponding symbolic class
 - In a file of **Order `n`**, symbolic classes may be referenced from other files using two distinct directives, with in the scope of whole `axiom` and `cluster` were permitted sources are:
 	-  `@--assign`: Files of **Order ≤ n−1**
 	-  `@--attach`: Files of **Order ≤ n**
-# 5. Hash Loader
+# 1.0 Hash Loaders
 
-# Hash Loaders
+> - Use sandbox for preview. Cursor on symclass and trigger. [ `ctrl` + `alt` + `x` ]  
+> - Start live compilation using `xtatix preview -w` or `xtatix debug -w`.  
+> - Toggle b/w input & ouput using [ `ctrl` + `alt` + `shift` + `x` ] 
+
+---
 
 The Hash Loader operator dynamically imports unique hashes for files, enabling their seamless use as identifiers in HTML attributes, CSS styles, and JavaScript code for efficient tracking and updates.
 
@@ -609,9 +441,22 @@ Using this escaping keeps hashes valid across different contexts whether in HTML
 ### Additional Tips
 
 - Always escape hashes with `\#` outside watch attribute values.
+- Use shortcuts like `Ctrl + Alt + Shift + X` to view the processed output of your source file with hashes applied.
 
-> This method ensures consistency and correctness when importing and using unique identifiers across your project files.
-# 6. Class Loader
+This method ensures consistency and correctness when importing and using unique identifiers across your project files.
+# 2.0 Class Loaders
+
+> - Use sandbox for preview. Cursor on symclass and trigger. [ `ctrl` + `alt` + `x` ]  
+> - Start live compilation using `xtatix preview -w` or `xtatix debug -w`.  
+> - Toggle b/w input + ouput using [ `ctrl` + `alt` + `shift` + `x` ] 
+
+---
+
+> ### Sym-classes include:
+> - Classes from your **configured flavor**
+> - **Custom classes** you create yourself
+> - Classes available in **[Libraries Setup](../xtatix/libraries/index.md)**
+> - **Components** declared in target folders
 
 Class Loaders are special operators in Xtatix that signal the use of symbolic classes (sym-classes) within watch attributes. They distinguish sym-classes from conventional CSS classes, enabling their simultaneous use without conflicts or style collisions in complex projects.
 
@@ -621,7 +466,7 @@ Unlike traditional CSS cascading, which applies styles globally, Class Loaders i
 
 Class Loaders create scoped cascade layers within an individual HTML element, applied in a strict sequence during compilation:
 
-> Scattered (~) → Ordered (+) → Final (=)
+> Scattered (~) > Ordered (+) > Final (=)
 
 Each variant represents a distinct cascade layer:
 
@@ -647,7 +492,7 @@ Each variant represents a distinct cascade layer:
 - `+`: For component styles that require explicit override control.
 - `=`: For state or property-driven styles in frameworks that need last-layer authority.
 
-> Enable project theme option in the sandbox toolbar enables global design tokens from your current design system, so turn it on to see live changes.
+> Enable `Project theme` option in the sandbox toolbar enables global design tokens from your current design system, so turn it on to see live changes.
 
 ## Scattered Class Loader (`~`)
 
@@ -676,6 +521,7 @@ Escape the tilde in JavaScript template literals or event handlers to maintain f
 - Best suited for utilities and atomic classes that do not overlap.
 - Avoid using it when stable or nested style propagation is required.
 
+> The append class loader is a special variant of the scattered class loader that uses the & operator. Instead of only applying classes, it also appends the associated stitch snippet to the end of the tag, making it especially useful for importing symbols. Which will be explained in [dependacy](./5.0-depedancy.md) in detail.
 
 ## Ordered Class Loader (`+`)
 
@@ -690,9 +536,9 @@ The Ordered Class Loader (+) applies classes after scattered classes, allowing e
 
 ```html
 <sketch class-loader$ordered>
-    <p class="~tx$size-h1 ~tx$size-h2 +tx$size-h3 +tx$size-h2" onload="func('\+align-center')">Paragraph</p>
+    <p class="~tx$size-h1 ~tx$size-h2 +tx$size-h3 +tx$size-h2" onload="func('\!align-center')">Paragraph</p>
 </sketch>
-<p class="~tx$size-h1 ~tx$size-h2 +tx$size-h2 +tx$size-h3" onload="func('\+align-center')">Paragraph</p>
+<p class="~tx$size-h1 ~tx$size-h2 +tx$size-h2 +tx$size-h3" onload="func('\!align-center')">Paragraph</p>
 <script>
     const classname = `\=tx$size-h1`; // Operator not allowed outside tag attributes
 </script>
@@ -738,140 +584,277 @@ The Final Class Loader operator `=` applies classes after both scattered `~` and
 - Ideal for external actions that come from outside the element's usual style scope, such as prop passing in JavaScript frameworks.
 - Useful for conditional logic where styles are applied dynamically and may change frequently.
 - This loader helps handle dynamic styling situations where final overrides are necessary but strict cascading order control is not required.
-# 6. Composition
+# 3.0 Composing components
 
-## Symbolic-Class 
+> <sketch> ... </sketch> is a special tag to create components in isolation, and keep a base template for smoother workflows.  
+> It will be discussed later with other [Custom tags](./4.0-custom-tags.md).
+
+## Symbolic Class Syntax
+
+A symbolic class (sym-class) is structured as:
 
 ``` 
-{cluster}{scope}{identifier}
+{cluster}{scope-op}{identifier}
+```
+ **cluster**: A collection or group of classes. Use characters `A-Z`, `a-z`, `0-9`, and `-`.
+  - Use `-` or `_` only to delegate to an open cluster at declaration; it will be hidden elsewhere.
+- **scope-op**: Defines the access scope of the styles.
+  - `$` for **Local** scope: styles are available only within the declared file.
+  - `$$` for **Global** scope: styles are available across all valid files in target folders.
+- **identifier**: Specific name within the cluster, consisting of `A-Z`, `a-z`, `0-9`, and `-`.
+
+## External Grouping for Compositions
+
+When composing styles, you can wrap groups externally using any of these delimiters to avoid conflicts:
+
+- Backticks: `` ` ... ` ``
+- Square brackets: `[ ... ]`
+- Curly braces: `{ ... }`
+- Parentheses: `( ... )`
+- Single quotes: `' ... '`
+- Double quotes: `" ... "`
+
+**Note:** Avoid using the same type of quotes internally and externally to prevent parsing issues.
+
+## Composing a Sym-Class
+
+### Compose Operators
+
+Xtatix provides two compose operators as replacements for traditional CSS composition directives:
+
+- `=` (equivalent to `@--assign`): Merges and flattens the provided sym-classes.
+- `~` (equivalent to `@--attach`): Creates a dependency node to the referenced sym-classes.
+
+Both produce the same final CSS output. They coexist for developer convenience and clarity.
+
+### Example Usage
+
+```html
+<!-- 
+    cluster    = "demo"
+    scope      = "local"
+    identifier = "button"
+-->
+<sketch 
+demo$$button="
+	= tx$weight-600 border-none cursor-pointer px-0 py-0;
+	--button_radius: 0.75em;
+	--button_color: #e8e8e8;
+	--button_outline_color: #000000;
+	font-size: 17px;
+	border-radius: var(--button_radius);
+	background: var(--button_outline_color);
+	& > span {
+		= tfx$duration-100 d-flex px-6 py-4 mod$-translate-y-6;
+		box-sizing: border-box;
+		border: 2px solid var(--button_outline_color);
+		border-radius: var(--button_radius);
+		background: var(--button_color);
+		color: var(--button_outline_color);
+	}
+	&:hover > span {
+		= mod$-translate-y-8;
+	}
+	&:active > span {
+		= mod$translate-y-0;
+	}
+"
+> <!-- Template follows -->
+    <span> Click Me </span>
+</sketch>
 ```
 
-- **`cluster`**: Collection of classes, or use '-' to delegate to open cluster. 
-  - Available characters: `A-Z`, `a-z`, `0-9`, and `-`.
-  - `-` or `_`  is only for delegating open cluster at declaration. It will be hidden in other cases.
-- **`scope`**: Scope of access of declared styles
-  - `$` | **Local:** with in the declared file.
-  - `$$` | **Global:** across all valid files in target folders.
-- **`identifier`**: Specific identifier within the cluster.
-  - Available characters: `A-Z` `a-z` `0-9` and `-`.
+- This defines a sym-class `demo$$button` with global scope.
+- Combines animations, typography, utility classes with custom properties and pseudo-class styles.
+- Uses both `~` and `=` compose operators for dependencies and merging respectively.
 
-- While composing styles, you can use any of the following for external grouping:
-  - **\` ... \`**
-  - **\[ ... \]**
-  - **\{ ... \}**
-  - **\( ... \)**
-  - **\' ... \'**
-  - **\" ... \"**
-- Be careful not to use the same internal quotes as the external grouping to avoid conflicts.
+> **Tip:** If the class name is `demo$button`, you can declare it once per file. However, if you use `demo$$button`, it becomes globally scoped and must appear only once across all files—otherwise, it will trigger an error.
+# 3.1 Variants in Xtatix
 
-### Example
+This tutorial shows how to extend variants of an existing symbolic class (sym-class) by leveraging exposed CSS variables, enabling dynamic theming and style variations.
+
+## Take a look in Practice, (Using a Sketch Sym-Class as a Preview Container)
+
 ```html
-<div -$button=" ... ">
-<div _$button-2={ ... }>
-<div animate$$fade-in=' ... '>
+<!-- Use a sketch symclass as preview container. -->
+ 
+<sketch 
+demo$varient-preview="= d-flex gap-8 ;"
+> 
+	<!-- Cascade conflicts does't affect this because specifity is taken advantage off. -->
+	<sketch class="&demo$$button"
+	demo$button-varients-1="
+		&[x-preset-1] {
+			--button_color: #ffe17d;
+			--button_outline_color: #491505;
+		}
+		&[x-preset-2] {
+			--button_color: #b3fff9;
+			--button_outline_color: #495f7a;
+		}
+	" 
+	x-preset-1
+	> </sketch>
+	<button class="&demo$$button ~demo$button-varients-1" x-preset-1> </button>
+	<!-- While composing symclass in this manner, all variables are detected, and autosuggests them. -->
+
+	<!-- Xtatix provieds a special operator called `de-nest`, it helps in much better organization of nested strucures. -->
+	<sketch class="&demo$$button"
+	demo$button-varients-2="
+		&[x-preset-]& {
+			&[1] {
+				--button_color: #ffe17d;
+				--button_outline_color: #491505;
+			}
+			&[2] {
+				--button_color: #b3fff9;
+				--button_outline_color: #495f7a;
+			}
+		}
+	" 
+	x-preset-1
+	> </sketch>
+	<button class="&demo$$button ~demo$button-varients-2" x-preset-2> </button>
+	<!-- While composing symclass in this manner, all variables are detected, and autosuggests them. -->
+
+	<!-- For runtime dynamic styling update the variable using style attribute. -->
+	<button 
+	class="&demo$$button"
+	style="--button_color: #8cff7d; --button_outline_color: #354905;"
+	> </button>
+
+</sketch>
 ```
 
-## Wrapper Attributes
 
-- Each wrapper-attribute generates a corresponding wrapper element around the class, with selectors derived directly from the attribute name.
-- Wrapper-attributes enable highly flexible conditional logic—styles can be scoped, toggled, or layered based on attribute presence or value.
-- Responsive design breakpoints are implemented using wrapper-attributes, allowing layout and style shifts based on contextual constraints.
+- The first button extends demo$$button by declaring variant styles using attribute selectors like `[x-preset-1]` and `[x-preset-2]`.
+- The second button demonstrates using the de-nest operator for better nested structure organization, generating variants based on nested selectors.
 
-### Rule Specification
-- Must terminate with an `&` token
-- `hashrules` (`#{rule}`) are valid within these attributes.
-- use `{...}` brackets for raw string formatting for not breaking at spaces.
-- Within `identifier@{ ... }`, shorthand expressions map to style constraints:
-  - `width>=` : `min-width:`
-  - `width<=` : `max-width:`
-  - `height>=` : `min-height:`
-  - `height<=` : `max-height:` 
-  
-### Example
+### De-nest Operator, (destructive nesting)
+
+The de-nest operator improves nesting by merging parent and child selectors using the `&` parent reference character.
+How it Works
+
+- Child selectors must begin with `&`.
+- The parent selector must end with one or more `&` characters (denoted n, where n ≥ 1).
+- When merging, exactly n characters are removed from the end of the parent selector and the beginning of the child selector (excluding `&`), then concatenated.
+
+#### Important Limitation
+
+This operator does not support comma-separated multiple nested selectors properly.
+
+```css
+/* Input */
+[a-]& { 
+  &[b], &[c] { ... } 
+}
+
+/* Expected output */
+[a-b] { ... }
+[a-c] { ... }
+
+/* Actual output */
+[a-b], &[c] { ... } 
+/* Incorrect: second selector fails */
+```
+
+The parent reference `&` does not expand correctly in comma-separated lists, so use this operator cautiously with complex multi-selector cases.
+
+This system allows automatic variable detection and autosuggestions when composing variants, making it easier to create flexible, maintainable component themes with clean scoped styles.
+# 3.2 Wrapper Attributes
+
+Wrapper attributes provide a way to express conditional and contextual styling directly in your markup by generating wrapper selectors around a class, without manually adding extra wrapper elements. They are an unconventional but highly effective pattern for controlling conditional states and responsive behavior.
+
+## How it works
+
+- Each wrapper-attribute creates an implicit wrapper element/selector around the class, with the selector derived from the attribute content.  
+- Wrapper-attributes let you **scope, toggle, or layer** styles based on attribute presence, feature support, or layout constraints.  
+- Responsive breakpoints and contextual constraints (like loading state or container size) are declared where the component is used, not scattered across separate CSS files.
+
+## Rule specification
+
+- The wrapper attribute value must **end with an `&` token**, which represents the wrapped class selector.  
+- `hashrules` like `#{Load}` are valid and are resolved from your configuration into full selectors.  
+- Use `{ ... }` braces for raw string formatting so values containing spaces are not split.  
+- Inside `identifier@{ ... }`, shorthand expressions map to CSS constraints:
+  - `width>=` => `min-width:`
+  - `width<=` => `max-width:`
+  - `height>=` => `min-height:`
+  - `height<=` => `max-height:`
+
+## Conceptual example
+
 ```html
-<!-- Assume Hashrule `#{Load}` == "body[data-loading]" from hashrules.jsonc  -->
+<!-- Assume hashrule #{Load} == "body[data-loading]" -->
 <div
   _$class="..."
-  #{Load}&="..." 
+  &#{Load}&{.parent}&="..."
   {@supports not (backdrop-filter: blur(1px))}&="..."
-  container@{(max-width: 320px)}&="...">
+  container@{(max-width: 320px)}&="..."
+>
   {Placeholder}
 </div>
 ```
-Gets structurally gets transformed into:
+
+This compiles conceptually to:
+
 ```css
 .$class { ... }
-body[data-loading] .$class { ... }
-@supports not (backdrop-filter: blur(1px)) { 
-  .$class { ... } 
+
+/* Global loading wrapper from hashrule */
+body[data-loading] .parent .$class { ... }
+
+/* Feature query wrapper */
+@supports not (backdrop-filter: blur(1px)) {
+  .$class { ... }
 }
-@container (max-width: 320px) { 
-  .$class { ... } 
+
+/* Container query wrapper */
+@container (max-width: 320px) {
+  .$class { ... }
 }
+
+```
+## Practical Example
+
+```html
+<sketch 
+demo$wrapper-preview="container-type: inline-size; width: 8rem;"
+>
+  <p class="=demo$wrapper-child"
+  demo$wrapper-child="
+    = p-4 radius-4;
+    background-color: red;
+    color: white;
+  "
+  #{Cs1}&="background-color: blue;"
+  >
+    Try Resizing using resize handle 
+  </p>
+</sketch>
 ```
 
-## Compiled Classnames
+> Wrapper attributes let you co-locate conditional logic and responsive behavior with component usage while still emitting clean, idiomatic CSS structures.
+# 4.0 Reserved Tags
 
-- Each compilation command uses different stratagies for cascading and create classes.
+Xtatix reserves a small set of custom tags and placeholders that make it possible to declare, reuse, and inject styles and snippets directly in markup. These tags are transformed away at compile time, so they never reach the browser.
 
-### `debug`
+## Declaration Tags (paired tags)
 
-- Unoptimized cascading order, and verbose classnames representing source-data.
-- **Scattered Classes:**
-  - Format: `{Type}|{Definition-Source}_{Symbolic-Class}`
-  - Example: `PUBLIC|xrc/content/demo.html:30:2_glass$$$container`
-- **Ordered Classes:**
-  - Format: `TAG|{Import-Source}__{Type}|{Definition-Source}_{Symbolic-Class}`
-  - Example: `TAG|xrc/content/demo.html:16:58__PUBLIC|xrc/content/demo.html:30:2_glass$$$container`
-- **Final Classes:**
-  - Format: `{Type}|{Definition-Source}_{Symbolic-Class}_Final`
-  - Example: `PUBLIC|xrc/content/demo.html:30:2_glass$$$container_Final`
-
-### `preview`
-
-- Unoptimized cascading order, and respective classnames.
-- Classname is enumered hash followed by cascade position index.
-- **Scattered Classes:**
-  - Format: `~{classname}_{hash}`
-  - Example: `~scatter-class_g3` 
-- **Ordered Classes:**
-  - Format: `!{classname}_{hash}-{cascade-counter}`
-  - Example: `!ordered-class_g3-134` 
-- **Final Classes:**
-  - Format: `={classname}_{hash}`
-  - Example: `=final-class_g3` 
-
-### `publish`
-
-- Unoptimized cascading order, and respective classnames.
-- Classname is enumered hash followed by cascade position index.
-- **Scattered Classes:**
-  - Format: `_{hash}`
-  - Example: `__k9`, `__8i` 
-- **Ordered Classes:**
-  - Format: `__{hash}-{cascade-counter}`
-  - Example: `__H9`, `__8h` 
-- **Final Classes:**
-  - Format: `___{hash}`
-  - Example: `___k9`, `___8i`
-# 7. Custom Tags
-
-## Declaration Tags (Paired Tags)
-
-- If a symbolic-class is found as attribute with in special tags, the content between tags is considered bound to it.
-- Paired tags are collapsed, and self closing tags are replaced with proper value while compiling.
+When a symbolic class (sym-class) appears as an attribute on these special tags, the content between the opening and closing tags is bound to that sym-class. During compilation, the tags themselves are collapsed and only the generated CSS and HTML remain.
 
 ```html 
 <style local$-class>
-  ...
+  /* CSS snippet bound to local$-class */
 </style>
+
 <stitch local$--class>
-  ...
+  <!-- Raw snippet bound to local$--class -->
 </stitch>
+
 <sketch
   attribute-1="attr-value-1"
   attribute-2="attr-value-2"
-  attribute-3="attr-value-3"
   local$class="
     ~ local$-class local$--class;
     = $class-1 $$class-2 $class-3;
@@ -884,55 +867,60 @@ body[data-loading] .$class { ... }
 </sketch>
 ```
 
-### `<style> ... </style>` 
-- This tag is a special case, as it’s the standard HTML tag for writing CSS content inside markup.
-- If a sym-class is found in the opening tag, the content between tags is considered a dependent snippet of that corresponding sym-class.
-- Declared using a sym-class where - immediately follows the final $ (e.g., style$-class-name).
+### `<style> ... </style>`
+
+- Uses the standard HTML `<style>` tag, but when a sym-class is present on the tag, its content becomes a dependent CSS snippet of that sym-class.
+- Declared with a sym-class where `-` immediately follows the final `$`, for example: `style$-class-name`.
+- The snippet is processed as CSS and merged into the compiled stylesheet.
 
 ### `<stitch> ... </stitch>`
-- Snippets are imported in a minified form but remain unprocessed.
-- Useful for direct association without transformation or validation.
-- Declared using a sym-class where -- immediately follows the final $ (e.g., stitch$--class-name).
+
+- Binds raw snippets to a sym-class without transforming them.
+- Content is imported in minified form but left otherwise unprocessed, making it ideal for SVG defs, filters, or other reusable chunks.
+- Declared with a sym-class where `--` immediately follows the final `$`, for example: `stitch$--class-name`.
 
 ### `<sketch> ... </sketch>`
-- Used to declare component-level styles and generate corresponding style templates.
-- The snippet inside these tags is used for live preview of the given classes.
-- Style attributes are passed to the sandbox body, while other attributes are passed directly to the preview sandbox.
 
-## Replacement Placeholders (Self-Closing Tags && Reserved HTML Comments)
+- Declares component-level styles and generates a corresponding preview template.
+- The attribute value for a sym-class defines its composition and rules.
+- The inner HTML is used as a live preview template in the sandbox:
+  - Style-related attributes are passed to the sandbox body.
+  - Other attributes are passed directly to the preview template.
+
+
+## Replacement Placeholders
+
+Self-closing tags and reserved HTML comments act as insertion points where compiled styles and stitch snippets are injected.
 
 ```html
 <!doctype html>
 <html lang="en">
-
 <head>
   <meta charset="utf-8" />
-  <meta 
+  <meta
     name="viewport"
-    content="width=device-width, initial-scale=1" 
+    content="width=device-width, initial-scale=1"
   />
   <!-- style -->
 </head>
 
-<body 
-  data-sveltekit-preload-data="hover" 
-  class="=bg$pattern-checkerboard =$custom-pattern" 
+<body
+  data-sveltekit-preload-data="hover"
+  class="=bg$pattern-checkerboard =$custom-pattern"
   _$custom-pattern="
     --pattern-checker-bg1: #456734;
     --pattern-checker-bg2: #2bb43d;
     --pattern-checker-size: var(---delta-block-lg);
   "
 >
-
   <stitch amorphous$--container>
     <svg xmlns="http://www.w3.org/2000/svg">
       <defs> ... </defs>
     </svg>
   </stitch>
 
-
-  <sketch 
-    data-glass-type="liquid" 
+  <sketch
+    data-glass-type="liquid"
     amorphous$$$container="
       ~ amorphous$--container;
       &::after {
@@ -943,29 +931,79 @@ body[data-loading] .$class { ... }
     Template
   </sketch>
 
-  <div 
-    id="#scoped-id" 
-    data-glass-type='liquid' 
+  <div
+    id="#scoped-id"
+    data-glass-type="liquid"
     class="~amorphous$$$container"
-  > Content </div>
+  >
+    Content
+  </div>
+
   <!-- stitch -->
 </body>
-
 </html>
 ```
 
-### `<sketch />` /  `<!-- sketch -->` 
+### `<sketch />` / `<!-- sketch -->`
 
-- Used as a placeholder for deploying `stylesheet` and `stitch-snippets` together in the compiled output.
-- Intended for rapid prototyping, not recommended for production use.
+- Placeholder used to deploy both the compiled stylesheet and associated stitch snippets in one shot.
+- Designed for rapid prototyping; for production builds, a more controlled injection strategy is recommended.
 
-### `<style />` /  `<!-- style -->`
+### `<style />` / `<!-- style -->`
 
-- Embed stylesheet using these tags with in any targeted files. 
+- Marks where the compiled stylesheet block should be embedded inside targeted files.
+- Lets you keep your source clean while still controlling where styles appear in the final HTML.
 
 ### `<stitch />` / `<!-- stitch -->`
 
-- Acts as a placeholder for injecting attached `stitch-snippets` into the compiled output.
+- Placeholder for injecting attached stitch snippets (for example SVG defs or filters) into the compiled output.
+- Ensures shared assets are emitted exactly once in the right place in the document.
+
+---
+
+These reserved tags and placeholders let Xtatix treat HTML as a rich declaration surface for styles, snippets, and components, while compiling everything down to standard HTML and CSS for the browser.
+# 5.0 Dependancy Patterns
+
+## While composing libraries
+
+```html
+🎑🎑🎑🎑
+
+<sketch
+  camera$button="
+    = tx$weight-600 cursor-pointer d-inline-flex gap-2;
+    padding: 0.5rem 0.9rem;
+    border-radius: 999px;
+    border: 1px solid black;
+    transition: background-color 150ms ease-out;
+  "
+  id="#"
+>
+<div onclick="XTATIX['\#'].onclick(this)">
+  <svg data-speed="300" class="&camera$icon" width="40" height="40" viewBox="0 0 24 24"> </svg>
+  <span>Take photo </span> <span id="#counter"> 0 </span>
+</div>
+</sketch>
+
+<stitch
+  camera$icon="
+        ~ camera$--symbol;
+        display: inline-flex;
+        width: 1rem;
+        height: 1rem;
+  ">
+  <use
+    href="#\#camera"
+  ></use>
+</stitch>
+
+<stitch camera$--symbol>
+  <svg>
+    <symbol id="#camera" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-camera-icon lucide-camera"><path d="M13.997 4a2 2 0 0 1 1.76 1.05l.486.9A2 2 0 0 0 18.003 7H20a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h1.997a2 2 0 0 0 1.759-1.048l.489-.904A2 2 0 0 1 10.004 4z"/><circle cx="12" cy="13" r="3"/>
+    </symbol>
+  </svg>
+</stitch>
+```
 # 8. Appendix
 
 ## Errors & diagnostics

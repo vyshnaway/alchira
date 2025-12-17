@@ -72,7 +72,7 @@ func main() {
 
 	compilerDir, _ := Path_FromBinFolder("..")
 	compilerConfigPath, _ := Path_FromBinFolder("configs.json")
-	
+
 	var compilerConfig models.Compiler_Config
 	if str, err := _fileman.Read_File(compilerConfigPath, false); err == nil {
 		json.Unmarshal([]byte(str), &compilerConfig)
@@ -94,8 +94,11 @@ func main() {
 		true, 2,
 	)
 
-	exitcode := 0
+	// S.Render.Raw(_config.Sync_Agreements)
+	// S.Render.Raw(_config.Sync_References)
 
+	exitcode := 0
+	
 	_config.Reset(false)
 	if _config.Static.Command != "void" && _fileman.Path_IfFile(_fileman.Path_Join(compilerDir, ".gitignore")) {
 		pprof, e := _server.RequestAvailablePort(0)
