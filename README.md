@@ -119,23 +119,25 @@ Inspiration: https://uiverse.io/Voxybuns/lucky-fireant-71
 
 ### `init` : Initialize and Healthcheck
 
-- Sets up the project by importing the configuration folder, and makes necessary changes to `configure.jsonc`.
-- If run inside an already initialized directory, it will create the necessary sub-folders as defined.
+- Sets up the project by importing the configuration folder.
+- `init {flavor}` uses an installed flavor to map the environment and bootstrap the project.
+- You should makes necessary changes to `configure.jsonc`, according to your preferences.
+- Running init again in an initialized directory creates any missing sub-folders and performs a setup health check.
 
 ### `debug` : Compiles with full verbosity and traceability
 
-- Verbose output
-- Traceable class-names and properties.
-- Larger output size
-- Use `debug -w` for live compilation with identical output.
+- Larger output size.
+- Verbose output with traceable class-names and properties.
 
 ### `preview` : Optimized compilation for lightweight builds:
 
-- Hashed class-names (≥ 3 characters)
 - Minified CSS.
-- Partial dependency resolution
-- Optimized for minimal class footprint
 - Use `preview -w` for live compilation.
+
+### `watch` : Preview Command in Continuous Watch Mode:
+
+- Same results as preview output, but with continuous compilation.
+- Start an instance along with dev-enviornments build command.
 
 ## Developer Commands
 
@@ -143,14 +145,11 @@ Inspiration: https://uiverse.io/Voxybuns/lucky-fireant-71
 
 - Helps in active language assistance in editors.
 - Start server, use `help` for available command list.
-- Used by extension developers.
+- Used by extension developers at build time and editor clients at runtime.
 
-## Experimental Commands
+### `void` : Void run, no execution.
 
-### `iamai` : Communication bridge for AI Agents
-
-- Helps in context aware styling by AI Agnets.
-- This command is a combination of `preview` and `server` commands.
+- For checking validity of binary without any side effects.
 # 3. Directory
 
 ## Setup folder
@@ -197,8 +196,8 @@ Inspiration: https://uiverse.io/Voxybuns/lucky-fireant-71
   "vendors": "none",
   "proxymap": [
     {
-      "source": "src",
-      "target": "xrc",
+      "source": "xrc",
+      "target": "src",
       "stylesheet": "styles.css",
       "extensions": {
         "html": [
@@ -348,12 +347,12 @@ All the first order blocks of each file will have a corresponding symbolic class
 
 ```css
 .classname {
-  @--assign $class-1 $class-2 $class-1;
+  @--apply $class-1 $class-2 $class-1;
   @--attach $attach-1 $attach-2;
 }
 ```
 
-### `@--assign`
+### `@--apply`
 - Compose styles from predefined classes from libraries using sym-classes.
 - Values derived from this action is overridden by explicit properties
 
@@ -363,7 +362,7 @@ All the first order blocks of each file will have a corresponding symbolic class
 
 ## Inheritence Pattern:
 
-- `order` is the hierarchy level for library inheritance. Lower order files provide base/axiom styles; higher order files can reference and extend lower orders. Use `order` to control assignment (`@--assign`) and attachment (`@--attach`) visibility and override behavior.
+- `order` is the hierarchy level for library inheritance. Lower order files provide base/axiom styles; higher order files can reference and extend lower orders. Use `order` to control applyment (`@--apply`) and attachment (`@--attach`) visibility and override behavior.
 
 ### Types of Libraries
 
@@ -375,14 +374,14 @@ All the first order blocks of each file will have a corresponding symbolic class
 - A special cluster without a cluster-name. ( Example: 0.display.css )
 
 - In a file of **Order `n`**, symbolic classes may be referenced from other files using two distinct directives, with in the scope of `axiom` where permitted sources are:
-	-  `@--assign`: Files of **Order ≤ n−1**
+	-  `@--apply`: Files of **Order ≤ n−1**
 	-  `@--attach`: Files of **Order ≤ n**
 
 #### Clusters
 
 - Named clusters can access all symbolic classes from Axioms.
 - In a file of **Order `n`**, symbolic classes may be referenced from other files using two distinct directives, with in the scope of whole `axiom` and `cluster` were permitted sources are:
-	-  `@--assign`: Files of **Order ≤ n−1**
+	-  `@--apply`: Files of **Order ≤ n−1**
 	-  `@--attach`: Files of **Order ≤ n**
 # 1.0 Hash Loaders
 
@@ -414,7 +413,7 @@ This links the hash dynamically to the HTML elements for tracking or live update
 
 ### Using Hashes Outside Watch Attributes
 
-When using hashes in other places like JavaScript, CSS, or non-watched attributes, prefix the hash follower with a backslash `\` to escape it, ensuring valid usage without conflicts:
+When using hashes in other places like JavaScript, CSS, or non-watched attributes, prefix the hash loader with a backslash `\` to escape it, ensuring valid usage without conflicts:
 
 ```html
 <div onload="func('\#reg-id')">
@@ -586,7 +585,7 @@ The Final Class Loader operator `=` applies classes after both scattered `~` and
 - This loader helps handle dynamic styling situations where final overrides are necessary but strict cascading order control is not required.
 # 3.0 Composing components
 
-> <sketch> ... </sketch> is a special tag to create components in isolation, and keep a base template for smoother workflows.  
+> `<sketch> ... </sketch>` is a special tag to create components in isolation, and keep a base template for smoother workflows.  
 > It will be discussed later with other [Custom tags](./4.0-custom-tags.md).
 
 ## Symbolic Class Syntax
@@ -622,7 +621,7 @@ When composing styles, you can wrap groups externally using any of these delimit
 
 Xtatix provides two compose operators as replacements for traditional CSS composition directives:
 
-- `=` (equivalent to `@--assign`): Merges and flattens the provided sym-classes.
+- `+` (equivalent to `@--apply`): Merges and flattens the provided sym-classes.
 - `~` (equivalent to `@--attach`): Creates a dependency node to the referenced sym-classes.
 
 Both produce the same final CSS output. They coexist for developer convenience and clarity.
@@ -632,12 +631,12 @@ Both produce the same final CSS output. They coexist for developer convenience a
 ```html
 <!-- 
     cluster    = "demo"
-    scope      = "local"
+    scope      = "global"
     identifier = "button"
 -->
 <sketch 
 demo$$button="
-	= tx$weight-600 border-none cursor-pointer px-0 py-0;
+	+ tx$weight-600 border-none cursor-pointer px-0 py-0;
 	--button_radius: 0.75em;
 	--button_color: #e8e8e8;
 	--button_outline_color: #000000;
@@ -666,7 +665,7 @@ demo$$button="
 
 - This defines a sym-class `demo$$button` with global scope.
 - Combines animations, typography, utility classes with custom properties and pseudo-class styles.
-- Uses both `~` and `=` compose operators for dependencies and merging respectively.
+- Uses both `~` and `+`,  operators for dependencies and composing respectively.
 
 > **Tip:** If the class name is `demo$button`, you can declare it once per file. However, if you use `demo$$button`, it becomes globally scoped and must appear only once across all files—otherwise, it will trigger an error.
 # 3.1 Variants in Xtatix
@@ -823,7 +822,7 @@ demo$wrapper-preview="container-type: inline-size; width: 8rem;"
 >
   <p class="=demo$wrapper-child"
   demo$wrapper-child="
-    = p-4 radius-4;
+    + p-4 radius-4;
     background-color: red;
     color: white;
   "
@@ -849,7 +848,7 @@ When a symbolic class (sym-class) appears as an attribute on these special tags,
 </style>
 
 <stitch local$--class>
-  <!-- Raw snippet bound to local$--class -->
+  <!-- Partial raw snippet bound to local$--class -->
 </stitch>
 
 <sketch
@@ -857,7 +856,7 @@ When a symbolic class (sym-class) appears as an attribute on these special tags,
   attribute-2="attr-value-2"
   local$class="
     ~ local$-class local$--class;
-    = $class-1 $$class-2 $class-3;
+    + $class-1 $$class-2 $class-3;
     property-1: value-1;
     property-2: value-2;
     property-3: value-3;
@@ -875,17 +874,17 @@ When a symbolic class (sym-class) appears as an attribute on these special tags,
 
 ### `<stitch> ... </stitch>`
 
-- Binds raw snippets to a sym-class without transforming them.
+- Binds raw partial snippets to a sym-class without transforming them, otherthan for hash loaders.
 - Content is imported in minified form but left otherwise unprocessed, making it ideal for SVG defs, filters, or other reusable chunks.
 - Declared with a sym-class where `--` immediately follows the final `$`, for example: `stitch$--class-name`.
 
 ### `<sketch> ... </sketch>`
 
 - Declares component-level styles and generates a corresponding preview template.
-- The attribute value for a sym-class defines its composition and rules.
+- The attribute-value for a sym-class defines its composition and rules.
 - The inner HTML is used as a live preview template in the sandbox:
-  - Style-related attributes are passed to the sandbox body.
-  - Other attributes are passed directly to the preview template.
+  - `style` attributes are passed to the sandbox body.
+  - Other attributes are passed directly to the component template.
 
 
 ## Replacement Placeholders
@@ -971,7 +970,7 @@ These reserved tags and placeholders let Xtatix treat HTML as a rich declaration
 
 <sketch
   camera$button="
-    = tx$weight-600 cursor-pointer d-inline-flex gap-2;
+    + tx$weight-600 cursor-pointer d-inline-flex gap-2;
     padding: 0.5rem 0.9rem;
     border-radius: 999px;
     border: 1px solid black;
@@ -1034,7 +1033,7 @@ These reserved tags and placeholders let Xtatix treat HTML as a rich declaration
 
 ## Hoisting semantics
 
-- Hoisting is a default behavior: assigned (`@--assign` / `=`) and attached (`@--attach` / `~`) styles are pulled toward the top during compilation. Variables are promoted to an even higher preface level.
+- Hoisting is a default behavior: applied (`@--apply` / `+`) and attached (`@--attach` / `~`) styles are pulled toward the top during compilation. Variables are promoted to an even higher preface level.
 - Under a single scope, a variable may only have a single effective value; later overrides declared in the same scope replace earlier ones during hoisting.
 - Prefer declaring state-affecting variables in the base class declaration and rely on compound selectors to update variables.
 

@@ -56,9 +56,9 @@ type R_Parse_Filter struct {
 	Variables  *O.T[string, string]
 }
 
-var assign_directive = _config.Root.CustomDirective["assign"]
+var apply_directive = _config.Root.CustomDirective["apply"]
 var attach_directive = _config.Root.CustomDirective["attach"]
-var assign_operator = string(_config.Root.CustomOp["assign"])
+var apply_operator = string(_config.Root.CustomOp["apply"])
 var attach_operator = string(_config.Root.CustomOp["attach"])
 
 func Parse_Filter(content string) R_Parse_Filter {
@@ -86,7 +86,7 @@ func Parse_Filter(content string) R_Parse_Filter {
 		case attach_directive:
 			breaks := _util.String_ZeroBreaks(val[spaceIndex:], []rune{' ', '\n', ','})
 			res.Attach = append(res.Attach, breaks...)
-		case assign_directive:
+		case apply_directive:
 			breaks := _util.String_ZeroBreaks(val[spaceIndex:], []rune{' ', '\n', ','})
 			res.Assign = append(res.Assign, breaks...)
 		default:
@@ -101,7 +101,7 @@ func Parse_Filter(content string) R_Parse_Filter {
 			switch breaks[0] {
 			case attach_operator:
 				res.Attach = append(res.Attach, breaks[1:]...)
-			case assign_operator:
+			case apply_operator:
 				res.Assign = append(res.Assign, breaks[1:]...)
 			default:
 				res.Properties.Set(val, "")

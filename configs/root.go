@@ -69,13 +69,14 @@ var Root = models.Cache_Root{
 		"sketch": 3,
 	},
 	CustomOp: map[string]rune{
+		"apply":  '+', // Rigid assign
 		"attach": '~', // Rapid assign
-		"strict": '+', // Rigid assign
 		"assign": '=', // Final assign
 		"append": '&', // Place assign
 		"lodash": '#', // Load file-hash
 	},
 	CustomDirective: map[string]string{
+		"apply":  "@--apply",
 		"attach": "@--attach",
 		"assign": "@--assign",
 	},

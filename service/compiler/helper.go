@@ -98,7 +98,7 @@ func FmtClassForCss(classname string) string {
 	)
 }
 
-var op_strict = _config.Root.CustomOp["strict"]
+var op_strict = _config.Root.CustomOp["apply"]
 var op_attach = _config.Root.CustomOp["attach"]
 var op_assign = _config.Root.CustomOp["assign"]
 var op_append = _config.Root.CustomOp["append"]
