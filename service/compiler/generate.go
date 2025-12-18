@@ -69,7 +69,7 @@ func Generate_Files() (Files map[string]string, Report string) {
 
 	report, errLen, finalMessage, index_frag := ClearUnwantedCache()
 	var class_builder _string.Builder
-	for _, i := range _config.Style.Publish_Ordered {
+	for _, i := range _config.Style.Classlist_Ordered {
 		class_builder.WriteString(_css.Render_Switched(func() *_css.T_Block {
 			result := _css.NewBlock(0, len(i))
 			for _, j := range i {

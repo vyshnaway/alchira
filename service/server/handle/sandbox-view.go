@@ -80,17 +80,17 @@ func Sandbox_Save(index int) (response any) {
 		{ClassName: "_", ClassIndex: data.SrcData.Index},
 	}
 	appendmap := map[int]bool{}
-	for c, i := range configs.Style.Sandbox_Append {
+	for c, i := range configs.Style.Classlist_Append {
 		appendmap[i] = true
 		FinalClassMap = append(FinalClassMap, models.Style_ClassIndexTrace{ClassName: c, ClassIndex: i})
 	}
-	for c, i := range configs.Style.Sandbox_Scattered {
+	for c, i := range configs.Style.Classlist_Scattered {
 		FinalClassMap = append(FinalClassMap, models.Style_ClassIndexTrace{ClassName: c, ClassIndex: i})
 	}
-	for _, i := range configs.Style.Publish_Ordered {
+	for _, i := range configs.Style.Classlist_Ordered {
 		FinalClassMap = append(FinalClassMap, i...)
 	}
-	for c, i := range configs.Style.Sandbox_Final {
+	for c, i := range configs.Style.Classlist_Final {
 		FinalClassMap = append(FinalClassMap, models.Style_ClassIndexTrace{ClassName: c, ClassIndex: i})
 	}
 

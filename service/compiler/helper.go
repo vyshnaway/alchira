@@ -20,13 +20,13 @@ func ClearUnwantedCache() (
 
 	if !_config.Static.IAMAI {
 		indexes := make(map[int]bool, 64)
-		for _, i := range _config.Style.Publish_Ordered {
+		for _, i := range _config.Style.Classlist_Ordered {
 			for _, j := range i {
 				indexes[j.ClassIndex] = true
 			}
 		}
 
-		for i := range _config.Style.Publish_Ordered {
+		for i := range _config.Style.Classlist_Ordered {
 			if _, k := indexes[i]; !k {
 				delete(_config.Style.Index_to_Styledata, i)
 			}
@@ -34,14 +34,14 @@ func ClearUnwantedCache() (
 	}
 
 	pubInLt := 24
-	newPubIn := make([][]_model.Style_ClassIndexTrace, 0, pubInLt*len(_config.Style.Publish_Ordered))
-	for _, A := range _config.Style.Publish_Ordered {
+	newPubIn := make([][]_model.Style_ClassIndexTrace, 0, pubInLt*len(_config.Style.Classlist_Ordered))
+	for _, A := range _config.Style.Classlist_Ordered {
 		for i := 0; i < len(A); i += pubInLt {
 			end := min(i+pubInLt, len(A))
 			newPubIn = append(newPubIn, A[i:end])
 		}
 	}
-	_config.Style.Publish_Ordered = newPubIn
+	_config.Style.Classlist_Ordered = newPubIn
 	consts := _slice.Collect(_map.Keys(_config.Manifest.Constants))
 	sort.Strings(consts)
 	_config.Delta.Report.Constants = X.List_Catalog(

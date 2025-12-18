@@ -24,7 +24,7 @@ var Cache = type_Cache{
 	Targetdir: map[string]*_target.Class{},
 }
 
-func Reset() {
+func Cache_Reset() {
 	Cache = type_Cache{
 		Handoffs:  map[string]map[string]string{},
 		Libraries: map[string]*_model.File_Stash{},

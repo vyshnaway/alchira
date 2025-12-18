@@ -65,8 +65,8 @@ var Root = models.Cache_Root{
 	},
 	CustomTags: map[string]int{
 		"style":  1,
-		"stitch": 2,
-		"sketch": 3,
+		"sketch": 2,
+		"stitch": 3,
 	},
 	CustomOp: map[string]rune{
 		"apply":  '+', // Rigid assign

@@ -16,8 +16,8 @@ type E_Method int
 
 const (
 	E_Method_Read E_Method = iota
-	E_Method_LoadHash
 	E_Method_Strip
+	E_Method_LoadHash
 	E_Method_DebugHash
 	E_Method_PreviewHash
 	E_Method_PublishHash
@@ -62,7 +62,7 @@ func Rider(
 	}
 	fileData.Scratch = ""
 
-	cursor := _reader.New(content + " ")
+	cursor := _reader.New(content)
 	var entry _string.Builder
 	awaitop := false
 	incFlag := true

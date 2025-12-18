@@ -85,9 +85,9 @@ func Value_Builder(
 								classname := res.Data.SrcData.DebugScatterClass
 								stream.WriteString(classname)
 								if waitop == op_scatter {
-									_config.Style.Sandbox_Scattered[classname] = res.Index
+									_config.Style.Classlist_Scattered[classname] = res.Index
 								} else {
-									_config.Style.Sandbox_Append[classname] = res.Index
+									_config.Style.Classlist_Append[classname] = res.Index
 								}
 							} else if method == E_Method_PreviewHash || _config.Static.PREVIEW {
 								stream.WriteString(res.Data.SrcData.PreviewScatterClass)
@@ -97,13 +97,14 @@ func Value_Builder(
 							awaitop = false
 						}
 					}
+					
 				case op_finalize:
 					if method != E_Method_LoadHash {
 						if res := _action.Index_Finder(entrystring, fileData.Cache.LocalMap); res.Index > 0 {
 							if method == E_Method_DebugHash {
 								classname := res.Data.SrcData.DebugFinalClass
 								stream.WriteString(classname)
-								_config.Style.Sandbox_Final[classname] = res.Index
+								_config.Style.Classlist_Final[classname] = res.Index
 							} else if method == E_Method_PreviewHash || _config.Static.PREVIEW {
 								stream.WriteString(res.Data.SrcData.PreviewFinalClass)
 							} else {

@@ -66,7 +66,7 @@ func Value_EvaluateIndexTraces(
 		}
 
 		if len(temp_map) > 0 {
-			_config.Style.Publish_Ordered = append(_config.Style.Publish_Ordered, temp_map)
+			_config.Style.Classlist_Ordered = append(_config.Style.Classlist_Ordered, temp_map)
 		}
 	}
 

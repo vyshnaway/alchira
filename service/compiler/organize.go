@@ -21,9 +21,10 @@ func SetReferences() {
 	_config.Style_Reset()
 	_config.Manifest_Reset()
 
-	_stash.Reset()
+	_stash.Cache_Reset()
 	_stash.Artifact_Update()
 	_stash.Library_Update()
+	
 	_style.Hashrule_Upload()
 
 	index_scanned := _style.Cssfile_String(_util.Code_Uncomment(_config.Saved.RootCSS, false, true, false), "INDEX | ")

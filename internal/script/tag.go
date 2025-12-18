@@ -229,16 +229,22 @@ func Tag_Scanner(
 		if fileCursor.Active.Char == '>' {
 			styleDeclarations.EndMarker++
 		}
+
 		fragString = fragment.String()
 		if fragString[1] == '!' {
 			fragString = string(fileCursor.Slice(tagStart, styleDeclarations.EndMarker))
 		} else {
+			fileCursor.Active.Cycle++
+			selfClosed = fileCursor.Active.Last == '/'
+			if (method == E_Method_DebugHash ||
+				method == E_Method_PreviewHash ||
+				method == E_Method_PublishHash) && selfClosed && styleDeclarations.Elid == _config.Root.CustomTags["sketch"] {
+				fragment.Reset()
+			}
 			for _, a := range appends {
 				fragment.WriteString(a)
 			}
 			fragString = fragment.String()
-			fileCursor.Active.Cycle++
-			selfClosed = fileCursor.Active.Last == '/'
 			styleDeclarations.Range = _reader.T_Range{Data: []string{}, Start: startpos, End: fileCursor.Active}
 		}
 
