@@ -238,7 +238,10 @@ func Tag_Scanner(
 			selfClosed = fileCursor.Active.Last == '/'
 			if (method == E_Method_DebugHash ||
 				method == E_Method_PreviewHash ||
-				method == E_Method_PublishHash) && selfClosed && styleDeclarations.Elid == _config.Root.CustomTags["sketch"] {
+				method == E_Method_PublishHash) &&
+				(styleDeclarations.Elid == _config.Root.CustomTags["sketch"] ||
+					styleDeclarations.Elid == _config.Root.CustomTags["style"]) &&
+				selfClosed {
 				fragment.Reset()
 			}
 			for _, a := range appends {
