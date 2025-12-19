@@ -240,7 +240,11 @@ func Tag_Scanner(
 			if E_Method_LoadHash != method && selfClosed && BuildMode &&
 				(styleDeclarations.Elid == _config.Root.CustomTags["sketch"] ||
 					styleDeclarations.Elid == _config.Root.CustomTags["style"]) {
-				fragString = Marcro_Builder(styleDeclarations.Comments, method, fileData, appendstack)
+				macrosrc := make([]string, len(styleDeclarations.Comments))
+				for _, m := range styleDeclarations.Comments {
+					macrosrc = append(macrosrc, Value_Builder(m, E_Method_LoadHash, fileData, fileCursor, false, orderedMapping))
+				}
+				fragString = Macro_Builder(macrosrc, method, fileData, appendstack)
 			}
 			_map.Copy(appendsList, Marcro_Reader(styleDeclarations.Comments))
 			styleDeclarations.Range = _reader.T_Range{Data: []string{}, Start: startpos, End: fileCursor.Active}

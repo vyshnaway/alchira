@@ -71,7 +71,7 @@ func ApplySymbols(input string, register *object.T[string, string]) string {
 	return input
 }
 
-func Marcro_Builder(
+func Macro_Builder(
 	macros []string,
 	method E_Method,
 	fileData *_model.File_Stash,
@@ -140,6 +140,6 @@ func Marcro_Reader(
 			symclasses[tkn.Symclass] = true
 		}
 	}
-	
+
 	return symclasses
 }
