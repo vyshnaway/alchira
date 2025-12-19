@@ -5,7 +5,6 @@ import (
 	_config "main/configs"
 	_action "main/internal/action"
 	_model "main/models"
-	"maps"
 
 	_reader "main/package/reader"
 	_string "strings"
@@ -18,10 +17,8 @@ func Value_Builder(
 	fileCursor *_reader.T_Reader,
 	isWatching bool,
 	orderedMapping map[string]string,
-	appendstack map[int]bool,
-) (string, []string) {
+) (string) {
 
-	appends := []string{}
 	awaitop := false
 	scribed := value
 	nr := _reader.New(value + " ")
@@ -57,27 +54,6 @@ func Value_Builder(
 						}
 					}
 
-				case op_append:
-					if method != E_Method_LoadHash {
-						if res := _action.Index_Finder(entrystring, fileData.Cache.LocalMap); res.Index > 0 {
-							if !appendstack[res.Index] {
-								subappendstack := make(map[int]bool, len(appendstack)+1)
-								maps.Copy(subappendstack, appendstack)
-								subappendstack[res.Index] = true
-								if len(res.Data.SrcData.NativeStitch) > 0 {
-									appends = append(appends, res.Data.SrcData.NativeStitch)
-								} else if len(res.Data.SrcData.Metadata.SketchSnippet) > 0 {
-									context := *res.Data.Context
-									context.Content = res.Data.SrcData.Metadata.SketchSnippet
-									context.Midway = res.Data.SrcData.Metadata.SketchSnippet
-									newappend := Rider(&context, method, subappendstack).Scribed
-									appends = append(appends, newappend)
-								}
-							}
-							awaitop = false
-						}
-					}
-					fallthrough
 				case op_scatter:
 					if method != E_Method_LoadHash {
 						if res := _action.Index_Finder(entrystring, fileData.Cache.LocalMap); res.Index > 0 {
@@ -143,5 +119,5 @@ func Value_Builder(
 
 	scribed = stream.String()
 
-	return _string.TrimSpace(scribed), appends
+	return _string.TrimSpace(scribed)
 }

@@ -59,18 +59,14 @@ func Sandbox_Save(index int) (response any) {
 	orderedMapping := script.Value_EvaluateIndexTraces(script.E_Method_DebugHash, "", orderedlist, clontext.Cache.LocalMap)
 
 	for k, v := range data.SrcData.Attributes {
-		scribes, appends := script.Value_Builder(
+		scribes := script.Value_Builder(
 			v, script.E_Method_DebugHash,
 			&clontext, reader.New(v),
 			slices.Contains(clontext.WatchAttrs, k),
-			orderedMapping, map[int]bool{},
+			orderedMapping,
 		)
 
 		attributes[k] = scribes
-		for _, vv := range appends {
-			Builder.WriteString(vv)
-			Builder.WriteRune('\n')
-		}
 	}
 
 	Builder.WriteString(strings.TrimSpace(script.Rider(&clontext, script.E_Method_DebugHash, map[int]bool{}).Scribed))

@@ -74,7 +74,6 @@ func Value_EvaluateIndexTraces(
 }
 
 var op_order = _config.Root.CustomOp["apply"]
-var op_append = _config.Root.CustomOp["append"]
 var op_scatter = _config.Root.CustomOp["attach"]
 var op_finalize = _config.Root.CustomOp["assign"]
 var op_lodash = _config.Root.CustomOp["lodash"]

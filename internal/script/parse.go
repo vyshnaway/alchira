@@ -93,8 +93,7 @@ func Rider(
 				parsed = Tag_Scanner(fileData, method, &cursorx, appendstack, orderedMapping)
 			}
 			fragment := parsed.Fragment
-			hasDeclared := (len(parsed.StyleDeclarations.Styles) > 0 || len(parsed.StyleDeclarations.SymClasses) > 0)
-
+			
 			exitedNow := false
 			if parsed.Ok {
 				_map.Copy(scatteredList, parsed.ScatteredList)
@@ -113,16 +112,16 @@ func Rider(
 				}
 
 				if method == E_Method_Read {
-					if hasDeclared {
+					if parsed.HasDeclared {
 						stylesList = append(stylesList, &parsed.StyleDeclarations)
 					}
-					if len(tagTrack) > 0 || (parsed.StyleDeclarations.Elid > 0 && hasDeclared) {
+					if len(tagTrack) > 0 || (parsed.StyleDeclarations.Elid > 0 && parsed.HasDeclared) {
 						fragment = ""
 					}
 				} else if elid, status := replacementTags[fragment]; status {
 					replacements = append(replacements, _model.File_TagReplacement{Loc: stream.Len(), Elid: elid})
 					fragment = ""
-				} else if len(tagTrack) > 0 || (parsed.StyleDeclarations.Elid > 0 && hasDeclared) {
+				} else if len(tagTrack) > 0 || (parsed.StyleDeclarations.Elid > 0 && parsed.HasDeclared) {
 					fragment = ""
 				}
 
@@ -140,7 +139,7 @@ func Rider(
 								tagTrack = append(tagTrack, track)
 							}
 						}
-					} else if _slice.Contains(_config.Static.CustomTags, parsed.StyleDeclarations.Element) && hasDeclared {
+					} else if _slice.Contains(_config.Static.CustomTags, parsed.StyleDeclarations.Element) && parsed.HasDeclared {
 						parsed.StyleDeclarations.Attributes = parsed.NativeAttributes
 						tagTrack = append(tagTrack, &parsed.StyleDeclarations)
 					}

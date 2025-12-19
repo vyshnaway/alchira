@@ -15,6 +15,7 @@ type tag_Parse_retype struct {
 	Ok                bool
 	SelfClosed        bool
 	ClassSynced       bool
+	HasDeclared       bool
 	Fragment          string
 	OrderedList       []string
 	Loadashes         map[string]bool
@@ -35,8 +36,9 @@ func Tag_Scanner(
 	appendstack map[int]bool,
 	orderedMapping map[string]string,
 ) tag_Parse_retype {
+	BuildMode := method == E_Method_DebugHash || method == E_Method_PreviewHash || method == E_Method_PublishHash
+
 	orderedlist := []string{}
-	appends := []string{}
 	appendsList := make(map[string]bool, 4)
 	scatterList := make(map[string]bool, 4)
 	finalList := make(map[string]bool, 4)
@@ -70,13 +72,13 @@ func Tag_Scanner(
 		Styles:     make(map[string]string, 3),
 	}
 
-	var fragment, whitespace _string.Builder
-	fragment.WriteRune('<')
+	var fragBuilder, whitespace _string.Builder
+	fragBuilder.WriteRune('<')
 	SaveToFrag := func(k, v string) {
-		fragment.WriteString(k)
+		fragBuilder.WriteString(k)
 		if len(v) > 0 {
-			fragment.WriteRune('=')
-			fragment.WriteString(v)
+			fragBuilder.WriteRune('=')
+			fragBuilder.WriteString(v)
 		}
 	}
 
@@ -127,16 +129,16 @@ func Tag_Scanner(
 
 				} else if styleDeclarations.Element[0] != '!' {
 					if whitespace.Len() > 0 {
-						fragment.WriteString(whitespace.String())
+						fragBuilder.WriteString(whitespace.String())
 						whitespace.Reset()
 					} else {
-						fragment.WriteString(" ")
+						fragBuilder.WriteString(" ")
 					}
 
 					if tr_Attr == "&" {
-						if len(tr_Value) > 3 {
-							for _, line := range _string.Split(tr_Value[1:len(tr_Value)-2], "\r\n") {
-								commentTrimmed := _string.Trim(line, "\t ")
+						if len(tr_Value) > 2 {
+							for _, line := range _string.Split(tr_Value[1:len(tr_Value)-1], "\n") {
+								commentTrimmed := _string.Trim(line, "\t \r")
 								if len(commentTrimmed) > 0 {
 									styleDeclarations.Comments = append(styleDeclarations.Comments, commentTrimmed)
 								}
@@ -172,22 +174,19 @@ func Tag_Scanner(
 							value_Parse_return := Value_ClassFilter(tr_Value, isWatching)
 							_map.Copy(loadashes, value_Parse_return.Loadashes)
 							_map.Copy(scatterList, value_Parse_return.ScatterList)
-							_map.Copy(appendsList, value_Parse_return.AppendsList)
 							_map.Copy(finalList, value_Parse_return.FinalList)
 							orderedlist = append(orderedlist, value_Parse_return.OrderedClasses...)
 						} else {
 
-							scribed_, append_ := Value_Builder(
+							scribed_ := Value_Builder(
 								tr_Value,
 								method,
 								fileData,
 								fileCursor,
 								isWatching,
 								orderedMapping,
-								appendstack,
 							)
 							scribed = scribed_
-							appends = append(appends, append_...)
 						}
 						nativeAttributes[tr_Attr] = scribed
 						SaveToFrag(tr_Attr, scribed)
@@ -200,8 +199,8 @@ func Tag_Scanner(
 			}
 			if (deviance == 0 && (ch == '>' || ch == ';' || ch == ',' || ch == '<')) || deviance < 0 {
 				if ch == '>' {
-					fragment.WriteString(whitespace.String())
-					fragment.WriteRune('>')
+					fragBuilder.WriteString(whitespace.String())
+					fragBuilder.WriteRune('>')
 					ok = true
 				}
 				break
@@ -225,29 +224,26 @@ func Tag_Scanner(
 	var fragString = ""
 	styleDeclarations.EndMarker = fileCursor.Active.Idx
 
+	hasDeclared := (len(styleDeclarations.Styles) > 0 || len(styleDeclarations.SymClasses) > 0)
 	if ok {
 		if fileCursor.Active.Char == '>' {
 			styleDeclarations.EndMarker++
 		}
 
-		fragString = fragment.String()
-		if fragString[1] == '!' {
+		fragString = fragBuilder.String()
+		if fragString[1] == '!' || (!hasDeclared && !BuildMode) {
 			fragString = string(fileCursor.Slice(tagStart, styleDeclarations.EndMarker))
 		} else {
 			fileCursor.Active.Cycle++
 			selfClosed = fileCursor.Active.Last == '/'
-			if (method == E_Method_DebugHash ||
-				method == E_Method_PreviewHash ||
-				method == E_Method_PublishHash) &&
+			if E_Method_LoadHash != method && selfClosed && BuildMode &&
 				(styleDeclarations.Elid == _config.Root.CustomTags["sketch"] ||
-					styleDeclarations.Elid == _config.Root.CustomTags["style"]) &&
-				selfClosed {
-				fragment.Reset()
+					styleDeclarations.Elid == _config.Root.CustomTags["style"]) {
+				fragString = Marcro_Builder(styleDeclarations.Comments, method, fileData, appendstack)
+			} else {
+				appendsList = Marcro_Reader(styleDeclarations.Comments)
+				fragString = fragBuilder.String()
 			}
-			for _, a := range appends {
-				fragment.WriteString(a)
-			}
-			fragString = fragment.String()
 			styleDeclarations.Range = _reader.T_Range{Data: []string{}, Start: startpos, End: fileCursor.Active}
 		}
 
@@ -260,6 +256,7 @@ func Tag_Scanner(
 
 	return tag_Parse_retype{
 		Ok:                ok,
+		HasDeclared:       hasDeclared,
 		AppendsList:       appendsList,
 		Loadashes:         loadashes,
 		FinalList:         finalList,

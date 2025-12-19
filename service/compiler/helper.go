@@ -94,11 +94,10 @@ func FmtClassForCss(classname string) string {
 		classname,
 		[]rune{'_', '-'},
 		[]rune{},
-		[]rune{'/', '.', ':', '|', '$', op_strict, op_attach, op_assign, op_append},
+		[]rune{'/', '.', ':', '|', '$', op_strict, op_attach, op_assign},
 	)
 }
 
 var op_strict = _config.Root.CustomOp["apply"]
 var op_attach = _config.Root.CustomOp["attach"]
 var op_assign = _config.Root.CustomOp["assign"]
-var op_append = _config.Root.CustomOp["append"]
