@@ -1,4 +1,4 @@
-# 0.0 Xtatix Client
+# 0.0 Xtatix Plugin
 
 The extension connects to language servers in this fallback order:
 
@@ -847,9 +847,9 @@ When a symbolic class (sym-class) appears as an attribute on these special tags,
   /* CSS snippet bound to local$-class */
 </style>
 
-<stitch local$--class>
-  <!-- Partial raw snippet bound to local$--class -->
-</stitch>
+<sketch local$--class>
+  <!-- Snippet bound to local$--class -->
+</sketch>
 
 <sketch
   attribute-1="attr-value-1"
@@ -872,12 +872,6 @@ When a symbolic class (sym-class) appears as an attribute on these special tags,
 - Declared with a sym-class where `-` immediately follows the final `$`, for example: `style$-class-name`.
 - The snippet is processed as CSS and merged into the compiled stylesheet.
 
-### `<stitch> ... </stitch>`
-
-- Binds raw partial snippets to a sym-class without transforming them, otherthan for hash loaders.
-- Content is imported in minified form but left otherwise unprocessed, making it ideal for SVG defs, filters, or other reusable chunks.
-- Declared with a sym-class where `--` immediately follows the final `$`, for example: `stitch$--class-name`.
-
 ### `<sketch> ... </sketch>`
 
 - Declares component-level styles and generates a corresponding preview template.
@@ -889,7 +883,7 @@ When a symbolic class (sym-class) appears as an attribute on these special tags,
 
 ## Replacement Placeholders
 
-Self-closing tags and reserved HTML comments act as insertion points where compiled styles and stitch snippets are injected.
+Self-closing tags and reserved HTML comments act as insertion points where compiled styles and sketch snippets are injected.
 
 ```html
 <!doctype html>
@@ -912,11 +906,11 @@ Self-closing tags and reserved HTML comments act as insertion points where compi
     --pattern-checker-size: var(---delta-block-lg);
   "
 >
-  <stitch amorphous$--container>
+  <sketch amorphous$--container>
     <svg xmlns="http://www.w3.org/2000/svg">
       <defs> ... </defs>
     </svg>
-  </stitch>
+  </sketch>
 
   <sketch
     data-glass-type="liquid"
@@ -938,14 +932,14 @@ Self-closing tags and reserved HTML comments act as insertion points where compi
     Content
   </div>
 
-  <!-- stitch -->
+  <!-- sketch -->
 </body>
 </html>
 ```
 
 ### `<sketch />` / `<!-- sketch -->`
 
-- Placeholder used to deploy both the compiled stylesheet and associated stitch snippets in one shot.
+- Placeholder used to deploy both the compiled stylesheet and associated sketch snippets in one shot.
 - Designed for rapid prototyping; for production builds, a more controlled injection strategy is recommended.
 
 ### `<style />` / `<!-- style -->`
@@ -953,10 +947,9 @@ Self-closing tags and reserved HTML comments act as insertion points where compi
 - Marks where the compiled stylesheet block should be embedded inside targeted files.
 - Lets you keep your source clean while still controlling where styles appear in the final HTML.
 
-### `<stitch />` / `<!-- stitch -->`
+### `<sketch class="&{sym-class}"/>` / `<style class="&{sym-class}"/>`
 
-- Placeholder for injecting attached stitch snippets (for example SVG defs or filters) into the compiled output.
-- Ensures shared assets are emitted exactly once in the right place in the document.
+- These acts as a build-time placeholder for specific symclasses and is replaced by the HTML snippet bound it.
 
 ---
 
