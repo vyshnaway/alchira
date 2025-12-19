@@ -231,19 +231,18 @@ func Tag_Scanner(
 		}
 
 		fragString = fragBuilder.String()
+		selfClosed = fileCursor.Active.Last == '/'
+
 		if fragString[1] == '!' || (!hasDeclared && !BuildMode) {
 			fragString = string(fileCursor.Slice(tagStart, styleDeclarations.EndMarker))
 		} else {
 			fileCursor.Active.Cycle++
-			selfClosed = fileCursor.Active.Last == '/'
 			if E_Method_LoadHash != method && selfClosed && BuildMode &&
 				(styleDeclarations.Elid == _config.Root.CustomTags["sketch"] ||
 					styleDeclarations.Elid == _config.Root.CustomTags["style"]) {
 				fragString = Marcro_Builder(styleDeclarations.Comments, method, fileData, appendstack)
-			} else {
-				appendsList = Marcro_Reader(styleDeclarations.Comments)
-				fragString = fragBuilder.String()
 			}
+			_map.Copy(appendsList, Marcro_Reader(styleDeclarations.Comments))
 			styleDeclarations.Range = _reader.T_Range{Data: []string{}, Start: startpos, End: fileCursor.Active}
 		}
 

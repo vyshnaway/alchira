@@ -518,9 +518,7 @@ Escape the tilde in JavaScript template literals or event handlers to maintain f
 ### When to Use
 
 - Best suited for utilities and atomic classes that do not overlap.
-- Avoid using it when stable or nested style propagation is required.
-
-> The append class loader is a special variant of the scattered class loader that uses the & operator. Instead of only applying classes, it also appends the associated stitch snippet to the end of the tag, making it especially useful for importing symbols. Which will be explained in [dependacy](./5.0-depedancy.md) in detail.
+- Avoid using it when stable nested style propagation is required.
 
 ## Ordered Class Loader (`+`)
 

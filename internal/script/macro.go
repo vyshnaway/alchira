@@ -1,9 +1,9 @@
 package script
 
 import (
-	"fmt"
 	_action "main/internal/action"
 	_model "main/models"
+	"main/package/object"
 	_map "maps"
 	"strconv"
 	"strings"
@@ -12,43 +12,63 @@ import (
 )
 
 type MultiplierInstruction struct {
-	Count  int
-	Symbol string
+	Count    int
+	Value    string
+	Symbol   string
+	Symclass string
 }
 
-func ParseMultiplier(input string) (MultiplierInstruction, error) {
+func Tokenize(input string) (MultiplierInstruction, error) {
 	input = strings.TrimSpace(input)
 	var countStr strings.Builder
-	var symbolStr strings.Builder
+	var symclass strings.Builder
+	var symbol strings.Builder
+	var value strings.Builder
 
 	foundAsterisk := false
+	gotSymbol := false
 
 	for _, char := range input {
-		if unicode.IsDigit(char) && !foundAsterisk {
-			// Phase 1: Capture the Multiplier (n)
+		if !gotSymbol {
+			if char == '=' {
+				gotSymbol = true
+				continue
+			} else {
+				symbol.WriteRune(char)
+			}
+		} else if !foundAsterisk && unicode.IsDigit(char) {
 			countStr.WriteRune(char)
 		} else if char == '*' && !foundAsterisk {
-			// Phase 2: Detect the Bridge (*)
 			foundAsterisk = true
 		} else if foundAsterisk {
-			symbolStr.WriteRune(char)
+			symclass.WriteRune(char)
 		}
-	}
+		if gotSymbol {
+			value.WriteRune(char)
+		}
 
-	// Validation
-	if !foundAsterisk {
-		return MultiplierInstruction{}, fmt.Errorf("invalid macro format: %s", input)
 	}
 
 	count, _ := strconv.Atoi(countStr.String())
 	if count == 0 {
 		count = 1
-	} // Default to 1 if no number provided
+	}
 
 	return MultiplierInstruction{
-		Count:  count,
-		Symbol: symbolStr.String(),
+		Count:    count,
+		Value:    _string.TrimSpace(value.String()),
+		Symbol:   _string.TrimSpace(symbol.String()),
+		Symclass: _string.TrimSpace(symclass.String()),
 	}, nil
+}
+
+func ApplySymbols(input string, register *object.T[string, string]) string {
+
+	register.Range(func(k, v string) {
+		input = _string.ReplaceAll(input, k, v)
+	})
+
+	return input
 }
 
 func Marcro_Builder(
@@ -58,15 +78,24 @@ func Marcro_Builder(
 	appendstack map[int]bool,
 ) string {
 
-	var builder _string.Builder
 	var entry _string.Builder
+	var register = object.New[string, string](4)
 
 	entry.Reset()
 
+	macrostack := make([]string, 4)
+
 	for _, line := range macros {
-		if tokens, err := ParseMultiplier(line); err == nil {
-			res := _action.Index_Finder(tokens.Symbol, fileData.Cache.LocalMap)
+		line = ApplySymbols(line, register)
+
+		if tokens, err := Tokenize(line); err == nil {
+
+			val := tokens.Value
+			res := _action.Index_Finder(tokens.Symclass, fileData.Cache.LocalMap)
+
 			if res.Index > 0 {
+				var tmbuild _string.Builder
+
 				if !appendstack[res.Index] {
 					subappendstack := make(map[int]bool, len(appendstack)+1)
 					_map.Copy(subappendstack, appendstack)
@@ -74,35 +103,43 @@ func Marcro_Builder(
 					context := *res.Data.Context
 					context.Content = res.Data.SrcData.Metadata.SketchSnippet
 					context.Midway = res.Data.SrcData.Metadata.SketchSnippet
-					append := Rider(&context, method, subappendstack).Scribed
+					content := Rider(&context, method, subappendstack).Scribed
 
-					builder.Grow((len(append) +1) * tokens.Count)
+					tmbuild.Grow((len(content) + 1) * tokens.Count)
 					for range tokens.Count {
-						builder.WriteRune('\n')
-						builder.WriteString(append)
+						if len(content) > 0 {
+							tmbuild.WriteString(content)
+						}
 					}
 				}
+
+				val = tmbuild.String()
 			}
+
+			if len(tokens.Symbol) == 0 {
+				macrostack = append(macrostack, val)
+			} else {
+				for i, s := range macrostack {
+					macrostack[i] = _string.ReplaceAll(s, tokens.Symbol, val)
+				}
+				register.Set(tokens.Symbol, val)
+			}
+
 		}
 	}
 
-	return builder.String()
+	return _string.Join(macrostack, "\n")
 }
 
 func Marcro_Reader(
 	macros []string,
 ) map[string]bool {
-
 	symclasses := map[string]bool{}
-	var entry _string.Builder
-
-	entry.Reset()
-
 	for _, line := range macros {
-		if tkn, err := ParseMultiplier(line); err == nil {
-			symclasses[tkn.Symbol] = true
+		if tkn, err := Tokenize(line); err == nil {
+			symclasses[tkn.Symclass] = true
 		}
 	}
-
+	
 	return symclasses
 }
