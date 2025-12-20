@@ -118,7 +118,6 @@ func (This *Class) SketchFiles(
 	stylesheet string,
 	styleBlock string,
 	sketchBlock string,
-	stitchBlock string,
 ) map[string]string {
 	savefiles := make(map[string]string, len(This.FileCache)+1)
 	savefiles[This.SourceStylesheet] = stylesheet
@@ -129,8 +128,6 @@ func (This *Class) SketchFiles(
 			var out _string.Builder
 			for _, m := range file.Cache.TagReplacements {
 				switch m.Elid {
-				case _config.Root.CustomTags["stitch"]:
-					out.WriteString(file.Scratch[fromPos:m.Loc] + stitchBlock)
 				case _config.Root.CustomTags["sketch"]:
 					out.WriteString(file.Scratch[fromPos:m.Loc] + sketchBlock)
 				case _config.Root.CustomTags["style"]:

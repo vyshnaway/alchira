@@ -16,11 +16,8 @@ func Artifact(index int) *_model.Style_ExportStyle {
 	symclass := ""
 	stylesheet := make(map[string]string, style.SrcData.ExportRawStyle.BlockLen())
 	attributes := make(map[string]string, len(style.SrcData.Attributes))
-
-	if len(style.SrcData.ExportStitch) > 0 {
-		element = "stitch"
-		innertext = style.SrcData.ExportStitch
-	} else if len(style.SrcData.Metadata.SketchSnippet) > 0 {
+	
+	if len(style.SrcData.Metadata.SketchSnippet) > 0 {
 		element = "sketch"
 		innertext = style.SrcData.Metadata.SketchSnippet
 	} else {

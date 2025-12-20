@@ -105,7 +105,7 @@ func Sandbox_Save(index int) (response any) {
 	for i := range attachIndex {
 		ref := action.Index_Fetch(i)
 		stylesheet.WriteString(css.Render_Vendored(ref.SrcData.NativeAttachStyle, true))
-		stitchsheet.WriteString(ref.SrcData.NativeStitch)
+		stitchsheet.WriteString(script.SketchBuilder(i, script.E_Method_DebugHash, map[int]bool{}))
 	}
 
 	Sandbox_View_Component = &T_Component_return{

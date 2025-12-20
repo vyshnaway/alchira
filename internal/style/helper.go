@@ -8,6 +8,7 @@ import (
 	_util "main/package/utils"
 	_regexp "regexp"
 	"strings"
+	"maps"
 )
 
 var symzero_regex = _regexp.MustCompile(`^[-_]\$`)
@@ -86,4 +87,18 @@ func stripCustomTags(context *_model.File_Stash, str string) string {
 	file.Content = str
 	out := _script.Rider(&file, _script.E_Method_Strip, map[int]bool{}).Scribed
 	return out
+}
+
+func ResolveDependints(data *_model.Cache_SymclassData) map[int]bool {
+	if data.Dependint == nil {
+		data.Dependint = map[int]bool{}
+		for as := range data.SrcData.Attachments {
+			if found := _action.Index_Finder(as, data.Context.Cache.LocalMap); found.Index > 0 {
+				r := ResolveDependints(found.Data)
+				data.Dependint[found.Index] = true
+				maps.Copy(data.Dependint, r)
+			}
+		}
+	}
+	return data.Dependint
 }

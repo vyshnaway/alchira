@@ -52,8 +52,6 @@ type Style_ClassData struct {
 	PublishScatterClass string
 	PublishFinalClass   string
 	Attachments         map[string]bool
-	NativeStitch        string
-	ExportStitch        string
 	NativeRawStyle      *_css.T_Block
 	ExportRawStyle      *_css.T_Block
 	NativeAttachStyle   *_css.T_Block

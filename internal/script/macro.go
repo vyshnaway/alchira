@@ -4,7 +4,7 @@ import (
 	_action "main/internal/action"
 	_model "main/models"
 	"main/package/object"
-	_map "maps"
+	"maps"
 	"strconv"
 	"strings"
 	_string "strings"
@@ -84,6 +84,8 @@ func Macro_Builder(
 	entry.Reset()
 
 	macrostack := make([]string, 4)
+	subappendstack := make(map[int]bool, len(appendstack))
+	maps.Copy(subappendstack, appendstack)
 
 	for _, line := range macros {
 		line = ApplySymbols(line, register)
@@ -97,13 +99,8 @@ func Macro_Builder(
 				var tmbuild _string.Builder
 
 				if !appendstack[res.Index] {
-					subappendstack := make(map[int]bool, len(appendstack)+1)
-					_map.Copy(subappendstack, appendstack)
+					content := res.Data.SrcData.Metadata.SketchSnippet
 					subappendstack[res.Index] = true
-					context := *res.Data.Context
-					context.Content = res.Data.SrcData.Metadata.SketchSnippet
-					context.Midway = res.Data.SrcData.Metadata.SketchSnippet
-					content := Rider(&context, method, subappendstack).Scribed
 
 					tmbuild.Grow((len(content) + 1) * tokens.Count)
 					for range tokens.Count {
@@ -124,8 +121,11 @@ func Macro_Builder(
 				}
 				register.Set(tokens.Symbol, val)
 			}
-
 		}
+	}
+
+	for i, s := range macrostack {
+		macrostack[i] = MacroSketcher(s, fileData, method, subappendstack)
 	}
 
 	return _string.Join(macrostack, "\n")

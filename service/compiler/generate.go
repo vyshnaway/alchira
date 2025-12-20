@@ -5,6 +5,7 @@ import (
 	_config "main/configs"
 	_action "main/internal/action"
 	X "main/internal/console"
+	// "main/internal/script"
 	_stash "main/internal/stash"
 	S "main/package/console"
 	_css "main/package/css"
@@ -27,18 +28,18 @@ func Generate_Files() (Files map[string]string, Report string) {
 		return result
 	}(), _config.Static.MINIFY)
 
-	attach_frag, stitch_sheet := func() (string, string) {
+	attach_frag, sketch_sheet := func() (string, string) {
 		attach_styles := _css.NewBlock(len(attachments), len(attachments))
-		var attach_stitchs _string.Builder
-		for a := range attachments {
-			if data := _action.Index_Fetch(a); data != nil {
+		var attach_sketchs _string.Builder
+		for i := range attachments {
+			if data := _action.Index_Fetch(i); data != nil {
 				attach_styles.Merge(data.SrcData.NativeAttachStyle)
-				attach_stitchs.WriteString(data.SrcData.NativeStitch)
+				// attach_sketchs.WriteString(script.SketchBuilder(i, script.E_Method_DebugHash, map[int]bool{}))
 			}
 		}
 		attach_frag := _css.Render_Vendored(attach_styles, _config.Static.MINIFY)
-		stitch_sheet := attach_stitchs.String()
-		return attach_frag, stitch_sheet
+		sketch_sheet := attach_sketchs.String()
+		return attach_frag, sketch_sheet
 	}()
 
 	scattered_block := _css.NewBlock(0, len(scatteredMap))
@@ -104,11 +105,10 @@ func Generate_Files() (Files map[string]string, Report string) {
 		return _string.Join(frags, "")
 	}()
 
-	stitch_block := _fmt.Sprint(_config.Saved.Tweaks["stitch-prefix"], stitch_sheet, _config.Saved.Tweaks["stitch-suffix"])
+	sketch_block := _fmt.Sprint(_config.Saved.Tweaks["sketch-prefix"], sketch_sheet, _config.Saved.Tweaks["sketch-suffix"])
 	style_block := _fmt.Sprint(_config.Saved.Tweaks["styles-prefix"], style_sheet, _config.Saved.Tweaks["styles-suffix"])
-	sketch_block := style_block + stitch_block
 	for _, target := range _stash.Cache.Targetdir {
-		_map.Copy(files, target.SketchFiles(style_sheet, style_block, sketch_block, stitch_block))
+		_map.Copy(files, target.SketchFiles(style_sheet, style_block, sketch_block))
 	}
 
 	if !_config.Static.WATCH {

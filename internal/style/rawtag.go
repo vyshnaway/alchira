@@ -132,14 +132,6 @@ func Rawtag_Upload(
 			exportAttachStyle = exportAttachResult.Result
 		}
 
-		exportStitch := ""
-		nativeStitch := ""
-		if raw.Elid == _config.Root.CustomTags["stitch"] {
-			stripped := _util.Code_Strip(raw.Innertext, false, false, false, false)
-			exportStitch = importLodash(file, stripped, Lodash_frag+file.Label)
-			nativeStitch = importLodash(file, stripped, file.Label)
-		}
-
 		sketch := ""
 		attributes := map[string]string{}
 		if raw.Elid == _config.Root.CustomTags["sketch"] {
@@ -149,7 +141,7 @@ func Rawtag_Upload(
 		}
 
 		appendable := false
-		if len(nativeStitch) > 0 || len(sketch) > 0 {
+		if len(sketch) > 0 {
 			appendable = true
 		}
 		comments := raw.Comments
@@ -176,8 +168,6 @@ func Rawtag_Upload(
 			SymClass:          symclass,
 			Metadata:          metadata,
 			Attachments:       attachments,
-			ExportStitch:      exportStitch,
-			NativeStitch:      nativeStitch,
 			ExportRawStyle:    exportRawStyle,
 			NativeRawStyle:    nativeRawStyle,
 			ExportAttachStyle: exportAttachStyle,

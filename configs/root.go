@@ -50,10 +50,10 @@ var Root = models.Cache_Root{
 		// "install": "Install external artifacts.",
 	},
 	Tweaks: models.Config_Tweaks{
-		"stitch-prefix": "",
-		// prefix for stitch replacement tags
-		"stitch-suffix": "",
-		// suffix for stitch replacement tags
+		"sketch-prefix": "",
+		// prefix for sketch replacement tags
+		"sketch-suffix": "",
+		// suffix for sketch replacement tags
 		"styles-prefix": "",
 		// prefix for styles replacement tags
 		"styles-suffix": "",
@@ -66,7 +66,6 @@ var Root = models.Cache_Root{
 	CustomTags: map[string]int{
 		"style":  1,
 		"sketch": 2,
-		"stitch": 3,
 	},
 	CustomOp: map[string]rune{
 		"apply":  '+', // Rigid assign

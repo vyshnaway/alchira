@@ -121,7 +121,6 @@ func Cssfile_Collection(files []*_model.File_Stash) cssfile_Collection_return {
 					NativeRawStyle:    object,
 					ExportRawStyle:    object,
 					Attachments:       attachments,
-					NativeStitch:      "",
 					NativeAttachStyle: attach_style,
 					ExportAttachStyle: attach_style,
 				}, debugClass)
