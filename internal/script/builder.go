@@ -17,7 +17,7 @@ func Value_Builder(
 	fileCursor *_reader.T_Reader,
 	isWatching bool,
 	orderedMapping map[string]string,
-) (string) {
+) string {
 
 	awaitop := false
 	scribed := value
@@ -46,7 +46,7 @@ func Value_Builder(
 						awaitop = false
 					}
 
-				case op_order:
+				case op_mid:
 					if method != E_Method_LoadHash {
 						if found_Entry, found_Status := orderedMapping[entrystring]; found_Status {
 							stream.WriteString(found_Entry)
@@ -54,37 +54,37 @@ func Value_Builder(
 						}
 					}
 
-				case op_scatter:
+				case op_low:
 					if method != E_Method_LoadHash {
 						if res := _action.Index_Finder(entrystring, fileData.Cache.LocalMap); res.Index > 0 {
 							if method == E_Method_DebugHash {
-								classname := res.Data.SrcData.DebugScatterClass
+								classname := res.Data.SrcData.DebugLow
 								stream.WriteString(classname)
-								if waitop == op_scatter {
+								if waitop == op_low {
 									_config.Style.Classlist_Scattered[classname] = res.Index
 								} else {
 									_config.Style.Classlist_Append[classname] = res.Index
 								}
 							} else if method == E_Method_PreviewHash || _config.Static.PREVIEW {
-								stream.WriteString(res.Data.SrcData.PreviewScatterClass)
+								stream.WriteString(res.Data.SrcData.PreviewLow)
 							} else {
-								stream.WriteString(res.Data.SrcData.PublishScatterClass)
+								stream.WriteString(res.Data.SrcData.PublishLow)
 							}
 							awaitop = false
 						}
 					}
-					
-				case op_finalize:
+
+				case op_top:
 					if method != E_Method_LoadHash {
 						if res := _action.Index_Finder(entrystring, fileData.Cache.LocalMap); res.Index > 0 {
 							if method == E_Method_DebugHash {
-								classname := res.Data.SrcData.DebugFinalClass
+								classname := res.Data.SrcData.DebugTop
 								stream.WriteString(classname)
 								_config.Style.Classlist_Final[classname] = res.Index
 							} else if method == E_Method_PreviewHash || _config.Static.PREVIEW {
-								stream.WriteString(res.Data.SrcData.PreviewFinalClass)
+								stream.WriteString(res.Data.SrcData.PreviewTop)
 							} else {
-								stream.WriteString(res.Data.SrcData.PublishFinalClass)
+								stream.WriteString(res.Data.SrcData.PublishTop)
 							}
 							awaitop = false
 						}

@@ -127,7 +127,7 @@ func CreateContext(
 			Type:            lookupType,
 			UsedIn:          []int{},
 			ScatteredStyles: map[string]bool{},
-			AppendsStyles:   map[string]bool{},
+			MacroStyles:     map[string]bool{},
 			FinalStyles:     map[string]bool{},
 			RigidTracks:     [][]string{},
 			LocalMap:        make(_model.Style_ClassIndexMap, AZ),

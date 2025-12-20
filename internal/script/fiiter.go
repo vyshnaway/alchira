@@ -13,7 +13,7 @@ type value_ClassFilter_return struct {
 }
 
 func checkOpSlash(isWatching bool, last, ch rune) bool {
-	opok := op_order == ch || ch == op_scatter || ch == op_finalize || ch == op_lodash
+	opok := op_mid == ch || ch == op_low || ch == op_top || ch == op_lodash
 	if isWatching {
 		return last != '\\' && opok
 	}
@@ -36,7 +36,7 @@ func Value_ClassFilter(
 	var waitop rune = 0
 
 	for nr.Streaming {
-		ch := nr.Active.Char 
+		ch := nr.Active.Char
 
 		if awaitop {
 			if ok := symclass_chars.Match([]byte{byte(ch)}); ok {
@@ -45,11 +45,11 @@ func Value_ClassFilter(
 				entryString := entry.String()
 
 				switch waitop {
-				case op_scatter:
+				case op_low:
 					scatterList[entryString] = true
-				case op_order:
+				case op_mid:
 					orderedlist = append(orderedlist, entryString)
-				case op_finalize:
+				case op_top:
 					finalList[entryString] = true
 				case op_lodash:
 					loadashes[entryString] = true

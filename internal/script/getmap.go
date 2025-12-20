@@ -46,7 +46,7 @@ func Value_EvaluateIndexTraces(
 		case E_Method_DebugHash:
 			for _, item := range classTrace {
 				classdata := _action.Index_Fetch(item.ClassIndex)
-				classname := _fmt.Sprintf("%s%s", metaFront, classdata.SrcData.DebugScatterClass)
+				classname := _fmt.Sprintf("%s%s", metaFront, classdata.SrcData.DebugMid)
 				temp_map = append(temp_map, _model.Style_ClassIndexTrace{
 					ClassName:  classname,
 					ClassIndex: item.ClassIndex,
@@ -56,7 +56,7 @@ func Value_EvaluateIndexTraces(
 		case E_Method_PreviewHash:
 			for _, item := range classTrace {
 				classdata := _action.Index_Fetch(item.ClassIndex)
-				classname := _fmt.Sprintf("%s%s", metaFront, classdata.SrcData.PreviewScatterClass)
+				classname := _fmt.Sprintf("%s%s", metaFront, classdata.SrcData.PreviewMid)
 				temp_map = append(temp_map, _model.Style_ClassIndexTrace{
 					ClassName:  classname,
 					ClassIndex: item.ClassIndex,
@@ -73,7 +73,7 @@ func Value_EvaluateIndexTraces(
 	return classMap
 }
 
-var op_order = _config.Root.CustomOp["apply"]
-var op_scatter = _config.Root.CustomOp["attach"]
-var op_finalize = _config.Root.CustomOp["assign"]
+var op_low = _config.Root.CustomOp["attach"]
+var op_mid = _config.Root.CustomOp["apply"]
+var op_top = _config.Root.CustomOp["assign"]
 var op_lodash = _config.Root.CustomOp["lodash"]

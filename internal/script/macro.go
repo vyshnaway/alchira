@@ -135,7 +135,8 @@ func Marcro_Reader(
 ) map[string]bool {
 	symclasses := map[string]bool{}
 	for _, line := range macros {
-		if tkn, err := Tokenize(line); err == nil {
+		tkn, err := Tokenize(line);
+		if  err == nil && len(tkn.Symclass) > 0 {
 			symclasses[tkn.Symclass] = true
 		}
 	}

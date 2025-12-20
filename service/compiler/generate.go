@@ -5,6 +5,7 @@ import (
 	_config "main/configs"
 	_action "main/internal/action"
 	X "main/internal/console"
+
 	// "main/internal/script"
 	_stash "main/internal/stash"
 	S "main/package/console"
@@ -17,7 +18,7 @@ import (
 
 func Generate_Files() (Files map[string]string, Report string) {
 
-	files, attachments, scatteredMap, finalMap := Organize()
+	files, shortlist := Organize()
 	_stash.Target_SyncClassNames()
 
 	appendix_frag := _css.Render_Sequence(func() *_css.T_BlockSeq {
@@ -29,12 +30,16 @@ func Generate_Files() (Files map[string]string, Report string) {
 	}(), _config.Static.MINIFY)
 
 	attach_frag, sketch_sheet := func() (string, string) {
-		attach_styles := _css.NewBlock(len(attachments), len(attachments))
+		attach_styles := _css.NewBlock(len(shortlist.DependMap), len(shortlist.DependMap))
 		var attach_sketchs _string.Builder
-		for i := range attachments {
+		for i := range shortlist.DependMap {
 			if data := _action.Index_Fetch(i); data != nil {
 				attach_styles.Merge(data.SrcData.NativeAttachStyle)
-				// attach_sketchs.WriteString(script.SketchBuilder(i, script.E_Method_DebugHash, map[int]bool{}))
+				// if _config.Static.DEBUG {
+				// 	attach_sketchs.WriteString(script.SketchBuilder(i, script.E_Method_DebugHash, map[int]bool{i: true}))
+				// } else {
+				// 	attach_sketchs.WriteString(script.SketchBuilder(i, script.E_Method_PreviewHash, map[int]bool{i: true}))
+				// }
 			}
 		}
 		attach_frag := _css.Render_Vendored(attach_styles, _config.Static.MINIFY)
@@ -42,33 +47,34 @@ func Generate_Files() (Files map[string]string, Report string) {
 		return attach_frag, sketch_sheet
 	}()
 
-	scattered_block := _css.NewBlock(0, len(scatteredMap))
-	for i := range scatteredMap {
+	scattered_block := _css.NewBlock(0, len(shortlist.ScatterMap))
+	for i := range shortlist.ScatterMap {
 		d := _action.Index_Fetch(i)
 		if _config.Static.DEBUG {
-			scattered_block.SetBlock(FmtClassForCss(d.SrcData.DebugScatterClass), d.SrcData.NativeRawStyle)
+			scattered_block.SetBlock(FmtClassForCss(d.SrcData.DebugLow), d.SrcData.NativeRawStyle)
 		} else if _config.Static.PREVIEW {
-			scattered_block.SetBlock(FmtClassForCss(d.SrcData.PreviewScatterClass), d.SrcData.NativeRawStyle)
+			scattered_block.SetBlock(FmtClassForCss(d.SrcData.PreviewLow), d.SrcData.NativeRawStyle)
 		} else {
-			scattered_block.SetBlock(FmtClassForCss(d.SrcData.PublishScatterClass), d.SrcData.NativeRawStyle)
+			scattered_block.SetBlock(FmtClassForCss(d.SrcData.PublishLow), d.SrcData.NativeRawStyle)
 		}
 	}
 	scattered_frag := _css.Render_Switched(scattered_block, _config.Static.MINIFY)
 
-	final_block := _css.NewBlock(0, len(finalMap))
-	for i := range finalMap {
+	final_block := _css.NewBlock(0, len(shortlist.FinalMap))
+	for i := range shortlist.FinalMap {
 		d := _action.Index_Fetch(i)
 		if _config.Static.DEBUG {
-			final_block.SetBlock(FmtClassForCss(d.SrcData.DebugFinalClass), d.SrcData.NativeRawStyle)
+			final_block.SetBlock(FmtClassForCss(d.SrcData.DebugTop), d.SrcData.NativeRawStyle)
 		} else if _config.Static.PREVIEW {
-			final_block.SetBlock(FmtClassForCss(d.SrcData.PreviewFinalClass), d.SrcData.NativeRawStyle)
+			final_block.SetBlock(FmtClassForCss(d.SrcData.PreviewTop), d.SrcData.NativeRawStyle)
 		} else {
-			final_block.SetBlock(FmtClassForCss(d.SrcData.PublishFinalClass), d.SrcData.NativeRawStyle)
+			final_block.SetBlock(FmtClassForCss(d.SrcData.PublishTop), d.SrcData.NativeRawStyle)
 		}
 	}
 	final_frag := _css.Render_Switched(final_block, _config.Static.MINIFY)
 
 	report, errLen, finalMessage, index_frag := ClearUnwantedCache()
+
 	var class_builder _string.Builder
 	for _, i := range _config.Style.Classlist_Ordered {
 		class_builder.WriteString(_css.Render_Switched(func() *_css.T_Block {
@@ -108,7 +114,7 @@ func Generate_Files() (Files map[string]string, Report string) {
 	sketch_block := _fmt.Sprint(_config.Saved.Tweaks["sketch-prefix"], sketch_sheet, _config.Saved.Tweaks["sketch-suffix"])
 	style_block := _fmt.Sprint(_config.Saved.Tweaks["styles-prefix"], style_sheet, _config.Saved.Tweaks["styles-suffix"])
 	for _, target := range _stash.Cache.Targetdir {
-		_map.Copy(files, target.SketchFiles(style_sheet, style_block, sketch_block))
+		_map.Copy(files, target.RebuildFiles(style_sheet, style_block, sketch_block))
 	}
 
 	if !_config.Static.WATCH {

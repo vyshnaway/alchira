@@ -93,7 +93,7 @@ func Rider(
 				parsed = Tag_Scanner(fileData, method, &cursorx, appendstack, orderedMapping)
 			}
 			fragment := parsed.Fragment
-			
+
 			exitedNow := false
 			if parsed.Ok {
 				_map.Copy(scatteredList, parsed.ScatteredList)
@@ -166,31 +166,31 @@ func Rider(
 						awaitop = false
 					}
 
-				case op_scatter:
+				case op_low:
 					if method == E_Method_Read {
 						scatteredList[entrystring] = true
 					} else if i := _action.Index_Finder(entrystring, fileData.Cache.LocalMap); i.Index > 0 && method != E_Method_LoadHash {
 						if method == E_Method_DebugHash {
-							stream.WriteString(i.Data.SrcData.DebugScatterClass)
+							stream.WriteString(i.Data.SrcData.DebugLow)
 						} else if E_Method_PreviewHash == method || _config.Static.PREVIEW {
-							stream.WriteString(i.Data.SrcData.PreviewScatterClass)
+							stream.WriteString(i.Data.SrcData.PreviewLow)
 						} else {
-							stream.WriteString(i.Data.SrcData.PublishScatterClass)
+							stream.WriteString(i.Data.SrcData.PublishLow)
 						}
 
 						awaitop = false
 					}
 
-				case op_finalize:
+				case op_top:
 					if method == E_Method_Read {
 						finalList[entrystring] = true
 					} else if i := _action.Index_Finder(entrystring, fileData.Cache.LocalMap); i.Index > 0 && method != E_Method_LoadHash {
 						if method == E_Method_DebugHash {
-							stream.WriteString(i.Data.SrcData.DebugFinalClass)
+							stream.WriteString(i.Data.SrcData.DebugTop)
 						} else if E_Method_PreviewHash == method || _config.Static.PREVIEW {
-							stream.WriteString(i.Data.SrcData.PreviewFinalClass)
+							stream.WriteString(i.Data.SrcData.PreviewTop)
 						} else {
-							stream.WriteString(i.Data.SrcData.PublishFinalClass)
+							stream.WriteString(i.Data.SrcData.PublishTop)
 						}
 						awaitop = false
 					}
@@ -208,7 +208,7 @@ func Rider(
 			}
 		} else if method != E_Method_Strip &&
 			cursor.Active.Last == '\\' &&
-			(ch == op_scatter || ch == op_finalize || ch == op_lodash) {
+			(ch == op_low || ch == op_top || ch == op_lodash) {
 			awaitop = true
 			waitop = ch
 		} else if len(tagTrack) == 0 {

@@ -87,8 +87,8 @@ func Execute(heading string) (Exitcode int) {
 
 			go func() {
 				<-sigs
-				watchman.Close()
 				S.Render.Write("\n"+S.Tag.H5("Ok, I will stop watching!!!", S.Preset.Failed, S.Style.AS_Bold), 3)
+				watchman.Close()
 				save_action.Wait()
 				_os.Exit(1)
 			}()

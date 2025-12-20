@@ -24,7 +24,7 @@ func SetReferences() {
 	_stash.Cache_Reset()
 	_stash.Artifact_Update()
 	_stash.Library_Update()
-	
+
 	_style.Hashrule_Upload()
 
 	index_scanned := _style.Cssfile_String(_util.Code_Uncomment(_config.Saved.RootCSS, false, true, false), "INDEX | ")
@@ -112,7 +112,7 @@ func Accumulate() _target.GetTracks_return {
 	return _stash.Target_GetTracks()
 }
 
-func Organize() (AritfactFiles map[string]string, Attachments map[int]bool, RapidMap map[int]bool, FinalMap map[int]bool) {
+func Organize() (AritfactFiles map[string]string, Shortlist _target.GetTracks_return) {
 
 	SaveClassRefs := func(stash _order_.R_Preview) {
 		// refmap := map[int]string{}
@@ -149,6 +149,7 @@ func Organize() (AritfactFiles map[string]string, Attachments map[int]bool, Rapi
 	}
 
 	tracks := Accumulate()
+	_map.Copy(tracks.MacroMap, _config.Delta.IndexAttach)
 	artifact_files := map[string]string{}
 	_config.Delta.FinalMessage = _strconv.Itoa(len(_config.Delta.Errors)) + " Errors."
 
@@ -189,6 +190,5 @@ func Organize() (AritfactFiles map[string]string, Attachments map[int]bool, Rapi
 		}
 	}
 
-	_map.Copy(tracks.Attachments, _config.Delta.IndexAttach)
-	return artifact_files, tracks.Attachments, tracks.ScatterMap, tracks.FinalMap
+	return artifact_files, tracks
 }

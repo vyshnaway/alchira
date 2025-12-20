@@ -4,7 +4,8 @@ import (
 	_config "main/configs"
 	_action "main/internal/action"
 	_script "main/internal/script"
-	"main/internal/style"
+
+	// "main/internal/style"
 	_model "main/models"
 	_map "maps"
 	_slice "slices"
@@ -34,39 +35,35 @@ func (This *Class) Accumulator() Accumulator_return {
 
 type GetTracks_return struct {
 	ClassTracks [][]int
-	Attachments map[int]bool
+	MacroMap    map[int]bool
 	ScatterMap  map[int]bool
+	DependMap  map[int]bool
 	FinalMap    map[int]bool
 }
 
 func (This *Class) GetTracks() GetTracks_return {
 	classtracks := make([][]int, 0, 24*len(This.FileCache))
 	finalIntMap := make(map[int]bool, 8)
-	attachIntMap := make(map[int]bool, 8)
+	macroMap := make(map[int]bool, 8)
 	scatterIntMap := make(map[int]bool, 8)
 
 	sc := This.StylesheetContext.Cache
 	for i := range sc.ScatteredStyles {
 		if found := _action.Index_Finder(i, sc.LocalMap); found.Index > 0 {
-			attachIntMap[found.Index] = true
+			macroMap[found.Index] = true
 		}
 	}
 
 	for _, file := range This.FileCache {
-		for s := range file.Cache.AppendsStyles {
+		for s := range file.Cache.MacroStyles {
 			if found := _action.Index_Finder(s, file.Cache.LocalMap); found.Index > 0 {
-				scatterIntMap[found.Index] = true
-				_map.Copy(attachIntMap, style.ResolveDependints(found.Data))
+				macroMap[found.Index] = true
 			}
 		}
 
 		for s := range file.Cache.ScatteredStyles {
 			if found := _action.Index_Finder(s, file.Cache.LocalMap); found.Index > 0 {
 				scatterIntMap[found.Index] = true
-				_map.Copy(attachIntMap, style.ResolveDependints(found.Data))
-				if found.Group != _model.Style_Type_Library {
-					attachIntMap[found.Index] = true
-				}
 			}
 		}
 
@@ -75,10 +72,6 @@ func (This *Class) GetTracks() GetTracks_return {
 			for _, i := range track {
 				if found := _action.Index_Finder(i, file.Cache.LocalMap); found.Index > 0 {
 					retraces = append(retraces, found.Index)
-					_map.Copy(attachIntMap, style.ResolveDependints(found.Data))
-					if found.Group != _model.Style_Type_Library {
-						attachIntMap[found.Index] = true
-					}
 				}
 			}
 
@@ -90,31 +83,26 @@ func (This *Class) GetTracks() GetTracks_return {
 		for s := range file.Cache.FinalStyles {
 			if found := _action.Index_Finder(s, file.Cache.LocalMap); found.Index > 0 {
 				finalIntMap[found.Index] = true
-				_map.Copy(attachIntMap, style.ResolveDependints(found.Data))
-				if found.Group != _model.Style_Type_Library {
-					attachIntMap[found.Index] = true
-				}
 			}
 		}
 	}
 	return GetTracks_return{
 		ClassTracks: classtracks,
-		Attachments: attachIntMap,
 		ScatterMap:  scatterIntMap,
 		FinalMap:    finalIntMap,
+		MacroMap:    macroMap,
 	}
 }
 
 func (This *Class) SyncClassnames(action _script.E_Method) {
 	for _, file := range This.FileCache {
 		res := _script.Rider(file, action, map[int]bool{})
-
 		file.Scratch = res.Scribed
 		file.Cache.TagReplacements = res.Replacements
 	}
 }
 
-func (This *Class) SketchFiles(
+func (This *Class) RebuildFiles(
 	stylesheet string,
 	styleBlock string,
 	sketchBlock string,

@@ -6,17 +6,19 @@ import (
 	_script "main/internal/script"
 	_model "main/models"
 	_util "main/package/utils"
+	"maps"
 	_regexp "regexp"
 	"strings"
-	"maps"
 )
 
 var symzero_regex = _regexp.MustCompile(`^[-_]\$`)
 
-var PublishScatterPrefix = "_"
-var PublishFinalPrefix = "___"
-var PreviewScatterPrefix = string([]rune{_config.Root.CustomOp["attach"]})
-var PreviewFinalPrefix = string([]rune{_config.Root.CustomOp["assign"]})
+var PublishLow = "_"
+var PublishMid = "__"
+var PublishTop = "___"
+var PreviewLow = string([]rune{_config.Root.CustomOp["attach"]})
+var PreviewMid = string([]rune{_config.Root.CustomOp["apply"]})
+var PreviewTop = string([]rune{_config.Root.CustomOp["assign"]})
 
 func DeclareClass(
 	file *_model.File_Stash,
@@ -30,16 +32,24 @@ func DeclareClass(
 
 	classhash := _util.String_EnCounter(index)
 	classdata.Classhash = classhash
-	classdata.DebugScatterClass = debugClass
-	classdata.DebugFinalClass = debugClass + "_Final"
-	classdata.PreviewScatterClass = PreviewScatterPrefix + classdata.SymClass
-	classdata.PreviewFinalClass = PreviewFinalPrefix + classdata.SymClass
+
+	classdata.DebugLow = debugClass + "_Low"
+	classdata.DebugLow = debugClass + "_Mid"
+	classdata.DebugTop = debugClass + "_Top"
+
+	classdata.PreviewLow = PreviewLow + classdata.SymClass
+	classdata.PreviewMid = PreviewMid + classdata.SymClass
+	classdata.PreviewTop = PreviewTop + classdata.SymClass
+
 	if !strings.Contains(classdata.SymClass, "$$") {
-		classdata.PreviewScatterClass = classdata.PreviewScatterClass + "_" + classhash
-		classdata.PreviewFinalClass = classdata.PreviewFinalClass + "_" + classhash
+		classdata.PreviewLow = classdata.PreviewLow + "_" + classhash
+		classdata.PreviewMid = classdata.PreviewMid + "_" + classhash
+		classdata.PreviewTop = classdata.PreviewTop + "_" + classhash
 	}
-	classdata.PublishScatterClass = PublishScatterPrefix + classhash
-	classdata.PublishFinalClass = PublishFinalPrefix + classhash
+
+	classdata.PublishLow = PublishLow + classhash
+	classdata.PublishMid = PublishMid + classhash
+	classdata.PublishTop = PublishTop + classhash
 
 	return index
 }
