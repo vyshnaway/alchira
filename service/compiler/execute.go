@@ -197,7 +197,7 @@ func Execute(heading string) (Exitcode int) {
 					save_action.Wait()
 					save_action.Add(1)
 					go func() {
-						// _fileman.Write_Bulk(outfiles)
+						_fileman.Write_Bulk(outfiles)
 						save_action.Done()
 					}()
 				}
