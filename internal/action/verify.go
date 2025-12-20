@@ -34,10 +34,10 @@ func Verify_Setup() (Report string, Status verify_Setup_Status_enum) {
 			}
 
 			if _fileman.Path_IfDir(_config.Root_Flavor["libraries"].Path) {
-				_fileman.Clone_Hard(
+				_fileman.Sync_Bulk(
 					_config.Root_Flavor["libraries"].Path,
 					_config.Path_Folder["libstatic"].Path,
-					[]string{},
+					[]string{}, []string{}, []string{}, true,
 				)
 			}
 		}
