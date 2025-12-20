@@ -23,11 +23,7 @@ func Value_Builder(
 	scribed := value
 	nr := _reader.New(value + " ")
 	var waitop rune = 0
-	var entry _string.Builder
-
-	var stream _string.Builder
-	entry.Reset()
-	waitop = 0
+	var entry, stream _string.Builder
 	awaitop = false
 
 	for nr.Streaming {
@@ -61,9 +57,9 @@ func Value_Builder(
 								classname := res.Data.SrcData.DebugLow
 								stream.WriteString(classname)
 								if waitop == op_low {
-									_config.Style.Classlist_Scattered[classname] = res.Index
+									_config.Style.Sketchpad.Low[classname] = res.Index
 								} else {
-									_config.Style.Classlist_Append[classname] = res.Index
+									_config.Style.Sketchpad.Mac[classname] = res.Index
 								}
 							} else if method == E_Method_PreviewHash || _config.Static.PREVIEW {
 								stream.WriteString(res.Data.SrcData.PreviewLow)
@@ -80,7 +76,7 @@ func Value_Builder(
 							if method == E_Method_DebugHash {
 								classname := res.Data.SrcData.DebugTop
 								stream.WriteString(classname)
-								_config.Style.Classlist_Final[classname] = res.Index
+								_config.Style.Sketchpad.Top[classname] = res.Index
 							} else if method == E_Method_PreviewHash || _config.Static.PREVIEW {
 								stream.WriteString(res.Data.SrcData.PreviewTop)
 							} else {

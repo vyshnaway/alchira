@@ -1,17 +1,14 @@
 package handle
 
 import (
-	"fmt"
 	"main/configs"
 	"main/internal/action"
 	"main/internal/script"
-	"main/internal/style"
 	"main/models"
 	"main/package/css"
 	"main/package/reader"
 	"main/package/utils"
 	"main/service/compiler"
-	"maps"
 	"slices"
 	"strings"
 	"time"
@@ -20,7 +17,7 @@ import (
 type T_Component_return struct {
 	Attributes map[string]string `json:"attributes"`
 	Sketch     string            `json:"sketch"`
-	Stitch     string            `json:"stitch"`
+	Depend     string            `json:"stitch"`
 	Symclass   string            `json:"symclass"`
 	Rootcss    string            `json:"rootcss"`
 	Compcss    string            `json:"compcss"`
@@ -36,7 +33,7 @@ func Sandbox_Load(filepath, symclass string) (response any) {
 }
 
 func Sandbox_Save(index int) (response any) {
-	var stitchsheet, stylesheet strings.Builder
+	var stylesheet strings.Builder
 	data := action.Index_Fetch(index)
 	if data == nil {
 		return nil
@@ -45,7 +42,6 @@ func Sandbox_Save(index int) (response any) {
 	sketch := data.SrcData.Metadata.SketchSnippet
 	clontext := *data.Context
 	clontext.Midway = sketch
-	attachIndex := map[int]bool{}
 	classBlocks := css.NewBlock(4, 4)
 
 	orderedlist := []string{}
@@ -69,49 +65,37 @@ func Sandbox_Save(index int) (response any) {
 		attributes[k] = scribes
 	}
 
-	Builder.WriteString(strings.TrimSpace(script.Rider(&clontext, script.E_Method_DebugHash, map[int]bool{}).Scribed))
+	res := script.Rider(&clontext, script.E_Method_DebugHash, map[int]bool{})
+	Builder.WriteString(strings.TrimSpace(res.Scribed))
 	sketch = Builder.String()
 
 	FinalClassMap := []models.Style_ClassIndexTrace{
 		{ClassName: "_", ClassIndex: data.SrcData.Index},
 	}
-	appendmap := map[int]bool{}
-	for c, i := range configs.Style.Classlist_Append {
-		appendmap[i] = true
+
+	for c, i := range configs.Style.Sketchpad.Low {
 		FinalClassMap = append(FinalClassMap, models.Style_ClassIndexTrace{ClassName: c, ClassIndex: i})
 	}
-	for c, i := range configs.Style.Classlist_Scattered {
-		FinalClassMap = append(FinalClassMap, models.Style_ClassIndexTrace{ClassName: c, ClassIndex: i})
-	}
-	for _, i := range configs.Style.Classlist_Ordered {
+	for _, i := range configs.Style.Sketchpad.Mid {
 		FinalClassMap = append(FinalClassMap, i...)
 	}
-	for c, i := range configs.Style.Classlist_Final {
+	for c, i := range configs.Style.Sketchpad.Top {
 		FinalClassMap = append(FinalClassMap, models.Style_ClassIndexTrace{ClassName: c, ClassIndex: i})
 	}
-
 	for _, i := range FinalClassMap {
-		if !appendmap[i.ClassIndex] {
-			attachIndex[i.ClassIndex] = true
-		}
 		data := action.Index_Fetch(i.ClassIndex)
-		maps.Copy(attachIndex, style.ResolveDependints(data))
-
 		classBlocks.SetBlock(compiler.FmtClassForCss(i.ClassName), data.SrcData.NativeRawStyle)
 	}
 	stylesheet.WriteString(css.Render_Switched(classBlocks, true))
-
 	stylesheet.WriteString(css.Render_Vendored(data.SrcData.NativeAttachStyle, true))
-	for i := range attachIndex {
-		ref := action.Index_Fetch(i)
-		stylesheet.WriteString(css.Render_Vendored(ref.SrcData.NativeAttachStyle, true))
-		stitchsheet.WriteString(script.SketchBuilder(i, script.E_Method_DebugHash, map[int]bool{}))
-	}
+
+	styleDeps, sketchDeps := compiler.GetDependentsForSketchpad()
+	stylesheet.WriteString(styleDeps)
 
 	Sandbox_View_Component = &T_Component_return{
 		Attributes: attributes,
 		Sketch:     sketch,
-		Stitch:     fmt.Sprint(configs.Saved.Tweaks["stitch-prefix"], stitchsheet.String(), configs.Saved.Tweaks["stitch-suffix"]),
+		Depend:     sketchDeps,
 		Symclass:   data.SrcData.SymClass,
 		Rootcss:    configs.Delta.IndexBuild,
 		Compcss:    stylesheet.String(),

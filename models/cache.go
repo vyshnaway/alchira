@@ -131,10 +131,14 @@ type Cache_Style struct {
 	ClassDictionary     Style_Dictionary
 	Index_to_Styledata  map[int]*Cache_SymclassData
 	Filepath_to_Context map[string]*File_Stash
-	Classlist_Scattered Style_ClassIndexMap
-	Classlist_Append    Style_ClassIndexMap
-	Classlist_Ordered   [][]Style_ClassIndexTrace
-	Classlist_Final     Style_ClassIndexMap
+	Sketchpad           Cache_Scratchpad
+}
+
+type Cache_Scratchpad struct {
+	Low Style_ClassIndexMap
+	Mac Style_ClassIndexMap
+	Mid [][]Style_ClassIndexTrace
+	Top Style_ClassIndexMap
 }
 
 type Cache_Manifest_Groups struct {

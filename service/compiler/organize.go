@@ -149,7 +149,7 @@ func Organize() (AritfactFiles map[string]string, Shortlist _target.GetTracks_re
 	}
 
 	tracks := Accumulate()
-	_map.Copy(tracks.MacroMap, _config.Delta.IndexAttach)
+	_map.Copy(tracks.MacRefs, _config.Delta.IndexAttach)
 	artifact_files := map[string]string{}
 	_config.Delta.FinalMessage = _strconv.Itoa(len(_config.Delta.Errors)) + " Errors."
 
@@ -157,7 +157,7 @@ func Organize() (AritfactFiles map[string]string, Shortlist _target.GetTracks_re
 	case "watch":
 		fallthrough
 	case "preview":
-		res, _ := _order_.Optimize(tracks.ClassTracks, false, _config.Static.Argument, &_model.Config_Archive{})
+		res, _ := _order_.Optimize(tracks.MidRefs, false, _config.Static.Argument, &_model.Config_Archive{})
 		SaveClassRefs(*res.Result)
 
 		if len(_config.Delta.Errors) > 0 {
@@ -167,14 +167,14 @@ func Organize() (AritfactFiles map[string]string, Shortlist _target.GetTracks_re
 		}
 	case "publish":
 		if len(_config.Delta.Errors) > 0 {
-			res, _ := _order_.Optimize(tracks.ClassTracks, false, _config.Static.Argument, archive_Build())
+			res, _ := _order_.Optimize(tracks.MidRefs, false, _config.Static.Argument, archive_Build())
 			SaveClassRefs(*res.Result)
 
 			_config.Delta.FinalMessage = _strconv.Itoa(len(_config.Delta.Errors)) + " Errors. Falling back to 'preview' command."
 			_config.Static.Command = "preview"
 		} else {
 			archive := archive_Build()
-			res, _ := _order_.Optimize(tracks.ClassTracks, true, _config.Static.Argument, archive)
+			res, _ := _order_.Optimize(tracks.MidRefs, true, _config.Static.Argument, archive)
 
 			if res.Status {
 				SaveClassRefs(*res.Result)

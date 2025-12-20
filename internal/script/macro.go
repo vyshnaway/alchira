@@ -1,6 +1,7 @@
 package script
 
 import (
+	"main/configs"
 	_action "main/internal/action"
 	_model "main/models"
 	"main/package/object"
@@ -82,7 +83,12 @@ func Macro_Builder(
 
 	entry.Reset()
 
-	macrostack := make([]string, 4)
+	type stack struct {
+		value string
+		cycle int
+	}
+
+	macrostack := object.New[int, *stack](4)
 	subappendstack := make(map[int]bool, len(appendstack))
 	maps.Copy(subappendstack, appendstack)
 
@@ -95,39 +101,36 @@ func Macro_Builder(
 			res := _action.Index_Finder(tokens.Symclass, fileData.Cache.LocalMap)
 
 			if res.Index > 0 {
-				var tmbuild strings.Builder
-
+				configs.Style.Sketchpad.Mac[tokens.Symclass] = res.Index
 				if !appendstack[res.Index] {
-					content := res.Data.SrcData.Metadata.SketchSnippet
 					subappendstack[res.Index] = true
-
-					tmbuild.Grow((len(content) + 1) * tokens.Count)
-					for range tokens.Count {
-						if len(content) > 0 {
-							tmbuild.WriteString(content)
-						}
-					}
+					val = res.Data.SrcData.Metadata.SketchSnippet
 				}
-
-				val = tmbuild.String()
 			}
 
 			if len(tokens.Symbol) == 0 {
-				macrostack = append(macrostack, val)
+				macrostack.Set(res.Index, &stack{value: val, cycle: tokens.Count})
 			} else {
-				for i, s := range macrostack {
-					macrostack[i] = strings.ReplaceAll(s, tokens.Symbol, val)
-				}
+				macrostack.Range(func(k int, v *stack) {
+					v.value = strings.ReplaceAll(v.value, tokens.Symbol, val)
+				})
 				register.Set(tokens.Symbol, val)
 			}
 		}
 	}
 
-	for i, s := range macrostack {
-		macrostack[i] = MacroSketcher(s, fileData, method, subappendstack)
-	}
+	var compose strings.Builder
+	macrostack.Range(func(k int, v *stack) {
+		for range v.cycle {
+			if k == 0 {
+				compose.WriteString(v.value)
+			} else {
+				compose.WriteString(MacroSketcher(v.value, _action.Index_Fetch(k).Context, method, subappendstack))
+			}
+		}
+	})
 
-	return strings.Join(macrostack, "\n")
+	return compose.String()
 }
 
 func Marcro_Reader(
@@ -135,8 +138,8 @@ func Marcro_Reader(
 ) map[string]bool {
 	symclasses := map[string]bool{}
 	for _, line := range macros {
-		tkn, err := Tokenize(line);
-		if  err == nil && len(tkn.Symclass) > 0 {
+		tkn, err := Tokenize(line)
+		if err == nil && len(tkn.Symclass) > 0 {
 			symclasses[tkn.Symclass] = true
 		}
 	}

@@ -98,10 +98,12 @@ func Style_Reset() {
 		ClassDictionary:     _model.Style_Dictionary{},
 		Index_to_Styledata:  map[int]*_model.Cache_SymclassData{},
 		Filepath_to_Context: map[string]*_model.File_Stash{},
-		Classlist_Ordered:   [][]_model.Style_ClassIndexTrace{},
-		Classlist_Scattered: _model.Style_ClassIndexMap{},
-		Classlist_Append:    _model.Style_ClassIndexMap{},
-		Classlist_Final:     _model.Style_ClassIndexMap{},
+		Sketchpad: _model.Cache_Scratchpad{
+			Low: _model.Style_ClassIndexMap{},
+			Mac: _model.Style_ClassIndexMap{},
+			Mid: [][]_model.Style_ClassIndexTrace{},
+			Top: _model.Style_ClassIndexMap{},
+		},
 	}
 }
 

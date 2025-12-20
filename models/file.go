@@ -34,10 +34,10 @@ type File_CacheData struct {
 	Id              string
 	Type            File_Type
 	UsedIn          []int
-	RigidTracks     [][]string
-	FinalStyles     map[string]bool
+	MidClass        [][]string
+	TopClass        map[string]bool
 	MacroStyles     map[string]bool
-	ScatteredStyles map[string]bool
+	LowClass        map[string]bool
 	Loadashes       map[string]bool
 	MixedMap        Style_ClassIndexMap
 	LocalMap        Style_ClassIndexMap

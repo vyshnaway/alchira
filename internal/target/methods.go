@@ -5,7 +5,6 @@ import (
 	_action "main/internal/action"
 	_script "main/internal/script"
 
-	// "main/internal/style"
 	_model "main/models"
 	_map "maps"
 	_slice "slices"
@@ -34,21 +33,20 @@ func (This *Class) Accumulator() Accumulator_return {
 }
 
 type GetTracks_return struct {
-	ClassTracks [][]int
-	MacroMap    map[int]bool
-	ScatterMap  map[int]bool
-	DependMap  map[int]bool
-	FinalMap    map[int]bool
+	MidRefs [][]int
+	LowRefs map[int]bool
+	TopRefs map[int]bool
+	MacRefs map[int]bool
 }
 
 func (This *Class) GetTracks() GetTracks_return {
-	classtracks := make([][]int, 0, 24*len(This.FileCache))
-	finalIntMap := make(map[int]bool, 8)
 	macroMap := make(map[int]bool, 8)
-	scatterIntMap := make(map[int]bool, 8)
+	midClassMap := make([][]int, 0, 24*len(This.FileCache))
+	topClassMap := make(map[int]bool, 8)
+	lowClassMap := make(map[int]bool, 8)
 
 	sc := This.StylesheetContext.Cache
-	for i := range sc.ScatteredStyles {
+	for i := range sc.LowClass {
 		if found := _action.Index_Finder(i, sc.LocalMap); found.Index > 0 {
 			macroMap[found.Index] = true
 		}
@@ -61,13 +59,13 @@ func (This *Class) GetTracks() GetTracks_return {
 			}
 		}
 
-		for s := range file.Cache.ScatteredStyles {
+		for s := range file.Cache.LowClass {
 			if found := _action.Index_Finder(s, file.Cache.LocalMap); found.Index > 0 {
-				scatterIntMap[found.Index] = true
+				lowClassMap[found.Index] = true
 			}
 		}
 
-		for _, track := range file.Cache.RigidTracks {
+		for _, track := range file.Cache.MidClass {
 			retraces := []int{}
 			for _, i := range track {
 				if found := _action.Index_Finder(i, file.Cache.LocalMap); found.Index > 0 {
@@ -76,21 +74,22 @@ func (This *Class) GetTracks() GetTracks_return {
 			}
 
 			if len(retraces) > 0 {
-				classtracks = append(classtracks, retraces)
+				midClassMap = append(midClassMap, retraces)
 			}
 		}
 
-		for s := range file.Cache.FinalStyles {
+		for s := range file.Cache.TopClass {
 			if found := _action.Index_Finder(s, file.Cache.LocalMap); found.Index > 0 {
-				finalIntMap[found.Index] = true
+				topClassMap[found.Index] = true
 			}
 		}
 	}
+
 	return GetTracks_return{
-		ClassTracks: classtracks,
-		ScatterMap:  scatterIntMap,
-		FinalMap:    finalIntMap,
-		MacroMap:    macroMap,
+		LowRefs: lowClassMap,
+		MidRefs: midClassMap,
+		TopRefs: topClassMap,
+		MacRefs: macroMap,
 	}
 }
 

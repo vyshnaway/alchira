@@ -24,13 +24,13 @@ const (
 )
 
 type parse_return struct {
-	Scribed         string
-	OrderedTracks   [][]string
-	StylesList      []*_model.T_RawStyle
-	ScatteredAssign map[string]bool
-	AppendsList     map[string]bool
-	FinalAssign     map[string]bool
-	Replacements    []_model.File_TagReplacement
+	LowRefs      map[string]bool
+	MidRefs      [][]string
+	MacRefs      map[string]bool
+	TopRefs      map[string]bool
+	Scribed      string
+	StylesList   []*_model.T_RawStyle
+	Replacements []_model.File_TagReplacement
 }
 
 var replacementTags = _config.Static.ReplacementTags
@@ -232,12 +232,12 @@ func Rider(
 		fileData.Cache.Loadashes = loadashes
 	}
 	return parse_return{
-		Scribed:         stream.String(),
-		StylesList:      stylesList,
-		FinalAssign:     finalList,
-		OrderedTracks:   orderList,
-		AppendsList:     appendsList,
-		ScatteredAssign: scatteredList,
-		Replacements:    replacements,
+		Scribed:      stream.String(),
+		StylesList:   stylesList,
+		TopRefs:      finalList,
+		MidRefs:      orderList,
+		MacRefs:      appendsList,
+		LowRefs:      scatteredList,
+		Replacements: replacements,
 	}
 }

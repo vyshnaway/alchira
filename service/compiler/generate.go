@@ -6,7 +6,6 @@ import (
 	_action "main/internal/action"
 	X "main/internal/console"
 
-	// "main/internal/script"
 	_stash "main/internal/stash"
 	S "main/package/console"
 	_css "main/package/css"
@@ -17,9 +16,7 @@ import (
 )
 
 func Generate_Files() (Files map[string]string, Report string) {
-
 	files, shortlist := Organize()
-	_stash.Target_SyncClassNames()
 
 	appendix_frag := _css.Render_Sequence(func() *_css.T_BlockSeq {
 		result := _css.NewBlockSeq(len(_stash.Cache.Targetdir) * 8)
@@ -29,26 +26,10 @@ func Generate_Files() (Files map[string]string, Report string) {
 		return result
 	}(), _config.Static.MINIFY)
 
-	attach_frag, sketch_sheet := func() (string, string) {
-		attach_styles := _css.NewBlock(len(shortlist.DependMap), len(shortlist.DependMap))
-		var attach_sketchs _string.Builder
-		for i := range shortlist.DependMap {
-			if data := _action.Index_Fetch(i); data != nil {
-				attach_styles.Merge(data.SrcData.NativeAttachStyle)
-				// if _config.Static.DEBUG {
-				// 	attach_sketchs.WriteString(script.SketchBuilder(i, script.E_Method_DebugHash, map[int]bool{i: true}))
-				// } else {
-				// 	attach_sketchs.WriteString(script.SketchBuilder(i, script.E_Method_PreviewHash, map[int]bool{i: true}))
-				// }
-			}
-		}
-		attach_frag := _css.Render_Vendored(attach_styles, _config.Static.MINIFY)
-		sketch_sheet := attach_sketchs.String()
-		return attach_frag, sketch_sheet
-	}()
+	attach_frag, sketch_sheet := GetDependents(shortlist)
 
-	scattered_block := _css.NewBlock(0, len(shortlist.ScatterMap))
-	for i := range shortlist.ScatterMap {
+	scattered_block := _css.NewBlock(0, len(shortlist.LowRefs))
+	for i := range shortlist.LowRefs {
 		d := _action.Index_Fetch(i)
 		if _config.Static.DEBUG {
 			scattered_block.SetBlock(FmtClassForCss(d.SrcData.DebugLow), d.SrcData.NativeRawStyle)
@@ -60,8 +41,8 @@ func Generate_Files() (Files map[string]string, Report string) {
 	}
 	scattered_frag := _css.Render_Switched(scattered_block, _config.Static.MINIFY)
 
-	final_block := _css.NewBlock(0, len(shortlist.FinalMap))
-	for i := range shortlist.FinalMap {
+	final_block := _css.NewBlock(0, len(shortlist.TopRefs))
+	for i := range shortlist.TopRefs {
 		d := _action.Index_Fetch(i)
 		if _config.Static.DEBUG {
 			final_block.SetBlock(FmtClassForCss(d.SrcData.DebugTop), d.SrcData.NativeRawStyle)
@@ -74,9 +55,10 @@ func Generate_Files() (Files map[string]string, Report string) {
 	final_frag := _css.Render_Switched(final_block, _config.Static.MINIFY)
 
 	report, errLen, finalMessage, index_frag := ClearUnwantedCache()
+	_stash.Target_SyncClassNames()
 
 	var class_builder _string.Builder
-	for _, i := range _config.Style.Classlist_Ordered {
+	for _, i := range _config.Style.Sketchpad.Mid {
 		class_builder.WriteString(_css.Render_Switched(func() *_css.T_Block {
 			result := _css.NewBlock(0, len(i))
 			for _, j := range i {
@@ -92,10 +74,10 @@ func Generate_Files() (Files map[string]string, Report string) {
 		val string
 	}{
 		{key: "Index", val: index_frag},
-		{key: "Scattered", val: scattered_frag},
-		{key: "Ordered", val: ordered_frag},
-		{key: "Final", val: final_frag},
-		{key: "Attach", val: attach_frag},
+		{key: "LowClass", val: scattered_frag},
+		{key: "MidClass", val: ordered_frag},
+		{key: "TopClass", val: final_frag},
+		{key: "Sketches", val: attach_frag},
 		{key: "Appendix", val: appendix_frag},
 	}
 
@@ -111,10 +93,9 @@ func Generate_Files() (Files map[string]string, Report string) {
 		return _string.Join(frags, "")
 	}()
 
-	sketch_block := _fmt.Sprint(_config.Saved.Tweaks["sketch-prefix"], sketch_sheet, _config.Saved.Tweaks["sketch-suffix"])
 	style_block := _fmt.Sprint(_config.Saved.Tweaks["styles-prefix"], style_sheet, _config.Saved.Tweaks["styles-suffix"])
 	for _, target := range _stash.Cache.Targetdir {
-		_map.Copy(files, target.RebuildFiles(style_sheet, style_block, sketch_block))
+		_map.Copy(files, target.RebuildFiles(style_sheet, style_block, sketch_sheet))
 	}
 
 	if !_config.Static.WATCH {

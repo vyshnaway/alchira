@@ -5,7 +5,6 @@ import (
 	_action "main/internal/action"
 	X "main/internal/console"
 	"main/internal/script"
-	"main/internal/style"
 	_target "main/internal/target"
 	_model "main/models"
 	O "main/package/object"
@@ -80,38 +79,22 @@ func Target_GetTracks() _target.GetTracks_return {
 	macromap := map[int]bool{}
 	rapidmap := map[int]bool{}
 	finalmap := map[int]bool{}
-	mixedmap := map[int]bool{}
 
 	for _, target := range Cache.Targetdir {
 		r := target.GetTracks()
-		classtracks = append(classtracks, r.ClassTracks...)
+		classtracks = append(classtracks, r.MidRefs...)
 
-		_map.Copy(macromap, r.MacroMap)
-		_map.Copy(rapidmap, r.ScatterMap)
-		_map.Copy(finalmap, r.FinalMap)
+		_map.Copy(macromap, r.MacRefs)
+		_map.Copy(rapidmap, r.LowRefs)
+		_map.Copy(finalmap, r.TopRefs)
 
-		_map.Copy(mixedmap, r.MacroMap)
-		_map.Copy(mixedmap, r.ScatterMap)
-		_map.Copy(mixedmap, r.FinalMap)
-	}
-
-	dependMap := map[int]bool{}
-	for i := range mixedmap {
-		if data := _action.Index_Fetch(i); data != nil {
-			for ii := range style.ResolveDependints(data) {
-				if !mixedmap[ii] || data.SrcData.NativeRawStyle.Len() > 0 {
-					dependMap[ii] = true
-				}
-			}
-		}
 	}
 
 	return _target.GetTracks_return{
-		MacroMap:    macromap,
-		ClassTracks: classtracks,
-		ScatterMap:  rapidmap,
-		FinalMap:    finalmap,
-		DependMap:   dependMap,
+		MacRefs: macromap,
+		MidRefs: classtracks,
+		LowRefs: rapidmap,
+		TopRefs: finalmap,
 	}
 }
 

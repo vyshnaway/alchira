@@ -37,10 +37,10 @@ func (This *Class) Savefile(filepath string, content string, hashindex int) {
 		file.WatchAttrs = watchAttrs.Watch
 	}
 	parse_response := _script.Rider(file, _script.E_Method_Read, map[int]bool{})
-	file.Cache.RigidTracks = parse_response.OrderedTracks
-	file.Cache.ScatteredStyles = parse_response.ScatteredAssign
-	file.Cache.MacroStyles = parse_response.AppendsList
-	file.Cache.FinalStyles = parse_response.FinalAssign
+	file.Cache.MidClass = parse_response.MidRefs
+	file.Cache.LowClass = parse_response.LowRefs
+	file.Cache.MacroStyles = parse_response.MacRefs
+	file.Cache.TopClass = parse_response.TopRefs
 	file.Midway = parse_response.Scribed
 
 	file.Cache.Id = file.TargetPath
