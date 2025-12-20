@@ -7,7 +7,6 @@ import (
 	"maps"
 	"strconv"
 	"strings"
-	_string "strings"
 	"unicode"
 )
 
@@ -56,16 +55,16 @@ func Tokenize(input string) (MultiplierInstruction, error) {
 
 	return MultiplierInstruction{
 		Count:    count,
-		Value:    _string.TrimSpace(value.String()),
-		Symbol:   _string.TrimSpace(symbol.String()),
-		Symclass: _string.TrimSpace(symclass.String()),
+		Value:    strings.TrimSpace(value.String()),
+		Symbol:   strings.TrimSpace(symbol.String()),
+		Symclass: strings.TrimSpace(symclass.String()),
 	}, nil
 }
 
 func ApplySymbols(input string, register *object.T[string, string]) string {
 
 	register.Range(func(k, v string) {
-		input = _string.ReplaceAll(input, k, v)
+		input = strings.ReplaceAll(input, k, v)
 	})
 
 	return input
@@ -78,7 +77,7 @@ func Macro_Builder(
 	appendstack map[int]bool,
 ) string {
 
-	var entry _string.Builder
+	var entry strings.Builder
 	var register = object.New[string, string](4)
 
 	entry.Reset()
@@ -96,7 +95,7 @@ func Macro_Builder(
 			res := _action.Index_Finder(tokens.Symclass, fileData.Cache.LocalMap)
 
 			if res.Index > 0 {
-				var tmbuild _string.Builder
+				var tmbuild strings.Builder
 
 				if !appendstack[res.Index] {
 					content := res.Data.SrcData.Metadata.SketchSnippet
@@ -117,7 +116,7 @@ func Macro_Builder(
 				macrostack = append(macrostack, val)
 			} else {
 				for i, s := range macrostack {
-					macrostack[i] = _string.ReplaceAll(s, tokens.Symbol, val)
+					macrostack[i] = strings.ReplaceAll(s, tokens.Symbol, val)
 				}
 				register.Set(tokens.Symbol, val)
 			}
@@ -128,7 +127,7 @@ func Macro_Builder(
 		macrostack[i] = MacroSketcher(s, fileData, method, subappendstack)
 	}
 
-	return _string.Join(macrostack, "\n")
+	return strings.Join(macrostack, "\n")
 }
 
 func Marcro_Reader(
