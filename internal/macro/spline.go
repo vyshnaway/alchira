@@ -1,14 +1,15 @@
-package script
+package macro
 
 import (
 	"math"
 	"strings"
 )
+
 type SplinePoint struct {
 	X, Y float64
 }
 
-func GenerateEquidistantSpline(yCoords []float64, m int) []float64 {
+func generateEquidistantSpline(yCoords []float64, m int) []float64 {
 	n := len(yCoords)
 	if n < 2 {
 		return yCoords
@@ -33,7 +34,7 @@ func GenerateEquidistantSpline(yCoords []float64, m int) []float64 {
 
 	b := make([]float64, n-1)
 	d := make([]float64, n-1)
-	
+
 	// Back-substitution
 	for j := n - 2; j >= 0; j-- {
 		c[j] = z[j] - mu[j]*c[j+1]
@@ -61,7 +62,7 @@ func GenerateEquidistantSpline(yCoords []float64, m int) []float64 {
 
 const charset = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
 
-func FloatToBase(val float64, base int, precision int) string {
+func floatToBase(val float64, base int, precision int) string {
 	if base < 2 || base > len(charset) {
 		return "Invalid Base"
 	}

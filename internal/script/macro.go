@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"main/configs"
 	"main/internal/action"
+	"main/internal/macro"
 	"main/models"
 	"main/package/object"
 	"maps"
@@ -41,7 +42,7 @@ func Macro_Builder(
 	for _, line := range macros {
 		line = ApplySymbols(line, register)
 
-		if tokens, err := Tokenize(line); err == nil {
+		if tokens, err := macro.Tokenize(line); err == nil {
 
 			val := tokens.Val
 			res := action.Index_Finder(tokens.Val, fileData.Cache.LocalMap)
@@ -94,11 +95,11 @@ func Macro_Builder(
 }
 
 func Marcro_Reader(
-	macros []string,
+	lines []string,
 ) map[string]bool {
 	symlinks := map[string]bool{}
-	for _, line := range macros {
-		tkn, err := Tokenize(line)
+	for _, line := range lines {
+		tkn, err := macro.Tokenize(line)
 		if err == nil && len(tkn.Val) > 0 {
 			symlinks[tkn.Val] = true
 		}
