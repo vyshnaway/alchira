@@ -1,77 +1,15 @@
 package script
 
 import (
+	"fmt"
 	"main/configs"
-	_action "main/internal/action"
-	_model "main/models"
+	"main/internal/action"
+	"main/models"
 	"main/package/object"
 	"maps"
-	"strconv"
 	"strings"
-	"unicode"
 )
 
-type MultiplierInstruction struct {
-	Int int
-	Val string
-	Raw string
-	Sym string
-}
-
-func Tokenize(input string) (MultiplierInstruction, error) {
-	input = strings.TrimSpace(input)
-	var countStr strings.Builder
-	var subvalue strings.Builder
-	var symbol strings.Builder
-	var fullvalue strings.Builder
-
-	foundAsterisk := false
-	gotSymbol := false
-
-	for _, char := range input {
-		if !gotSymbol {
-			if char == '=' {
-				gotSymbol = true
-				continue
-			} else {
-				symbol.WriteRune(char)
-			}
-		} else if !foundAsterisk && unicode.IsDigit(char) {
-			countStr.WriteRune(char)
-		} else if char == '*' && !foundAsterisk {
-			foundAsterisk = true
-		} else if foundAsterisk {
-			subvalue.WriteRune(char)
-		}
-		if gotSymbol {
-			fullvalue.WriteRune(char)
-		}
-	}
-
-	count, _ := strconv.Atoi(countStr.String())
-	if count == 0 {
-		count = 1
-	}
-
-	return MultiplierInstruction{
-		Sym: strings.TrimSpace(symbol.String()),
-		Int: func() int {
-			if foundAsterisk {
-				return count
-			} else {
-				return 0
-			}
-		}(),
-		Val: func() string {
-			if foundAsterisk {
-				return strings.TrimSpace(subvalue.String())
-			} else {
-				return fullvalue.String()
-			}
-		}(),
-		Raw: fullvalue.String(),
-	}, nil
-}
 
 func ApplySymbols(input string, register *object.T[string, string]) string {
 
@@ -85,7 +23,7 @@ func ApplySymbols(input string, register *object.T[string, string]) string {
 func Macro_Builder(
 	macros []string,
 	method E_Method,
-	fileData *_model.File_Stash,
+	fileData *models.File_Stash,
 	appendstack map[int]bool,
 ) string {
 	var register = object.New[string, string](4)
@@ -106,7 +44,7 @@ func Macro_Builder(
 		if tokens, err := Tokenize(line); err == nil {
 
 			val := tokens.Val
-			res := _action.Index_Finder(tokens.Val, fileData.Cache.LocalMap)
+			res := action.Index_Finder(tokens.Val, fileData.Cache.LocalMap)
 
 			if res.Index > 0 && tokens.Int > 0 {
 				configs.Style.Sketchpad.Mac[tokens.Val] = res.Index
@@ -118,7 +56,7 @@ func Macro_Builder(
 				tokens.Int = 1
 			}
 
-			if len(tokens.Sym) != 0 {
+			if len(tokens.Sym) > 0 {
 				var s strings.Builder
 				for range tokens.Int {
 					s.WriteString(val)
@@ -150,6 +88,7 @@ func Macro_Builder(
 			}
 		}
 	}
+	fmt.Println("------")
 
 	return compose.String()
 }
