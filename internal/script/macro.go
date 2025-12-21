@@ -55,13 +55,17 @@ func Tokenize(input string) (MultiplierInstruction, error) {
 	return MultiplierInstruction{
 		Symbol: strings.TrimSpace(symbol.String()),
 		Count: func() int {
-			return count
+			if foundAsterisk {
+				return count
+			} else {
+				return 0
+			}
 		}(),
 		Value: func() string {
 			if foundAsterisk {
 				return strings.TrimSpace(subvalue.String())
 			} else {
-				return strings.TrimSpace(fullvalue.String())
+				return fullvalue.String()
 			}
 		}(),
 	}, nil
@@ -100,12 +104,14 @@ func Macro_Builder(
 			val := tokens.Value
 			res := _action.Index_Finder(tokens.Value, fileData.Cache.LocalMap)
 
-			if res.Index > 0 {
+			if res.Index > 0 && tokens.Count > 0 {
 				configs.Style.Sketchpad.Mac[tokens.Value] = res.Index
 				if !appendstack[res.Index] {
 					subappendstack[res.Index] = true
 					val = res.Data.SrcData.Metadata.SketchSnippet
 				}
+			} else if tokens.Count == 0 {
+				tokens.Count = 1
 			}
 
 			if len(tokens.Symbol) == 0 {
