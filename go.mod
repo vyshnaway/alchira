@@ -9,4 +9,7 @@ require (
 	golang.org/x/term v0.37.0
 )
 
-require golang.org/x/sys v0.38.0 // indirect
+require (
+	github.com/gomarkdown/markdown v0.0.0-20250810172220-2e2c11897d1a // indirect
+	golang.org/x/sys v0.38.0 // indirect
+)

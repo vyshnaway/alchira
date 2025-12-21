@@ -123,17 +123,18 @@ func Macro_Builder(
 				for range tokens.Int {
 					s.WriteString(val)
 				}
-				S := s.String()
+				superval := s.String()
 				for i, m := range macrostack {
-					macrostack[i].value = strings.ReplaceAll(m.value, tokens.Sym, S)
+					macrostack[i].value = strings.ReplaceAll(m.value, tokens.Sym, superval)
 				}
 				register.Set(tokens.Sym, val)
 			} else if len(val) > 0 {
-				macrostack = append(macrostack, &stack{
-					index: res.Index, cycle: tokens.Int,
-					macro: res.Data.SrcData.Metadata.Handles,
-					value: ResolveHandles(val, res.Data.SrcData.Metadata.Handles, true, false, false),
-				})
+				submacros := []string{}
+				if res.Index > 0 {
+					submacros = res.Data.SrcData.Metadata.Macros
+					val = ApplyCommand(val, submacros, true, false, false)
+				}
+				macrostack = append(macrostack, &stack{index: res.Index, cycle: tokens.Int, macro: submacros, value: val})
 			}
 		}
 	}

@@ -101,7 +101,7 @@ func Cssfile_Collection(files []*_model.File_Stash) cssfile_Collection_return {
 					vars = nil
 				}
 				metadata := &_model.Style_Metadata{
-					Handles:       nil,
+					Macros:        []string{},
 					Skeleton:      object.Skeleton(),
 					Declarations:  []string{declaration},
 					Variables:     vars,

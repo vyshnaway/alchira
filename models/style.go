@@ -28,7 +28,7 @@ type Style_ExportStyle struct {
 }
 
 type Style_Metadata struct {
-	Handles       []string          `json:"info,omitempty"`
+	Macros        []string          `json:"info,omitempty"`
 	Skeleton      any               `json:"skeleton,omitempty"`
 	Declarations  []string          `json:"declarations,omitempty"`
 	Variables     map[string]string `json:"variables,omitempty"`

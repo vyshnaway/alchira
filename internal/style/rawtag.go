@@ -144,16 +144,12 @@ func Rawtag_Upload(
 		if len(sketch) > 0 {
 			appendable = true
 		}
-		comments := raw.Comments
-		if len(comments) == 0 {
-			comments = nil
-		}
 		vars := variables.ToMap()
 		if len(vars) == 0 {
 			vars = nil
 		}
 		metadata := &_model.Style_Metadata{
-			Handles:       comments,
+			Macros:        raw.Comments,
 			Skeleton:      nativeRawStyle.Skeleton(),
 			Declarations:  []string{declaration},
 			Variables:     vars,
