@@ -90,9 +90,10 @@ func Macro_Builder(
 	type stack struct {
 		value string
 		cycle int
+		index int
 	}
 
-	macrostack := object.New[int, *stack](4)
+	macrostack := []*stack{}
 	subappendstack := make(map[int]bool, len(appendstack))
 	maps.Copy(subappendstack, appendstack)
 
@@ -115,30 +116,32 @@ func Macro_Builder(
 			}
 
 			if len(tokens.Symbol) == 0 {
-				macrostack.Set(res.Index, &stack{value: val, cycle: tokens.Count})
+				macrostack = append(macrostack, &stack{index: res.Index, value: val, cycle: tokens.Count})
 			} else {
 				var s strings.Builder
 				for range tokens.Count {
 					s.WriteString(val)
 				}
-				macrostack.Range(func(k int, v *stack) {
-					v.value = strings.ReplaceAll(v.value, tokens.Symbol, s.String())
-				})
+				S := s.String()
+				for i, m := range macrostack {
+					macrostack[i].value = strings.ReplaceAll(m.value, tokens.Symbol, S)
+				}
 				register.Set(tokens.Symbol, val)
 			}
 		}
 	}
 
 	var compose strings.Builder
-	macrostack.Range(func(k int, v *stack) {
-		for range v.cycle {
-			if k == 0 {
-				compose.WriteString(v.value)
+
+	for _, m := range macrostack {
+		for range m.cycle {
+			if m.index == 0 {
+				compose.WriteString(m.value)
 			} else {
-				compose.WriteString(MacroSketcher(v.value, _action.Index_Fetch(k).Context, method, subappendstack))
+				compose.WriteString(MacroSketcher(m.value, _action.Index_Fetch(m.index).Context, method, subappendstack))
 			}
 		}
-	})
+	}
 
 	return compose.String()
 }
