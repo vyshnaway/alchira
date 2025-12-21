@@ -13,7 +13,7 @@ import (
 )
 
 type R_Rawtag_Upload struct {
-	Symclass    string
+	Symlink     string
 	Index       int
 	Attachments map[string]bool
 	Diagnostics []*_model.File_Diagnostic
@@ -33,24 +33,24 @@ func Rawtag_Upload(
 		"::" + _strconv.Itoa(raw.Range.End.Row) + ":" + _strconv.Itoa(raw.Range.End.Col)
 
 	symzero := ""
-	if len(raw.SymClasses) > 0 {
-		symzero = symzero_regex.ReplaceAllString(raw.SymClasses[0], "$")
+	if len(raw.Symlinks) > 0 {
+		symzero = symzero_regex.ReplaceAllString(raw.Symlinks[0], "$")
 	}
-	var normalized_symclass string
-	symclass := file.ClassFront
+	var normalized_symlink string
+	symlink := file.ClassFront
 	if forArtifact {
 		if !_string.Contains(symzero, "$$$") {
-			symclass += "$/" + symzero
+			symlink += "$/" + symzero
 		} else {
-			symclass += _string.ReplaceAll(symzero, "$$$", "$")
+			symlink += _string.ReplaceAll(symzero, "$$$", "$")
 		}
-		normalized_symclass = _util.String_Filter(symclass, []rune{'$', '/'}, []rune{}, []rune{})
+		normalized_symlink = _util.String_Filter(symlink, []rune{'$', '/'}, []rune{}, []rune{})
 	} else {
-		symclass += string(symzero)
-		normalized_symclass = _util.String_Filter(symclass, []rune{'$'}, []rune{}, []rune{})
+		symlink += string(symzero)
+		normalized_symlink = _util.String_Filter(symlink, []rune{'$'}, []rune{}, []rune{})
 	}
 
-	found := _action.Index_Finder(symclass, IndexMap)
+	found := _action.Index_Finder(symlink, IndexMap)
 	index := found.Index
 	if found.Index > 0 {
 		classdata := _action.Index_Fetch(found.Index)
@@ -62,10 +62,10 @@ func Rawtag_Upload(
 		} else {
 			scope = raw.Scope
 		}
-		debugClass := _fmt.Sprint(scope, file.DebugFront, ":", raw.Range.Start.Row, ":", raw.Range.Start.Col, "_", normalized_symclass)
+		debugClass := _fmt.Sprint(scope, file.DebugFront, ":", raw.Range.Start.Row, ":", raw.Range.Start.Col, "_", normalized_symlink)
 
 		native_scanned, export_scanned := stylesnippet_process(raw.Styles[""], file, false,
-			_fmt.Sprint(raw.Scope, " : ", declaration, " | "), raw.SymClasses[0],
+			_fmt.Sprint(raw.Scope, " : ", declaration, " | "), raw.Symlinks[0],
 		)
 		nativeRawStyle := native_scanned.Result
 		exportRawStyle := export_scanned.Result
@@ -78,7 +78,7 @@ func Rawtag_Upload(
 				if query.Status {
 					native_scanned, export_scanned := stylesnippet_process(val, file, true,
 						_fmt.Sprint(raw.Scope, " : ", declaration, " | "),
-						_fmt.Sprint(raw.SymClasses[0], " // ", key),
+						_fmt.Sprint(raw.Symlinks[0], " // ", key),
 					)
 
 					_map.Copy(attachments, native_scanned.Attachments)
@@ -120,7 +120,7 @@ func Rawtag_Upload(
 		if raw.Elid == _config.Root.CustomTags["style"] {
 			nativeAttachResult, exportAttachResult := stylesnippet_process(raw.Innertext, file, true,
 				_fmt.Sprint(raw.Scope, ":ATTACHMENT : ", file.FilePath, ":", raw.Range.Start.Row, ":", raw.Range.Start.Col, " | "),
-				raw.SymClasses[0],
+				raw.Symlinks[0],
 			)
 
 			_map.Copy(attachments, nativeAttachResult.Attachments)
@@ -153,19 +153,19 @@ func Rawtag_Upload(
 			vars = nil
 		}
 		metadata := &_model.Style_Metadata{
-			Info:          comments,
+			Handles:       comments,
 			Skeleton:      nativeRawStyle.Skeleton(),
 			Declarations:  []string{declaration},
 			Variables:     vars,
 			SketchSnippet: sketch,
 			Appendable:    appendable,
 		}
-		
+
 		index = DeclareClass(file, &_model.Style_ClassData{
 			Attributes:        attributes,
 			Artifact:          artifact,
-			Definent:          raw.SymClasses[0],
-			SymClass:          symclass,
+			Definent:          raw.Symlinks[0],
+			Symlink:           symlink,
 			Metadata:          metadata,
 			Attachments:       attachments,
 			ExportRawStyle:    exportRawStyle,
@@ -179,7 +179,7 @@ func Rawtag_Upload(
 	}
 
 	return R_Rawtag_Upload{
-		Symclass:    symclass,
+		Symlink:     symlink,
 		Index:       index,
 		Attachments: attachments,
 		Diagnostics: diagnostics,

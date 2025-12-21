@@ -60,12 +60,12 @@ var Registery = map[string]*T_RegisterEntry{
 		},
 		func(params struct {
 			Filepath string `json:"filepath"`
-			Symclass string `json:"symclass"`
+			Symlink  string `json:"symlink"`
 		}) any {
-			return handle.Sandbox_Load(params.Filepath, params.Symclass)
+			return handle.Sandbox_Load(params.Filepath, params.Symlink)
 		},
 		[]string{
-			`sandbox-load {relative-filepath} {symclass}`,
+			`sandbox-load {relative-filepath} {symlink}`,
 		},
 		true,
 	),

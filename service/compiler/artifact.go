@@ -65,7 +65,7 @@ func artifact_Fetch(identifier string, source string) (Files map[string]string, 
 
 		if artifact.ExportSheet != "" {
 			lines := []string{
-				_fmt.Sprintf("# %s@%s : Available SymClasses", artifact.Name, artifact.Version),
+				_fmt.Sprintf("# %s@%s : Available Symlinks", artifact.Name, artifact.Version),
 				"",
 			}
 

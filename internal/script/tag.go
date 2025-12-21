@@ -26,8 +26,8 @@ type tag_Parse_retype struct {
 	StyleDeclarations _model.T_RawStyle
 }
 
-var symclass_regex = _regexp.MustCompile(`(?i)^[\w\-_]+\$+[\w\-]+$`)
-var symclass_chars = _regexp.MustCompile(`[A-Za-z0-9/_\$\-]`)
+var symlink_regex = _regexp.MustCompile(`(?i)^[\w\-_]+\$+[\w\-]+$`)
+var symlink_chars = _regexp.MustCompile(`[A-Za-z0-9/_\$\-]`)
 
 func Tag_Scanner(
 	fileData *_model.File_Stash,
@@ -66,7 +66,7 @@ func Tag_Scanner(
 		Innertext:  "",
 		Scope:      _model.Style_Type_Null,
 		TagCount:   fileCursor.Active.Cycle + 1,
-		SymClasses: make([]string, 0, 1),
+		Symlinks:   make([]string, 0, 1),
 		Attributes: make(map[string]string, 12),
 		Comments:   make([]string, 0, 1),
 		Styles:     make(map[string]string, 3),
@@ -144,8 +144,8 @@ func Tag_Scanner(
 								}
 							}
 						}
-					} else if symclass_regex.MatchString(tr_Attr) {
-						if len(styleDeclarations.SymClasses) == 0 {
+					} else if symlink_regex.MatchString(tr_Attr) {
+						if len(styleDeclarations.Symlinks) == 0 {
 							if _string.Contains(tr_Attr, "$$$$") {
 								styleDeclarations.Scope = _model.Style_Type_Null
 							} else if fileData.Cache.Type == _model.File_Type_Artifact {
@@ -161,7 +161,7 @@ func Tag_Scanner(
 								styleDeclarations.Styles[""] = tr_Value
 							}
 						}
-						styleDeclarations.SymClasses = append(styleDeclarations.SymClasses, tr_Attr)
+						styleDeclarations.Symlinks = append(styleDeclarations.Symlinks, tr_Attr)
 					} else if _string.HasSuffix(tr_Attr, "&") {
 						if len(tr_Value) > 0 {
 							styleDeclarations.Styles[tr_Attr] = tr_Value
@@ -224,7 +224,7 @@ func Tag_Scanner(
 	var fragString = ""
 	styleDeclarations.EndMarker = fileCursor.Active.Idx
 
-	hasDeclared := (len(styleDeclarations.Styles) > 0 || len(styleDeclarations.SymClasses) > 0)
+	hasDeclared := (len(styleDeclarations.Styles) > 0 || len(styleDeclarations.Symlinks) > 0)
 	if ok {
 		if fileCursor.Active.Char == '>' {
 			styleDeclarations.EndMarker++
@@ -259,7 +259,7 @@ func Tag_Scanner(
 			fileCursor.LoadFallback()
 		}
 	}
-	
+
 	return tag_Parse_retype{
 		Ok:                ok,
 		HasDeclared:       hasDeclared,

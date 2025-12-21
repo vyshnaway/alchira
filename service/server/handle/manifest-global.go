@@ -14,7 +14,7 @@ type R_ManifestGlobal struct {
 	SwitchMap      map[string]string                 `json:"switchmap"`
 	Hashrules      map[string]string                 `json:"hashrules"`
 	Constants      map[string]string                 `json:"constants"`
-	Symclasses     map[string]*models.Style_Metadata `json:"symclasses"`
+	Symlinks       map[string]*models.Style_Metadata `json:"symlinks"`
 	Diagnostics    []*models.File_Diagnostic         `json:"diagnostics"`
 }
 
@@ -28,10 +28,10 @@ func Manifest_Global() *R_ManifestGlobal {
 		switchmap[tv.Target] = tv.Source
 	}
 
-	symclassData := map[string]*models.Style_Metadata{}
+	symlinkData := map[string]*models.Style_Metadata{}
 	AppendIndexMap := func(refMap models.Style_ClassIndexMap) {
 		for k, v := range refMap {
-			symclassData[k] = action.Index_Fetch(v).SrcData.Metadata
+			symlinkData[k] = action.Index_Fetch(v).SrcData.Metadata
 		}
 	}
 	AppendIndexMap(configs.Style.Global___Index)
@@ -51,7 +51,7 @@ func Manifest_Global() *R_ManifestGlobal {
 		SwitchMap:      switchmap,
 		Hashrules:      configs.Style.Hashrules,
 		Constants:      configs.Manifest.Constants,
-		Symclasses:     symclassData,
+		Symlinks:       symlinkData,
 		Diagnostics:    configs.Manifest.Diagnostics,
 	}
 }

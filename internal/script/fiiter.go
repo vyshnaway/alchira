@@ -39,7 +39,7 @@ func Value_ClassFilter(
 		ch := nr.Active.Char
 
 		if awaitop {
-			if ok := symclass_chars.Match([]byte{byte(ch)}); ok {
+			if ok := symlink_chars.Match([]byte{byte(ch)}); ok {
 				entry.WriteRune(ch)
 			} else {
 				entryString := entry.String()

@@ -29,8 +29,8 @@ func archive_Build() *_models.Config_Archive {
 	for _, data := range exportdata {
 		exportsheet.WriteString("\r\n")
 
-		if _string.Contains(data.SymClass, "$$$") {
-			archive.ExportClasses = append(archive.ExportClasses, data.SymClass)
+		if _string.Contains(data.Symlink, "$$$") {
+			archive.ExportClasses = append(archive.ExportClasses, data.Symlink)
 		}
 
 		exportsheet.WriteString("<")
@@ -45,10 +45,10 @@ func archive_Build() *_models.Config_Archive {
 		}
 
 		exportsheet.WriteString(" ")
-		if data.SymClass[0] == '$' {
+		if data.Symlink[0] == '$' {
 			exportsheet.WriteString("-")
 		}
-		exportsheet.WriteString(data.SymClass)
+		exportsheet.WriteString(data.Symlink)
 
 		v := data.Stylesheet["[]"]
 		attachments := _slice.Collect(_map.Keys(data.Attachments))

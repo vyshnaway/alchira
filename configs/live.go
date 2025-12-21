@@ -96,7 +96,7 @@ func Style_Reset() {
 		Library__Index:      _model.Style_ClassIndexMap{},
 		Artifact_Index:      _model.Style_ClassIndexMap{},
 		ClassDictionary:     _model.Style_Dictionary{},
-		Index_to_Styledata:  map[int]*_model.Cache_SymclassData{},
+		Index_to_Styledata:  map[int]*_model.Cache_SymlinkData{},
 		Filepath_to_Context: map[string]*_model.File_Stash{},
 		Sketchpad: _model.Cache_Scratchpad{
 			Low: _model.Style_ClassIndexMap{},

@@ -13,10 +13,10 @@ func Artifact(index int) *_model.Style_ExportStyle {
 
 	element := ""
 	innertext := ""
-	symclass := ""
+	symlink := ""
 	stylesheet := make(map[string]string, style.SrcData.ExportRawStyle.BlockLen())
 	attributes := make(map[string]string, len(style.SrcData.Attributes))
-	
+
 	if len(style.SrcData.Metadata.SketchSnippet) > 0 {
 		element = "sketch"
 		innertext = style.SrcData.Metadata.SketchSnippet
@@ -26,9 +26,9 @@ func Artifact(index int) *_model.Style_ExportStyle {
 	}
 
 	if _string.Contains(style.SrcData.Definent, "$$$") {
-		symclass = style.SrcData.Definent
+		symlink = style.SrcData.Definent
 	} else {
-		symclass = "$---" + _util.String_EnCounter(style.SrcData.Index)
+		symlink = "$---" + _util.String_EnCounter(style.SrcData.Index)
 	}
 
 	isPublic := _string.Contains(style.SrcData.Definent, "$$$")
@@ -44,7 +44,7 @@ func Artifact(index int) *_model.Style_ExportStyle {
 
 	return &_model.Style_ExportStyle{
 		Element:     element,
-		SymClass:    symclass,
+		Symlink:     symlink,
 		InnerText:   innertext,
 		Stylesheet:  stylesheet,
 		Attributes:  attributes,
@@ -62,11 +62,11 @@ func (This *Class) GetArtifacts() map[string]*_model.Style_ExportStyle {
 			for a := range _action.Index_Fetch(pubindex).SrcData.Attachments {
 				if found := _action.Index_Finder(a, file.Cache.PublicMap); found.Index > 0 {
 					subexporting := Artifact(found.Index)
-					exporting.Attachments[subexporting.SymClass] = true
-					exports[subexporting.SymClass] = subexporting
+					exporting.Attachments[subexporting.Symlink] = true
+					exports[subexporting.Symlink] = subexporting
 				}
 			}
-			exports[exporting.SymClass] = exporting
+			exports[exporting.Symlink] = exporting
 		}
 	}
 

@@ -14,7 +14,7 @@ type R_ManifestLocal struct {
 	Lodashes   []string                          `json:"hashes"`
 	Assignable []string                          `json:"assignable"`
 	Attachable []string                          `json:"attachable"`
-	Symclasses map[string]*models.Style_Metadata `json:"symclasses"`
+	Symlinks   map[string]*models.Style_Metadata `json:"symlinks"`
 }
 
 type T_Manifest_Locals struct {
@@ -23,7 +23,7 @@ type T_Manifest_Locals struct {
 	Content string `json:"content"`
 }
 
-func Manifest_Locals(filemap []T_Manifest_Locals, symclass string) map[string]*R_ManifestLocal {
+func Manifest_Locals(filemap []T_Manifest_Locals, symlink string) map[string]*R_ManifestLocal {
 	result := make(map[string]*R_ManifestLocal, len(filemap))
 	for _, file := range filemap {
 		if file.Content != "" {
@@ -31,12 +31,12 @@ func Manifest_Locals(filemap []T_Manifest_Locals, symclass string) map[string]*R
 		}
 	}
 	for _, file := range filemap {
-		result[file.RelPath] = Manifest_Local(file.RelPath, symclass)
+		result[file.RelPath] = Manifest_Local(file.RelPath, symlink)
 	}
 	return result
 }
 
-func Manifest_Local(filepath string, symclass string) *R_ManifestLocal {
+func Manifest_Local(filepath string, symlink string) *R_ManifestLocal {
 	configs.Static.ExecuteMutex.Lock()
 	defer configs.Static.ExecuteMutex.Unlock()
 
@@ -58,8 +58,8 @@ func Manifest_Local(filepath string, symclass string) *R_ManifestLocal {
 	manifest := configs.Manifest
 	assignable := []string{}
 	attachable := []string{}
-	symclassData := map[string]*models.Style_Metadata{}
-	symclassIndex := map[string]int{}
+	symlinkData := map[string]*models.Style_Metadata{}
+	symlinkIndex := map[string]int{}
 	lodashes := []string{}
 
 	if nav, ok := configs.Manifest.Lookup[filepath]; ok {
@@ -70,7 +70,7 @@ func Manifest_Local(filepath string, symclass string) *R_ManifestLocal {
 		if nav.Type == models.File_Type_Artifact {
 			if stash, er := manifest.Group.Artifact[nav.Id]; er {
 				for k, i := range stash {
-					symclassIndex[k] = i
+					symlinkIndex[k] = i
 					attachable = append(attachable, k)
 				}
 			}
@@ -78,7 +78,7 @@ func Manifest_Local(filepath string, symclass string) *R_ManifestLocal {
 			for _, K := range convertAndSort(slices.Collect(maps.Keys(manifest.Group.Axiom))) {
 				KK := strconv.Itoa(K)
 				for k, i := range manifest.Group.Axiom[KK] {
-					symclassIndex[k] = i
+					symlinkIndex[k] = i
 					attachable = append(attachable, k)
 				}
 				if nav.Id == KK {
@@ -92,7 +92,7 @@ func Manifest_Local(filepath string, symclass string) *R_ManifestLocal {
 			for _, K := range convertAndSort(slices.Collect(maps.Keys(manifest.Group.Cluster))) {
 				KK := strconv.Itoa(K)
 				for k, i := range manifest.Group.Cluster[KK] {
-					symclassIndex[k] = i
+					symlinkIndex[k] = i
 					attachable = append(attachable, k)
 				}
 				if nav.Id == KK {
@@ -105,14 +105,14 @@ func Manifest_Local(filepath string, symclass string) *R_ManifestLocal {
 
 			for _, V := range manifest.Group.Artifact {
 				for k, i := range V {
-					symclassIndex[k] = i
+					symlinkIndex[k] = i
 					attachable = append(attachable, k)
 				}
 			}
 
 			for _, V := range manifest.Group.Global {
 				for k, i := range V {
-					symclassIndex[k] = i
+					symlinkIndex[k] = i
 					attachable = append(attachable, k)
 				}
 			}
@@ -120,16 +120,16 @@ func Manifest_Local(filepath string, symclass string) *R_ManifestLocal {
 			if nav.Type != models.File_Type_Stylesheet {
 				if stash, er := manifest.Group.Local[nav.Id]; er {
 					for k, i := range stash {
-						symclassIndex[k] = i
+						symlinkIndex[k] = i
 						attachable = append(attachable, k)
-						symclassData[k] = MetadataFromIndex(i)
+						symlinkData[k] = MetadataFromIndex(i)
 					}
 				}
 			}
 		}
 	}
 
-	if index, ok := symclassIndex[symclass]; ok {
+	if index, ok := symlinkIndex[symlink]; ok {
 		Sandbox_Save(index)
 	}
 
@@ -138,6 +138,6 @@ Return:
 		Assignable: assignable,
 		Attachable: attachable,
 		Lodashes:   lodashes,
-		Symclasses: symclassData,
+		Symlinks:   symlinkData,
 	}
 }

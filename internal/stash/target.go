@@ -69,8 +69,8 @@ func Target_Accumulate() (
 
 	counter := global_counter + public_counter
 	report :=
-		X.List_Chart("Globals: "+_strconv.Itoa(counter)+" Symclasses", globals) +
-			X.List_Chart("Publics: "+_strconv.Itoa(counter)+" Symclasses", publics)
+		X.List_Chart("Globals: "+_strconv.Itoa(counter)+" Symlinks", globals) +
+			X.List_Chart("Publics: "+_strconv.Itoa(counter)+" Symlinks", publics)
 	return contextMaps, report
 }
 

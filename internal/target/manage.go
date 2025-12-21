@@ -47,16 +47,16 @@ func (This *Class) Savefile(filepath string, content string, hashindex int) {
 	file.Cache.Type = _model.File_Type_Target
 
 	for _, tagdata := range parse_response.StylesList {
-		if len(tagdata.SymClasses) == 0 {
+		if len(tagdata.Symlinks) == 0 {
 			E := X.Error_Standard(
-				"Symclass missing declaration scope.",
+				"Symlink missing declaration scope.",
 				[]string{_fmt.Sprint(file.TargetPath, ":", tagdata.Range.Start.Row, ":", tagdata.Range.Start.Col)},
 			)
 			file.Errors = append(file.Errors, E.Errorstring)
 			file.Diagnostics = append(file.Diagnostics, &E.Diagnostic)
-		} else if len(tagdata.SymClasses) > 1 {
+		} else if len(tagdata.Symlinks) > 1 {
 			E := X.Error_Standard(
-				"Multiple SymClasses declaration scope.",
+				"Multiple Symlinks declaration scope.",
 				[]string{_fmt.Sprint(file.TargetPath, ":", tagdata.Range.Start.Row, ":", tagdata.Range.Start.Col)},
 			)
 			file.Errors = append(file.Errors, E.Errorstring)
@@ -78,10 +78,10 @@ func (This *Class) Savefile(filepath string, content string, hashindex int) {
 			}
 
 			response := _style.Rawtag_Upload(tagdata, file, loc_index_map)
-			loc_index_map[response.Symclass] = response.Index
+			loc_index_map[response.Symlink] = response.Index
 			if ref_index_map != nil {
-				ref_index_map[response.Symclass] = response.Index
-				ref_index_map[response.Symclass] = response.Index
+				ref_index_map[response.Symlink] = response.Index
+				ref_index_map[response.Symlink] = response.Index
 			}
 
 			file.Errors = append(file.Errors, response.Errors...)

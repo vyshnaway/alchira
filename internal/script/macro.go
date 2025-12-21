@@ -12,9 +12,10 @@ import (
 )
 
 type MultiplierInstruction struct {
-	Count  int
-	Value  string
-	Symbol string
+	Int int
+	Val string
+	Raw string
+	Sym string
 }
 
 func Tokenize(input string) (MultiplierInstruction, error) {
@@ -53,21 +54,22 @@ func Tokenize(input string) (MultiplierInstruction, error) {
 	}
 
 	return MultiplierInstruction{
-		Symbol: strings.TrimSpace(symbol.String()),
-		Count: func() int {
+		Sym: strings.TrimSpace(symbol.String()),
+		Int: func() int {
 			if foundAsterisk {
 				return count
 			} else {
 				return 0
 			}
 		}(),
-		Value: func() string {
+		Val: func() string {
 			if foundAsterisk {
 				return strings.TrimSpace(subvalue.String())
 			} else {
 				return fullvalue.String()
 			}
 		}(),
+		Raw: fullvalue.String(),
 	}, nil
 }
 
@@ -88,9 +90,10 @@ func Macro_Builder(
 ) string {
 	var register = object.New[string, string](4)
 	type stack struct {
-		value string
 		cycle int
 		index int
+		value string
+		macro []string
 	}
 
 	macrostack := []*stack{}
@@ -102,31 +105,35 @@ func Macro_Builder(
 
 		if tokens, err := Tokenize(line); err == nil {
 
-			val := tokens.Value
-			res := _action.Index_Finder(tokens.Value, fileData.Cache.LocalMap)
+			val := tokens.Val
+			res := _action.Index_Finder(tokens.Val, fileData.Cache.LocalMap)
 
-			if res.Index > 0 && tokens.Count > 0 {
-				configs.Style.Sketchpad.Mac[tokens.Value] = res.Index
+			if res.Index > 0 && tokens.Int > 0 {
+				configs.Style.Sketchpad.Mac[tokens.Val] = res.Index
 				if !appendstack[res.Index] {
 					subappendstack[res.Index] = true
 					val = res.Data.SrcData.Metadata.SketchSnippet
 				}
-			} else if tokens.Count == 0 {
-				tokens.Count = 1
+			} else if tokens.Int == 0 {
+				tokens.Int = 1
 			}
 
-			if len(tokens.Symbol) == 0 {
-				macrostack = append(macrostack, &stack{index: res.Index, value: val, cycle: tokens.Count})
-			} else {
+			if len(tokens.Sym) != 0 {
 				var s strings.Builder
-				for range tokens.Count {
+				for range tokens.Int {
 					s.WriteString(val)
 				}
 				S := s.String()
 				for i, m := range macrostack {
-					macrostack[i].value = strings.ReplaceAll(m.value, tokens.Symbol, S)
+					macrostack[i].value = strings.ReplaceAll(m.value, tokens.Sym, S)
 				}
-				register.Set(tokens.Symbol, val)
+				register.Set(tokens.Sym, val)
+			} else if len(val) > 0 {
+				macrostack = append(macrostack, &stack{
+					index: res.Index, cycle: tokens.Int,
+					macro: res.Data.SrcData.Metadata.Handles,
+					value: ResolveHandles(val, res.Data.SrcData.Metadata.Handles, true, false, false),
+				})
 			}
 		}
 	}
@@ -138,7 +145,7 @@ func Macro_Builder(
 			if m.index == 0 {
 				compose.WriteString(m.value)
 			} else {
-				compose.WriteString(MacroSketcher(m.value, _action.Index_Fetch(m.index).Context, method, subappendstack))
+				compose.WriteString(MacroSketcher(m.value, m.index, method, subappendstack))
 			}
 		}
 	}
@@ -149,13 +156,13 @@ func Macro_Builder(
 func Marcro_Reader(
 	macros []string,
 ) map[string]bool {
-	symclasses := map[string]bool{}
+	symlinks := map[string]bool{}
 	for _, line := range macros {
 		tkn, err := Tokenize(line)
-		if err == nil && len(tkn.Value) > 0 {
-			symclasses[tkn.Value] = true
+		if err == nil && len(tkn.Val) > 0 {
+			symlinks[tkn.Val] = true
 		}
 	}
 
-	return symclasses
+	return symlinks
 }

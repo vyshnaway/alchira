@@ -8,7 +8,7 @@ import (
 // Simulated utils and enums
 
 // Index_Declare: Assigns and registers a new index
-func Index_Declare(object *_model.Cache_SymclassData) int {
+func Index_Declare(object *_model.Cache_SymlinkData) int {
 	var idx int
 	for i := range _config.Style.Index_Bin {
 		idx = i
@@ -37,10 +37,10 @@ func Index_Dispose(indexes ...int) {
 type index_Find_retrun struct {
 	Index int
 	Group _model.Style_Type
-	Data  *_model.Cache_SymclassData
+	Data  *_model.Cache_SymlinkData
 }
 
-func Index_Fetch(index int) *_model.Cache_SymclassData {
+func Index_Fetch(index int) *_model.Cache_SymlinkData {
 	data, ok := _config.Style.Index_to_Styledata[index]
 	if ok {
 		return data

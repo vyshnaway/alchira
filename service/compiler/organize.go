@@ -74,7 +74,7 @@ func Accumulate() _target.GetTracks_return {
 	_config.Delta.Diagnostic.Multiples = []*_model.File_Diagnostic{}
 	for _, val := range _config.Style.Index_to_Styledata {
 		if len(val.SrcData.Metadata.Declarations) > 1 {
-			error_ := K.Error_Standard("Duplicate Declarations: "+val.SrcData.SymClass, val.SrcData.Metadata.Declarations)
+			error_ := K.Error_Standard("Duplicate Declarations: "+val.SrcData.Symlink, val.SrcData.Metadata.Declarations)
 			_config.Delta.Error.Multiples = append(_config.Delta.Error.Multiples, error_.Errorstring)
 			_config.Delta.Diagnostic.Multiples = append(_config.Delta.Diagnostic.Multiples, &error_.Diagnostic)
 		}
@@ -125,7 +125,7 @@ func Organize() (AritfactFiles map[string]string, Shortlist _target.GetTracks_re
 		// 		var classname string
 		// 		if _config.Static.PREVIEW {
 		// 			if d := _action.Index_Fetch(index); d != nil {
-		// 				classname = string(op_strict) + d.SrcData.SymClass + "_" + d.SrcData.Classhash + "-" + _strconv.Itoa(classid)
+		// 				classname = string(op_strict) + d.SrcData.Symlink + "_" + d.SrcData.Classhash + "-" + _strconv.Itoa(classid)
 		// 			}
 		// 		} else {
 		// 			classname = "__" + _util.String_EnCounter(classid)

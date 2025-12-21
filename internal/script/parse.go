@@ -153,7 +153,7 @@ func Rider(
 			}
 			awaitop = false
 		} else if method != E_Method_Strip && awaitop {
-			if ok := symclass_chars.Match([]byte{byte(ch)}); ok {
+			if ok := symlink_chars.Match([]byte{byte(ch)}); ok {
 				entry.WriteRune(ch)
 			} else {
 				entrystring := entry.String()

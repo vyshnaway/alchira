@@ -114,7 +114,7 @@ type Cache_Delta struct {
 	Diagnostic   Cache_Delta_Diagnostics
 }
 
-type Cache_SymclassData struct {
+type Cache_SymlinkData struct {
 	Context   *File_Stash
 	SrcData   *Style_ClassData
 	Dependint map[int]bool
@@ -129,7 +129,7 @@ type Cache_Style struct {
 	Library__Index      Style_ClassIndexMap
 	Artifact_Index      Style_ClassIndexMap
 	ClassDictionary     Style_Dictionary
-	Index_to_Styledata  map[int]*Cache_SymclassData
+	Index_to_Styledata  map[int]*Cache_SymlinkData
 	Filepath_to_Context map[string]*File_Stash
 	Sketchpad           Cache_Scratchpad
 }

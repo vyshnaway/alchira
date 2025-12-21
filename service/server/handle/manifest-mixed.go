@@ -12,7 +12,7 @@ type R_Manifest_Mixed struct {
 
 type T_Manifest_Mixed struct {
 	ActiveFilepath string              `json:"filepath"`
-	ActiveSymclass string              `json:"symclass"`
+	ActiveSymlink  string              `json:"symlink"`
 	FileMap        []T_Manifest_Locals `json:"filemap"`
 }
 
@@ -25,7 +25,7 @@ func Manifest_Mixed(req T_Manifest_Mixed) R_Manifest_Mixed {
 	}
 	for _, f := range req.FileMap {
 		if f.RelPath == req.ActiveFilepath {
-			localManifest[f.RelPath] = Manifest_Local(f.RelPath, req.ActiveSymclass)
+			localManifest[f.RelPath] = Manifest_Local(f.RelPath, req.ActiveSymlink)
 		} else {
 			localManifest[f.RelPath] = Manifest_Local(f.RelPath, "")
 		}

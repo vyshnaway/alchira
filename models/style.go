@@ -20,7 +20,7 @@ const (
 
 type Style_ExportStyle struct {
 	Element     string
-	SymClass    string
+	Symlink     string
 	InnerText   string
 	Stylesheet  map[string]string
 	Attributes  map[string]string
@@ -28,7 +28,7 @@ type Style_ExportStyle struct {
 }
 
 type Style_Metadata struct {
-	Info          []string          `json:"info,omitempty"`
+	Handles       []string          `json:"info,omitempty"`
 	Skeleton      any               `json:"skeleton,omitempty"`
 	Declarations  []string          `json:"declarations,omitempty"`
 	Variables     map[string]string `json:"variables,omitempty"`
@@ -43,7 +43,7 @@ type Style_ClassData struct {
 	Metadata          *Style_Metadata
 	Artifact          string
 	Definent          string
-	SymClass          string
+	Symlink           string
 	Classhash         string
 	PreviewLow        string
 	PreviewMid        string
@@ -72,7 +72,7 @@ type T_RawStyle struct {
 	TagCount   int
 	Range      reader.T_Range
 	EndMarker  int
-	SymClasses []string
+	Symlinks   []string
 	Scope      Style_Type
 	Comments   []string
 	Innertext  string

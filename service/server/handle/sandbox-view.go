@@ -18,7 +18,7 @@ type T_Component_return struct {
 	Attributes map[string]string `json:"attributes"`
 	Sketch     string            `json:"sketch"`
 	Depend     string            `json:"stitch"`
-	Symclass   string            `json:"symclass"`
+	Symlink    string            `json:"symlink"`
 	Rootcss    string            `json:"rootcss"`
 	Compcss    string            `json:"compcss"`
 	Timestamp  int64             `json:"timestamp"`
@@ -27,8 +27,8 @@ type T_Component_return struct {
 
 var Sandbox_View_Component = new(T_Component_return)
 
-func Sandbox_Load(filepath, symclass string) (response any) {
-	Manifest_Local(filepath, symclass)
+func Sandbox_Load(filepath, symlink string) (response any) {
+	Manifest_Local(filepath, symlink)
 	return Sandbox_View_Component
 }
 
@@ -65,8 +65,7 @@ func Sandbox_Save(index int) (response any) {
 		attributes[k] = scribes
 	}
 
-	res := script.Rider(&clontext, script.E_Method_DebugHash, map[int]bool{})
-	Builder.WriteString(strings.TrimSpace(res.Scribed))
+	Builder.WriteString(script.SketchBuilder(index, script.E_Method_DebugHash, map[int]bool{}))
 	sketch = Builder.String()
 
 	FinalClassMap := []models.Style_ClassIndexTrace{
@@ -96,7 +95,7 @@ func Sandbox_Save(index int) (response any) {
 		Attributes: attributes,
 		Sketch:     sketch,
 		Depend:     sketchDeps,
-		Symclass:   data.SrcData.SymClass,
+		Symlink:    data.SrcData.Symlink,
 		Rootcss:    configs.Delta.IndexBuild,
 		Compcss:    stylesheet.String(),
 		Timestamp:  time.Now().UnixNano(),
@@ -118,7 +117,7 @@ func Sandbox_Save(index int) (response any) {
 // 		return false
 // 	}
 
-// 	if now.Symclass != last.Symclass {
+// 	if now.Symlink != last.Symlink {
 // 		return true
 // 	}
 // 	if now.Sketch != last.Sketch {

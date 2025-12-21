@@ -25,7 +25,7 @@ const content = `
 	--pattern-checker-bg2: var(---secondary-900);
 ">
 
-	<stitch glass$$--container="= d-flex" &#{Cl1}&#{Cl2}&#{Load}&="= d-flex">Test
+	<sketch glass$$--container="= d-flex" &#{Cl1}&#{Cl2}&#{Load}&="= d-flex">Test
 		<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
 			<defs>
 				<filter id="glass-distortion" x="0%" y="0%" width="100%" height="100%">
@@ -37,7 +37,7 @@ const content = `
 				</filter>
 			</defs>
 		</svg>
-	</stitch>
+	</sketch>
 
 	<sketch style="
 		background-image: linear-gradient(#ffffff 0.9px, transparent 0.9px), linear-gradient(to right, #ffffff 0.9px, #cacaca 1px);  
@@ -83,7 +83,7 @@ const content = `
 		Liquid Glass
 	</div>
 
-	<stitch />
+	<sketch />
 </body>
 
 </html>

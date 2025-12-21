@@ -25,7 +25,7 @@ func DeclareClass(
 	classdata *_model.Style_ClassData,
 	debugClass string,
 ) int {
-	index := _action.Index_Declare(&_model.Cache_SymclassData{
+	index := _action.Index_Declare(&_model.Cache_SymlinkData{
 		Context: file,
 		SrcData: classdata,
 	})
@@ -37,11 +37,11 @@ func DeclareClass(
 	classdata.DebugLow = debugClass + "_Mid"
 	classdata.DebugTop = debugClass + "_Top"
 
-	classdata.PreviewLow = PreviewLow + classdata.SymClass
-	classdata.PreviewMid = PreviewMid + classdata.SymClass
-	classdata.PreviewTop = PreviewTop + classdata.SymClass
+	classdata.PreviewLow = PreviewLow + classdata.Symlink
+	classdata.PreviewMid = PreviewMid + classdata.Symlink
+	classdata.PreviewTop = PreviewTop + classdata.Symlink
 
-	if !strings.Contains(classdata.SymClass, "$$") {
+	if !strings.Contains(classdata.Symlink, "$$") {
 		classdata.PreviewLow = classdata.PreviewLow + "_" + classhash
 		classdata.PreviewMid = classdata.PreviewMid + "_" + classhash
 		classdata.PreviewTop = classdata.PreviewTop + "_" + classhash
@@ -99,8 +99,8 @@ func stripCustomTags(context *_model.File_Stash, str string) string {
 	return out
 }
 
-func ResolveDependints(data *_model.Cache_SymclassData) map[int]bool {
-	if data.Dependint == nil {
+func ResolveDependints(data *_model.Cache_SymlinkData) map[int]bool {
+	if data != nil && data.Dependint == nil {
 		data.Dependint = map[int]bool{}
 		for as := range data.SrcData.Attachments {
 			if found := _action.Index_Finder(as, data.Context.Cache.LocalMap); found.Index > 0 {

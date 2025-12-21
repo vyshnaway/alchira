@@ -70,7 +70,7 @@ Inspiration: https://uiverse.io/Voxybuns/lucky-fireant-71
 
 ### SandBox: `[ ctrl + alt + x ]`
 
-- Put cursor on a symclass here `demo$buttom` instance and trigger event.
+- Put cursor on a symlink here `demo$buttom` instance and trigger event.
 - Change attribute `x-preset-1` to `x-preset-2`, to observe live udpates.
 - In the sandbox webview panal few tools are available try out those.
 
@@ -86,11 +86,11 @@ Inspiration: https://uiverse.io/Voxybuns/lucky-fireant-71
 
 ### Template Import: `[ alt + x ]`
 
-- Import available templates for the symclass at the active cursor position, appending them to the current HTML tag.
-- In practice: Change `class=""` to `class="=demo$button"`, hover over preferred symclass and trigger the event, the template snippet imports after the current tag scope.
+- Import available templates for the symlink at the active cursor position, appending them to the current HTML tag.
+- In practice: Change `class=""` to `class="=demo$button"`, hover over preferred symlink and trigger the event, the template snippet imports after the current tag scope.
 - This is especially useful for complex, highly structured compound components, allowing you to build and iterate from there
 
-### Goto Source: `[ F12 ]` / `[ ctrl + (left-click over symclass) ]`
+### Goto Source: `[ F12 ]` / `[ ctrl + (left-click over symlink) ]`
 
 - Redirects to location of declaration.
 
@@ -106,7 +106,7 @@ Inspiration: https://uiverse.io/Voxybuns/lucky-fireant-71
 
 ## Real-time diagnostics.
 
-- Declararion collition of symclasses as errors.
+- Declararion collition of symlinks as errors.
 - Invalid use of hashrules as warnings.
 
 ## Intellisense and autocomplete.
@@ -281,7 +281,7 @@ Inspiration: https://uiverse.io/Voxybuns/lucky-fireant-71
 ### `./libraries/_scaffold_`
 
 - This folder contains the immutable part of your library supplied by the initalized flavour.
-- It includes static class sources used for symclass generation.
+- It includes static class sources used for symlink generation.
 # 4. Libraries
 
 Composing libraries is essentially like managing a set of CSS files—sensibly grouping classes and naming them according to established standards. This approach ensures clarity, maintainability, and consistency across your stylesheets.
@@ -311,24 +311,24 @@ The classes defined in this file are accessed from other files using the followi
 
 .none {
   transition: none;
-} /* Sym-class: anim$none */
+} /* Symlink: anim$none */
 
 .all {
   transition: all 300ms ease;
-} /* Sym-class: anim$all */
+} /* Symlink: anim$all */
 
 .transform {
   transition: transform 300ms ease;
-} /* Sym-class: anim$transform */
+} /* Symlink: anim$transform */
 
 .opacity {
   transition: opacity 300ms ease;
-} /* Sym-class: anim$opacity */
+} /* Symlink: anim$opacity */
 
 .fade-in {
   @--attach anim$_keyframes_fade-in;
   animation-name: fade-in;
-} /* Sym-class: anim$fade-in */
+} /* Symlink: anim$fade-in */
 
 @keyframes fade-in {
   from {
@@ -338,7 +338,7 @@ The classes defined in this file are accessed from other files using the followi
   to {
     opacity: 1;
   }
-} /* Sym-class: anim$_keyframes_fade-in */
+} /* Symlink: anim$_keyframes_fade-in */
 ```
 
 All the first order blocks of each file will have a corresponding symbolic class generated. This will be use full in cases where custom rule block has to be linked with classes.
@@ -353,7 +353,7 @@ All the first order blocks of each file will have a corresponding symbolic class
 ```
 
 ### `@--apply`
-- Compose styles from predefined classes from libraries using sym-classes.
+- Compose styles from predefined classes from libraries using symlinks.
 - Values derived from this action is overridden by explicit properties
 
 ### `@--attach`
@@ -385,7 +385,7 @@ All the first order blocks of each file will have a corresponding symbolic class
 	-  `@--attach`: Files of **Order ≤ n**
 # 1.0 Hash Loaders
 
-> - Use sandbox for preview. Cursor on symclass and trigger. [ `ctrl` + `alt` + `x` ]  
+> - Use sandbox for preview. Cursor on symlink and trigger. [ `ctrl` + `alt` + `x` ]  
 > - Start live compilation using `xtatix preview -w` or `xtatix debug -w`.  
 > - Toggle b/w input & ouput using [ `ctrl` + `alt` + `shift` + `x` ] 
 
@@ -445,21 +445,21 @@ Using this escaping keeps hashes valid across different contexts whether in HTML
 This method ensures consistency and correctness when importing and using unique identifiers across your project files.
 # 2.0 Class Loaders
 
-> - Use sandbox for preview. Cursor on symclass and trigger. [ `ctrl` + `alt` + `x` ]  
+> - Use sandbox for preview. Cursor on symlink and trigger. [ `ctrl` + `alt` + `x` ]  
 > - Start live compilation using `xtatix preview -w` or `xtatix debug -w`.  
 > - Toggle b/w input + ouput using [ `ctrl` + `alt` + `shift` + `x` ] 
 
 ---
 
-> ### Sym-classes include:
+> ### Symlinks include:
 > - Classes from your **configured flavor**
 > - **Custom classes** you create yourself
 > - Classes available in **[Libraries Setup](../xtatix/libraries/index.md)**
 > - **Components** declared in target folders
 
-Class Loaders are special operators in Xtatix that signal the use of symbolic classes (sym-classes) within watch attributes. They distinguish sym-classes from conventional CSS classes, enabling their simultaneous use without conflicts or style collisions in complex projects.
+Class Loaders are special operators in Xtatix that signal the use of symbolic classes (symlinks) within watch attributes. They distinguish symlinks from conventional CSS classes, enabling their simultaneous use without conflicts or style collisions in complex projects.
 
-Unlike traditional CSS cascading, which applies styles globally, Class Loaders implement localized cascade control rules at the element level. This allows developers to precisely layer and control how sym-classes interact with each other and with existing styles, eliminating global cascade conflicts.
+Unlike traditional CSS cascading, which applies styles globally, Class Loaders implement localized cascade control rules at the element level. This allows developers to precisely layer and control how symlinks interact with each other and with existing styles, eliminating global cascade conflicts.
 
 ### Core Concept
 
@@ -502,7 +502,7 @@ The Scattered Class Loader (`~`) applies utility and atomic classes in a non-det
 - Styles may change continuously due to this unpredictable loading behavior.
 
 ### Syntax and Usage
-- Prefix sym-classes with a backslash when used outside watch attribute values: `\~`.
+- Prefix symlinks with a backslash when used outside watch attribute values: `\~`.
 
 ```html
 <sketch class-loader$scattered>
@@ -588,7 +588,7 @@ The Final Class Loader operator `=` applies classes after both scattered `~` and
 
 ## Symbolic Class Syntax
 
-A symbolic class (sym-class) is structured as:
+A symbolic class (symlink) is structured as:
 
 ``` 
 {cluster}{scope-op}{identifier}
@@ -613,14 +613,14 @@ When composing styles, you can wrap groups externally using any of these delimit
 
 **Note:** Avoid using the same type of quotes internally and externally to prevent parsing issues.
 
-## Composing a Sym-Class
+## Composing a Symlink
 
 ### Compose Operators
 
 Xtatix provides two compose operators as replacements for traditional CSS composition directives:
 
-- `+` (equivalent to `@--apply`): Merges and flattens the provided sym-classes.
-- `~` (equivalent to `@--attach`): Creates a dependency node to the referenced sym-classes.
+- `+` (equivalent to `@--apply`): Merges and flattens the provided symlinks.
+- `~` (equivalent to `@--attach`): Creates a dependency node to the referenced symlinks.
 
 Both produce the same final CSS output. They coexist for developer convenience and clarity.
 
@@ -661,19 +661,19 @@ demo$$button="
 </sketch>
 ```
 
-- This defines a sym-class `demo$$button` with global scope.
+- This defines a symlink `demo$$button` with global scope.
 - Combines animations, typography, utility classes with custom properties and pseudo-class styles.
 - Uses both `~` and `+`,  operators for dependencies and composing respectively.
 
 > **Tip:** If the class name is `demo$button`, you can declare it once per file. However, if you use `demo$$button`, it becomes globally scoped and must appear only once across all files—otherwise, it will trigger an error.
 # 3.1 Variants in Xtatix
 
-This tutorial shows how to extend variants of an existing symbolic class (sym-class) by leveraging exposed CSS variables, enabling dynamic theming and style variations.
+This tutorial shows how to extend variants of an existing symbolic class (symlink) by leveraging exposed CSS variables, enabling dynamic theming and style variations.
 
-## Take a look in Practice, (Using a Sketch Sym-Class as a Preview Container)
+## Take a look in Practice, (Using a Sketch Symlink as a Preview Container)
 
 ```html
-<!-- Use a sketch symclass as preview container. -->
+<!-- Use a sketch symlink as preview container. -->
  
 <sketch 
 demo$varient-preview="= d-flex gap-8 ;"
@@ -693,7 +693,7 @@ demo$varient-preview="= d-flex gap-8 ;"
 	x-preset-1
 	> </sketch>
 	<button class="&demo$$button ~demo$button-varients-1" x-preset-1> </button>
-	<!-- While composing symclass in this manner, all variables are detected, and autosuggests them. -->
+	<!-- While composing symlink in this manner, all variables are detected, and autosuggests them. -->
 
 	<!-- Xtatix provieds a special operator called `de-nest`, it helps in much better organization of nested strucures. -->
 	<sketch class="&demo$$button"
@@ -712,7 +712,7 @@ demo$varient-preview="= d-flex gap-8 ;"
 	x-preset-2
 	> </sketch>
 	<button class="&demo$$button ~demo$button-varients-2" x-preset-2> </button>
-	<!-- While composing symclass in this manner, all variables are detected, and autosuggests them. -->
+	<!-- While composing symlink in this manner, all variables are detected, and autosuggests them. -->
 
 	<!-- For runtime dynamic styling update the variable using style attribute. -->
 	<button 
@@ -838,7 +838,7 @@ Xtatix reserves a small set of custom tags and placeholders that make it possibl
 
 ## Declaration Tags (paired tags)
 
-When a symbolic class (sym-class) appears as an attribute on these special tags, the content between the opening and closing tags is bound to that sym-class. During compilation, the tags themselves are collapsed and only the generated CSS and HTML remain.
+When a symbolic class (symlink) appears as an attribute on these special tags, the content between the opening and closing tags is bound to that symlink. During compilation, the tags themselves are collapsed and only the generated CSS and HTML remain.
 
 ```html 
 <style local$-class>
@@ -866,14 +866,14 @@ When a symbolic class (sym-class) appears as an attribute on these special tags,
 
 ### `<style> ... </style>`
 
-- Uses the standard HTML `<style>` tag, but when a sym-class is present on the tag, its content becomes a dependent CSS snippet of that sym-class.
-- Declared with a sym-class where `-` immediately follows the final `$`, for example: `style$-class-name`.
+- Uses the standard HTML `<style>` tag, but when a symlink is present on the tag, its content becomes a dependent CSS snippet of that symlink.
+- Declared with a symlink where `-` immediately follows the final `$`, for example: `style$-class-name`.
 - The snippet is processed as CSS and merged into the compiled stylesheet.
 
 ### `<sketch> ... </sketch>`
 
 - Declares component-level styles and generates a corresponding preview template.
-- The attribute-value for a sym-class defines its composition and rules.
+- The attribute-value for a symlink defines its composition and rules.
 - The inner HTML is used as a live preview template in the sandbox:
   - `style` attributes are passed to the sandbox body.
   - Other attributes are passed directly to the component template.
@@ -945,9 +945,9 @@ Self-closing tags and reserved HTML comments act as insertion points where compi
 - Marks where the compiled stylesheet block should be embedded inside targeted files.
 - Lets you keep your source clean while still controlling where styles appear in the final HTML.
 
-### `<sketch class="&{sym-class}"/>` / `<style class="&{sym-class}"/>`
+### `<sketch class="&{symlink}"/>` / `<style class="&{symlink}"/>`
 
-- These acts as a build-time placeholder for specific symclasses and is replaced by the HTML snippet bound it.
+- These acts as a build-time placeholder for specific symlinks and is replaced by the HTML snippet bound it.
 
 ---
 
@@ -975,7 +975,7 @@ These reserved tags and placeholders let Xtatix treat HTML as a rich declaration
 </div>
 </sketch>
 
-<stitch
+<sketch
   camera$icon="
         ~ camera$--symbol;
         display: inline-flex;
@@ -985,14 +985,14 @@ These reserved tags and placeholders let Xtatix treat HTML as a rich declaration
   <use
     href="#\#camera"
   ></use>
-</stitch>
+</sketch>
 
-<stitch camera$--symbol>
+<sketch camera$--symbol>
   <svg>
     <symbol id="#camera" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-camera-icon lucide-camera"><path d="M13.997 4a2 2 0 0 1 1.76 1.05l.486.9A2 2 0 0 0 18.003 7H20a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h1.997a2 2 0 0 0 1.759-1.048l.489-.904A2 2 0 0 1 10.004 4z"/><circle cx="12" cy="13" r="3"/>
     </symbol>
   </svg>
-</stitch>
+</sketch>
 ```
 # 8. Appendix
 
@@ -1015,7 +1015,7 @@ These reserved tags and placeholders let Xtatix treat HTML as a rich declaration
 ## Dependency resolution
 
 - Dependency resolution is automated. The compiler traverses the attachment tree for symbolic-class `@--attach`/`~` links and deploys all interconnected dependencies together after symbolic classes are composed.
-- `stitch` snippets are replaced with the `<stitch />` placeholder at compile time; ensure your attached stitch snippets are present where expected to avoid missing assets.
+- `stitch` snippets are replaced with the `<sketch />` placeholder at compile time; ensure your attached stitch snippets are present where expected to avoid missing assets.
 
 ## Hashing Methodology
 

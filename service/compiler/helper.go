@@ -179,8 +179,8 @@ func GetDependentsForSketchpad() (stylesheet, sketchsheet string) {
 
 	for _, i := range SP.Mid {
 		tmp := make([]int, len(i))
-		for _, ii := range i {
-			tmp = append(tmp, ii.ClassIndex)
+		for ii, iii := range i {
+			tmp[ii] = iii.ClassIndex
 		}
 		MidRefs = append(MidRefs, tmp)
 	}

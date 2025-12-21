@@ -102,20 +102,20 @@ func Artifact_Update() {
 	for _, file := range SaveArtifactFile_.Files {
 		Cache.Artifacts[file.FilePath] = file
 
-		symclasses := []string{}
+		symlinks := []string{}
 		metadatas := _model.Style_ClassIndexMap{}
 		for _, tagstyle := range _script.Rider(file, _script.E_Method_Read, map[int]bool{}).StylesList {
 
-			if len(tagstyle.SymClasses) == 0 {
+			if len(tagstyle.Symlinks) == 0 {
 				E := X.Error_Standard(
-					"Symclass missing declaration scope.",
+					"Symlink missing declaration scope.",
 					[]string{_fmt.Sprint(file.FilePath, ":", tagstyle.Range.Start.Row, ":", tagstyle.Range.Start.Col)},
 				)
 				file.Errors = append(file.Errors, E.Errorstring)
 				file.Diagnostics = append(file.Diagnostics, &E.Diagnostic)
-			} else if len(tagstyle.SymClasses) > 1 {
+			} else if len(tagstyle.Symlinks) > 1 {
 				E := X.Error_Standard(
-					"Multiple SymClasses declaration scope.",
+					"Multiple Symlinks declaration scope.",
 					[]string{_fmt.Sprint(file.FilePath, ":", tagstyle.Range.Start.Row, ":", tagstyle.Range.Start.Col)},
 				)
 				file.Errors = append(file.Errors, E.Errorstring)
@@ -123,24 +123,24 @@ func Artifact_Update() {
 			} else {
 				artifact_counter++
 				Rawtag_Upload_ := _style_.Rawtag_Upload(tagstyle, file, _config.Style.Artifact_Index)
-				if _, k := _config.Style.Artifact_Index[Rawtag_Upload_.Symclass]; !k {
-					symclasses = append(symclasses, Rawtag_Upload_.Symclass)
-					_config.Style.Artifact_Index[Rawtag_Upload_.Symclass] = Rawtag_Upload_.Index
+				if _, k := _config.Style.Artifact_Index[Rawtag_Upload_.Symlink]; !k {
+					symlinks = append(symlinks, Rawtag_Upload_.Symlink)
+					_config.Style.Artifact_Index[Rawtag_Upload_.Symlink] = Rawtag_Upload_.Index
 				}
 
 				file.Errors = append(file.Errors, Rawtag_Upload_.Errors...)
 				file.Diagnostics = append(file.Diagnostics, Rawtag_Upload_.Diagnostics...)
 			}
 		}
-		if len(symclasses) > 0 {
+		if len(symlinks) > 0 {
 			artifact_chart.Set(
-				_fmt.Sprint("[", file.FilePath, "]: ", len(symclasses)),
-				symclasses,
+				_fmt.Sprint("[", file.FilePath, "]: ", len(symlinks)),
+				symlinks,
 			)
 		}
 		_config.Manifest.Group.Artifact[file.FilePath] = metadatas
 		_config.Delta.Error.Artifacts = append(_config.Delta.Error.Artifacts, file.Errors...)
 		_config.Delta.Diagnostic.Artifacts = append(_config.Delta.Diagnostic.Artifacts, file.Diagnostics...)
 	}
-	_config.Delta.Report.Artifacts = X.List_Chart("Artifact: "+_strconv.Itoa(artifact_counter)+" Symclasses", artifact_chart)
+	_config.Delta.Report.Artifacts = X.List_Chart("Artifact: "+_strconv.Itoa(artifact_counter)+" Symlinks", artifact_chart)
 }

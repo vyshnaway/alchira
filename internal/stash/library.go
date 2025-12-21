@@ -117,7 +117,7 @@ func Library_Update() {
 			_config.Delta.Diagnostic.Axioms = append(_config.Delta.Diagnostic.Axioms, file.Diagnostics...)
 		}
 	}
-	_config.Delta.Report.Axioms = X.List_Chart("Axiom: "+_strconv.Itoa(axiom_counter)+" Symclasses", axiom_chart)
+	_config.Delta.Report.Axioms = X.List_Chart("Axiom: "+_strconv.Itoa(axiom_counter)+" Symlinks", axiom_chart)
 
 	// Cluster update actions
 	_config.Manifest.Group.Cluster = map[string]_model.Style_ClassIndexMap{}
@@ -141,5 +141,5 @@ func Library_Update() {
 			_config.Delta.Diagnostic.Clusters = append(_config.Delta.Diagnostic.Clusters, file.Diagnostics...)
 		}
 	}
-	_config.Delta.Report.Clusters = X.List_Chart("Cluster: "+_strconv.Itoa(cluster_counter)+" Symclasses", cluster_chart)
+	_config.Delta.Report.Clusters = X.List_Chart("Cluster: "+_strconv.Itoa(cluster_counter)+" Symlinks", cluster_chart)
 }
