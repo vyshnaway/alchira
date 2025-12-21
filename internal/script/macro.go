@@ -12,18 +12,17 @@ import (
 )
 
 type MultiplierInstruction struct {
-	Count    int
-	Value    string
-	Symbol   string
-	Symclass string
+	Count  int
+	Value  string
+	Symbol string
 }
 
 func Tokenize(input string) (MultiplierInstruction, error) {
 	input = strings.TrimSpace(input)
 	var countStr strings.Builder
-	var symclass strings.Builder
+	var subvalue strings.Builder
 	var symbol strings.Builder
-	var value strings.Builder
+	var fullvalue strings.Builder
 
 	foundAsterisk := false
 	gotSymbol := false
@@ -41,12 +40,11 @@ func Tokenize(input string) (MultiplierInstruction, error) {
 		} else if char == '*' && !foundAsterisk {
 			foundAsterisk = true
 		} else if foundAsterisk {
-			symclass.WriteRune(char)
+			subvalue.WriteRune(char)
 		}
 		if gotSymbol {
-			value.WriteRune(char)
+			fullvalue.WriteRune(char)
 		}
-
 	}
 
 	count, _ := strconv.Atoi(countStr.String())
@@ -55,10 +53,17 @@ func Tokenize(input string) (MultiplierInstruction, error) {
 	}
 
 	return MultiplierInstruction{
-		Count:    count,
-		Value:    strings.TrimSpace(value.String()),
-		Symbol:   strings.TrimSpace(symbol.String()),
-		Symclass: strings.TrimSpace(symclass.String()),
+		Symbol: strings.TrimSpace(symbol.String()),
+		Count: func() int {
+			return count
+		}(),
+		Value: func() string {
+			if foundAsterisk {
+				return strings.TrimSpace(subvalue.String())
+			} else {
+				return strings.TrimSpace(fullvalue.String())
+			}
+		}(),
 	}, nil
 }
 
@@ -77,12 +82,7 @@ func Macro_Builder(
 	fileData *_model.File_Stash,
 	appendstack map[int]bool,
 ) string {
-
-	var entry strings.Builder
 	var register = object.New[string, string](4)
-
-	entry.Reset()
-
 	type stack struct {
 		value string
 		cycle int
@@ -98,10 +98,10 @@ func Macro_Builder(
 		if tokens, err := Tokenize(line); err == nil {
 
 			val := tokens.Value
-			res := _action.Index_Finder(tokens.Symclass, fileData.Cache.LocalMap)
+			res := _action.Index_Finder(tokens.Value, fileData.Cache.LocalMap)
 
 			if res.Index > 0 {
-				configs.Style.Sketchpad.Mac[tokens.Symclass] = res.Index
+				configs.Style.Sketchpad.Mac[tokens.Value] = res.Index
 				if !appendstack[res.Index] {
 					subappendstack[res.Index] = true
 					val = res.Data.SrcData.Metadata.SketchSnippet
@@ -111,8 +111,12 @@ func Macro_Builder(
 			if len(tokens.Symbol) == 0 {
 				macrostack.Set(res.Index, &stack{value: val, cycle: tokens.Count})
 			} else {
+				var s strings.Builder
+				for range tokens.Count {
+					s.WriteString(val)
+				}
 				macrostack.Range(func(k int, v *stack) {
-					v.value = strings.ReplaceAll(v.value, tokens.Symbol, val)
+					v.value = strings.ReplaceAll(v.value, tokens.Symbol, s.String())
 				})
 				register.Set(tokens.Symbol, val)
 			}
@@ -139,8 +143,8 @@ func Marcro_Reader(
 	symclasses := map[string]bool{}
 	for _, line := range macros {
 		tkn, err := Tokenize(line)
-		if err == nil && len(tkn.Symclass) > 0 {
-			symclasses[tkn.Symclass] = true
+		if err == nil && len(tkn.Value) > 0 {
+			symclasses[tkn.Value] = true
 		}
 	}
 
