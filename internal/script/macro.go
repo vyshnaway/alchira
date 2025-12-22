@@ -6,8 +6,8 @@ import (
 	"main/internal/action"
 	"main/internal/macro"
 	"main/models"
-	"main/package/object"
 	"maps"
+	"strconv"
 	"strings"
 )
 
@@ -17,53 +17,77 @@ func Macro_Builder(
 	fileData *models.File_Stash,
 	appendstack map[int]bool,
 ) string {
-	var register = object.New[string, string](4)
 
-	stack := macro.NewAst()
+	Stack := macro.NewAst()
 	subappendstack := make(map[int]bool, len(appendstack))
 	maps.Copy(subappendstack, appendstack)
 
 	for _, cmd := range commands {
-		T, K := stack.Tokenize(cmd, true)
+		T, K := Stack.Tokenize(cmd, true)
 		if !K {
 			continue
 		}
 
-		if T.Instance == 0 {
-
+		if T.Mul0Mod1 {
+			if T.Instance == 0 {
+				if modifier, ok := macro.Modifiers[T.Modify]; ok {
+					if reg, exist := Stack.Register.Get(T.Register); exist {
+						uses := []string{}
+						if subreg, exist := Stack.Register.Get(T.Target); exist && (len(T.Target) > 0) {
+							subsubappendstack := make(map[int]bool, len(subappendstack))
+							maps.Copy(subsubappendstack, subsubappendstack)
+							uses = MacroSketcher(subreg.Array[0], subreg.Index, method, subsubappendstack)
+						}
+						Stack.Render.Array = modifier(reg.Array, uses, T.Arguments)
+					}
+				}
+			} else if reg, exist := Stack.Register.Get(T.Register); exist {
+				instances, _ := strconv.Atoi(T.Target)
+				for i, v := range reg.Array {
+					reg.Array[i] = strings.Replace(v, T.Modify, T.Arguments, instances)
+				}
+			}
 		} else {
-			res := action.Index_Finder(T.Argument, fileData.Cache.LocalMap)
+			res := action.Index_Finder(T.Arguments, fileData.Cache.LocalMap)
 
-		}
-		val := T.Val
+			// if T.Instance > 0 {
+			// } else if {
 
-		if res.Index > 0 && T.Int > 0 {
-			configs.Style.Sketchpad.Mac[T.Val] = res.Index
-			if !appendstack[res.Index] {
-				subappendstack[res.Index] = true
-				val = res.Data.SrcData.Metadata.SketchSnippet
-			}
-		} else if T.Int == 0 {
-			T.Int = 1
-		}
+			// }
+			// if T.Instance == 0 && len(T.Register) > 0 {
+			// 	Stack.Const.Set(T.Register, T.Operation)
+			// }
 
-		if len(T.Sym) > 0 {
-			var s strings.Builder
-			for range T.Int {
-				s.WriteString(val)
+			val := T.Val
+
+			if res.Index > 0 && T.Int > 0 {
+				configs.Style.Sketchpad.Mac[T.Val] = res.Index
+				if !appendstack[res.Index] {
+					subappendstack[res.Index] = true
+					val = res.Data.SrcData.Metadata.SketchSnippet
+				}
+			} else if T.Int == 0 {
+				T.Int = 1
 			}
-			superval := s.String()
-			for i, m := range macrostack {
-				macrostack[i].value = strings.ReplaceAll(m.value, T.Sym, superval)
+
+			if len(T.Sym) > 0 {
+				var s strings.Builder
+				for range T.Int {
+					s.WriteString(val)
+				}
+				superval := s.String()
+				for i, m := range macrostack {
+					macrostack[i].value = strings.ReplaceAll(m.value, T.Sym, superval)
+				}
+				register.Set(T.Sym, val)
+			} else if len(val) > 0 {
+				submacros := []string{}
+				if res.Index > 0 {
+					submacros = res.Data.SrcData.Metadata.Macros
+					val = ApplyCommand(val, submacros, true, false, false)
+				}
+				macrostack = append(macrostack, &Stack{index: res.Index, cycle: T.Int, macro: submacros, value: val})
 			}
-			register.Set(T.Sym, val)
-		} else if len(val) > 0 {
-			submacros := []string{}
-			if res.Index > 0 {
-				submacros = res.Data.SrcData.Metadata.Macros
-				val = ApplyCommand(val, submacros, true, false, false)
-			}
-			macrostack = append(macrostack, &stack{index: res.Index, cycle: T.Int, macro: submacros, value: val})
 		}
 	}
 
@@ -90,7 +114,7 @@ func Marcro_Reader(
 	ast := macro.NewAst()
 	for _, line := range lines {
 		if tkn, ok := ast.Tokenize(line, false); ok && tkn.Instance > 0 {
-			symlinks[tkn.Argument] = true
+			symlinks[tkn.Arguments] = true
 		}
 	}
 

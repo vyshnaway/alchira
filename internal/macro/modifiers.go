@@ -2,7 +2,6 @@ package macro
 
 import (
 	"main/package/utils"
-	"strconv"
 	"strings"
 
 	"github.com/gomarkdown/markdown"
@@ -10,91 +9,91 @@ import (
 	"github.com/gomarkdown/markdown/parser"
 )
 
-var Modifiers = map[string]func(OP string, TABLE, PARAMS []string) []string{
-	"SPLINE": func(OP string, TABLE, PARAMS []string) []string {
-		if len(PARAMS) >= 3 {
-			divident := len(TABLE)
-			replacee := PARAMS[0]
-			baseXout, _ := strconv.Atoi(PARAMS[1])
-			decimals, _ := strconv.Atoi(PARAMS[2])
-			yCoords := []float64{}
-			for _, i := range PARAMS {
-				ii, _ := strconv.ParseFloat(i, 64)
-				yCoords = append(yCoords, ii)
-			}
+var Modifiers = map[string]func(TABLE, USES []string, PARSTR string)  []string{
+	// "SPLINE": func(TABLE, USES []string, PARSTR string) []string {
+	// 	if len(PARSTR) >= 3 {
+	// 		divident := len(TABLE)
+	// 		replacee := PARSTR[0]
+	// 		baseXout, _ := strconv.Atoi(PARSTR[1])
+	// 		decimals, _ := strconv.Atoi(PARSTR[2])
+	// 		yCoords := []float64{}
+	// 		for _, i := range PARSTR {
+	// 			ii, _ := strconv.ParseFloat(i, 64)
+	// 			yCoords = append(yCoords, ii)
+	// 		}
 
-			outs := generateEquidistantSpline(yCoords, divident)
+	// 		outs := generateEquidistantSpline(yCoords, divident)
 
-			for i, v := range outs {
-				TABLE[i] = strings.Replace(TABLE[i], replacee, floatToBase(v, baseXout, decimals), 1)
-			}
-		}
-		return TABLE
-	},
-	"INJECT": func(OP string, TABLE, PARAMS []string) []string {
-		if len(PARAMS) > 1 {
-			replacee := PARAMS[0]
-			lastval := PARAMS[len(PARAMS)-1]
-			for i, v := range PARAMS[1:] {
-				if i < len(TABLE) {
-					TABLE[i] = strings.Replace(TABLE[i], replacee, v, 1)
-				} else {
-					TABLE = append(TABLE, strings.Replace(lastval, replacee, v, 1))
-				}
-			}
-		}
-		return TABLE
-	},
-	"EXTEND": func(OP string, TABLE, PARAMS []string) []string {
-		if len(PARAMS) >= 1 {
-			newlength, _ := strconv.Atoi(PARAMS[0])
-			template := TABLE[len(TABLE)-1]
+	// 		for i, v := range outs {
+	// 			TABLE[i] = strings.Replace(TABLE[i], replacee, floatToBase(v, baseXout, decimals), 1)
+	// 		}
+	// 	}
+	// 	return TABLE
+	// },
+	// "INJECT": func(TABLE, USES []string, PARSTR string) []string {
+	// 	if len(PARSTR) > 1 {
+	// 		replacee := PARSTR[0]
+	// 		lastval := PARSTR[len(PARSTR)-1]
+	// 		for i, v := range PARSTR[1:] {
+	// 			if i < len(TABLE) {
+	// 				TABLE[i] = strings.Replace(TABLE[i], replacee, v, 1)
+	// 			} else {
+	// 				TABLE = append(TABLE, strings.Replace(lastval, replacee, v, 1))
+	// 			}
+	// 		}
+	// 	}
+	// 	return TABLE
+	// },
+	// "EXTEND": func(TABLE, USES []string, PARSTR string) []string {
+	// 	if len(PARSTR) >= 1 {
+	// 		newlength, _ := strconv.Atoi(PARSTR[0])
+	// 		template := TABLE[len(TABLE)-1]
 
-			for len(TABLE) < newlength {
-				TABLE = append(TABLE, template)
-			}
-		}
-		return TABLE
-	},
-	"APPEND": func(OP string, TABLE, PARAMS []string) []string {
-		if len(PARAMS) == 2 {
-			REPLACE := PARAMS[0] + PARAMS[1]
-			for INDEX, TEXT := range TABLE {
-				TABLE[INDEX] = strings.Replace(TEXT, PARAMS[0], REPLACE, 1)
-			}
-		}
-		return TABLE
-	},
-	"PREPEND": func(OP string, TABLE, PARAMS []string) []string {
-		if len(PARAMS) == 2 {
-			REPLACE := PARAMS[1] + PARAMS[0]
-			for INDEX, TEXT := range TABLE {
-				TABLE[INDEX] = strings.Replace(TEXT, PARAMS[0], REPLACE, 1)
-			}
-		}
-		return TABLE
-	},
-	"REPLACE": func(OP string, TABLE, PARAMS []string) []string {
-		if len(PARAMS) == 2 {
-			for INDEX, TEXT := range TABLE {
-				TABLE[INDEX] = strings.Replace(TEXT, PARAMS[0], PARAMS[1], 1)
-			}
-		}
-		return TABLE
-	},
-	"UNCOMMENT": func(OP string, TABLE, PARAMS []string) []string {
+	// 		for len(TABLE) < newlength {
+	// 			TABLE = append(TABLE, template)
+	// 		}
+	// 	}
+	// 	return TABLE
+	// },
+	// "APPEND": func(TABLE, USES []string, PARSTR string) []string {
+	// 	if len(PARSTR) == 2 {
+	// 		REPLACE := PARSTR[0] + PARSTR[1]
+	// 		for INDEX, TEXT := range TABLE {
+	// 			TABLE[INDEX] = strings.Replace(TEXT, PARSTR[0], REPLACE, 1)
+	// 		}
+	// 	}
+	// 	return TABLE
+	// },
+	// "PREPEND": func(TABLE, USES []string, PARSTR string) []string {
+	// 	if len(PARSTR) == 2 {
+	// 		REPLACE := PARSTR[1] + PARSTR[0]
+	// 		for INDEX, TEXT := range TABLE {
+	// 			TABLE[INDEX] = strings.Replace(TEXT, PARSTR[0], REPLACE, 1)
+	// 		}
+	// 	}
+	// 	return TABLE
+	// },
+	// "REPLACE": func(TABLE, USES []string, PARSTR string) []string {
+	// 	if len(PARSTR) == 2 {
+	// 		for INDEX, TEXT := range TABLE {
+	// 			TABLE[INDEX] = strings.Replace(TEXT, PARSTR[0], PARSTR[1], 1)
+	// 		}
+	// 	}
+	// 	return TABLE
+	// },
+	"UNCOMMENT": func(TABLE, USES []string, PARSTR string) []string {
 		for INDEX, TEXT := range TABLE {
 			TABLE[INDEX] = utils.Code_Strip(TEXT, false, false, true, false)
 		}
 		return TABLE
 	},
-	"MINIFY": func(OP string, TABLE, PARAMS []string) []string {
+	"MINIFY": func(TABLE, USES []string, PARSTR string) []string {
 		for INDEX, TEXT := range TABLE {
 			TABLE[INDEX] = utils.Code_Strip(TEXT, false, false, false, true)
 		}
 		return TABLE
 	},
-	"MD": func(OP string, TABLE, PARAMS []string) []string {
+	"MD": func(TABLE, USES []string, PARSTR string) []string {
 		extensions := parser.CommonExtensions | parser.AutoHeadingIDs | parser.NoEmptyLineBeforeBlock
 		p := parser.NewWithExtensions(extensions)
 		for INDEX, TEXT := range TABLE {
@@ -109,7 +108,7 @@ var Modifiers = map[string]func(OP string, TABLE, PARAMS []string) []string{
 		}
 		return TABLE
 	},
-	"DEDENT": func(OP string, TABLE, PARAMS []string) []string {
+	"DEDENT": func(TABLE, USES []string, PARSTR string) []string {
 
 		for INDEX, TEXT := range TABLE {
 			lines := strings.Split(TEXT, "\n")
@@ -144,7 +143,7 @@ var Modifiers = map[string]func(OP string, TABLE, PARAMS []string) []string{
 		}
 		return TABLE
 	},
-	"": func(OP string, TABLE, PARAMS []string) []string {
+	"": func(TABLE, USES []string, PARSTR string) []string {
 		return TABLE
 	},
 }

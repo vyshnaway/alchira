@@ -23,48 +23,15 @@ func SketchBuilder(index int, method E_Method, appendstack map[int]bool) string 
 	return ApplyCommand(result, data.SrcData.Metadata.Macros, false, true, true)
 }
 
-func MacroSketcher(content string, index int, method E_Method, appendstack map[int]bool) string {
+func MacroSketcherArray(regs macro.REG, index int, method E_Method) macro.REG {
 	data := action.Index_Fetch(index)
-	subappendstack := make(map[int]bool, len(appendstack))
-	maps.Copy(subappendstack, appendstack)
+	regs.Used[regs.Index] = true
 
-	context2 := *data.Context
-	resoled := ApplyCommand(content, data.SrcData.Metadata.Macros, false, true, true)
-	context2.Content = resoled
-	context2.Midway = resoled
-
-	return Rider(&context2, method, subappendstack).Scribed
-}
-
-func ApplyCommand(content string, macros []string, preInject, inject, postInject bool) string {
-	fmt.Println(content)
-	for _, mac := range macros {
-
-		if len(mac) < 2 {
-			continue
-		}
-		op := mac[0]
-
-		if (op == '<' && preInject) ||
-			(op == '=' && inject) ||
-			(op == '>' && postInject) {
-			T := macro.Tokenizer(mac[1:])
-
-			if T.Sym[0] == '|' {
-				if mod := macro.Modifiers[T.Sym]; mod != nil {
-					content = mod(T.Sym[1:], []string{T.Raw}, []string{})[0]
-				}
-			} else if len(T.Sym) > 0 && len(T.Raw) > 0 {
-				content = strings.ReplaceAll(content, T.Sym, T.Raw)
-			}
-		}
-
-		fmt.Println("---")
-		fmt.Println(mac)
-		fmt.Println("---")
-		fmt.Println(content)
+	for i, content := range regs.Array {
+		context2 := *data.Context
+		context2.Content = content
+		context2.Midway = content
+		regs.Array[i] = Rider(&context2, method, regs.Used).Scribed
 	}
-	fmt.Println("------")
-
-	return content
+	return regs
 }

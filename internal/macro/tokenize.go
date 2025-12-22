@@ -6,23 +6,25 @@ import (
 )
 
 // execmod = Inject values to Stack
-func (Stack *AST) Tokenize(command string, execmod bool) (tokens CMD, ok bool) {
-	LoadSigns := func() {
-		if execmod {
-			Stack.Register.Range(func(k string, v []string) {
-				if len(v) > 0 {
-					command = strings.ReplaceAll(command, k, v[0])
+func (Stack *AST) Tokenize(command string, execute bool) (tokens CMD, ok bool) {
+	LoadConsts := func(str string) string {
+		if execute {
+			Stack.Const.Range(func(k string, v REG) {
+				if len(k) > 0 && len(v.Array) > 0 {
+					str = strings.ReplaceAll(str, k, v.Array[0])
 				}
 			})
 		}
+		return str
 	}
 
 	tokens = CMD{
 		Mul0Mod1:  false,
 		Instance:  0,
+		Target:    "",
+		Modify:    "",
 		Register:  "",
-		Modifier:  "",
-		Argument:  "",
+		Arguments: "",
 		Operation: "",
 		RawString: command,
 	}
@@ -37,6 +39,7 @@ func (Stack *AST) Tokenize(command string, execmod bool) (tokens CMD, ok bool) {
 			tokens.Mul0Mod1 = true
 			fallthrough
 		case '=':
+			tokens.Mul0Mod1 = false
 			tokens.Register = strings.TrimSpace(builder.String())
 			gotRegister = true
 			builder.Reset()
@@ -52,10 +55,6 @@ func (Stack *AST) Tokenize(command string, execmod bool) (tokens CMD, ok bool) {
 		}
 	}
 	tokens.Operation = strings.TrimSpace(builder.String())
-	command = tokens.Operation
-	if !tokens.Mul0Mod1 {
-		LoadSigns()
-	}
 	builder.Reset()
 
 	if gotRegister {
@@ -63,27 +62,44 @@ func (Stack *AST) Tokenize(command string, execmod bool) (tokens CMD, ok bool) {
 		// Get Modifier Data
 		SetModifier := func(char rune, finalize bool) {
 			if tokens.Mul0Mod1 && ('=' == char || ':' == char || finalize) {
+				tmp := strings.TrimSpace(builder.String())
+				var onmod = true
+				var b1, b2 strings.Builder
+				for _, c := range tmp {
+					if onmod {
+						if c == '/' {
+							onmod = false
+						} else {
+							b1.WriteRune(c)
+						}
+					} else {
+						b2.WriteRune(c)
+					}
+				}
+
+				B1 := strings.TrimSpace(b1.String())
+				B2 := LoadConsts(strings.TrimSpace(b2.String()))
+
 				switch char {
 				case '=':
-					tokens.Instance = 1
+					tokens.Modify = B1
+					tokens.Instance, _ = strconv.Atoi(B2)
+					if tokens.Instance == 0 {
+						tokens.Instance = 1
+					}
 					fallthrough
 				case ':':
-					tokens.Modifier = strings.TrimSpace(builder.String())
+					tokens.Modify = LoadConsts(B1)
+					tokens.Target = B2
 				}
-				LoadSigns()
 
 			} else if !tokens.Mul0Mod1 && (char == '*' || finalize) {
 				tokens.Instance, _ = strconv.Atoi(strings.TrimSpace(builder.String()))
-				if tokens.Instance == 0 && !finalize {
-					tokens.Instance = 1
-				}
 			} else {
 				builder.WriteRune(char)
 				return
 			}
-			if finalize {
-				tokens.Argument = builder.String()
-			}
+
 			gotOperator = true
 			builder.Reset()
 		}
@@ -95,16 +111,17 @@ func (Stack *AST) Tokenize(command string, execmod bool) (tokens CMD, ok bool) {
 			}
 		}
 		if !gotOperator {
-			SetModifier(' ', true)
-		} else {
-			tokens.Argument = builder.String()
+			SetModifier(':', true)
 		}
+		tokens.Arguments = LoadConsts(strings.TrimSpace(builder.String()))
 
-		if execmod {
+		if execute {
 			Stack.Commands = append(Stack.Commands, tokens)
 
-			if _, ok := Stack.Register.Get(tokens.Register); !ok {
-				Stack.Register.Set(tokens.Register, []string{})
+			if !tokens.Mul0Mod1 && tokens.Instance > 0 {
+				if _, ok := Stack.Register.Get(tokens.Register); !ok {
+					Stack.Register.Set(tokens.Register, NewReg())
+				}
 			}
 
 			Stack.recent = tokens.Register
