@@ -11,70 +11,59 @@ import (
 	"strings"
 )
 
-
-func ApplySymbols(input string, register *object.T[string, string]) string {
-
-	register.Range(func(k, v string) {
-		input = strings.ReplaceAll(input, k, v)
-	})
-
-	return input
-}
-
 func Macro_Builder(
-	macros []string,
+	commands []string,
 	method E_Method,
 	fileData *models.File_Stash,
 	appendstack map[int]bool,
 ) string {
 	var register = object.New[string, string](4)
-	type stack struct {
-		cycle int
-		index int
-		value string
-		macro []string
-	}
 
-	macrostack := []*stack{}
+	stack := macro.NewAst()
 	subappendstack := make(map[int]bool, len(appendstack))
 	maps.Copy(subappendstack, appendstack)
 
-	for _, line := range macros {
-		line = ApplySymbols(line, register)
+	for _, cmd := range commands {
+		T, K := stack.Tokenize(cmd, true)
+		if !K {
+			continue
+		}
 
-		if tokens, err := macro.Tokenize(line); err == nil {
+		if T.Instance == 0 {
 
-			val := tokens.Val
-			res := action.Index_Finder(tokens.Val, fileData.Cache.LocalMap)
+		} else {
+			res := action.Index_Finder(T.Argument, fileData.Cache.LocalMap)
 
-			if res.Index > 0 && tokens.Int > 0 {
-				configs.Style.Sketchpad.Mac[tokens.Val] = res.Index
-				if !appendstack[res.Index] {
-					subappendstack[res.Index] = true
-					val = res.Data.SrcData.Metadata.SketchSnippet
-				}
-			} else if tokens.Int == 0 {
-				tokens.Int = 1
+		}
+		val := T.Val
+
+		if res.Index > 0 && T.Int > 0 {
+			configs.Style.Sketchpad.Mac[T.Val] = res.Index
+			if !appendstack[res.Index] {
+				subappendstack[res.Index] = true
+				val = res.Data.SrcData.Metadata.SketchSnippet
 			}
+		} else if T.Int == 0 {
+			T.Int = 1
+		}
 
-			if len(tokens.Sym) > 0 {
-				var s strings.Builder
-				for range tokens.Int {
-					s.WriteString(val)
-				}
-				superval := s.String()
-				for i, m := range macrostack {
-					macrostack[i].value = strings.ReplaceAll(m.value, tokens.Sym, superval)
-				}
-				register.Set(tokens.Sym, val)
-			} else if len(val) > 0 {
-				submacros := []string{}
-				if res.Index > 0 {
-					submacros = res.Data.SrcData.Metadata.Macros
-					val = ApplyCommand(val, submacros, true, false, false)
-				}
-				macrostack = append(macrostack, &stack{index: res.Index, cycle: tokens.Int, macro: submacros, value: val})
+		if len(T.Sym) > 0 {
+			var s strings.Builder
+			for range T.Int {
+				s.WriteString(val)
 			}
+			superval := s.String()
+			for i, m := range macrostack {
+				macrostack[i].value = strings.ReplaceAll(m.value, T.Sym, superval)
+			}
+			register.Set(T.Sym, val)
+		} else if len(val) > 0 {
+			submacros := []string{}
+			if res.Index > 0 {
+				submacros = res.Data.SrcData.Metadata.Macros
+				val = ApplyCommand(val, submacros, true, false, false)
+			}
+			macrostack = append(macrostack, &stack{index: res.Index, cycle: T.Int, macro: submacros, value: val})
 		}
 	}
 
@@ -98,10 +87,10 @@ func Marcro_Reader(
 	lines []string,
 ) map[string]bool {
 	symlinks := map[string]bool{}
+	ast := macro.NewAst()
 	for _, line := range lines {
-		tkn, err := macro.Tokenize(line)
-		if err == nil && len(tkn.Val) > 0 {
-			symlinks[tkn.Val] = true
+		if tkn, ok := ast.Tokenize(line, false); ok && tkn.Instance > 0 {
+			symlinks[tkn.Argument] = true
 		}
 	}
 

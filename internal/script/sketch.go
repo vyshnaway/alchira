@@ -48,7 +48,7 @@ func ApplyCommand(content string, macros []string, preInject, inject, postInject
 		if (op == '<' && preInject) ||
 			(op == '=' && inject) ||
 			(op == '>' && postInject) {
-			T, _ := macro.Tokenize(mac[1:])
+			T := macro.Tokenizer(mac[1:])
 
 			if T.Sym[0] == '|' {
 				if mod := macro.Modifiers[T.Sym]; mod != nil {
