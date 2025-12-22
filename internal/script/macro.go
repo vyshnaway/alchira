@@ -36,7 +36,7 @@ func Macro_Builder(
 						if subreg, exist := Stack.Register.Get(T.Target); exist && (len(T.Target) > 0) {
 							subsubappendstack := make(map[int]bool, len(subappendstack))
 							maps.Copy(subsubappendstack, subsubappendstack)
-							uses = MacroSketcher(subreg.Array[0], subreg.Index, method, subsubappendstack)
+							uses = MacroSketchByArray(subreg, subreg.Index, method).Array
 						}
 						Stack.Render.Array = modifier(reg.Array, uses, T.Arguments)
 					}
@@ -47,16 +47,16 @@ func Macro_Builder(
 					reg.Array[i] = strings.Replace(v, T.Modify, T.Arguments, instances)
 				}
 			}
-		} else {
-			res := action.Index_Finder(T.Arguments, fileData.Cache.LocalMap)
+		} else if res := action.Index_Finder(T.Arguments, fileData.Cache.LocalMap); res.Index > 0 {
 
-			// if T.Instance > 0 {
-			// } else if {
+			if T.Instance > 0 {
+				macro.BuildInjectionAst(res.Data.SrcData.Metadata.Macros)
+				// } else if {
 
-			// }
-			// if T.Instance == 0 && len(T.Register) > 0 {
-			// 	Stack.Const.Set(T.Register, T.Operation)
-			// }
+				// }
+				// if T.Instance == 0 && len(T.Register) > 0 {
+				// 	Stack.Const.Set(T.Register, T.Operation)
+			}
 
 			val := T.Val
 
@@ -88,21 +88,29 @@ func Macro_Builder(
 				}
 				macrostack = append(macrostack, &Stack{index: res.Index, cycle: T.Int, macro: submacros, value: val})
 			}
+		} else if T.Instance > 0 {
+			for range T.Instance {	
+				Stack.Render.Array = append(Stack.Render.Array, T.Operation)
+			}
+		} else if len(T.Register) > 0 {
+			Stack.SetVariable(T.Register, T.Operation, 0)
+		} else {
+			Stack.Render.Array = append(Stack.Render.Array, T.Operation)
 		}
 	}
 
 	var compose strings.Builder
 
-	for _, m := range macrostack {
-		for range m.cycle {
-			if m.index == 0 {
-				compose.WriteString(m.value)
-			} else {
-				compose.WriteString(MacroSketcher(m.value, m.index, method, subappendstack))
-			}
-		}
-	}
-	fmt.Println("------")
+	// for _, m := range macrostack {
+	// 	for range m.cycle {
+	// 		if m.index == 0 {
+	// 			compose.WriteString(m.value)
+	// 		} else {
+	// 			compose.WriteString(MacroSketcher(m.value, m.index, method, subappendstack))
+	// 		}
+	// 	}
+	// }
+	// fmt.Println("------")
 
 	return compose.String()
 }

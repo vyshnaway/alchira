@@ -9,7 +9,7 @@ import (
 func (Stack *AST) Tokenize(command string, execute bool) (tokens CMD, ok bool) {
 	LoadConsts := func(str string) string {
 		if execute {
-			Stack.Const.Range(func(k string, v REG) {
+			Stack.Variables.Range(func(k string, v REG) {
 				if len(k) > 0 && len(v.Array) > 0 {
 					str = strings.ReplaceAll(str, k, v.Array[0])
 				}

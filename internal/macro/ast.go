@@ -17,7 +17,7 @@ type CMD struct {
 type AST struct {
 	recent     string
 	Render     *REG
-	Const      *object.T[string, REG]
+	Variables  *object.T[string, REG]
 	Register   *object.T[string, REG]
 	Commands   []CMD
 	PreInject  []CMD
@@ -39,7 +39,7 @@ func NewAst() *AST {
 	stack := AST{
 		recent:     "",
 		Render:     nil,
-		Const:      object.New[string, REG](4),
+		Variables:  object.New[string, REG](4),
 		Register:   object.New[string, REG](4),
 		Commands:   []CMD{},
 		PreInject:  []CMD{},
@@ -61,11 +61,15 @@ func (Stack *AST) RegPush(reg, val string) {
 	}
 }
 
+func (Stack *AST) SetVariable(key, val string, idx int) {
+	Stack.Variables.Set(key, REG{Array: []string{val}, Index: idx})
+}
+
 func (Stack *AST) RegPull(reg string) (*REG, bool) {
 	return Stack.Register.Get(reg)
 }
 
-func InjectAst(lines []string) (ast *AST) {
+func BuildInjectionAst(lines []string) (ast *AST) {
 	ast = NewAst()
 
 	for _, line := range lines {
