@@ -4,16 +4,18 @@ import "main/package/object"
 
 // Instance = 0 means modifier
 type CMD struct {
+	Mul0Mod1  bool
 	Instance  int
 	Register  string
 	Modifier  string
 	Argument  string
 	RawString string
-	ArgString string
+	Operation string
 }
 
 type AST struct {
 	recent     string
+	Render     *[]string
 	Register   *object.T[string, []string]
 	Commands   []CMD
 	PreInject  []CMD
@@ -31,7 +33,18 @@ func NewAst() *AST {
 		OnInject:   map[string][]CMD{},
 	}
 	stack.Register.Set("", []string{})
+	if r, k := stack.Register.Get(""); k {
+		stack.Render = r
+	}
 	return &stack
+}
+
+func (Stack *AST) SetRender(val string) {
+	*Stack.Render = append(*Stack.Render, val)
+}
+
+func (Stack *AST) GetRender(val string) []string {
+	return *Stack.Render
 }
 
 func InjectAst(lines []string) (ast *AST) {
