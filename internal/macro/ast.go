@@ -2,22 +2,26 @@ package macro
 
 import "main/package/object"
 
-// Instance = 0 means modifier
+type OP struct {
+	Type     E_Op
+	Replace  string
+	Modifier T_Modifier
+	Instance int
+}
+
 type CMD struct {
-	Instance  int
-	Mul0Mod1  bool
-	Target    string
-	Modify    string
-	Register  string
-	Arguments string
 	RawString string
+	Register  string
 	Operation string
+	Operand   string
+	Helper    string
+	Arguments string
+	OpRefer   OP
 }
 
 type AST struct {
 	recent     string
 	Render     *REG
-	Variables  *object.T[string, REG]
 	Register   *object.T[string, REG]
 	Commands   []CMD
 	PreInject  []CMD
@@ -39,7 +43,6 @@ func NewAst() *AST {
 	stack := AST{
 		recent:     "",
 		Render:     nil,
-		Variables:  object.New[string, REG](4),
 		Register:   object.New[string, REG](4),
 		Commands:   []CMD{},
 		PreInject:  []CMD{},
@@ -53,28 +56,16 @@ func NewAst() *AST {
 	return &stack
 }
 
-func (Stack *AST) RegPush(reg, val string) {
-	if v, k := Stack.Register.Get(reg); k {
-		v.Array = append(v.Array, val)
-	} else {
-		Stack.Register.Set(reg, REG{Array: []string{}})
-	}
-}
-
-func (Stack *AST) SetVariable(key, val string, idx int) {
-	Stack.Variables.Set(key, REG{Array: []string{val}, Index: idx})
-}
-
-func (Stack *AST) RegPull(reg string) (*REG, bool) {
-	return Stack.Register.Get(reg)
+func (Stack *AST) RegSet(ind int, reg string, val []string) {
+	Stack.Register.Set(reg, REG{Array: []string{}, Index: ind})
 }
 
 func BuildInjectionAst(lines []string) (ast *AST) {
 	ast = NewAst()
 
 	for _, line := range lines {
-		t, _ := ast.Tokenize(line[1:], true)
-		if !(t.Instance > 0 || len(t.Modify) > 0) {
+		t := ast.Tokenize(line[1:], true)
+		if t.OpRefer.Type == E_Op_Invalid {
 			continue
 		}
 

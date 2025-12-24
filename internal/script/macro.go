@@ -1,20 +1,20 @@
 package script
 
 import (
-	"fmt"
-	"main/configs"
 	"main/internal/action"
 	"main/internal/macro"
 	"main/models"
 	"maps"
-	"strconv"
+	"math"
 	"strings"
 )
+
+const ()
 
 func Macro_Builder(
 	commands []string,
 	method E_Method,
-	fileData *models.File_Stash,
+	context *models.File_Stash,
 	appendstack map[int]bool,
 ) string {
 
@@ -23,94 +23,59 @@ func Macro_Builder(
 	maps.Copy(subappendstack, appendstack)
 
 	for _, cmd := range commands {
-		T, K := Stack.Tokenize(cmd, true)
-		if !K {
+		T := Stack.Tokenize(cmd, true)
+		if T.OpRefer.Type == macro.E_Op_Invalid {
 			continue
 		}
 
-		if T.Mul0Mod1 {
-			if T.Instance == 0 {
-				if modifier, ok := macro.Modifiers[T.Modify]; ok {
-					if reg, exist := Stack.Register.Get(T.Register); exist {
-						uses := []string{}
-						if subreg, exist := Stack.Register.Get(T.Target); exist && (len(T.Target) > 0) {
-							subsubappendstack := make(map[int]bool, len(subappendstack))
-							maps.Copy(subsubappendstack, subsubappendstack)
-							uses = MacroSketchByArray(subreg, subreg.Index, method).Array
-						}
-						Stack.Render.Array = modifier(reg.Array, uses, T.Arguments)
-					}
-				}
-			} else if reg, exist := Stack.Register.Get(T.Register); exist {
-				instances, _ := strconv.Atoi(T.Target)
-				for i, v := range reg.Array {
-					reg.Array[i] = strings.Replace(v, T.Modify, T.Arguments, instances)
-				}
-			}
-		} else if res := action.Index_Finder(T.Arguments, fileData.Cache.LocalMap); res.Index > 0 {
+		helper := []string{}
+		var register *macro.REG
+		if reg, ok := Stack.Register.Get(T.Register); ok {
+			register = reg
+		}
 
-			if T.Instance > 0 {
-				macro.BuildInjectionAst(res.Data.SrcData.Metadata.Macros)
-				// } else if {
-
-				// }
-				// if T.Instance == 0 && len(T.Register) > 0 {
-				// 	Stack.Const.Set(T.Register, T.Operation)
-			}
-
-			val := T.Val
-
-			if res.Index > 0 && T.Int > 0 {
-				configs.Style.Sketchpad.Mac[T.Val] = res.Index
-				if !appendstack[res.Index] {
-					subappendstack[res.Index] = true
-					val = res.Data.SrcData.Metadata.SketchSnippet
-				}
-			} else if T.Int == 0 {
-				T.Int = 1
-			}
-
-			if len(T.Sym) > 0 {
-				var s strings.Builder
-				for range T.Int {
-					s.WriteString(val)
-				}
-				superval := s.String()
-				for i, m := range macrostack {
-					macrostack[i].value = strings.ReplaceAll(m.value, T.Sym, superval)
-				}
-				register.Set(T.Sym, val)
-			} else if len(val) > 0 {
-				submacros := []string{}
-				if res.Index > 0 {
-					submacros = res.Data.SrcData.Metadata.Macros
-					val = ApplyCommand(val, submacros, true, false, false)
-				}
-				macrostack = append(macrostack, &Stack{index: res.Index, cycle: T.Int, macro: submacros, value: val})
-			}
-		} else if T.Instance > 0 {
-			for range T.Instance {	
-				Stack.Render.Array = append(Stack.Render.Array, T.Operation)
-			}
-		} else if len(T.Register) > 0 {
-			Stack.SetVariable(T.Register, T.Operation, 0)
+		if reg, ok := Stack.Register.Get(T.Helper); ok {
+			helper = append(helper, reg.Array...)
+		} else if refer := action.Index_Finder(T.Helper, context.Cache.LocalMap); refer.Index > 0 {
+			s := SketchCompiler(refer.Index, method, subappendstack)
+			helper = append(helper, s)
 		} else {
-			Stack.Render.Array = append(Stack.Render.Array, T.Operation)
+			helper = append(helper, T.Helper)
+		}
+
+		switch T.OpRefer.Type {
+		case macro.E_Op_Instances:
+			Stack.RegSet(0, T.Register, helper)
+		case macro.E_Op_Modifier:
+			Stack.RegSet(0, T.Register, T.OpRefer.Modifier(register.Array, helper, T.Arguments))
+		case macro.E_Op_Replace:
+			hl := len(helper)
+			rl := len(register.Array)
+			itr := int(math.Max(float64(hl), float64(rl)))
+			outs := make([]string, itr)
+
+			i := 0
+			for i < itr {
+				hi := itr % hl
+				ri := itr % rl
+				outs[i] = strings.Replace(register.Array[ri], T.Operand, helper[hi], T.OpRefer.Instance)
+				i++
+			}
+			Stack.RegSet(0, T.Register, outs)
 		}
 	}
 
 	var compose strings.Builder
 
-	// for _, m := range macrostack {
-	// 	for range m.cycle {
-	// 		if m.index == 0 {
-	// 			compose.WriteString(m.value)
-	// 		} else {
-	// 			compose.WriteString(MacroSketcher(m.value, m.index, method, subappendstack))
-	// 		}
-	// 	}
-	// }
-	// fmt.Println("------")
+	if Stack.Render.Index > 0 {
+		for _, v := range Stack.Render.Array {
+			compose.WriteString(v)
+		}
+	} else {
+		for _, v := range Stack.Render.Array {
+			compose.WriteString(v)
+		}
+	}
 
 	return compose.String()
 }
@@ -121,8 +86,8 @@ func Marcro_Reader(
 	symlinks := map[string]bool{}
 	ast := macro.NewAst()
 	for _, line := range lines {
-		if tkn, ok := ast.Tokenize(line, false); ok && tkn.Instance > 0 {
-			symlinks[tkn.Arguments] = true
+		if tkn := ast.Tokenize(line, false); tkn.OpRefer.Type != macro.E_Op_Invalid && len(tkn.Register) > 0 {
+			symlinks[tkn.Register] = true
 		}
 	}
 

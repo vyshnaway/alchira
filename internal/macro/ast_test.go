@@ -2,13 +2,14 @@ package macro_test
 
 import (
 	"main/internal/macro"
-	"main/package/console"
 	"testing"
 )
 
 func Test_Ast(t *testing.T) {
 	lines := []string{
-		"$Key = $asdf",
+		"$Key = ~",
+		"$Key = ~$asdf",
+		"$Key = 3 ~ $asdf | as",
 		// "$Key = 3*asdf{{replace}}",
 		// "$Key | 3*asdf{{replace}}",
 		// "$Key | {{replace}}*asdfs",
@@ -17,7 +18,7 @@ func Test_Ast(t *testing.T) {
 		// "= 3*asdf",
 		// "| {replace} / 3 = asdf",
 		// "| Modifier / $Key : args",
-		"| Modifier / $Key: $Key",
+		"k = 0 ~ $ | a, b, c",
 	}
 
 	ast_0 := macro.NewAst()
@@ -27,6 +28,14 @@ func Test_Ast(t *testing.T) {
 		// ast_1.Tokenize(l, false)
 	}
 
-	console.Render.Raw(ast_0)
 	// console.Render.Raw(ast_1)
 }
+
+// "< $Key = 3*asdf{{replace}}",
+// "< $Key | 3*asdf{{replace}}",
+// "| $Key | {{replace}}*asdfs",
+// "= $Key = {{replace}}=asdfs",
+// "| $Key | Modifier/Assist:args",
+// "| = 3*asdf",
+// "> {replace} / 3 = asdf",
+// "> Modifier / $Key : args",

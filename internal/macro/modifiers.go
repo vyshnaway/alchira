@@ -9,7 +9,9 @@ import (
 	"github.com/gomarkdown/markdown/parser"
 )
 
-var Modifiers = map[string]func(TABLE, USES []string, PARSTR string)  []string{
+type T_Modifier func(TABLE, USES []string, PARSTR string) []string
+
+var Modifiers = map[string]T_Modifier{
 	// "SPLINE": func(TABLE, USES []string, PARSTR string) []string {
 	// 	if len(PARSTR) >= 3 {
 	// 		divident := len(TABLE)

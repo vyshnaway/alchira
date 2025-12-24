@@ -146,9 +146,9 @@ func GetDependents(tr target.GetTracks_return) (stylesheet, sketchsheet string) 
 		if data := _action.Index_Fetch(i); data != nil {
 			attach_styles.Merge(data.SrcData.NativeAttachStyle)
 			if _config.Static.PREVIEW {
-				attach_sketchs.WriteString(script.SketchBuilder(i, script.E_Method_PreviewHash, map[int]bool{i: true}))
+				attach_sketchs.WriteString(script.SketchCompiler(i, script.E_Method_PreviewHash, map[int]bool{i: true}))
 			} else {
-				attach_sketchs.WriteString(script.SketchBuilder(i, script.E_Method_DebugHash, map[int]bool{i: true}))
+				attach_sketchs.WriteString(script.SketchCompiler(i, script.E_Method_DebugHash, map[int]bool{i: true}))
 			}
 		}
 	}

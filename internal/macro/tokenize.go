@@ -5,11 +5,39 @@ import (
 	"strings"
 )
 
+type E_Op int
+
+const (
+	E_Op_Invalid E_Op = iota
+	E_Op_Instances
+	E_Op_Modifier
+	E_Op_Replace
+)
+
+func OpType(op string) OP {
+	var Op OP
+	if v, e := Modifiers[op]; e {
+		Op.Type = E_Op_Modifier
+		Op.Modifier = v
+	} else if v, e := strconv.Atoi(op); e == nil {
+		Op.Type = E_Op_Instances
+		Op.Instance = v
+	} else {
+		Op.Type = E_Op_Replace
+		Op.Replace = op
+	}
+	return Op
+}
+
 // execmod = Inject values to Stack
-func (Stack *AST) Tokenize(command string, execute bool) (tokens CMD, ok bool) {
+func (Stack *AST) Tokenize(Command string, execute bool) (tokens CMD) {
+	ASSIGN := '='
+	USING := '~'
+	WITH := '|'
+
 	LoadConsts := func(str string) string {
 		if execute {
-			Stack.Variables.Range(func(k string, v REG) {
+			Stack.Register.Range(func(k string, v REG) {
 				if len(k) > 0 && len(v.Array) > 0 {
 					str = strings.ReplaceAll(str, k, v.Array[0])
 				}
@@ -18,56 +46,40 @@ func (Stack *AST) Tokenize(command string, execute bool) (tokens CMD, ok bool) {
 		return str
 	}
 
-	tokens = CMD{
-		Mul0Mod1:  false,
-		Instance:  0,
-		Target:    "",
-		Modify:    "",
-		Register:  "",
-		Arguments: "",
-		Operation: "",
-		RawString: command,
-	}
+	tokens = CMD{RawString: Command}
 
 	gotRegister := false
 	gotOperator := false
 	var builder strings.Builder
 
-	SetRegister := func(char rune) {
-		switch char {
-		case '|':
-			tokens.Mul0Mod1 = true
-			fallthrough
-		case '=':
-			tokens.Mul0Mod1 = false
-			tokens.Register = strings.TrimSpace(builder.String())
-			gotRegister = true
-			builder.Reset()
-		default:
-			builder.WriteRune(char)
-		}
-	}
-	for _, char := range command {
+	for _, char := range Command {
 		if !gotRegister {
-			SetRegister(char)
+			if char == ASSIGN {
+				tokens.Register = strings.TrimSpace(builder.String())
+				gotRegister = true
+				builder.Reset()
+			} else {
+				builder.WriteRune(char)
+			}
 		} else {
 			builder.WriteRune(char)
 		}
 	}
 	tokens.Operation = strings.TrimSpace(builder.String())
+	Command = tokens.Operation
 	builder.Reset()
 
 	if gotRegister {
 
 		// Get Modifier Data
 		SetModifier := func(char rune, finalize bool) {
-			if tokens.Mul0Mod1 && ('=' == char || ':' == char || finalize) {
+			if WITH == char || finalize {
 				tmp := strings.TrimSpace(builder.String())
 				var onmod = true
 				var b1, b2 strings.Builder
 				for _, c := range tmp {
 					if onmod {
-						if c == '/' {
+						if c == USING {
 							onmod = false
 						} else {
 							b1.WriteRune(c)
@@ -77,33 +89,18 @@ func (Stack *AST) Tokenize(command string, execute bool) (tokens CMD, ok bool) {
 					}
 				}
 
-				B1 := strings.TrimSpace(b1.String())
-				B2 := LoadConsts(strings.TrimSpace(b2.String()))
+				tokens.Operand = strings.TrimSpace(b1.String())
+				tokens.Helper = strings.TrimSpace(b2.String())
+				gotOperator = true
+				builder.Reset()
 
-				switch char {
-				case '=':
-					tokens.Modify = B1
-					tokens.Instance, _ = strconv.Atoi(B2)
-					if tokens.Instance == 0 {
-						tokens.Instance = 1
-					}
-					fallthrough
-				case ':':
-					tokens.Modify = LoadConsts(B1)
-					tokens.Target = B2
-				}
-
-			} else if !tokens.Mul0Mod1 && (char == '*' || finalize) {
-				tokens.Instance, _ = strconv.Atoi(strings.TrimSpace(builder.String()))
 			} else {
 				builder.WriteRune(char)
 				return
 			}
-
-			gotOperator = true
-			builder.Reset()
 		}
-		for _, char := range command {
+
+		for _, char := range Command {
 			if !gotOperator {
 				SetModifier(char, false)
 			} else {
@@ -111,24 +108,24 @@ func (Stack *AST) Tokenize(command string, execute bool) (tokens CMD, ok bool) {
 			}
 		}
 		if !gotOperator {
-			SetModifier(':', true)
+			SetModifier('|', true)
 		}
-		tokens.Arguments = LoadConsts(strings.TrimSpace(builder.String()))
+		tokens.Arguments = strings.TrimSpace(builder.String())
+		tokens.Arguments = LoadConsts(tokens.Arguments)
+		tokens.Operand = LoadConsts(tokens.Operand)
+		tokens.Helper = LoadConsts(tokens.Helper)
+		tokens.OpRefer = OpType(tokens.Operand)
 
 		if execute {
 			Stack.Commands = append(Stack.Commands, tokens)
 
-			if !tokens.Mul0Mod1 && tokens.Instance > 0 {
-				if _, ok := Stack.Register.Get(tokens.Register); !ok {
-					Stack.Register.Set(tokens.Register, NewReg())
-				}
+			if _, ok := Stack.Register.Get(tokens.Register); !ok {
+				Stack.Register.Set(tokens.Register, NewReg())
 			}
 
 			Stack.recent = tokens.Register
 		}
-
-		ok = true
 	}
 
-	return tokens, ok
+	return tokens
 }

@@ -65,7 +65,7 @@ func Sandbox_Save(index int) (response any) {
 		attributes[k] = scribes
 	}
 
-	Builder.WriteString(script.SketchBuilder(index, script.E_Method_DebugHash, map[int]bool{}))
+	Builder.WriteString(script.SketchCompiler(index, script.E_Method_DebugHash, map[int]bool{}))
 	sketch = Builder.String()
 
 	FinalClassMap := []models.Style_ClassIndexTrace{
