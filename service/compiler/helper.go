@@ -184,11 +184,16 @@ func GetDependentsForSketchpad() (stylesheet, sketchsheet string) {
 		}
 		MidRefs = append(MidRefs, tmp)
 	}
-
-	return GetDependents(target.GetTracks_return{
+	use := target.GetTracks_return{
 		LowRefs: LowRefs,
 		MidRefs: MidRefs,
 		TopRefs: TopRefs,
 		MacRefs: MacRefs,
-	})
+	}
+	// console.Render.Raw(use)
+	// _fmt.Println(LowRefs)
+	// _fmt.Println(MidRefs)
+	// _fmt.Println(TopRefs)
+	// _fmt.Println(MacRefs)
+	return GetDependents(use)
 }

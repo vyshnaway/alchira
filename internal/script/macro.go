@@ -1,6 +1,7 @@
 package script
 
 import (
+	"main/configs"
 	"main/internal/action"
 	"main/internal/macro"
 	"main/models"
@@ -39,6 +40,7 @@ func Macro_Builder(
 			helper = append(helper, reg.Array...)
 		} else if refer := action.Index_Finder(T.Helper, context.Cache.LocalMap); refer.Index > 0 {
 			index = refer.Index
+			configs.Style.Sketchpad.Mac[T.Helper] = index
 			s := SketchCompiler(refer.Index, method, subappendstack)
 			helper = append(helper, s)
 		} else {
@@ -80,10 +82,10 @@ func Marcro_Reader(
 	symlinks := map[string]bool{}
 	ast := macro.NewAst()
 	for _, line := range lines {
-		if tkn := ast.Tokenize(line, false); tkn.OpRefer.Type != macro.E_Op_Invalid && len(tkn.Register) > 0 {
-			symlinks[tkn.Register] = true
+		if tkn := ast.Tokenize(line, false); tkn.OpRefer.Type != macro.E_Op_Invalid && len(tkn.Helper) > 0 {
+			symlinks[tkn.Helper] = true
 		}
 	}
-
+	
 	return symlinks
 }
