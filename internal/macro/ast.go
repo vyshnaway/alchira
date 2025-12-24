@@ -1,6 +1,9 @@
 package macro
 
-import "main/package/object"
+import (
+	"main/package/object"
+	"strings"
+)
 
 type OP struct {
 	Type     E_Op
@@ -21,7 +24,7 @@ type CMD struct {
 
 type AST struct {
 	recent     string
-	Render     *REG
+	render     *REG
 	Register   *object.T[string, REG]
 	Commands   []CMD
 	PreInject  []CMD
@@ -35,29 +38,44 @@ type REG struct {
 	Used  map[int]bool
 }
 
-func NewReg() REG {
-	return REG{Array: []string{}, Used: map[int]bool{}}
-}
-
 func NewAst() *AST {
 	stack := AST{
 		recent:     "",
-		Render:     nil,
+		render:     nil,
 		Register:   object.New[string, REG](4),
 		Commands:   []CMD{},
 		PreInject:  []CMD{},
 		PostInject: []CMD{},
 		OnInject:   object.New[string, []CMD](4),
 	}
-	stack.Register.Set("", NewReg())
+	stack.RegSet(0, "", []string{})
 	if r, k := stack.Register.Get(""); k {
-		stack.Render = r
+		stack.render = r
 	}
 	return &stack
 }
 
 func (Stack *AST) RegSet(ind int, reg string, val []string) {
-	Stack.Register.Set(reg, REG{Array: []string{}, Index: ind})
+	Stack.Register.Set(reg, REG{Array: val, Index: ind})
+	if reg == "" {
+		if r, k := Stack.Register.Get(""); k {
+			Stack.render = r
+		}
+	}
+}
+
+func (Stack *AST) Render() string{
+	var compose strings.Builder
+	if Stack.render.Index > 0 {
+		for _, v := range Stack.render.Array {
+			compose.WriteString(v)
+		}
+	} else {
+		for _, v := range Stack.render.Array {
+			compose.WriteString(v)
+		}
+	}
+	return compose.String()
 }
 
 func BuildInjectionAst(lines []string) (ast *AST) {

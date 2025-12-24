@@ -120,7 +120,7 @@ func (Stack *AST) Tokenize(Command string, execute bool) (tokens CMD) {
 			Stack.Commands = append(Stack.Commands, tokens)
 
 			if _, ok := Stack.Register.Get(tokens.Register); !ok {
-				Stack.Register.Set(tokens.Register, NewReg())
+				Stack.RegSet(0, tokens.Register, []string{})
 			}
 
 			Stack.recent = tokens.Register

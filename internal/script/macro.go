@@ -28,15 +28,17 @@ func Macro_Builder(
 			continue
 		}
 
-		helper := []string{}
 		var register *macro.REG
 		if reg, ok := Stack.Register.Get(T.Register); ok {
 			register = reg
 		}
 
+		index := 0
+		helper := []string{}
 		if reg, ok := Stack.Register.Get(T.Helper); ok {
 			helper = append(helper, reg.Array...)
 		} else if refer := action.Index_Finder(T.Helper, context.Cache.LocalMap); refer.Index > 0 {
+			index = refer.Index
 			s := SketchCompiler(refer.Index, method, subappendstack)
 			helper = append(helper, s)
 		} else {
@@ -45,9 +47,13 @@ func Macro_Builder(
 
 		switch T.OpRefer.Type {
 		case macro.E_Op_Instances:
-			Stack.RegSet(0, T.Register, helper)
+			instances := []string{}
+			for range T.OpRefer.Instance {
+				instances = append(instances, helper...)
+			}
+			Stack.RegSet(index, T.Register, instances)
 		case macro.E_Op_Modifier:
-			Stack.RegSet(0, T.Register, T.OpRefer.Modifier(register.Array, helper, T.Arguments))
+			Stack.RegSet(index, T.Register, T.OpRefer.Modifier(register.Array, helper, T.Arguments))
 		case macro.E_Op_Replace:
 			hl := len(helper)
 			rl := len(register.Array)
@@ -61,23 +67,11 @@ func Macro_Builder(
 				outs[i] = strings.Replace(register.Array[ri], T.Operand, helper[hi], T.OpRefer.Instance)
 				i++
 			}
-			Stack.RegSet(0, T.Register, outs)
+			Stack.RegSet(index, T.Register, outs)
 		}
 	}
 
-	var compose strings.Builder
-
-	if Stack.Render.Index > 0 {
-		for _, v := range Stack.Render.Array {
-			compose.WriteString(v)
-		}
-	} else {
-		for _, v := range Stack.Render.Array {
-			compose.WriteString(v)
-		}
-	}
-
-	return compose.String()
+	return Stack.Render()
 }
 
 func Marcro_Reader(
