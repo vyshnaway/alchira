@@ -1,11 +1,11 @@
 # Agent Prompt
 
-## Xtatix Initial Prompt for Frontend Style Context Exploration
+## Alchira Initial Prompt for Frontend Style Context Exploration
 
-Welcome to the Xtatix style context exploration interface. To begin, start the live interactive Xtatix terminal by running:
+Welcome to the Alchira style context exploration interface. To begin, start the live interactive Alchira terminal by running:
 
 ```
-npx xtatix iamai
+npx alchira iamai
 ```
 
 This launches a real-time interactive session similar to a REPL, enabling you to explore your project’s styling system dynamically.

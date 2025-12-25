@@ -1,4 +1,4 @@
-# 0.0 Xtatix Plugin
+# 0.0 Alchira Plugin
 
 The extension connects to language servers in this fallback order:
 
@@ -6,7 +6,7 @@ The extension connects to language servers in this fallback order:
 - Globally installed on the system
 - Built-in language instance bundled with the extension
 
-In `./xtatix/configure.jsonc` | `environment`, determines the css completion provider in composition blocks.
+In `./alchira/configure.jsonc` | `environment`, determines the css completion provider in composition blocks.
 	
 ## Status bar Widget
 
@@ -76,13 +76,13 @@ Inspiration: https://uiverse.io/Voxybuns/lucky-fireant-71
 
 ### Formating: `[ alt + shift + x ]`
 
-- The extension formats Xtatix-Composition Blocks in the focused file on first trigger.
+- The extension formats Alchira-Composition Blocks in the focused file on first trigger.
 - Subsequent triggers toggle the nearest folding range across the entire file, not just composition blocks.
 
 ### Source/Target Switch: `[ ctrl + alt + shift + x ]`
 
 - Toggle between files in the source and target directories with a one-to-one mapping.
-- This feature will not work for `*.xtatix` files, given the fact compilation doesnot produce source files.
+- This feature will not work for `*.alchira` files, given the fact compilation doesnot produce source files.
 
 ### Template Import: `[ alt + x ]`
 
@@ -96,10 +96,10 @@ Inspiration: https://uiverse.io/Voxybuns/lucky-fireant-71
 
 ## Language support
 
-- Files of extensions `.xtatix` is treated as markdown.
+- Files of extensions `.alchira` is treated as markdown.
 - Support for `@--attach` and `@--assign` directives css files.
 - Tooltips with information, on watching attributes, symbolic classes and hashrules.
-- Block recognitions, folding range detection, color pallete and syntax highliting for Xtatix Composition blocks.
+- Block recognitions, folding range detection, color pallete and syntax highliting for Alchira Composition blocks.
 - Color picker palettes: `rgb`, `rgba`, `hsl`, `hsla`, `lch`, `oklch`, `lab`, `oklab`, `hex`
 
 ### Developer Assistance
@@ -386,7 +386,7 @@ All the first order blocks of each file will have a corresponding symbolic class
 # 1.0 Hash Loaders
 
 > - Use sketchpad for preview. Cursor on symlink and trigger. [ `ctrl` + `alt` + `x` ]  
-> - Start live compilation using `xtatix preview -w` or `xtatix debug -w`.  
+> - Start live compilation using `alchira preview -w` or `alchira debug -w`.  
 > - Toggle b/w input & ouput using [ `ctrl` + `alt` + `shift` + `x` ] 
 
 ---
@@ -446,7 +446,7 @@ This method ensures consistency and correctness when importing and using unique 
 # 2.0 Class Loaders
 
 > - Use sketchpad for preview. Cursor on symlink and trigger. [ `ctrl` + `alt` + `x` ]  
-> - Start live compilation using `xtatix preview -w` or `xtatix debug -w`.  
+> - Start live compilation using `alchira preview -w` or `alchira debug -w`.  
 > - Toggle b/w input + ouput using [ `ctrl` + `alt` + `shift` + `x` ] 
 
 ---
@@ -454,10 +454,10 @@ This method ensures consistency and correctness when importing and using unique 
 > ### Symlinks include:
 > - Classes from your **configured flavor**
 > - **Custom classes** you create yourself
-> - Classes available in **[Libraries Setup](../xtatix/libraries/index.md)**
+> - Classes available in **[Libraries Setup](../alchira/libraries/index.md)**
 > - **Components** declared in target folders
 
-Class Loaders are special operators in Xtatix that signal the use of symbolic classes (symlinks) within watch attributes. They distinguish symlinks from conventional CSS classes, enabling their simultaneous use without conflicts or style collisions in complex projects.
+Class Loaders are special operators in Alchira that signal the use of symbolic classes (symlinks) within watch attributes. They distinguish symlinks from conventional CSS classes, enabling their simultaneous use without conflicts or style collisions in complex projects.
 
 Unlike traditional CSS cascading, which applies styles globally, Class Loaders implement localized cascade control rules at the element level. This allows developers to precisely layer and control how symlinks interact with each other and with existing styles, eliminating global cascade conflicts.
 
@@ -617,7 +617,7 @@ When composing styles, you can wrap groups externally using any of these delimit
 
 ### Compose Operators
 
-Xtatix provides two compose operators as replacements for traditional CSS composition directives:
+Alchira provides two compose operators as replacements for traditional CSS composition directives:
 
 - `+` (equivalent to `@--apply`): Merges and flattens the provided symlinks.
 - `~` (equivalent to `@--attach`): Creates a dependency node to the referenced symlinks.
@@ -666,7 +666,7 @@ demo$$button="
 - Uses both `~` and `+`,  operators for dependencies and composing respectively.
 
 > **Tip:** If the class name is `demo$button`, you can declare it once per file. However, if you use `demo$$button`, it becomes globally scoped and must appear only once across all files—otherwise, it will trigger an error.
-# 3.1 Variants in Xtatix
+# 3.1 Variants in Alchira
 
 This tutorial shows how to extend variants of an existing symbolic class (symlink) by leveraging exposed CSS variables, enabling dynamic theming and style variations.
 
@@ -695,7 +695,7 @@ demo$varient-preview="= d-flex gap-8 ;"
 	<button class="&demo$$button ~demo$button-varients-1" x-preset-1> </button>
 	<!-- While composing symlink in this manner, all variables are detected, and autosuggests them. -->
 
-	<!-- Xtatix provieds a special operator called `de-nest`, it helps in much better organization of nested strucures. -->
+	<!-- Alchira provieds a special operator called `de-nest`, it helps in much better organization of nested strucures. -->
 	<sketch class="&demo$$button"
 	demo$button-varients-2="
 		&[x-preset-]& {
@@ -834,7 +834,7 @@ demo$wrapper-preview="container-type: inline-size; width: 8rem;"
 > Wrapper attributes let you co-locate conditional logic and responsive behavior with component usage while still emitting clean, idiomatic CSS structures.
 # 4.0 Reserved Tags
 
-Xtatix reserves a small set of custom tags and placeholders that make it possible to declare, reuse, and inject styles and snippets directly in markup. These tags are transformed away at compile time, so they never reach the browser.
+Alchira reserves a small set of custom tags and placeholders that make it possible to declare, reuse, and inject styles and snippets directly in markup. These tags are transformed away at compile time, so they never reach the browser.
 
 ## Declaration Tags (paired tags)
 
@@ -951,7 +951,7 @@ Self-closing tags and reserved HTML comments act as insertion points where compi
 
 ---
 
-These reserved tags and placeholders let Xtatix treat HTML as a rich declaration surface for styles, snippets, and components, while compiling everything down to standard HTML and CSS for the browser.
+These reserved tags and placeholders let Alchira treat HTML as a rich declaration surface for styles, snippets, and components, while compiling everything down to standard HTML and CSS for the browser.
 # 5.0 Dependancy Patterns
 
 ## While composing libraries
@@ -969,7 +969,7 @@ These reserved tags and placeholders let Xtatix treat HTML as a rich declaration
   "
   id="#"
 >
-<div onclick="XTATIX['\#'].onclick(this)">
+<div onclick="ALCHIRA['\#'].onclick(this)">
   <svg data-speed="300" class="&camera$icon" width="40" height="40" viewBox="0 0 24 24"> </svg>
   <span>Take photo </span> <span id="#counter"> 0 </span>
 </div>
@@ -1047,7 +1047,7 @@ These reserved tags and placeholders let Xtatix treat HTML as a rich declaration
 - Users may fork or clone the repository, personalize their own variants, and distribute them as needed. For detailed guidance on customization, refer to the Flavourize documentation. Be sure to review the EULA for any usage constraints and legal requirements associated with redistribution and modification.
 # 6.0 Macro Patterns
 
-XTATIX utilizes a Layer-Based Macro System. In this territory, every sketch or style tag is a processing unit that maintains two distinct internal memories: a Render Stack and a Reference Stack.
+ALCHIRA utilizes a Layer-Based Macro System. In this territory, every sketch or style tag is a processing unit that maintains two distinct internal memories: a Render Stack and a Reference Stack.
 
 ### Macro blocks
 

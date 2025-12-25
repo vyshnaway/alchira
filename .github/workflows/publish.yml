@@ -11,7 +11,7 @@ permissions:
   contents: write
 
 env:
-  PACKAGE_REPO: xtatixone/xtatix
+  PACKAGE_REPO: alchira/package
 
 jobs:
   bin-release:

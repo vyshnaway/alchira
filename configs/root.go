@@ -10,9 +10,9 @@ import (
 )
 
 const (
-	ID     = "xtatix"
+	ID     = "alchira"
 	TLD    = "one"
-	EXT    = "xtx"
+	EXT    = "al"
 	DOMAIN = ID + "." + TLD
 )
 
