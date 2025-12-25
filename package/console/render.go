@@ -79,15 +79,18 @@ func render_Animate(frames []string, duration int, iterations int) error {
 	}
 }
 
-func render_Raw(content any) []byte {
-	json, _ := _json.MarshalIndent(content, "", "  ")
-	_fmt.Println(string(json))
-	return json
+func render_Raw(content any) {
+    json, e := _json.MarshalIndent(content, "", "  ")
+    if e == nil { // Success!
+        _fmt.Println(string(json))
+    } else { // Handle the error
+        _fmt.Println("JSON Error:", e.Error())
+    }
 }
 
 // E provides package-level access to render functions
 var Render = struct {
-	Raw       func(content any) []byte
+	Raw       func(content any)
 	Close     func(content any)
 	Write     func(str string, backRows int) int
 	Backspace func(chars int)

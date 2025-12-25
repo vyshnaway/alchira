@@ -31,11 +31,11 @@ func Setup_Environment(compilerdir, relWorkpath, absWorkpath string, config _mod
 		_config.Root_Flavor["libraries"].Path = config.Flavour.Default.Libraries
 	}
 
-	if sandbox := FlavRef.Sandbox; len(sandbox) > 0 && _fileman.Path_IfDir(sandbox) {
+	if sketchpad := FlavRef.Sketchpad; len(sketchpad) > 0 && _fileman.Path_IfDir(sketchpad) {
 		flavourable = true
-		_config.Root_Flavor["sandbox"].Path = sandbox
+		_config.Root_Flavor["sketchpad"].Path = sketchpad
 	} else {
-		_config.Root_Flavor["sandbox"].Path = config.Flavour.Default.Sandbox
+		_config.Root_Flavor["sketchpad"].Path = config.Flavour.Default.Sketchpad
 
 	}
 
@@ -107,10 +107,10 @@ func Setup_Tweaks(tweaks map[string]any) {
 	}
 }
 
-func Setup_Sandbox(configs map[string]any) {
+func Setup_Sketchpad(configs map[string]any) {
 	if configs == nil {
-		_config.Saved.Sandbox = map[string]any{}
+		_config.Saved.Sketchpad = map[string]any{}
 	} else {
-		_config.Saved.Sandbox = configs
+		_config.Saved.Sketchpad = configs
 	}
 }

@@ -29,22 +29,26 @@ func Macro_Builder(
 			continue
 		}
 
+		index := 0
+		helper := []string{}
+		if reg, ok := Stack.Register.Get(T.Helper); ok && len(T.Helper) > 0 {
+			helper = append(helper, reg.Array...)
+		} else if refer := action.Index_Finder(T.Helper, context.Cache.LocalMap); refer.Index > 0 {
+			if !appendstack[refer.Index] {
+				index = refer.Index
+				configs.Style.Sketchpad.Mac[T.Helper] = index
+				s := SketchCompile(refer.Index, method, subappendstack)
+				helper = append(helper, s)
+			} else {
+				helper = append(helper, "")
+			}
+		} else {
+			helper = append(helper, T.Helper)
+		}
+
 		var register *macro.REG
 		if reg, ok := Stack.Register.Get(T.Register); ok {
 			register = reg
-		}
-
-		index := 0
-		helper := []string{}
-		if reg, ok := Stack.Register.Get(T.Helper); ok {
-			helper = append(helper, reg.Array...)
-		} else if refer := action.Index_Finder(T.Helper, context.Cache.LocalMap); refer.Index > 0 {
-			index = refer.Index
-			configs.Style.Sketchpad.Mac[T.Helper] = index
-			s := SketchCompiler(refer.Index, method, subappendstack)
-			helper = append(helper, s)
-		} else {
-			helper = append(helper, T.Helper)
 		}
 
 		switch T.OpRefer.Type {
@@ -59,17 +63,19 @@ func Macro_Builder(
 		case macro.E_Op_Replace:
 			hl := len(helper)
 			rl := len(register.Array)
-			itr := int(math.Max(float64(hl), float64(rl)))
-			outs := make([]string, itr)
 
-			i := 0
-			for i < itr {
-				hi := itr % hl
-				ri := itr % rl
-				outs[i] = strings.Replace(register.Array[ri], T.Operand, helper[hi], T.OpRefer.Instance)
-				i++
+			if hl > 0 && rl > 0 {
+				itr := int(math.Max(float64(hl), float64(rl)))
+				outs := make([]string, itr)
+				i := 0
+				for i < itr {
+					hi := itr % hl
+					ri := itr % rl
+					outs[i] = strings.ReplaceAll(register.Array[ri], T.Operand, helper[hi])
+					i++
+				}
+				Stack.RegSet(index, T.Register, outs)
 			}
-			Stack.RegSet(index, T.Register, outs)
 		}
 	}
 
@@ -86,6 +92,6 @@ func Marcro_Reader(
 			symlinks[tkn.Helper] = true
 		}
 	}
-	
+
 	return symlinks
 }

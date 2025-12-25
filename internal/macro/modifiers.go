@@ -97,8 +97,8 @@ var Modifiers = map[string]T_Modifier{
 	},
 	"MD": func(TABLE, USES []string, PARSTR string) []string {
 		extensions := parser.CommonExtensions | parser.AutoHeadingIDs | parser.NoEmptyLineBeforeBlock
-		p := parser.NewWithExtensions(extensions)
 		for INDEX, TEXT := range TABLE {
+			p := parser.NewWithExtensions(extensions)
 			doc := p.Parse([]byte(TEXT))
 
 			// create HTML renderer with extensions

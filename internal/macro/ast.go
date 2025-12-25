@@ -6,10 +6,10 @@ import (
 )
 
 type OP struct {
-	Type     E_Op
-	Replace  string
-	Modifier T_Modifier
-	Instance int
+    Type     E_Op       `json:"Type"`      // Exported & Labeled
+    Replace  string     `json:"Replace"`   // Exported & Labeled
+    Modifier T_Modifier `json:"-"`         // HIDDEN 
+    Instance int        `json:"Instance"`  // Exported & Labeled
 }
 
 type CMD struct {
@@ -26,10 +26,10 @@ type AST struct {
 	recent     string
 	render     *REG
 	Register   *object.T[string, REG]
-	Commands   []CMD
-	PreInject  []CMD
-	PostInject []CMD
-	OnInject   *object.T[string, []CMD]
+	Commands   []*CMD
+	PreInject  []*CMD
+	PostInject []*CMD
+	OnInject   *object.T[string, []*CMD]
 }
 
 type REG struct {
@@ -39,20 +39,20 @@ type REG struct {
 }
 
 func NewAst() *AST {
-	stack := AST{
+	Stack := AST{
 		recent:     "",
 		render:     nil,
 		Register:   object.New[string, REG](4),
-		Commands:   []CMD{},
-		PreInject:  []CMD{},
-		PostInject: []CMD{},
-		OnInject:   object.New[string, []CMD](4),
+		Commands:   []*CMD{},
+		PreInject:  []*CMD{},
+		PostInject: []*CMD{},
+		OnInject:   object.New[string, []*CMD](4),
 	}
-	stack.RegSet(0, "", []string{})
-	if r, k := stack.Register.Get(""); k {
-		stack.render = r
+	Stack.RegSet(0, "", []string{})
+	if r, k := Stack.Register.Get(""); k {
+		Stack.render = r
 	}
-	return &stack
+	return &Stack
 }
 
 func (Stack *AST) RegSet(ind int, reg string, val []string) {
@@ -64,7 +64,7 @@ func (Stack *AST) RegSet(ind int, reg string, val []string) {
 	}
 }
 
-func (Stack *AST) Render() string{
+func (Stack *AST) Render() string {
 	var compose strings.Builder
 	if Stack.render.Index > 0 {
 		for _, v := range Stack.render.Array {
@@ -97,7 +97,7 @@ func BuildInjectionAst(lines []string) (ast *AST) {
 			if v, k := ast.OnInject.Get(t.Register); k {
 				*v = append(*v, t)
 			} else {
-				ast.OnInject.Set(t.Register, []CMD{t})
+				ast.OnInject.Set(t.Register, []*CMD{t})
 			}
 		case '~':
 			if ast.recent == "" {
@@ -105,7 +105,7 @@ func BuildInjectionAst(lines []string) (ast *AST) {
 			} else if v, k := ast.OnInject.Get(ast.recent); k {
 				*v = append(*v, t)
 			} else {
-				ast.OnInject.Set(t.Register, []CMD{t})
+				ast.OnInject.Set(t.Register, []*CMD{t})
 			}
 		}
 	}

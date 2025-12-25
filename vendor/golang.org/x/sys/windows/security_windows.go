@@ -516,7 +516,7 @@ const (
 	TokenSessionId
 	TokenGroupsAndPrivileges
 	TokenSessionReference
-	TokenSandBoxInert
+	TokenSketchpadInert
 	TokenAuditPolicy
 	TokenOrigin
 	TokenElevationType

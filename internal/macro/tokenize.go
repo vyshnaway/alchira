@@ -15,6 +15,9 @@ const (
 )
 
 func OpType(op string) OP {
+	if op == "" {
+		op = "1"
+	}
 	var Op OP
 	if v, e := Modifiers[op]; e {
 		Op.Type = E_Op_Modifier
@@ -30,7 +33,7 @@ func OpType(op string) OP {
 }
 
 // execmod = Inject values to Stack
-func (Stack *AST) Tokenize(Command string, execute bool) (tokens CMD) {
+func (Stack *AST) Tokenize(Command string, execute bool) (*CMD) {
 	ASSIGN := '='
 	USING := '~'
 	WITH := '|'
@@ -45,8 +48,8 @@ func (Stack *AST) Tokenize(Command string, execute bool) (tokens CMD) {
 		}
 		return str
 	}
-
-	tokens = CMD{RawString: Command}
+	
+	Tokens := &CMD{RawString: Command}
 
 	gotRegister := false
 	gotOperator := false
@@ -55,7 +58,7 @@ func (Stack *AST) Tokenize(Command string, execute bool) (tokens CMD) {
 	for _, char := range Command {
 		if !gotRegister {
 			if char == ASSIGN {
-				tokens.Register = strings.TrimSpace(builder.String())
+				Tokens.Register = strings.TrimSpace(builder.String())
 				gotRegister = true
 				builder.Reset()
 			} else {
@@ -65,8 +68,8 @@ func (Stack *AST) Tokenize(Command string, execute bool) (tokens CMD) {
 			builder.WriteRune(char)
 		}
 	}
-	tokens.Operation = strings.TrimSpace(builder.String())
-	Command = tokens.Operation
+	Tokens.Operation = strings.TrimSpace(builder.String())
+	Command = Tokens.Operation
 	builder.Reset()
 
 	if gotRegister {
@@ -89,8 +92,8 @@ func (Stack *AST) Tokenize(Command string, execute bool) (tokens CMD) {
 					}
 				}
 
-				tokens.Operand = strings.TrimSpace(b1.String())
-				tokens.Helper = strings.TrimSpace(b2.String())
+				Tokens.Operand = strings.TrimSpace(b1.String())
+				Tokens.Helper = strings.TrimSpace(b2.String())
 				gotOperator = true
 				builder.Reset()
 
@@ -110,22 +113,22 @@ func (Stack *AST) Tokenize(Command string, execute bool) (tokens CMD) {
 		if !gotOperator {
 			SetModifier('|', true)
 		}
-		tokens.Arguments = strings.TrimSpace(builder.String())
-		tokens.Arguments = LoadConsts(tokens.Arguments)
-		tokens.Operand = LoadConsts(tokens.Operand)
-		tokens.Helper = LoadConsts(tokens.Helper)
-		tokens.OpRefer = OpType(tokens.Operand)
+		Tokens.Arguments = strings.TrimSpace(builder.String())
+		Tokens.Arguments = LoadConsts(Tokens.Arguments)
+		Tokens.Operand = LoadConsts(Tokens.Operand)
+		Tokens.Helper = LoadConsts(Tokens.Helper)
+		Tokens.OpRefer = OpType(Tokens.Operand)
 
 		if execute {
-			Stack.Commands = append(Stack.Commands, tokens)
+			Stack.Commands = append(Stack.Commands, Tokens)
 
-			if _, ok := Stack.Register.Get(tokens.Register); !ok {
-				Stack.RegSet(0, tokens.Register, []string{})
+			if _, ok := Stack.Register.Get(Tokens.Register); !ok {
+				Stack.RegSet(0, Tokens.Register, []string{})
 			}
 
-			Stack.recent = tokens.Register
+			Stack.recent = Tokens.Register
 		}
 	}
 
-	return tokens
+	return Tokens
 }

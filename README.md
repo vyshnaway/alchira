@@ -10,7 +10,7 @@ In `./xtatix/configure.jsonc` | `environment`, determines the css completion pro
 	
 ## Status bar Widget
 
-- Hover to find Sandbox-Url.
+- Hover to find Sketchpad-Url.
 - Click on widget to see essential links and and Cli commands.
 - Displays if focused editor file is being watched and error count.
 
@@ -68,11 +68,11 @@ Inspiration: https://uiverse.io/Voxybuns/lucky-fireant-71
 
 ## Shortcuts
 
-### SandBox: `[ ctrl + alt + x ]`
+### Sketchpad: `[ ctrl + alt + x ]`
 
 - Put cursor on a symlink here `demo$buttom` instance and trigger event.
 - Change attribute `x-preset-1` to `x-preset-2`, to observe live udpates.
-- In the sandbox webview panal few tools are available try out those.
+- In the sketchpad webview panal few tools are available try out those.
 
 ### Formating: `[ alt + shift + x ]`
 
@@ -385,7 +385,7 @@ All the first order blocks of each file will have a corresponding symbolic class
 	-  `@--attach`: Files of **Order ≤ n**
 # 1.0 Hash Loaders
 
-> - Use sandbox for preview. Cursor on symlink and trigger. [ `ctrl` + `alt` + `x` ]  
+> - Use sketchpad for preview. Cursor on symlink and trigger. [ `ctrl` + `alt` + `x` ]  
 > - Start live compilation using `xtatix preview -w` or `xtatix debug -w`.  
 > - Toggle b/w input & ouput using [ `ctrl` + `alt` + `shift` + `x` ] 
 
@@ -445,7 +445,7 @@ Using this escaping keeps hashes valid across different contexts whether in HTML
 This method ensures consistency and correctness when importing and using unique identifiers across your project files.
 # 2.0 Class Loaders
 
-> - Use sandbox for preview. Cursor on symlink and trigger. [ `ctrl` + `alt` + `x` ]  
+> - Use sketchpad for preview. Cursor on symlink and trigger. [ `ctrl` + `alt` + `x` ]  
 > - Start live compilation using `xtatix preview -w` or `xtatix debug -w`.  
 > - Toggle b/w input + ouput using [ `ctrl` + `alt` + `shift` + `x` ] 
 
@@ -491,7 +491,7 @@ Each variant represents a distinct cascade layer:
 - `+`: For component styles that require explicit override control.
 - `=`: For state or property-driven styles in frameworks that need last-layer authority.
 
-> Enable `Project theme` option in the sandbox toolbar enables global design tokens from your current design system, so turn it on to see live changes.
+> Enable `Project theme` option in the sketchpad toolbar enables global design tokens from your current design system, so turn it on to see live changes.
 
 ## Scattered Class Loader (`~`)
 
@@ -874,8 +874,8 @@ When a symbolic class (symlink) appears as an attribute on these special tags, t
 
 - Declares component-level styles and generates a corresponding preview template.
 - The attribute-value for a symlink defines its composition and rules.
-- The inner HTML is used as a live preview template in the sandbox:
-  - `style` attributes are passed to the sandbox body.
+- The inner HTML is used as a live preview template in the sketchpad:
+  - `style` attributes are passed to the sketchpad body.
   - Other attributes are passed directly to the component template.
 
 
@@ -1045,3 +1045,98 @@ These reserved tags and placeholders let Xtatix treat HTML as a rich declaration
 - Extending the system: users can add CSS files to the `xtyles/libraries` folder to create custom libraries/frameworks; the six-level inheritance model allows rapid propagation of changes across a project.
 - Conditional definitions (media queries, custom at-rules, container-dependent variants, etc.) are generated using wrapper-attributes. `hashrules` provide reusable snippets for wrapper attributes.
 - Users may fork or clone the repository, personalize their own variants, and distribute them as needed. For detailed guidance on customization, refer to the Flavourize documentation. Be sure to review the EULA for any usage constraints and legal requirements associated with redistribution and modification.
+# 6.0 Macro Patterns
+
+XTATIX utilizes a Layer-Based Macro System. In this territory, every sketch or style tag is a processing unit that maintains two distinct internal memories: a Render Stack and a Reference Stack.
+
+### Macro blocks
+
+Self-closing tags are identified as macro declarations. Inputs are passed as sequential & attributes.
+
+```html
+<sketch
+  &="operation 1"
+  &="operation 2" />
+
+<style
+  &="operation 1"
+  &="operation 2" />
+```
+
+### The Two Stacks Rule
+
+The behavior of the `&` attribute is determined by the use of the Assignment Operator (`=`).
+
+1. The Render Stack (Direct Injection): Using `=` without a leading symbol (e.g., `&="= value"`) appends content directly to the output buffer of that block.
+2. The Reference Stack (Key-Value Storage): Using `=` with a symbol/key (e.g., `&="key=value"`) stores a variable.
+3. The Injection Pass (The "Wash"): Crucially, the assign operator is active. Every time a new & line is processed, the engine scans the current Render Stack and replaces any occurrences of keys found in the Reference Stack.
+
+> **Caution:** Because replacement is "dumb" (string-based), ensure your keys are unique enough not to accidentally collide with standard HTML tags or properties.
+
+### The Multiplier Operator (*)
+
+To generate repetitive structures, use the `*` operator within a Render Stack assignment.
+
+- **Syntax:** `&="[count]*[content]"`
+- **Count:** If omitted (e.g., `&="= *value"`), it defaults to 1.
+- **Content:** If the string after the `*` matches a Symbolic Class (an existing `$sketch`), that sketch is expanded into the stack.
+
+```html
+<sketch &="= 2*value" />
+
+<sketch 
+  &="$N=4" 
+  &="= $N*value" />
+```
+
+### The Tunneling Pattern
+
+Because the assignment operator replaces string occurrences within the existing Render Stack, you can "tunnel" data deep into nested structures.
+
+When you inject a Sketch into the Render Stack, its "holes" (e.g., `{title}`) become part of the current buffer. Subsequent layers can then "reach into" that buffer and fill those holes.
+
+```html
+<sketch _$btn &="={text}">
+    <button>{text}</button>
+</sketch>
+
+<sketch 
+  &="= *$$index"
+  &="{{content}}= *$btn"
+  &="{{text}}=Click Me" />
+```
+
+### Recursive Value Population
+
+By combining multipliers and tunneling, you can populate complex, nested values. In the example below, `{innerbutton}` acts as a conduit that carries data from the top-level macro down into the nested `$innerbutton` sketch.
+
+```html
+
+<sketch _$innerbutton 
+&="={buttoncontent}">
+{buttoncontent}
+</sketch>
+
+<!--  -->
+<sketch 
+_$innercard 
+&="
+    ={innercard}
+    ={innerbutton}
+"> 
+    {innercard}
+
+<sketch 
+&="= *$innerbutton"
+&="{buttoncontent}={innerbutton}" />
+
+</sketch>
+
+<sketch _$preview>
+    <sketch
+    &="$N= 12" 
+    &="= *$innercard"
+    &="{innercard}=2*CARD" 
+    &="{innerbutton}=SUBMIT<br/>" />
+</sketch>
+```

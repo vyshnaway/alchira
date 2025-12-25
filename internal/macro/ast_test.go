@@ -2,6 +2,7 @@ package macro_test
 
 import (
 	"main/internal/macro"
+	"main/package/console"
 	"testing"
 )
 
@@ -21,13 +22,14 @@ func Test_Ast(t *testing.T) {
 		"k = 0 ~ $ | a, b, c",
 	}
 
-	ast_0 := macro.NewAst()
+	Ast_0 := macro.NewAst()
 	// ast_1 := macro.NewAst()
 	for _, l := range lines {
-		ast_0.Tokenize(l, true)
+		Ast_0.Tokenize(l, true)
 		// ast_1.Tokenize(l, false)
 	}
 
+	console.Render.Raw(Ast_0)
 	// console.Render.Raw(ast_1)
 }
 

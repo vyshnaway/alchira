@@ -26,7 +26,7 @@ var Root = models.Cache_Root{
 	Flavor: models.Compiler_Flavor{
 		Name:      "",
 		Version:   "",
-		Sandbox:   "",
+		Sketchpad: "",
 		Blueprint: "",
 		Libraries: "",
 	},
@@ -123,7 +123,7 @@ var Root_Flavor = map[string]*models.File_Source{
 		Path:      "",
 		Essential: true,
 	},
-	"sandbox": {
+	"sketchpad": {
 		Frags:     []string{},
 		Path:      "",
 		Essential: true,

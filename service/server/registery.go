@@ -53,29 +53,29 @@ var Registery = map[string]*T_RegisterEntry{
 		[]string{},
 		false,
 	),
-	"sandbox-load": RegisterMethod(
+	"sketchpad-load": RegisterMethod(
 		2,
 		func(args []string) any {
-			return handle.Sandbox_Load(args[0], args[1])
+			return handle.Sketchpad_Load(args[0], args[1])
 		},
 		func(params struct {
 			Filepath string `json:"filepath"`
 			Symlink  string `json:"symlink"`
 		}) any {
-			return handle.Sandbox_Load(params.Filepath, params.Symlink)
+			return handle.Sketchpad_Load(params.Filepath, params.Symlink)
 		},
 		[]string{
-			`sandbox-load {relative-filepath} {symlink}`,
+			`sketchpad-load {relative-filepath} {symlink}`,
 		},
 		true,
 	),
-	"sandbox-view": RegisterMethod(
+	"sketchpad-view": RegisterMethod(
 		0,
 		func(args []string) any {
-			return handle.Sandbox_View_Component
+			return handle.Sketchpad_View_Component
 		},
 		func(params any) any {
-			return handle.Sandbox_View_Component
+			return handle.Sketchpad_View_Component
 		},
 		[]string{},
 		true,
@@ -84,18 +84,18 @@ var Registery = map[string]*T_RegisterEntry{
 		1,
 		func(args []string) any {
 			if len(args) > 1 {
-				return handle.Sandbox_State_Set(args[0], args[1])
+				return handle.Sketchpad_State_Set(args[0], args[1])
 			}
-			return handle.Sandbox_State_Mem[args[0]]
+			return handle.Sketchpad_State_Mem[args[0]]
 		},
 		func(params struct {
 			Key string `json:"key"`
 			Val any    `json:"value"`
 		}) any {
-			return handle.Sandbox_State_Set(params.Key, params.Val)
+			return handle.Sketchpad_State_Set(params.Key, params.Val)
 		},
 		[]string{
-			`returns component-sandbox option states`,
+			`returns component-sketchpad option states`,
 		},
 		true,
 	),
@@ -103,35 +103,35 @@ var Registery = map[string]*T_RegisterEntry{
 		1,
 		func(args []string) any {
 			if len(args) > 1 {
-				return handle.Sandbox_State_Init(args[0], args[1])
+				return handle.Sketchpad_State_Init(args[0], args[1])
 			}
-			return handle.Sandbox_State_Mem[args[0]]
+			return handle.Sketchpad_State_Mem[args[0]]
 		},
 		func(params struct {
 			Key string `json:"key"`
 			Val any    `json:"value"`
 		}) any {
-			return handle.Sandbox_State_Init(params.Key, params.Val)
+			return handle.Sketchpad_State_Init(params.Key, params.Val)
 		},
 		[]string{
-			`returns component-sandbox option states`,
+			`returns component-sketchpad option states`,
 		},
 		true,
 	),
 	"server-state-list": RegisterMethod(
 		0,
 		func(args []string) any {
-			return handle.Sandbox_State_Mem
+			return handle.Sketchpad_State_Mem
 		},
 		func(params any) any {
-			return handle.Sandbox_State_Mem
+			return handle.Sketchpad_State_Mem
 		},
 		[]string{
-			`returns component-sandbox option states`,
+			`returns component-sketchpad option states`,
 		},
 		false,
 	),
-	"sandbox-url": RegisterMethod(
+	"sketchpad-url": RegisterMethod(
 		0,
 		func(args []string) any {
 			return "http://" + Session_Url
@@ -140,7 +140,7 @@ var Registery = map[string]*T_RegisterEntry{
 			return "http://" + Session_Url
 		},
 		[]string{
-			`returns component-sandbox url`,
+			`returns component-sketchpad url`,
 		},
 		false,
 	),

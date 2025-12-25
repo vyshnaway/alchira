@@ -25,14 +25,14 @@ type T_Component_return struct {
 	Configs    map[string]any    `json:"configs"`
 }
 
-var Sandbox_View_Component = new(T_Component_return)
+var Sketchpad_View_Component = new(T_Component_return)
 
-func Sandbox_Load(filepath, symlink string) (response any) {
+func Sketchpad_Load(filepath, symlink string) (response any) {
 	Manifest_Local(filepath, symlink)
-	return Sandbox_View_Component
+	return Sketchpad_View_Component
 }
 
-func Sandbox_Save(index int) (response any) {
+func Sketchpad_Save(index int) (response any) {
 	var stylesheet strings.Builder
 	data := action.Index_Fetch(index)
 	if data == nil {
@@ -65,7 +65,7 @@ func Sandbox_Save(index int) (response any) {
 		attributes[k] = scribes
 	}
 
-	Builder.WriteString(script.SketchCompiler(index, script.E_Method_DebugHash, map[int]bool{}))
+	Builder.WriteString(script.SketchCompile(index, script.E_Method_DebugHash, map[int]bool{}))
 	sketch = Builder.String()
 
 	FinalClassMap := []models.Style_ClassIndexTrace{
@@ -91,7 +91,7 @@ func Sandbox_Save(index int) (response any) {
 	styleDeps, sketchDeps := compiler.GetDependentsForSketchpad()
 	stylesheet.WriteString(styleDeps)
 
-	Sandbox_View_Component = &T_Component_return{
+	Sketchpad_View_Component = &T_Component_return{
 		Attributes: attributes,
 		Sketch:     sketch,
 		Depend:     sketchDeps,
@@ -99,18 +99,18 @@ func Sandbox_Save(index int) (response any) {
 		Rootcss:    configs.Delta.IndexBuild,
 		Compcss:    stylesheet.String(),
 		Timestamp:  time.Now().UnixNano(),
-		Configs:    configs.Saved.Sandbox,
+		Configs:    configs.Saved.Sketchpad,
 	}
 
-	return Sandbox_View_Component
+	return Sketchpad_View_Component
 }
 
-// var sandbox_View_ComponentLast = new(T_Component_return)
+// var sketchpad_View_ComponentLast = new(T_Component_return)
 
-// func SandboxDataDiffered() bool {
-// 	now := Sandbox_View_Component
-// 	last := sandbox_View_ComponentLast
-// 	sandbox_View_ComponentLast = Sandbox_View_Component
+// func SketchpadDataDiffered() bool {
+// 	now := Sketchpad_View_Component
+// 	last := sketchpad_View_ComponentLast
+// 	sketchpad_View_ComponentLast = Sketchpad_View_Component
 // 	differed := false
 
 // 	if now.Timestamp == last.Timestamp {

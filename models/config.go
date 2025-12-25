@@ -32,7 +32,7 @@ type Config_Raw struct {
 	Artifacts   map[string]string `json:"artifacts,omitempty"`
 	ProxyMap    []Config_ProxyMap `json:"proxymap,omitempty"`
 	Tweaks      Config_Tweaks     `json:"tweaks,omitempty"`
-	Sandbox     map[string]any    `json:"sandbox,omitempty"`
+	Sketchpad   map[string]any    `json:"sketchpad,omitempty"`
 }
 
 type Config_Archive struct {

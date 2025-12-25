@@ -3,7 +3,7 @@ package models
 type Compiler_Flavor struct {
 	Name      string `json:"name"`
 	Version   string `json:"version"`
-	Sandbox   string `json:"sandbox"`
+	Sketchpad string `json:"sketchpad"`
 	Blueprint string `json:"blueprint"`
 	Libraries string `json:"libraries"`
 }
@@ -17,4 +17,3 @@ type Compiler_Config struct {
 		Workspace map[string]Compiler_Flavor `json:"workspace"`
 	} `json:"flavour"`
 }
- 

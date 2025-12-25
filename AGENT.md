@@ -21,6 +21,6 @@ This launches a real-time interactive session similar to a REPL, enabling you to
 - Discover and bootstrap your projects with customized libraries reflecting your unique style.  
 - Examine dependency inheritance for scalable and composable CSS architecture.  
 - Integrate insights gained here with your VSCode and LSP tooling for an enhanced developer experience.  
-- Utilize sandbox previews, template generation, and attribute-based variants with minified classnames for optimized CSS generation.
+- Utilize sketchpad previews, template generation, and attribute-based variants with minified classnames for optimized CSS generation.
 
 Starting with `help` is recommended to familiarize yourself with commands that will help you deduce the project’s design context — this empowers frontend agents and tools to provide tailored styling assistance perfectly aligned with your existing system.

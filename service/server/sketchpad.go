@@ -54,7 +54,7 @@ func Webview_Create(tryport int) (httpServer *http.Server, deducedPort int, err 
 	}
 
 	mux := http.NewServeMux()
-	serveDir := configs.Root_Flavor["sandbox"].Path
+	serveDir := configs.Root_Flavor["sketchpad"].Path
 
 	// Serve index.html on /, and all files under serveDir
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
@@ -129,13 +129,13 @@ func Webview_Create(tryport int) (httpServer *http.Server, deducedPort int, err 
 	// 	t := time.NewTicker(100 * time.Millisecond)
 	// 	cycle := 0
 	// 	for range t.C {
-	// 		if handle.SandboxDataDiffered() {
+	// 		if handle.SketchpadDataDiffered() {
 	// 			cycle = 5
 	// 		} else if cycle == 0 {
 	// 			continue
 	// 		}
 	// 		cycle--
-	// 		Interactive("sandbox-view", []string{}, true)
+	// 		Interactive("sketchpad-view", []string{}, true)
 	// 	}
 	// }()
 

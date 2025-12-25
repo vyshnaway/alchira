@@ -130,7 +130,7 @@ func Manifest_Local(filepath string, symlink string) *R_ManifestLocal {
 	}
 
 	if index, ok := symlinkIndex[symlink]; ok {
-		Sandbox_Save(index)
+		Sketchpad_Save(index)
 	}
 
 Return:

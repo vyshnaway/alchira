@@ -128,7 +128,7 @@ func Verify_Configs(remote_vendors bool) (Report string, Status bool) {
 
 			_config.Archive.Environment = config.Environment
 			Setup_Tweaks(config.Tweaks)
-			Setup_Sandbox(config.Sandbox)
+			Setup_Sketchpad(config.Sketchpad)
 
 			if len(config.Name) > 0 {
 				_config.Archive.Name = config.Name
