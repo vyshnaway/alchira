@@ -68,7 +68,7 @@ func Generate_Files() (Files map[string]string, Report string) {
 		}(), _config.Static.MINIFY))
 	}
 	ordered_frag := class_builder.String()
-
+	
 	render_frags := []struct {
 		key string
 		val string
