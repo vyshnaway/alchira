@@ -23,7 +23,7 @@ Use this code block as your workspace to try out features.
 ```html
 <sketch 
 demo$button="
-	= tx$weight-600 border-none cursor-pointer;
+	+ tx$weight-600 border-none cursor-pointer;
 	--button_radius: 0.75em;
 	--button_color: #e8e8e8;
 	--button_outline_color: #000000;
@@ -31,7 +31,7 @@ demo$button="
 	border-radius: var(--button_radius);
 	background: var(--button_outline_color);
 	& > span {
-		= tfx$duration-100 d-flex px-6 py-4 mod$-translate-y-6;
+		+ tfx$duration-100 d-flex px-6 py-4 mod$-translate-y-6;
 		box-sizing: border-box;
 		border: 2px solid var(--button_outline_color);
 		border-radius: var(--button_radius);
@@ -39,10 +39,10 @@ demo$button="
 		color: var(--button_outline_color);
 	}
 	&:hover > span {
-		= mod$-translate-y-8;
+		+ mod$-translate-y-8;
 	}
 	&:active > span {
-		= mod$translate-y-0;
+		+ mod$translate-y-0;
 	}
 	&[x-preset-]& {
 		&[1] {
@@ -383,6 +383,7 @@ All the first order blocks of each file will have a corresponding symbolic class
 - In a file of **Order `n`**, symbolic classes may be referenced from other files using two distinct directives, with in the scope of whole `axiom` and `cluster` were permitted sources are:
 	-  `@--apply`: Files of **Order ≤ n−1**
 	-  `@--attach`: Files of **Order ≤ n**
+
 # 1.0 Hash Loaders
 
 > - Use sketchpad for preview. Cursor on symlink and trigger. [ `ctrl` + `alt` + `x` ]  
@@ -650,10 +651,10 @@ demo$$button="
 		color: var(--button_outline_color);
 	}
 	&:hover > span {
-		= mod$-translate-y-8;
+		+ mod$-translate-y-8;
 	}
 	&:active > span {
-		= mod$translate-y-0;
+		+ mod$translate-y-0;
 	}
 "
 > <!-- Template follows -->
@@ -676,7 +677,7 @@ This tutorial shows how to extend variants of an existing symbolic class (symlin
 <!-- Use a sketch symlink as preview container. -->
  
 <sketch 
-demo$varient-preview="= d-flex gap-8 ;"
+demo$varient-preview="+ d-flex gap-8 ;"
 > 
 	<!-- Cascade conflicts does't affect this because specifity is taken advantage off. -->
 	<sketch class="&demo$$button"
@@ -785,7 +786,7 @@ Wrapper attributes provide a way to express conditional and contextual styling d
 <!-- Assume hashrule #{Load} == "body[data-loading]" -->
 <div
   _$class="..."
-  &#{Load}&{.parent}&="..."
+  &#{Cs1}&{.parent}&="..."
   {@supports not (backdrop-filter: blur(1px))}&="..."
   container@{(max-width: 320px)}&="..."
 >
