@@ -643,7 +643,7 @@ demo$$button="
 	border-radius: var(--button_radius);
 	background: var(--button_outline_color);
 	& > span {
-		= tfx$duration-100 d-flex px-6 py-4 mod$-translate-y-6;
+		+ tfx$duration-100 d-flex px-6 py-4 mod$-translate-y-6;
 		box-sizing: border-box;
 		border: 2px solid var(--button_outline_color);
 		border-radius: var(--button_radius);
