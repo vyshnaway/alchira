@@ -156,7 +156,7 @@ Inspiration: https://uiverse.io/Voxybuns/lucky-fireant-71
 ```
     xtyles/
     ├── libraries
-    |   ├── _scaffold_
+    |   ├── _
     |   |    └── *.css
     |   └── *.css
     ├── #at-rules.css
@@ -278,7 +278,7 @@ Inspiration: https://uiverse.io/Voxybuns/lucky-fireant-71
 - Organize classes into groups with up to 6 levels of inheritance based on existing classes.
 - Details on managing libraries are covered in the next section.
 
-### `./libraries/_scaffold_`
+### `./libraries/_`
 
 - This folder contains the immutable part of your library supplied by the initalized flavour.
 - It includes static class sources used for symlink generation.
