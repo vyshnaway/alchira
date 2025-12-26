@@ -33,7 +33,7 @@ You may not, without explicit prior written consent from Us:
 
 During the preview period, You are encouraged to:
 
-- Provide feedback, ideas, and sample projects via [GitHub issues](https://github.com/yshelldev/alchira-central/issues) or [discussions](https://github.com/yshelldev/alchira-central/discussions).
+- Provide feedback, ideas, and sample projects via [GitHub issues](https://github.com/yshelldev/alchira/issues) or [discussions](https://github.com/yshelldev/alchira/discussions).
 - Experiment with integrating Alchira in your projects and share your experiences.
 - Contributions to the source repository are not expected at this stage; you may fork the repository to create derivative works.
 
