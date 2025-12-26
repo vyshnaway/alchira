@@ -196,8 +196,8 @@ Inspiration: https://uiverse.io/Voxybuns/lucky-fireant-71
   "vendors": "none",
   "proxymap": [
     {
-      "source": "xrc",
-      "target": "src",
+      "source": "source",
+      "target": "target",
       "stylesheet": "styles.css",
       "extensions": {
         "html": [
