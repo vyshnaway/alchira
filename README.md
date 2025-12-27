@@ -162,7 +162,7 @@ Alchira asks you to think about HTML and CSS as one fused, declarative language 
 
 ```html
 <sketch
-  global$$symlink="/* css styles */">
+  global$symlink="/* css styles */">
   <h1>Heading 1</h1>
   <button
     global$$button-1="--var: val; /* button css styles */">

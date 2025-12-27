@@ -4,7 +4,7 @@
 
 Welcome to the Alchira style context exploration interface. To begin, start the live interactive Alchira terminal by running:
 
-```
+```sh
 npx alchira iamai
 ```
 

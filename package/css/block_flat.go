@@ -1,7 +1,7 @@
 package css
 
 import (
-	_slice "slices"
+	"main/package/utils"
 	_string "strings"
 )
 
@@ -17,41 +17,40 @@ func amparsandSuffixLen(str string) int {
 	return count
 }
 
-func (This *T_Block) flatten(parent string) (Res *T_Block) {
+func Blocksort(list []string) []string {
 
-	blocksort := func(list []string) []string {
+	l := len(list)
+	outs := make([]string, 0, l)
+	mins := make([]string, 0, l)
+	maxs := make([]string, 0, l)
+	none := make([]string, 0, l)
 
-		l := len(list)
-		outs := make([]string, 0, l)
-		mins := make([]string, 0, l)
-		maxs := make([]string, 0, l)
-		none := make([]string, 0, l)
-
-		for _, key := range list {
-			min := _string.Index(key, "min-")
-			max := _string.Index(key, "max-")
-			if key != "" {
-				if min < max {
-					mins = append(mins, key)
-				} else if min > max {
-					maxs = append(maxs, key)
-				} else {
-					none = append(none, key)
-				}
+	for _, key := range list {
+		min := _string.Index(key, "min-")
+		max := _string.Index(key, "max-")
+		if key != "" {
+			if min < max {
+				mins = append(mins, key)
+			} else if min > max {
+				maxs = append(maxs, key)
+			} else {
+				none = append(none, key)
 			}
 		}
-
-		_slice.Sort(none)
-		_slice.Sort(maxs)
-		_slice.Sort(mins)
-		_slice.Reverse(mins)
-
-		outs = append(outs, none...)
-		outs = append(outs, maxs...)
-		outs = append(outs, mins...)
-
-		return outs
 	}
+
+	utils.String_SortAlphaAsc(none)
+	utils.String_SortAlphaAsc(maxs)
+	utils.String_SortAlphaDesc(mins)
+
+	outs = append(outs, none...)
+	outs = append(outs, maxs...)
+	outs = append(outs, mins...)
+
+	return outs
+}
+
+func (This *T_Block) flatten(parent string) (Res *T_Block) {
 
 	p := This.PropLen()
 	b := This.BlockLen()
@@ -128,8 +127,8 @@ func (This *T_Block) flatten(parent string) (Res *T_Block) {
 		}
 	})
 
-	atven_list = blocksort(atven_list)
-	atstd_list = blocksort(atstd_list)
+	atven_list = Blocksort(atven_list)
+	atstd_list = Blocksort(atstd_list)
 
 	add := func(target *T_Block, list []string) {
 		for _, k := range list {
@@ -183,10 +182,11 @@ func (This *T_Block) Flatten() *T_Block {
 	This.PropRange(func(k string, v string) {
 		all.SetProp(k, v)
 	})
-
-	This.BlockRange(func(k string, v *T_Block) {
+	
+	for _, k := range Blocksort(This.BlockKeys()) {
+		_, v := This.GetBlock(k)
 		all.Merge(v.flatten(k))
-	})
+	}
 
 	return all
 }

@@ -180,7 +180,6 @@ func Render_Switched(refmap *T_Block, minify bool) string {
 			} else if wrappers, err := _util.Code_JsoncParse[[]string](k1); err == nil {
 				var target *T_Block
 				if k1[0] == ' ' {
-
 					target = labelwrap
 				} else {
 					target = rulewrap

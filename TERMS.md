@@ -17,9 +17,9 @@
 - **Data Collection:** No data collected unless explicitly shared with us.
 
 ### 5. Changes to Terms
-- **Updates:** These Terms & Conditions may be updated periodically. Changes posted at [www.alchira.io/notifications](https://www.alchira.io/notifications).
+- **Updates:** These Terms & Conditions may be updated periodically. Changes posted at [https://github.com/alchira](https://https://github.com/alchira).
 - **Acceptance:** Continued use after updates indicates acceptance of revised terms. Check periodically for major changes.
 
 #### Contact Information
 - **Support:** [alchira@yshell.dev](mailto:alchira@yshell.dev)
-- **Website:** [https://www.alchira.io](https://www.alchira.io)
+- **Website:** [https://github.com/alchira](https://github.com/alchira)

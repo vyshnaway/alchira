@@ -3,6 +3,7 @@ package utils
 import (
 	_regexp "regexp"
 	_slices "slices"
+	"sort"
 	_strconv "strconv"
 	_strings "strings"
 )
@@ -151,4 +152,16 @@ func String_Unique[T comparable](input []T) []T {
 		}
 	}
 	return result
+}
+
+func String_SortAlphaDesc[T ~string](slice []T) {
+    sort.Slice(slice, func(i, j int) bool {
+        return slice[i] > slice[j]
+    })
+}
+
+func String_SortAlphaAsc[T ~string](slice []T) {
+    sort.Slice(slice, func(i, j int) bool {
+        return slice[i] < slice[j]
+    })
 }
