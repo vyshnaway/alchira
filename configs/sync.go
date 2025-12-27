@@ -7,7 +7,7 @@ import (
 var Sync_References = map[string]_model.File_Source{
 	"readme": {
 		Title:   "Guide",
-		Url:     "guide.md",
+		Url:     "documentation.md",
 		Path:    "",
 		Frags:   []string{"README.md"},
 		Content: "",

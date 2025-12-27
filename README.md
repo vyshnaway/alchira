@@ -27,7 +27,7 @@ demo$button="
 	--button_radius: 0.75em;
 	--button_color: #e8e8e8;
 	--button_outline_color: #000000;
-	font-size: 17px;
+	font-size: 16px;
 	border-radius: var(--button_radius);
 	background: var(--button_outline_color);
 	& > span {
@@ -56,11 +56,9 @@ demo$button="
 	}
 "
 x-preset-1
-> 
-    <span> Click Me </span>
-</sketch>
+>	<span> Click Me </span> </sketch>
 
-<button class="=demo$button">
+<button class="~demo$button">
 </button>
 
 ```
@@ -70,7 +68,7 @@ Inspiration: https://uiverse.io/Voxybuns/lucky-fireant-71
 
 ### Sketchpad: `[ ctrl + alt + x ]`
 
-- Put cursor on a symlink here `demo$buttom` instance and trigger event.
+- Put cursor on a symlink here `\~demo$button` instance and trigger event.
 - Change attribute `x-preset-1` to `x-preset-2`, to observe live udpates.
 - In the sketchpad webview panal few tools are available try out those.
 
@@ -87,7 +85,7 @@ Inspiration: https://uiverse.io/Voxybuns/lucky-fireant-71
 ### Template Import: `[ alt + x ]`
 
 - Import available templates for the symlink at the active cursor position, appending them to the current HTML tag.
-- In practice: Change `class=""` to `class="=demo$button"`, hover over preferred symlink and trigger the event, the template snippet imports after the current tag scope.
+- In practice: Change `class=""` to `class="~demo$button"`, hover over preferred symlink and trigger the event, the template snippet imports after the current tag scope.
 - This is especially useful for complex, highly structured compound components, allowing you to build and iterate from there
 
 ### Goto Source: `[ F12 ]` / `[ ctrl + (left-click over symlink) ]`
@@ -131,8 +129,8 @@ Inspiration: https://uiverse.io/Voxybuns/lucky-fireant-71
 
 ### `preview` : Optimized compilation for lightweight builds:
 
-- Minified CSS.
-- Use `preview -w` for live compilation.
+- One-to-one compilation.
+- Minified Css Output
 
 ### `watch` : Preview Command in Continuous Watch Mode:
 
@@ -150,6 +148,56 @@ Inspiration: https://uiverse.io/Voxybuns/lucky-fireant-71
 ### `void` : Void run, no execution.
 
 - For checking validity of binary without any side effects.
+# Thinking with AL
+
+Alchira asks you to think about HTML and CSS as one fused, declarative language instead of two files you wire together with class names.  You describe what the UI is and how it should look in one place, and the compiler handles selectors, cascade, and output CSS.
+
+### Start from structure, not selectors
+
+- Model the page as sketches and regions (layout, card, header, sidebar) rather than as loose DOM nodes styled by global selectors.
+- Each sketch exposes a unique **symlink** (a symbolic handle) that can be referenced anywhere within its scope.  
+- The same symlink powers both styling and preview: because structure and style are tied to the symclass, the editor can jump to and render the sketch at any time in the workflow.  
+- Each Alchira block owns both its structure and its styling rules, so you think **“What does this component mean?”** instead of **“Which selector should target this div?”**.  
+- Simple, first‑order components can be written inline without sketches when you do not need reuse or dedicated preview.  
+
+```html
+<sketch
+  global$$symlink="/* css styles */">
+  <h1>Heading 1</h1>
+  <button
+    global$$button-1="--var: val; /* button css styles */">
+    Submit
+  </button>
+</sketch>
+```
+
+### Declare visual intent, not mechanics
+
+- Using a sketch is optional, but it is especially helpful during early UI prototyping, where quick preview and restructuring matter more than perfect markup.
+- For throwaway or one‑off layouts, you can rely on existing utilities; when you plan to reuse a piece, declare spacing, alignment, and typography on the sketch itself as readable constraints.  
+- Once a sketch feels stable, import it into your framework's component logic and wire up data, events, and behavior there.  
+
+### Composition over cascade
+
+- You build UIs by composing sketches and symclasses, not by depending on the global CSS cascade to “trickle down” styles.
+- Variants, themes, and responsive behavior are modeled as explicit properties or nested blocks, which keeps behavior local and predictable instead of hidden in distant overrides.  
+
+### Let the language encode the design system
+
+- Tokens like colors, spacing scales, and typography ramps live as first‑class language concepts instead of ad‑hoc variables scattered across stylesheets.
+- Global design tokens start with `---` (three dashes) instead of `--` and are declared in `alchira/#constants.css`, forming the shared design vocabulary.  
+- Additional variables declared inside symclass styles are treated as *mutable style handles*; they are surfaced in tooltips and IntelliSense. Hovering on `\~global$$button-1` will show which handles can be safely tweaked.  
+- This makes design rules testable and shareable: changing a token or a symclass rule in one place can safely refactor every Alchira composition that depends on it.
+
+### Mental model shift
+
+| Factor | Without Alchira (traditional HTML+CSS/tooling) | With Alchira |
+| --- | --- | --- |
+| Context switching | Frequent jumps between templates, CSS files, and design‑token data; typical setups rely on multiple tools (preprocessors, utility frameworks, purge steps, IDE helpers) to stay productive. | Single language for structure and style; most layout and visual logic lives in one artifact, reducing file‑hopping and cognitive overhead. |
+| Component thinking | Component boundaries are enforced by conventions (BEM, CSS Modules, utility naming); architecture tends to drift over time. | Components and sketches are the native unit; composition, variants, and reuse are expressed directly in the DSL, making them easier to maintain and evolve. |
+| Design‑system reuse | Tokens, scales, and patterns are split across CSS, JS, and design docs; keeping them in sync costs review time and often causes regressions. | Tokens and rules are part of the language semantics; changing a token updates all dependent compositions deterministically. 
+| Refactoring cost | Renaming classes/selectors and reorganizing files is error‑prone; dead CSS and specificity cruft accumulate and slow future work. | Refactors happen at the DSL layer; the compiler regenerates optimized CSS, reducing manual clean‑up and making large changes safer and faster. |
+| Tool leverage | 	Generic tools (linters, preprocessors, editors) help, but their view is limited by naming and mixed concerns. | Strong structure enables richer tooling (semantic navigation, live preview, rule validation, token inspectors) that meaningfully cuts iteration time.
 # 3. Directory
 
 ## Setup folder
@@ -383,48 +431,9 @@ All the first order blocks of each file will have a corresponding symbolic class
 - In a file of **Order `n`**, symbolic classes may be referenced from other files using two distinct directives, with in the scope of whole `axiom` and `cluster` were permitted sources are:
 	-  `@--apply`: Files of **Order ≤ n−1**
 	-  `@--attach`: Files of **Order ≤ n**
-# Thinking in Alchira
-
-Alchira asks you to think about HTML and CSS as one fused, declarative language instead of two files you wire together with class names.  You describe what the UI is and how it should look in one place, and the compiler handles selectors, cascade, and output CSS.
-
-### Start from structure, not selectors
-
-- Model the page as fragments of sketches and regions (layout, card, header, sidebar) rather than as loose DOM nodes styled by global selectors.
-- Each sketch should have a unique symlink that will be used later be called as a reference point. These symclass can be called any where anytime if with in its scope.
-- The same symlink helps in accessing the preview anytime in work flow due to this treatment of style and sketch being tied together
-- Each Alchira block owns both its structure and its styling rules, so you think **"What does this component *mean*?"** instead of "**Which selector should target this div?"**.
-- Simple first order components can be implemented without sketches.
-
-```html
-<sketch global$$symlink="/* css styles */">
-    <h1> Heading 1 </h1>
-    <button global$$button-1="/* button css styles */"> 
-        Submit
-    </button>
-</sketch>
-```
-
-### Declare visual intent, not mechanics
-
-- Instead of hand‑crafting utility class combos, you declare spacing, alignment, and typography in the component itself as readable constraints.
-- The compiler decides whether those declarations become semantic rules, atomic utilities, or a mix, letting you focus on intent while the tool optimizes the mechanics.
-
-### Composition over cascade
-
-- You build UIs by composing Alchira blocks, not by relying on the global CSS cascade to “trickle down" styles.
-- Variants, themes, and responsive behavior are modeled as explicit properties or sub‑blocks, which keeps behavior local and predictable rather than hidden in far‑away overrides.
-
-### Let the language encode the design system
-
-- Tokens like colors, spacing scales, and typography ramps live as first‑class language concepts instead of ad‑hoc variables scattered across stylesheets.
-- This makes design rules testable and shareable: changing a token or rule in one place can safely refactor every Alchira composition that depends on it.
 # 1.0 Hash Loaders
 
-> - Use sketchpad for preview. Cursor on symlink and trigger. [ `ctrl` + `alt` + `x` ]  
-> - Start live compilation using `alchira preview -w` or `alchira debug -w`.  
-> - Toggle b/w input & ouput using [ `ctrl` + `alt` + `shift` + `x` ] 
-
----
+<sketch &="= ~$$unlock" />
 
 The Hash Loader operator dynamically imports unique hashes for files, enabling their seamless use as identifiers in HTML attributes, CSS styles, and JavaScript code for efficient tracking and updates.
 
