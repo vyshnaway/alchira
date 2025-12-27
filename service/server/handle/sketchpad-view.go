@@ -15,14 +15,15 @@ import (
 )
 
 type T_Component_return struct {
-	Attributes map[string]string `json:"attributes"`
-	Sketch     string            `json:"sketch"`
-	Depend     string            `json:"stitch"`
+	Preview    string            `json:"preview"`
+	Element    string            `json:"element"`
+	Depends    string            `json:"depends"`
 	Symlink    string            `json:"symlink"`
 	Rootcss    string            `json:"rootcss"`
 	Compcss    string            `json:"compcss"`
-	Timestamp  int64             `json:"timestamp"`
 	Configs    map[string]any    `json:"configs"`
+	Attributes map[string]string `json:"attributes"`
+	Timestamp  int64             `json:"timestamp"`
 }
 
 var Sketchpad_View_Component = new(T_Component_return)
@@ -93,8 +94,9 @@ func Sketchpad_Save(index int) (response any) {
 
 	Sketchpad_View_Component = &T_Component_return{
 		Attributes: attributes,
-		Sketch:     sketch,
-		Depend:     sketchDeps,
+		Preview:    sketch,
+		Depends:    sketchDeps,
+		Element:    data.SrcData.Element,
 		Symlink:    data.SrcData.Symlink,
 		Rootcss:    configs.Delta.IndexBuild,
 		Compcss:    stylesheet.String(),

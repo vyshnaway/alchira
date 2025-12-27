@@ -157,8 +157,13 @@ func Rawtag_Upload(
 			Appendable:    appendable,
 		}
 
+		element := ""
+		if raw.Elid == 0 {
+			element = raw.Element
+		}
 		index = DeclareClass(file, &_model.Style_ClassData{
 			Attributes:        attributes,
+			Element:           element,
 			Artifact:          artifact,
 			Definent:          raw.Symlinks[0],
 			Symlink:           symlink,

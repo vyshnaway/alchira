@@ -41,6 +41,7 @@ type Style_ClassData struct {
 	Index             int
 	Range             *reader.T_Range
 	Metadata          *Style_Metadata
+	Element           string
 	Artifact          string
 	Definent          string
 	Symlink           string

@@ -383,7 +383,41 @@ All the first order blocks of each file will have a corresponding symbolic class
 - In a file of **Order `n`**, symbolic classes may be referenced from other files using two distinct directives, with in the scope of whole `axiom` and `cluster` were permitted sources are:
 	-  `@--apply`: Files of **Order ≤ n−1**
 	-  `@--attach`: Files of **Order ≤ n**
+# Thinking in Alchira
 
+Alchira asks you to think about HTML and CSS as one fused, declarative language instead of two files you wire together with class names.  You describe what the UI is and how it should look in one place, and the compiler handles selectors, cascade, and output CSS.
+
+### Start from structure, not selectors
+
+- Model the page as fragments of sketches and regions (layout, card, header, sidebar) rather than as loose DOM nodes styled by global selectors.
+- Each sketch should have a unique symlink that will be used later be called as a reference point. These symclass can be called any where anytime if with in its scope.
+- The same symlink helps in accessing the preview anytime in work flow due to this treatment of style and sketch being tied together
+- Each Alchira block owns both its structure and its styling rules, so you think **"What does this component *mean*?"** instead of "**Which selector should target this div?"**.
+- Simple first order components can be implemented without sketches.
+
+```html
+<sketch global$$symlink="/* css styles */">
+    <h1> Heading 1 </h1>
+    <button global$$button-1="/* button css styles */"> 
+        Submit
+    </button>
+</sketch>
+```
+
+### Declare visual intent, not mechanics
+
+- Instead of hand‑crafting utility class combos, you declare spacing, alignment, and typography in the component itself as readable constraints.
+- The compiler decides whether those declarations become semantic rules, atomic utilities, or a mix, letting you focus on intent while the tool optimizes the mechanics.
+
+### Composition over cascade
+
+- You build UIs by composing Alchira blocks, not by relying on the global CSS cascade to “trickle down" styles.
+- Variants, themes, and responsive behavior are modeled as explicit properties or sub‑blocks, which keeps behavior local and predictable rather than hidden in far‑away overrides.
+
+### Let the language encode the design system
+
+- Tokens like colors, spacing scales, and typography ramps live as first‑class language concepts instead of ad‑hoc variables scattered across stylesheets.
+- This makes design rules testable and shareable: changing a token or rule in one place can safely refactor every Alchira composition that depends on it.
 # 1.0 Hash Loaders
 
 > - Use sketchpad for preview. Cursor on symlink and trigger. [ `ctrl` + `alt` + `x` ]  
@@ -825,7 +859,6 @@ demo$wrapper-preview="container-type: inline-size; width: 8rem;"
     background-color: red;
     color: white;
   "
-  #{Cs1}&="background-color: blue;"
   >
     Try Resizing using resize handle 
   </p>
