@@ -113,7 +113,7 @@ Inspiration: https://uiverse.io/Voxybuns/lucky-fireant-71
 - Hashrules: on `&` or `#`(have a chance to not get triggered in case of collition with other extensions), for tag attributes.
 - Variables: Resolved from complete active tag-scope.
 - Attributes: Varient attributes derived from tag-scope.
-# Thinking with AL
+# 0.1 Thinking with AL
 
 Alchira treats HTML and CSS as one language: you describe *what the UI is* and *how it should look* in the same place. The compiler handles selectors, cascade, and CSS output automatically.
 
@@ -160,7 +160,7 @@ Alchira treats HTML and CSS as one language: you describe *what the UI is* and *
 | Design tokens | Split across files and tools. | Centralized and semantic—changes propagate safely. |
 | Refactoring | Manual, error‑prone cleanup. | Compiler regenerates optimized CSS automatically. |
 | Tool Leverage | Generic, name‑based linting. | Smarter IDE features—live previews, rule validation, token introspection. |
-# 1. Command Line
+# 0.2 Command Line
 
 ### `init` : Initialize and Healthcheck
 
@@ -195,7 +195,7 @@ Alchira treats HTML and CSS as one language: you describe *what the UI is* and *
 ### `void` : Void run, no execution.
 
 - For checking validity of binary without any side effects.
-# 3. Directory
+# 0.3 Directory
 
 ## Setup folder
 ```
@@ -327,7 +327,7 @@ Alchira treats HTML and CSS as one language: you describe *what the UI is* and *
 
 - This folder contains the immutable part of your library supplied by the initalized flavour.
 - It includes static class sources used for symlink generation.
-# 4. Libraries
+# 0.4 Libraries
 
 Composing libraries is essentially like managing a set of CSS files—sensibly grouping classes and naming them according to established standards. This approach ensures clarity, maintainability, and consistency across your stylesheets.
 
@@ -984,7 +984,7 @@ Self-closing tags and reserved HTML comments act as insertion points where compi
 ---
 
 > By using reserved tags and placeholders, Alchira transforms HTML into a high-level declaration layer. It enables you to define styles and components directly on the structure, which the compiler then distills into standard, browser-ready HTML and CSS. This approach keeps your source code clean and unified while granting precise control over the final CSS output.
-# 8. Appendix
+# Appendix
 
 ## Errors & diagnostics
 
@@ -1035,3 +1035,58 @@ Self-closing tags and reserved HTML comments act as insertion points where compi
 - Extending the system: users can add CSS files to the `alchira/libraries` folder to create custom libraries/frameworks; the six-level inheritance model allows rapid propagation of changes across a project.
 - Conditional definitions (media queries, custom at-rules, container-dependent variants, etc.) are generated using wrapper-attributes. `hashrules` provide reusable snippets for wrapper attributes.
 - Users may fork or clone the repository, personalize their own variants, and distribute them as needed. For detailed guidance on customization, refer to the Flavourize documentation. Be sure to review the EULA for any usage constraints and legal requirements associated with redistribution and modification.
+
+# Getting Started
+
+## Node Package
+
+- Alchira is distributed via **npm**.
+- Custom flavors created by independent developers are also published on npm.
+- You can install an existing flavor for your project, or create a personal flavor and reuse it across projects.
+- To start your own flavor, use the scaffold template: https://github.com/alchira/scaffold
+
+### Core runtime (alchira)
+
+- **Package:** [alchira](https://www.npmjs.com/package/alchira)
+- Installs the appropriate core binary for your OS.
+- Provides the CLI used to orchestrate flavors and run builds.
+
+```bash
+# Local Installation
+npm install -g alchira
+# Local Command Run
+alchira {command}
+al {command}
+
+# Global Installation
+npm install --save-dev alchira
+# Global Command Run
+npx alchira {command}
+npx al {command}
+```
+
+### Flavored Template (@alchira/scaffold)
+
+- **Link:** [@alchira/scaffold](https://www.npmjs.com/package/@alchira/scaffold)
+- [alchira](#unflavoured-alchira) will be installed along with flavor and all the commands will work the same manner.
+- To initialize flavour run
+
+```bash
+# Local Initialization
+npx al init {flavor-package-name}
+
+# Global Initialization
+al init {flavor-package-name}
+```
+
+## Editor extension
+
+- **VS Code:** [Marketplace](https://marketplace.visualstudio.com/items?itemName=yshelldev.alchira)
+- **Open VSX:** [yshelldev.alchira-client](https://open-vsx.org/extension/yshelldev/alchira-client)
+- Adds full language support and extra tooling for Alchira configured projects.
+- Bundles an Alchira core, so no separate install is required for small workflows.
+- Plug‑and‑play setup, ideal for trying Alchira or for small projects.
+
+![Preview](./assets/preview.png)
+
+---
