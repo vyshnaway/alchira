@@ -4,6 +4,11 @@ Welcome to **Alchira**—the declarative UI language that treats structure and s
 
 In traditional web development, you are often forced to juggle HTML templates and CSS stylesheets, bridging the gap with fragile class names. Alchira eliminates this friction by fusing them into a **single source of truth**.
 
+> ## End-User License Agreement (EULA)
+> By using this software, you agree to the terms and conditions outlined in the [End-User License Agreement](https://github.com/alchira/agreements/license).
+
+---
+
 ### How it Works
 
 1. **Sketch your UI:** Wrap your elements in a `<sketch>` to define a regional boundary.
@@ -60,9 +65,14 @@ al init {flavor-package-name}
 - Bundles an Alchira core, so no separate install is required for small workflows.
 - Plug‑and‑play setup, ideal for trying Alchira or for small projects.
 
-![Preview](./assets/preview.png)
+![Preview](https://github.com/alchira/package/blob/main/assets/preview.png?raw=true)
 
 ---
+
+> Clone the tutorial repository to get used to the tool with a intractive walkthrough guide
+> ```sh
+> git clone https://github.com/alchira/tutorial.git
+> ```
 
 # 0.0 Alchira Plugin
 
