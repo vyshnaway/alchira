@@ -5,7 +5,7 @@
 ### 1. User Conduct
 - **Permitted Use:** Personal use includes nearly all features for free.
 - **Prohibited Actions:** Misuse of Alchira or violation of license restrictions, such as reverse engineering, is strictly prohibited.
-- **Respect:** The Alchira kernel is proprietary technology. Please honor the confidentiality and intellectual property terms described in the License.
+- **Respect:** The Alchira compiler is proprietary technology. Please honor the confidentiality and intellectual property terms described in the License.
 
 ### 2. Tools Powered by Alchira
 - **Development Use:** Creating or distributing tools or applications powered by Alchira for public or commercial purposes requires a written agreement.
@@ -17,7 +17,7 @@
 - **Data Collection:** No data collected unless explicitly shared with us.
 
 ### 5. Changes to Terms
-- **Updates:** These Terms & Conditions may be updated periodically. Changes posted at [https://github.com/alchira](https://https://github.com/alchira).
+- **Updates:** These Terms & Conditions may be updated periodically and latest notice will be provided by CLI tool itself.
 - **Acceptance:** Continued use after updates indicates acceptance of revised terms. Check periodically for major changes.
 
 #### Contact Information

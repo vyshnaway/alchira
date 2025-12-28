@@ -1038,6 +1038,17 @@ Self-closing tags and reserved HTML comments act as insertion points where compi
 
 # Getting Started
 
+Welcome to **Alchira**—the declarative UI language that treats structure and style as a single, unified intent.
+
+In traditional web development, you are often forced to juggle HTML templates and CSS stylesheets, bridging the gap with fragile class names. Alchira eliminates this friction by fusing them into a **single source of truth**.
+
+### How it Works
+
+1. **Sketch your UI:** Wrap your elements in a `<sketch>` to define a regional boundary.
+2. **Declare Intent:** Use symlinks (like `global$header`) to attach style rules directly to your structure.
+3. **Use Smart Tokens:** Apply your pre-defined layout logic (like `@#Mmd` for media queries or `@#Cmd` for container queries) to make your components responsive by default.
+4. **Compile:** The Alchira compiler distills your "rich declaration" into lean, production-ready HTML and CSS.
+
 ## Node Package
 
 - Alchira is distributed via **npm**.

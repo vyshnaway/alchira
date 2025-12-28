@@ -12,8 +12,8 @@
 
 Subject to the terms of this Agreement, We grant You a limited, non-exclusive, non-transferable license to:
 
-- Download and use the Preview Package of Alchira free of charge during the preview period.
-- Integrate Alchira into your development tools and build processes solely for evaluation and testing.
+- Download and use the Preview Package of Alchira free of charge.
+- Integrate Alchira into your frontend development workflow and build processes.
 
 Any attempt to bypass or extend the preview period restrictions without authorization is prohibited and constitutes a violation of this Agreement.
 
@@ -27,7 +27,7 @@ You may not, without explicit prior written consent from Us:
 
 - Copy, modify, distribute or create derivative works of the source code or binaries.
 - Decompile, reverse-engineer, disassemble or attempt to discover the source code.
-- Remove or alter any copyright, trademark, or proprietary notices.
+- Remove or alter any copyright, or proprietary notices.
 
 ### 5. Community and Contributions
 
@@ -47,7 +47,7 @@ You agree to keep confidential all non-public information of Alchira Compiler, i
 
 ### 8. No Warranty
 
-Alchira is provided “AS IS” without warranties, express or implied. Real-time features are experimental and may change post-preview.
+Alchira is provided “AS IS” without warranties, express or implied. Experimental and may change post-preview.
 
 ### 9. Updates and Support
 
@@ -57,9 +57,10 @@ Updates during the preview period are at Our discretion. Support is provided thr
 
 ### Contact Information
 
-- **Website:** [www.alchira.io](https://www.alchira.io)  
+- **Website:** [github.com/alchira](https://github.com/alchira)  
 - **E-Mail:** [alchira@yshell.dev](mailto:alchira@yshell.dev)
 
 ---
 
-This EULA represents a binding legal agreement between You and Us regarding your use of Alchira during its preview period. By downloading, installing, or using Alchira, You acknowledge that You have read this Agreement, understand it, and agree to be bound by its terms.
+This EULA represents a binding legal agreement between You and Us regarding your use of Alchira during its preview period.
+By downloading, installing, or using Alchira, You acknowledge that You have read this Agreement, understand it, and agree to be bound by its terms.
