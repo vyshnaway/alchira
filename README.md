@@ -113,6 +113,53 @@ Inspiration: https://uiverse.io/Voxybuns/lucky-fireant-71
 - Hashrules: on `&` or `#`(have a chance to not get triggered in case of collition with other extensions), for tag attributes.
 - Variables: Resolved from complete active tag-scope.
 - Attributes: Varient attributes derived from tag-scope.
+# Thinking with AL
+
+Alchira treats HTML and CSS as one language: you describe *what the UI is* and *how it should look* in the same place. The compiler handles selectors, cascade, and CSS output automatically.
+
+### Start from structure, not selectors
+
+- Model pages as sketches and regions (card, header, layout) instead of loose DOM nodes styled later.
+- Each sketch has a unique symlink—a symbolic handle used for both styling and preview.
+- Because structure and style share the same symclass, the editor can instantly render or navigate to any sketch.
+- Each block owns its markup and styles, so you design by meaning, not selectors.
+- Small or one‑off pieces can be written inline without a sketch.
+
+```html
+<sketch global$symlink="/* styles */">
+  <h1>Heading</h1>
+  <button global$$button-1="--var: val;">Submit</button>
+</sketch>
+```
+
+### Declare visual intent, not mechanics
+
+- Sketches speed up early prototyping—perfect for quick layout and preview.
+- For throwaway UIs, reuse utilities; for reusable parts, define spacing, alignment, and type directly on the sketch.
+- When stable, export the sketch into your framework and connect logic there.
+ 
+### Composition over cascade
+
+- Build with composition of sketches and symclasses, not global CSS selectors.
+- Variants, themes, and responsive modes are explicit properties or nested blocks—local, predictable, and free of cascade traps.
+
+### The language is the design system
+
+- Colors, spacing, and type tokens are first‑class language concepts.
+- Global tokens (prefix `---`) live in `alchira/#constants.css`.
+- Local `--` variables act as live, mutable style handles shown in IntelliSense.
+- Hovering on `\~global$$button-1` will show which handles can be safely tweaked.  
+- Editing a token or symclass safely refactors every dependent component.
+
+### Mental model shift
+
+| Factor | Traditional HTML + CSS | With Alchira |
+| --- | --- | --- |
+| Context switching | Jumping across templates, CSS, and token files. | One unified artifact—less cognitive friction. |
+| Components | Enforced by naming and conventions. | Native in language—composition and reuse are built in. |
+| Design tokens | Split across files and tools. | Centralized and semantic—changes propagate safely. |
+| Refactoring | Manual, error‑prone cleanup. | Compiler regenerates optimized CSS automatically. |
+| Tool Leverage | Generic, name‑based linting. | Smarter IDE features—live previews, rule validation, token introspection. |
 # 1. Command Line
 
 ### `init` : Initialize and Healthcheck
@@ -124,8 +171,8 @@ Inspiration: https://uiverse.io/Voxybuns/lucky-fireant-71
 
 ### `debug` : Compiles with full verbosity and traceability
 
-- Larger output size.
 - Verbose output with traceable class-names and properties.
+- Larger output size.
 
 ### `preview` : Optimized compilation for lightweight builds:
 
@@ -148,72 +195,22 @@ Inspiration: https://uiverse.io/Voxybuns/lucky-fireant-71
 ### `void` : Void run, no execution.
 
 - For checking validity of binary without any side effects.
-# Thinking with AL
-
-Alchira asks you to think about HTML and CSS as one fused, declarative language instead of two files you wire together with class names.  You describe what the UI is and how it should look in one place, and the compiler handles selectors, cascade, and output CSS.
-
-### Start from structure, not selectors
-
-- Model the page as sketches and regions (layout, card, header, sidebar) rather than as loose DOM nodes styled by global selectors.
-- Each sketch exposes a unique **symlink** (a symbolic handle) that can be referenced anywhere within its scope.  
-- The same symlink powers both styling and preview: because structure and style are tied to the symclass, the editor can jump to and render the sketch at any time in the workflow.  
-- Each Alchira block owns both its structure and its styling rules, so you think **“What does this component mean?”** instead of **“Which selector should target this div?”**.  
-- Simple, first‑order components can be written inline without sketches when you do not need reuse or dedicated preview.  
-
-```html
-<sketch
-  global$symlink="/* css styles */">
-  <h1>Heading 1</h1>
-  <button
-    global$$button-1="--var: val; /* button css styles */">
-    Submit
-  </button>
-</sketch>
-```
-
-### Declare visual intent, not mechanics
-
-- Using a sketch is optional, but it is especially helpful during early UI prototyping, where quick preview and restructuring matter more than perfect markup.
-- For throwaway or one‑off layouts, you can rely on existing utilities; when you plan to reuse a piece, declare spacing, alignment, and typography on the sketch itself as readable constraints.  
-- Once a sketch feels stable, import it into your framework's component logic and wire up data, events, and behavior there.  
-
-### Composition over cascade
-
-- You build UIs by composing sketches and symclasses, not by depending on the global CSS cascade to “trickle down” styles.
-- Variants, themes, and responsive behavior are modeled as explicit properties or nested blocks, which keeps behavior local and predictable instead of hidden in distant overrides.  
-
-### Let the language encode the design system
-
-- Tokens like colors, spacing scales, and typography ramps live as first‑class language concepts instead of ad‑hoc variables scattered across stylesheets.
-- Global design tokens start with `---` (three dashes) instead of `--` and are declared in `alchira/#constants.css`, forming the shared design vocabulary.  
-- Additional variables declared inside symclass styles are treated as *mutable style handles*; they are surfaced in tooltips and IntelliSense. Hovering on `\~global$$button-1` will show which handles can be safely tweaked.  
-- This makes design rules testable and shareable: changing a token or a symclass rule in one place can safely refactor every Alchira composition that depends on it.
-
-### Mental model shift
-
-| Factor | Without Alchira (traditional HTML+CSS/tooling) | With Alchira |
-| --- | --- | --- |
-| Context switching | Frequent jumps between templates, CSS files, and design‑token data; typical setups rely on multiple tools (preprocessors, utility frameworks, purge steps, IDE helpers) to stay productive. | Single language for structure and style; most layout and visual logic lives in one artifact, reducing file‑hopping and cognitive overhead. |
-| Component thinking | Component boundaries are enforced by conventions (BEM, CSS Modules, utility naming); architecture tends to drift over time. | Components and sketches are the native unit; composition, variants, and reuse are expressed directly in the DSL, making them easier to maintain and evolve. |
-| Design‑system reuse | Tokens, scales, and patterns are split across CSS, JS, and design docs; keeping them in sync costs review time and often causes regressions. | Tokens and rules are part of the language semantics; changing a token updates all dependent compositions deterministically. 
-| Refactoring cost | Renaming classes/selectors and reorganizing files is error‑prone; dead CSS and specificity cruft accumulate and slow future work. | Refactors happen at the DSL layer; the compiler regenerates optimized CSS, reducing manual clean‑up and making large changes safer and faster. |
-| Tool leverage | 	Generic tools (linters, preprocessors, editors) help, but their view is limited by naming and mixed concerns. | Strong structure enables richer tooling (semantic navigation, live preview, rule validation, token inspectors) that meaningfully cuts iteration time.
 # 3. Directory
 
 ## Setup folder
 ```
-    xtyles/
-    ├── libraries
-    |   ├── _
-    |   |    └── *.css
-    |   └── *.css
-    ├── #at-rules.css
-    ├── #constants.css
-    ├── #elements.css
-    ├── #extends.css
-    ├── configure.jsonc
-    ├── hashrules.jsonc
-    └── vendors.jsonc
+    alchira/
+    ├── #at-rules.css      # Preface stylesheet directives for final stylesheet.
+    ├── #constants.css     # Global design tokens, starts with `---`.
+    ├── #elements.css      # Sematic tag style definitions.
+    ├── #extends.css       # Miscellanious declarations and overrides.
+    ├── configure.jsonc    # Project configs for reference.
+    ├── hashrules.jsonc    # Standerdize wrapper chains for reuse.
+    ├── vendors.jsonc      # Vendor provider data for final stylesheet.
+    └── libraries          # Reusable style Symlinks (class equilents generator) 
+          ├── *.css        # Additional custom definitions
+          └── _            # Immutables by flavor provider.
+                └── *.css  # Definitions
 ```
 
 ### `./#at-rules.css`
@@ -433,8 +430,6 @@ All the first order blocks of each file will have a corresponding symbolic class
 	-  `@--attach`: Files of **Order ≤ n**
 # 1.0 Hash Loaders
 
-<sketch &="= ~$$unlock" />
-
 The Hash Loader operator dynamically imports unique hashes for files, enabling their seamless use as identifiers in HTML attributes, CSS styles, and JavaScript code for efficient tracking and updates.
 
 ## Watch Attributes Configuration
@@ -509,13 +504,13 @@ Unlike traditional CSS cascading, which applies styles globally, Class Loaders i
 
 Class Loaders create scoped cascade layers within an individual HTML element, applied in a strict sequence during compilation:
 
-> Scattered (~) > Ordered (+) > Final (=)
+> Low-layer (~) > Mid-layer (+) > Top-layer (=)
 
 Each variant represents a distinct cascade layer:
 
-- **Scattered (~):** Utility and atomic classes applied first, in a non-deterministic order.
-- **Ordered (+):** Classes applied after scattered, with explicit order-based control.
-- **Final (=):** Classes applied last, typically for dynamic or externally controlled styles.
+- **Low-layer (~):** Utility and atomic classes applied first, in a non-deterministic order.
+- **Mid-layer (+):** Classes applied after Low-layer, with explicit order-based control.
+- **Top-layer (=):** Classes applied last, typically for dynamic or externally controlled styles.
 
 ### Practical Cascade Flow
 
@@ -524,7 +519,7 @@ Each variant represents a distinct cascade layer:
   <!-- 
     1. `~` classes load first (atomic utilities, no strict cascade)
     2. `+` classes override next based on declared order (component-level styles)
-    3. `=` classes apply last and have final precedence (dynamic props or conditional styles)
+    3. `=` classes apply last and have Top-layer precedence (dynamic props or conditional styles)
   -->
 </p>
 ```
@@ -537,9 +532,9 @@ Each variant represents a distinct cascade layer:
 
 > Enable `Project theme` option in the sketchpad toolbar enables global design tokens from your current design system, so turn it on to see live changes.
 
-## Scattered Class Loader (`~`)
+## Low-layer Class Loader (`~`)
 
-The Scattered Class Loader (`~`) applies utility and atomic classes in a non-deterministic way. It avoids reliable style cascading, especially in complex or deeply nested components, providing low-specificity control without predictable inheritance.
+The Low-layer Class Loader (`~`) applies utility and atomic classes in a non-deterministic way. It avoids reliable style cascading, especially in complex or deeply nested components, providing low-specificity control without predictable inheritance.
 
 ### Key Limitations
 - Does not cascade styles reliably in nested components, making inheritance unpredictable.
@@ -549,7 +544,7 @@ The Scattered Class Loader (`~`) applies utility and atomic classes in a non-det
 - Prefix symlinks with a backslash when used outside watch attribute values: `\~`.
 
 ```html
-<sketch class-loader$scattered>
+<sketch class-loader$low-layer>
     <p class="~tx$size-h1 ~tx$size-h2" onload="func('\~align-center')">Paragraph</p>
 </sketch>
 <p class="~tx$size-h1 ~tx$size-h2" onload="func('\~align-center')">Paragraph</p>
@@ -564,9 +559,9 @@ Escape the tilde in JavaScript template literals or event handlers to maintain f
 - Best suited for utilities and atomic classes that do not overlap.
 - Avoid using it when stable nested style propagation is required.
 
-## Ordered Class Loader (`+`)
+## Mid-layer Class Loader (`+`)
 
-The Ordered Class Loader (+) applies classes after scattered classes, allowing explicit control over cascading order within a single element.
+The Mid-layer Class Loader (+) applies classes after Low-layer classes, allowing explicit control over cascading order within a single element.
 
 ### Usage Restrictions
 
@@ -576,7 +571,7 @@ The Ordered Class Loader (+) applies classes after scattered classes, allowing e
 ### Example
 
 ```html
-<sketch class-loader$ordered>
+<sketch class-loader$mid-layer>
     <p class="~tx$size-h1 ~tx$size-h2 +tx$size-h3 +tx$size-h2" onload="func('\+align-center')">Paragraph</p>
 </sketch>
 <p class="~tx$size-h1 ~tx$size-h2 +tx$size-h2 +tx$size-h3" onload="func('\+align-center')">Paragraph</p>
@@ -588,7 +583,7 @@ The Ordered Class Loader (+) applies classes after scattered classes, allowing e
 ### Cascading Behavior
 
 - The cascade follows the exact order of classes within the attribute's value.
-- Classes with `+` are applied after scattered ~ classes, overriding them if necessary.
+- Classes with `+` are applied after Low-layer `~` classes, overriding them if necessary.
 - In the example, `tx$size-h2` applied with `+` comes last and thus takes precedence.
 
 ### When to Use
@@ -596,9 +591,9 @@ The Ordered Class Loader (+) applies classes after scattered classes, allowing e
 - Use to control precisely which styles override others within the same element.
 - Handy when combining conflicting utility classes or higher order component classes, to make style application predictable.
 
-## Final Class Loader (`=`)
+## Top-layer Class Loader (`=`)
 
-The Final Class Loader operator `=` applies classes after both scattered `~` and ordered `+` classes, but it does not provide explicit control over the cascading order.
+The Top-layer Class Loader operator `=` applies classes after both Low-layer `~` and Mid-layer `+` classes, but it does not provide explicit control over the cascading order.
 
 ### Usage and Syntax
 
@@ -606,7 +601,7 @@ The Final Class Loader operator `=` applies classes after both scattered `~` and
 - Outside watch attribute values (e.g. JavaScript), escape with a backslash: `\=`.
 
 ```html
-<sketch class-loader$final>
+<sketch class-loader$Top-layer>
      <p class="~tx$size-h1 ~tx$size-h2 +tx$size-h3 =tx$size-h4 =tx$size-h5"> paragraph </p>
 </sketch>
 <p class="~tx$size-h1 ~tx$size-h2 +tx$size-h3 =tx$size-h4 =tx$size-h5"> paragraph </p>
@@ -617,14 +612,14 @@ The Final Class Loader operator `=` applies classes after both scattered `~` and
 
 ### Behavior
 
-- The final classes are applied last and may cause continuous style changes due to their unpredictable cascading.
-- The cascade order is less explicit compared to the Ordered Class Loader.
+- The Top-layer classes are applied last and may cause continuous style changes due to their unpredictable cascading.
+- The cascade order is less explicit compared to the Mid-layer Class Loader.
 
 ### When to Use
 
 - Ideal for external actions that come from outside the element's usual style scope, such as prop passing in JavaScript frameworks.
 - Useful for conditional logic where styles are applied dynamically and may change frequently.
-- This loader helps handle dynamic styling situations where final overrides are necessary but strict cascading order control is not required.
+- This loader helps handle dynamic styling situations where Top-layer overrides are necessary but strict cascading order control is not required.
 # 3.0 Composing components
 
 > `<sketch> ... </sketch>` is a special tag to create components in isolation, and keep a base template for smoother workflows.  
@@ -707,7 +702,6 @@ demo$$button="
 
 - This defines a symlink `demo$$button` with global scope.
 - Combines animations, typography, utility classes with custom properties and pseudo-class styles.
-- Uses both `~` and `+`,  operators for dependencies and composing respectively.
 
 > **Tip:** If the class name is `demo$button`, you can declare it once per file. However, if you use `demo$$button`, it becomes globally scoped and must appear only once across all files—otherwise, it will trigger an error.
 # 3.1 Variants in Alchira
@@ -720,10 +714,9 @@ This tutorial shows how to extend variants of an existing symbolic class (symlin
 <!-- Use a sketch symlink as preview container. -->
  
 <sketch 
-demo$varient-preview="+ d-flex gap-8 ;"
+demo$varient-preview="+ d-flex flex-column gap-8;"
 > 
-	<!-- Cascade conflicts does't affect this because specifity is taken advantage off. -->
-	<sketch class="&demo$$button"
+	<button class="~demo$$button ~demo$button-varients-1" 
 	demo$button-varients-1="
 		&[x-preset-1] {
 			--button_color: #ffe17d;
@@ -734,13 +727,11 @@ demo$varient-preview="+ d-flex gap-8 ;"
 			--button_outline_color: #495f7a;
 		}
 	" 
-	x-preset-1
-	> </sketch>
-	<button class="&demo$$button ~demo$button-varients-1" x-preset-1> </button>
+	x-preset-1> <span> Varients with Nesting </span> </button>
 	<!-- While composing symlink in this manner, all variables are detected, and autosuggests them. -->
 
 	<!-- Alchira provieds a special operator called `de-nest`, it helps in much better organization of nested strucures. -->
-	<sketch class="&demo$$button"
+	<button class="~demo$$button ~demo$button-varients-2" 
 	demo$button-varients-2="
 		&[x-preset-]& {
 			&[1] {
@@ -753,20 +744,17 @@ demo$varient-preview="+ d-flex gap-8 ;"
 			}
 		}
 	" 
-	x-preset-2
-	> </sketch>
-	<button class="&demo$$button ~demo$button-varients-2" x-preset-2> </button>
+	x-preset-2><span> Grouped with Denest-Op </span></button>
 	<!-- While composing symlink in this manner, all variables are detected, and autosuggests them. -->
 
 	<!-- For runtime dynamic styling update the variable using style attribute. -->
 	<button 
-	class="&demo$$button"
+	class="~demo$$button"
 	style="--button_color: #8cff7d; --button_outline_color: #354905;"
-	> </button>
+	><span> Style attribute Over-rides </span></button>
 
 </sketch>
 ```
-
 
 - The first button extends demo$$button by declaring variant styles using attribute selectors like `[x-preset-1]` and `[x-preset-2]`.
 - The second button demonstrates using the de-nest operator for better nested structure organization, generating variants based on nested selectors.
@@ -827,14 +815,14 @@ Wrapper attributes provide a way to express conditional and contextual styling d
 
 ```html
 <!-- Assume hashrule #{Load} == "body[data-loading]" -->
-<div
+<sketch
   _$class="..."
-  &#{Cs1}&{.parent}&="..."
+  &#{Ms1}&{.parent}&="..."
   {@supports not (backdrop-filter: blur(1px))}&="..."
-  container@{(max-width: 320px)}&="..."
+  container@{(width>=320px)}&="..."
 >
   {Placeholder}
-</div>
+</sketch>
 ```
 
 This compiles conceptually to:
@@ -843,7 +831,9 @@ This compiles conceptually to:
 .$class { ... }
 
 /* Global loading wrapper from hashrule */
-body[data-loading] .parent .$class { ... }
+@media (min-width:512px)  { 
+  .$class { ... } 
+}
 
 /* Feature query wrapper */
 @supports not (backdrop-filter: blur(1px)) {
@@ -860,21 +850,140 @@ body[data-loading] .parent .$class { ... }
 
 ```html
 <sketch 
-demo$wrapper-preview="container-type: inline-size; width: 8rem;"
+class="parent"
+demo$wrapper-preview="
+	+ p-1 radius-1;
+	container-type: inline-size;
+	width: 8rem;
+"
 >
   <p class="=demo$wrapper-child"
   demo$wrapper-child="
-    + p-4 radius-4;
-    background-color: red;
-    color: white;
+  	+ p-4 radius-4;
+  	background-color: red;
+  	color: white;
   "
+  &#{Cs2}&.parent&="background-color: blue;"
+  &#{Cs1}&.parent&="background-color: brown;"
+  &#{Cmd}&.parent&="background-color: black;"
   >
-    Try Resizing using resize handle 
+    <!-- Editor plugin hint -->
+    Try resizing using rescale handle.
   </p>
 </sketch>
 ```
 
 > Wrapper attributes let you co-locate conditional logic and responsive behavior with component usage while still emitting clean, idiomatic CSS structures.
+# 4.0 Custom Reserved Tags
+
+Alchira reserves a small set of custom tags and placeholders that make it possible to declare, reuse, and inject styles and snippets directly in markup. These tags are transformed away at compile time, so they never reach the browser.
+
+## Declaration Tags (paired tags)
+
+When a symbolic class (symlink) appears as an attribute on these special tags, the content between the opening and closing tags is bound to that symlink. During compilation, the tags themselves are collapsed and only the generated CSS and HTML remain.
+
+```html 
+<style local$-class>
+  /* CSS snippet bound to local$class */
+</style>
+
+<sketch local$--class>
+  <!-- Snippet bound to local$class -->
+</sketch>
+
+<sketch
+  attribute-1="attr-value-1"
+  attribute-2="attr-value-2"
+  local$class="
+    ~ local$-class local$--class;
+    + $class-1 $$class-2 $class-3;
+    property-1: value-1;
+    property-2: value-2;
+    property-3: value-3;
+  "
+>
+  Template
+</sketch>
+```
+
+### `<style> ... </style>`
+
+- Uses the standard HTML `<style>` tag, but when a symlink is present on the tag, its content becomes a dependent CSS snippet of that symlink.
+- Declared with a symlink where `-` immediately follows the final `$`, for example: `style$-class-name`.
+- The snippet is processed as CSS and merged into the compiled stylesheet.
+
+### `<sketch> ... </sketch>`
+
+- Declares component-level styles and generates a corresponding preview template.
+- The attribute-value for a symlink defines its composition and rules.
+- The inner HTML is used as a live preview template in the sketchpad:
+  - `style` attributes are passed to the sketchpad body.
+  - Other attributes are passed directly to the component template.
+
+
+## Replacement Placeholders
+
+Self-closing tags and reserved HTML comments act as insertion points where compiled styles and sketch snippets are injected.
+
+```html
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1"
+  />
+  <!-- style -->
+</head>
+
+<body
+  data-sveltekit-preload-data="hover"
+  class="=bg$pattern-checkerboard =$custom-pattern"
+  _$custom-pattern="
+    --pattern-checker-bg1: #456734;
+    --pattern-checker-bg2: #2bb43d;
+    --pattern-checker-size: var(---delta-block-lg);
+  "
+>
+  <sketch amorphous$--container>
+    <svg xmlns="http://www.w3.org/2000/svg"></svg>
+  </sketch>
+
+  <sketch
+    data-glass-type="liquid"
+    amorphous$$$container="
+      ~ amorphous$--container;
+      &::after {
+        filter: url(#\#glass-distortion);
+      }
+    "
+  >
+    Template
+  </sketch>
+
+  <div
+    id="#scoped-id"
+    data-glass-type="liquid"
+    class="~amorphous$$$container"
+  > Content </div>
+
+  <!-- sketch -->
+</body>
+</html>
+```
+
+### `<sketch />` / `<!-- sketch -->`
+
+- Placeholder used to deploy associated partial sketch snippets.
+
+### `<style />` / `<!-- style -->`
+
+- Marks where the compiled stylesheet block should be embedded inside targeted files.
+
+---
+
+> By using reserved tags and placeholders, Alchira transforms HTML into a high-level declaration layer. It enables you to define styles and components directly on the structure, which the compiler then distills into standard, browser-ready HTML and CSS. This approach keeps your source code clean and unified while granting precise control over the final CSS output.
 # 8. Appendix
 
 ## Errors & diagnostics
@@ -923,6 +1032,6 @@ demo$wrapper-preview="container-type: inline-size; width: 8rem;"
 ## Extensibility & contributions
 
 - The compiler binary is intentionally a closed distribution for runtime execution: contributions to the binary itself are not expected. The tool is a structural processor and does not validate or understand CSS properties or values — **it operates on document structure and symbolic classes**.
-- Extending the system: users can add CSS files to the `xtyles/libraries` folder to create custom libraries/frameworks; the six-level inheritance model allows rapid propagation of changes across a project.
+- Extending the system: users can add CSS files to the `alchira/libraries` folder to create custom libraries/frameworks; the six-level inheritance model allows rapid propagation of changes across a project.
 - Conditional definitions (media queries, custom at-rules, container-dependent variants, etc.) are generated using wrapper-attributes. `hashrules` provide reusable snippets for wrapper attributes.
 - Users may fork or clone the repository, personalize their own variants, and distribute them as needed. For detailed guidance on customization, refer to the Flavourize documentation. Be sure to review the EULA for any usage constraints and legal requirements associated with redistribution and modification.

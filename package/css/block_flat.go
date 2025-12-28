@@ -168,7 +168,6 @@ func (This *T_Block) flatten(parent string) (Res *T_Block) {
 	add(all, comps_list)
 	add(all, clven_list)
 	add(all, clstd_list)
-	// all.SetBlock(parent, natives)
 	add(all, elven_list)
 	add(all, elstd_list)
 	add(all, child_list)
