@@ -1,3 +1,69 @@
+# Getting Started
+
+Welcome to **Alchira**—the declarative UI language that treats structure and style as a single, unified intent.
+
+In traditional web development, you are often forced to juggle HTML templates and CSS stylesheets, bridging the gap with fragile class names. Alchira eliminates this friction by fusing them into a **single source of truth**.
+
+### How it Works
+
+1. **Sketch your UI:** Wrap your elements in a `<sketch>` to define a regional boundary.
+2. **Declare Intent:** Use symlinks (like `global$header`) to attach style rules directly to your structure.
+3. **Use Smart Tokens:** Apply your pre-defined layout logic (like `@#Mmd` for media queries or `@#Cmd` for container queries) to make your components responsive by default.
+4. **Compile:** The Alchira compiler distills your "rich declaration" into lean, production-ready HTML and CSS.
+
+## Node Package
+
+- Alchira is distributed via **npm**.
+- Custom flavors created by independent developers are also published on npm.
+- You can install an existing flavor for your project, or create a personal flavor and reuse it across projects.
+- To start your own flavor, use the scaffold template: https://github.com/alchira/scaffold
+
+### Core runtime (alchira)
+
+- **Package:** [alchira](https://www.npmjs.com/package/alchira)
+- Installs the appropriate core binary for your OS.
+- Provides the CLI used to orchestrate flavors and run builds.
+
+```bash
+# Local Installation
+npm install -g alchira
+# Local Command Run
+alchira {command}
+al {command}
+
+# Global Installation
+npm install --save-dev alchira
+# Global Command Run
+npx alchira {command}
+npx al {command}
+```
+
+### Flavored Template (@alchira/scaffold)
+
+- **Link:** [@alchira/scaffold](https://www.npmjs.com/package/@alchira/scaffold)
+- [alchira](#unflavoured-alchira) will be installed along with flavor and all the commands will work the same manner.
+- To initialize flavour run
+
+```bash
+# Local Initialization
+npx al init {flavor-package-name}
+
+# Global Initialization
+al init {flavor-package-name}
+```
+
+## Editor extension
+
+- **VS Code:** [Marketplace](https://marketplace.visualstudio.com/items?itemName=yshelldev.alchira)
+- **Open VSX:** [yshelldev.alchira-client](https://open-vsx.org/extension/yshelldev/alchira-client)
+- Adds full language support and extra tooling for Alchira configured projects.
+- Bundles an Alchira core, so no separate install is required for small workflows.
+- Plug‑and‑play setup, ideal for trying Alchira or for small projects.
+
+![Preview](./assets/preview.png)
+
+---
+
 # 0.0 Alchira Plugin
 
 The extension connects to language servers in this fallback order:
@@ -1035,69 +1101,3 @@ Self-closing tags and reserved HTML comments act as insertion points where compi
 - Extending the system: users can add CSS files to the `alchira/libraries` folder to create custom libraries/frameworks; the six-level inheritance model allows rapid propagation of changes across a project.
 - Conditional definitions (media queries, custom at-rules, container-dependent variants, etc.) are generated using wrapper-attributes. `hashrules` provide reusable snippets for wrapper attributes.
 - Users may fork or clone the repository, personalize their own variants, and distribute them as needed. For detailed guidance on customization, refer to the Flavourize documentation. Be sure to review the EULA for any usage constraints and legal requirements associated with redistribution and modification.
-
-# Getting Started
-
-Welcome to **Alchira**—the declarative UI language that treats structure and style as a single, unified intent.
-
-In traditional web development, you are often forced to juggle HTML templates and CSS stylesheets, bridging the gap with fragile class names. Alchira eliminates this friction by fusing them into a **single source of truth**.
-
-### How it Works
-
-1. **Sketch your UI:** Wrap your elements in a `<sketch>` to define a regional boundary.
-2. **Declare Intent:** Use symlinks (like `global$header`) to attach style rules directly to your structure.
-3. **Use Smart Tokens:** Apply your pre-defined layout logic (like `@#Mmd` for media queries or `@#Cmd` for container queries) to make your components responsive by default.
-4. **Compile:** The Alchira compiler distills your "rich declaration" into lean, production-ready HTML and CSS.
-
-## Node Package
-
-- Alchira is distributed via **npm**.
-- Custom flavors created by independent developers are also published on npm.
-- You can install an existing flavor for your project, or create a personal flavor and reuse it across projects.
-- To start your own flavor, use the scaffold template: https://github.com/alchira/scaffold
-
-### Core runtime (alchira)
-
-- **Package:** [alchira](https://www.npmjs.com/package/alchira)
-- Installs the appropriate core binary for your OS.
-- Provides the CLI used to orchestrate flavors and run builds.
-
-```bash
-# Local Installation
-npm install -g alchira
-# Local Command Run
-alchira {command}
-al {command}
-
-# Global Installation
-npm install --save-dev alchira
-# Global Command Run
-npx alchira {command}
-npx al {command}
-```
-
-### Flavored Template (@alchira/scaffold)
-
-- **Link:** [@alchira/scaffold](https://www.npmjs.com/package/@alchira/scaffold)
-- [alchira](#unflavoured-alchira) will be installed along with flavor and all the commands will work the same manner.
-- To initialize flavour run
-
-```bash
-# Local Initialization
-npx al init {flavor-package-name}
-
-# Global Initialization
-al init {flavor-package-name}
-```
-
-## Editor extension
-
-- **VS Code:** [Marketplace](https://marketplace.visualstudio.com/items?itemName=yshelldev.alchira)
-- **Open VSX:** [yshelldev.alchira-client](https://open-vsx.org/extension/yshelldev/alchira-client)
-- Adds full language support and extra tooling for Alchira configured projects.
-- Bundles an Alchira core, so no separate install is required for small workflows.
-- Plug‑and‑play setup, ideal for trying Alchira or for small projects.
-
-![Preview](./assets/preview.png)
-
----
