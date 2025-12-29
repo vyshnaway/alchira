@@ -57,14 +57,18 @@ func Target_Accumulate() (
 		public_counter += len(C.PublicClasses)
 		_map.Copy(contextMaps, C.ContextMap)
 
-		globals.Set(
-			"["+target.Target+" -> "+target.Source+"]: "+_strconv.Itoa(len(C.GlobalClasses)),
-			C.GlobalClasses,
-		)
-		publics.Set(
-			"["+target.Target+" -> "+target.Source+"]: "+_strconv.Itoa(len(C.PublicClasses)),
-			C.PublicClasses,
-		)
+		if len(C.GlobalClasses) > 0 {
+			globals.Set(
+				"["+target.Target+" -> "+target.Source+"]: "+_strconv.Itoa(len(C.GlobalClasses)),
+				C.GlobalClasses,
+			)
+		}
+		if len(C.PublicClasses) > 0 {
+			publics.Set(
+				"["+target.Target+" -> "+target.Source+"]: "+_strconv.Itoa(len(C.PublicClasses)),
+				C.PublicClasses,
+			)
+		}
 	}
 
 	counter := global_counter + public_counter

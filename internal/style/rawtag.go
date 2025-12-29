@@ -74,7 +74,11 @@ func Rawtag_Upload(
 		variables := native_scanned.Variables
 		for key, val := range raw.Styles {
 			if key != "" {
-				query := Hashrule_Render(key, declaration)
+				nkey := key
+				if !forArtifact {
+					nkey = importLodash(file, key, file.Label)
+				}
+				query := Hashrule_Render(nkey, declaration)
 				if query.Status {
 					native_scanned, export_scanned := stylesnippet_process(val, file, true,
 						_fmt.Sprint(raw.Scope, " : ", declaration, " | "),
@@ -86,9 +90,7 @@ func Rawtag_Upload(
 
 					if native_scanned.Result.Len() > 0 {
 						if wrapperjson, err := _util.Code_JsoncBuild(query.Wrappers, ""); err == nil {
-							if res := importLodash(file, wrapperjson, file.Label); !forArtifact {
-								wrapperjson = res
-							} else {
+							if forArtifact {
 								exportRawStyle.SetBlock(wrapperjson, export_scanned.Result)
 							}
 							nativeRawStyle.SetBlock(wrapperjson, native_scanned.Result)

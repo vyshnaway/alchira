@@ -35,7 +35,7 @@ func CreateContext(
 
 	parts := _string.Split(_fileman.Path_BaseName(filePath), ".")
 	_slice.Reverse(parts)
-	var extension, artifactName, liblevel, cluster string
+	var extension, artifactName, liblevel, group string
 	if len(parts) > 0 {
 		extension = parts[0]
 	}
@@ -46,7 +46,7 @@ func CreateContext(
 		liblevel = parts[2]
 	}
 	if len(parts) > 3 {
-		cluster = parts[3]
+		group = parts[3]
 	}
 
 	idn := 0
@@ -69,8 +69,8 @@ func CreateContext(
 			lookupType = _model.File_Type_Null
 		}
 	} else if isLibrary {
-		if cluster != "" {
-			lookupType = _model.File_Type_Cluster
+		if group != "" {
+			lookupType = _model.File_Type_Group
 		} else {
 			lookupType = _model.File_Type_Axiom
 		}
@@ -78,14 +78,14 @@ func CreateContext(
 		lookupType = _model.File_Type_Target
 	}
 
-	norm_cluster := _util.String_Filter(cluster, []rune{}, []rune{}, []rune{})
+	norm_group := _util.String_Filter(group, []rune{}, []rune{}, []rune{})
 	classFront := ""
 
 	if isArtifact {
 		classFront += "/" + norm_artifact + "/"
 	}
-	if (idn > 0) && (extension == "css") && (norm_cluster != "-") {
-		classFront += norm_cluster
+	if (idn > 0) && (extension == "css") && (norm_group != "-") {
+		classFront += norm_group
 	}
 	if fromBlueprint && extension == "css" {
 		classFront += _string.Repeat("$", idn)

@@ -7,8 +7,6 @@ In traditional web development, you are often forced to juggle HTML templates an
 > ## End-User License Agreement (EULA)
 > By using this software, you agree to the terms and conditions outlined in the [End-User License Agreement](https://github.com/alchira/agreements/license).
 
----
-
 ### How it Works
 
 1. **Sketch your UI:** Wrap your elements in a `<sketch>` to define a regional boundary.
@@ -69,7 +67,7 @@ al init {flavor-package-name}
 
 ---
 
-> Clone the tutorial repository to get used to the tool with a intractive walkthrough guide
+> Clone the tutorial repository for an interactive walkthrough guide:
 > ```sh
 > git clone https://github.com/alchira/tutorial.git
 > ```
@@ -411,17 +409,17 @@ Well-structured grouping and naming conventions help in scalable CSS architectur
 
 ## Naming Files
 ```
-{cluster}.{order}.{name}.css
+{group}.{order}.{name}.css
 ``` 
 
-- **cluster** : `string[A-Z a-z 0-9 -]`
+- **group** : `string[A-Z a-z 0-9 -]`
 - **order** : `0|1|2`
 - **name** : `string[A-Z a-z 0-9 -]`
 
 ## Managing Library Files
 
 ```
-{cluster}{'$'*order}{Normalized(selector)}
+{group}{'$'*order}{Normalized(selector)}
 ```
 #### Example
 
@@ -491,17 +489,17 @@ All the first order blocks of each file will have a corresponding symbolic class
 
 #### Axiom
 
-- `cluster` = `''`
-- A special cluster without a cluster-name. ( Example: 0.display.css )
+- `group` = `''`
+- A special group without a group-name. ( Example: 0.display.css )
 
 - In a file of **Order `n`**, symbolic classes may be referenced from other files using two distinct directives, with in the scope of `axiom` where permitted sources are:
 	-  `@--apply`: Files of **Order ≤ n−1**
 	-  `@--attach`: Files of **Order ≤ n**
 
-#### Clusters
+#### Groups
 
-- Named clusters can access all symbolic classes from Axioms.
-- In a file of **Order `n`**, symbolic classes may be referenced from other files using two distinct directives, with in the scope of whole `axiom` and `cluster` were permitted sources are:
+- Named groups can access all symbolic classes from Axioms.
+- In a file of **Order `n`**, symbolic classes may be referenced from other files using two distinct directives, with in the scope of whole `axiom` and `group` were permitted sources are:
 	-  `@--apply`: Files of **Order ≤ n−1**
 	-  `@--attach`: Files of **Order ≤ n**
 # 1.0 Hash Loaders
@@ -706,14 +704,14 @@ The Top-layer Class Loader operator `=` applies classes after both Low-layer `~`
 A symbolic class (symlink) is structured as:
 
 ``` 
-{cluster}{scope-op}{identifier}
+{group}{scope-op}{identifier}
 ```
- **cluster**: A collection or group of classes. Use characters `A-Z`, `a-z`, `0-9`, and `-`.
-  - Use `-` or `_` only to delegate to an open cluster at declaration; it will be hidden elsewhere.
+ **group**: A collection or group of classes. Use characters `A-Z`, `a-z`, `0-9`, and `-`.
+  - Use `-` or `_` only to delegate to an open group at declaration; it will be hidden elsewhere.
 - **scope-op**: Defines the access scope of the styles.
   - `$` for **Local** scope: styles are available only within the declared file.
   - `$$` for **Global** scope: styles are available across all valid files in target folders.
-- **identifier**: Specific name within the cluster, consisting of `A-Z`, `a-z`, `0-9`, and `-`.
+- **identifier**: Specific name within the group, consisting of `A-Z`, `a-z`, `0-9`, and `-`.
 
 ## External Grouping for Compositions
 
@@ -743,7 +741,7 @@ Both produce the same final CSS output. They coexist for developer convenience a
 
 ```html
 <!-- 
-    cluster    = "demo"
+    group    = "demo"
     scope      = "global"
     identifier = "button"
 -->
@@ -926,7 +924,7 @@ This compiles conceptually to:
 
 ```html
 <sketch 
-class="parent"
+class="prefix#parent"
 demo$wrapper-preview="
 	+ p-1 radius-1;
 	container-type: inline-size;
@@ -939,11 +937,10 @@ demo$wrapper-preview="
   	background-color: red;
   	color: white;
   "
-  &#{Cs2}&.parent&="background-color: blue;"
-  &#{Cs1}&.parent&="background-color: brown;"
-  &#{Cmd}&.parent&="background-color: black;"
-  >
-    <!-- Editor plugin hint -->
+  &#{Cs2}&{.prefix\#parent}&="background-color: blue;"
+  &#{Cs1}&{.prefix\#parent}&="background-color: brown;"
+  &#{Cmd}&{.prefix\#parent}&="background-color: black;"
+  > <!-- Editor plugin hint -->
     Try resizing using rescale handle.
   </p>
 </sketch>

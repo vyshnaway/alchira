@@ -51,7 +51,7 @@ func Delta_Reset() {
 		Report: _model.Cache_Delta_Report{
 			Artifacts: "",
 			Axioms:    "",
-			Clusters:  "",
+			Groups:    "",
 			TargetDir: "",
 			Constants: "",
 			Hashrule:  "",
@@ -66,7 +66,7 @@ func Delta_Reset() {
 		Error: _model.Cache_Delta_Errors{
 			Artifacts: []string{},
 			Axioms:    []string{},
-			Clusters:  []string{},
+			Groups:    []string{},
 			Multiples: []string{},
 			TargetDir: []string{},
 			Hashrules: []string{},
@@ -75,7 +75,7 @@ func Delta_Reset() {
 		Diagnostic: _model.Cache_Delta_Diagnostics{
 			Artifacts: []*_model.File_Diagnostic{},
 			Axioms:    []*_model.File_Diagnostic{},
-			Clusters:  []*_model.File_Diagnostic{},
+			Groups:    []*_model.File_Diagnostic{},
 			TargetDir: []*_model.File_Diagnostic{},
 			Multiples: []*_model.File_Diagnostic{},
 			Hashrules: []*_model.File_Diagnostic{},
@@ -116,7 +116,7 @@ func Manifest_Reset() {
 		Lookup:      map[string]*_model.File_CacheData{},
 		Group: _model.Cache_Manifest_Groups{
 			Axiom:    map[string]_model.Style_ClassIndexMap{},
-			Cluster:  map[string]_model.Style_ClassIndexMap{},
+			Group:    map[string]_model.Style_ClassIndexMap{},
 			Local:    map[string]_model.Style_ClassIndexMap{},
 			Global:   map[string]_model.Style_ClassIndexMap{},
 			Artifact: map[string]_model.Style_ClassIndexMap{},

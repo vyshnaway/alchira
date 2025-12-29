@@ -9,7 +9,7 @@ import (
 	_style "main/internal/style"
 	_model "main/models"
 	_util "main/package/utils"
-	"maps"
+	_map "maps"
 )
 
 func (This *Class) Savefile(filepath string, content string, hashindex int) {
@@ -89,15 +89,15 @@ func (This *Class) Savefile(filepath string, content string, hashindex int) {
 		}
 	}
 
-	maps.Copy(file.Cache.MixedMap, file.Cache.LocalMap)
+	_map.Copy(file.Cache.MixedMap, file.Cache.LocalMap)
 
-	maps.Copy(file.Cache.MixedMap, file.Cache.GlobalMap)
-	maps.Copy(This.GlobalMap, file.Cache.GlobalMap)
-	maps.Copy(This.MixedMap, file.Cache.GlobalMap)
+	_map.Copy(file.Cache.MixedMap, file.Cache.GlobalMap)
+	_map.Copy(This.GlobalMap, file.Cache.GlobalMap)
+	_map.Copy(This.MixedMap, file.Cache.GlobalMap)
 
-	maps.Copy(file.Cache.MixedMap, file.Cache.PublicMap)
-	maps.Copy(This.PublicMap, file.Cache.PublicMap)
-	maps.Copy(This.MixedMap, file.Cache.PublicMap)
+	_map.Copy(file.Cache.MixedMap, file.Cache.PublicMap)
+	_map.Copy(This.PublicMap, file.Cache.PublicMap)
+	_map.Copy(This.MixedMap, file.Cache.PublicMap)
 
 	This.FileCache[filepath] = file
 }

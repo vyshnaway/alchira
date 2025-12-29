@@ -28,9 +28,9 @@ func library_SaveFile(filepath string, content string) {
 }
 
 type library_StackFiles_return struct {
-	Cluster [][]*_model.File_Stash
-	Axiom   [][]*_model.File_Stash
-	Lookup  map[string]*_model.File_CacheData
+	Group  [][]*_model.File_Stash
+	Axiom  [][]*_model.File_Stash
+	Lookup map[string]*_model.File_CacheData
 }
 
 func library_Clear() {
@@ -52,7 +52,7 @@ func Library_CacheFiles() library_StackFiles_return {
 
 	length := 0
 	axiom_map := map[int][]*_model.File_Stash{}
-	cluster_map := map[int][]*_model.File_Stash{}
+	group_map := map[int][]*_model.File_Stash{}
 	lookup := map[string]*_model.File_CacheData{}
 
 	for path, data := range Cache.Libraries {
@@ -60,8 +60,8 @@ func Library_CacheFiles() library_StackFiles_return {
 		switch data.Cache.Type {
 		case _model.File_Type_Axiom:
 			collection = axiom_map
-		case _model.File_Type_Cluster:
-			collection = cluster_map
+		case _model.File_Type_Group:
+			collection = group_map
 		default:
 			continue
 		}
@@ -82,12 +82,12 @@ func Library_CacheFiles() library_StackFiles_return {
 		}
 	}
 	axiom := Array_FromNumberMap(axiom_map, length)
-	cluster := Array_FromNumberMap(cluster_map, length)
+	group := Array_FromNumberMap(group_map, length)
 
 	return library_StackFiles_return{
-		Cluster: cluster,
-		Axiom:   axiom,
-		Lookup:  lookup,
+		Group:  group,
+		Axiom:  axiom,
+		Lookup: lookup,
 	}
 }
 
@@ -119,27 +119,27 @@ func Library_Update() {
 	}
 	_config.Delta.Report.Axioms = X.List_Chart("Axiom: "+_strconv.Itoa(axiom_counter)+" Symlinks", axiom_chart)
 
-	// Cluster update actions
-	_config.Manifest.Group.Cluster = map[string]_model.Style_ClassIndexMap{}
-	_config.Delta.Error.Clusters = []string{}
-	_config.Delta.Diagnostic.Clusters = []*_model.File_Diagnostic{}
-	cluster_chart := O.New[string, []string](len(StackLibraryFiles_.Cluster))
-	cluster_counter := 0
-	for index, files := range StackLibraryFiles_.Cluster {
+	// Group update actions
+	_config.Manifest.Group.Group = map[string]_model.Style_ClassIndexMap{}
+	_config.Delta.Error.Groups = []string{}
+	_config.Delta.Diagnostic.Groups = []*_model.File_Diagnostic{}
+	group_chart := O.New[string, []string](len(StackLibraryFiles_.Group))
+	group_counter := 0
+	for index, files := range StackLibraryFiles_.Group {
 		Cssfile_Collection_ := _style.Cssfile_Collection(files)
 		_map.Copy(_config.Style.Library__Index, Cssfile_Collection_.SelectorMap)
-		_config.Manifest.Group.Cluster[_strconv.Itoa(index)] = Cssfile_Collection_.SelectorMap
+		_config.Manifest.Group.Group[_strconv.Itoa(index)] = Cssfile_Collection_.SelectorMap
 		if count := len(Cssfile_Collection_.SelectorList); count > 0 {
-			cluster_counter += count
-			cluster_chart.Set(
+			group_counter += count
+			group_chart.Set(
 				_fmt.Sprint("Level ", index, ": ", count),
 				Cssfile_Collection_.SelectorList,
 			)
 		}
 		for _, file := range files {
-			_config.Delta.Error.Clusters = append(_config.Delta.Error.Clusters, file.Errors...)
-			_config.Delta.Diagnostic.Clusters = append(_config.Delta.Diagnostic.Clusters, file.Diagnostics...)
+			_config.Delta.Error.Groups = append(_config.Delta.Error.Groups, file.Errors...)
+			_config.Delta.Diagnostic.Groups = append(_config.Delta.Diagnostic.Groups, file.Diagnostics...)
 		}
 	}
-	_config.Delta.Report.Clusters = X.List_Chart("Cluster: "+_strconv.Itoa(cluster_counter)+" Symlinks", cluster_chart)
+	_config.Delta.Report.Groups = X.List_Chart("Groups: "+_strconv.Itoa(group_counter)+" Symlinks", group_chart)
 }

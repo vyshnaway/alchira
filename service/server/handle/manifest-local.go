@@ -89,16 +89,16 @@ func Manifest_Local(filepath string, symlink string) *R_ManifestLocal {
 				}
 			}
 
-			for _, K := range convertAndSort(slices.Collect(maps.Keys(manifest.Group.Cluster))) {
+			for _, K := range convertAndSort(slices.Collect(maps.Keys(manifest.Group.Group))) {
 				KK := strconv.Itoa(K)
-				for k, i := range manifest.Group.Cluster[KK] {
+				for k, i := range manifest.Group.Group[KK] {
 					symlinkIndex[k] = i
 					attachable = append(attachable, k)
 				}
 				if nav.Id == KK {
 					goto Return
 				}
-				for k := range manifest.Group.Cluster[KK] {
+				for k := range manifest.Group.Group[KK] {
 					assignable = append(assignable, k)
 				}
 			}

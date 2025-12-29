@@ -6,7 +6,7 @@ const (
 	File_Type_Null       File_Type = "NULL"
 	File_Type_Artifact   File_Type = "ARITFACT"
 	File_Type_Axiom      File_Type = "AXIOM"
-	File_Type_Cluster    File_Type = "CLUSTER"
+	File_Type_Group      File_Type = "GROUP"
 	File_Type_Target     File_Type = "TARGET"
 	File_Type_Stylesheet File_Type = "STYLESHEET"
 )

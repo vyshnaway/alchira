@@ -85,7 +85,7 @@ func Accumulate() _target.GetTracks_return {
 	diagnostics = append(diagnostics, _config.Delta.Diagnostic.Artifacts...)
 	diagnostics = append(diagnostics, _config.Delta.Diagnostic.Handoffs...)
 	diagnostics = append(diagnostics, _config.Delta.Diagnostic.Axioms...)
-	diagnostics = append(diagnostics, _config.Delta.Diagnostic.Clusters...)
+	diagnostics = append(diagnostics, _config.Delta.Diagnostic.Groups...)
 	diagnostics = append(diagnostics, _config.Delta.Diagnostic.Multiples...)
 	diagnostics = append(diagnostics, _config.Delta.Diagnostic.TargetDir...)
 	_config.Manifest.Diagnostics = diagnostics
@@ -95,7 +95,7 @@ func Accumulate() _target.GetTracks_return {
 	errors = append(errors, _config.Delta.Error.Hashrules...)
 	errors = append(errors, _config.Delta.Error.Artifacts...)
 	errors = append(errors, _config.Delta.Error.Axioms...)
-	errors = append(errors, _config.Delta.Error.Clusters...)
+	errors = append(errors, _config.Delta.Error.Groups...)
 	errors = append(errors, _config.Delta.Error.Multiples...)
 	errors = append(errors, _config.Delta.Error.TargetDir...)
 	_config.Delta.Errors = errors

@@ -5,6 +5,7 @@ import (
 	_action "main/internal/action"
 	_script "main/internal/script"
 	_model "main/models"
+	"main/package/reader"
 	_util "main/package/utils"
 	"maps"
 	_regexp "regexp"
@@ -87,7 +88,12 @@ func importLodash(context *_model.File_Stash, str, lbl string) string {
 	file.Label = lbl
 	file.Midway = str
 	file.Content = str
-	out := _script.Rider(&file, _script.E_Method_LoadHash, map[int]bool{}).Scribed
+
+	out := _script.Value_Builder(
+		str, _script.E_Method_LoadHash,
+		&file, reader.New(str),
+		false, map[string]string{},
+	)
 	return out
 }
 
@@ -95,7 +101,7 @@ func stripCustomTags(context *_model.File_Stash, str string) string {
 	file := *context
 	file.Midway = str
 	file.Content = str
-	out := _script.Rider(&file, _script.E_Method_Strip, map[int]bool{}).Scribed
+	out := _script.Rider(&file, _script.E_Method_LoadHash, map[int]bool{}).Scribed
 	return out
 }
 

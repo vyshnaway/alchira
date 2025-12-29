@@ -68,7 +68,7 @@ type Cache_Saved struct {
 type Cache_Delta_Report struct {
 	Artifacts string
 	Axioms    string
-	Clusters  string
+	Groups    string
 	TargetDir string
 	Constants string
 	Hashrule  string
@@ -79,7 +79,7 @@ type Cache_Delta_Report struct {
 type Cache_Delta_Errors struct {
 	Artifacts []string
 	Axioms    []string
-	Clusters  []string
+	Groups    []string
 	Multiples []string
 	TargetDir []string
 	Hashrules []string
@@ -95,7 +95,7 @@ type Cache_Delta_Lookup struct {
 type Cache_Delta_Diagnostics struct {
 	Artifacts []*File_Diagnostic
 	Axioms    []*File_Diagnostic
-	Clusters  []*File_Diagnostic
+	Groups    []*File_Diagnostic
 	TargetDir []*File_Diagnostic
 	Multiples []*File_Diagnostic
 	Hashrules []*File_Diagnostic
@@ -143,7 +143,7 @@ type Cache_Scratchpad struct {
 
 type Cache_Manifest_Groups struct {
 	Axiom    map[string]Style_ClassIndexMap `json:"axiom"`
-	Cluster  map[string]Style_ClassIndexMap `json:"cluster"`
+	Group    map[string]Style_ClassIndexMap `json:"group"`
 	Local    map[string]Style_ClassIndexMap `json:"local"`
 	Global   map[string]Style_ClassIndexMap `json:"global"`
 	Artifact map[string]Style_ClassIndexMap `json:"artifact"`
