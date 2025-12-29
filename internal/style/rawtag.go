@@ -76,7 +76,7 @@ func Rawtag_Upload(
 			if key != "" {
 				nkey := key
 				if !forArtifact {
-					nkey = importLodash(file, key, file.Label)
+					nkey = importHashruleLodash(file, key, file.Label)
 				}
 				query := Hashrule_Render(nkey, declaration)
 				if query.Status {

@@ -40,9 +40,9 @@ func Sketchpad_Save(index int) (response any) {
 		return nil
 	}
 
-	sketch := data.SrcData.Metadata.SketchSnippet
+	preview := data.SrcData.Metadata.SketchSnippet
 	clontext := *data.Context
-	clontext.Midway = sketch
+	clontext.Midway = preview
 	classBlocks := css.NewBlock(4, 4)
 
 	orderedlist := []string{}
@@ -67,7 +67,7 @@ func Sketchpad_Save(index int) (response any) {
 	}
 
 	Builder.WriteString(script.SketchCompile(index, script.E_Method_DebugHash, map[int]bool{}))
-	sketch = Builder.String()
+	preview = Builder.String()
 
 	FinalClassMap := []models.Style_ClassIndexTrace{
 		{ClassName: "_", ClassIndex: data.SrcData.Index},
@@ -94,7 +94,7 @@ func Sketchpad_Save(index int) (response any) {
 
 	Sketchpad_View_Component = &T_Component_return{
 		Attributes: attributes,
-		Preview:    sketch,
+		Preview:    preview,
 		Depends:    sketchDeps,
 		Element:    data.SrcData.Element,
 		Symlink:    data.SrcData.Symlink,

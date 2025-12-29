@@ -68,13 +68,13 @@ func stylesnippet_process(
 	NativeResult R_Parse,
 	AttachResult R_Parse,
 ) {
-	native := importLodash(file, content, file.Label)
+	native := importScriptLodash(file, content, file.Label)
 	nativeAttachResult := Parse_CssSnippet(
 		_util.Code_Uncomment(native, true, true, true),
 		selector, initial, flatten,
 	)
 	exportAttachResult := nativeAttachResult
-	export := importLodash(file, content, Lodash_frag+file.Label)
+	export := importScriptLodash(file, content, Lodash_frag+file.Label)
 	exportAttachResult = Parse_CssSnippet(
 		_util.Code_Uncomment(export, true, true, true),
 		selector, initial, flatten,
@@ -83,7 +83,16 @@ func stylesnippet_process(
 	return nativeAttachResult, exportAttachResult
 }
 
-func importLodash(context *_model.File_Stash, str, lbl string) string {
+func importScriptLodash(context *_model.File_Stash, str, lbl string) string {
+	file := *context
+	file.Label = lbl
+	file.Midway = str
+	file.Content = str
+	out := _script.Rider(&file, _script.E_Method_LoadHash, map[int]bool{}).Scribed
+	return out
+}
+
+func importHashruleLodash(context *_model.File_Stash, str, lbl string) string {
 	file := *context
 	file.Label = lbl
 	file.Midway = str
@@ -101,7 +110,7 @@ func stripCustomTags(context *_model.File_Stash, str string) string {
 	file := *context
 	file.Midway = str
 	file.Content = str
-	out := _script.Rider(&file, _script.E_Method_LoadHash, map[int]bool{}).Scribed
+	out := _script.Rider(&file, _script.E_Method_Strip, map[int]bool{}).Scribed
 	return out
 }
 
