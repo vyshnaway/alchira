@@ -63,7 +63,7 @@ al init {flavor-package-name}
 - Bundles an Alchira core, so no separate install is required for small workflows.
 - Plug‑and‑play setup, ideal for trying Alchira or for small projects.
 
-![Preview](https://github.com/alchira/package/blob/main/assets/preview.png?raw=true)
+![Preview](https://github.com/alchira/package/blob/main/assets/preview.gif?raw=true)
 
 ---
 
@@ -809,16 +809,20 @@ demo$varient-preview="+ d-flex flex-column gap-8;"
 	demo$button-varients-2="
 		&[x-preset-]& {
 			&[1] {
-				--button_color: #ffe17d;
+				--button_color: #d6ff7d;
 				--button_outline_color: #491505;
-			}
+			} 
 			&[2] {
-				--button_color: #b3fff9;
-				--button_outline_color: #495f7a;
+				--button_color: #b4fff9;
+				--button_outline_color: #001e51; 
+			}
+			&[3] {
+				--button_color: var(---code);
+				--button_outline_color: var(---background-body);
 			}
 		}
-	" 
-	x-preset-2><span> Grouped with Denest-Op </span></button>
+	"
+	x-preset-1><span> Grouped with Denest-Op </span></button>
 	<!-- While composing symlink in this manner, all variables are detected, and autosuggests them. -->
 
 	<!-- For runtime dynamic styling update the variable using style attribute. -->
@@ -924,8 +928,8 @@ This compiles conceptually to:
 
 ```html
 <sketch 
-class="prefix#parent"
-demo$wrapper-preview="
+class="parent"
+demo$$wrapper-preview="
 	+ p-1 radius-1;
 	container-type: inline-size;
 	width: 8rem;
@@ -937,9 +941,9 @@ demo$wrapper-preview="
   	background-color: red;
   	color: white;
   "
-  &#{Cs2}&{.prefix\#parent}&="background-color: blue;"
-  &#{Cs1}&{.prefix\#parent}&="background-color: brown;"
-  &#{Cmd}&{.prefix\#parent}&="background-color: black;"
+  &#{Cs2}&{.parent}&="background-color: blue;"
+  &#{Cs1}&{.parent}&="background-color: brown;"
+  &#{Cmd}&{.parent}&="background-color: black;"
   > <!-- Editor plugin hint -->
     Try resizing using rescale handle.
   </p>
