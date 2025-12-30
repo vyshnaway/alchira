@@ -79,6 +79,9 @@ func Rawtag_Upload(
 					nkey = importHashruleLodash(file, key, file.Label)
 				}
 				query := Hashrule_Render(nkey, declaration)
+				if len(query.Wrappers) == 0  {
+					continue
+				}
 				if query.Status {
 					native_scanned, export_scanned := stylesnippet_process(val, file, true,
 						_fmt.Sprint(raw.Scope, " : ", declaration, " | "),
@@ -89,7 +92,11 @@ func Rawtag_Upload(
 					variables.Copy(native_scanned.Variables)
 
 					if native_scanned.Result.Len() > 0 {
-						if wrapperjson, err := _util.Code_JsoncBuild(query.Wrappers, ""); err == nil {
+						
+						// XXX Mission 2: Hashrule Unchained | Swap comment to Unlock
+						// if wrapperjson, err := _util.Code_JsoncBuild(query.Wrappers, ""); err == nil {
+						if wrapperjson, err := _util.Code_JsoncBuild([]string{query.Wrappers[0]}, ""); err == nil {
+
 							if forArtifact {
 								exportRawStyle.SetBlock(wrapperjson, export_scanned.Result)
 							}
@@ -97,8 +104,9 @@ func Rawtag_Upload(
 						}
 					}
 				} else {
-					errors = append(errors, query.Errorstring)
-					diagnostics = append(diagnostics, &query.Diagnostic)
+					// XXX Mission 2: Hashrule Error | Uncomment to Unlock
+					// errors = append(errors, query.Errorstring)
+					// diagnostics = append(diagnostics, &query.Diagnostic)
 				}
 			}
 		}

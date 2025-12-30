@@ -69,17 +69,18 @@ var Registery = map[string]*T_RegisterEntry{
 		},
 		true,
 	),
-	"sketchpad-view": RegisterMethod(
-		0,
-		func(args []string) any {
-			return handle.Sketchpad_View_Component
-		},
-		func(params any) any {
-			return handle.Sketchpad_View_Component
-		},
-		[]string{},
-		true,
-	),
+	// XXX Mission 1: Sketchpad | Uncomment to Unlock
+	// "sketchpad-view": RegisterMethod(
+	// 	0,
+	// 	func(args []string) any {
+	// 		return handle.Sketchpad_View_Component
+	// 	},
+	// 	func(params any) any {
+	// 		return handle.Sketchpad_View_Component
+	// 	},
+	// 	[]string{},
+	// 	true,
+	// ),
 	"server-state-set": RegisterMethod(
 		1,
 		func(args []string) any {

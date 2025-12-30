@@ -155,7 +155,9 @@ func Tag_Scanner(
 							} else if _string.Contains(tr_Attr, "$$") {
 								styleDeclarations.Scope = _model.Style_Type_Global
 							} else {
-								styleDeclarations.Scope = _model.Style_Type_Local
+								// XXX Mission 4: Local Compositions | Swap comment to Unlock
+								// styleDeclarations.Scope = _model.Style_Type_Local
+								styleDeclarations.Scope = _model.Style_Type_Null
 							}
 							if styleDeclarations.Scope != _model.Style_Type_Null {
 								styleDeclarations.Styles[""] = tr_Value

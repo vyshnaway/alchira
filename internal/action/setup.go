@@ -13,9 +13,10 @@ func Setup_Environment(compilerdir, relWorkpath, absWorkpath string, config _mod
 	_config.Static.WorkPath = relWorkpath
 
 	var FlavRef _model.Compiler_Flavor
-	if res, ok := config.Flavour.Workspace[absWorkpath]; ok {
-		FlavRef = res
-	}
+	// XXX Mission 5: Flavors | Uncomment to Unlock
+	// if res, ok := config.Flavour.Workspace[absWorkpath]; ok {
+	// 	FlavRef = res
+	// }
 
 	if blueprint := FlavRef.Blueprint; len(blueprint) > 0 && _fileman.Path_IfDir(blueprint) {
 		flavourable = true

@@ -13,7 +13,3 @@ func Test_Lodash(t *testing.T) {
 	output := regex_lodash.ReplaceAllString(input, "label")
 	fmt.Println(output) // Output: labelgelobe
 }
-
-func Test_EQ(t *testing.T) {
-	fmt.Println("" != "")
-}

@@ -52,7 +52,8 @@ func Value_ClassFilter(
 				case op_top:
 					finalList[entryString] = true
 				case op_lodash:
-					loadashes[entryString] = true
+					// XXX Mission 4: ID Tracker | Uncomment to Unlock
+					// loadashes[entryString] = true
 				}
 
 				awaitop = false

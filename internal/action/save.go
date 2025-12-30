@@ -4,8 +4,8 @@ import (
 	_config "main/configs"
 	S "main/package/console"
 	_css "main/package/css"
-	_fileman "main/package/fileman"
-	_util "main/package/utils"
+	// _fileman "main/package/fileman"
+	// _util "main/package/utils"
 )
 
 func Save_RootCss() {
@@ -18,10 +18,11 @@ func Save_RootCss() {
 }
 
 func Save_Libraries() {
-	_config.Saved.Libraries_Saved, _ = _fileman.Read_Bulk(
-		_config.Path_Folder["libraries"].Path,
-		[]string{"css"},
-	)
+	// XXX Mission 3: Libraries | Uncomment to Unlock
+	// _config.Saved.Libraries_Saved, _ = _fileman.Read_Bulk(
+	// 	_config.Path_Folder["libraries"].Path,
+	// 	[]string{"css"},
+	// )
 }
 
 func Save_Artifacts() {
@@ -38,23 +39,25 @@ func Save_Targets() {
 
 func Save_Hashrule() (Report string, Status bool) {
 
-	S.TASK("Saving Hashrule", 1)
-
 	status := true
+
 	errors := make([]string, 0, 1)
 	_config.Saved.Hashrule = map[string]string{}
 	hashrule_path := _config.Path_Json["hashrule"].Path
-	if content, err := _fileman.Read_File(hashrule_path, false); err == nil {
-		if hashrules, e := _util.Code_JsoncParse[map[string]string](content); e == nil {
-			_config.Saved.Hashrule = hashrules
-		} else {
-			status = false
-			errors = append(errors, "Bad "+hashrule_path+" file data.")
-		}
-	} else {
-		status = false
-		errors = append(errors, "Failed to read "+hashrule_path+".")
-	}
+
+	// XXX Mission 2: Hashrules | Uncomment to Unlock
+	// S.TASK("Saving Hashrule", 1)
+	// if content, err := _fileman.Read_File(hashrule_path, false); err == nil {
+	// 	if hashrules, e := _util.Code_JsoncParse[map[string]string](content); e == nil {
+	// 		_config.Saved.Hashrule = hashrules
+	// 	} else {
+	// 		status = false
+	// 		errors = append(errors, "Bad "+hashrule_path+" file data.")
+	// 	}
+	// } else {
+	// 	status = false
+	// 	errors = append(errors, "Failed to read "+hashrule_path+".")
+	// }
 
 	report := S.MAKE(
 		S.Tag.H4("Hashrule error: "+hashrule_path, S.Preset.Failed, S.Style.AS_Bold),
