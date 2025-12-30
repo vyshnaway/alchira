@@ -13,8 +13,9 @@ env:
 
 jobs:
   bin-release:
+    name: Build & Publish Binary
     runs-on: ubuntu-latest
-
+    
     steps:
       - name: Checkout current repo
         uses: actions/checkout@v3
