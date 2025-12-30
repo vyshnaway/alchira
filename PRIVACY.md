@@ -17,5 +17,5 @@ We respect your privacy while using Alchira. This Privacy Policy explains how we
 ---
 
 ### Contact Information
-- **Support:** [alchira@yshell.dev](mailto:alchira@yshell.dev)
+- **Support:** [mail@alchira.io](mailto:mail@alchira.io)
 - **Website:** [https://github.com/alchira](https://github.com/alchira)

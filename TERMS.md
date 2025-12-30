@@ -21,5 +21,5 @@
 - **Acceptance:** Continued use after updates indicates acceptance of revised terms. Check periodically for major changes.
 
 #### Contact Information
-- **Support:** [alchira@yshell.dev](mailto:alchira@yshell.dev)
+- **Support:** [mail@alchira.io](mailto:mail@alchira.io)
 - **Website:** [https://github.com/alchira](https://github.com/alchira)

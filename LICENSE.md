@@ -33,13 +33,13 @@ You may not, without explicit prior written consent from Us:
 
 During the preview period, You are encouraged to:
 
-- Provide feedback, ideas, and sample projects via [GitHub issues](https://github.com/yshelldev/alchira/issues) or [discussions](https://github.com/yshelldev/alchira/discussions).
+- Provide feedback, ideas, and sample projects via [GitHub issues](https://github.com/alchira/issues) or [discussions](https://github.com/alchira/discussions).
 - Experiment with integrating Alchira in your projects and share your experiences.
 - Contributions to the source repository are not expected at this stage; you may fork the repository to create derivative works.
 
 ### 6. Tools Powered by Alchira
 
-If You plan to create public or commercial tools or applications powered by Alchira, You must enter into a written agreement with Us before development or distribution. Contact us at [alchira@yshell.dev](mailto:alchira@yshell.dev) for contract discussions.
+If You plan to create public or commercial tools or applications powered by Alchira, You must enter into a written agreement with Us before development or distribution. Contact us at [mail@alchira.io](mailto:mail@alchira.io) for contract discussions.
 
 ### 7. Confidentiality
 
@@ -58,7 +58,7 @@ Updates during the preview period are at Our discretion. Support is provided thr
 ### Contact Information
 
 - **Website:** [github.com/alchira](https://github.com/alchira)  
-- **E-Mail:** [alchira@yshell.dev](mailto:alchira@yshell.dev)
+- **E-Mail:** [mail@alchira.io](mailto:mail@alchira.io)
 
 ---
 

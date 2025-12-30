@@ -11,7 +11,7 @@ import (
 
 const (
 	ID     = "alchira"
-	TLD    = "one"
+	TLD    = "io"
 	EXT    = "al"
 	DOMAIN = ID + "." + TLD
 )
