@@ -1,9 +1,9 @@
 name: Release Binary
 
 on:
-  push:
-    branches:
-      - missions  # Fixed syntax
+  # push:
+    # branches:
+    #   - missions  # Fixed syntax
   workflow_dispatch:
 
 permissions:
