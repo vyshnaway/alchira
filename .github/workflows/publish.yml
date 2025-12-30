@@ -1,9 +1,6 @@
 name: Release Binary
 
 on:
-  # push:
-    # branches:
-    #   - missions  # Fixed syntax
   workflow_dispatch:
 
 permissions:
@@ -15,7 +12,7 @@ env:
 jobs:
   bin-release:
     name: Build & Publish Binary
-    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/missions'
     
     steps:
       - name: Checkout current repo
