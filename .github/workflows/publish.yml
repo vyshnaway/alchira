@@ -6,12 +6,8 @@ on:
 permissions:
   contents: write
 
-env:
-  PACKAGE_REPO: alchira/package
-
 jobs:
   bin-release:
-    name: Bin Update Trigger
     runs-on: ubuntu-latest
 
     steps:
@@ -22,7 +18,7 @@ jobs:
         id: pacver
         run: |
           ls
-          version=${< VERSION}
+          version=$(< VERSION)
           echo "version=$version" >> $GITHUB_OUTPUT
 
           patchTag=$version
@@ -104,21 +100,3 @@ jobs:
           overwrite_files: true
         env:
           GITHUB_TOKEN: ${{ secrets.ALCHIRA_BINPUB }}
-
-  publish-package:
-    name: Trigger Package Release
-    runs-on: ubuntu-latest
-    needs: bin-release
-    steps:
-      - name: Checkout ${{ env.PACKAGE_REPO }} (read-only)
-        uses: actions/checkout@v4
-        with:
-          repository: ${{ env.PACKAGE_REPO }}
-          token: ${{ secrets.ALCHIRA_BINPUB }}
-
-      - name: Trigger publish workflow on Parent Repo
-        uses: peter-evans/repository-dispatch@v2
-        with:
-          repository: ${{ env.PACKAGE_REPO }}
-          token: ${{ secrets.ALCHIRA_BINPUB }}
-          event-type: trigger-publish
