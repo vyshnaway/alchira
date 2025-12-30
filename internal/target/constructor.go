@@ -9,7 +9,6 @@ import (
 	"main/package/utils"
 	_map "maps"
 	_slice "slices"
-	"sort"
 )
 
 type Class struct {
@@ -60,12 +59,11 @@ func New(storage _model.Config_ProxyStorage, label string) *Class {
 		PublicMap:          make(_model.Style_ClassIndexMap, len(storage.Filepath_to_Content)*12),
 	}
 
-	i := 1
-	paths := sort.StringSlice(_slice.Collect(_map.Keys(storage.Filepath_to_Content)))
-	for _, filepath := range paths {
+	paths := _slice.Collect(_map.Keys(storage.Filepath_to_Content))
+	utils.String_SortAlphaAsc(paths)
+	for i, filepath := range paths {
 		filecontent := storage.Filepath_to_Content[filepath]
-		This.Savefile(filepath, filecontent, i)
-		i++
+		This.Savefile(filepath, filecontent, i+1)
 	}
 
 	return &This
