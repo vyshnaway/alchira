@@ -8,8 +8,10 @@ import (
 	_target "main/internal/target"
 	_model "main/models"
 	O "main/package/object"
+	"main/package/utils"
 	_util "main/package/utils"
 	_map "maps"
+	"slices"
 	_strconv "strconv"
 )
 
@@ -33,10 +35,10 @@ func Target_UpdateDirs() {
 	}
 	_config.Style.Global___Index = _model.Style_ClassIndexMap{}
 
-	i := 0
-	for key, files := range _config.Saved.TargetDir_Saved {
-		Cache.Targetdir[key] = _target.New(files, _util.String_EnCounter(i))
-		i++
+	paths := slices.Collect(_map.Keys(_config.Saved.TargetDir_Saved))
+	utils.String_SortAlphaAsc(paths)
+	for i, key := range paths {
+		Cache.Targetdir[key] = _target.New(_config.Saved.TargetDir_Saved[key], _util.String_EnCounter(i))
 	}
 }
 
