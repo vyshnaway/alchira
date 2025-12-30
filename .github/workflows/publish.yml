@@ -1,16 +1,17 @@
 name: Release Binary
 
 on:
-  branches:
-    missions
+  push:
+    branches:
+      - missions  # Fixed syntax
   workflow_dispatch:
 
 permissions:
   contents: write
 
 env:
-  PACKAGE_REPO: "https://github.com/alchira/package"
-
+  PACKAGE_REPO: "alchira/package"
+  
 jobs:
   bin-release:
     name: Build & Publish Binary
@@ -18,23 +19,17 @@ jobs:
     
     steps:
       - name: Checkout current repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4 # Updated to v4
 
       - name: Get version from package
         id: pacver
         run: |
-          ls
           version=$(< VERSION)
           echo "version=$version" >> $GITHUB_OUTPUT
-
-          patchTag=$version
-          echo "patchTag=$patchTag" >> $GITHUB_OUTPUT
-
-          minorTag=$(echo "$version" | cut -d '.' -f1-2)
-          echo "minorTag=$minorTag" >> $GITHUB_OUTPUT
-
-          majorTag=$(echo "$version" | cut -d '.' -f1)
-          echo "majorTag=$majorTag" >> $GITHUB_OUTPUT
+          echo "patchTag=v$version" >> $GITHUB_OUTPUT
+          echo "minorTag=v$(echo "$version" | cut -d '.' -f1-2)" >> $GITHUB_OUTPUT
+          echo "majorTag=v$(echo "$version" | cut -d '.' -f1)" >> $GITHUB_OUTPUT
+          # It's better to prefix tags with 'v' for standard release logic
 
       - name: Run build script
         run: |
@@ -43,17 +38,8 @@ jobs:
 
       - name: Prepare artifacts
         run: |
-          mkdir -p artifacts
-          cp -r ./binary/* artifacts/
-
-      - name: Checkout Public Repo (read-only)
-        uses: actions/checkout@v3
-        with:
-          repository: ${{ env.PACKAGE_REPO }}
-          token: ${{ secrets.ALCHIRA_BINPUB }}
-          path: pubrepo
-
-      - run: cd pubrepo
+          mkdir -p dist
+          cp -r ./binary/* dist/
 
       - name: Publish release (latest tag)
         uses: softprops/action-gh-release@v2
@@ -63,10 +49,8 @@ jobs:
           tag_name: latest
           name: Release latest
           body_path: ./RELEASE.md
-          files: artifacts/**
+          files: dist/**
           overwrite_files: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.ALCHIRA_BINPUB }}
 
       - name: Publish release (Major Tag)
         uses: softprops/action-gh-release@v2
@@ -76,10 +60,8 @@ jobs:
           tag_name: ${{ steps.pacver.outputs.majorTag }}
           name: Release ${{ steps.pacver.outputs.majorTag }}
           body_path: ./RELEASE.md
-          files: artifacts/**
+          files: dist/**
           overwrite_files: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.ALCHIRA_BINPUB }}
 
       - name: Publish release (Minor Tag)
         uses: softprops/action-gh-release@v2
@@ -89,10 +71,8 @@ jobs:
           tag_name: ${{ steps.pacver.outputs.minorTag }}
           name: Release ${{ steps.pacver.outputs.minorTag }}
           body_path: ./RELEASE.md
-          files: artifacts/**
+          files: dist/**
           overwrite_files: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.ALCHIRA_BINPUB }}
 
       - name: Publish release (Patch Tag)
         uses: softprops/action-gh-release@v2
@@ -102,7 +82,5 @@ jobs:
           tag_name: ${{ steps.pacver.outputs.patchTag }}
           name: Release ${{ steps.pacver.outputs.patchTag }}
           body_path: ./RELEASE.md
-          files: artifacts/**
+          files: dist/**
           overwrite_files: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.ALCHIRA_BINPUB }}
