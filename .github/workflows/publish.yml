@@ -1,10 +1,6 @@
 name: Release Binary
 
 on:
-  # push:
-  #   branches: [missions]
-  repository_dispatch:
-    types: [trigger-publish]
   workflow_dispatch:
 
 permissions:
@@ -17,7 +13,6 @@ jobs:
   bin-release:
     name: Bin Update Trigger
     runs-on: ubuntu-latest
-    # if: (github.event_name == 'push' && github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, '#Release')) || (github.event_name != 'push')
 
     steps:
       - name: Checkout current repo
@@ -26,6 +21,7 @@ jobs:
       - name: Get version from package
         id: pacver
         run: |
+          ls
           version=${< VERSION}
           echo "version=$version" >> $GITHUB_OUTPUT
 
