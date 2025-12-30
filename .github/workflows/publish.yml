@@ -12,6 +12,7 @@ env:
 jobs:
   bin-release:
     name: Build & Publish Binary
+    runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/missions'
     
     steps:
