@@ -8,6 +8,9 @@ on:
 permissions:
   contents: write
 
+env:
+  PACKAGE_REPO: "https://github.com/alchira/package"
+
 jobs:
   bin-release:
     runs-on: ubuntu-latest
@@ -40,7 +43,7 @@ jobs:
       - name: Prepare artifacts
         run: |
           mkdir -p artifacts
-          cp -r ./bin/* artifacts/
+          cp -r ./binary/* artifacts/
 
       - name: Checkout Public Repo (read-only)
         uses: actions/checkout@v3
