@@ -240,17 +240,19 @@ func Tag_Scanner(
 			fragString = string(fileCursor.Slice(tagStart, styleDeclarations.EndMarker))
 		} else {
 			fileCursor.Active.Cycle++
-			if E_Method_LoadHash != method && selfClosed && BuildMode &&
-				(styleDeclarations.Elid == _config.Root.CustomTags["sketch"] ||
-					styleDeclarations.Elid == _config.Root.CustomTags["style"]) {
 
-				macrosrc := make([]string, len(styleDeclarations.Comments))
-				for _, m := range styleDeclarations.Comments {
-					macrosrc = append(macrosrc, Value_Builder(m, E_Method_LoadHash, fileData, fileCursor, false, orderedMapping))
-				}
+			// XXX Mission Dev: Macros: uncomment to unlock
+			// if E_Method_LoadHash != method && selfClosed && BuildMode &&
+			// 	(styleDeclarations.Elid == _config.Root.CustomTags["sketch"] ||
+			// 		styleDeclarations.Elid == _config.Root.CustomTags["style"]) {
 
-				fragString = Macro_Builder(macrosrc, method, fileData, appendstack)
-			}
+			// 	macrosrc := make([]string, len(styleDeclarations.Comments))
+			// 	for _, m := range styleDeclarations.Comments {
+			// 		macrosrc = append(macrosrc, Value_Builder(m, E_Method_LoadHash, fileData, fileCursor, false, orderedMapping))
+			// 	}
+
+			// 	fragString = Macro_Builder(macrosrc, method, fileData, appendstack)
+			// }
 
 			styleDeclarations.Range = _reader.T_Range{Data: []string{}, Start: startpos, End: fileCursor.Active}
 		}
