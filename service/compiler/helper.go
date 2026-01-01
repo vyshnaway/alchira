@@ -11,7 +11,9 @@ import (
 	_model "main/models"
 	_css "main/package/css"
 	"main/package/utils"
+	"maps"
 	_map "maps"
+	"slices"
 	_slice "slices"
 	"sort"
 	_string "strings"
@@ -142,7 +144,8 @@ func GetDependents(tr target.GetTracks_return) (stylesheet, sketchsheet string) 
 	attach_styles := _css.NewBlock(0, len(dependmap))
 
 	var attach_sketchs _string.Builder
-	for i := range dependmap {
+	dependsorted := sort.IntSlice(slices.Collect(maps.Keys(dependmap)))
+	for _, i := range dependsorted {
 		if data := _action.Index_Fetch(i); data != nil {
 			attach_styles.Merge(data.SrcData.NativeAttachStyle)
 			if _config.Static.PREVIEW {
