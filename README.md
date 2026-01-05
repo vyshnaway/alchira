@@ -196,7 +196,7 @@ Alchira treats HTML and CSS as one language: you describe *what the UI is* and *
 
 - Model pages as sketches and regions (card, header, layout) instead of loose DOM nodes styled later.
 - Each sketch has a unique symlink—a symbolic handle used for both styling and preview.
-- Because structure and style share the same symclass, the editor can instantly render or navigate to any sketch.
+- Because structure and style share the same symlink, the editor can instantly render or navigate to any sketch.
 - Each block owns its markup and styles, so you design by meaning, not selectors.
 - Small or one‑off pieces can be written inline without a sketch.
 
@@ -215,7 +215,7 @@ Alchira treats HTML and CSS as one language: you describe *what the UI is* and *
  
 ### Composition over cascade
 
-- Build with composition of sketches and symclasses, not global CSS selectors.
+- Build with composition of sketches and symlinkes, not global CSS selectors.
 - Variants, themes, and responsive modes are explicit properties or nested blocks—local, predictable, and free of cascade traps.
 
 ### The language is the design system
@@ -224,7 +224,7 @@ Alchira treats HTML and CSS as one language: you describe *what the UI is* and *
 - Global tokens (prefix `---`) live in `alchira/#constants.css`.
 - Local `--` variables act as live, mutable style handles shown in IntelliSense.
 - Hovering on `\~global$$button-1` will show which handles can be safely tweaked.  
-- Editing a token or symclass safely refactors every dependent component.
+- Editing a token or symlink safely refactors every dependent component.
 
 ### Mental model shift
 
