@@ -68,6 +68,18 @@ func Rider(
 	incFlag := true
 	var waitop rune = 0
 
+	streamWriteString := func(s string) {
+		if len(tagTrack) == 0 {
+			stream.WriteString(s)
+		}
+	}
+
+	streamWriteRune := func(s rune) {
+		if len(tagTrack) == 0 {
+			stream.WriteRune(s)
+		}
+	}
+
 	for cursor.Streaming {
 		ch := cursor.Active.Char
 
@@ -148,8 +160,8 @@ func Rider(
 				incFlag = false
 			}
 
-			if len(tagTrack) == 0 && !exitedNow {
-				stream.WriteString(fragment)
+			if !exitedNow {
+				streamWriteString(fragment)
 			}
 			awaitop = false
 		} else if method != E_Method_Strip && awaitop {
@@ -161,8 +173,8 @@ func Rider(
 				switch waitop {
 				case op_lodash:
 					if method != E_Method_Read && fileData.Cache.Loadashes[entrystring] {
-						stream.WriteString(fileData.Label)
-						stream.WriteString(entrystring)
+						streamWriteString(fileData.Label)
+						streamWriteString(entrystring)
 						awaitop = false
 					}
 
@@ -171,11 +183,11 @@ func Rider(
 						scatteredList[entrystring] = true
 					} else if i := _action.Index_Finder(entrystring, fileData.Cache.LocalMap); i.Index > 0 && method != E_Method_LoadHash {
 						if method == E_Method_DebugHash {
-							stream.WriteString(i.Data.SrcData.DebugLow)
+							streamWriteString(i.Data.SrcData.DebugLow)
 						} else if E_Method_PreviewHash == method || _config.Static.PREVIEW {
-							stream.WriteString(i.Data.SrcData.PreviewLow)
+							streamWriteString(i.Data.SrcData.PreviewLow)
 						} else {
-							stream.WriteString(i.Data.SrcData.PublishLow)
+							streamWriteString(i.Data.SrcData.PublishLow)
 						}
 
 						awaitop = false
@@ -186,22 +198,22 @@ func Rider(
 						finalList[entrystring] = true
 					} else if i := _action.Index_Finder(entrystring, fileData.Cache.LocalMap); i.Index > 0 && method != E_Method_LoadHash {
 						if method == E_Method_DebugHash {
-							stream.WriteString(i.Data.SrcData.DebugTop)
+							streamWriteString(i.Data.SrcData.DebugTop)
 						} else if E_Method_PreviewHash == method || _config.Static.PREVIEW {
-							stream.WriteString(i.Data.SrcData.PreviewTop)
+							streamWriteString(i.Data.SrcData.PreviewTop)
 						} else {
-							stream.WriteString(i.Data.SrcData.PublishTop)
+							streamWriteString(i.Data.SrcData.PublishTop)
 						}
 						awaitop = false
 					}
 				}
 
 				if awaitop {
-					stream.WriteRune('\\')
-					stream.WriteRune(waitop)
-					stream.WriteString(entrystring)
+					streamWriteRune('\\')
+					streamWriteRune(waitop)
+					streamWriteString(entrystring)
 				}
-				stream.WriteRune(ch)
+				streamWriteRune(ch)
 				entry.Reset()
 				waitop = 0
 				awaitop = false
@@ -213,10 +225,10 @@ func Rider(
 			waitop = ch
 		} else if len(tagTrack) == 0 {
 			if cursor.Active.Last == '\\' {
-				stream.WriteRune('\\')
+				streamWriteRune('\\')
 			}
 			if cursor.Active.Char != '\\' {
-				stream.WriteRune(cursor.Active.Char)
+				streamWriteRune(cursor.Active.Char)
 			}
 		}
 

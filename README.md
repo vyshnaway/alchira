@@ -557,7 +557,9 @@ Using this escaping keeps hashes valid across different contexts whether in HTML
 - Use shortcuts like `Ctrl + Alt + Shift + X` to view the processed output of your source file with hashes applied.
 
 This method ensures consistency and correctness when importing and using unique identifiers across your project files.
-# 2.0 Class Loaders
+EX---
+title: 2.0 Class Loaders
+---
 
 > - Use sketchpad for preview. Cursor on symlink and trigger. [ `ctrl` + `alt` + `x` ]  
 > - Start live compilation using `alchira preview -w` or `alchira debug -w`.  

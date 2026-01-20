@@ -7,7 +7,7 @@ SRCMETA="./configs/meta.go"
   printf 'var VERSION = "%s"\n' "$VERSION"
 } > "$SRCMETA"
 
-OUT_DIR=./binary
+OUT_DIR=binary
 
 TMP_EXE="$OUT_DIR/executable"
 go build -gcflags='all=-l -N' -ldflags='-s -w' -o "$TMP_EXE"
