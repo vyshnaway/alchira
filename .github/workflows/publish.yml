@@ -11,7 +11,7 @@ permissions:
   contents: write
 
 env:
-  PACKAGE_REPO: alchira/package
+  PACKAGE_REPO: yshelldev/package
 
 jobs:
   bin-release:
