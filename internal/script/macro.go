@@ -60,8 +60,8 @@ func Macro_Builder(
 			}
 			Stack.RegSet(index, T.Register, instances)
 
-		// TODO: Macro Modifiers to be resolved Later
-		// case macro.E_Op_Modifier:
+		case macro.E_Op_Modifier:
+		//  TODO: Macro Modifiers to be resolved Later
 		// 	Stack.RegSet(index, T.Register, T.OpRefer.Modifier(register.Array, helper, T.Arguments))
 
 		case macro.E_Op_Replace:
