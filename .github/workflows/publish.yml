@@ -17,9 +17,6 @@ jobs:
   bin-release:
     name: Bin Update Trigger
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: source
     if: (github.event_name == 'push' && github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, '#Release')) || (github.event_name != 'push')
 
     steps:
