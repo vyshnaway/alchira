@@ -52,7 +52,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           repository: ${{ env.PACKAGE_REPO }}
-          token: ${{ secrets.ALCHIRA_REPO_CROSS }}
+          token: ${{ secrets.ALCHIRA_PACKAGE }}
           path: pubrepo
 
       - run: cd pubrepo
@@ -61,53 +61,53 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           repository: ${{ env.PACKAGE_REPO }}
-          token: ${{ secrets.ALCHIRA_REPO_CROSS }}
+          token: ${{ secrets.ALCHIRA_PACKAGE }}
           tag_name: latest
           name: Release latest
           body_path: ./RELEASE.md
           files: artifacts/**
           overwrite_files: true
         env:
-          GITHUB_TOKEN: ${{ secrets.ALCHIRA_REPO_CROSS }}
+          GITHUB_TOKEN: ${{ secrets.ALCHIRA_PACKAGE }}
 
       # - name: Publish release (Major Tag)
       #   uses: softprops/action-gh-release@v2
       #   with:
       #     repository: ${{ env.PACKAGE_REPO }}
-      #     token: ${{ secrets.ALCHIRA_REPO_CROSS }}
+      #     token: ${{ secrets.ALCHIRA_PACKAGE }}
       #     tag_name: ${{ steps.pacver.outputs.majorTag }}
       #     name: Release ${{ steps.pacver.outputs.majorTag }}
       #     body_path: ./RELEASE.md
       #     files: artifacts/**
       #     overwrite_files: true
       #   env:
-      #     GITHUB_TOKEN: ${{ secrets.ALCHIRA_REPO_CROSS }}
+      #     GITHUB_TOKEN: ${{ secrets.ALCHIRA_PACKAGE }}
 
       # - name: Publish release (Minor Tag)
       #   uses: softprops/action-gh-release@v2
       #   with:
       #     repository: ${{ env.PACKAGE_REPO }}
-      #     token: ${{ secrets.ALCHIRA_REPO_CROSS }}
+      #     token: ${{ secrets.ALCHIRA_PACKAGE }}
       #     tag_name: ${{ steps.pacver.outputs.minorTag }}
       #     name: Release ${{ steps.pacver.outputs.minorTag }}
       #     body_path: ./RELEASE.md
       #     files: artifacts/**
       #     overwrite_files: true
       #   env:
-      #     GITHUB_TOKEN: ${{ secrets.ALCHIRA_REPO_CROSS }}
+      #     GITHUB_TOKEN: ${{ secrets.ALCHIRA_PACKAGE }}
 
       # - name: Publish release (Patch Tag)
       #   uses: softprops/action-gh-release@v2
       #   with:
       #     repository: ${{ env.PACKAGE_REPO }}
-      #     token: ${{ secrets.ALCHIRA_REPO_CROSS }}
+      #     token: ${{ secrets.ALCHIRA_PACKAGE }}
       #     tag_name: ${{ steps.pacver.outputs.patchTag }}
       #     name: Release ${{ steps.pacver.outputs.patchTag }}
       #     body_path: ./RELEASE.md
       #     files: artifacts/**
       #     overwrite_files: true
       #   env:
-      #     GITHUB_TOKEN: ${{ secrets.ALCHIRA_REPO_CROSS }}
+      #     GITHUB_TOKEN: ${{ secrets.ALCHIRA_PACKAGE }}
 
   publish-package:
     name: Trigger Package Release
@@ -118,11 +118,11 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: ${{ env.PACKAGE_REPO }}
-          token: ${{ secrets.ALCHIRA_REPO_CROSS }}
+          token: ${{ secrets.ALCHIRA_PACKAGE }}
 
       - name: Trigger publish workflow on Parent Repo
         uses: peter-evans/repository-dispatch@v2
         with:
           repository: ${{ env.PACKAGE_REPO }}
-          token: ${{ secrets.ALCHIRA_REPO_CROSS }}
+          token: ${{ secrets.ALCHIRA_PACKAGE }}
           event-type: trigger-publish
