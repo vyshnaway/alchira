@@ -52,14 +52,18 @@ func Macro_Builder(
 		}
 
 		switch T.OpRefer.Type {
+
 		case macro.E_Op_Instances:
 			instances := []string{}
 			for range T.OpRefer.Instance {
 				instances = append(instances, helper...)
 			}
 			Stack.RegSet(index, T.Register, instances)
-		case macro.E_Op_Modifier:
-			Stack.RegSet(index, T.Register, T.OpRefer.Modifier(register.Array, helper, T.Arguments))
+
+		// TODO: Macro Modifiers to be resolved Later
+		// case macro.E_Op_Modifier:
+		// 	Stack.RegSet(index, T.Register, T.OpRefer.Modifier(register.Array, helper, T.Arguments))
+
 		case macro.E_Op_Replace:
 			hl := len(helper)
 			rl := len(register.Array)

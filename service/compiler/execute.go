@@ -314,7 +314,7 @@ func Execute(heading string) (Exitcode int) {
 			report = ""
 			heading = ""
 			showReport = true
-			// _time.Sleep(_time.Duration(_config.Root.WaitingInterval) * _time.Millisecond)
+			_time.Sleep(_time.Duration(_config.Root.WaitingInterval) * _time.Millisecond)
 		} else {
 			S.Post(report)
 			break
