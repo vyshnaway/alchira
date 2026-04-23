@@ -84,10 +84,10 @@ func main() {
 
 	_config.Static.DEBUG = command == "debug"
 	_config.Static.IAMAI = command == "iamai"
-	_config.Static.WATCH = command == "server" || command == "watch"
+	_config.Static.WATCH = command == "server" || command == "watch" || command == "iamai"
 	_config.Static.SERVER = command == "server"
 	_config.Static.MINIFY = !(_config.Static.DEBUG || _config.Static.SERVER)
-	_config.Static.PREVIEW = command == "preview" || command == "watch"
+	_config.Static.PREVIEW = command == "preview" || command == "watch" || command == "iamai"
 
 	S.Canvas.Initialize(
 		!_config.Static.WATCH && _slice.Contains([]string{"debug", "watch", "preview", "publish", "init", "install"}, command),

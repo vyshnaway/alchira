@@ -24,6 +24,7 @@ func Verify_Setup() (Report string, Status verify_Setup_Status_enum) {
 	report := ""
 
 	if _fileman.Path_IfDir(_config.Path_Folder["blueprint"].Path) {
+
 		time.Sleep(2 * time.Second)
 		if !_config.Static.SERVER {
 			if _fileman.Path_IfDir(_config.Root_Flavor["blueprint"].Path) {

@@ -5,7 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"main/configs"
+	// "main/configs"
 	"main/service/compiler"
 	"slices"
 
@@ -67,18 +67,17 @@ func Connect(tryport int) {
 				}
 				res, _ = json.MarshalIndent(m, "", "  ")
 
-			} else if !configs.Static.Watchman.Status {
-				time.Sleep(100 * time.Millisecond)
-				continue
+			// } else if !configs.Static.Watchman.Status {
+			// 	fmt.Println(request)
+			// 	time.Sleep(100 * time.Millisecond)
+			// 	continue
 			} else if strings.HasPrefix(request, "$ ") || strings.HasPrefix(request, "> ") {
 				split := strings.Fields(request[2:])
 				if len(split) < 1 {
 					continue
 				}
 				res = Interactive(split[0], split[1:], request[0] == '>')
-
 			} else {
-
 				res = IO_Json([]byte(request))
 			}
 

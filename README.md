@@ -64,7 +64,7 @@ al init {flavor-package-name}
 - Bundles an Alchira core, so no separate install is required for small workflows.
 - Plug‑and‑play setup, ideal for trying Alchira or for small projects.
 
-![Preview](https://github.com/alchira/package/blob/main/assets/preview.gif?raw=true)
+![Preview](https://github.com/alchira/.github/blob/main/assets/preview.gif?raw=true)
 
 ---
 

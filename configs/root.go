@@ -45,7 +45,7 @@ var Root = models.Cache_Root{
 		"watch":   "Preview command in live watch mode.",
 		"server":  "LSP Communication Brige.",
 		"preview": "Test build. Pass test for \"publish\" command.",
-		// "iamai":   "Let ai agents start here.",
+		"iamai":   "Let ai agents start here.",
 		// "publish": "Optimized build, uses web-api.",
 		// "install": "Install external artifacts.",
 	},

@@ -53,11 +53,13 @@ func Webview_Create(tryport int) (httpServer *http.Server, deducedPort int, err 
 		return nil, 0, fmt.Errorf("unable to bind port: %v", err)
 	}
 
+
 	mux := http.NewServeMux()
 	serveDir := configs.Root_Flavor["sketchpad"].Path
-
+	
 	// Serve index.html on /, and all files under serveDir
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		
 		if r.URL.Path == "/" || r.URL.Path == "/index.html" {
 			http.ServeFile(w, r, filepath.Join(serveDir, "index.html"))
 		} else {
